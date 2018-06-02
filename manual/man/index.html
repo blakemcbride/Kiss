@@ -1,0 +1,580 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<head>
+<title>Kiss Manual</title>
+
+<meta name="description" content="Kiss Manual">
+<meta name="keywords" content="Kiss Manual">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.smallquotation {font-size: smaller}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.indentedblock {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+div.smalldisplay {margin-left: 3.2em}
+div.smallexample {margin-left: 3.2em}
+div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
+div.smalllisp {margin-left: 3.2em}
+kbd {font-style:oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+pre.smalldisplay {font-family: inherit; font-size: smaller}
+pre.smallexample {font-size: smaller}
+pre.smallformat {font-family: inherit; font-size: smaller}
+pre.smalllisp {font-size: smaller}
+span.nocodebreak {white-space:nowrap}
+span.nolinebreak {white-space:nowrap}
+span.roman {font-family:serif; font-weight:normal}
+span.sansserif {font-family:sans-serif; font-weight:normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<h1 class="settitle" align="center">Kiss Manual</h1>
+
+
+
+<a name="SEC_Overview"></a>
+<h2 class="shortcontents-heading">Short Table of Contents</h2>
+
+<div class="shortcontents">
+<ul class="no-bullet">
+<li><a name="stoc-Introduction" href="#toc-Introduction">1 Introduction</a></li>
+<li><a name="stoc-System-Setup" href="#toc-System-Setup">2 System Setup</a></li>
+<li><a name="stoc-Orientation" href="#toc-Orientation">3 Orientation</a></li>
+<li><a name="stoc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#toc-Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
+
+</ul>
+</div>
+
+<a name="SEC_Contents"></a>
+<h2 class="contents-heading">Table of Contents</h2>
+
+<div class="contents">
+<ul class="no-bullet">
+<li><a name="toc-Introduction" href="#Introduction">1 Introduction</a>
+<ul class="no-bullet">
+  <li><a name="toc-Kiss-Highlights" href="#Kiss-Highlights">1.1 <em>Kiss</em> Highlights</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Back_002dend-Highlights" href="#Back_002dend-Highlights">1.1.1 Back-end Highlights</a></li>
+    <li><a name="toc-Front_002dend-Highlights" href="#Front_002dend-Highlights">1.1.2 Front-end Highlights</a></li>
+    <li><a name="toc-Back_002dend-Web-Service-Example" href="#Back_002dend-Web-Service-Example">1.1.3 Back-end Web Service Example</a></li>
+    <li><a name="toc-Front_002dend-Web-Service-Usage-Example" href="#Front_002dend-Web-Service-Usage-Example">1.1.4 Front-end Web Service Usage Example</a></li>
+  </ul></li>
+  <li><a name="toc-HTML-component-usage" href="#HTML-component-usage">1.2 HTML component usage</a></li>
+  <li><a name="toc-System-Maturity-And-Future" href="#System-Maturity-And-Future">1.3 System Maturity And Future</a></li>
+  <li><a name="toc-Contact-And-Links" href="#Contact-And-Links">1.4 Contact And Links</a></li>
+  <li><a name="toc-License" href="#License">1.5 License</a></li>
+  <li><a name="toc-Acknowledgments" href="#Acknowledgments">1.6 Acknowledgments</a></li>
+</ul></li>
+<li><a name="toc-System-Setup" href="#System-Setup">2 System Setup</a>
+<ul class="no-bullet">
+  <li><a name="toc-Pre_002drequisites" href="#Pre_002drequisites">2.1 Pre-requisites</a></li>
+  <li><a name="toc-Download-Kiss" href="#Download-Kiss">2.2 Download Kiss</a></li>
+  <li><a name="toc-Setup-And-Configuration" href="#Setup-And-Configuration">2.3 Setup And Configuration</a></li>
+</ul></li>
+<li><a name="toc-Orientation" href="#Orientation">3 Orientation</a>
+<ul class="no-bullet">
+  <li><a name="toc-Back_002dend-Application-Files" href="#Back_002dend-Application-Files">3.1 Back-end Application Files</a></li>
+  <li><a name="toc-Front_002dend-Application-Files" href="#Front_002dend-Application-Files">3.2 Front-end Application Files</a></li>
+  <li><a name="toc-Single-Page-Application" href="#Single-Page-Application">3.3 Single Page Application</a></li>
+  <li><a name="toc-Controlling-Browser-Cache" href="#Controlling-Browser-Cache">3.4 Controlling Browser Cache</a></li>
+  <li><a name="toc-Creating-JavaDocs" href="#Creating-JavaDocs">3.5 Creating JavaDocs</a></li>
+  <li><a name="toc-Deploying-A-Kiss-Application" href="#Deploying-A-Kiss-Application">3.6 Deploying A Kiss Application</a></li>
+  <li><a name="toc-Database-Access" href="#Database-Access">3.7 Database Access</a></li>
+  <li><a name="toc-Learning-The-System" href="#Learning-The-System">3.8 Learning The System</a></li>
+</ul></li>
+<li><a name="toc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
+
+</ul>
+</div>
+
+
+
+
+
+<a name="Introduction"></a>
+<h2 class="chapter">1 Introduction</h2>
+
+<p>The <em>KISS Framework</em> is an application development framework for
+developing web-based business applications.  The main home for <em>Kiss</em>
+is <a href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
+</p>
+
+<p>Kiss&rsquo; focus is on
+simplicity and development speed.  By being simple to develop in,
+development and support of the application can occur more rapidly.
+Simplicity is achieved by abstracting away as much common
+functionality as possible so that developer lines of code are
+maximally for the application solution rather than infrastructure and
+support of the framework.  Throughout the framework, business-normal
+defaults have been employed in order to minimize commonly needed
+functionality.
+</p>
+<p>Another goal of the <em>Kiss</em> framework is to be a complete web-based
+application development solution.  <em>Kiss</em> isn&rsquo;t a browser solution
+alone, nor is it a back-end solution.  <em>Kiss</em> includes solutions for
+both ends &ndash; although the two sides may largely be used independently.
+</p>
+<p><em>Kiss</em> attempts to create a consistent interface.  This can greatly
+simply code even in simple cases.  For example, in terms of an input
+text control, why would you disable/enable it with:
+</p>
+<div class="example">
+<pre class="example">$('#id').prop('disable', false);
+$('#id').prop('disable', true);
+</pre></div>
+
+<p>and then hide/show it with:
+</p>
+<div class="example">
+<pre class="example">$('#id').hide();
+$('#id').show();
+</pre></div>
+
+<p><em>Kiss</em> provides a consistent interface.  With <em>Kiss</em>, you would do:
+</p>
+<div class="example">
+<pre class="example">$$('id').disable();
+$$('id').enable();
+$$('id').hide();
+$$('id').show();
+</pre></div>
+    
+<p><em>Kiss</em> is designed to be simple to get started with, simple to learn,
+and simple to use.  <em>Kiss</em> does this while supporting important
+technologies such as micro-services, front-end components, and SQL.
+</p>
+<p>The term <em>single page application</em> has several, subtly different,
+meanings.  One meaning is that the entire application code is bundled
+into a single file or HTTP GET request.  In that sense, <em>Kiss</em> is not a
+single page application.  This makes no sense for a business
+application that could have hundreds of screens.
+</p>
+<p>Another meaning of the term <em>single page application</em> is that there is
+only a single <code>html</code> tag and all of the remaining pages are
+modifications of the original <code>html</code> tag contents.  In this
+sense, <em>Kiss</em> is a <em>single page application</em>.  <em>Kiss</em>
+applications lazy-load as needed.  Browser cache is leveraged to
+minimize Internet traffic.
+</p>
+<p><em>Kiss</em> is used in a production environment and built by someone with
+more than 30 years experience as a framework designer and a business
+application software engineer.  So <em>Kiss</em> is not a proof of concept.
+</p>
+<p><em>Kiss</em> was built as a solution to the challenges faced by the author
+when developing web-based business applications.  As such, <em>Kiss</em> is
+more a solution for business application development than for the
+development of public facing company presentation web sites.
+</p>
+<p>Another goal of <em>Kiss</em> is to keep the front-end and back-end as
+independent of each other as possible.  To this end, communications
+between the front-end and back-end occur via REST services and JSON.
+This accomplished two things.  First, it allows your organization to be
+best prepared for the ever-evolving software environment.  Pieces can
+be changed and enhanced without causing massive re-writes of the entire
+system.  The second advantage is that by pushing as much processing to
+the front-end as possible (rendering the display on the front-end),
+the system can better scale.
+</p>
+<a name="Kiss-Highlights"></a>
+<h3 class="section">1.1 <em>Kiss</em> Highlights</h3>
+
+<p>Some highlights of the <em>Kiss</em> system include:
+</p>
+<a name="Back_002dend-Highlights"></a>
+<h4 class="subsection">1.1.1 Back-end Highlights</h4>
+
+<ol>
+<li> Micro services - add, change, or delete a web service on a running system.
+</li><li> Each web-method is in a single file and are very simple.  No configuration files or setup code needed.
+</li><li> Easy access to common SQL databases with support for nested queries without cursor interference.
+</li><li> All REST services are stateless.  However, the system fully authenticates each request.
+</li><li> Changes to web services occur immediately, on a running system, without the need to reboot the application.
+</li><li> A growing class library to handle common business application needs.
+</li><li> Back-end framework is written in Java, and the system is portable to Linux or Windows servers.
+</li><li> Web services may be written in Groovy, Java or Common Lisp.  Python,
+JavaScript, Ruby, and Scala are expected to follow soon.
+</li><li> User authentication
+</li></ol>
+
+<a name="Front_002dend-Highlights"></a>
+<h4 class="subsection">1.1.2 Front-end Highlights</h4>
+
+<ol>
+<li> Build your own HTML components thus encapsulating any amount of code into a simple, custom HTML tag.
+</li><li> Browser cache control.  Never ask your users to clear their browser cache again.
+</li><li> All code written in JavaScript/HTML/CSS.  No need for a complex build and debug process, nor any need to learn yet another language.
+</li><li> Growing list of included business oriented components designed to provide simple access to fully functional business components.
+</li><li> Straight forward means of designing your own components without a lot of hidden and unpredictable magic.
+</li><li> System is small and concise, rather then hundreds of megabytes other systems take up.
+</li><li> Consistent and simple API.
+</li></ol>
+
+<a name="Back_002dend-Web-Service-Example"></a>
+<h4 class="subsection">1.1.3 Back-end Web Service Example</h4>
+
+
+<p>The following example depicts a complete back-end web service.  The
+path to the file is its URL.  The class name is the web method name.
+</p>
+<p>The file is a text file, but compiled code gets executed.
+Authentication occurs before <code>main</code> is called.
+</p>
+<p>Simply drop the file in place and the web service and method become
+immediately available on a running system.  Changes to the service
+take effect immediately (no need to reboot the server app).  There are
+no configuration files or other code that needs to be changed.
+</p>
+<p>For example, the following file is located in the
+<code>my/web/service</code> directory.
+</p>
+<div class="example">
+<pre class="example">class MyWebMethod {
+    static void main(JSONObject injson, JSONObject outjson) {
+        int num1 = injson.getInt(&quot;num1&quot;);
+        int num2 = injson.getInt(&quot;num2&quot;);
+        outjson.put(&quot;result&quot;, num1 + num2);
+    }
+}
+</pre></div>
+
+<a name="Front_002dend-Web-Service-Usage-Example"></a>
+<h4 class="subsection">1.1.4 Front-end Web Service Usage Example</h4>
+
+<p>The following front-end example utilizes the web service defined in the
+previous sub-section.
+</p>
+<div class="example">
+<pre class="example">var data = {
+    num1:  22,
+    num2:  11
+};
+Server.call(&quot;my/web/service&quot;, &quot;MyWebMethod&quot;, data).then(function (res) {
+    if (res._Success) {
+        var result = res.result;
+        //...
+    }
+});
+</pre></div>
+    
+<a name="HTML-component-usage"></a>
+<h3 class="section">1.2 HTML component usage</h3>
+   
+<p>To use a component add to HTML:
+</p>
+<div class="example">
+<pre class="example">&lt;my-component&gt;&lt;/my-component&gt;
+</pre></div>
+
+<p>Add to JavaScript:
+</p>
+<div class="example">
+<pre class="example">utils.useComponent('MyComponent');
+</pre></div>
+    
+<p>The component can put any HTML in the component location, have any
+functionality, have its own modal windows, and use other components.
+The component can have custom and non-custom attributes (like style).
+Non-custom attributes do what you&rsquo;s expect them to do.
+</p>
+<p>The system also supports tag-less components.  This provides an easy
+way to package arbitrary blocks of code (that can have screens too).
+</p>
+<a name="System-Maturity-And-Future"></a>
+<h3 class="section">1.3 System Maturity And Future</h3>
+
+<p>Largely, the Kiss system, in the form of running applications, has
+been used in production environments for a few years.  The effort to
+tease away the generic parts and generalize them is recent (2018).
+Moving forward, as time permits, the priorities are as follows:
+</p>
+<ol>
+<li> Improve documentation
+</li><li> More examples
+</li><li> Greater front-end functionality (modal windows, grid control, etc. - note that these can be done by any other known facility.  They just don&rsquo;t come included with Kiss yet.)
+</li><li> Support more back-end languages (such as Python, JavaScript, Ruby, etc.)
+</li></ol>
+
+<a name="Contact-And-Links"></a>
+<h3 class="section">1.4 Contact And Links</h3>
+
+<p>The <em>Kiss</em> main web site is at <a href="http://kissweb.org">http://kissweb.org</a>
+</p>
+<p>Source code is at <a href="https://github.com/kiss-web/Kiss">https://github.com/kiss-web/Kiss</a>
+</p>
+<p>Public discussion and support is available at <br> <a href="https://groups.google.com/forum/#!forum/kissweb">https://groups.google.com/forum/#!forum/kissweb</a>
+</p>
+<p>Issue tracking is at <a href="https://github.com/kiss-web/Kiss/issues">https://github.com/kiss-web/Kiss/issues</a>
+</p>
+<p>Commercial support is available.  Contact us via email at <a href="mailto:kissweb.org@gmail.com">kissweb.org@gmail.com</a>
+</p>
+<a name="License"></a>
+<h3 class="section">1.5 License</h3>
+
+<p>Copyright (c) 2018 Blake McBride (blake@mcbride.name)
+</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+&ldquo;Software&rdquo;), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+</p>
+<p>1. Redistributions of source code must retain the above copyright
+notice, this list of conditions, and the following disclaimer.
+</p>
+<p>2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+</p>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+&ldquo;AS IS&rdquo; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</p>
+<a name="Acknowledgments"></a>
+<h3 class="section">1.6 Acknowledgments</h3>
+
+<p>The Kiss design, code, documentation, and web site were written by Blake
+McBride.  The author gratefully acknowledges and appreciates, among others, the following:
+</p>
+
+<p>Apache Groovy located at <a href="http://groovy-lang.org">http://groovy-lang.org</a>
+</p>
+<p>ABCL project located at <a href="https://common-lisp.net/project/armedbear">https://common-lisp.net/project/armedbear</a>
+</p>
+<p>Dynamic Loader located at <a href="https://github.com/dvare/dynamic-loader">https://github.com/dvare/dynamic-loader</a>
+</p>
+<p>JSON-Java located at <a href="https://github.com/stleary/JSON-java">https://github.com/stleary/JSON-java</a> (although
+I am using a modified version located at <a href="https://github.com/blakemcbride/JSON-java">https://github.com/blakemcbride/JSON-java</a>)
+</p>
+<p>C3P0 located at <a href="https://www.mchange.com/projects/c3p0">https://www.mchange.com/projects/c3p0</a>
+</p>
+
+
+
+<a name="System-Setup"></a>
+<h2 class="chapter">2 System Setup</h2>
+
+
+<a name="Pre_002drequisites"></a>
+<h3 class="section">2.1 Pre-requisites</h3>
+
+<p>You should download and install the following pre-requisites.
+</p>
+<ol>
+<li> Java JDK 8 from <a href="https://www.oracle.com/java/index.html">https://www.oracle.com/java/index.html</a>
+</li><li> Gradle from <a href="https://gradle.org">https://gradle.org</a>
+</li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL, Oracle, SQLite)
+</li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, Netbeans, eclipse)
+</li><li> GIT source code control system
+</li></ol>
+
+<p>The system was built and tested with JDK 8, <a href="https://www.postgresql.org">PostgreSQL</a>, <a href="https://www.jetbrains.com/idea">IntelliJ</a>, and 
+<a href="http://tomcat.apache.org">tomcat</a>.  Other environments such as IIS, Glassfish, eclipse, should work fine but may require some configuration.
+</p>
+<p>Install the above per their instructions.
+</p>
+<p>In addition to the Gradle build files, Kiss comes with IntelliJ project files that may be used out-of-the-box.  Other IDE&rsquo;s can import the Gradle build files.
+</p>
+<a name="Download-Kiss"></a>
+<h3 class="section">2.2 Download Kiss</h3>
+
+
+<p>Kiss is located at <a href="https://github.com/kiss-web/Kiss">https://github.com/kiss-web/Kiss</a>
+</p>
+<p>It can be downloaded via the following command:
+</p>
+<p><code>git clone https://github.com/kiss-web/Kiss.git</code>
+</p>
+<a name="Setup-And-Configuration"></a>
+<h3 class="section">2.3 Setup And Configuration</h3>
+
+
+<p>Given that Kiss is for business applications, it authenticates its
+users.  In order for this to work, there must be a database of valid
+users.  This information is persisted in an SQL database.  Therefore a
+database will need to be created.  As shipped, the system comes
+configured as follows:
+</p>
+<table>
+<tr><td>Database type</td><td>PostgreSQL</td></tr>
+<tr><td>Host</td><td>localhost</td></tr>
+<tr><td>Database</td><td>kiss</td></tr>
+<tr><td>Database user</td><td>postgres</td></tr>
+<tr><td>Database user password</td><td>postgres</td></tr>
+</table>
+
+<p>This can be configured in the file <code>src/main/application/KissInit.groovy</code>
+Valid options for the Database type are as follows:
+</p>
+<ul>
+<li> PostgreSQL
+</li><li> Microsoft SQL Server
+</li><li> MySQL
+</li><li> Oracle
+</li><li> SQLite
+</li></ul>
+
+<p>Support for other databases is easy to add.
+</p>
+<p>The remaining parameters should be self-explanatory.  Use the format shown in the example.
+</p>
+<p>Create the database (named &ldquo;kiss&rdquo; above or whatever name you
+configured).  After that, you can run the script file <code>init.sql</code>
+to create the table and some initial data.
+</p>
+<p>The default username is <em>kiss</em>, and the default password is <em>password</em>
+</p>
+
+
+<a name="Orientation"></a>
+<h2 class="chapter">3 Orientation</h2>
+
+
+<p>The entire source code comes with the system and is convenient when debugging, however, only a few areas in the system would normally be of concern when building an application as follows.
+</p>
+
+<a name="Back_002dend-Application-Files"></a>
+<h3 class="section">3.1 Back-end Application Files</h3>
+
+<dl compact="compact">
+<dt><code>src/main/application/KissInit.groovy</code></dt>
+<dd><p>This file is used to configure the system.
+</p></dd>
+<dt><code>src/main/application</code></dt>
+<dd><p>All other files under this directory represent the application
+back-end.  All the files are used and distributed in source form.  The
+Kiss system compiles them at runtime but does not save the compiled form.
+Updates to files under this directory take affect
+immediately on a running system.
+</p></dd>
+</dl>
+
+
+<a name="Front_002dend-Application-Files"></a>
+<h3 class="section">3.2 Front-end Application Files</h3>
+
+<p>Files under the <code>src/main/webapp</code> directory represent the front-end of the application.
+</p>
+<p>All files under the <code>src/main/webapp/kiss</code> directory are part of the <em>Kiss</em> system and would normally not need to be touched.
+</p>
+<p><code>index.html</code> and <code>index.js</code> are also part of the <em>Kiss</em> system and aren&rsquo;t normally modified.
+</p>
+<p><code>login.html</code> and <code>login.js</code> represent the user login page and would be modified to suit your needs.
+</p>
+<p>Other directories such as <code>page1</code> represent other user pages and would be the application specific screens you create.  The included <code>page1</code> directory is only an example page.
+</p>
+
+<a name="Single-Page-Application"></a>
+<h3 class="section">3.3 Single Page Application</h3>
+
+<p><em>Kiss</em> applications are single page applications in the sense
+that there is a single <code>&lt;body&gt;</code> tag and all other pages
+essentially get placed into that tag on a single page.  However,
+<em>Kiss</em> is not a single page application in the sense that the
+entire application gets loaded with a single <code>GET</code> request.  This
+doesn&rsquo;t make sense for a large business application in which many
+hundreds of pages may exist.  <em>Kiss</em> lazy-loads pages as they are
+used, and except for browser cache, eliminates them once another page
+is loaded.
+</p>
+<a name="Controlling-Browser-Cache"></a>
+<h3 class="section">3.4 Controlling Browser Cache</h3>
+
+<p>The user&rsquo;s browser cache can be controlled from the file <code>src/main/webapp/index.html</code>  In that file you will see two lines that look as follows:
+</p>
+<div class="example">
+<pre class="example">var softwareVersion = &quot;1&quot;;  // version of the entire system
+var controlCache = false;   // normally true but use false during 
+                            // debugging
+</pre></div>
+
+<p>If <code>controlCache</code> is set to <code>true</code>, each time <code>softwareVersion</code>
+is incremented all users starting the application will be forced to
+load new code from the server and not use their browser&rsquo;s cache.  Once
+they download the new version, normal browser cache activity will
+occur.
+</p>
+
+<a name="Creating-JavaDocs"></a>
+<h3 class="section">3.5 Creating JavaDocs</h3>
+
+<p>JavaDocs for the <em>Kiss</em> system may be created by issuing the following command:  <code>gradle javadoc</code> The JavaDoc files end up in the <code>build/docs/javadoc</code> directory.
+</p>
+
+<a name="Deploying-A-Kiss-Application"></a>
+<h3 class="section">3.6 Deploying A Kiss Application</h3>
+
+<p>The only file needed to deply the application is <code>Kiss.war</code> It
+can either be built by your IDE, or at can be build by typing
+<code>gradle war</code> at a command prompt.  In the case of Gradle,
+<code>Kiss.war</code> ends up in the <code>build/libs</code> directory.
+</p>
+<p>If using <em>tomcat</em>, <code>Kiss.war</code> should be placed in the <code>webapps</code> directory.  When <em>tomcat</em> starts, it will see the file, unpack it, and run it.  The application will be available at <code>[HOST]/Kiss</code>
+</p>
+<p>Renaming <code>Kiss.war</code> to <code>ABC.war</code>, for example, will cause the application path to change to <code>[HOST]/ABC</code>
+</p>
+<a name="Database-Access"></a>
+<h3 class="section">3.7 Database Access</h3>
+
+<p><em>Kiss</em> comes with a powerful library for accessing SQL databases.
+Code for this is located under <code>org.kissweb.database</code> It is
+currently only documented via JavaDocs but examples and documentation
+will follow soon.  It is currently being used in production
+environments.  This API provides the following benefits:
+</p>
+<ul>
+<li> Automatic connection and statement pooling
+</li><li> Vastly simpler API than bare JDBC
+</li><li> Handling of parameterized arguments
+</li><li> Auto generation of SQL for single record adds, edits, and deletions
+</li><li> Auto handling for cases of cursor interference on nested queries
+</li><li> Supports transactions out-of-the-box
+</li></ul>
+
+
+<a name="Learning-The-System"></a>
+<h3 class="section">3.8 Learning The System</h3>
+
+<p>In order to start getting a feel for how <code>Kiss</code> applications
+function, in terms of the back-end, look at files in the
+<code>src/main/application/page1</code> directory.  With <code>Kiss</code> you can
+develop applications in several different languages.  The <code>page1</code>
+example shows the same code in all of the suported languages.
+</p>
+<p>In terms of the front-end, see the example files under <code>src/main/webapp/page1</code>
+</p>
+
+<a name="Method_002c-Macro_002c-Function-And-Variable-Index"></a>
+<h2 class="unnumbered">Method, Macro, Function And Variable Index</h2>
+
+<hr>
+
+
+
+</body>
+</html>
