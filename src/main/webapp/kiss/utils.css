@@ -1,0 +1,107 @@
+/* button { height: 25px; position: relative;} */
+input[type=text] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+input[type=password] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+input[type=number] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+input[type=date] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+textarea { border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+
+
+label { margin-right: 8px; }
+/* input[type=button] { border-radius: 5px; } */
+
+div.vert-input {
+    display:grid;
+    grid-template-columns: max-content max-content;
+    grid-column-gap:5px;
+    grid-row-gap: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+div.vert-input label       { text-align:right; }
+div.vert-input label:after { content: ":"; }
+
+
+/* The Modal (background) */
+.msg-modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 19000; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.msg-modal-content {
+    z-index: 19001; /* Sit on top */
+    position: relative;
+    background-color: white;
+    margin: auto;
+    padding: 0;
+    /*border: 1px solid #888;*/
+    /*display: inline-block; */
+    width: 400px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.msg-close {
+    color: black;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    line-height: 1;
+    margin-right: 5px;
+    margin-top: -4px;
+}
+
+.msg-close:hover,
+.msg-close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.msg-modal-header {
+    /* padding: 2px 16px; */
+    padding-left: 10px;
+    background-color: #6495ed;
+    color: black;
+    padding-top: 3px;
+    padding-bottom: 1px;
+    line-height: 1;
+    height: 25px;
+}
+
+.msg-modal-body {
+    padding: 2px 16px;
+    margin-top: 10px;
+}
+
+.msg-modal-footer {
+    /*
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+    */
+    text-align: center;
+}

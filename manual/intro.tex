@@ -1,0 +1,306 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+@chapter Introduction
+@c @pdfchapter{Introduction}
+
+The @emph{KISS Framework} is an application development framework for
+developing web-based business applications.  The main home for @emph{Kiss}
+is @uref{https://github.com/blakemcbride/Kiss}
+
+
+Kiss' focus is on
+simplicity and development speed.  By being simple to develop in,
+development and support of the application can occur more rapidly.
+Simplicity is achieved by abstracting away as much common
+functionality as possible so that developer lines of code are
+maximally for the application solution rather than infrastructure and
+support of the framework.  Throughout the framework, business-normal
+defaults have been employed in order to minimize commonly needed
+functionality.
+
+Another goal of the @emph{Kiss} framework is to be a complete web-based
+application development solution.  @emph{Kiss} isn't a browser solution
+alone, nor is it a back-end solution.  @emph{Kiss} includes solutions for
+both ends -- although the two sides may largely be used independently.
+
+@emph{Kiss} attempts to create a consistent interface.  This can greatly
+simply code even in simple cases.  For example, in terms of an input
+text control, why would you disable/enable it with:
+
+@example
+$('#id').prop('disable', false);
+$('#id').prop('disable', true);
+@end example
+
+and then hide/show it with:
+
+@example
+$('#id').hide();
+$('#id').show();
+@end example
+
+@emph{Kiss} provides a consistent interface.  With @emph{Kiss}, you would do:
+
+@example
+$$('id').disable();
+$$('id').enable();
+$$('id').hide();
+$$('id').show();
+@end example
+    
+@emph{Kiss} is designed to be simple to get started with, simple to learn,
+and simple to use.  @emph{Kiss} does this while supporting important
+technologies such as micro-services, front-end components, and SQL.
+
+The term @emph{single page application} has several, subtly different,
+meanings.  One meaning is that the entire application code is bundled
+into a single file or HTTP GET request.  In that sense, @emph{Kiss} is not a
+single page application.  This makes no sense for a business
+application that could have hundreds of screens.
+
+Another meaning of the term @emph{single page application} is that there is
+only a single @code{html} tag and all of the remaining pages are
+modifications of the original @code{html} tag contents.  In this
+sense, @emph{Kiss} is a @emph{single page application}.  @emph{Kiss}
+applications lazy-load as needed.  Browser cache is leveraged to
+minimize Internet traffic.
+
+@emph{Kiss} is used in a production environment and built by someone with
+more than 30 years experience as a framework designer and a business
+application software engineer.  So @emph{Kiss} is not a proof of concept.
+
+@emph{Kiss} was built as a solution to the challenges faced by the author
+when developing web-based business applications.  As such, @emph{Kiss} is
+more a solution for business application development than for the
+development of public facing company presentation web sites.
+
+Another goal of @emph{Kiss} is to keep the front-end and back-end as
+independent of each other as possible.  To this end, communications
+between the front-end and back-end occur via REST services and JSON.
+This accomplished two things.  First, it allows your organization to be
+best prepared for the ever-evolving software environment.  Pieces can
+be changed and enhanced without causing massive re-writes of the entire
+system.  The second advantage is that by pushing as much processing to
+the front-end as possible (rendering the display on the front-end),
+the system can better scale.
+
+@section @emph{Kiss} Highlights
+
+Some highlights of the @emph{Kiss} system include:
+
+@subsection Back-end Highlights
+
+@enumerate
+@item
+Micro services - add, change, or delete a web service on a running system.
+@item
+Each web-method is in a single file and are very simple.  No configuration files or setup code needed.
+@item
+Easy access to common SQL databases with support for nested queries without cursor interference.
+@item
+All REST services are stateless.  However, the system fully authenticates each request.
+@item
+Changes to web services occur immediately, on a running system, without the need to reboot the application.
+@item
+A growing class library to handle common business application needs.
+@item
+Back-end framework is written in Java, and the system is portable to Linux or Windows servers.
+@item
+Web services may be written in Groovy, Java or Common Lisp.  Python,
+JavaScript, Ruby, and Scala are expected to follow soon.
+@item
+User authentication
+@end enumerate
+
+@subsection Front-end Highlights
+
+@enumerate
+@item
+Build your own HTML components thus encapsulating any amount of code into a simple, custom HTML tag.
+@item
+Browser cache control.  Never ask your users to clear their browser cache again.
+@item
+All code written in JavaScript/HTML/CSS.  No need for a complex build and debug process, nor any need to learn yet another language.
+@item
+Growing list of included business oriented components designed to provide simple access to fully functional business components.
+@item
+Straight forward means of designing your own components without a lot of hidden and unpredictable magic.
+@item
+System is small and concise, rather then hundreds of megabytes other systems take up.
+@item
+Consistent and simple API.
+@end enumerate
+
+@subsection Back-end Web Service Example
+
+
+The following example depicts a complete back-end web service.  The
+path to the file is its URL.  The class name is the web method name.
+
+The file is a text file, but compiled code gets executed.
+Authentication occurs before @code{main} is called.
+
+Simply drop the file in place and the web service and method become
+immediately available on a running system.  Changes to the service
+take effect immediately (no need to reboot the server app).  There are
+no configuration files or other code that needs to be changed.
+
+For example, the following file is located in the
+@code{my/web/service} directory.
+
+@example
+class MyWebMethod @{
+    static void main(JSONObject injson, JSONObject outjson) @{
+        int num1 = injson.getInt("num1");
+        int num2 = injson.getInt("num2");
+        outjson.put("result", num1 + num2);
+    @}
+@}
+@end example
+
+@subsection Front-end Web Service Usage Example
+
+The following front-end example utilizes the web service defined in the
+previous sub-section.
+
+@example
+var data = @{
+    num1:  22,
+    num2:  11
+@};
+Server.call("my/web/service", "MyWebMethod", data).then(function (res) @{
+    if (res._Success) @{
+        var result = res.result;
+        //...
+    @}
+@});
+@end example
+    
+@section HTML component usage
+   
+To use a component add to HTML:
+
+@example
+<my-component></my-component>
+@end example
+
+Add to JavaScript:
+
+@example
+utils.useComponent('MyComponent');
+@end example
+    
+The component can put any HTML in the component location, have any
+functionality, have its own modal windows, and use other components.
+The component can have custom and non-custom attributes (like style).
+Non-custom attributes do what you's expect them to do.
+
+The system also supports tag-less components.  This provides an easy
+way to package arbitrary blocks of code (that can have screens too).
+
+@section System Maturity And Future
+
+Largely, the Kiss system, in the form of running applications, has
+been used in production environments for a few years.  The effort to
+tease away the generic parts and generalize them is recent (2018).
+Moving forward, as time permits, the priorities are as follows:
+
+@enumerate
+@item
+Improve documentation
+@item
+More examples
+@item
+Greater front-end functionality (modal windows, grid control, etc. - note that these can be done by any other known facility.  They just don't come included with Kiss yet.)
+@item
+Support more back-end languages (such as Python, JavaScript, Ruby, etc.)
+@end enumerate
+
+@section Contact And Links
+
+@indent
+The @emph{Kiss} main web site is at @uref{kissweb.org}
+
+Source code is at @uref{https://github.com/kiss-web/Kiss}
+
+Public discussion and support is available at @* @uref{https://groups.google.com/forum/#!forum/kissweb}
+
+Issue tracking is at @uref{https://github.com/kiss-web/Kiss/issues}
+
+Commercial support is available.  Contact us via email at @email{kissweb.org@@gmail.com}
+
+@section License
+
+Copyright (c) 2018 Blake McBride (blake@@mcbride.name)
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+``Software''), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions, and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+@section Acknowledgments
+
+The Kiss design, code, documentation, and web site were written by Blake
+McBride.  The author gratefully acknowledges and appreciates, among others, the following:
+
+
+Apache Groovy located at @uref{http://groovy-lang.org}
+
+ABCL project located at @uref{https://common-lisp.net/project/armedbear}
+
+Dynamic Loader located at @uref{https://github.com/dvare/dynamic-loader}
+
+JSON-Java located at @uref{https://github.com/stleary/JSON-java} (although
+I am using a modified version located at @uref{https://github.com/blakemcbride/JSON-java})
+
+C3P0 located at @uref{https://www.mchange.com/projects/c3p0}
+

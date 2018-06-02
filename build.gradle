@@ -1,0 +1,35 @@
+plugins {
+    id 'war'  
+    id 'org.akhikhl.gretty' version '1.4.2'
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    providedCompile 'javax.servlet:javax.servlet-api:3.1.0' 
+    testCompile 'junit:junit:4.12'
+
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.2'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
+    compile group: 'com.oracle', name: 'ojdbc6', version: '12.1.0.1-atlassian-hosted'
+    compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.21.0.1'
+    compile group: 'com.microsoft.sqlserver', name: 'mssql-jdbc', version: '6.4.0.jre8'
+    
+    compile group: 'com.mchange', name: 'c3p0', version: '0.9.5.2'
+
+    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.15'
+//    compile group: 'org.abcl', name: 'abcl', version: '1.5.0'
+    compile group: 'log4j', name: 'log4j', version: '1.2.17'
+}
+
+war {
+    from("src/main/application") {
+        into("WEB-INF/application")
+    }
+}
+

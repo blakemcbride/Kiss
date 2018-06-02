@@ -1,0 +1,3 @@
+#
+rsync -rtv src/main/webapp/ build/libs/exploded/Kiss.war
+

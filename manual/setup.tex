@@ -1,0 +1,112 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+@chapter System Setup
+
+
+@section Pre-requisites
+
+You should download and install the following pre-requisites.
+
+@enumerate
+@item
+Java JDK 8 from @uref{https://www.oracle.com/java/index.html}
+@item
+Gradle from @uref{https://gradle.org}
+@item
+An SQL database server (e.g.@ PostgreSQL, Microsoft SQL Server, MySQL, Oracle, SQLite)
+@item
+IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, Netbeans, eclipse)
+@item
+GIT source code control system
+@end enumerate
+
+The system was built and tested with JDK 8, @uref{https://www.postgresql.org,PostgreSQL}, @uref{https://www.jetbrains.com/idea,IntelliJ}, and 
+@uref{http://tomcat.apache.org,tomcat}.  Other environments such as Microsoft SQL Server, IIS, Glassfish, eclipse, should work fine but may require some configuration.
+
+Install the above per their instructions.
+
+In addition to the Gradle build files, Kiss comes with IntelliJ project files that may be used out-of-the-box.  Other IDE's can import the Gradle build files.
+
+@section Download Kiss
+
+
+Kiss is located at @uref{https://github.com/blakemcbride/Kiss}
+
+It can be downloaded via the following command:
+
+@code{git clone https://github.com/blakemcbride/Kiss.git}
+
+@section Setup And Configuration
+
+
+Given that Kiss is for business applications, it authenticates its
+users.  In order for this to work, there must be a database of valid
+users.  This information is persisted in an SQL database.  Therefore a
+database will need to be created.  As shipped, the system comes
+configured as follows:
+
+@multitable {Database user password} {PostgreSQL} 
+
+@item Database type
+@tab PostgreSQL
+@item Host
+@tab localhost
+@item Database
+@tab kiss
+@item Database user
+@tab postgres
+@item Database user password
+@tab postgres
+
+@end multitable
+
+This can be configured in the file @code{src/main/application/KissInit.groovy}
+Valid options for the Database type are as follows:
+
+@itemize @bullet
+@item
+PostgreSQL
+@item
+Microsoft SQL Server
+@item
+MySQL
+@item
+Oracle
+@item
+SQLite
+@end itemize
+
+Support for other databases is easy to add.
+
+The remaining parameters should be self-explanatory.  Use the format shown in the example.
+
+Create the database (named ``kiss'' above or whatever name you configured).   After that, you can run the script file @code{init.sql} to create the table and some initial data.
+
+The default username is @emph{kiss}, and the default password is @emph{password}

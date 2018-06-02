@@ -1,0 +1,140 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+@chapter Orientation
+
+
+The entire source code comes with the system and is convenient when debugging, however, only a few areas in the system would normally be of concern when building an application as follows.
+
+
+@section Back-end Application Files
+
+@table @code
+@item src/main/application/KissInit.groovy
+This file is used to configure the system.
+@item src/main/application
+All other files under this directory represent the application
+back-end.  All the files are used and distributed in source form.  The
+Kiss system compiles them at runtime but does not save the compiled form.
+Updates to files under this directory take affect
+immediately on a running system.
+@end table
+
+
+@section Front-end Application Files
+
+Files under the @code{src/main/webapp} directory represent the front-end of the application.
+
+All files under the @code{src/main/webapp/kiss} directory are part of the @emph{Kiss} system and would normally not need to be touched.
+
+@code{index.html} and @code{index.js} are also part of the @emph{Kiss} system and aren't normally modified.
+
+@code{login.html} and @code{login.js} represent the user login page and would be modified to suit your needs.
+
+Other directories such as @code{page1} represent other user pages and would be the application specific screens you create.  The included @code{page1} directory is only an example page.
+
+
+@section Single Page Application
+
+@emph{Kiss} applications are single page applications in the sense
+that there is a single @code{<body>} tag and all other pages
+essentially get placed into that tag on a single page.  However,
+@emph{Kiss} is not a single page application in the sense that the
+entire application gets loaded with a single @code{GET} request.  This
+doesn't make sense for a large business application in which many
+hundreds of pages may exist.  @emph{Kiss} lazy-loads pages as they are
+used, and except for browser cache, eliminates them once another page
+is loaded.
+
+@section Controlling Browser Cache
+
+The user's browser cache can be controlled from the file @code{src/main/webapp/index.html}  In that file you will see two lines that look as follows:
+
+@example
+var softwareVersion = "1";  // version of the entire system
+var controlCache = false;   // normally true but use false during 
+                            // debugging
+@end example
+
+If @code{controlCache} is set to @code{true}, each time @code{softwareVersion}
+is incremented all users starting the application will be forced to
+load new code from the server and not use their browser's cache.  Once
+they download the new version, normal browser cache activity will
+occur.
+
+
+@section Creating JavaDocs
+
+JavaDocs for the @emph{Kiss} system may be created by issuing the following command:  @code{gradle javadoc} The JavaDoc files end up in the @code{build/docs/javadoc} directory.
+
+
+@section Deploying A Kiss Application
+
+The only file needed to deply the application is @code{Kiss.war} It
+can either be built by your IDE, or at can be build by typing
+@code{gradle war} at a command prompt.  In the case of Gradle,
+@code{Kiss.war} ends up in the @code{build/libs} directory.
+
+If using @emph{tomcat}, @code{Kiss.war} should be placed in the @code{webapps} directory.  When @emph{tomcat} starts, it will see the file, unpack it, and run it.  The application will be available at @code{[HOST]/Kiss}
+
+Renaming @code{Kiss.war} to @code{ABC.war}, for example, will cause the application path to change to @code{[HOST]/ABC}
+
+@section Database Access
+
+@emph{Kiss} comes with a powerful library for accessing SQL databases.
+Code for this is located under @code{org.kissweb.database} It is
+currently only documented via JavaDocs but examples and documentation
+will follow soon.  It is currently being used in production
+environments.  This API provides the following benefits:
+
+@itemize @bullet
+@item
+Automatic connection and statement pooling
+@item
+Vastly simpler API than bare JDBC
+@item
+Handling of parameterized arguments
+@item 
+Auto generation of SQL for single record adds, edits, and deletions
+@item
+Auto handling for cases of cursor interference on nested queries
+@item
+Supports transactions out-of-the-box
+@end itemize
+
+
+@section Learning The System
+
+In order to start getting a feel for how @code{Kiss} applications
+function, in terms of the back-end, look at files in the
+@code{src/main/application/page1} directory.  With @code{Kiss} you can
+develop applications in several different languages.  The @code{page1}
+example shows the same code in all of the suported languages.
+
+In terms of the front-end, see the example files under @code{src/main/webapp/page1}
