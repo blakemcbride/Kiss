@@ -48,7 +48,7 @@ GIT source code control system
 @end enumerate
 
 The system was built and tested with JDK 8, @uref{https://www.postgresql.org,PostgreSQL}, @uref{https://www.jetbrains.com/idea,IntelliJ}, and 
-@uref{http://tomcat.apache.org,tomcat}.  Other environments such as Microsoft SQL Server, IIS, Glassfish, eclipse, should work fine but may require some configuration.
+@uref{http://tomcat.apache.org,tomcat}.  Other environments such as IIS, Glassfish, eclipse, should work fine but may require some configuration.
 
 Install the above per their instructions.
 
@@ -57,11 +57,11 @@ In addition to the Gradle build files, Kiss comes with IntelliJ project files th
 @section Download Kiss
 
 
-Kiss is located at @uref{https://github.com/blakemcbride/Kiss}
+Kiss is located at @uref{https://github.com/kiss-web/Kiss}
 
 It can be downloaded via the following command:
 
-@code{git clone https://github.com/blakemcbride/Kiss.git}
+@code{git clone https://github.com/kiss-web/Kiss.git}
 
 @section Setup And Configuration
 
@@ -107,6 +107,8 @@ Support for other databases is easy to add.
 
 The remaining parameters should be self-explanatory.  Use the format shown in the example.
 
-Create the database (named ``kiss'' above or whatever name you configured).   After that, you can run the script file @code{init.sql} to create the table and some initial data.
+Create the database (named ``kiss'' above or whatever name you
+configured).  After that, you can run the script file @code{init.sql}
+to create the table and some initial data.
 
 The default username is @emph{kiss}, and the default password is @emph{password}
