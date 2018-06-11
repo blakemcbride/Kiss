@@ -7,7 +7,7 @@ site for a more detailed description at
 [http://kissweb.org](http://kissweb.org)
 
 
-Home for the code is at:  [https://github.com/kiss-web/Kiss](https://github.com/kiss-web/Kiss)
+Home for the code is at:  [https://gitlab.com/kissweb/Kiss.git](https://gitlab.com/kissweb/Kiss.git)
 
 For build and usage instructions see the manual at `manual/Kiss.pdf` or `manual/man/index.html`
 
