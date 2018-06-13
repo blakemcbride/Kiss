@@ -17,35 +17,48 @@ Server.setUUID = function (uuid) {
     Server.uuid = uuid;
 };
 
-Server.call = function (pkg, cls, injson) {
-    var path = "rest";  // path to servlet
-    if (!injson)
-        injson = {};
-    injson._uuid = Server.uuid;
-    injson._method = "main";
-    injson._package = pkg;
-    injson._class = cls;
+Server.logout = function () {
+    Server.uuid = '';
+};
 
-    var dfd = jQuery.Deferred();
-    jQuery.ajax({
-        type: 'POST',
-        url: path,
-        data: JSON.stringify(injson),
-        contentType: 'application/json',
-        dataType: 'json',
-        success:  function (data, status, hdr) {
-            if (!data._Success)
-                utils.showMessage('Error', data._ErrorMessage);
-            dfd.resolve(data);
-        },
-        error: function (error, status) {
-            var msg = 'Error communicating with the server.';
-            utils.showMessage('Error', msg);
-            dfd.resolve({ _Success: false, _ErrorMessage: msg });
-            //dfd.reject(error, status);
-        }
+Server.call = function (pkg, cls, injson) {
+
+    const doCall = function (pkg, cls, injson, pass, resolve, reject) {
+        const path = "rest";  // path to servlet
+        if (!injson)
+            injson = {};
+        injson._uuid = Server.uuid;
+        injson._method = "main";
+        injson._package = pkg;
+        injson._class = cls;
+
+        jQuery.ajax({
+            type: 'POST',
+            url: path,
+            data: JSON.stringify(injson),
+            contentType: 'application/json',
+            dataType: 'json',
+            success: function (data, status, hdr) {
+                if (!data._Success)
+                    utils.showMessage('Error', data._ErrorMessage);
+                resolve(data);
+            },
+            error: function (error, status) {
+                if (pass < 3) {
+                    doCall(pkg, cls, injson, pass + 1, resolve, reject);
+                    return;
+                }
+                const msg = 'Error communicating with the server.';
+                utils.showMessage('Error', msg);
+                resolve({_Success: false, _ErrorMessage: msg});
+                //reject(error, status);
+            }
+        });
+    };
+
+    return new Promise(function (resolve, reject) {
+        doCall(pkg, cls, injson, 1, resolve, reject);
     });
-    return dfd.promise();
 };
 
 //# sourceURL=kiss/Server.js

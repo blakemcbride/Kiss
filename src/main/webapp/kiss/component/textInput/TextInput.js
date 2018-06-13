@@ -51,7 +51,7 @@
             }
         }
 
-        nattrs += ' oninput="this.value=Component.TextInput.$textinput(this)"';
+        nattrs += ' oninput="this.value=Component.TextInput.$textinput(this)" autocorrect="off" autocapitalize="off" spellcheck="false"';
 
         var newElm = utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             type: password ? 'password' : 'text',

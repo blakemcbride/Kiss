@@ -3,12 +3,12 @@
 
 $$('login').onclick(function () {
 
-    var error = $$('username').isError('Username');
+    let error = $$('username').isError('Username');
     if (!error)
         error = $$('password').isError('Password');
 
     if (!error) {
-        var data = {
+        let data = {
             username: $$('username').getValue(),
             password: $$('password').getValue()
         };

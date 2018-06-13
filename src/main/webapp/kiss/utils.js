@@ -903,5 +903,10 @@ utils.loadPage = function (page) {
     });
 };
 
+utils.isOnline = function () {
+    //return false;          //  used to simulate off-line condition
+    return navigator.onLine;
+};
+
 
 //# sourceURL=kiss/utils.js

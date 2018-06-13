@@ -63,6 +63,10 @@
             jqObj.val(val).change();
         };
 
+        newElm.getLabel = function () {
+            return jqObj.find('option:selected').text();
+        };
+
         newElm.disable = function () {
             jqObj.prop('disabled', true);
         };

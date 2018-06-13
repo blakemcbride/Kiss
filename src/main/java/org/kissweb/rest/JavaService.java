@@ -56,7 +56,7 @@ public class JavaService {
         } catch (ClassNotFoundException e) {
             ms.errorReturn(response, "Class not found: " + e.getMessage(), null);
             return MainServlet.ExecutionReturn.Error;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             ms.errorReturn(response, e.getMessage(), null);
             return MainServlet.ExecutionReturn.Error;
         }
