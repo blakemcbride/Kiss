@@ -5,7 +5,7 @@
 
 'use strict';
 
-Kiss.RadioButtons = {};  // we want this to be zeroed out each time
+Kiss.RadioButtons = {};
 Kiss.RadioButtons.groups = {};
 
 
@@ -14,6 +14,7 @@ Kiss.RadioButtons.groups = {};
     var processor = function (elm, attr, content) {
         var nstyle;
         var group;
+        var required = false;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -29,6 +30,9 @@ Kiss.RadioButtons.groups = {};
                 case 'name':
                     group = utils.removeQuotes(attr[prop]);
                     break;
+                case 'required':
+                    required = true;
+                    break;
 
                 // pre-existing attributes
 
@@ -40,7 +44,12 @@ Kiss.RadioButtons.groups = {};
             }
         }
 
-        Kiss.RadioButtons.groups[group] = true;
+        if (!Kiss.RadioButtons.groups[group]) {
+            Kiss.RadioButtons.groups[group] = {};
+            Kiss.RadioButtons.groups[group].required = false;
+        }
+        if (required)
+            Kiss.RadioButtons.groups[group].required = true;
 
         var nhtml = utils.tagReplace('<input type="radio" style="{style}" {attr} name="{name}">{content}', {
             style: nstyle,
@@ -69,8 +78,26 @@ Kiss.RadioButtons.setValue = function (group, val) {
     return $('input[type=radio][name=' + group + '][value='+val+']').prop('checked', true);
 };
 
+Kiss.RadioButtons.isError = function (group, desc) {
+    if (!Kiss.RadioButtons.groups[group].required)
+        return false;
+    var val = $('input[type=radio][name=' + group + ']:checked').val();
+    if (!val) {
+        utils.showMessage('Error', 'A ' + desc + ' selection is required.');
+        return true;
+    }
+    return false;
+};
+
 Kiss.RadioButtons.onChange = function (group, fun) {
     return $('input[type=radio][name=' + group + ']').change(fun);
+};
+
+/**
+ * Essentially, resets the required setting for all radio buttons
+ */
+Kiss.RadioButtons.resetGroups = function () {
+    Kiss.RadioButtons.groups = {};
 };
 
 
