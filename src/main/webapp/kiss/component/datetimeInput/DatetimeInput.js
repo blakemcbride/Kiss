@@ -5,18 +5,22 @@
 
 'use strict';
 
+
 (function () {
 
     var processor = function (elm, attr, content) {
+
         var nstyle;
+        var min = null;
+        var max = null;
         var required = false;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
+
         var nattrs = '';
         var id;
-        var default_option;
         for (var prop in attr) {
             switch (prop) {
 
@@ -25,10 +29,6 @@
                 case 'required':
                     required = true;
                     break;
-                case 'default-option':
-                    default_option = attr[prop];
-                    break;
-
 
                 // pre-existing attributes
 
@@ -43,36 +43,33 @@
             }
         }
 
-        if (!content  &&  default_option)
-            content = '<option value="">' + default_option + '</option>';
-
-        var newElm = utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}">{content}</select>', {
+        var newElm = utils.replaceHTML(id, elm, '<input type="datetime-local" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
-            content: content
+            placeholder: content
         });
         var jqObj = newElm.jqObj;
 
-        newElm.clear = function () {
-            jqObj.empty();
-            if (default_option)
-                newElm.add('', default_option);
-        };
-
-        newElm.add = function (val, label) {
-            jqObj.append($('<option></option>').attr('value', val).text(label));
-        };
-
-        newElm.getValue = function () {
+        newElm.getSQLValue = function () {
             return jqObj.val();
         };
 
-        newElm.setValue = function (val) {
-            jqObj.val(val).change();
+        newElm.getDateValue = function () {
+            var val = jqObj.val();
+            if (!val  ||  val.length < 16)
+                return null;
+            return new Date(parseInt(val.substr(0, 4), 10), parseInt(val.substr(5, 2), 10)-1, parseInt(val.substr(8, 2), 10), parseInt(val.substr(11, 2), 10), parseInt(val.substr(14, 2), 10));
         };
 
-        newElm.getLabel = function () {
-            return jqObj.find('option:selected').text();
+        newElm.setValue = function (val) {
+            if (!val)
+                jqObj.val('');
+            else if (typeof val === 'string')
+                jqObj.val(val);
+        };
+
+        newElm.clear = function () {
+            jqObj.val('');
         };
 
         newElm.disable = function () {
@@ -92,11 +89,9 @@
         };
 
         newElm.isError = function (desc) {
-            if (!required)
-                return false;
-            var val = newElm.getValue();
-            if (!val) {
-                utils.showMessage('Error', desc + ' selection is required.', function () {
+            var val = newElm.getSQLValue();
+            if (required && !val) {
+                utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
@@ -106,8 +101,8 @@
     };
 
     var componentInfo = {
-        name: 'DropDown',
-        tag: 'drop-down',
+        name: 'DatetimeInput',
+        tag: 'datetime-input',
         processor: processor
     };
     utils.newComponent(componentInfo);
@@ -115,4 +110,5 @@
 })();
 
 
-//# sourceURL=kiss/component/dropDown/DropDown.js
+
+//# sourceURL=kiss/component/datetimeInput/DatetimeInput.js
