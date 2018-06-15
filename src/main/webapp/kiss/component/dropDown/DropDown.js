@@ -14,9 +14,9 @@
             nstyle = attr.style;
         else
             nstyle = '';
-
         var nattrs = '';
         var id;
+        var default_option;
         for (var prop in attr) {
             switch (prop) {
 
@@ -24,6 +24,9 @@
 
                 case 'required':
                     required = true;
+                    break;
+                case 'default-option':
+                    default_option = attr[prop];
                     break;
 
 
@@ -40,6 +43,9 @@
             }
         }
 
+        if (!content  &&  default_option)
+            content = '<option value="">' + default_option + '</option>';
+
         var newElm = utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}">{content}</select>', {
             style: nstyle,
             attr: nattrs,
@@ -49,6 +55,8 @@
 
         newElm.clear = function () {
             jqObj.empty();
+            if (default_option)
+                newElm.add('', default_option);
         };
 
         newElm.add = function (val, label) {
