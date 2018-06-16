@@ -64,7 +64,11 @@
         newElm.setValue = function (val) {
             if (!val)
                 jqObj.val('');
-            else if (typeof val === 'string')
+            else if (val instanceof Date) {
+                var v =  val.getFullYear() + "-" + ("0"+(val.getMonth()+1)).slice(-2) + "-" + ("0" + val.getDate()).slice(-2) +
+                    "T" + ("0" + val.getHours()).slice(-2) + ":" + ("0" + val.getMinutes()).slice(-2);
+                jqObj.val(v);
+            } else
                 jqObj.val(val);
         };
 
