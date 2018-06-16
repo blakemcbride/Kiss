@@ -75,6 +75,13 @@
             return jqObj.find('option:selected').text();
         };
 
+        newElm.onchange = function (func) {
+            jqObj.on('change', function () {
+                // func gets passed the selected value, label
+                func(jqObj.val(), jqObj.find('option:selected').text());
+            });
+        };
+
         newElm.disable = function () {
             jqObj.prop('disabled', true);
         };
@@ -113,6 +120,7 @@
     utils.newComponent(componentInfo);
 
 })();
+
 
 
 //# sourceURL=kiss/component/dropDown/DropDown.js
