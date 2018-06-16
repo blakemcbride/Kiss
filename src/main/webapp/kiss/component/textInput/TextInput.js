@@ -129,7 +129,7 @@
 
 
     Component.TextInput.$textinput = function (elm) {
-        var val = elm.value.trim();
+        var val = elm.value.replace(/^\s+/, "");
         return elm.kiss.elementInfo.upcase ? val.toUpperCase() : val;
     };
 
