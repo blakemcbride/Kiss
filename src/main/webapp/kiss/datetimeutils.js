@@ -10,6 +10,8 @@ var datetimeutils = function () {};
 
 
 datetimeutils.format = function (dt) {
+    if (!dt)
+        return '';
     var hours = dt.getHours();
     var sf;
     if (hours > 12)
