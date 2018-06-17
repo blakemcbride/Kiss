@@ -69,7 +69,7 @@ utils.showMessage = function(title, message, afterFun) {
             '<div id="msg-modal" class="msg-modal">' +
             '  <!-- Modal content -->' +
             '  <div class="msg-modal-content">' +
-            '    <div class="msg-modal-header">' +
+            '    <div class="msg-modal-header" id="msg-modal-header-tab">' +
             '      <span id="msg-close-btn" class="msg-close">&times;</span>' +
             '      <p id="msg-header" style="margin-top: 2px;">Modal Header</p>' +
             '    </div>' +
@@ -87,6 +87,10 @@ utils.showMessage = function(title, message, afterFun) {
     $('#msg-message').text(message);
     var modal = $('#msg-modal');
     var span = $('#msg-close-btn');
+    if (title === 'Error')
+        $('#msg-modal-header-tab').css('background-color', 'red');
+    else
+        $('#msg-modal-header-tab').css('background-color', '#6495ed');
     modal.show();
     var endfun = function () {
         modal.hide();
