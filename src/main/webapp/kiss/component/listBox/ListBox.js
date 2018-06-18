@@ -54,13 +54,17 @@
             size: size
         });
         var jqObj = newElm.jqObj;
+        var dataStore = {};
 
         newElm.clear = function () {
             jqObj.empty();
+            dataStore = {};
         };
 
-        newElm.add = function (val, label) {
+        newElm.add = function (val, label, data) {
             jqObj.append($('<option></option>').attr('value', val).text(label));
+            if (data)
+                dataStore[val] = data;
         };
 
         newElm.getValue = function () {
@@ -69,6 +73,14 @@
 
         newElm.setValue = function (val) {
             jqObj.val(val).change();
+        };
+
+        newElm.getLabel = function () {
+            return jqObj.find('option:selected').text();
+        };
+
+        newElm.getData = function () {
+            return dataStore[jqObj.val()];
         };
 
         newElm.disable = function () {
@@ -92,7 +104,7 @@
                 return false;
             var val = newElm.getValue();
             if (!val) {
-                utils.showMessage('Error', desc + ' is required.', function () {
+                utils.showMessage('Error', desc + ' selection is required.', function () {
                     jqObj.focus();
                 });
                 return true;
