@@ -119,7 +119,7 @@
                 if (jqObj.val()) {
                     timeout = setTimeout(function () {
                         if (timeout)
-                            fun(jqObj.val(), jqObj.find('option:selected').text());
+                            fun(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
                     }, 300);
                 }
             });
@@ -132,7 +132,7 @@
                         clearTimeout(timeout);
                         timeout = null;
                     }
-                    fun(jqObj.val(), jqObj.find('option:selected').text());
+                    fun(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
                 }
             });
         };

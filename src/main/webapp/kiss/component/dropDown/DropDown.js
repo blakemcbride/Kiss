@@ -86,7 +86,7 @@
         newElm.onchange = function (func) {
             jqObj.on('change', function () {
                 // func gets passed the selected value, label
-                func(jqObj.val(), jqObj.find('option:selected').text());
+                func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
             });
         };
 

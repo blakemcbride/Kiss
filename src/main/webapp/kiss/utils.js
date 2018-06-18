@@ -878,6 +878,9 @@ var $$ = function (id) {
         rbobj.onChange = function (fun) {
             Kiss.RadioButtons.onChange(id, fun);
         };
+        rbobj.isError = function (lbl) {
+            return Kiss.RadioButtons.isError(id, lbl);
+        };
         return rbobj;
     }
     var e = $((id.charAt(0) === '#'?'':'#')+id);
@@ -899,6 +902,8 @@ utils.replaceHTML = function (id, elm, template, rplobj) {
 };
 
 utils.loadPage = function (page) {
+    if (typeof Kiss !== 'undefined'  &&  typeof Kiss.RadioButtons !== 'undefined')
+        Kiss.RadioButtons.resetGroups();
     $.get(page + '.html' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function (text) {
         $('body').html(text);
         utils.rescan();  // does all the tag replacement
