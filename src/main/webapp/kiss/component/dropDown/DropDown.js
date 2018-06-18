@@ -52,15 +52,19 @@
             content: content
         });
         var jqObj = newElm.jqObj;
+        var dataStore = {};
 
         newElm.clear = function () {
             jqObj.empty();
             if (default_option)
                 newElm.add('', default_option);
+            dataStore = {};
         };
 
-        newElm.add = function (val, label) {
+        newElm.add = function (val, label, data) {
             jqObj.append($('<option></option>').attr('value', val).text(label));
+            if (data)
+                dataStore[val] = data;
         };
 
         newElm.getValue = function () {
@@ -73,6 +77,10 @@
 
         newElm.getLabel = function () {
             return jqObj.find('option:selected').text();
+        };
+
+        newElm.getData = function () {
+            return dataStore[jqObj.val()];
         };
 
         newElm.onchange = function (func) {
