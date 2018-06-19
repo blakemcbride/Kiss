@@ -18,6 +18,7 @@ utils.afterComponentsLoaded(function () {
     utils.useComponent("RadioButton");
     utils.useComponent("TextboxInput");
     utils.useComponent("TextInput");
+    utils.useComponent("TimeInput");
 })();
 
 //# sourceURL=index.js

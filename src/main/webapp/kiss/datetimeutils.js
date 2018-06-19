@@ -1,6 +1,6 @@
 /**
- * Created by Blake McBride on 6/16/18.
- */
+* Created by Blake McBride on 6/16/18.
+*/
 
 'use strict';
 
@@ -8,8 +8,13 @@
 var datetimeutils = function () {};
 
 
-
-datetimeutils.format = function (dt) {
+/**
+ * Format a Date to a string representation.
+ *
+ * @param dt a Date type
+ * @returns {string}
+ */
+datetimeutils.formatDate = function (dt) {
     if (!dt)
         return '';
     var hours = dt.getHours();
@@ -28,6 +33,23 @@ datetimeutils.format = function (dt) {
     else
         min = min.toString();
     return (dt.getMonth()+1).toString() + '/' + dt.getDate().toString() + '/' + dt.getFullYear().toString() + ' ' + hours.toString() + ':' + min + sf;
+};
+
+/**
+ *
+ * @param dt    int YYYYMMDD
+ * @param time  int 1231
+ * @returns {*}
+ */
+datetimeutils.formatInt = function (dt, time) {
+    if (!dt && (time === undefined  ||  time === null  ||  time === ''))
+        return '';
+    var res = dateutils.intToStr4(dt);
+    var tf = timeutils.format(time);
+    if (res && tf)
+        return res + ' ' + tf;
+    else
+        return res + tf;
 };
 
 
