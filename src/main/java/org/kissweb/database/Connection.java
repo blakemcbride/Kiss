@@ -59,6 +59,10 @@ public class Connection implements AutoCloseable {
     public Connection(java.sql.Connection db) {
         this.conn = db;
         externalConnection = true;
+        try {
+            dmd = conn.getMetaData();
+        } catch (SQLException e) {
+        }
     }
 
     public static String makeConnectionString(ConnectionType type, String host, String dbname, String user, String pw) {
@@ -114,11 +118,13 @@ public class Connection implements AutoCloseable {
     public Connection(ConnectionType type, String host, String dbname, String user, String pw) throws SQLException, ClassNotFoundException {
         this(type, makeConnectionString(type, host, dbname, user, pw));
         ctype = type;
+        dmd = conn.getMetaData();
     }
 
     public Connection(ConnectionType type, String host, String dbname) throws SQLException, ClassNotFoundException {
         this(type, makeConnectionString(type, host, dbname, null, null));
         ctype = type;
+        dmd = conn.getMetaData();
     }
 
     @Override
