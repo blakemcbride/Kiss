@@ -21,11 +21,12 @@ timeutils.format = function (val, zero_fill) {
         width = 0;
         msk = '';
     }
-    if (hours >= 13) {
-        hours -= 12;
-        return utils.format(hours, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + ' PM';
-    } else
-        return utils.format(hours, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + ' AM';
+    if (hours === 0)
+        return utils.format(hours+12, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + ' AM';
+    if (hours >= 13)
+        return utils.format(hours-12, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + ' PM';
+    else
+        return utils.format(hours, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + (hours === 12 ? ' PM' : ' AM');
 };
 
 

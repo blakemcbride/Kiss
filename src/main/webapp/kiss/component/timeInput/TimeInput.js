@@ -37,7 +37,7 @@
                 case 'zero-fill':
                     zero_fill = true;
                     break;
-                    
+
                 // pre-existing attributes
 
                 case 'style':
@@ -127,6 +127,8 @@
                     part = null;
             }
 
+            if (part === 'A'  &&  hours === 12)
+                return (hours-12) * 100 + minutes;
             if (!part  ||  part === 'A'  ||  hours === 12)
                 return hours * 100 + minutes;
             else
