@@ -9,7 +9,7 @@
 %.ps : %.dvi
 	dvips -T Letter -O 0in,-0.8in $*
 
-all: Kiss.pdf man/index.html
+all: man/index.html # Kiss.pdf
 
 Kiss.pdf : Kiss.tex intro.tex setup.tex orientation.tex
 	pdftex Kiss.tex

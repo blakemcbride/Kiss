@@ -86,6 +86,12 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Pre_002drequisites" href="#Pre_002drequisites">2.1 Pre-requisites</a></li>
   <li><a name="toc-Download-Kiss" href="#Download-Kiss">2.2 Download Kiss</a></li>
   <li><a name="toc-Setup-And-Configuration" href="#Setup-And-Configuration">2.3 Setup And Configuration</a></li>
+  <li><a name="toc-Building-The-System" href="#Building-The-System">2.4 Building The System</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Gradle" href="#Gradle">2.4.1 Gradle</a></li>
+    <li><a name="toc-IntelliJ-Ultimate" href="#IntelliJ-Ultimate">2.4.2 IntelliJ Ultimate</a></li>
+  </ul></li>
+  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.5 What Do I Do With It Now?</a></li>
 </ul></li>
 <li><a name="toc-Orientation" href="#Orientation">3 Orientation</a>
 <ul class="no-bullet">
@@ -406,11 +412,11 @@ I am using a modified version located at <a href="https://github.com/blakemcbrid
 <h3 class="section">2.2 Download Kiss</h3>
 
 
-<p>Kiss is located at <a href="https://gitlab.com/kissweb/Kiss">https://gitlab.com/kissweb/Kiss</a>
+<p>Kiss is located at <a href="https://github.com/kiss-web/Kiss">https://github.com/kiss-web/Kiss</a>
 </p>
 <p>It can be downloaded via the following command:
 </p>
-<p><code>git clone https://gitlab.com/kissweb/Kiss.git</code>
+<p><code>git clone https://github.com/kiss-web/Kiss.git</code>
 </p>
 <a name="Setup-And-Configuration"></a>
 <h3 class="section">2.3 Setup And Configuration</h3>
@@ -450,6 +456,74 @@ configured).  After that, you can run the script file <code>init.sql</code>
 to create the table and some initial data.
 </p>
 <p>The default username is <em>kiss</em>, and the default password is <em>password</em>
+</p>
+<a name="Building-The-System"></a>
+<h3 class="section">2.4 Building The System</h3>
+
+<p>The system may be built in several way.  It can be build from the
+command line using <em>Gradle</em>, or at can be build from within your
+favorite IDE.  Using an IDE has the great advantage of a built-in
+debugger.  This section will outline usage of some of these scenarios.
+</p>
+<a name="Gradle"></a>
+<h4 class="subsection">2.4.1 Gradle</h4>
+
+<p>While not the best choice when in development mode, <em>Gradle</em> is a
+good choice when generating the JavaDocs and possible also when
+generating the final <em>WAR</em> file.  <em>Gradle</em> may be used as follows:
+</p>
+<dl compact="compact">
+<dt><code>gradle javadoc</code></dt>
+<dd><p>JavaDocs end up in the <code>build/docs/javadoc</code> directory.
+</p></dd>
+<dt><code>gradle war</code></dt>
+<dd><p>The WAR file ends up in the <code>build/libs</code> directory.  This file can be just placed in the webapps directory of tomcat to deploy.
+</p></dd>
+<dt><code>gradle clean</code></dt>
+<dd><p>Removes all the generated files.
+</p></dd>
+<dt><code>gradle appRun</code></dt>
+<dd><p>Runs a sample server serving up the application.  The system will be
+available from your local browser at
+<code>http://localhost:8080/Kiss</code>.  Use <code>^C</code> to exit.
+</p></dd>
+</dl>
+
+<a name="IntelliJ-Ultimate"></a>
+<h4 class="subsection">2.4.2 IntelliJ Ultimate</h4>
+
+<p>IntelliJ is a good IDE.  The free version may be inadequate for
+<em>Kiss</em> however.  IntelliJ should be configured with support for
+<em>Gradle</em> and <code>tomcat</code>.  You may set it up as follows:
+</p>
+<ol>
+<li> Get a fresh clone
+</li><li> If you just entered IntelliJ select &ldquo;Import Project&rdquo;, or if already in a project select New / Project from existing source.
+</li><li> Select the file <em>build.gradle</em>
+</li><li> Accept all defaults
+</li><li> Go to dropdown at the top of intelliJ screen and select Edit Configurations
+</li><li> Click the green + in the upper left corner
+</li><li> Select <em>Tomcat Server</em> / <em>Local</em>
+</li><li> Change the Name to Kiss
+</li><li> Click the Deployment tab
+</li><li> Click the Green + in the middle of the screen (not the upper left)
+</li><li> Select <em>Artifact</em> and then <em>Kiss.war</em> (exploded)
+</li><li> Click &quot;OK&quot;
+</li></ol>
+
+<p>To run the app in debug mode just click the green bug at the top of the screen.
+</p>
+
+<a name="What-Do-I-Do-With-It-Now_003f"></a>
+<h3 class="section">2.5 What Do I Do With It Now?</h3>
+
+<p>What you have at this point is the beginnings of your new application.
+<em>Kiss</em> is provided as a running and deployable system.  It is
+expected that you would modify what&rsquo;s here to suit your application
+needs.
+</p>
+<p>Besides this narrative, you would need the JavaDocs located under the
+<code>build/docs/javadoc</code> directory for API specific documentation.
 </p>
 
 

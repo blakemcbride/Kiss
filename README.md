@@ -9,5 +9,5 @@ site for a more detailed description at
 
 Home for the code is at:  [https://github.com/kiss-web/Kiss.git](https://github.com/kiss-web/Kiss.git)
 
-For build and usage instructions see the manual at `manual/Kiss.pdf` or `manual/man/index.html`
+For build and usage instructions see the manual at `manual/man/index.html`
 
