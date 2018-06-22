@@ -260,4 +260,15 @@ public class Connection implements AutoCloseable {
         return res;
     }
 
+    public int getColumnSize(String table, String cname) throws SQLException {
+        ResultSet columns = dmd.getColumns(null, null, table, cname);
+        int size;
+        if (columns.next()) {
+            String s = columns.getString("COLUMN_SIZE");
+            size = Integer.parseInt(s);
+        } else
+            size = -1;
+        columns.close();
+        return size;
+    }
 }

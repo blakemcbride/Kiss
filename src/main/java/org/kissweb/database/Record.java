@@ -332,4 +332,11 @@ public class Record implements AutoCloseable {
         }
     }
 
+    public Connection getConnection() {
+        return conn;
+    }
+
+    public String getTableName() {
+        return table;
+    }
 }
