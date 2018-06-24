@@ -3,6 +3,8 @@
 
 utils.afterComponentsLoaded(function () {
 
+    Server.setURL('http://localhost:8080');
+
     utils.loadPage('login');
 
 });

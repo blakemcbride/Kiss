@@ -34,7 +34,7 @@ Server.call = function (pkg, cls, injson) {
 
         jQuery.ajax({
             type: 'POST',
-            url: path,
+            url: Server.url + '/' + path,
             data: JSON.stringify(injson),
             contentType: 'application/json',
             dataType: 'json',
