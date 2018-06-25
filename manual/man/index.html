@@ -56,6 +56,7 @@ ul.no-bullet {list-style: none}
 <li><a name="stoc-Introduction" href="#toc-Introduction">1 Introduction</a></li>
 <li><a name="stoc-System-Setup" href="#toc-System-Setup">2 System Setup</a></li>
 <li><a name="stoc-Orientation" href="#toc-Orientation">3 Orientation</a></li>
+<li><a name="stoc-Developing" href="#toc-Developing">4 Developing</a></li>
 <li><a name="stoc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#toc-Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
 
 </ul>
@@ -103,6 +104,11 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Deploying-A-Kiss-Application" href="#Deploying-A-Kiss-Application">3.6 Deploying A Kiss Application</a></li>
   <li><a name="toc-Database-Access" href="#Database-Access">3.7 Database Access</a></li>
   <li><a name="toc-Learning-The-System" href="#Learning-The-System">3.8 Learning The System</a></li>
+</ul></li>
+<li><a name="toc-Developing" href="#Developing">4 Developing</a>
+<ul class="no-bullet">
+  <li><a name="toc-Back_002dend-Development" href="#Back_002dend-Development">4.1 Back-end Development</a></li>
+  <li><a name="toc-Front_002dend-Development" href="#Front_002dend-Development">4.2 Front-end Development</a></li>
 </ul></li>
 <li><a name="toc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
 
@@ -645,6 +651,90 @@ example shows the same code in all of the suported languages.
 </p>
 <p>In terms of the front-end, see the example files under <code>src/main/webapp/page1</code>
 </p>
+
+
+<a name="Developing"></a>
+<h2 class="chapter">4 Developing</h2>
+
+<p>This section details the development process with <em>Kiss</em>.  The
+details provided will be for intelliJ but can be adapted to other
+IDE&rsquo;s.  The use of an IDE is tremendously beneficial because of the
+graphical debugging and intelligent code completion capabilities.
+</p>
+<p>A good development environment includes two separate servers running
+on two different ports.  One serves the back-end, and the other serves
+the front-end.  This arrangement allows both front-end and back-end
+development without any compiles, server reboots, file copies, or deployments.
+Back-end and front-end files can be edited and saved.  Their changes
+take effect immediately.
+</p>
+<p>Of course, in a production environment, only a single server would be utilized.
+</p>
+<a name="Back_002dend-Development"></a>
+<h3 class="section">4.1 Back-end Development</h3>
+
+<p>Typically, the IDE manages a tomcat instance and serves up the core
+back-end code.  That code detects that it is running under an IDE and
+re-routes all back-end application files back to the source
+directories.
+</p>
+<p>Although back-end files are edited in source form and run in compiled
+form, back-end code can be debugged (including break-points) as if
+they were compiled before the system was booted.
+</p>
+<p>Once the back-end server is up, application files changed under the
+<code>src/main/application</code> directory will take effect immediately.
+</p>
+<p>The back-end server should be started before the front-end server.
+</p>
+<a name="Front_002dend-Development"></a>
+<h3 class="section">4.2 Front-end Development</h3>
+
+<p>The front-end can be debugged through your browser debugger (F12 on Chrome).
+</p>
+<p>A separate server is used so that development files will be served
+rather than the front-end that was present when the back-end server
+was started.  In order to make this work, there are two steps that need to be followed.
+</p>
+<ol>
+<li> The front-end needs to know where the back-end is located.  This is controlled in the file <code>src/main/webapp/index.js</code>.
+That file contains a line that looks as follows:
+<div class="example">
+<pre class="example">    Server.setURL('http://localhost:8080');
+</pre></div>
+<p>As shipped, that setting should be good in most cases.  Adjust as needed.
+</p></li><li> A server needs to be running to serve the front-end code.  The
+<em>Kiss</em> system comes with a simple server that performs this
+function.  It is in a file named <code>SimpleWebServer.jar</code> on the
+root of the <em>Kiss</em> system.  From the root of the <em>Kiss</em>
+system, run the following command to run the front-end server:
+<div class="example">
+<pre class="example">   ./serve
+</pre></div>
+<p>or on Windows:
+</p><div class="example">
+<pre class="example">   serve.cmd
+</pre></div>
+</li></ol>
+
+<p>The back-end server should be started before the front-end server.
+</p>
+<p>Once the front-end server is up, you can access the development
+environment through your browser at <code>http://localhost:8000</code>
+</p>
+<p>If you disable the browser cache, changes you make to the front-end
+will appear by just reloading the page.  On Chrome, for example, the
+browser cache can be turned off by going into the page debugger (F12),
+then <code>settings</code>, and then select <code>Disable cache (while
+DevTools is open)</code>
+</p>
+<p>You can now develop the front-end portion of your application by
+editing files under the <code>src/main/webapp</code> directory.
+</p>
+
+
+
+
 
 <a name="Method_002c-Macro_002c-Function-And-Variable-Index"></a>
 <h2 class="unnumbered">Method, Macro, Function And Variable Index</h2>

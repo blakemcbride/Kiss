@@ -13,6 +13,8 @@ all: man/index.html # Kiss.pdf
 
 Kiss.pdf : Kiss.tex intro.tex setup.tex orientation.tex
 	pdftex Kiss.tex
+	pdftex Kiss.tex
+	pdftex Kiss.tex
 
 man/index.html : Kiss.tex intro.tex setup.tex orientation.tex
 	makeinfo --html Kiss.tex

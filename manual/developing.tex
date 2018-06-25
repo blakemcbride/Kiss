@@ -1,0 +1,109 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+@chapter Developing
+
+This section details the development process with @emph{Kiss}.  The
+details provided will be for intelliJ but can be adapted to other
+IDE's.  The use of an IDE is tremendously beneficial because of the
+graphical debugging and intelligent code completion capabilities.
+
+A good development environment includes two separate servers running
+on two different ports.  One serves the back-end, and the other serves
+the front-end.  This arrangement allows both front-end and back-end
+development without any compiles, server reboots, file copies, or deployments.
+Back-end and front-end files can be edited and saved.  Their changes
+take effect immediately.
+
+Of course, in a production environment, only a single server would be utilized.
+
+@section Back-end Development
+
+Typically, the IDE manages a tomcat instance and serves up the core
+back-end code.  That code detects that it is running under an IDE and
+re-routes all back-end application files back to the source
+directories.
+
+Although back-end files are edited in source form and run in compiled
+form, back-end code can be debugged (including break-points) as if
+they were compiled before the system was booted.
+
+Once the back-end server is up, application files changed under the
+@code{src/main/application} directory will take effect immediately.
+
+The back-end server should be started before the front-end server.
+
+@section Front-end Development
+
+The front-end can be debugged through your browser debugger (F12 on Chrome).
+
+A separate server is used so that development files will be served
+rather than the front-end that was present when the back-end server
+was started.  In order to make this work, there are two steps that need to be followed.
+
+@enumerate
+@item
+The front-end needs to know where the back-end is located.  This is controlled in the file @code{src/main/webapp/index.js}.
+That file contains a line that looks as follows:
+@example
+    Server.setURL('http://localhost:8080');
+@end example
+As shipped, that setting should be good in most cases.  Adjust as needed.
+@item
+A server needs to be running to serve the front-end code.  The
+@emph{Kiss} system comes with a simple server that performs this
+function.  It is in a file named @code{SimpleWebServer.jar} on the
+root of the @emph{Kiss} system.  From the root of the @emph{Kiss}
+system, run the following command to run the front-end server:
+@example
+   ./serve
+@end example
+or on Windows:
+@example
+   serve.cmd
+@end example
+@end enumerate
+
+The back-end server should be started before the front-end server.
+
+Once the front-end server is up, you can access the development
+environment through your browser at @code{http://localhost:8000}
+
+If you disable the browser cache, changes you make to the front-end
+will appear by just reloading the page.  On Chrome, for example, the
+browser cache can be turned off by going into the page debugger (F12),
+then @code{settings}, and then select @code{Disable cache (while
+DevTools is open)}
+
+You can now develop the front-end portion of your application by
+editing files under the @code{src/main/webapp} directory.
+
+
+
+
