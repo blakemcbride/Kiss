@@ -52,7 +52,7 @@ The system was built and tested with JDK 8, @uref{https://www.postgresql.org,Pos
 
 Install the above per their instructions.
 
-In addition to the Gradle build files, Kiss comes with IntelliJ project files that may be used out-of-the-box.  Other IDE's can import the Gradle build files.
+With the proper plugins, all of the IDE's can import the Gradle build files.
 
 @section Download Kiss
 
@@ -123,7 +123,7 @@ debugger.  This section will outline usage of some of these scenarios.
 @subsection Gradle 
 
 While not the best choice when in development mode, @emph{Gradle} is a
-good choice when generating the JavaDocs and possible also when
+good choice when generating the JavaDocs and possibly also when
 generating the final @emph{WAR} file.  @emph{Gradle} may be used as follows:
 
 @table @code
@@ -184,3 +184,4 @@ needs.
 
 Besides this narrative, you would need the JavaDocs located under the
 @code{build/docs/javadoc} directory for API specific documentation.
+(Which you may also generate via @emph{Gradle} as described above.)
