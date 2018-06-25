@@ -115,3 +115,5 @@ atlassian-ide-plugin.xml
 /manual/*.toc
 /manual/*.tp
 /manual/*.vr
+/manual/Kiss.pdf
+
