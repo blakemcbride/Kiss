@@ -52,6 +52,19 @@ div.vert-input label:after { content: ":"; }
     animation-duration: 0.4s
 }
 
+/* Wait Modal Content (animation sometimes causes message not to show) */
+.wmsg-modal-content {
+    z-index: 19001; /* Sit on top */
+    position: relative;
+    background-color: white;
+    margin: auto;
+    padding: 0;
+    /*border: 1px solid #888;*/
+    /*display: inline-block; */
+    width: 400px;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
 /* Add Animation */
 @-webkit-keyframes animatetop {
     from {top:-300px; opacity:0}

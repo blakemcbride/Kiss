@@ -154,7 +154,7 @@ utils.waitMessage = function(message) {
         $('body').append(
             '<div id="wmsg-modal" class="msg-modal">' +
             '  <!-- Modal content -->' +
-            '  <div class="msg-modal-content">' +
+            '  <div class="wmsg-modal-content">' +
             '    <div class="msg-modal-body">' +
             '      <p id="wmsg-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
             '    </div>' +
