@@ -1,0 +1,131 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+@chapter Back-end API
+
+@section REST Services
+
+All communications between the front-end and back-end occur over REST services you define.  Each REST service exists in its own, single file.
+
+As architected, each directory under @code{src/main/application} represents a single REST service.  Each class / file under that directory represents
+a web method.  The name of the class is the name of the web method.
+
+Each class must have a static main method.  This is the method that the @emph{Kiss} core calls.  This method is passed four argument as follows:
+
+@table @code
+@item JSONObject injson
+This represents the data that came from the front-end.
+@item JSONObject outjson
+This represents the data being returned to the front-end.
+@item Connection db
+This is a pre-opened connection to the defined database (defined in @code{application/KissInit.groovy})
+@item MainServlet servlet
+This is a rarely used servlet context argument.
+@end table
+
+Basically what happens is:
+
+@enumerate
+@item
+The front-end make a REST service call.
+@item
+The @code{Kiss} back-end receives the request.
+@item
+The user gets authenticated.
+@item
+A new database connection is formed.
+@item
+The requested web services is loaded (and compiled if needed).
+@item
+The @code{outjson} object that is filled in by the web service is returned to the front-end.
+@end enumerate
+
+Of course during this process, @code{Kiss} handles many possible error conditions.
+
+@section Database API
+
+
+@emph{Kiss} comes with a powerful library for accessing SQL databases.
+Code for this is located under @code{org.kissweb.database} It is
+currently being used in production environments.  This API provides
+the following benefits:
+
+@itemize @bullet
+@item
+Automatic connection and statement pooling
+@item
+Vastly simpler API than bare JDBC
+@item
+Handling of parameterized arguments
+@item 
+Auto generation of SQL for single record adds, edits, and deletions
+@item
+Auto handling for cases of cursor interference on nested queries
+@item
+Supports transactions out-of-the-box
+@end itemize
+
+As shipped, this library supports PostgreSQL, Microsoft Server, Oracle, MySQL, and SQLite.
+
+The detailed documentation for the database utilities are the
+accompanying JavaDocs.  This section provides an overview.
+
+The @emph{Kiss} database routines revolve around four main classes as follows:
+
+@table @code
+@item Connection
+This represents a connection to an SQL database.
+@item Command
+This represents a single action or command against the database.
+@item Cursor
+If the action is a @code{select}, the @code{Cursor} represents a pointer into the result set.
+@item Record
+This class represents a single row within a table or result set.
+@end table
+
+The @code{Connection} class contains several convenience methods that
+are used in simple cases where only a single action is being
+performed.  These methods should not be used when multiple
+simultaneous actions are taking place at once (by that single thread).
+This issue is not a problem in multi-user or multi-threaded
+situations.  It is only a problem when a single thread is doing one
+action while another action is still open.
+
+You will notice that your REST services are passed a @emph{Connection}
+argument.  @emph{Kiss} automatically forms a unique connection for
+each REST service call and closes it when the call is done.
+Therefore, you will not normally need to create your own connection.
+
+You would not normally write SQL for single record adds, updates, and
+deletes.  Using the @emph{Record} API, @code{Kiss} automatically
+generates these statements for you.
+
+In addition to the above, these utilities provide full support for transactions and parameters.
+
+@section Utilities

@@ -30,7 +30,9 @@
 @chapter Orientation
 
 
-The entire source code comes with the system and is convenient when debugging, however, only a few areas in the system would normally be of concern when building an application as follows.
+The entire source code comes with the system and is convenient when
+debugging, however, only a few areas in the system would normally be
+of concern when building an application as follows.
 
 
 @section Back-end Application Files
@@ -104,30 +106,6 @@ can either be built by your IDE, or at can be build by typing
 If using @emph{tomcat}, @code{Kiss.war} should be placed in the @code{webapps} directory.  When @emph{tomcat} starts, it will see the file, unpack it, and run it.  The application will be available at @code{[HOST]/Kiss}
 
 Renaming @code{Kiss.war} to @code{ABC.war}, for example, will cause the application path to change to @code{[HOST]/ABC}
-
-@section Database Access
-
-@emph{Kiss} comes with a powerful library for accessing SQL databases.
-Code for this is located under @code{org.kissweb.database} It is
-currently only documented via JavaDocs but examples and documentation
-will follow soon.  It is currently being used in production
-environments.  This API provides the following benefits:
-
-@itemize @bullet
-@item
-Automatic connection and statement pooling
-@item
-Vastly simpler API than bare JDBC
-@item
-Handling of parameterized arguments
-@item 
-Auto generation of SQL for single record adds, edits, and deletions
-@item
-Auto handling for cases of cursor interference on nested queries
-@item
-Supports transactions out-of-the-box
-@end itemize
-
 
 @section Learning The System
 

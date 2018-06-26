@@ -40,8 +40,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
+ *  This class represents a connection to an SQL database.
+ *
+ *  Typically, one connection would be used for each thread in an application.  Operations on a connection
+ *  is separate or isolated from all of the other connections.
  *
  * @author Blake McBride
+ *
+ * @see Command
+ * @see Cursor
+ * @see Record
+ *
  */
 public class Connection implements AutoCloseable {
 
@@ -56,6 +65,16 @@ public class Connection implements AutoCloseable {
     DatabaseMetaData dmd;
     ConnectionType ctype;
 
+    /**
+     * Create a Connection out of a pre-opened JDBC connection.
+     *
+     * If a new instance of this class is created with this method, the JDBC connection passed in will not be closed
+     * when this instance is closed.  Thus, if the connection was externally formed, it must be externally released.
+     *
+     * @param db
+     *
+     * @see Connection(ConnectionType, String, String, String, String)
+     */
     public Connection(java.sql.Connection db) {
         this.conn = db;
         externalConnection = true;
@@ -65,6 +84,18 @@ public class Connection implements AutoCloseable {
         }
     }
 
+    /**
+     * Create a connection string appropriate for the indicated database type.  This method is only used in special situations.
+     *
+     * @param type
+     * @param host
+     * @param dbname
+     * @param user
+     * @param pw
+     * @return
+     *
+     * @see Connection(ConnectionType, String, String, String, String)
+     */
     public static String makeConnectionString(ConnectionType type, String host, String dbname, String user, String pw) {
         String connectionString;
 
@@ -89,6 +120,14 @@ public class Connection implements AutoCloseable {
         return connectionString;
     }
 
+    /**
+     * Return the name of the driver used for the specified database type.  This method is only used in special circumstances.
+     *
+     * @param type
+     * @return
+     *
+     * @see Connection(ConnectionType, String, String, String, String)
+     */
     public static String getDriverName(ConnectionType type) {
         String driver;
         if (type == ConnectionType.PostgreSQL)
@@ -106,6 +145,16 @@ public class Connection implements AutoCloseable {
         return driver;
     }
 
+    /**
+     * Form a new connection to an SQL database.  This method is only used in special situations.
+     *
+     * @param type
+     * @param connectionString
+     * @throws ClassNotFoundException
+     * @throws SQLException
+     *
+     * @see Connection(ConnectionType, String, String, String, String)
+     */
     public Connection(ConnectionType type, String connectionString) throws ClassNotFoundException, SQLException {
         String driver = getDriverName(type);
         Class.forName(driver);
@@ -115,18 +164,48 @@ public class Connection implements AutoCloseable {
         dmd = conn.getMetaData();
     }
 
+    /**
+     * This is the main method of forming a new database connection.
+     *
+     * @param type
+     * @param host
+     * @param dbname
+     * @param user
+     * @param pw
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     *
+     * @see Connection(ConnectionType, String, String)
+     */
     public Connection(ConnectionType type, String host, String dbname, String user, String pw) throws SQLException, ClassNotFoundException {
         this(type, makeConnectionString(type, host, dbname, user, pw));
         ctype = type;
         dmd = conn.getMetaData();
     }
 
+    /**
+     * This is the main method of forming a new database connection when Windows authentication is used.
+     *
+     * @param type
+     * @param host
+     * @param dbname
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     *
+     * @see Connection(ConnectionType, String, String, String, String)
+     */
     public Connection(ConnectionType type, String host, String dbname) throws SQLException, ClassNotFoundException {
         this(type, makeConnectionString(type, host, dbname, null, null));
         ctype = type;
         dmd = conn.getMetaData();
     }
 
+    /**
+     * This method closes a connection.  It rarely needs to be called explicitly because it gets called
+     * automatically when using the Java try-with-resource statement.
+     *
+     * @throws SQLException
+     */
     @Override
     public void close() throws SQLException {
         if (conn != null) {
@@ -136,26 +215,69 @@ public class Connection implements AutoCloseable {
         }
     }
 
+    /**
+     * Begin a transaction.  All following operations are part of the transaction up untill a commit() or rollback().
+     * @throws SQLException
+     *
+     * @see #commit
+     * @see #rollback
+     */
     public void beginTransaction() throws SQLException {
         conn.setAutoCommit(false);
     }
 
+    /**
+     * Commit all the operations to the database since the last beginTransaction().  Also ends the transaction.
+     *
+     * @throws SQLException
+     *
+     * @see #beginTransaction
+     * @see #rollback
+     */
     public void commit() throws SQLException {
         conn.commit();
         conn.setAutoCommit(true);
     }
 
+    /**
+     * Rollback, erase, or forget all the operations since the last beginTransaction.  Also ends the transaction.
+     *
+     * @throws SQLException
+     *
+     * @see #beginTransaction
+     * @see #commit
+     */
     public void rollback() throws SQLException {
         conn.rollback();
         conn.setAutoCommit(true);
     }
 
+    /**
+     * Execute an SQL statement provided in a string.  The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement.
+     *
+     * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
+     * within the same connection occurring.  Remember, each REST service has its own connection.
+     *
+     * @param sql the SQL statement to execute
+     * @param args
+     * @throws SQLException
+     *
+     * @see Command#execute(String, Object...)
+     */
     public void execute(String sql, Object... args) throws SQLException {
         try (Command cmd = newCommand()) {
             cmd.execute(sql, args);
         }
     }
 
+    /**
+     * This is the main way of creating a new Command instance.
+     *
+     * @return
+     */
     public Command newCommand() {
         try {
             return new Command(this);
@@ -169,10 +291,15 @@ public class Connection implements AutoCloseable {
      * Read in the first record and then close it.
      * The record cannot be updated or deleted.
      *
+     * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
+     * within the same connection occurring.  Remember, each REST service has its own connection.
+     *
      * @param sql
      * @param args
      * @return
      * @throws SQLException
+     *
+     * @see Command#fetchOne(String, Object...)
      */
     public Record fetchOne(String sql, Object... args) throws SQLException {
         try (Command cmd = newCommand()) {
@@ -184,10 +311,15 @@ public class Connection implements AutoCloseable {
      * Fetch all of the records and close it.
      * No records can be updated or deleted.
      *
+     * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
+     * within the same connection occurring.  Remember, each REST service has its own connection.
+     *
      * @param sql
      * @param args
      * @return
      * @throws SQLException
+     *
+     * @see Command#fetchAll(String, Object...)
      */
     public List<Record> fetchAll(String sql, Object... args) throws SQLException {
         try (Command cmd = newCommand()) {
@@ -195,6 +327,16 @@ public class Connection implements AutoCloseable {
         }
     }
 
+    /**
+     * Return the name of the column that is the table's primary key.  Throws an exception of
+     * the table has a composite primary key.
+     *
+     * @param table
+     * @return
+     * @throws SQLException
+     *
+     * @see #getPrimaryColumns(String table)
+     */
     public String getPrimaryColumnName(String table) throws SQLException {
         String colname = primaryColName.get(table);
         if (colname == null) {
@@ -210,6 +352,15 @@ public class Connection implements AutoCloseable {
         return colname;
     }
 
+    /**
+     * Returns a list of column names that make up the primary key.
+     *
+     * @param table
+     * @return
+     * @throws SQLException
+     *
+     * @see #getPrimaryColumnName(String)
+     */
     public List<String> getPrimaryColumns(String table) throws SQLException {
         List<String> colnames = primaryColumns.get(table);
         if (colnames == null) {
@@ -226,10 +377,29 @@ public class Connection implements AutoCloseable {
         return colnames;
     }
 
+    /**
+     * This is the primary method of creating a new row in a table.  First, the new row would be created with this method.
+     * Then the columns would be filled with the methods in the Record class.  Finally, the addRecord() method would be called
+     * to perform the operation.
+     *
+     * @param table
+     * @return
+     *
+     * @see Record#set(String, Object)
+     * @see Record#addRecord()
+     * @see Record#addRecordAutoInc()
+     */
     public Record newRecord(String table) {
         return new Record(this, table);
     }
 
+    /**
+     * Tests to see if a specified table exists.
+     * Returns true if it does and false otherwise.
+     *
+     * @param table
+     * @return
+     */
     public boolean tableExists(String table) {
         String schema = null;
 
@@ -260,6 +430,14 @@ public class Connection implements AutoCloseable {
         return res;
     }
 
+    /**
+     * Manly useful in CHAR or VARCHAR columns, this method returns the maximum size of the column.
+     *
+     * @param table
+     * @param cname
+     * @return
+     * @throws SQLException
+     */
     public int getColumnSize(String table, String cname) throws SQLException {
         ResultSet columns = dmd.getColumns(null, null, table, cname);
         int size;

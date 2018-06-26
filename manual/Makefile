@@ -1,3 +1,6 @@
+
+TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex backendapi.tex frontendapi.tex
+
 %.dvi : %.tex
 	tex $<
 	texindex $*.fn
@@ -11,12 +14,12 @@
 
 all: man/index.html # Kiss.pdf
 
-Kiss.pdf : Kiss.tex intro.tex setup.tex orientation.tex
+Kiss.pdf : $(TEXFILES)
 	pdftex Kiss.tex
 	pdftex Kiss.tex
 	pdftex Kiss.tex
 
-man/index.html : Kiss.tex intro.tex setup.tex orientation.tex
+man/index.html :  $(TEXFILES)
 	makeinfo --html Kiss.tex
 
 clean:

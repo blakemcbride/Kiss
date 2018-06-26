@@ -57,6 +57,8 @@ ul.no-bullet {list-style: none}
 <li><a name="stoc-System-Setup" href="#toc-System-Setup">2 System Setup</a></li>
 <li><a name="stoc-Orientation" href="#toc-Orientation">3 Orientation</a></li>
 <li><a name="stoc-Developing" href="#toc-Developing">4 Developing</a></li>
+<li><a name="stoc-Front_002dend-API" href="#toc-Front_002dend-API">5 Front-end API</a></li>
+<li><a name="stoc-Back_002dend-API" href="#toc-Back_002dend-API">6 Back-end API</a></li>
 <li><a name="stoc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#toc-Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
 
 </ul>
@@ -102,13 +104,28 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Controlling-Browser-Cache" href="#Controlling-Browser-Cache">3.4 Controlling Browser Cache</a></li>
   <li><a name="toc-Creating-JavaDocs" href="#Creating-JavaDocs">3.5 Creating JavaDocs</a></li>
   <li><a name="toc-Deploying-A-Kiss-Application" href="#Deploying-A-Kiss-Application">3.6 Deploying A Kiss Application</a></li>
-  <li><a name="toc-Database-Access" href="#Database-Access">3.7 Database Access</a></li>
-  <li><a name="toc-Learning-The-System" href="#Learning-The-System">3.8 Learning The System</a></li>
+  <li><a name="toc-Learning-The-System" href="#Learning-The-System">3.7 Learning The System</a></li>
 </ul></li>
 <li><a name="toc-Developing" href="#Developing">4 Developing</a>
 <ul class="no-bullet">
   <li><a name="toc-Back_002dend-Development" href="#Back_002dend-Development">4.1 Back-end Development</a></li>
   <li><a name="toc-Front_002dend-Development" href="#Front_002dend-Development">4.2 Front-end Development</a></li>
+</ul></li>
+<li><a name="toc-Front_002dend-API" href="#Front_002dend-API">5 Front-end API</a>
+<ul class="no-bullet">
+  <li><a name="toc-Kiss-Components" href="#Kiss-Components">5.1 Kiss Components</a>
+  <ul class="no-bullet">
+    <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.1.1 Tagless Components</a></li>
+  </ul></li>
+  <li><a name="toc-Utilities" href="#Utilities">5.2 Utilities</a></li>
+  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.3 Controlling Browser Cache</a></li>
+  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.4 Additional Resources</a></li>
+</ul></li>
+<li><a name="toc-Back_002dend-API" href="#Back_002dend-API">6 Back-end API</a>
+<ul class="no-bullet">
+  <li><a name="toc-REST-Services" href="#REST-Services">6.1 REST Services</a></li>
+  <li><a name="toc-Database-API" href="#Database-API">6.2 Database API</a></li>
+  <li><a name="toc-Utilities-1" href="#Utilities-1">6.3 Utilities</a></li>
 </ul></li>
 <li><a name="toc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
 
@@ -538,7 +555,9 @@ needs.
 <h2 class="chapter">3 Orientation</h2>
 
 
-<p>The entire source code comes with the system and is convenient when debugging, however, only a few areas in the system would normally be of concern when building an application as follows.
+<p>The entire source code comes with the system and is convenient when
+debugging, however, only a few areas in the system would normally be
+of concern when building an application as follows.
 </p>
 
 <a name="Back_002dend-Application-Files"></a>
@@ -621,27 +640,8 @@ can either be built by your IDE, or at can be build by typing
 </p>
 <p>Renaming <code>Kiss.war</code> to <code>ABC.war</code>, for example, will cause the application path to change to <code>[HOST]/ABC</code>
 </p>
-<a name="Database-Access"></a>
-<h3 class="section">3.7 Database Access</h3>
-
-<p><em>Kiss</em> comes with a powerful library for accessing SQL databases.
-Code for this is located under <code>org.kissweb.database</code> It is
-currently only documented via JavaDocs but examples and documentation
-will follow soon.  It is currently being used in production
-environments.  This API provides the following benefits:
-</p>
-<ul>
-<li> Automatic connection and statement pooling
-</li><li> Vastly simpler API than bare JDBC
-</li><li> Handling of parameterized arguments
-</li><li> Auto generation of SQL for single record adds, edits, and deletions
-</li><li> Auto handling for cases of cursor interference on nested queries
-</li><li> Supports transactions out-of-the-box
-</li></ul>
-
-
 <a name="Learning-The-System"></a>
-<h3 class="section">3.8 Learning The System</h3>
+<h3 class="section">3.7 Learning The System</h3>
 
 <p>In order to start getting a feel for how <code>Kiss</code> applications
 function, in terms of the back-end, look at files in the
@@ -734,6 +734,134 @@ editing files under the <code>src/main/webapp</code> directory.
 
 
 
+
+
+
+<a name="Front_002dend-API"></a>
+<h2 class="chapter">5 Front-end API</h2>
+
+<a name="Kiss-Components"></a>
+<h3 class="section">5.1 Kiss Components</h3>
+
+<a name="Tagless-Components"></a>
+<h4 class="subsection">5.1.1 Tagless Components</h4>
+
+<a name="Utilities"></a>
+<h3 class="section">5.2 Utilities</h3>
+
+<a name="Controlling-Browser-Cache-1"></a>
+<h3 class="section">5.3 Controlling Browser Cache</h3>
+
+<a name="Additional-Resources"></a>
+<h3 class="section">5.4 Additional Resources</h3>
+
+<p>Lovefield SQL on the browser side
+</p>
+<p>Offline browser applications
+</p>
+
+
+<a name="Back_002dend-API"></a>
+<h2 class="chapter">6 Back-end API</h2>
+
+<a name="REST-Services"></a>
+<h3 class="section">6.1 REST Services</h3>
+
+<p>All communications between the front-end and back-end occur over REST services you define.  Each REST service exists in its own, single file.
+</p>
+<p>As architected, each directory under <code>src/main/application</code> represents a single REST service.  Each class / file under that directory represents
+a web method.  The name of the class is the name of the web method.
+</p>
+<p>Each class must have a static main method.  This is the method that the <em>Kiss</em> core calls.  This method is passed four argument as follows:
+</p>
+<dl compact="compact">
+<dt><code>JSONObject injson</code></dt>
+<dd><p>This represents the data that came from the front-end.
+</p></dd>
+<dt><code>JSONObject outjson</code></dt>
+<dd><p>This represents the data being returned to the front-end.
+</p></dd>
+<dt><code>Connection db</code></dt>
+<dd><p>This is a pre-opened connection to the defined database (defined in <code>application/KissInit.groovy</code>)
+</p></dd>
+<dt><code>MainServlet servlet</code></dt>
+<dd><p>This is a rarely used servlet context argument.
+</p></dd>
+</dl>
+
+<p>Basically what happens is:
+</p>
+<ol>
+<li> The front-end make a REST service call.
+</li><li> The <code>Kiss</code> back-end receives the request.
+</li><li> The user gets authenticated.
+</li><li> A new database connection is formed.
+</li><li> The requested web services is loaded (and compiled if needed).
+</li><li> The <code>outjson</code> object that is filled in by the web service is returned to the front-end.
+</li></ol>
+
+<p>Of course during this process, <code>Kiss</code> handles many possible error conditions.
+</p>
+<a name="Database-API"></a>
+<h3 class="section">6.2 Database API</h3>
+
+
+<p><em>Kiss</em> comes with a powerful library for accessing SQL databases.
+Code for this is located under <code>org.kissweb.database</code> It is
+currently being used in production environments.  This API provides
+the following benefits:
+</p>
+<ul>
+<li> Automatic connection and statement pooling
+</li><li> Vastly simpler API than bare JDBC
+</li><li> Handling of parameterized arguments
+</li><li> Auto generation of SQL for single record adds, edits, and deletions
+</li><li> Auto handling for cases of cursor interference on nested queries
+</li><li> Supports transactions out-of-the-box
+</li></ul>
+
+<p>As shipped, this library supports PostgreSQL, Microsoft Server, Oracle, MySQL, and SQLite.
+</p>
+<p>The detailed documentation for the database utilities are the
+accompanying JavaDocs.  This section provides an overview.
+</p>
+<p>The <em>Kiss</em> database routines revolve around four main classes as follows:
+</p>
+<dl compact="compact">
+<dt><code>Connection</code></dt>
+<dd><p>This represents a connection to an SQL database.
+</p></dd>
+<dt><code>Command</code></dt>
+<dd><p>This represents a single action or command against the database.
+</p></dd>
+<dt><code>Cursor</code></dt>
+<dd><p>If the action is a <code>select</code>, the <code>Cursor</code> represents a pointer into the result set.
+</p></dd>
+<dt><code>Record</code></dt>
+<dd><p>This class represents a single row within a table or result set.
+</p></dd>
+</dl>
+
+<p>The <code>Connection</code> class contains several convenience methods that
+are used in simple cases where only a single action is being
+performed.  These methods should not be used when multiple
+simultaneous actions are taking place at once (by that single thread).
+This issue is not a problem in multi-user or multi-threaded
+situations.  It is only a problem when a single thread is doing one
+action while another action is still open.
+</p>
+<p>You will notice that your REST services are passed a <em>Connection</em>
+argument.  <em>Kiss</em> automatically forms a unique connection for
+each REST service call and closes it when the call is done.
+Therefore, you will not normally need to create your own connection.
+</p>
+<p>You would not normally write SQL for single record adds, updates, and
+deletes.  Using the <em>Record</em> API, <code>Kiss</code> automatically
+generates these statements for you.
+</p>
+
+<a name="Utilities-1"></a>
+<h3 class="section">6.3 Utilities</h3>
 
 
 <a name="Method_002c-Macro_002c-Function-And-Variable-Index"></a>
