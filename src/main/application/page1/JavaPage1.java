@@ -12,7 +12,6 @@ public class JavaPage1 {
         int num1 = injson.getInt("num1");
         int num2 = injson.getInt("num2");
         outjson.put("num3", (num1 + num2));
-        Object x;
     }
 
 }
