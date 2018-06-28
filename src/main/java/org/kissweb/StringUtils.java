@@ -34,6 +34,7 @@ package org.kissweb;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Formatter;
 
 /**
  * This class contains many methods used to maniulate <code>String</code>s.
@@ -192,23 +193,36 @@ public class StringUtils {
         return s.replaceAll("\\s+$", "");
     }
 
-    public static String leftStrip(String s) {
+	/**
+	 * Strip the spaces at the beginning of a string.
+	 *
+	 * @param s
+	 * @return
+	 */
+	public static String leftStrip(String s) {
         return s.replaceAll("^\\s+", "");
     }
 
-    public static String centerStrip(String s) {
+	/**
+	 * Strip the spaces on both ends of a string.
+	 *
+	 * @param s
+	 * @return
+	 */
+	public static String centerStrip(String s) {
         return s.trim();
     }
 
-//    public static String sprintf(String fmt) {
-//        StringWriter sw = new StringWriter();
-//        PrintWriter pw = new PrintWriter(sw);
-//        pw.printf(fmt);
-//        pw.flush();
-//        sw.flush();
-//        return sw.toString();
-//    }
-
+	/**
+	 * C-like sprintf method.  Format a string according to the format insering the arguments
+     * as placed in the format string.
+     *
+	 * @param fmt format string
+	 * @param arg1 consecutive values used by the format string
+	 * @return
+     *
+     * @see Formatter
+	 */
     public static String sprintf(String fmt, Object ... arg1) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
@@ -218,6 +232,13 @@ public class StringUtils {
         return sw.toString();
     }
 
+    /**
+     * Join rows or a String array into a String separated by a delimiter.
+     *
+     * @param strings
+     * @param separator
+     * @return
+     */
     public static String join(String[] strings, String separator) {
         StringBuilder sb = new StringBuilder();
         for (String str : strings) {
@@ -228,15 +249,14 @@ public class StringUtils {
         return sb.toString();
     }
 
+    /**
+     * String null or empty test.  Returns true if string is null or empty.
+     *
+     * @param str
+     * @return
+     */
 	public static boolean isEmpty(final String str) {
-		return str == null || str.equals("");
-	}
-	
-	public static String charArrayToString(char [] v) {
-		int n=0;
-		while (v[n] != '\0')
-			n++;
-		return new String(v, 0, n);
+		return str == null || str.isEmpty();
 	}
 
 }
