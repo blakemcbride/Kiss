@@ -42,6 +42,16 @@ import java.util.*;
 
 
 /**
+ * Instances of this class represent a row into a result set.  Cursors are forward-only and read-only from the database's
+ * perspective so are very efficient and shouldn't create an actual cursor on the database side.  If a single table is
+ * selected from, rows may be updated or deleted via these facilities without the use of a database cursor.
+ * <br><br>
+ * A new cursor is created with the following code:
+ * <br><br>
+ *  &nbsp;&nbsp;&nbsp;&nbsp;   <code>Cursor cursor = cmd.query("select .....</code>
+ * <br><br>
+ *     where <code>cmd</code> is an instance of Command.
+ * @see Command#query
  *
  * @author Blake McBride
  */
@@ -61,6 +71,11 @@ public class Cursor implements AutoCloseable {
         cmd.isSelect = true;
     }
 
+    /**
+     * Returns the name of the table associated with the select associated with this cursor.
+     *
+     * @return
+     */
     public String getTableName() {
         if (tname == null) {
             try {
@@ -72,14 +87,42 @@ public class Cursor implements AutoCloseable {
         return tname;
     }
 
+    /**
+     * Returns the <code>Record</code> instance representing the current row.  This method does not advance the row pointer.
+     *
+     * @return
+     *
+     * @see #next()
+     * @see #isNext()
+     */
     public Record getRecord() {
         return lastRec;
     }
 
+    /**
+     * This method advances the row pointer and returns <code>true</code> if there is a next record.
+     * @return
+     * @throws SQLException
+     *
+     * @see #getRecord()
+     * @see #next()
+     */
     public boolean isNext() throws SQLException {
         return null != next();
     }
 
+    /**
+     * This method is used to advance the row pointer and return the next <code>Record</code>
+     * instance representing the next row.  If there are no more records, <code>null</code>
+     * is returned and the cursor is closed.
+     *
+     *
+     * @return
+     * @throws SQLException
+     *
+     *  @see #getRecord()
+     * @see #isNext()
+     */
     public Record next() throws SQLException {
         if (rset.next()) {
             HashMap<String,Object> ocols = new HashMap<>();
@@ -128,7 +171,7 @@ public class Cursor implements AutoCloseable {
     }
 
     /**
-     * After this, you can edit and delete records.  You just can't read anymore.
+     * After this, you can edit and delete records.  You just can't read any more.
      *
      * @throws SQLException
      */
@@ -141,6 +184,7 @@ public class Cursor implements AutoCloseable {
 
     /**
      * Close the entire cursor.  No more read, edit, or deletes.
+     * Since this class implement AutoCloseable, this method is rarely needed.
      *
      * @throws SQLException
      */
@@ -155,53 +199,156 @@ public class Cursor implements AutoCloseable {
         lastRec = null;
     }
 
+    /**
+     * Set the value of a column in the current record.
+     *
+     * @param name the column name
+     * @param val the value to set.  Can be any type.
+     * @return
+     *
+     * @see Record#set(String, Object)
+     */
     public Object set(String name, Object val) {
         lastRec.cols.put(name.toLowerCase(), val);
         return val;
     }
 
-    public Object get(String fname) throws SQLException {
-        fname = fname.toLowerCase();
-        if (lastRec.cols.containsKey(fname))
-            return lastRec.cols.get(fname);
+    /**
+     * Get the value of a column as an <code>Object</code>.  Other methods that get
+     * expected types are typically used over this method.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#get(String)
+     * @see #getShort(String)
+     * @see #getLong(String)
+     * @see #getString(String)
+     * etc.
+     */
+    public Object get(String cname) throws SQLException {
+        cname = cname.toLowerCase();
+        if (lastRec.cols.containsKey(cname))
+            return lastRec.cols.get(cname);
         else
-            throw new SQLException("Column " + fname + " not found.");
+            throw new SQLException("Column " + cname + " not found.");
     }
 
-    public Integer getShort(String fname) throws SQLException {
-        return (Integer) get(fname);
+    /**
+     * Return the <code>Integer</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getShort(String)
+     */
+    public Integer getShort(String cname) throws SQLException {
+        return (Integer) get(cname);
     }
 
-    public Integer getInt(String fname) throws SQLException {
-        return (Integer) get(fname);
+    /**
+     * Return the <code>Integer</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getInt(String)
+     */
+    public Integer getInt(String cname) throws SQLException {
+        return (Integer) get(cname);
     }
 
-    public Long getLong(String fname) throws SQLException {
-        return (Long) get(fname);
+    /**
+     * Return the <code>Long</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getLong(String)
+     */
+    public Long getLong(String cname) throws SQLException {
+        return (Long) get(cname);
     }
 
-    public Float getFloat(String fname) throws SQLException {
-        return (Float) get(fname);
+    /**
+     * Return the <code>Float</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getFloat(String)
+     */
+    public Float getFloat(String cname) throws SQLException {
+        return (Float) get(cname);
     }
 
-    public Double getDouble(String fname) throws SQLException {
-        return (Double) get(fname);
+    /**
+     * Return the <code>Double</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getDouble(String)
+     */
+    public Double getDouble(String cname) throws SQLException {
+        return (Double) get(cname);
     }
 
-    public Date getDate(String fname) throws SQLException {
-        return (Date) get(fname);
+    /**
+     * Return the <code>Date</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getDate(String)
+     */
+    public Date getDate(String cname) throws SQLException {
+        return (Date) get(cname);
     }
 
-    public String getString(String fname) throws SQLException {
-        return (String) get(fname);
+    /**
+     * Return the <code>String</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getString(String)
+     */
+    public String getString(String cname) throws SQLException {
+        return (String) get(cname);
     }
 
-    public Character getChar(String fname) throws SQLException {
-        String s = (String) get(fname);
+    /**
+     * Return the <code>Character</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#getChar(String)
+     */
+    public Character getChar(String cname) throws SQLException {
+        String s = (String) get(cname);
         if (s == null)
             return null;
         if (s.length() != 1)
-            throw new SQLException("Column \"" + fname + "\" not a single character");
+            throw new SQLException("Column \"" + cname + "\" not a single character");
         return s.charAt(0);
     }
 

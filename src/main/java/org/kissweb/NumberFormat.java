@@ -66,8 +66,9 @@ public class NumberFormat {
      *
      *		result in r:&nbsp;&nbsp;&nbsp;"(12,345.35)"
      * </p>
+     *
+     * @see #Format(double, String, int, int)
      */
-
     public static String Formatb(double num, int base, String msk, int wth, int dp) {
         int si, i;
         int sign, blnk, comma, left, paren, zfill, nd, dol, tw, dl, ez, ucase, cf, percent;
@@ -286,8 +287,9 @@ public class NumberFormat {
      *
      *		result in r:&nbsp;&nbsp;&nbsp;"(12,345.35)"
      * </p>
+     *
+     * @see #Formatb(double, int, String, int, int)
      */
-
     public static String Format(double num, String msk, int wth, int dp) {
         return Formatb(num, 10, msk, wth, dp);
     }
@@ -296,6 +298,11 @@ public class NumberFormat {
         System.out.println("\"" + Format(num, msk, wth, dp) + "\"");
     }
 
+    /**
+     * Test function.
+     *
+     * @param argv
+     */
     public static void main(String[] argv) {
         print(12345.146, "CD", 10, 2);
         print(12345.146, "CD", 10, 2);

@@ -37,7 +37,22 @@ import java.util.*;
 
 
 /**
+ * Instances of this class represent a single row in a table or a row in a result set.
+ * <br><br>
+ * There are two ways of getting instances of this class.  The first way is by doing a
+ * select against the database.  In that case, a <code>Record</code> or list of <code>Record's</code>
+ * is returned.  The other way is to create a new row or record for inseration into the database.
+ * In that case, one should create the new <code>Record</code> instance as follows:
+ * <br><br>
+ *  &nbsp;&nbsp;&nbsp;&nbsp;   <code>Record rec = db.newRecord('myTable');</code>
+ *<br><br>
+ *     where <code>db</code> is a <code>Connection</code> instance.
  *
+ * @see Connection#newRecord(String)
+ * @see Connection#fetchAll(String, Object...)
+ * @see Connection#fetchOne(String, Object...)
+ * @see Command#fetchAll(String, Object...)
+ * @see Command#fetchOne(String, Object...)
  * @author Blake McBride
  */
 public class Record implements AutoCloseable {
@@ -62,64 +77,190 @@ public class Record implements AutoCloseable {
         this.cols = cols;
     }
 
+    /**
+     * Set the value of a column in the record.
+     *
+     * @param name the column name
+     * @param val the value to set.  Can be any type.
+     * @return
+     *
+     * @see Cursor#set(String, Object)
+     */
     public Object set(String name, Object val) {
         cols.put(name.toLowerCase(), val);
         return val;
     }
 
-    public Object get(String fname) throws SQLException {
-        fname = fname.toLowerCase();
-        if (cols.containsKey(fname))
-            return cols.get(fname);
+    /**
+     * Get the value of a column as an <code>Object</code>.  Other methods that get
+     * expected types are typically used over this method.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#get(String)
+     * @see #getShort(String)
+     * @see #getLong(String)
+     * @see #getString(String)
+     * etc.
+     */
+    public Object get(String cname) throws SQLException {
+        cname = cname.toLowerCase();
+        if (cols.containsKey(cname))
+            return cols.get(cname);
         else
-            throw new SQLException("Column " + fname + " not found.");
+            throw new SQLException("Column " + cname + " not found.");
     }
 
-    public Integer getShort(String fname) throws SQLException {
-        return (Integer) get(fname);
+    /**
+     * Return the <code>Integer</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getShort(String)
+     */
+    public Integer getShort(String cname) throws SQLException {
+        return (Integer) get(cname);
     }
 
-    public Integer getInt(String fname) throws SQLException {
-        return (Integer) get(fname);
+    /**
+     * Return the <code>Integer</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getInt(String)
+     */
+    public Integer getInt(String cname) throws SQLException {
+        return (Integer) get(cname);
     }
 
-    public Long getLong(String fname) throws SQLException {
-        return (Long) get(fname);
+    /**
+     * Return the <code>Long</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getLong(String)
+     */
+    public Long getLong(String cname) throws SQLException {
+        return (Long) get(cname);
     }
 
-    public Float getFloat(String fname) throws SQLException {
-        return (Float) get(fname);
+    /**
+     * Return the <code>Float</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getFloat(String)
+     */
+    public Float getFloat(String cname) throws SQLException {
+        return (Float) get(cname);
     }
 
-    public Double getDouble(String fname) throws SQLException {
-        return (Double) get(fname);
+    /**
+     * Return the <code>Double</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getDouble(String)
+     */
+    public Double getDouble(String cname) throws SQLException {
+        return (Double) get(cname);
     }
 
-    public java.sql.Date getDate(String fname) throws SQLException {
-        return (java.sql.Date) get(fname);
+    /**
+     * Return the <code>Date</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getDate(String)
+     */
+    public java.sql.Date getDate(String cname) throws SQLException {
+        return (java.sql.Date) get(cname);
     }
 
-    public Timestamp getTimestamp(String fname) throws SQLException {
-        return (Timestamp) get(fname);
+    /**
+     * Return the <code>Timestamp</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     */
+    public Timestamp getTimestamp(String cname) throws SQLException {
+        return (Timestamp) get(cname);
     }
 
-    public java.sql.Time getTime(String fname) throws SQLException {
-        return (java.sql.Time) get(fname);
+    /**
+     * Return the <code>Time</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     */
+    public java.sql.Time getTime(String cname) throws SQLException {
+        return (java.sql.Time) get(cname);
     }
 
-    public String getString(String fname) throws SQLException {
-        return (String) get(fname);
+    /**
+     * Return the <code>String</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getString(String)
+     */
+    public String getString(String cname) throws SQLException {
+        return (String) get(cname);
     }
 
-    public Character getChar(String fname) throws SQLException {
-        String s = (String) get(fname);
+    /**
+     * Return the <code>Character</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#getChar(String)
+     */
+    public Character getChar(String cname) throws SQLException {
+        String s = (String) get(cname);
         if (s == null)
             return null;
         if (s.length() != 1)
-            throw new SQLException("Column \"" + fname + "\" not a single character");
+            throw new SQLException("Column \"" + cname + "\" not a single character");
         return s.charAt(0);
     }
 
+    /**
+     * Erases all the column information associated with a <code>Record</code> instance.
+     *
+     * @return this
+     */
     public Record clear() {
         if (cols != null)
             cols.clear();
@@ -136,6 +277,12 @@ public class Record implements AutoCloseable {
         return val;
     }
 
+    /**
+     * Performs an SQL update on the record.  This is done by creating an actual update statement and
+     * executing it against the database.  It does not affect any cursors.
+     *
+     * @throws SQLException
+     */
     public void update() throws SQLException {
         if (cursor == null  ||  !cursor.cmd.isSelect)
             throw new RuntimeException("Can't update record; not in select");
@@ -186,6 +333,12 @@ public class Record implements AutoCloseable {
         }
     }
 
+    /**
+     * Performs an SQL delete on the record.  This is done by creating an actual update statement and
+     * executing it against the database.  It does not affect any cursors.
+     *
+     * @throws SQLException
+     */
     public void delete() throws SQLException {
         /*
         if (cursor == null || !cursor.cmd.isSelect)
@@ -243,6 +396,8 @@ public class Record implements AutoCloseable {
      *
      * @return an Object - should be cast to (short), (int), or (long) depending on the serial type
      * @throws SQLException
+     *
+     * @see #addRecord()
      */
     public Object addRecordAutoInc() throws SQLException {
         String colname = conn.getPrimaryColumnName(table);
@@ -291,6 +446,15 @@ public class Record implements AutoCloseable {
         return nextId;
     }
 
+    /**
+     * Inserts a new row into the database by creating an executing an SQL statement.
+     * It does not affect any cursors.
+     *
+     * @return
+     * @throws SQLException
+     *
+     * @see #addRecordAutoInc()
+     */
     public boolean addRecord() throws SQLException {
         if (pstmt == null) {
             StringBuilder sql = new StringBuilder("insert into " + table + " (");
@@ -321,6 +485,10 @@ public class Record implements AutoCloseable {
         return pstmt.execute();
     }
 
+    /**
+     * Closes any open prepared statements against this record.  It is not normally needed since
+     * this class implements the AutoCloseable interface.
+     */
     @Override
     public void close() {
         if (pstmt != null) {
@@ -332,10 +500,20 @@ public class Record implements AutoCloseable {
         }
     }
 
+    /**
+     * Returns the <code>Connection</code> instance associated to this <code>Record</code> instance.
+     *
+     * @return
+     */
     public Connection getConnection() {
         return conn;
     }
 
+    /**
+     * Returns the name of the table associated to this <code>Record</code> instance.
+     * 
+     * @return
+     */
     public String getTableName() {
         return table;
     }

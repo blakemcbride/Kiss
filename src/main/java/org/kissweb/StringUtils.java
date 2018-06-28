@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
+ * This class contains many methods used to maniulate <code>String</code>s.
  *
  * @author Blake McBride
  */
@@ -54,6 +55,22 @@ public class StringUtils {
         return str.substring(from, n + from);
     }
 
+    /**
+     * An APL-like TAKE function. Assures that the string is <code>n</code> characters long.
+     * <br><br>
+     * If the string is shorter than <code>n</code> it is padded by spaces.
+     * <br><br>
+     * If the string is longer than <code>n</code> it is cut short.
+     * <br><br>
+     * If <code>n</code> is negative, the same thing occurs but it starts at the back of the string.
+     * Thus padding or cuttin of the string occur at the start of the string.
+     *
+     * @param s
+     * @param n
+     * @return
+     *
+     * @see #drop(String, int)
+     */
     public static String take(String s, int n) {
         int len = s.length();
         if (len == n)
@@ -139,6 +156,21 @@ public class StringUtils {
 		return t;
 	}
 
+    /**
+     * An APL-like DROP function. Drops <code>n</code> characters from the string.
+     * <br><br>
+     * If <code>n</code> is positive, <code>n</code> characters get dropped from the beginning of the string.
+     * <br><br>
+     * If <code>n</code> is negative, <code>n</code> characters get dropped from the end of the string.
+     * <br><br>
+     * If <code>n</code> is greater than the length of the string, "" is returned.
+     *
+     * @param s
+     * @param n
+     * @return
+     *
+     * @see #take(String, int)
+     */
     public static String drop(String s, int n) {
         if (n == 0)
             return s;
@@ -150,22 +182,18 @@ public class StringUtils {
         return s.substring(0, len + n);
     }
 
+    /**
+     * Strip the spaces of the end of a string.
+     *
+     * @param s
+     * @return
+     */
     public static String rightStrip(String s) {
-        int i;
-        for (i = s.length() - 1; i >= 0 && Character.isSpaceChar(s.charAt(i));)
-            i--;
-        if (i == -1)
-            return s;
-        return s.substring(0, i + 1);
+        return s.replaceAll("\\s+$", "");
     }
 
     public static String leftStrip(String s) {
-        int i, m = s.length();
-        for (i = 0; i < m && Character.isSpaceChar(s.charAt(i));)
-            i++;
-        if (i == 0)
-            return s;
-        return s.substring(i);
+        return s.replaceAll("^\\s+", "");
     }
 
     public static String centerStrip(String s) {

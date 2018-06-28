@@ -35,20 +35,33 @@ IDE's.  The use of an IDE is tremendously beneficial because of the
 graphical debugging and intelligent code completion capabilities.
 
 A good development environment includes two separate servers running
-on two different ports.  One serves the back-end, and the other serves
-the front-end.  This arrangement allows both front-end and back-end
-development without any compiles, server reboots, file copies, or deployments.
-Back-end and front-end files can be edited and saved.  Their changes
-take effect immediately.
+on two different ports.  One serves the back-end REST services, and
+the other serves the front-end HTML, JavaScript, and CSS files.  This
+arrangement allows both front-end and back-end development without any
+compiles, server reboots, file copies, or deployments.  Back-end and
+front-end files can be edited and saved.  Their changes take effect
+immediately.
 
-Of course, in a production environment, only a single server would be utilized.
+Of course, in a production environment, only a single server would be
+utilized.
 
 @section Back-end Development
 
+The back-end works differently in development and production
+environments.  Although in both environments back-end and front-end
+changes take effect immediately, setup of the production environment
+copies all files into the production environment, whereas in a
+development environment the souce and production code are split.  In
+order to facilitate rapid and clear development, it is important that
+souce files be used rather than the production copies during the
+development process.
+
+@subsection REST Server
+
 Typically, the IDE manages a tomcat instance and serves up the core
-back-end code.  That code detects that it is running under an IDE and
-re-routes all back-end application files back to the source
-directories.
+back-end code seriving the REST services.  That code detects that it is
+running under an IDE and re-routes all back-end application files back
+to the source directories.
 
 Although back-end files are edited in source form and run in compiled
 form, back-end code can be debugged (including break-points) as if
@@ -59,13 +72,92 @@ Once the back-end server is up, application files changed under the
 
 The back-end server should be started before the front-end server.
 
+@subsection Application Code
+
+All communications between the front-end and back-end occur over REST
+services you define.  Each REST service method exists in its own, single
+file.
+
+As architected, each directory under @code{src/main/application}
+represents a single REST service.  Each class / file under that
+directory represents a web method.  The name of the class is the name
+of the web method.
+
+Each class must have a static main method.  This is the method that
+the @emph{Kiss} core calls.  This method is passed four argument as
+follows:
+
+@table @code
+@item JSONObject injson
+This represents the data that came from the front-end.
+@item JSONObject outjson
+This represents the data being returned to the front-end.  It is pre-initialized with an empty @code{JSONObject}.
+@item Connection db
+This is a pre-opened connection to the defined database (defined in @code{application/KissInit.groovy})
+@item MainServlet servlet
+This is a rarely used servlet context argument.
+@end table
+
+Basically what happens is:
+
+@enumerate
+@item
+The front-end make a REST service call.
+@item
+The @code{Kiss} back-end receives the request.
+@item
+The user gets authenticated.
+@item
+A new database connection is formed, and a new database transaction is started.
+@item
+The requested web services is loaded (and compiled if needed).
+@item
+The @code{outjson} object that is filled in by the web service that is to be returned to the front-end.
+@item
+Upon completion of the REST service, @emph{Kiss} commits the transaction, closes the databse connection, and returns @code{outjson} to the front-end.
+@item
+If, however, the REST service threw an exception, @emph{Kiss} rolls back the transaction, closes the database, and sends an error return to the front-end.
+@end enumerate
+
+Of course during this process, @code{Kiss} handles many possible error conditions.
+
+@subsection Programming Languages
+
+At this point, @emph{Kiss} supports the develpment of back-end REST
+services in the Java, Groovy, or Common Lisp languages.  Groovy was
+added first because it was easy, worked with the IDE well, and did all
+that was needed.  Java was added simply due to its natural integration
+with the rest of the system.
+
+With @emph{Kiss}, different web services can be written in different
+languages.  You are not forced to use one or the other.
+
+Common Lisp (ABCL) was added due to this author's love of that
+language.  Unlike Groovy and Java, Lisp has an impedence mismatch with
+the core @emph{Kiss} system that is written in Java.  For example, in
+Java, one can have two methods with the same name in the same class
+that differ only by their argument types.  This is not part of the
+Common Lisp language.  Also, the foreign function interface in Lisp
+requires some Lisp code to make the connection clear.  Due to this
+connection code having to run, the Lisp interface is very slow on the
+first call.  It is, however, reasonably fast on all subsequent calls.
+The code that interfaces Java to Lisp is under the
+@code{src/main/java/org/kissweb/lisp} directory.
+
+Do to the easy and natural connection between Java and many other JVM
+languages, interfaces to those languages is very easy.  It is
+anticipated that support for many of these other languages (such as
+Scala, Clojure, JRuby, Jython, and Kotlin) will likely follow,
+especially if there are requests.
+
 @section Front-end Development
 
 The front-end can be debugged through your browser debugger (F12 on Chrome).
 
 A separate server is used so that development files will be served
 rather than the front-end that was present when the back-end server
-was started.  In order to make this work, there are two steps that need to be followed.
+was started.  In order to make this work, there are two steps that
+need to be followed.
 
 @enumerate
 @item

@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *  This class represents a connection to an SQL database.
- *
+ * <br><br>
  *  Typically, one connection would be used for each thread in an application.  Operations on a connection
  *  is separate or isolated from all of the other connections.
  *
@@ -67,7 +67,7 @@ public class Connection implements AutoCloseable {
 
     /**
      * Create a Connection out of a pre-opened JDBC connection.
-     *
+     * <br><br>
      * If a new instance of this class is created with this method, the JDBC connection passed in will not be closed
      * when this instance is closed.  Thus, if the connection was externally formed, it must be externally released.
      *
@@ -253,11 +253,13 @@ public class Connection implements AutoCloseable {
     }
 
     /**
-     * Execute an SQL statement provided in a string.  The SQL string may contain parameters indicated by the '?' character.
-     * A variable number of arguments are used to fill those parameters.
+     * Execute an SQL statement provided in a string.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
-     * in the SQL statement.
-     *
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
      *
@@ -290,7 +292,12 @@ public class Connection implements AutoCloseable {
     /**
      * Read in the first record and then close it.
      * The record cannot be updated or deleted.
-     *
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
      *
@@ -310,7 +317,12 @@ public class Connection implements AutoCloseable {
     /**
      * Fetch all of the records and close it.
      * No records can be updated or deleted.
-     *
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
      *

@@ -40,6 +40,14 @@ import java.util.List;
 
 
 /**
+ * This class represents a single statement or command against a database.  Of course, each Connection may have
+ * many Command instances in play at a time.  New Command instances may by obtained via the Connection class as follows:
+ *<br><br>
+ *   &nbsp;&nbsp;&nbsp;&nbsp;   <code>Command cmd = db.newCommand();</code>
+ *<br><br>
+ *  where <code>db</code> is a Connection instance.
+ *
+ * @see Connection#newCommand()
  *
  * @author Blake McBride
  */
@@ -58,12 +66,20 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Execute non-select statement.
+     * Execute non-select statement.  This is useful, for example, for UPDATE, INSERT, and DELETE SQL statements.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
      *
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
-     * @return
+     * @return false is a normal result
      * @throws SQLException
+     *
+     * @see #fetchOne(String, Object...)
+     * @see #fetchAll(String, Object...)
      */
     public boolean execute(String sql, Object ... args) throws SQLException {
         if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
@@ -84,12 +100,23 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Execute a select statement.
+     * Execute a select statement returning a Cursor that may be used to
+     * obtain each subsequent row.  This is useful when a large number of records
+     * is possible and fetching all into memory at one time is unneeded.  This can
+     * save a significant amount of memory since only one record is in memory at a time.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
      *
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
      * @return
      * @throws SQLException
+     *
+     * @see #fetchAll(String, Object...)
+     * @see #fetchOne(String, Object...)
      */
     public Cursor query(String sql, Object ... args) throws SQLException {
         if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
@@ -112,11 +139,22 @@ public class Command implements AutoCloseable {
     /**
      * Read in the first record and then close the cursor.
      * The record cannot be updated or deleted.
+     * <br><br>
+     * Adding code to the SQL statement telling the database to limit its result set to
+     * one record doesn't affect the result but it can make the query significantly faster.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
      *
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
      * @return
      * @throws SQLException
+     *
+     * @see #fetchAll(String, Object...)
+     * @see #execute(String, Object...)
      */
     public Record fetchOne(String sql, Object ... args) throws SQLException {
         try (Cursor c = query(sql, args)) {
@@ -127,11 +165,19 @@ public class Command implements AutoCloseable {
     /**
      * Fetch all of the records and close the cursor.
      * No records can be updated or deleted.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
      *
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
      * @return
      * @throws SQLException
+     *
+     * @see #fetchOne(String, Object...)
+     * @see #execute(String, Object...)
      */
     public List<Record> fetchAll(String sql, Object ... args) throws SQLException {
         return query(sql, args).fetchAll();
@@ -151,6 +197,9 @@ public class Command implements AutoCloseable {
         return pcols;
     }
 
+    /**
+     * This closes the Command instance.  This need not be done manually since this class implements the AutoCloseable interface.
+     */
     @Override
     public void close() {
         if (pstat != null) {

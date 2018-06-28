@@ -33,3 +33,7 @@ war {
     }
 }
 
+javadoc {
+    destinationDir = new File('manual/javadoc')
+}
+

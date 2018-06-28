@@ -3,7 +3,11 @@ package org.kissweb;
 import java.util.Calendar;
 
 /**
- * User: Blake McBride
+ * This class deals with dates in several formats including int, Date, and Calendar.
+ * <code>int</code> dates are formatted as YYYYMMDD.  For example, June 8, 2018 would
+ * be represented as 20180608.
+ *
+ * Author: Blake McBride
  * Date: 12/3/17
  */
 public class DateUtils {

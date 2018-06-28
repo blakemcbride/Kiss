@@ -108,7 +108,12 @@ ul.no-bullet {list-style: none}
 </ul></li>
 <li><a name="toc-Developing" href="#Developing">4 Developing</a>
 <ul class="no-bullet">
-  <li><a name="toc-Back_002dend-Development" href="#Back_002dend-Development">4.1 Back-end Development</a></li>
+  <li><a name="toc-Back_002dend-Development" href="#Back_002dend-Development">4.1 Back-end Development</a>
+  <ul class="no-bullet">
+    <li><a name="toc-REST-Server" href="#REST-Server">4.1.1 REST Server</a></li>
+    <li><a name="toc-Application-Code" href="#Application-Code">4.1.2 Application Code</a></li>
+    <li><a name="toc-Programming-Languages" href="#Programming-Languages">4.1.3 Programming Languages</a></li>
+  </ul></li>
   <li><a name="toc-Front_002dend-Development" href="#Front_002dend-Development">4.2 Front-end Development</a></li>
 </ul></li>
 <li><a name="toc-Front_002dend-API" href="#Front_002dend-API">5 Front-end API</a>
@@ -123,8 +128,8 @@ ul.no-bullet {list-style: none}
 </ul></li>
 <li><a name="toc-Back_002dend-API" href="#Back_002dend-API">6 Back-end API</a>
 <ul class="no-bullet">
-  <li><a name="toc-REST-Services" href="#REST-Services">6.1 REST Services</a></li>
-  <li><a name="toc-Database-API" href="#Database-API">6.2 Database API</a></li>
+  <li><a name="toc-Database-API" href="#Database-API">6.1 Database API</a></li>
+  <li><a name="toc-JSON" href="#JSON">6.2 JSON</a></li>
   <li><a name="toc-Utilities-1" href="#Utilities-1">6.3 Utilities</a></li>
 </ul></li>
 <li><a name="toc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
@@ -398,7 +403,7 @@ McBride.  The author gratefully acknowledges and appreciates, among others, the 
 <p>Dynamic Loader located at <a href="https://github.com/dvare/dynamic-loader">https://github.com/dvare/dynamic-loader</a>
 </p>
 <p>JSON-Java located at <a href="https://github.com/stleary/JSON-java">https://github.com/stleary/JSON-java</a> (although
-I am using a modified version located at <a href="https://github.com/blakemcbride/JSON-java">https://github.com/blakemcbride/JSON-java</a>)
+I am using a modified version included with the system)
 </p>
 <p>C3P0 located at <a href="https://www.mchange.com/projects/c3p0">https://www.mchange.com/projects/c3p0</a>
 </p>
@@ -497,7 +502,7 @@ generating the final <em>WAR</em> file.  <em>Gradle</em> may be used as follows:
 </p>
 <dl compact="compact">
 <dt><code>gradle javadoc</code></dt>
-<dd><p>JavaDocs end up in the <code>build/docs/javadoc</code> directory.
+<dd><p>JavaDocs end up in the <code>manual/javadoc</code> directory.
 </p></dd>
 <dt><code>gradle war</code></dt>
 <dd><p>The WAR file ends up in the <code>build/libs</code> directory.  This file can be just placed in the webapps directory of tomcat to deploy.
@@ -546,7 +551,7 @@ expected that you would modify what&rsquo;s here to suit your application
 needs.
 </p>
 <p>Besides this narrative, you would need the JavaDocs located under the
-<code>build/docs/javadoc</code> directory for API specific documentation.
+<code>manual/javadoc</code> directory for API specific documentation.
 (Which you may also generate via <em>Gradle</em> as described above.)
 </p>
 
@@ -625,7 +630,9 @@ occur.
 <a name="Creating-JavaDocs"></a>
 <h3 class="section">3.5 Creating JavaDocs</h3>
 
-<p>JavaDocs for the <em>Kiss</em> system may be created by issuing the following command:  <code>gradle javadoc</code> The JavaDoc files end up in the <code>build/docs/javadoc</code> directory.
+<p>JavaDocs for the <em>Kiss</em> system may be created by issuing the
+following command: <code>gradle javadoc</code> The JavaDoc files end up in
+the <code>manual/javadoc</code> directory.
 </p>
 
 <a name="Deploying-A-Kiss-Application"></a>
@@ -636,9 +643,13 @@ can either be built by your IDE, or at can be build by typing
 <code>gradle war</code> at a command prompt.  In the case of Gradle,
 <code>Kiss.war</code> ends up in the <code>build/libs</code> directory.
 </p>
-<p>If using <em>tomcat</em>, <code>Kiss.war</code> should be placed in the <code>webapps</code> directory.  When <em>tomcat</em> starts, it will see the file, unpack it, and run it.  The application will be available at <code>[HOST]/Kiss</code>
+<p>If using <em>tomcat</em>, <code>Kiss.war</code> should be placed in the
+<code>webapps</code> directory.  When <em>tomcat</em> starts, it will see the
+file, unpack it, and run it.  The application will be available at
+<code>[HOST]/Kiss</code>
 </p>
-<p>Renaming <code>Kiss.war</code> to <code>ABC.war</code>, for example, will cause the application path to change to <code>[HOST]/ABC</code>
+<p>Renaming <code>Kiss.war</code> to <code>ABC.war</code>, for example, will cause
+the application path to change to <code>[HOST]/ABC</code>
 </p>
 <a name="Learning-The-System"></a>
 <h3 class="section">3.7 Learning The System</h3>
@@ -662,21 +673,35 @@ IDE&rsquo;s.  The use of an IDE is tremendously beneficial because of the
 graphical debugging and intelligent code completion capabilities.
 </p>
 <p>A good development environment includes two separate servers running
-on two different ports.  One serves the back-end, and the other serves
-the front-end.  This arrangement allows both front-end and back-end
-development without any compiles, server reboots, file copies, or deployments.
-Back-end and front-end files can be edited and saved.  Their changes
-take effect immediately.
+on two different ports.  One serves the back-end REST services, and
+the other serves the front-end HTML, JavaScript, and CSS files.  This
+arrangement allows both front-end and back-end development without any
+compiles, server reboots, file copies, or deployments.  Back-end and
+front-end files can be edited and saved.  Their changes take effect
+immediately.
 </p>
-<p>Of course, in a production environment, only a single server would be utilized.
+<p>Of course, in a production environment, only a single server would be
+utilized.
 </p>
 <a name="Back_002dend-Development"></a>
 <h3 class="section">4.1 Back-end Development</h3>
 
+<p>The back-end works differently in development and production
+environments.  Although in both environments back-end and front-end
+changes take effect immediately, setup of the production environment
+copies all files into the production environment, whereas in a
+development environment the souce and production code are split.  In
+order to facilitate rapid and clear development, it is important that
+souce files be used rather than the production copies during the
+development process.
+</p>
+<a name="REST-Server"></a>
+<h4 class="subsection">4.1.1 REST Server</h4>
+
 <p>Typically, the IDE manages a tomcat instance and serves up the core
-back-end code.  That code detects that it is running under an IDE and
-re-routes all back-end application files back to the source
-directories.
+back-end code seriving the REST services.  That code detects that it is
+running under an IDE and re-routes all back-end application files back
+to the source directories.
 </p>
 <p>Although back-end files are edited in source form and run in compiled
 form, back-end code can be debugged (including break-points) as if
@@ -687,6 +712,82 @@ they were compiled before the system was booted.
 </p>
 <p>The back-end server should be started before the front-end server.
 </p>
+<a name="Application-Code"></a>
+<h4 class="subsection">4.1.2 Application Code</h4>
+
+<p>All communications between the front-end and back-end occur over REST
+services you define.  Each REST service method exists in its own, single
+file.
+</p>
+<p>As architected, each directory under <code>src/main/application</code>
+represents a single REST service.  Each class / file under that
+directory represents a web method.  The name of the class is the name
+of the web method.
+</p>
+<p>Each class must have a static main method.  This is the method that
+the <em>Kiss</em> core calls.  This method is passed four argument as
+follows:
+</p>
+<dl compact="compact">
+<dt><code>JSONObject injson</code></dt>
+<dd><p>This represents the data that came from the front-end.
+</p></dd>
+<dt><code>JSONObject outjson</code></dt>
+<dd><p>This represents the data being returned to the front-end.  It is pre-initialized with an empty <code>JSONObject</code>.
+</p></dd>
+<dt><code>Connection db</code></dt>
+<dd><p>This is a pre-opened connection to the defined database (defined in <code>application/KissInit.groovy</code>)
+</p></dd>
+<dt><code>MainServlet servlet</code></dt>
+<dd><p>This is a rarely used servlet context argument.
+</p></dd>
+</dl>
+
+<p>Basically what happens is:
+</p>
+<ol>
+<li> The front-end make a REST service call.
+</li><li> The <code>Kiss</code> back-end receives the request.
+</li><li> The user gets authenticated.
+</li><li> A new database connection is formed, and a new database transaction is started.
+</li><li> The requested web services is loaded (and compiled if needed).
+</li><li> The <code>outjson</code> object that is filled in by the web service that is to be returned to the front-end.
+</li><li> Upon completion of the REST service, <em>Kiss</em> commits the transaction, closes the databse connection, and returns <code>outjson</code> to the front-end.
+</li><li> If, however, the REST service threw an exception, <em>Kiss</em> rolls back the transaction, closes the database, and sends an error return to the front-end.
+</li></ol>
+
+<p>Of course during this process, <code>Kiss</code> handles many possible error conditions.
+</p>
+<a name="Programming-Languages"></a>
+<h4 class="subsection">4.1.3 Programming Languages</h4>
+
+<p>At this point, <em>Kiss</em> supports the develpment of back-end REST
+services in the Java, Groovy, or Common Lisp languages.  Groovy was
+added first because it was easy, worked with the IDE well, and did all
+that was needed.  Java was added simply due to its natural integration
+with the rest of the system.
+</p>
+<p>With <em>Kiss</em>, different web services can be written in different
+languages.  You are not forced to use one or the other.
+</p>
+<p>Common Lisp (ABCL) was added due to this author&rsquo;s love of that
+language.  Unlike Groovy and Java, Lisp has an impedence mismatch with
+the core <em>Kiss</em> system that is written in Java.  For example, in
+Java, one can have two methods with the same name in the same class
+that differ only by their argument types.  This is not part of the
+Common Lisp language.  Also, the foreign function interface in Lisp
+requires some Lisp code to make the connection clear.  Due to this
+connection code having to run, the Lisp interface is very slow on the
+first call.  It is, however, reasonably fast on all subsequent calls.
+The code that interfaces Java to Lisp is under the
+<code>src/main/java/org/kissweb/lisp</code> directory.
+</p>
+<p>Do to the easy and natural connection between Java and many other JVM
+languages, interfaces to those languages is very easy.  It is
+anticipated that support for many of these other languages (such as
+Scala, Clojure, JRuby, Jython, and Kotlin) will likely follow,
+especially if there are requests.
+</p>
 <a name="Front_002dend-Development"></a>
 <h3 class="section">4.2 Front-end Development</h3>
 
@@ -694,7 +795,8 @@ they were compiled before the system was booted.
 </p>
 <p>A separate server is used so that development files will be served
 rather than the front-end that was present when the back-end server
-was started.  In order to make this work, there are two steps that need to be followed.
+was started.  In order to make this work, there are two steps that
+need to be followed.
 </p>
 <ol>
 <li> The front-end needs to know where the back-end is located.  This is controlled in the file <code>src/main/webapp/index.js</code>.
@@ -755,56 +857,37 @@ editing files under the <code>src/main/webapp</code> directory.
 <a name="Additional-Resources"></a>
 <h3 class="section">5.4 Additional Resources</h3>
 
-<p>Lovefield SQL on the browser side
+<p>Although not a part of the <em>Kiss</em> system, there are some very valuable technologies and libraries that
+have been used with <em>Kiss</em> in order to create some very powerful solutions.
 </p>
-<p>Offline browser applications
+<p>The first is the Lovefield library that adds SQL capabilities on the brower side.  Data is persisted on the user&rsquo;s browser
+and remains through browser or machine re-boots.  The library is located at <a href="https://github.com/google/lovefield">https://github.com/google/lovefield</a>
 </p>
+<p>A recent technology that has been used to enable browser application that run when there is no Internet connection
+is calles <em>Service Workers</em>.
+</p>
+
 
 
 <a name="Back_002dend-API"></a>
 <h2 class="chapter">6 Back-end API</h2>
 
-<a name="REST-Services"></a>
-<h3 class="section">6.1 REST Services</h3>
-
-<p>All communications between the front-end and back-end occur over REST services you define.  Each REST service exists in its own, single file.
-</p>
-<p>As architected, each directory under <code>src/main/application</code> represents a single REST service.  Each class / file under that directory represents
-a web method.  The name of the class is the name of the web method.
-</p>
-<p>Each class must have a static main method.  This is the method that the <em>Kiss</em> core calls.  This method is passed four argument as follows:
-</p>
-<dl compact="compact">
-<dt><code>JSONObject injson</code></dt>
-<dd><p>This represents the data that came from the front-end.
-</p></dd>
-<dt><code>JSONObject outjson</code></dt>
-<dd><p>This represents the data being returned to the front-end.
-</p></dd>
-<dt><code>Connection db</code></dt>
-<dd><p>This is a pre-opened connection to the defined database (defined in <code>application/KissInit.groovy</code>)
-</p></dd>
-<dt><code>MainServlet servlet</code></dt>
-<dd><p>This is a rarely used servlet context argument.
-</p></dd>
-</dl>
-
-<p>Basically what happens is:
+<p>In addition to the full API provided by the Java system, and any additional
+JAR files you add, <em>Kiss</em> comes with an API that assists with the
+development of business application with <em>Kiss</em>.  These 
+API&rsquo;s may be broadly grouped as follows:
 </p>
 <ol>
-<li> The front-end make a REST service call.
-</li><li> The <code>Kiss</code> back-end receives the request.
-</li><li> The user gets authenticated.
-</li><li> A new database connection is formed.
-</li><li> The requested web services is loaded (and compiled if needed).
-</li><li> The <code>outjson</code> object that is filled in by the web service is returned to the front-end.
+<li> Database API
+</li><li> JSON API
+</li><li> Utilities
 </li></ol>
 
-<p>Of course during this process, <code>Kiss</code> handles many possible error conditions.
+<p>An overview of these API&rsquo;s is contained in this chapter.  Detailed
+documentation is contained in the accompanying JavaDocs.
 </p>
 <a name="Database-API"></a>
-<h3 class="section">6.2 Database API</h3>
-
+<h3 class="section">6.1 Database API</h3>
 
 <p><em>Kiss</em> comes with a powerful library for accessing SQL databases.
 Code for this is located under <code>org.kissweb.database</code> It is
@@ -854,11 +937,69 @@ action while another action is still open.
 argument.  <em>Kiss</em> automatically forms a unique connection for
 each REST service call and closes it when the call is done.
 Therefore, you will not normally need to create your own connection.
+Additionally, <em>Kiss</em> automatically starts a new transaction with
+each REST service and commits it when the service is done.  However,
+if the service throws any exception, the transaction is rolled back
+instead.
 </p>
 <p>You would not normally write SQL for single record adds, updates, and
 deletes.  Using the <em>Record</em> API, <code>Kiss</code> automatically
 generates these statements for you.
 </p>
+<p>In addition to the above, these utilities provide full support for transactions and parameters.
+</p>
+<a name="JSON"></a>
+<h3 class="section">6.2 JSON</h3>
+
+<p>The first two arguments to all REST methods is <code>injson</code> and
+<code>outjson</code>.  <code>injson</code> is a <code>JSONObject</code> that contains
+the data passed in <em>from</em> the front-end.  <code>outjson</code> is a
+pre-initialized, empty <code>JSONObject</code> that will be <em>returned
+to</em> the front-end.  The rest service should read the data passed in
+from <code>injson</code>, perform any needed processes, and put the result
+into <code>outjson</code> to be returned to the front-end.
+</p>
+<p>A modified version of a publicly available JSON Java package is
+included and used to access JSON from the front-end and create JSON to
+return to the front-end.  This package has many methods but only a few are
+commonly used.
+</p>
+<p>There are two main data type of interest.  They are <code>JSONObject</code> and
+<code>JSONArray</code>.  They hold the JSON types indicated by their names.
+</p>
+<p>Command useful for getting data out of <code>injson</code>:
+</p>
+<ul>
+<li> JSONObject.has(String key)
+</li><li> JSONObject.getString(String key)
+</li><li> JSONObject.getBoolean(String key)
+</li><li> JSONObject.getInt(String key)
+</li><li> JSONObject.getLong(String key)
+</li><li> JSONObject.getDouble(String key)
+</li><li> JSONObject.getFloat(String key)
+</li><li> JSONObject.getJSONArray(String key)
+</li><li> JSONArray.length()
+</li><li> JSONArray.getString(int index)
+</li><li> JSONArray.getBoolean(int index)
+</li><li> JSONArray.getInt(int index)
+</li><li> JSONArray.getLong(int index)
+</li><li> JSONArray.getFloat(int index)
+</li><li> JSONArray.getDouble(int index)
+</li><li> JSONArray.getString(int index)
+</li><li> JSONArray.getJSONArray(int index)
+</li></ul>
+
+<p>Again, <code>outjson</code> is supplied as a pre-initialized, but empty,
+<code>JSONObject</code>.  It is up to the REST service code to populate it
+with the return data.  Useful JSON utilities include the following:
+</p>
+<ul>
+<li> JSONObject.put(String label, Object data)
+</li><li> new JSONObject()
+</li><li> new JSONArray()
+</li><li> JSONArray.put(Object obj)
+</li></ul>
+
 
 <a name="Utilities-1"></a>
 <h3 class="section">6.3 Utilities</h3>
