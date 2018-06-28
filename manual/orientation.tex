@@ -91,11 +91,17 @@ they download the new version, normal browser cache activity will
 occur.
 
 
-@section Creating JavaDocs
+@anchor{javadoc} @section Creating JavaDocs
 
-JavaDocs for the @emph{Kiss} system may be created by issuing the
-following command: @code{gradle javadoc} The JavaDoc files end up in
-the @code{manual/javadoc} directory.
+JavaDocs for the @emph{Kiss} system will need to be created.  It is created from the command line using @emph{Gradle} by issuing the
+following command: 
+
+@example
+gradle javadoc
+@end example
+
+@noindent
+The JavaDoc files end up in the @code{build/docs/javadoc} directory.
 
 
 @section Deploying A Kiss Application

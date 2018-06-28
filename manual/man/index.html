@@ -88,13 +88,14 @@ ul.no-bullet {list-style: none}
 <ul class="no-bullet">
   <li><a name="toc-Pre_002drequisites" href="#Pre_002drequisites">2.1 Pre-requisites</a></li>
   <li><a name="toc-Download-Kiss" href="#Download-Kiss">2.2 Download Kiss</a></li>
-  <li><a name="toc-Setup-And-Configuration" href="#Setup-And-Configuration">2.3 Setup And Configuration</a></li>
-  <li><a name="toc-Building-The-System" href="#Building-The-System">2.4 Building The System</a>
+  <li><a name="toc-Documentation" href="#Documentation">2.3 Documentation</a></li>
+  <li><a name="toc-Setup-And-Configuration" href="#Setup-And-Configuration">2.4 Setup And Configuration</a></li>
+  <li><a name="toc-Building-The-System" href="#Building-The-System">2.5 Building The System</a>
   <ul class="no-bullet">
-    <li><a name="toc-Gradle" href="#Gradle">2.4.1 Gradle</a></li>
-    <li><a name="toc-IntelliJ-Ultimate" href="#IntelliJ-Ultimate">2.4.2 IntelliJ Ultimate</a></li>
+    <li><a name="toc-Gradle" href="#Gradle">2.5.1 Gradle</a></li>
+    <li><a name="toc-IntelliJ-Ultimate" href="#IntelliJ-Ultimate">2.5.2 IntelliJ Ultimate</a></li>
   </ul></li>
-  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.5 What Do I Do With It Now?</a></li>
+  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.6 What Do I Do With It Now?</a></li>
 </ul></li>
 <li><a name="toc-Orientation" href="#Orientation">3 Orientation</a>
 <ul class="no-bullet">
@@ -446,9 +447,39 @@ I am using a modified version included with the system)
 </p>
 <p><code>git clone https://github.com/kiss-web/Kiss.git</code>
 </p>
-<a name="Setup-And-Configuration"></a>
-<h3 class="section">2.3 Setup And Configuration</h3>
+<a name="Documentation"></a>
+<h3 class="section">2.3 Documentation</h3>
 
+<p>The <em>Kiss</em> documentation consists of two pieces; this manual, and the detailed API documentation contained in the JavaDocs.
+The JavaDocs do not come with the system, but you can generate them yourself with what is provided.  See <a href="#javadoc">Creating JavaDocs</a>.
+</p>
+<p>This manual may be created in two forms.  The first is as an HTML
+file.  The system comes with this.  You can also generate a nicely
+formatted PDF file with the following commands (if you have all of the tools installed):
+</p>
+<div class="example">
+<pre class="example">cd manual
+make Kiss.pdf
+</pre></div>
+
+<p>Updated to the HTML file are achieved with the following commands:
+</p><div class="example">
+<pre class="example">cd manual
+make
+</pre></div>
+
+<p>Both the HTML form of this manual and the JavaDocs can be accessed with your browser.  For example,
+if the root of <em>Kiss</em> is located at <code>/my/home/path/kiss</code> then you will be able to access the two 
+manuals at the following two URL&rsquo;s:
+</p>
+<div class="example">
+<pre class="example">file:///my/home/path/kiss/manual/man/index.html
+
+file:///my/home/path/kiss/build/docs/javadoc/index.html
+</pre></div>
+
+<a name="Setup-And-Configuration"></a>
+<h3 class="section">2.4 Setup And Configuration</h3>
 
 <p>Given that Kiss is for business applications, it authenticates its
 users.  In order for this to work, there must be a database of valid
@@ -486,7 +517,7 @@ to create the table and some initial data.
 <p>The default username is <em>kiss</em>, and the default password is <em>password</em>
 </p>
 <a name="Building-The-System"></a>
-<h3 class="section">2.4 Building The System</h3>
+<h3 class="section">2.5 Building The System</h3>
 
 <p>The system may be built in several way.  It can be build from the
 command line using <em>Gradle</em>, or at can be build from within your
@@ -494,7 +525,7 @@ favorite IDE.  Using an IDE has the great advantage of a built-in
 debugger.  This section will outline usage of some of these scenarios.
 </p>
 <a name="Gradle"></a>
-<h4 class="subsection">2.4.1 Gradle</h4>
+<h4 class="subsection">2.5.1 Gradle</h4>
 
 <p>While not the best choice when in development mode, <em>Gradle</em> is a
 good choice when generating the JavaDocs and possibly also when
@@ -502,7 +533,7 @@ generating the final <em>WAR</em> file.  <em>Gradle</em> may be used as follows:
 </p>
 <dl compact="compact">
 <dt><code>gradle javadoc</code></dt>
-<dd><p>JavaDocs end up in the <code>manual/javadoc</code> directory.
+<dd><p>JavaDocs end up in the <code>build/docs/javadoc</code> directory.
 </p></dd>
 <dt><code>gradle war</code></dt>
 <dd><p>The WAR file ends up in the <code>build/libs</code> directory.  This file can be just placed in the webapps directory of tomcat to deploy.
@@ -518,7 +549,7 @@ available from your local browser at
 </dl>
 
 <a name="IntelliJ-Ultimate"></a>
-<h4 class="subsection">2.4.2 IntelliJ Ultimate</h4>
+<h4 class="subsection">2.5.2 IntelliJ Ultimate</h4>
 
 <p>IntelliJ is a good IDE.  The free version may be inadequate for
 <em>Kiss</em> however.  IntelliJ should be configured with support for
@@ -543,7 +574,7 @@ available from your local browser at
 </p>
 
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
-<h3 class="section">2.5 What Do I Do With It Now?</h3>
+<h3 class="section">2.6 What Do I Do With It Now?</h3>
 
 <p>What you have at this point is the beginnings of your new application.
 <em>Kiss</em> is provided as a running and deployable system.  It is
@@ -551,8 +582,8 @@ expected that you would modify what&rsquo;s here to suit your application
 needs.
 </p>
 <p>Besides this narrative, you would need the JavaDocs located under the
-<code>manual/javadoc</code> directory for API specific documentation.
-(Which you may also generate via <em>Gradle</em> as described above.)
+<code>build/docs/javadoc</code> directory for API specific documentation.
+(Which you must generate via <em>Gradle</em> as described. See <a href="#javadoc">Creating JavaDocs</a>.
 </p>
 
 
@@ -627,12 +658,17 @@ they download the new version, normal browser cache activity will
 occur.
 </p>
 
-<a name="Creating-JavaDocs"></a>
+<a name="javadoc"></a><a name="Creating-JavaDocs"></a>
 <h3 class="section">3.5 Creating JavaDocs</h3>
 
-<p>JavaDocs for the <em>Kiss</em> system may be created by issuing the
-following command: <code>gradle javadoc</code> The JavaDoc files end up in
-the <code>manual/javadoc</code> directory.
+<p>JavaDocs for the <em>Kiss</em> system will need to be created.  It is created from the command line using <em>Gradle</em> by issuing the
+following command: 
+</p>
+<div class="example">
+<pre class="example">gradle javadoc
+</pre></div>
+
+<p>The JavaDoc files end up in the <code>build/docs/javadoc</code> directory.
 </p>
 
 <a name="Deploying-A-Kiss-Application"></a>
@@ -884,7 +920,7 @@ API&rsquo;s may be broadly grouped as follows:
 </li></ol>
 
 <p>An overview of these API&rsquo;s is contained in this chapter.  Detailed
-documentation is contained in the accompanying JavaDocs.
+documentation is contained in the JavaDocs.  See <a href="#javadoc">Creating JavaDocs</a>.
 </p>
 <a name="Database-API"></a>
 <h3 class="section">6.1 Database API</h3>
@@ -905,8 +941,8 @@ the following benefits:
 
 <p>As shipped, this library supports PostgreSQL, Microsoft Server, Oracle, MySQL, and SQLite.
 </p>
-<p>The detailed documentation for the database utilities are the
-accompanying JavaDocs.  This section provides an overview.
+<p>The detailed documentation for the database utilities are in the
+JavaDocs which you must generate. (See <a href="#javadoc">Creating JavaDocs</a>.) This section provides an overview.
 </p>
 <p>The <em>Kiss</em> database routines revolve around four main classes as follows:
 </p>

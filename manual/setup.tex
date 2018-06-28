@@ -63,8 +63,38 @@ It can be downloaded via the following command:
 
 @code{git clone https://github.com/kiss-web/Kiss.git}
 
-@section Setup And Configuration
+@section Documentation
 
+The @emph{Kiss} documentation consists of two pieces; this manual, and the detailed API documentation contained in the JavaDocs.
+The JavaDocs do not come with the system, but you can generate them yourself with what is provided.  @xref{javadoc,,Creating JavaDocs}.
+
+This manual may be created in two forms.  The first is as an HTML
+file.  The system comes with this.  You can also generate a nicely
+formatted PDF file with the following commands (if you have all of the tools installed):
+
+@example
+cd manual
+make Kiss.pdf
+@end example
+
+@noindent
+Updated to the HTML file are achieved with the following commands:
+@example
+cd manual
+make
+@end example
+
+Both the HTML form of this manual and the JavaDocs can be accessed with your browser.  For example,
+if the root of @emph{Kiss} is located at @code{/my/home/path/kiss} then you will be able to access the two 
+manuals at the following two URL's:
+
+@example
+file:///my/home/path/kiss/manual/man/index.html
+
+file:///my/home/path/kiss/build/docs/javadoc/index.html
+@end example
+
+@section Setup And Configuration
 
 Given that Kiss is for business applications, it authenticates its
 users.  In order for this to work, there must be a database of valid
@@ -128,7 +158,7 @@ generating the final @emph{WAR} file.  @emph{Gradle} may be used as follows:
 
 @table @code
 @item gradle javadoc
-JavaDocs end up in the @code{manual/javadoc} directory.
+JavaDocs end up in the @code{build/docs/javadoc} directory.
 @item gradle war
 The WAR file ends up in the @code{build/libs} directory.  This file can be just placed in the webapps directory of tomcat to deploy.
 @item gradle clean
@@ -183,5 +213,5 @@ expected that you would modify what's here to suit your application
 needs.
 
 Besides this narrative, you would need the JavaDocs located under the
-@code{manual/javadoc} directory for API specific documentation.
-(Which you may also generate via @emph{Gradle} as described above.)
+@code{build/docs/javadoc} directory for API specific documentation.
+(Which you must generate via @emph{Gradle} as described. @xref{javadoc,,Creating JavaDocs}.
