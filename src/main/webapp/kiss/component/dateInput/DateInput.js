@@ -99,6 +99,10 @@
             jqObj.show();
         };
 
+        newElm.focus = function () {
+            jqObj.focus();
+        };
+
         newElm.isError = function (desc) {
             var val = newElm.getIntValue();
             if (required && !val) {

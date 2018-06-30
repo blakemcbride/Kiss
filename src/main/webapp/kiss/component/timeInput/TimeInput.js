@@ -172,6 +172,10 @@
             jqObj.show();
         };
 
+        newElm.focus = function () {
+            jqObj.focus();
+        };
+
         newElm.isError = function (desc) {
             var val = newElm.getValue$();
             if (required && val === null) {
