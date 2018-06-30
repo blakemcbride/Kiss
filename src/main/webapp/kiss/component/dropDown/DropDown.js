@@ -106,6 +106,10 @@
             jqObj.show();
         };
 
+        newElm.size = function () {
+            return jqObj.children('option').length;
+        };
+
         newElm.isError = function (desc) {
             if (!required)
                 return false;

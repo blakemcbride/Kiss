@@ -71,7 +71,7 @@
             jqObj.val(val);
         };
 
-        newElm.clear = function (val) {
+        newElm.clear = function () {
             jqObj.val('');
         };
 

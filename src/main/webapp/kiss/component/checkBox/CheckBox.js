@@ -50,7 +50,7 @@
             jqObj.prop('checked', !!val);
         };
 
-        newElm.clear = function (val) {
+        newElm.clear = function () {
             jqObj.prop('checked', false);
         };
 
