@@ -1,0 +1,3 @@
+#
+rm -rf manual/jsdoc
+jsdoc -t /usr/local/lib/node_modules/docdash -d manual/jsdoc src/main/webapp/kiss/*.js src/main/webapp/kiss/component/components.js

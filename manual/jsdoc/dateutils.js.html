@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>dateutils.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="components.html">components</a><ul class='methods'><li data-type='method'><a href="components.html#.check_box">check_box</a></li><li data-type='method'><a href="components.html#.date_input">date_input</a></li><li data-type='method'><a href="components.html#.drop_down">drop_down</a></li><li data-type='method'><a href="components.html#.list_box">list_box</a></li><li data-type='method'><a href="components.html#.numeric_input">numeric_input</a></li><li data-type='method'><a href="components.html#.push_button">push_button</a></li><li data-type='method'><a href="components.html#.radio_button">radio_button</a></li><li data-type='method'><a href="components.html#.text_input">text_input</a></li><li data-type='method'><a href="components.html#.textbox_input">textbox_input</a></li><li data-type='method'><a href="components.html#.time_input">time_input</a></li></ul></li><li><a href="datetimeutils.html">datetimeutils</a><ul class='methods'><li data-type='method'><a href="datetimeutils.html#.formatDate">formatDate</a></li><li data-type='method'><a href="datetimeutils.html#.formatInt">formatInt</a></li></ul></li><li><a href="dateutils.html">dateutils</a><ul class='methods'><li data-type='method'><a href="dateutils.html#.dateAddDays">dateAddDays</a></li><li data-type='method'><a href="dateutils.html#.dateToInt">dateToInt</a></li><li data-type='method'><a href="dateutils.html#.intAddDays">intAddDays</a></li><li data-type='method'><a href="dateutils.html#.intToDate">intToDate</a></li><li data-type='method'><a href="dateutils.html#.intToSQL">intToSQL</a></li><li data-type='method'><a href="dateutils.html#.intToStr2">intToStr2</a></li><li data-type='method'><a href="dateutils.html#.intToStr4">intToStr4</a></li><li data-type='method'><a href="dateutils.html#.isSQLDate">isSQLDate</a></li><li data-type='method'><a href="dateutils.html#.isStrDate">isStrDate</a></li><li data-type='method'><a href="dateutils.html#.SQLtoInt">SQLtoInt</a></li><li data-type='method'><a href="dateutils.html#.strToInt">strToInt</a></li></ul></li><li><a href="Server.html">Server</a><ul class='methods'><li data-type='method'><a href="Server.html#.call">call</a></li><li data-type='method'><a href="Server.html#.logout">logout</a></li><li data-type='method'><a href="Server.html#.setURL">setURL</a></li></ul></li><li><a href="timeutils.html">timeutils</a><ul class='methods'><li data-type='method'><a href="timeutils.html#.format">format</a></li></ul></li><li><a href="utils.html">utils</a><ul class='methods'><li data-type='method'><a href="utils.html#.assureArray">assureArray</a></li><li data-type='method'><a href="utils.html#.beep">beep</a></li><li data-type='method'><a href="utils.html#.drop">drop</a></li><li data-type='method'><a href="utils.html#.fileNameExtension">fileNameExtension</a></li><li data-type='method'><a href="utils.html#.format">format</a></li><li data-type='method'><a href="utils.html#.formatb">formatb</a></li><li data-type='method'><a href="utils.html#.getURLParam">getURLParam</a></li><li data-type='method'><a href="utils.html#.isOnline">isOnline</a></li><li data-type='method'><a href="utils.html#.loadPage">loadPage</a></li><li data-type='method'><a href="utils.html#.showMessage">showMessage</a></li><li data-type='method'><a href="utils.html#.take">take</a></li><li data-type='method'><a href="utils.html#.useComponent">useComponent</a></li><li data-type='method'><a href="utils.html#.useTaglessComponent">useTaglessComponent</a></li><li data-type='method'><a href="utils.html#.uuid">uuid</a></li><li data-type='method'><a href="utils.html#.waitMessage">waitMessage</a></li><li data-type='method'><a href="utils.html#.waitMessageEnd">waitMessageEnd</a></li><li data-type='method'><a href="utils.html#.yesNo">yesNo</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#$$">$$</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">dateutils.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Created by Blake McBride on 3/15/18.
+ */
+
+'use strict';
+
+/**
+     Function names are meant to tell what the input and output date date types they work on.
+     In terms of understanding the data types used to represent dates:
+
+     int          20180322
+     str          "3/22/[20]18"
+     str2         "3/22/18"
+     str4         "3/22/2018"
+     SQL          "2018-03-22"
+     Date         JavaScript Date object
+ */
+class dateutils {
+
+    /**
+     * Converts a string date "mM/dD/yyYY" to an integer of the form YYYYMMDD.
+     * Bad dates return 0
+     *
+     * @param {string} dateString
+     * @returns {number}
+     */
+    static strToInt(dateString) {
+        dateString = dateString.trim();
+        dateString = dateString.replace(/-/g, '/');
+        dateString = dateString.replace(/\./g, '/');
+
+        if (!/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString))
+            return 0;
+
+        var parts = dateString.split("/");
+        var day = parseInt(parts[1], 10);
+        var month = parseInt(parts[0], 10);
+        var year = parseInt(parts[2], 10);
+
+        if (year &lt; 100) {
+            var currentYear = new Date().getFullYear();
+            var y19 = 1900 + year;
+            var y20 = 2000 + year;
+            year = Math.abs(currentYear - y19) &lt; Math.abs(currentYear - y20) ? y19 : y20;
+        }
+
+        if (year &lt; 1000 || year > 3000 || month &lt; 1 || month > 12 || day &lt; 1)
+            return 0;
+
+        var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // Adjust for leap years
+        if (year % 400 === 0 || (year % 100 !== 0 &amp;&amp; year % 4 === 0))
+            monthLength[1] = 29;
+
+        if (day > monthLength[month - 1])
+            return 0;
+
+        return year * 10000 + month * 100 + day;
+    }
+
+    /**
+     * Converts a string date ("YYYY-MM-DD") to an integer of the form YYYYMMDD.
+     * Bad dates return 0
+     *
+     * @param {string} dateString
+     * @returns {number}
+     */
+    static SQLtoInt(dateString) {
+        dateString = dateString.trim();
+        dateString = dateString.replace(/-/g, '/');
+        dateString = dateString.replace(/\./g, '/');
+
+        if (!/^\d{4,4}\/\d{1,2}\/\d{1,2}$/.test(dateString))
+            return 0;
+
+        var parts = dateString.split("/");
+        var day = parseInt(parts[2], 10);
+        var month = parseInt(parts[1], 10);
+        var year = parseInt(parts[0], 10);
+
+        if (year &lt; 100) {
+            var currentYear = new Date().getFullYear();
+            var y19 = 1900 + year;
+            var y20 = 2000 + year;
+            year = Math.abs(currentYear - y19) &lt; Math.abs(currentYear - y20) ? y19 : y20;
+        }
+
+        if (year &lt; 1000 || year > 3000 || month &lt; 1 || month > 12 || day &lt; 1)
+            return 0;
+
+        var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // Adjust for leap years
+        if (year % 400 === 0 || (year % 100 !== 0 &amp;&amp; year % 4 === 0))
+            monthLength[1] = 29;
+
+        if (day > monthLength[month - 1])
+            return 0;
+
+        return year * 10000 + month * 100 + day;
+    }
+
+    /**
+     * Verify string date formatted like mM/dD/yyYY
+     *
+     * @param {string} val
+     * @returns {boolean}
+     */
+    static isStrDate(val) {
+        if (val)
+            val = $.trim(val);
+        if (!val)
+            return false;
+        var dt = dateutils.strToInt(val);
+        return !!dt;
+    }
+
+    /**
+     * Verify SQL date formatted like YYYY-MM-DD
+     *
+     * @param {string} val
+     * @returns {boolean}
+     */
+    static isSQLDate(val) {
+        if (val)
+            val = $.trim(val);
+        if (!val)
+            return false;
+        var dt = dateutils.SQLtoInt(val);
+        return !!dt;
+    }
+
+    /**
+     * Convert numeric YYYYMMDD to string mm/dd/yyyy
+     *
+     * @param {number} dt
+     * @returns {string}
+     */
+    static intToStr4(dt) {
+        if (!dt)
+            return '';
+        var y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        var m = Math.floor(dt / 100);
+        var d = Math.floor(dt - m * 100);
+        return utils.take(m.toString(), -2) + '/' + utils.zeroPad(d, 2) + '/' + utils.zeroPad(y, 4);
+    }
+
+    /**
+     * Convert numeric YYYYMMDD to string yyyy-mm-dd
+     *
+     * @param {number} dt
+     * @returns {string}
+     */
+    static intToSQL(dt) {
+        if (!dt)
+            return '';
+        var y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        var m = Math.floor(dt / 100);
+        var d = Math.floor(dt - m * 100);
+        return utils.format(y, "Z", 4, 0) + '-' + utils.format(m, "Z", 2, 0) + '-' + utils.format(d, "Z", 2, 0);
+    }
+
+    /**
+     * Convert numeric YYYYMMDD to string mm/dd/yy
+     *
+     * @param {number} dt
+     * @returns {string}
+     */
+    static intToStr2(dt) {
+        if (!dt)
+            return '';
+        var y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        y %= 100;
+        var m = Math.floor(dt / 100);
+        var d = Math.floor(dt - m * 100);
+        return utils.take(m.toString(), -2) + '/' + utils.zeroPad(d, 2) + '/' + utils.zeroPad(y, 2);
+    }
+
+    /**
+     * Convert a Date object to YYYYMMDD int
+     *
+     * @param {Date} dt
+     * @returns {number}
+     */
+    static dateToInt(dt) {
+        return dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
+    }
+
+    /**
+     * Convert an int date YYYYMMDD to a JavaScrip Date object
+     *
+     * @param {number} dt
+     * @returns {Date}
+     */
+    static intToDate(dt) {
+        var y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        var m = Math.floor(dt / 100);
+        var d = Math.floor(dt - m * 100);
+        return new Date(y, m - 1, d);
+    }
+
+    /**
+     * Add days to a Date object
+     *
+     * @param {Date} dt
+     * @param {number} days number of days to add or subtract
+     * @returns {Date}
+     */
+    static dateAddDays(dt, days) {
+        var result = new Date(dt);
+        result.setDate(result.getDate() + days);
+        return result;
+//    return new Date(((dt.getTime() / 1000 + (60 * 60 * 24 * days)) * 1000));
+    }
+
+    /**
+     * Add days to an int date
+     *
+     * @param {number} dt int date YYYYMMDD
+     * @param {number} days number of days to add or subtract
+     * @returns {int}
+     */
+    static intAddDays(dt, days) {
+        return dateutils.dateToInt(dateutils.dateAddDays(dateutils.intToDate(dt), days));
+    }
+
+}
+
+
+
+
+//# sourceURL=kiss/dateutils.js
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jun 30 2018 08:19:19 GMT-0500 (CDT) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

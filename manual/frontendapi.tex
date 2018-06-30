@@ -29,7 +29,54 @@
 
 @chapter Front-end API
 
+The front-end API are all the facilities that run on the browser.
+This includes HTML, CSS, JavaScript, image files, etc.  The @emph{Kiss}
+back-end does not produce or modify HTML or JavaScript code.  These
+files are served, unaltered, by the server as they are on the back-end
+disk.  The @code{Kiss} model is that the browser receives these files
+from the server, and that they include all the code that the browser
+needs to perform its function.  Besides these static files, all data
+is communicated between the back-end and front-end via REST services.
+
+Having all of the display logic running on the front-end or user's
+browser makes a lot of sense for the following reasons:
+
+@enumerate
+@item
+Minimize the dependence the front-end and back-end have on each other.  This means that one end can be changed without necessitating
+the need for the other to change.  In other words, they are minimally dependent on each other.
+@enumerate a
+@item
+In this rapidly changing environment, minimizing dependencies means minimizing the amount of code that has to be changed as technology changes.
+@item
+Code is easier to understand and maintain since you don't have four totally different languages in the same file.
+@end enumerate
+@item
+Push as much processing to the client side so that the back-end can scale easier.
+@end enumerate
+
+@noindent
+All of this leads to the following:
+@enumerate
+@item
+Shorter development time
+@item 
+Easier to maintain
+@item
+Be most prepared for future changes
+@item
+Reduces server costs
+@item
+Reduced development time and cost
+@end enumerate
+
+
+
+@section Calling REST Services
+
 @section Kiss Components
+
+@subsection Custom Tags
 
 @subsection Tagless Components
 

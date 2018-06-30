@@ -119,13 +119,15 @@ ul.no-bullet {list-style: none}
 </ul></li>
 <li><a name="toc-Front_002dend-API" href="#Front_002dend-API">5 Front-end API</a>
 <ul class="no-bullet">
-  <li><a name="toc-Kiss-Components" href="#Kiss-Components">5.1 Kiss Components</a>
+  <li><a name="toc-Calling-REST-Services" href="#Calling-REST-Services">5.1 Calling REST Services</a></li>
+  <li><a name="toc-Kiss-Components" href="#Kiss-Components">5.2 Kiss Components</a>
   <ul class="no-bullet">
-    <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.1.1 Tagless Components</a></li>
+    <li><a name="toc-Custom-Tags" href="#Custom-Tags">5.2.1 Custom Tags</a></li>
+    <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.2.2 Tagless Components</a></li>
   </ul></li>
-  <li><a name="toc-Utilities" href="#Utilities">5.2 Utilities</a></li>
-  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.3 Controlling Browser Cache</a></li>
-  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.4 Additional Resources</a></li>
+  <li><a name="toc-Utilities" href="#Utilities">5.3 Utilities</a></li>
+  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.4 Controlling Browser Cache</a></li>
+  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.5 Additional Resources</a></li>
 </ul></li>
 <li><a name="toc-Back_002dend-API" href="#Back_002dend-API">6 Back-end API</a>
 <ul class="no-bullet">
@@ -450,11 +452,12 @@ I am using a modified version included with the system)
 <a name="Documentation"></a>
 <h3 class="section">2.3 Documentation</h3>
 
-<p>The <em>Kiss</em> documentation consists of two pieces; this manual, and the detailed API documentation contained in the JavaDocs.
+<p>The <em>Kiss</em> documentation consists of three parts; this manual, the detailed back-end API documentation contained in the JavaDocs,
+and the detailed front-end API documentation.
 The JavaDocs do not come with the system, but you can generate them yourself with what is provided.  See <a href="#javadoc">Creating JavaDocs</a>.
 </p>
-<p>This manual may be created in two forms.  The first is as an HTML
-file.  The system comes with this.  You can also generate a nicely
+<p>This manual may be created in two forms.  The first is in an HTML
+form.  The system comes with this.  You can also generate a nicely
 formatted PDF file with the following commands (if you have all of the tools installed):
 </p>
 <div class="example">
@@ -468,14 +471,16 @@ make Kiss.pdf
 make
 </pre></div>
 
-<p>Both the HTML form of this manual and the JavaDocs can be accessed with your browser.  For example,
-if the root of <em>Kiss</em> is located at <code>/my/home/path/kiss</code> then you will be able to access the two 
-manuals at the following two URL&rsquo;s:
+<p>All of the documentation can be accessed with your browser.  For example,
+if the root of <em>Kiss</em> is located at <code>/my/home/path/kiss</code> then you will be able to access the three
+manuals at the following URL&rsquo;s:
 </p>
 <div class="example">
 <pre class="example">file:///my/home/path/kiss/manual/man/index.html
 
 file:///my/home/path/kiss/build/docs/javadoc/index.html
+
+file:///my/home/path/kiss/manual/jsdoc/index.html
 </pre></div>
 
 <a name="Setup-And-Configuration"></a>
@@ -878,20 +883,59 @@ editing files under the <code>src/main/webapp</code> directory.
 <a name="Front_002dend-API"></a>
 <h2 class="chapter">5 Front-end API</h2>
 
+<p>The front-end API are all the facilities that run on the browser.
+This includes HTML, CSS, JavaScript, image files, etc.  The <em>Kiss</em>
+back-end does not produce or modify HTML or JavaScript code.  These
+files are served, unaltered, by the server as they are on the back-end
+disk.  The <code>Kiss</code> model is that the browser receives these files
+from the server, and that they include all the code that the browser
+needs to perform its function.  Besides these static files, all data
+is communicated between the back-end and front-end via REST services.
+</p>
+<p>Having all of the display logic running on the front-end or user&rsquo;s
+browser makes a lot of sense for the following reasons:
+</p>
+<ol>
+<li> Minimize the dependence the front-end and back-end have on each other.  This means that one end can be changed without necessitating
+the need for the other to change.  In other words, they are minimally dependent on each other.
+<ol>
+<li> In this rapidly changing environment, minimizing dependencies means minimizing the amount of code that has to be changed as technology changes.
+</li><li> Code is easier to understand and maintain since you don&rsquo;t have four totally different languages in the same file.
+</li></ol>
+</li><li> Push as much processing to the client side so that the back-end can scale easier.
+</li></ol>
+
+<p>All of this leads to the following:
+</p><ol>
+<li> Shorter development time
+</li><li> Easier to maintain
+</li><li> Be most prepared for future changes
+</li><li> Reduces server costs
+</li><li> Reduced development time and cost
+</li></ol>
+
+
+
+<a name="Calling-REST-Services"></a>
+<h3 class="section">5.1 Calling REST Services</h3>
+
 <a name="Kiss-Components"></a>
-<h3 class="section">5.1 Kiss Components</h3>
+<h3 class="section">5.2 Kiss Components</h3>
+
+<a name="Custom-Tags"></a>
+<h4 class="subsection">5.2.1 Custom Tags</h4>
 
 <a name="Tagless-Components"></a>
-<h4 class="subsection">5.1.1 Tagless Components</h4>
+<h4 class="subsection">5.2.2 Tagless Components</h4>
 
 <a name="Utilities"></a>
-<h3 class="section">5.2 Utilities</h3>
+<h3 class="section">5.3 Utilities</h3>
 
 <a name="Controlling-Browser-Cache-1"></a>
-<h3 class="section">5.3 Controlling Browser Cache</h3>
+<h3 class="section">5.4 Controlling Browser Cache</h3>
 
 <a name="Additional-Resources"></a>
-<h3 class="section">5.4 Additional Resources</h3>
+<h3 class="section">5.5 Additional Resources</h3>
 
 <p>Although not a part of the <em>Kiss</em> system, there are some very valuable technologies and libraries that
 have been used with <em>Kiss</em> in order to create some very powerful solutions.

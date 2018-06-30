@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>component/components.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="components.html">components</a><ul class='methods'><li data-type='method'><a href="components.html#.check_box">check_box</a></li><li data-type='method'><a href="components.html#.date_input">date_input</a></li><li data-type='method'><a href="components.html#.drop_down">drop_down</a></li><li data-type='method'><a href="components.html#.list_box">list_box</a></li><li data-type='method'><a href="components.html#.numeric_input">numeric_input</a></li><li data-type='method'><a href="components.html#.push_button">push_button</a></li><li data-type='method'><a href="components.html#.radio_button">radio_button</a></li><li data-type='method'><a href="components.html#.text_input">text_input</a></li><li data-type='method'><a href="components.html#.textbox_input">textbox_input</a></li><li data-type='method'><a href="components.html#.time_input">time_input</a></li></ul></li><li><a href="datetimeutils.html">datetimeutils</a><ul class='methods'><li data-type='method'><a href="datetimeutils.html#.formatDate">formatDate</a></li><li data-type='method'><a href="datetimeutils.html#.formatInt">formatInt</a></li></ul></li><li><a href="dateutils.html">dateutils</a><ul class='methods'><li data-type='method'><a href="dateutils.html#.dateAddDays">dateAddDays</a></li><li data-type='method'><a href="dateutils.html#.dateToInt">dateToInt</a></li><li data-type='method'><a href="dateutils.html#.intAddDays">intAddDays</a></li><li data-type='method'><a href="dateutils.html#.intToDate">intToDate</a></li><li data-type='method'><a href="dateutils.html#.intToSQL">intToSQL</a></li><li data-type='method'><a href="dateutils.html#.intToStr2">intToStr2</a></li><li data-type='method'><a href="dateutils.html#.intToStr4">intToStr4</a></li><li data-type='method'><a href="dateutils.html#.isSQLDate">isSQLDate</a></li><li data-type='method'><a href="dateutils.html#.isStrDate">isStrDate</a></li><li data-type='method'><a href="dateutils.html#.SQLtoInt">SQLtoInt</a></li><li data-type='method'><a href="dateutils.html#.strToInt">strToInt</a></li></ul></li><li><a href="Server.html">Server</a><ul class='methods'><li data-type='method'><a href="Server.html#.call">call</a></li><li data-type='method'><a href="Server.html#.logout">logout</a></li><li data-type='method'><a href="Server.html#.setURL">setURL</a></li></ul></li><li><a href="timeutils.html">timeutils</a><ul class='methods'><li data-type='method'><a href="timeutils.html#.format">format</a></li></ul></li><li><a href="utils.html">utils</a><ul class='methods'><li data-type='method'><a href="utils.html#.assureArray">assureArray</a></li><li data-type='method'><a href="utils.html#.beep">beep</a></li><li data-type='method'><a href="utils.html#.drop">drop</a></li><li data-type='method'><a href="utils.html#.fileNameExtension">fileNameExtension</a></li><li data-type='method'><a href="utils.html#.format">format</a></li><li data-type='method'><a href="utils.html#.formatb">formatb</a></li><li data-type='method'><a href="utils.html#.getURLParam">getURLParam</a></li><li data-type='method'><a href="utils.html#.isOnline">isOnline</a></li><li data-type='method'><a href="utils.html#.loadPage">loadPage</a></li><li data-type='method'><a href="utils.html#.showMessage">showMessage</a></li><li data-type='method'><a href="utils.html#.take">take</a></li><li data-type='method'><a href="utils.html#.useComponent">useComponent</a></li><li data-type='method'><a href="utils.html#.useTaglessComponent">useTaglessComponent</a></li><li data-type='method'><a href="utils.html#.uuid">uuid</a></li><li data-type='method'><a href="utils.html#.waitMessage">waitMessage</a></li><li data-type='method'><a href="utils.html#.waitMessageEnd">waitMessageEnd</a></li><li data-type='method'><a href="utils.html#.yesNo">yesNo</a></li></ul></li></ul><h3>Global</h3><ul><li><a href="global.html#$$">$$</a></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">component/components.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>
+/* This file is only used for documentation purposes.  */
+
+
+/**
+ * This class doesn't actually exist.  It is merely used to group and document the HTML components that come with the &lt;em>Kiss&lt;/em> system.
+ * Each method represents a new HTML tag offered by the &lt;em>Kiss&lt;/em> system.  Although these methods are shown with an underscore in their name,
+ * the actual tag they represent would have a dash instead.
+ * &lt;br>&lt;br>
+ * In addition to the additional capabilities offered by some of these controls, many are enhancements over features already provided by HTML.
+ * These enhancements offer significant additioanl functionality as well as a more consistent interface.
+ * &lt;br>&lt;br>
+ * In addition to the tag attributes and content documented here, most of these new HTML tags also support the standard attributes
+ * that HTML normally supports (such as "style" and "id").  Each of these controls (except &lt;code>radio-button&lt;/code>) &lt;em>require&lt;/em> the "id" attribute in order
+ * for your code to reference the control.
+ * &lt;br>&lt;br>
+ * Components are accessed via the &lt;code>$$&lt;/code> global function.  For example, if you have HTML containing:
+ * &lt;br>&lt;br>
+ *     &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;code>&amp;lt;text-input id="fname"&amp;gt;&amp;lt;/text-input&amp;gt;&lt;/code>
+ *  &lt;br>&lt;br>
+ *  You would acces that control in your code with &lt;code>$$('fname')&lt;/code>  Methods available withing that control are
+ *  accessed from that point.  For example, one method available to &lt;code>text-input&lt;/code> is &lt;code>hide()&lt;/code>.
+ *  This method can be accessed as follows:
+ *  &lt;br>&lt;br>
+ *   &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;   &lt;code>$$('fname').hide()&lt;/code>
+ *  &lt;br>&lt;br>
+ *  The documentation for each element includes three sections labeled &lt;em>Attributes&lt;/em>, &lt;em>Content&lt;/em>, and &lt;em>API&lt;/em>.
+ *  These are used as follows:
+ *  &lt;br>&lt;br>
+ *  &amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp; &lt;code>&amp;lt;text-input Attributes&amp;gt;Content&amp;lt;/text-input&amp;gt;&lt;/code>
+ *  &lt;br>&lt;br>
+ *  The &lt;em>API&lt;/em> is what is used within JavaScript.
+ *
+ *
+ */
+class components {
+
+    /**
+     * There is no constructor.
+     */
+    constructor() {}
+
+    /**
+     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided checkbox.
+     * &lt;br>&lt;br>
+     * &lt;strong>Attributes&lt;/strong>
+     * &lt;br>&lt;br>
+     *     This element contains no attributes in addition to those supplied by an HTML checkbox input type.
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the label assoiated with the checkbox.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     uncheck the box               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns &lt;code>true&lt;/code> if checked and &lt;code>false&lt;/code> if unchecked               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the state of this control changes.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     if &lt;code>val&lt;/code> is &lt;code>true&lt;/code> check the box, uncheck if &lt;code>false&lt;/code>               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static check_box() {}
+
+    /**
+     * This HTML tag, "date-input", adds functionality and a consistent and convenient API to the HTML provided date input.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    min="20180101"     &lt;/td>&lt;td>     the minimum date allowed               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    max="20181231"     &lt;/td>&lt;td>     the maximum date allowed               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     clear the control value               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>     sets the focus (where the cursor is located) to this control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getDateValue()     &lt;/td>&lt;td>     returns the date as a &lt;code>Date&lt;/code> instance             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getIntValue()     &lt;/td>&lt;td>     returns the date as an integer with the "YYYYMMDD" format             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getSQLValue()     &lt;/td>&lt;td>     returns the date as a string with the "YYYY-MM-DD" format             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the state of this control changes.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     sets the control value.  &lt;code>val&lt;/code> may be a &lt;code>Date&lt;/code>, &lt;code>number&lt;/code> (20180608), or &lt;code>string&lt;/code> ("2018-06-08")              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static date_input() {}
+
+    /**
+     * This HTML tag, "drop-down", adds functionality and a consistent and convenient API to the HTML provided select.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    default-option="label"     &lt;/td>&lt;td>     what is shown before the user makes a selection.  This would often be something like "(choose)"               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the HTML that would normally be inside an HTML &lt;code>select&lt;/code> element.  This would only be used
+     *     in cases of a static list.  List contents that depended on data would use the &lt;code>add&lt;/code> method.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    add(val, lbl, data)     &lt;/td>&lt;td>     add a new list item.  &lt;code>val&lt;/code> is the value associated to the option, &lt;code>lbl&lt;/code> is the text shown in the list, and &lt;code>data&lt;/data> represents optional and arbitrary data associated to the option               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     remove the list contents except the &lt;code>default-option&lt;/code>               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getData()     &lt;/td>&lt;td>     returns the data associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getLabel()     &lt;/td>&lt;td>     returns the label associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the state of this control changes. &lt;code>fun&lt;/code> is called as follows &lt;code>fun(val, lbl, data)&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     selects the row that contains the value specified by &lt;code>val&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    size()     &lt;/td>&lt;td>    returns the number of rows in the list (including &lt;code>default-option&lt;/code>              &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static drop_down() {}
+
+    /**
+     * This HTML tag, "list-box", adds functionality and a consistent and convenient API to the HTML provided select.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the HTML that would normally be inside an HTML &lt;code>select&lt;/code> element.  This would only be used
+     *     in cases of a static list.  List contents that depended on data would use the &lt;code>add&lt;/code> method.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    add(val, lbl, data)     &lt;/td>&lt;td>     add a new list item.  &lt;code>val&lt;/code> is the value associated to the option, &lt;code>lbl&lt;/code> is the text shown in the list, and &lt;code>data&lt;/data> represents optional and arbitrary data associated to the option               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     remove the list contents except the &lt;code>default-option&lt;/code>               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getData()     &lt;/td>&lt;td>     returns the data associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getLabel()     &lt;/td>&lt;td>     returns the label associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onClick(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user clicks on an item. &lt;code>fun&lt;/code> is called as follows &lt;code>fun(val, lbl, data)&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onDblClick(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user double-clicks on an item. &lt;code>fun&lt;/code> is called as follows &lt;code>fun(val, lbl, data)&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    removeByIndex(idx)     &lt;/td>&lt;td>     remove the indicated row              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     selects the row that contains the value specified by &lt;code>val&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    selectedIndex()     &lt;/td>&lt;td>     returns the index of the selected item  (-1 if none)             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    size()     &lt;/td>&lt;td>    returns the number of rows in the list               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static list_box() {}
+
+    /**
+     * This HTML tag, "numeric-input", adds functionality and a consistent and convenient API to the HTML input text element. For example, it will
+     * only accept numbers, can verify decimal places, and formats the number when the control is exited by the user.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    decimal-places="2"     &lt;/td>&lt;td>     controls the maximum number of digits past the decimal point               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    dollar-sign     &lt;/td>&lt;td>     adds a dollar sign when formatting the number               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    min="20"     &lt;/td>&lt;td>     sets the minimum acceptable value               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    max="200"     &lt;/td>&lt;td>     sets the maximum acceptable value               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    money     &lt;/td>&lt;td>     sets &lt;code>min="o" dollar-sign decimal-places="2"&lt;/code>               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show-zero     &lt;/td>&lt;td>    show zero values (instead of blank if zero)               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     erases the contents of the control               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>     sets the focus (where the cursor is located) to this control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the numeric value of the control             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     sets the numeric value of the control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static numeric_input() {}
+
+    /**
+     * This HTML tag, "push-button", adds functionality and a consistent and convenient API to the HTML provided button input.
+     * &lt;br>&lt;br>
+     *     No new attributes are defined.
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     No element content is defined.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    click()     &lt;/td>&lt;td>     simulate a button click               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onclick(fun)     &lt;/td>&lt;td>     &lt;code>fun&lt;/code> is executed when the user clicks on the button               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static push_button() {}
+
+    /**
+     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided radio input element.
+     * &lt;br>&lt;br>
+     * One thing that makes this control different from the others is that it is referred to with the &lt;code>$$&lt;/code> function
+     * by its group name rather than the element &lt;code>id&lt;/code>.  All the radio buttons in the same group shouls share the
+     * same group name.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    group="name"     &lt;/td>&lt;td>     the name of the group this radio button is a part of (the same for each radio button in a group)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    name="name"     &lt;/td>&lt;td>     this is an alternate to the &lt;code>group&lt;/code> attribute for HTML consistency               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    value="name"     &lt;/td>&lt;td>     required unique value associate with each radio button (different for each radio button)               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     This is the label associated with the radio button.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     the value of the selected ratio button               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the state of this control changes.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     selects the button with the associated value               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;/table>
+     */
+    static radio_button() {}
+
+    /**
+     * This HTML tag, "textbox-input", adds functionality and a consistent and convenient API to the HTML provided multi-line text input.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    minlength="5"     &lt;/td>&lt;td>     sets the minimum acceptable string length               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    maxlength="200"     &lt;/td>&lt;td>     sets the maximum number of characters               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    password     &lt;/td>&lt;td>     the character are not shown on the screen              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required (at least 1 character)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    upcase     &lt;/td>&lt;td>     when the user enters text, it is auto-upcased               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     erases the contents of the control               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>     sets the focus (where the cursor is located) to this control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the string associated with the control             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     sets the string inside the control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static textbox_input() {}
+
+    /**
+     * This HTML tag, "text-input", adds functionality and a consistent and convenient API to the HTML provided text input.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    minlength="5"     &lt;/td>&lt;td>     sets the minimum acceptable string length               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    maxlength="20"     &lt;/td>&lt;td>     sets the maximum number of characters               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    password     &lt;/td>&lt;td>     the character are not shown on the screen              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required (at least 1 character)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    upcase     &lt;/td>&lt;td>     when the user enters text, it is auto-upcased               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     erases the contents of the control               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>     sets the focus (where the cursor is located) to this control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the string associated with the control             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     sets the string inside the control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static text_input() {}
+
+    /**
+     * This HTML tag, "time-input", provides a control where the user can enter a time.  The time appear like "3:30 PM".  A 24 hour clock is also supported automatically (like 14:30).
+     * The values this control interacs with is a plain integer in the form HHMM in a 24 hour clock.  So, "1:30 PM" would be &lt;code>1330&lt;/code>.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    min="0800"     &lt;/td>&lt;td>     the minimum time allowed               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    min="1800"     &lt;/td>&lt;td>     the maximum time allowed               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    zero-fill     &lt;/td>&lt;td>     zero fill the display               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>&lt;br>
+     * &lt;strong>Content&lt;/strong>
+     * &lt;br>&lt;br>
+     *     The &lt;em>Content&lt;/em> represents the HTML that would normally be inside an HTML &lt;code>select&lt;/code> element.  This would only be used
+     *     in cases of a static list.  List contents that depended on data would use the &lt;code>add&lt;/code> method.
+     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 120px;">API&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    clear()     &lt;/td>&lt;td>     remove the value associated with the control               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>     sets the focus (where the cursor is located) to this control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated with the control             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     sets the value associated with the control              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     */
+    static time_input() {}
+
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jun 30 2018 08:19:19 GMT-0500 (CDT) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
