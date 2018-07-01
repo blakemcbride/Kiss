@@ -122,8 +122,7 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Calling-REST-Services" href="#Calling-REST-Services">5.1 Calling REST Services</a></li>
   <li><a name="toc-Kiss-Components" href="#Kiss-Components">5.2 Kiss Components</a>
   <ul class="no-bullet">
-    <li><a name="toc-Custom-Tags" href="#Custom-Tags">5.2.1 Custom Tags</a></li>
-    <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.2.2 Tagless Components</a></li>
+    <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.2.1 Tagless Components</a></li>
   </ul></li>
   <li><a name="toc-Utilities" href="#Utilities">5.3 Utilities</a></li>
   <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.4 Controlling Browser Cache</a></li>
@@ -914,37 +913,126 @@ the need for the other to change.  In other words, they are minimally dependent 
 </li><li> Reduced development time and cost
 </li></ol>
 
+<p>The front-end API is documented in the file <code>manual/jsdoc/index.html</code>.
+</p>
 
 
 <a name="Calling-REST-Services"></a>
 <h3 class="section">5.1 Calling REST Services</h3>
 
+<p>On the front-end, the class <code>Server</code> is what deals with the REST
+communications between the front-end and back-end.  In it, there are a
+handful of methods that deal with the environment such as the back-end
+URL.  All communications between the back-end and front-end are done
+with JSON.
+</p>
+<p>The way it works is the login service requires a user name and
+password, and it returns a login token (uuid).  That token is used in
+all future calls, and it gets automatically invalidated after a certain
+amount of non-use time.  There is no state kept on the back-end.  Each
+REST call must login to the back-end with the provided token in order
+to be authenticated to communicate.
+</p>
+<p>The method used to communicate is named <code>call</code>. It is passed the
+path to the REST service, the RESET service method name, and a JSON
+object that is send to the back-end method.  A <code>promise</code> is
+returned that is used to obtain the result of the call.
+</p>
+<p>There is also a <code>logout</code> method that simply erases the
+login token so that future communications cannot occur.
+</p>
 <a name="Kiss-Components"></a>
 <h3 class="section">5.2 Kiss Components</h3>
 
-<a name="Custom-Tags"></a>
-<h4 class="subsection">5.2.1 Custom Tags</h4>
+
+<p>Although HTML provides what is needed for real applications, it
+provides those facilities in too low a level to be useful without a
+lot of custom code.  Custom components (tags) allow you to encapsulate
+that advanced behavior into what is used as and appears as native
+functionality.
+</p>
+<p><em>Kiss</em> provides the ability to create your own custom HTML tags
+or elements as well as use those provided by <em>Kiss</em>.  There are
+two principal user methods that make this work.
+<code>utils.useComponent</code> is used to load either a <em>Kiss</em> defined
+component or one you define yourself (there is no difference).  This
+loads the JavaScript file that defines the new tag.  All of the
+components that come with the <em>Kiss</em> system are under the
+<code>src/main/webapp/kiss/component</code> directory.  You can see those
+files for examples of how custom tags are defined.
+</p>
+<p>New application pages are loaded with the <code>utils.loadPage</code>
+method.  In addition to loading the HTML and JavaScript code
+associated with that page, this method performs the processing
+necessary to make the components work.  It does this intelligently so
+that, for example, one component can use another component without any
+special loading order requirement.
+</p>
+<p>Briefly, the code that describes the custom tag must describe what the
+tag is replaced with.  Ultimately, it must boil down to straight HTML,
+CSS, and JavaScript code.
+</p>
 
 <a name="Tagless-Components"></a>
-<h4 class="subsection">5.2.2 Tagless Components</h4>
+<h4 class="subsection">5.2.1 Tagless Components</h4>
 
+<p>Let&rsquo;s say you have a pop-up window that allows a user to search for employees, or product, or whatever.
+The user gets a variety of search capabilities and the selected item is returned. Let&rsquo;s further say
+that you need this functionality in several places within your application.  These are tagless
+components.  They aren&rsquo;t places with a custom tag.  They are a response to an event like a button push.
+Tagless components allow you to encapsulate a block of functionality (including pop-up windows) into
+a neat package that can be re-used in any number of places.
+</p>
+<p>The method used to load tagless components is
+<code>utils.useTaglessComponent</code>.  Later, when the tagless component
+is needed, one would execute <code>Kiss.MyComponent.run()</code> (where
+<code>MyComponent</code> is the name of your tagless component.  When the
+tagless component was loaded (with <code>utils.useTaglessComponent</code>)
+you specify what happens when the component completes.
+</p>
 <a name="Utilities"></a>
 <h3 class="section">5.3 Utilities</h3>
 
+<p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
+These utilities are located under the <code>src/main/webapp/kiss</code> directory and have names such as
+<code>datetimeutils.js</code>, <code>dateutils</code>, <code>timeutils</code>, <code>utils</code>, etc.  These utilities
+are documented in the front-end API documentation.
+</p>
 <a name="Controlling-Browser-Cache-1"></a>
 <h3 class="section">5.4 Controlling Browser Cache</h3>
 
+<p>Browser&rsquo;s have a mind of their own in term of deciding when to use
+their cache for a file and when to download a new one.  This can cause
+no end of trouble when code gets changed.  Some user files end up
+being old from the browser cache, and others are freshly downloaded.
+The old and new files don&rsquo;t agree with each other and all sorts of
+errors occur.
+</p>
+<p><em>Kiss</em> includes a facility to assure that all files are
+downloaded afresh whenever the application changes while still taking
+maximal advantage of the browser cache when the files have not
+changed.  The only cost for this capability is the requirement
+that the <code>index.html</code> file <em>always</em> gets loaded afresh.
+To that end, <em>Kiss</em> has code to ignore browser cache and always load
+<code>index.html</code> afresh.
+</p>
+<p><code>index.html</code> contains two variables names <code>softwareVersion</code> and <code>controlCache</code>.
+Assuming <code>controlCache</code> is <code>true</code>, <em>Kiss</em> has code that forces the browser
+to re-load all files whenever <code>softwareVersion</code> changes.  After the code is re-loaded,
+the browser cache will work as normal to maximally cache the files until the next
+<code>softwareVersion</code> change.
+</p>
 <a name="Additional-Resources"></a>
 <h3 class="section">5.5 Additional Resources</h3>
 
 <p>Although not a part of the <em>Kiss</em> system, there are some very valuable technologies and libraries that
 have been used with <em>Kiss</em> in order to create some very powerful solutions.
 </p>
-<p>The first is the Lovefield library that adds SQL capabilities on the brower side.  Data is persisted on the user&rsquo;s browser
+<p>The first is the Lovefield library that adds SQL capabilities on the browser side.  Data is persisted on the user&rsquo;s browser
 and remains through browser or machine re-boots.  The library is located at <a href="https://github.com/google/lovefield">https://github.com/google/lovefield</a>
 </p>
 <p>A recent technology that has been used to enable browser application that run when there is no Internet connection
-is calles <em>Service Workers</em>.
+is called <em>Service Workers</em>.
 </p>
 
 

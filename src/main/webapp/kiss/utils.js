@@ -698,6 +698,7 @@ class utils {
 
     /**
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
+     * Also, the loaded code is processed for custom tags / components.
      *
      * @param {string} page path to the page to be loaded.
      */
