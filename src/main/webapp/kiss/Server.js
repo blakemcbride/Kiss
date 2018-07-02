@@ -10,8 +10,6 @@
  */
 class Server {
 
-    static contextCreated = false;
-
     /**
      * Set the URL of the back-end.
      *
@@ -82,5 +80,9 @@ class Server {
         });
     }
 }
+
+Server.contextCreated = false;
+
+
 
 //# sourceURL=kiss/Server.js

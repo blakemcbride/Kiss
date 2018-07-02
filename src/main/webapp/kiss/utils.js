@@ -676,8 +676,6 @@ class utils {
         snd.play();
     }
 
-    static count = 1;
-
     static nextID() {
         return "ID-" + utils.count++;
     }
@@ -739,5 +737,9 @@ class utils {
         return uuid;
     }
 }
+
+utils.count = 1;
+
+
 
 //# sourceURL=kiss/utils.js
