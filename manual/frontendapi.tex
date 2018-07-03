@@ -184,8 +184,8 @@ An examples is as follows:
 There are only two JavaScript functions used to control the popup.
 
 @table @code
-@item utils.popup_open(id)
-open the popup indicated by the @code{id}
+@item utils.popup_open(id [, focus-id])
+open the popup indicated by the @code{id}, and if @code{focus-id} is present, set initial focus to that control
 @item popup_close(id)
 close the popup indicated by the @code{id}
 @end table

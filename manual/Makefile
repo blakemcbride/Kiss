@@ -12,7 +12,7 @@ TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex backendapi
 %.ps : %.dvi
 	dvips -T Letter -O 0in,-0.8in $*
 
-all: man/index.html # Kiss.pdf
+all: man/index.html jsdoc/index.html # Kiss.pdf
 
 Kiss.pdf : $(TEXFILES)
 	pdftex Kiss.tex
@@ -21,6 +21,10 @@ Kiss.pdf : $(TEXFILES)
 
 man/index.html :  $(TEXFILES)
 	makeinfo --html Kiss.tex
+
+jsdoc/index.html: ../src/main/webapp/kiss/*.js ../src/main/webapp/kiss/component/components.js
+	rm -rf manual/jsdoc
+	jsdoc -t /usr/local/lib/node_modules/docdash -d jsdoc $^
 
 clean:
 	rm -f *.cp *.fn *.fns *.ky *.pg *.toc *.tp *.vr *.aux *.log

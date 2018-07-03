@@ -742,11 +742,12 @@ class utils {
     /**
      * Open a modal popup window identified by id <code>id</code>.
      *
-     * @param id
+     * @param {string} id the id of the popup to evoke
+     * @param {string} focus_ctl optional control to set initial focus
      *
      * @see popup_close
      */
-    static popup_open(id) {
+    static popup_open(id, focus_ctl) {
         let w = $('#' + id);
         let content;
         let both_parts;
@@ -813,12 +814,15 @@ class utils {
         w.show();
 
         header.mousedown(handle_mousedown);
+
+        if (focus_ctl)
+            $('#' + focus_ctl).focus();
     }
 
     /**
      * Close a modal popup.
      *
-     * @param id
+     * @param {string} id the id of the popup to close
      *
      * @see popup_open
      */
