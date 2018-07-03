@@ -124,9 +124,10 @@ ul.no-bullet {list-style: none}
   <ul class="no-bullet">
     <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.2.1 Tagless Components</a></li>
   </ul></li>
-  <li><a name="toc-Utilities" href="#Utilities">5.3 Utilities</a></li>
-  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.4 Controlling Browser Cache</a></li>
-  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.5 Additional Resources</a></li>
+  <li><a name="toc-Modal-Popup-Windows" href="#Modal-Popup-Windows">5.3 Modal Popup Windows</a></li>
+  <li><a name="toc-Utilities" href="#Utilities">5.4 Utilities</a></li>
+  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.5 Controlling Browser Cache</a></li>
+  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.6 Additional Resources</a></li>
 </ul></li>
 <li><a name="toc-Back_002dend-API" href="#Back_002dend-API">6 Back-end API</a>
 <ul class="no-bullet">
@@ -990,8 +991,62 @@ is needed, one would execute <code>Kiss.MyComponent.run()</code> (where
 tagless component was loaded (with <code>utils.useTaglessComponent</code>)
 you specify what happens when the component completes.
 </p>
+<a name="Modal-Popup-Windows"></a>
+<h3 class="section">5.3 Modal Popup Windows</h3>
+
+<p><em>Kiss</em> supports dragable, modal popup windows. <em>HTML</em> is used to describe the layout of the popup, and JavaScript is used
+to control the appearance of the popup.
+</p>
+<p>The <em>HTML</em> portion is represented as a top-level <code>div</code> that represents the entire popup.  Withing the top-level
+<code>div</code> there most be two child <code>div</code>&rsquo;s.  The first represents the single line header, and the second represents
+the body of the grid.
+</p>
+<p>The top-level <code>div</code> attribute section must contain the following:
+</p>
+<dl compact="compact">
+<dt><code>id=&quot;my-popup&quot;</code></dt>
+<dd><p>an ID is needed to reference the popup
+</p></dd>
+<dt><code>style=&quot;width: 600px; height: 300px;&quot;</code></dt>
+<dd><p>Set the height and width of the popup
+</p></dd>
+<dt><code>hidden</code></dt>
+<dd><p>be sure the popup doesn&rsquo;t appear until requested
+</p></dd>
+</dl>
+
+<p>An examples is as follows:
+</p>
+<div class="example">
+<pre class="example">&lt;div id=&quot;my-popup&quot; style=&quot;width: 600px; height: 300px;&quot; hidden&gt;
+    &lt;div&gt;The title&lt;/div&gt;
+    &lt;div&gt;
+        The content
+        &lt;div style=&quot;display: inline-block; position: absolute; bottom: 20px; right: 20px;&quot;&gt;
+            &lt;push-button id=&quot;cancel&quot; style=&quot;margin-left: 15px;&quot;&gt;Cancel&lt;/push-button&gt;
+            &lt;push-button id=&quot;ok&quot; style=&quot;margin-left: 15px;&quot;&gt;Ok&lt;/push-button&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre></div>
+
+<p>There are only two JavaScript functions used to control the popup.
+</p>
+<dl compact="compact">
+<dt><code>utils.popup_open(id)</code></dt>
+<dd><p>open the popup indicated by the <code>id</code>
+</p></dd>
+<dt><code>popup_close(id)</code></dt>
+<dd><p>close the popup indicated by the <code>id</code>
+</p></dd>
+</dl>
+
+<p>Your defined responses to the buttons on the popup determines your dealing with the
+data on the popup and when to close it.
+</p>
+
 <a name="Utilities"></a>
-<h3 class="section">5.3 Utilities</h3>
+<h3 class="section">5.4 Utilities</h3>
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code>src/main/webapp/kiss</code> directory and have names such as
@@ -999,7 +1054,7 @@ These utilities are located under the <code>src/main/webapp/kiss</code> director
 are documented in the front-end API documentation.
 </p>
 <a name="Controlling-Browser-Cache-1"></a>
-<h3 class="section">5.4 Controlling Browser Cache</h3>
+<h3 class="section">5.5 Controlling Browser Cache</h3>
 
 <p>Browser&rsquo;s have a mind of their own in term of deciding when to use
 their cache for a file and when to download a new one.  This can cause
@@ -1023,7 +1078,7 @@ the browser cache will work as normal to maximally cache the files until the nex
 <code>softwareVersion</code> change.
 </p>
 <a name="Additional-Resources"></a>
-<h3 class="section">5.5 Additional Resources</h3>
+<h3 class="section">5.6 Additional Resources</h3>
 
 <p>Although not a part of the <em>Kiss</em> system, there are some very valuable technologies and libraries that
 have been used with <em>Kiss</em> in order to create some very powerful solutions.

@@ -118,3 +118,36 @@ div.vert-input label:after { content: ":"; }
     */
     text-align: center;
 }
+
+/* The Modal (background) */
+.popup-modal {
+    position: fixed; /* Stay in place */
+    left: 0;
+    top: 0;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.popup-modal-content {
+    position: absolute;
+    background-color: white;
+    margin: auto;
+    padding: 0;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+}
+
+.popup-modal-header {
+    padding-left: 10px;
+    background-color: #6495ed;
+    color: black;
+    padding-top: 3px;
+    padding-bottom: 1px;
+    line-height: 1;
+    height: 25px;
+}
+
+.popup-modal-body {
+    padding: 2px 10px;
+    margin-top: 10px;
+}

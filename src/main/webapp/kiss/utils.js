@@ -266,6 +266,8 @@ class utils {
      *<br><br>
      *    result in r:   "(12,345.35)"
      * </p>
+     *
+     * @see format
      */
     static formatb(num, base, msk, wth, dp) {
         var si, i, r, n;
@@ -736,10 +738,103 @@ class utils {
         }
         return uuid;
     }
+
+    /**
+     * Open a modal popup window identified by id <code>id</code>.
+     *
+     * @param id
+     *
+     * @see popup_close
+     */
+    static popup_open(id) {
+        let w = $('#' + id);
+        let content;
+        let both_parts;
+        let header;
+        let body;
+        let drag = {};
+
+        function handle_mousedown(e){
+            let body = $('body');
+            drag.pageX0 = e.pageX;
+            drag.pageY0 = e.pageY;
+            drag.elem = content;
+            drag.offset0 = $(this).offset();
+            function handle_dragging(e){
+                let left = drag.offset0.left + (e.pageX - drag.pageX0);
+                let top = drag.offset0.top + (e.pageY - drag.pageY0);
+                $(drag.elem)
+                    .offset({top: top, left: left});
+            }
+            function handle_mouseup(e){
+                body
+                    .off('mousemove', handle_dragging)
+                    .off('mouseup', handle_mouseup);
+            }
+            body
+                .on('mouseup', handle_mouseup)
+                .on('mousemove', handle_dragging);
+        }
+
+        if (!w.hasClass('popup-modal')) {
+            w.addClass('popup-modal');
+            w.css('z-index', utils.popup_zindex++);
+
+            let width = w.css('width');
+            let height = w.css('height');
+            w.css('width', '100%');
+            w.css('height', '100%');
+
+            w.wrapInner('<div class="popup-modal-content"></div>');
+            content = w.children();
+
+            // content.css('position', 'absolute');
+            content.css('z-index', utils.popup_zindex++);
+            content.css('top', '50%');
+            content.css('left', '50%');
+            content.css('transform', 'translate(-50%, -50%)');
+
+            both_parts = content.children();
+            header = both_parts.first();
+            header.wrapInner('<div style="margin-top: 3px;"></div>div>');
+            body = header.next();
+            header.addClass('popup-modal-header');
+            header.css('cursor', 'all-scroll');
+            body.addClass('popup-modal-body');
+            content.css('width', width);
+            body.css('height', height);
+        } else {
+            content = w.children();
+            both_parts = content.children();
+            header = both_parts.first();
+            body = header.next();
+        }
+
+        w.show();
+
+        header.mousedown(handle_mousedown);
+    }
+
+    /**
+     * Close a modal popup.
+     *
+     * @param id
+     *
+     * @see popup_open
+     */
+    static popup_close(id) {
+        $('#' + id).hide();
+        utils.popup_zindex -= 2;
+        if (utils.popup_zindex < 10)
+            utils.popup_zindex = 10;
+
+    }
+
 }
 
 utils.count = 1;
 
+utils.popup_zindex = 10;
 
 
 //# sourceURL=kiss/utils.js

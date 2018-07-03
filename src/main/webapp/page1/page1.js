@@ -41,10 +41,8 @@ $$('lisp-button').onclick(function () {
 });
 
 $$('logout').onclick(function () {
-
     Server.setUUID('');
     history.go(0);
-
 });
 
 

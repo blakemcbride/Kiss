@@ -144,6 +144,57 @@ is needed, one would execute @code{Kiss.MyComponent.run()} (where
 tagless component was loaded (with @code{utils.useTaglessComponent})
 you specify what happens when the component completes.
 
+@section Modal Popup Windows
+
+@emph{Kiss} supports dragable, modal popup windows. @emph{HTML} is used to describe the layout of the popup, and JavaScript is used
+to control the appearance of the popup.
+
+The @emph{HTML} portion is represented as a top-level @code{div} that represents the entire popup.  Withing the top-level
+@code{div} there most be two child @code{div}'s.  The first represents the single line header, and the second represents
+the body of the grid.
+
+The top-level @code{div} attribute section must contain the following:
+
+@table @code
+@item id="my-popup"
+an ID is needed to reference the popup
+@item style="width: 600px; height: 300px;"
+Set the height and width of the popup
+@item hidden
+be sure the popup doesn't appear until requested
+@end table
+
+@noindent
+An examples is as follows:
+
+@example
+<div id="my-popup" style="width: 600px; height: 300px;" hidden>
+    <div>The title</div>
+    <div>
+        The content
+        <div style="display: inline-block; position: absolute; bottom: 20px; right: 20px;">
+            <push-button id="cancel" style="margin-left: 15px;">Cancel</push-button>
+            <push-button id="ok" style="margin-left: 15px;">Ok</push-button>
+        </div>
+    </div>
+</div>
+@end example
+
+@noindent
+There are only two JavaScript functions used to control the popup.
+
+@table @code
+@item utils.popup_open(id)
+open the popup indicated by the @code{id}
+@item popup_close(id)
+close the popup indicated by the @code{id}
+@end table
+
+@noindent
+Your defined responses to the buttons on the popup determines your dealing with the
+data on the popup and when to close it.
+
+
 @section Utilities
 
 @emph{Kiss} includes an ever-growing set of utilities to help deal with common tasks.
