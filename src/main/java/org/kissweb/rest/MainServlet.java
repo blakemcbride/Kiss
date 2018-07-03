@@ -60,8 +60,11 @@ public class MainServlet extends ServiceBase {
 
         try {
             newDatabaseConnection();
-        } catch (Exception e) {
-            errorReturn(response, "Unable to connect to the database", e);
+        } catch (Throwable e) {
+            if (e instanceof Exception)
+                errorReturn(response, "Unable to connect to the database", (Exception) e);
+            else
+                errorReturn(response, "Unable to connect to the database", null);
             return;
         }
 

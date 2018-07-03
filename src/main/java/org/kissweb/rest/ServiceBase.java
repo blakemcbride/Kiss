@@ -27,6 +27,7 @@ public class ServiceBase extends HttpServlet {
     private static final String IDEPath = "Kiss.war";
     private static ComboPooledDataSource cpds;
     protected Connection DB;
+    private java.sql.Connection sconn;
 
     public static String getApplicationPath() {
         return applicationPath;
@@ -114,6 +115,14 @@ public class ServiceBase extends HttpServlet {
         } finally {
             DB = null;
         }
+        try {
+            if (sconn != null)
+                sconn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            sconn = null;
+        }
     }
 
     protected static String getDynamicClassPath() {
@@ -146,7 +155,9 @@ public class ServiceBase extends HttpServlet {
     }
 
     protected void newDatabaseConnection () throws SQLException {
-        DB = new Connection(cpds.getConnection());
+      //  System.err.println("newDatabaseConnection 1 (" + cpds.getNumBusyConnections() + ")");
+        DB = new Connection(sconn=cpds.getConnection());
+      //  System.err.println("newDatabaseConnection 2");
     }
 
     public static Connection.ConnectionType getConnectionType() {
