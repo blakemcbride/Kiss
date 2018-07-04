@@ -802,7 +802,7 @@ follows:
 </li><li> The <code>Kiss</code> back-end receives the request.
 </li><li> The user gets authenticated.
 </li><li> A new database connection is formed, and a new database transaction is started.
-</li><li> The requested web services is loaded (and compiled if needed).
+</li><li> The requested web service is identified (and loaded and compiled if needed).
 </li><li> The <code>outjson</code> object that is filled in by the web service that is to be returned to the front-end.
 </li><li> Upon completion of the REST service, <em>Kiss</em> commits the transaction, closes the databse connection, and returns <code>outjson</code> to the front-end.
 </li><li> If, however, the REST service threw an exception, <em>Kiss</em> rolls back the transaction, closes the database, and sends an error return to the front-end.
