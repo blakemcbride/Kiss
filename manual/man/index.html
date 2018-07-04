@@ -94,6 +94,7 @@ ul.no-bullet {list-style: none}
   <ul class="no-bullet">
     <li><a name="toc-Gradle" href="#Gradle">2.5.1 Gradle</a></li>
     <li><a name="toc-IntelliJ-Ultimate" href="#IntelliJ-Ultimate">2.5.2 IntelliJ Ultimate</a></li>
+    <li><a name="toc-NetBeans_002c-eclipse_002c-etc_002e" href="#NetBeans_002c-eclipse_002c-etc_002e">2.5.3 NetBeans, eclipse, etc.</a></li>
   </ul></li>
   <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.6 What Do I Do With It Now?</a></li>
 </ul></li>
@@ -550,6 +551,9 @@ generating the final <em>WAR</em> file.  <em>Gradle</em> may be used as follows:
 <dd><p>Runs a sample server serving up the application.  The system will be
 available from your local browser at
 <code>http://localhost:8080/Kiss</code>.  Use <code>^C</code> to exit.
+(Note two things about this.  First, this will not run unless you created the database described in the previous section.
+Also, although <code>gradle appRun</code> is nice to do a quick check, this is neither an apt development environment nor
+an apt production environment.  It is simply good as a quick check.  The following sections detail apt development and production environments.)  
 </p></dd>
 </dl>
 
@@ -575,9 +579,16 @@ available from your local browser at
 </li><li> Click &quot;OK&quot;
 </li></ol>
 
-<p>To run the app in debug mode just click the green bug at the top of the screen.
+<p>To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 
+in a debug mode.  Although this is the recommended setup for the back-end portion during development, it is not recommended
+for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
+the front-end and back-end are served by different servers is recommended.  
 </p>
+<a name="NetBeans_002c-eclipse_002c-etc_002e"></a>
+<h4 class="subsection">2.5.3 NetBeans, eclipse, etc.</h4>
 
+<p>Other IDE&rsquo;s that can import <em>gradle</em> projects should run equally well.  More detailed instruction will follow.
+</p>
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
 <h3 class="section">2.6 What Do I Do With It Now?</h3>
 
@@ -740,7 +751,7 @@ development process.
 <h4 class="subsection">4.1.1 REST Server</h4>
 
 <p>Typically, the IDE manages a tomcat instance and serves up the core
-back-end code seriving the REST services.  That code detects that it is
+back-end code serving the REST services.  That code detects that it is
 running under an IDE and re-routes all back-end application files back
 to the source directories.
 </p>

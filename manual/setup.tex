@@ -170,6 +170,9 @@ Removes all the generated files.
 Runs a sample server serving up the application.  The system will be
 available from your local browser at
 @code{http://localhost:8080/Kiss}.  Use @code{^C} to exit.
+(Note two things about this.  First, this will not run unless you created the database described in the previous section.
+Also, although @code{gradle appRun} is nice to do a quick check, this is neither an apt development environment nor
+an apt production environment.  It is simply good as a quick check.  The following sections detail apt development and production environments.)  
 @end table
 
 @subsection IntelliJ Ultimate
@@ -205,8 +208,14 @@ Select @emph{Artifact} and then @emph{Kiss.war} (exploded)
 Click "OK"
 @end enumerate
 
-To run the app in debug mode just click the green bug at the top of the screen.
+To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 
+in a debug mode.  Although this is the recommended setup for the back-end portion during development, it is not recommended
+for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
+the front-end and back-end are served by different servers is recommended.  
 
+@subsection NetBeans, eclipse, etc.
+
+Other IDE's that can import @emph{gradle} projects should run equally well.  More detailed instruction will follow.
 
 @section What Do I Do With It Now?
 
