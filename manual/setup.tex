@@ -63,8 +63,35 @@ Development
 Production
 @end enumerate
 
+The @emph{Test} environment is started with @code{gradle tomcatRun} but
+is only good for a quick test to see if the system is running.  It is
+neither good in a development nor production environment.
 
+The @emph{Production} scenario is created with a single command 
+(@code{gradle war}) and produces a single @code{war} file that
+can be deployed.
 
+Unfortunately, the @emph{Development} environment takes many steps to
+setup.  This is largely due to the complexity and variations between
+IDE's.  However, once the environment is setup, developing with
+@emph{Kiss} is smooth and easy.
+
+The @emph{Development} environment consists of two servers.  One serves
+the back-end REST services, and the second serves the front-end HTML, CSS, 
+and JavaScript files.  By using this method, both front-end and back-end
+source files can be changed on a running system and take affect immediately
+without any server reboots, re-deploys, or file copies.  (This is also
+true of a production environment when the new files are put in place.)
+
+Back-end REST services are served, debugged, and edited through the IDE.
+Saving a source file is all that is needed to have it take effect.
+Unfortunately, setting up IDE's to do this takes several steps and is different
+for each IDE.
+
+The front-end (HTML, CSS, and JavaScript files) are served by a simple
+server supplied with the @emph{Kiss} system.  @xref{Front-end Development}.
+Debugging is normally done through the browser debugger.
+There is no setup, and it runs by executing a single command.
 
 @anchor{Pre-requisites}@section Pre-requisites
 

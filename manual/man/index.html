@@ -118,7 +118,7 @@ ul.no-bullet {list-style: none}
     <li><a name="toc-Application-Code" href="#Application-Code">4.1.2 Application Code</a></li>
     <li><a name="toc-Programming-Languages" href="#Programming-Languages">4.1.3 Programming Languages</a></li>
   </ul></li>
-  <li><a name="toc-Front_002dend-Development" href="#Front_002dend-Development">4.2 Front-end Development</a></li>
+  <li><a name="toc-Front_002dend-Development-1" href="#Front_002dend-Development-1">4.2 Front-end Development</a></li>
 </ul></li>
 <li><a name="toc-Front_002dend-API" href="#Front_002dend-API">5 Front-end API</a>
 <ul class="no-bullet">
@@ -449,9 +449,36 @@ run in as follows:
 </li><li> Production
 </li></ol>
 
-
-
-
+<p>The <em>Test</em> environment is started with <code>gradle tomcatRun</code> but
+is only good for a quick test to see if the system is running.  It is
+neither good in a development nor production environment.
+</p>
+<p>The <em>Production</em> scenario is created with a single command 
+(<code>gradle war</code>) and produces a single <code>war</code> file that
+can be deployed.
+</p>
+<p>Unfortunately, the <em>Development</em> environment takes many steps to
+setup.  This is largely due to the complexity and variations between
+IDE&rsquo;s.  However, once the environment is setup, developing with
+<em>Kiss</em> is smooth and easy.
+</p>
+<p>The <em>Development</em> environment consists of two servers.  One serves
+the back-end REST services, and the second serves the front-end HTML, CSS, 
+and JavaScript files.  By using this method, both front-end and back-end
+source files can be changed on a running system and take affect immediately
+without any server reboots, re-deploys, or file copies.  (This is also
+true of a production environment when the new files are put in place.)
+</p>
+<p>Back-end REST services are served, debugged, and edited through the IDE.
+Saving a source file is all that is needed to have it take effect.
+Unfortunately, setting up IDE&rsquo;s to do this takes several steps and is different
+for each IDE.
+</p>
+<p>The front-end (HTML, CSS, and JavaScript files) are served by a simple
+server supplied with the <em>Kiss</em> system.  See <a href="#Front_002dend-Development">Front-end Development</a>.
+Debugging is normally done through the browser debugger.
+There is no setup, and it runs by executing a single command.
+</p>
 <a name="Pre_002drequisites"></a><a name="Pre_002drequisites-1"></a>
 <h3 class="section">2.3 Pre-requisites</h3>
 
@@ -872,7 +899,7 @@ anticipated that support for many of these other languages (such as
 Scala, Clojure, JRuby, Jython, and Kotlin) will likely follow,
 especially if there are requests.
 </p>
-<a name="Front_002dend-Development"></a>
+<a name="Front_002dend-Development"></a><a name="Front_002dend-Development-1"></a>
 <h3 class="section">4.2 Front-end Development</h3>
 
 <p>The front-end can be debugged through your browser debugger (F12 on Chrome).
