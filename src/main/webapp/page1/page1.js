@@ -1,43 +1,40 @@
 
 'use strict';
 
-$$('groovy-button').onclick(function () {
+$$('groovy-button').onclick(async function () {
     $$('input-3').setValue('');
-    var data = {
+    let data = {
         num1: $$('input-1').getValue(),
         num2: $$('input-2').getValue()
     };
-    Server.call('page1', 'GroovyPage1', data).then(function (res) {
-        if (res._Success) {
-            $$('input-3').setValue(res.num3);
-        }
-    });
+    let res = await Server.call('page1', 'GroovyPage1', data);
+    if (res._Success) {
+        $$('input-3').setValue(res.num3);
+    }
 });
 
-$$('java-button').onclick(function () {
+$$('java-button').onclick(async function () {
     $$('input-3').setValue('');
-    var data = {
+    let data = {
         num1: $$('input-1').getValue(),
         num2: $$('input-2').getValue()
     };
-    Server.call('page1', 'JavaPage1', data).then(function (res) {
-        if (res._Success) {
-            $$('input-3').setValue(res.num3);
-        }
-    });
+    let res = await Server.call('page1', 'JavaPage1', data);
+    if (res._Success) {
+        $$('input-3').setValue(res.num3);
+    }
 });
 
-$$('lisp-button').onclick(function () {
+$$('lisp-button').onclick(async function () {
     $$('input-3').setValue('');
-    var data = {
+    let data = {
         num1: $$('input-1').getValue(),
         num2: $$('input-2').getValue()
     };
-    Server.call('page1', 'LispPage1', data).then(function (res) {
-        if (res._Success) {
-            $$('input-3').setValue(res.num3);
-        }
-    });
+    let res = await Server.call('page1', 'LispPage1', data);
+    if (res._Success) {
+        $$('input-3').setValue(res.num3);
+    }
 });
 
 $$('logout').onclick(function () {

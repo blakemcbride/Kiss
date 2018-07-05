@@ -1,7 +1,7 @@
 
 'use strict';
 
-$$('login').onclick(function () {
+$$('login').onclick(async function () {
 
     let error = $$('username').isError('Username');
     if (!error)
@@ -12,12 +12,11 @@ $$('login').onclick(function () {
             username: $$('username').getValue(),
             password: $$('password').getValue()
         };
-        Server.call('', 'Login', data).then(function (res) {
-            if (res._Success) {
-                Server.setUUID(res.uuid);
-                utils.loadPage('page1/page1');
-            }
-        });
+        let res = await Server.call('', 'Login', data);
+        if (res._Success) {
+            Server.setUUID(res.uuid);
+            utils.loadPage('page1/page1');
+        }
     }
 
 });

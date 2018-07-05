@@ -34,6 +34,8 @@ class Server {
     /**
      * Evoke a back-end REST service.
      *
+     * This function is typically called with an await and returns the resule of the call.
+     *
      * @param {string} pkg the web service to be called
      * @param {string} cls  the web method
      * @param {object} injson data to be passed to the back-end
