@@ -3,6 +3,8 @@ plugins {
     id 'org.akhikhl.gretty' version '1.4.2'
 }
 
+import org.akhikhl.gretty.AppStartTask
+
 repositories {
     jcenter()
     mavenCentral()

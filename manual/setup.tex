@@ -30,7 +30,43 @@
 @chapter System Setup
 
 
-@section Pre-requisites
+@section Quick-start Checklist
+
+The following enumerates the steps necessary to get the system up and running:
+
+@enumerate
+@item
+@xref{Pre-requisites}
+@item
+@xref{Download Kiss}
+@item
+@xref{Setup And Configuration}
+@item
+Run the server by running @code{gradle tomcatRun}
+@item
+You can access the server by going to @code{http://localhost:8080/Kiss}
+@end enumerate
+
+@noindent Use @code{^C} to stop the server.
+
+@section Runtime Environments
+
+As shipped, there are three different environments that @emph{Kiss} may
+run in as follows:
+
+@enumerate
+@item
+Test
+@item
+Development
+@item 
+Production
+@end enumerate
+
+
+
+
+@anchor{Pre-requisites}@section Pre-requisites
 
 You should download and install the following pre-requisites.
 
@@ -54,7 +90,7 @@ Install the above per their instructions.
 
 With the proper plugins, all of the IDE's can import the Gradle build files.
 
-@section Download Kiss
+@anchor{Download Kiss}@section Download Kiss
 
 
 Kiss is located at @uref{https://github.com/kiss-web/Kiss}
@@ -97,7 +133,7 @@ file:///my/home/path/kiss/build/docs/javadoc/index.html
 file:///my/home/path/kiss/manual/jsdoc/index.html
 @end example
 
-@section Setup And Configuration
+@anchor{Setup And Configuration}@section Setup And Configuration
 
 Given that Kiss is for business applications, it authenticates its
 users.  In order for this to work, there must be a database of valid
@@ -127,7 +163,7 @@ Valid options for the Database type are as follows:
 @item
 PostgreSQL
 @item
-Microsoft SQL Server
+MicrosoftServer
 @item
 MySQL
 @item
@@ -149,7 +185,7 @@ The default username is @emph{kiss}, and the default password is @emph{password}
 @section Building The System
 
 The system may be built in several way.  It can be build from the
-command line using @emph{Gradle}, or at can be build from within your
+command line using @emph{Gradle}, or it can be build from within your
 favorite IDE.  Using an IDE has the great advantage of a built-in
 debugger.  This section will outline usage of some of these scenarios.
 
@@ -166,12 +202,12 @@ JavaDocs end up in the @code{build/docs/javadoc} directory.
 The WAR file ends up in the @code{build/libs} directory.  This file can be just placed in the webapps directory of tomcat to deploy.
 @item gradle clean
 Removes all the generated files.
-@item gradle appRun
+@item gradle tomcatRun
 Runs a sample server serving up the application.  The system will be
 available from your local browser at
 @code{http://localhost:8080/Kiss}.  Use @code{^C} to exit.
 (Note two things about this.  First, this will not run unless you created the database described in the previous section.
-Also, although @code{gradle appRun} is nice to do a quick check, this is neither an apt development environment nor
+Also, although @code{gradle tomcatRun} is nice to do a quick check, this is neither an apt development environment nor
 an apt production environment.  It is simply good as a quick check.  The following sections detail apt development and production environments.)  
 @end table
 

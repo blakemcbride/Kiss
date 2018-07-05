@@ -2,8 +2,7 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee  http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 <!-- The following can also be turned on and off by changing between \"CONFIDENTIAL\" and \"NONE\".  -->
 
-	<!--  The following allows CORS - sometimes good in a development environment.  The down side is this code only works under tomcat.
-	      The split development we utilize does not depend on this.
+	<!--  The following allows CORS - sometimes good in a development environment.  The down side is this code only works under tomcat. -->
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>securedapp</web-resource-name>
@@ -38,5 +37,5 @@
 		<filter-name>CorsFilter</filter-name>
 		<url-pattern>/*</url-pattern>
 	</filter-mapping>
-	-->
+
 </web-app>

@@ -2,8 +2,12 @@
 'use strict';
 
 utils.afterComponentsLoaded(function () {
+    var href = window.location.href;
+    var len = href.lastIndexOf('/');
+    var url = href.substr(0, len);
+    url = url.replace('8000', '8080');
 
-    Server.setURL('http://localhost:8080');
+    Server.setURL(url);
 
     utils.loadPage('login');
 
