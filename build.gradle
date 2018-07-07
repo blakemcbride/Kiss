@@ -39,3 +39,8 @@ war {
 //    destinationDir = new File('manual/javadoc')
 //}
 
+task explodedWar(type: Sync) {
+    into "${buildDir}/exploded"
+    with war
+} 
+
