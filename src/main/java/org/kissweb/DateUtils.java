@@ -458,6 +458,8 @@ public class DateUtils {
      * @return int date or 0 on error
      */
     public static int parse(String date) {
+        if (date == null  ||  date.trim().isEmpty())
+            return 0;
         try {
             date = date.replaceAll("\\.", "/");
 
