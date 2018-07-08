@@ -701,12 +701,16 @@ class utils {
      * Also, the loaded code is processed for custom tags / components.
      *
      * @param {string} page path to the page to be loaded.
+     * @param {string} optional ID of div to fill (if empty "body" tag is used)
      */
-    static loadPage(page) {
+    static loadPage(page, tag) {
         if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
             Kiss.RadioButtons.resetGroups();
         $.get(page + '.html' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function (text) {
-            $('body').html(text);
+            if (tag)
+                $('#' + tag).html(text);
+            else
+                $('body').html(text);
             utils.rescan();  // does all the tag replacement
             $.getScript(page + '.js' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function () {
             });
