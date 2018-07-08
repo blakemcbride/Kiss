@@ -30,7 +30,7 @@
 @chapter System Setup
 
 
-@section Quick-start Checklist
+@anchor{Quick-start Checklist}@section Quick-start Checklist
 
 The following enumerates the steps necessary to get the system up and running:
 
@@ -221,12 +221,19 @@ debugger.  This section will outline usage of some of these scenarios.
 While not the best choice when in development mode, @emph{Gradle} is a
 good choice when generating the JavaDocs and possibly also when
 generating the final @emph{WAR} file.  @emph{Gradle} may be used as follows:
+(Note, this is not a list of command you should run in order to get the system running.  
+@xref{Quick-start Checklist}.
 
 @table @code
 @item gradle javadoc
 JavaDocs end up in the @code{build/docs/javadoc} directory.
 @item gradle war
-The WAR file ends up in the @code{build/libs} directory.  This file can be just placed in the webapps directory of tomcat to deploy.
+The WAR file ends up in the @code{build/libs} directory.  
+This file can be just placed in the webapps directory of tomcat to deploy.
+@item gradle explodedWar
+This builds a set of files that would have been placed in the deployment WAR file.  It is used, when needed,
+to run the entire system from a local directory.  The files are placed in the @code{build/exploded/kiss}
+directory.
 @item gradle clean
 Removes all the generated files.
 @item gradle tomcatRun
@@ -254,7 +261,7 @@ Select the file @emph{build.gradle}
 @item
 Accept all defaults
 @item
-Go to dropdown at the top of intelliJ screen and select Edit Configurations
+Go to Run / Edit Configurations
 @item
 Click the green + in the upper left corner
 @item
@@ -264,7 +271,7 @@ Change the Name to Kiss
 @item
 Click the Deployment tab
 @item
-Click the Green + in the middle of the screen (not the upper left)
+Click the Green + in the upper right quadrant of the screen (not the upper left)
 @item
 Select @emph{Artifact} and then @emph{Kiss.war} (exploded)
 @item

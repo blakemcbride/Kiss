@@ -40,7 +40,7 @@ war {
 //}
 
 task explodedWar(type: Sync) {
-    into "${buildDir}/exploded"
+    into "${buildDir}/exploded/kiss"
     with war
 } 
 

@@ -86,7 +86,7 @@ ul.no-bullet {list-style: none}
 </ul></li>
 <li><a name="toc-System-Setup" href="#System-Setup">2 System Setup</a>
 <ul class="no-bullet">
-  <li><a name="toc-Quick_002dstart-Checklist" href="#Quick_002dstart-Checklist">2.1 Quick-start Checklist</a></li>
+  <li><a name="toc-Quick_002dstart-Checklist-1" href="#Quick_002dstart-Checklist-1">2.1 Quick-start Checklist</a></li>
   <li><a name="toc-Runtime-Environments" href="#Runtime-Environments">2.2 Runtime Environments</a></li>
   <li><a name="toc-Pre_002drequisites-1" href="#Pre_002drequisites-1">2.3 Pre-requisites</a></li>
   <li><a name="toc-Download-Kiss-1" href="#Download-Kiss-1">2.4 Download Kiss</a></li>
@@ -422,7 +422,7 @@ I am using a modified version included with the system)
 <h2 class="chapter">2 System Setup</h2>
 
 
-<a name="Quick_002dstart-Checklist"></a>
+<a name="Quick_002dstart-Checklist"></a><a name="Quick_002dstart-Checklist-1"></a>
 <h3 class="section">2.1 Quick-start Checklist</h3>
 
 <p>The following enumerates the steps necessary to get the system up and running:
@@ -595,13 +595,21 @@ debugger.  This section will outline usage of some of these scenarios.
 <p>While not the best choice when in development mode, <em>Gradle</em> is a
 good choice when generating the JavaDocs and possibly also when
 generating the final <em>WAR</em> file.  <em>Gradle</em> may be used as follows:
+(Note, this is not a list of command you should run in order to get the system running.  
+See <a href="#Quick_002dstart-Checklist">Quick-start Checklist</a>.
 </p>
 <dl compact="compact">
 <dt><code>gradle javadoc</code></dt>
 <dd><p>JavaDocs end up in the <code>build/docs/javadoc</code> directory.
 </p></dd>
 <dt><code>gradle war</code></dt>
-<dd><p>The WAR file ends up in the <code>build/libs</code> directory.  This file can be just placed in the webapps directory of tomcat to deploy.
+<dd><p>The WAR file ends up in the <code>build/libs</code> directory.  
+This file can be just placed in the webapps directory of tomcat to deploy.
+</p></dd>
+<dt><code>gradle explodedWar</code></dt>
+<dd><p>This builds a set of files that would have been placed in the deployment WAR file.  It is used, when needed,
+to run the entire system from a local directory.  The files are placed in the <code>build/exploded/kiss</code>
+directory.
 </p></dd>
 <dt><code>gradle clean</code></dt>
 <dd><p>Removes all the generated files.
@@ -628,12 +636,12 @@ an apt production environment.  It is simply good as a quick check.  The followi
 </li><li> If you just entered IntelliJ select &ldquo;Import Project&rdquo;, or if already in a project select New / Project from existing source.
 </li><li> Select the file <em>build.gradle</em>
 </li><li> Accept all defaults
-</li><li> Go to dropdown at the top of intelliJ screen and select Edit Configurations
+</li><li> Go to Run / Edit Configurations
 </li><li> Click the green + in the upper left corner
 </li><li> Select <em>Tomcat Server</em> / <em>Local</em>
 </li><li> Change the Name to Kiss
 </li><li> Click the Deployment tab
-</li><li> Click the Green + in the middle of the screen (not the upper left)
+</li><li> Click the Green + in the upper right quadrant of the screen (not the upper left)
 </li><li> Select <em>Artifact</em> and then <em>Kiss.war</em> (exploded)
 </li><li> Click &quot;OK&quot;
 </li></ol>
