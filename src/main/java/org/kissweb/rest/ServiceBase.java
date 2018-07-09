@@ -1,8 +1,8 @@
 package org.kissweb.rest;
 
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.kissweb.database.Connection;
 import org.kissweb.database.Record;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -38,8 +38,12 @@ public class ServiceBase extends HttpServlet {
         if (list != null)
             for (File f2 : list)
                 if (f2.isDirectory()) {
-                    if (underIDE && f2.getName().equals(IDEPath))
+                    String fname = f2.getName();
+                    if (fname.equals(".git") || fname.equals(".svn"))
                         continue;
+                    if (underIDE && fname.equals(IDEPath))
+                        continue;
+                    //System.out.println("Searching " + f2.getAbsolutePath());
                     File f3 = search(f2);
                     if (f3 != null)
                         return f3;
@@ -61,10 +65,13 @@ public class ServiceBase extends HttpServlet {
         } else
             System.out.println("* * * Is not running under IDE");
         File f;
+        boolean once = underIDE;
         do {
             path = path.substring(0, path.lastIndexOf('/'));
-            if (underIDE)
+            if (once) {
                 path = path.substring(0, path.lastIndexOf('/'));
+                once = false;
+            }
             f = search(new File(path));
         } while (f == null  &&  path.lastIndexOf('/') > 0);
 
