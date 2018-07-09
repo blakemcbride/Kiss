@@ -24,7 +24,7 @@ public class ServiceBase extends HttpServlet {
     private static String password;
     private static String applicationPath;
     private static boolean underIDE = false;
-    private static final String IDEPath = "Kiss.war";
+    private static String IDEPath;
     private static ComboPooledDataSource cpds;
     protected Connection DB;
     private java.sql.Connection sconn;
@@ -53,8 +53,10 @@ public class ServiceBase extends HttpServlet {
         String path = request.getServletContext().getRealPath("/");
         path = path.replaceAll("\\\\", "/");  // for Windows
         System.out.println("* * * Context path = " + path);
-        if (path.endsWith("/" + IDEPath + "/")) {
+        if (path.endsWith(".war/")) {
             underIDE = true;
+            IDEPath = path.substring(0, path.length()-1);
+            IDEPath = IDEPath.substring(IDEPath.lastIndexOf('/')+1);
             System.out.println("* * * Is running under IDE");
         } else
             System.out.println("* * * Is not running under IDE");
