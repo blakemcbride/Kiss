@@ -465,7 +465,7 @@ IDE&rsquo;s.  However, once the environment is setup, developing with
 <p>The <em>Development</em> environment consists of two servers.  One serves
 the back-end REST services, and the second serves the front-end HTML, CSS, 
 and JavaScript files.  By using this method, both front-end and back-end
-source files can be changed on a running system and take affect immediately
+source files can be changed on a running system and take effect immediately
 without any server reboots, re-deploys, or file copies.  (This is also
 true of a production environment when the new files are put in place.)
 </p>
@@ -865,7 +865,7 @@ follows:
 <p>Basically what happens is:
 </p>
 <ol>
-<li> The front-end make a REST service call.
+<li> The front-end makes a REST service call.
 </li><li> The <code>Kiss</code> back-end receives the request.
 </li><li> The user gets authenticated.
 </li><li> A new database connection is formed, and a new database transaction is started.
@@ -1012,10 +1012,11 @@ amount of non-use time.  There is no state kept on the back-end.  Each
 REST call must login to the back-end with the provided token in order
 to be authenticated to communicate.
 </p>
-<p>The method used to communicate is named <code>call</code>. It is passed the
-path to the REST service, the RESET service method name, and a JSON
+<p>The method used to communicate is named <code>Server.call()</code>. It is passed the
+path to the REST service, the REST service method name, and a JSON
 object that is send to the back-end method.  A <code>promise</code> is
-returned that is used to obtain the result of the call.
+returned that is used to obtain the result of the call.  This
+can also be used with <code>async/await</code>.
 </p>
 <p>There is also a <code>logout</code> method that simply erases the
 login token so that future communications cannot occur.

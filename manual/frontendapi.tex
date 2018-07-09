@@ -89,10 +89,11 @@ amount of non-use time.  There is no state kept on the back-end.  Each
 REST call must login to the back-end with the provided token in order
 to be authenticated to communicate.
 
-The method used to communicate is named @code{call}. It is passed the
-path to the REST service, the RESET service method name, and a JSON
+The method used to communicate is named @code{Server.call()}. It is passed the
+path to the REST service, the REST service method name, and a JSON
 object that is send to the back-end method.  A @code{promise} is
-returned that is used to obtain the result of the call.
+returned that is used to obtain the result of the call.  This
+can also be used with @code{async/await}.
 
 There is also a @code{logout} method that simply erases the
 login token so that future communications cannot occur.
