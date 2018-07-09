@@ -7,7 +7,7 @@ $$('groovy-button').onclick(async function () {
         num1: $$('input-1').getValue(),
         num2: $$('input-2').getValue()
     };
-    let res = await Server.call('page1', 'GroovyPage1', data);
+    let res = await Server.call('services/MyGroovyService', 'addNumbers', data);
     if (res._Success) {
         $$('input-3').setValue(res.num3);
     }
@@ -19,7 +19,7 @@ $$('java-button').onclick(async function () {
         num1: $$('input-1').getValue(),
         num2: $$('input-2').getValue()
     };
-    let res = await Server.call('page1', 'JavaPage1', data);
+    let res = await Server.call('services/MyJavaService', 'addNumbers', data);
     if (res._Success) {
         $$('input-3').setValue(res.num3);
     }
@@ -31,7 +31,7 @@ $$('lisp-button').onclick(async function () {
         num1: $$('input-1').getValue(),
         num2: $$('input-2').getValue()
     };
-    let res = await Server.call('page1', 'LispPage1', data);
+    let res = await Server.call('services/MyLispService', 'addNumbers', data);
     if (res._Success) {
         $$('input-3').setValue(res.num3);
     }

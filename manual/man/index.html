@@ -281,11 +281,11 @@ take effect immediately (no need to reboot the server app).  There are
 no configuration files or other code that needs to be changed.
 </p>
 <p>For example, the following file is located in the
-<code>my/web/service</code> directory.
+<code>services</code> directory.
 </p>
 <div class="example">
-<pre class="example">class MyWebMethod {
-    static void main(JSONObject injson, JSONObject outjson) {
+<pre class="example">class MyWebService {
+    void myWebMethod(JSONObject injson, JSONObject outjson) {
         int num1 = injson.getInt(&quot;num1&quot;);
         int num2 = injson.getInt(&quot;num2&quot;);
         outjson.put(&quot;result&quot;, num1 + num2);
@@ -304,7 +304,7 @@ previous sub-section.
     num1:  22,
     num2:  11
 };
-let res = await Server.call(&quot;my/web/service&quot;, &quot;MyWebMethod&quot;, data);
+let res = await Server.call(&quot;services/MyWebService&quot;, &quot;myWebMethod&quot;, data);
 if (res._Success) {
     let result = res.result;
     //...
@@ -698,15 +698,21 @@ immediately on a running system.
 <a name="Front_002dend-Application-Files"></a>
 <h3 class="section">3.2 Front-end Application Files</h3>
 
-<p>Files under the <code>src/main/webapp</code> directory represent the front-end of the application.
+<p>Files under the <code>src/main/webapp</code> directory represent the
+front-end of the application.
 </p>
-<p>All files under the <code>src/main/webapp/kiss</code> directory are part of the <em>Kiss</em> system and would normally not need to be touched.
+<p>All files under the <code>src/main/webapp/kiss</code> directory are part of
+the <em>Kiss</em> system and would normally not need to be touched.
 </p>
-<p><code>index.html</code> and <code>index.js</code> are also part of the <em>Kiss</em> system and aren&rsquo;t normally modified.
+<p><code>index.html</code> and <code>index.js</code> are also part of the <em>Kiss</em>
+system and aren&rsquo;t normally modified.
 </p>
-<p><code>login.html</code> and <code>login.js</code> represent the user login page and would be modified to suit your needs.
+<p><code>login.html</code> and <code>login.js</code> represent the user login page
+and would be modified to suit your needs.
 </p>
-<p>Other directories such as <code>page1</code> represent other user pages and would be the application specific screens you create.  The included <code>page1</code> directory is only an example page.
+<p>Other directories such as <code>page1</code> represent other user pages and
+would be the application specific screens you create.  The included
+<code>page1</code> directory is only an example page.
 </p>
 
 <a name="Single-Page-Application"></a>
@@ -774,8 +780,8 @@ the application path to change to <code>[HOST]/ABC</code>
 
 <p>In order to start getting a feel for how <code>Kiss</code> applications
 function, in terms of the back-end, look at files in the
-<code>src/main/application/page1</code> directory.  With <code>Kiss</code> you can
-develop applications in several different languages.  The <code>page1</code>
+<code>src/main/application/services</code> directory.  With <code>Kiss</code> you can
+develop applications in several different languages.  The <code>services</code>
 example shows the same code in all of the suported languages.
 </p>
 <p>In terms of the front-end, see the example files under <code>src/main/webapp/page1</code>
@@ -809,7 +815,7 @@ environments.  Although in both environments back-end and front-end
 changes take effect immediately, setup of the production environment
 copies all files into the production environment, whereas in a
 development environment the souce and production code are split.  In
-order to facilitate rapid and clear development, it is important that
+order to facilitate rapid and easy development, it is important that
 souce files be used rather than the production copies during the
 development process.
 </p>
@@ -834,17 +840,16 @@ they were compiled before the system was booted.
 <h4 class="subsection">4.1.2 Application Code</h4>
 
 <p>All communications between the front-end and back-end occur over REST
-services you define.  Each REST service method exists in its own, single
-file.
+services you define.  Each REST service exists in its own
+file or class.  Web methods are methods within those classes.
 </p>
-<p>As architected, each directory under <code>src/main/application</code>
-represents a single REST service.  Each class / file under that
-directory represents a web method.  The name of the class is the name
-of the web method.
+<p>As architected, directories under <code>src/main/application</code>
+represent the application&rsquo;s REST services.  Each class / file under that
+directory represents a web service.  The name of the class is the name
+of the web service.
 </p>
-<p>Each class must have a static main method.  This is the method that
-the <em>Kiss</em> core calls.  This method is passed four argument as
-follows:
+<p>Instance methods within the web service class represent REST methods
+for that web service.  Each web method is passed four arguments as follows:
 </p>
 <dl compact="compact">
 <dt><code>JSONObject injson</code></dt>
@@ -874,6 +879,9 @@ follows:
 </li><li> If, however, the REST service threw an exception, <em>Kiss</em> rolls back the transaction, closes the database, and sends an error return to the front-end.
 </li></ol>
 
+<p>Additional class and instance methods, that are not web methods, may
+be defined and used within web service classes.
+</p>
 <p>Of course during this process, <code>Kiss</code> handles many possible error conditions.
 </p>
 <a name="Programming-Languages"></a>

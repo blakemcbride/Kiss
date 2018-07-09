@@ -173,11 +173,11 @@ take effect immediately (no need to reboot the server app).  There are
 no configuration files or other code that needs to be changed.
 
 For example, the following file is located in the
-@code{my/web/service} directory.
+@code{services} directory.
 
 @example
-class MyWebMethod @{
-    static void main(JSONObject injson, JSONObject outjson) @{
+class MyWebService @{
+    void myWebMethod(JSONObject injson, JSONObject outjson) @{
         int num1 = injson.getInt("num1");
         int num2 = injson.getInt("num2");
         outjson.put("result", num1 + num2);
@@ -195,7 +195,7 @@ let data = @{
     num1:  22,
     num2:  11
 @};
-let res = await Server.call("my/web/service", "MyWebMethod", data);
+let res = await Server.call("services/MyWebService", "myWebMethod", data);
 if (res._Success) @{
     let result = res.result;
     //...

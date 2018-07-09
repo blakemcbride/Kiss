@@ -8,6 +8,7 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -47,10 +48,10 @@ public class JavaService {
         }
     }
 
-    MainServlet.ExecutionReturn tryJava(MainServlet ms, HttpServletResponse response, String _package, String _className, String _method, JSONObject injson, JSONObject outjson) {
+    @SuppressWarnings("unchecked")
+    MainServlet.ExecutionReturn tryJava(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         JavaClassInfo ci;
-        final String _fullClassPath = _package != null ? _package + "." + _className : _className;
-        String fileName = getApplicationPath() + _fullClassPath.replace(".", "/") + ".java";
+        String fileName = getApplicationPath() + _className.replace(".", "/") + ".java";
         try {
             ci = loadJavaClass(_className, fileName, false);
         } catch (ClassNotFoundException e) {
@@ -61,31 +62,29 @@ public class JavaService {
             return MainServlet.ExecutionReturn.Error;
         }
         if (ci != null) {
-            Class[] ca = {
-                    JSONObject.class,
-                    JSONObject.class,
-                    Connection.class,
-                    MainServlet.class
-            };
 
+            Object instance;
+
+            Method meth;
             try {
-                @SuppressWarnings("unchecked")
-                Method methp = ci.jclass.getMethod(_method, ca);
-                if (methp == null) {
-                    ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
-                    return MainServlet.ExecutionReturn.Error;
-                }
-                try {
-                    ci.executing++;
-                    methp.invoke(null, injson, outjson, ms.DB, ms);
-                } finally {
-                    ci.executing--;
-                }
-                return MainServlet.ExecutionReturn.Success;
+                instance = ci.jclass.newInstance();
             } catch (Exception e) {
-                ms.errorReturn(response, "Error running method " + _method + " in class " + this.getClass().getName(), e);
+                ms.errorReturn(response, "Error creating instance of of " + fileName, null);
                 return MainServlet.ExecutionReturn.Error;
             }
+            try {
+                meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, MainServlet.class);
+            } catch (NoSuchMethodException e) {
+                ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
+                return MainServlet.ExecutionReturn.Error;
+            }
+            try {
+                meth.invoke(instance, injson, outjson, ms.DB, ms);
+            } catch (Exception e) {
+                ms.errorReturn(response, fileName + " " + _method + "()", e);
+                return MainServlet.ExecutionReturn.Error;
+            }
+            return MainServlet.ExecutionReturn.Success;
         }
         return MainServlet.ExecutionReturn.NotFound;
     }
@@ -118,9 +117,9 @@ public class JavaService {
             String code = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
 
             DynamicCompiler dc = new DynamicCompiler();
-            dc.addSource("page1." + className, code);
+            dc.addSource(className, code);
             Map<String, Class<?>> compiled = dc.build();
-            jclass = compiled.get("page1." + className);
+            jclass = compiled.get(className.replace('/', '.'));
 
             javaClassCache.put(fileName, ci = new JavaClassInfo(jclass, (new File(fileName)).lastModified()));
         } catch (FileNotFoundException | NoSuchFileException e) {

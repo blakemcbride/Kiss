@@ -52,7 +52,7 @@ environments.  Although in both environments back-end and front-end
 changes take effect immediately, setup of the production environment
 copies all files into the production environment, whereas in a
 development environment the souce and production code are split.  In
-order to facilitate rapid and clear development, it is important that
+order to facilitate rapid and easy development, it is important that
 souce files be used rather than the production copies during the
 development process.
 
@@ -75,17 +75,16 @@ The back-end server should be started before the front-end server.
 @subsection Application Code
 
 All communications between the front-end and back-end occur over REST
-services you define.  Each REST service method exists in its own, single
-file.
+services you define.  Each REST service exists in its own
+file or class.  Web methods are methods within those classes.
 
-As architected, each directory under @code{src/main/application}
-represents a single REST service.  Each class / file under that
-directory represents a web method.  The name of the class is the name
-of the web method.
+As architected, directories under @code{src/main/application}
+represent the application's REST services.  Each class / file under that
+directory represents a web service.  The name of the class is the name
+of the web service.
 
-Each class must have a static main method.  This is the method that
-the @emph{Kiss} core calls.  This method is passed four argument as
-follows:
+Instance methods within the web service class represent REST methods
+for that web service.  Each web method is passed four arguments as follows:
 
 @table @code
 @item JSONObject injson
@@ -118,6 +117,9 @@ Upon completion of the REST service, @emph{Kiss} commits the transaction, closes
 @item
 If, however, the REST service threw an exception, @emph{Kiss} rolls back the transaction, closes the database, and sends an error return to the front-end.
 @end enumerate
+
+Additional class and instance methods, that are not web methods, may
+be defined and used within web service classes.
 
 Of course during this process, @code{Kiss} handles many possible error conditions.
 

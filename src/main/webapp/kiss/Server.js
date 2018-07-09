@@ -36,21 +36,20 @@ class Server {
      *
      * This function is typically called with an await and returns the resule of the call.
      *
-     * @param {string} pkg the web service to be called
-     * @param {string} cls  the web method
+     * @param {string} cls the web service to be called
+     * @param {string} meth  the web method
      * @param {object} injson data to be passed to the back-end
      *
      * @returns {Promise<any>} data returned from the back-end
      */
-    static call(pkg, cls, injson) {
+    static call(cls, meth, injson) {
 
-        const doCall = function (pkg, cls, injson, pass, resolve, reject) {
+        const doCall = function (cls, meth, injson, pass, resolve, reject) {
             const path = "rest";  // path to servlet
             if (!injson)
                 injson = {};
             injson._uuid = Server.uuid;
-            injson._method = "main";
-            injson._package = pkg;
+            injson._method = meth;
             injson._class = cls;
 
             jQuery.ajax({
@@ -66,7 +65,7 @@ class Server {
                 },
                 error: function (error, status) {
                     if (pass < 3) {
-                        doCall(pkg, cls, injson, pass + 1, resolve, reject);
+                        doCall(cls, meth, injson, pass + 1, resolve, reject);
                         return;
                     }
                     const msg = 'Error communicating with the server.';
@@ -78,7 +77,7 @@ class Server {
         };
 
         return new Promise(function (resolve, reject) {
-            doCall(pkg, cls, injson, 1, resolve, reject);
+            doCall(cls, meth, injson, 1, resolve, reject);
         });
     }
 }

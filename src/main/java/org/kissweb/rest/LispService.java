@@ -48,9 +48,8 @@ public class LispService {
         }
     }
 
-    ExecutionReturn tryLisp(MainServlet ms, HttpServletResponse response, String _package, String _className, String _method, JSONObject injson, JSONObject outjson) {
-        final String _fullClassPath = _package != null ? _package + "." + _className : _className;
-        String lispFileName = _fullClassPath.replace(".", "/") + ".lisp";
+    ExecutionReturn tryLisp(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
+        String lispFileName = _className.replace(".", "/") + ".lisp";
         LispObject args;
 
         if (!(new File(getApplicationPath() + lispFileName)).exists())
@@ -75,7 +74,7 @@ public class LispService {
 
         LispPackageInfo res;
         try {
-            res = loadLispFile(_package, lispFileName, true);
+            res = loadLispFile(_className, lispFileName, true);
         } catch (Exception e) {
             ms.errorReturn(response, "Error loading Lisp " + lispFileName, e);
             res = null;
@@ -87,9 +86,9 @@ public class LispService {
 
         try {
             res.executing++;
-            ABCL.executeLisp(_package, _method, lispIn, lispOut, lispHSU, lispThis);
+            ABCL.executeLisp(_className, _method, lispIn, lispOut, lispHSU, lispThis);
         } catch (Exception e) {
-            ms.errorReturn(response, "Error executing Lisp " + lispFileName, e);
+            ms.errorReturn(response, "Error executing Lisp " + lispFileName + " " + _method + "()", e);
             return ExecutionReturn.Error;
         } finally {
             res.executing--;

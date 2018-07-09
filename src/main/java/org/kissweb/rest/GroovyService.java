@@ -72,36 +72,30 @@ public class GroovyService {
         return MainServlet.ExecutionReturn.NotFound;
     }
 
-    MainServlet.ExecutionReturn tryGroovy(MainServlet ms, HttpServletResponse response, String _package, String _className, String _method, JSONObject injson, JSONObject outjson) {
+    MainServlet.ExecutionReturn tryGroovy(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         GroovyClassInfo ci;
-        final String _fullClassPath = _package != null ? _package + "." + _className : _className;
-        String fileName = ServiceBase.getApplicationPath() + "/" + _fullClassPath.replace(".", "/") + ".groovy";
+        String fileName = ServiceBase.getApplicationPath() + _className.replace(".", "/") + ".groovy";
         ci = loadGroovyClass(fileName, false);
         if (ci != null) {
-            Class[] ca = {
-                    JSONObject.class,
-                    JSONObject.class,
-                    Connection.class,
-                    MainServlet.class
-            };
-
             try {
-                @SuppressWarnings("unchecked")
-                Method methp = ci.gclass.getMethod(_method, ca);
-                if (methp == null) {
-                    ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
+                ci.executing++;
+                Object instance;
+                try {
+                    instance = ci.gclass.invokeConstructor();
+                } catch (Exception e) {
+                    ms.errorReturn(response, "Error creating instance of of " + fileName, null);
                     return MainServlet.ExecutionReturn.Error;
                 }
+
                 try {
-                    ci.executing++;
-                    methp.invoke(null, injson, outjson, ms.DB, ms);
-                } finally {
-                    ci.executing--;
+                    ci.gclass.invoke(_method, instance, injson, outjson, ms.DB, ms);
+                } catch (Exception e) {
+                    ms.errorReturn(response, fileName + " " + _method + "()", e);
+                    return MainServlet.ExecutionReturn.Error;
                 }
                 return MainServlet.ExecutionReturn.Success;
-            } catch (Exception e) {
-                ms.errorReturn(response, "Error running method " + _method + " in class " + this.getClass().getName(), e);
-                return MainServlet.ExecutionReturn.Error;
+            } finally {
+                ci.executing--;
             }
         }
         return MainServlet.ExecutionReturn.NotFound;

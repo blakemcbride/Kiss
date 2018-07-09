@@ -68,11 +68,10 @@ public class MainServlet extends ServiceBase {
             return;
         }
 
-        final String _package = injson.getString("_package");
         final String _className = injson.getString("_class");
         final String _method = injson.getString("_method");
 
-        if (_package.isEmpty() && _className.equals("Login"))
+        if (_className.isEmpty() && _method.equals("Login"))
             try {
                 String uuid = login(injson.getString("username"), injson.getString("password"));
                 outjson.put("uuid", uuid);
@@ -90,30 +89,29 @@ public class MainServlet extends ServiceBase {
                 return;
             }
 
-        res = (new GroovyService()).tryGroovy(this, response, _package, _className, _method, injson, outjson);
+        res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
         if (res == ExecutionReturn.Error)
             return;
 
         if (res == ExecutionReturn.NotFound) {
-            res = (new JavaService()).tryJava(this, response, _package, _className, _method, injson, outjson);
+            res = (new JavaService()).tryJava(this, response, _className, _method, injson, outjson);
             if (res == ExecutionReturn.Error)
                 return;
         }
 
         if (res == ExecutionReturn.NotFound) {
-            res = (new LispService()).tryLisp(this, response, _package, _className, _method, injson, outjson);
+            res = (new LispService()).tryLisp(this, response, _className, _method, injson, outjson);
             if (res == ExecutionReturn.Error)
                 return;
         }
-
         if (res == ExecutionReturn.NotFound) {
-            res = (new CompiledJavaService()).tryCompiledJava(this, response, _package, _className, _method, injson, outjson);
+            res = (new CompiledJavaService()).tryCompiledJava(this, response, _className, _method, injson, outjson);
             if (res == ExecutionReturn.Error)
                 return;
         }
 
         if (res == ExecutionReturn.NotFound)
-            errorReturn(response, "No back-end code found for " + _package + "." + _className, null);
+            errorReturn(response, "No back-end code found for " + _className, null);
         else
             successReturn(response, outjson);
     }
@@ -147,12 +145,12 @@ public class MainServlet extends ServiceBase {
         if (e != null) {
             String m = e.getMessage();
             if (m != null)
-                finalMsg = m;
+                finalMsg = msg + " " + m;
             Throwable cause = e.getCause();
             if (cause != null) {
                 m = cause.getMessage();
                 if (m != null)
-                    finalMsg = m;
+                    finalMsg = msg + " " + m;
             }
         }
         outjson.put("_ErrorMessage", finalMsg);

@@ -14,7 +14,7 @@ import java.lang.reflect.Method;
 public class CompiledJavaService {
 
 
-    MainServlet.ExecutionReturn tryCompiledJava(MainServlet ms, HttpServletResponse response, String _package, String _className, String _method, JSONObject injson, JSONObject outjson) {
+    MainServlet.ExecutionReturn tryCompiledJava(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
 
         if (true)
             return MainServlet.ExecutionReturn.NotFound;   // not done yet
@@ -25,7 +25,7 @@ public class CompiledJavaService {
         if (!ms.isEmpty(dynamicClassPath)) {
             if (dynamicClassPath.charAt(dynamicClassPath.length() - 1) != '/')
                 dynamicClassPath += "/";
-            String classPath = dynamicClassPath + _package.replace(".", "/") + "/";
+            String classPath = dynamicClassPath + _className.replace(".", "/") + "/";
             try {
                 cls = MainServlet.class.getClassLoader().loadClass(_className);
             } catch (Throwable e) {
@@ -34,7 +34,7 @@ public class CompiledJavaService {
         }
         if (cls == null)
             try {
-                cls = Class.forName(_package + "." + _className);
+                cls = Class.forName(_className + "." + _className);
             } catch (ClassNotFoundException classNotFoundException) {
                 // ignore
             }

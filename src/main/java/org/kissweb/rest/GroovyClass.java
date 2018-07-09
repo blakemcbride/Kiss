@@ -87,7 +87,12 @@ public class GroovyClass {
 	}
 		
 	public Object invoke(String methodName, Object instance, Object ... args) throws Exception {
-		Method methp = getMethod(methodName, args);
+	    Method methp;
+	    try {
+            methp = getMethod(methodName, args);
+        } catch (Exception e) {
+            throw new Exception("Can't find method named " + methodName);
+        }
 		return methp.invoke(instance, args);
 	}
 		
