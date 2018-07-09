@@ -300,16 +300,15 @@ no configuration files or other code that needs to be changed.
 previous sub-section.
 </p>
 <div class="example">
-<pre class="example">var data = {
+<pre class="example">let data = {
     num1:  22,
     num2:  11
 };
-Server.call(&quot;my/web/service&quot;, &quot;MyWebMethod&quot;, data).then(function (res) {
-    if (res._Success) {
-        var result = res.result;
-        //...
-    }
-});
+let res = await Server.call(&quot;my/web/service&quot;, &quot;MyWebMethod&quot;, data);
+if (res._Success) {
+    let result = res.result;
+    //...
+}
 </pre></div>
     
 <a name="HTML-component-usage"></a>

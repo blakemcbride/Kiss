@@ -191,16 +191,15 @@ The following front-end example utilizes the web service defined in the
 previous sub-section.
 
 @example
-var data = @{
+let data = @{
     num1:  22,
     num2:  11
 @};
-Server.call("my/web/service", "MyWebMethod", data).then(function (res) @{
-    if (res._Success) @{
-        var result = res.result;
-        //...
-    @}
-@});
+let res = await Server.call("my/web/service", "MyWebMethod", data);
+if (res._Success) @{
+    let result = res.result;
+    //...
+@}
 @end example
     
 @section HTML component usage
