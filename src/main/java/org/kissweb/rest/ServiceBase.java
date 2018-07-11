@@ -27,7 +27,6 @@ public class ServiceBase extends HttpServlet {
     private static String IDEPath;
     private static ComboPooledDataSource cpds;
     protected Connection DB;
-    private java.sql.Connection sconn;
 
     public static String getApplicationPath() {
         return applicationPath;
@@ -116,9 +115,12 @@ public class ServiceBase extends HttpServlet {
     }
 
     protected void closeSession() {
+        java.sql.Connection sconn = null;
         try {
-            if (DB != null)
+            if (DB != null) {
+                sconn = DB.getSQLConnection();
                 DB.close();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
@@ -129,8 +131,6 @@ public class ServiceBase extends HttpServlet {
                 sconn.close();
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            sconn = null;
         }
     }
 
@@ -165,7 +165,7 @@ public class ServiceBase extends HttpServlet {
 
     protected void newDatabaseConnection () throws SQLException {
       //  System.err.println("newDatabaseConnection 1 (" + cpds.getNumBusyConnections() + ")");
-        DB = new Connection(sconn=cpds.getConnection());
+        DB = new Connection(cpds.getConnection());
       //  System.err.println("newDatabaseConnection 2");
     }
 

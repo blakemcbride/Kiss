@@ -461,4 +461,13 @@ public class Connection implements AutoCloseable {
         columns.close();
         return size;
     }
+
+    /**
+     * Return the underlying java.sql.Connection associated with this Connection.
+     *
+     * @return
+     */
+    public java.sql.Connection getSQLConnection() {
+        return conn;
+    }
 }
