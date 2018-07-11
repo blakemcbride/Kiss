@@ -3,6 +3,7 @@ package org.kissweb.rest;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
+import javax.servlet.ServletContext;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ public class MainServlet extends ServiceBase {
     static final int MaxHold = 600;         // number of seconds to cache microservices before unloading them
     static final int CheckCacheDelay = 60;  // how often to check to unload microservices in seconds
     private static boolean systemInitialized = false;
+    private ServletContext servletContext;
 
     enum ExecutionReturn {
         Success,
@@ -41,12 +43,23 @@ public class MainServlet extends ServiceBase {
         }
     }
 
+    /**
+     * Get the absolute path of the root of the back-end application.
+     *
+     * @return
+     */
+    public String getRealPath() {
+        return servletContext.getRealPath("/");
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String instr = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
         JSONObject injson = new JSONObject(instr);
         JSONObject outjson = new JSONObject();
         ExecutionReturn res;
+
+        servletContext = request.getServletContext();
 
         if (!systemInitialized) {
             try {
