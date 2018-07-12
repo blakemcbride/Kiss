@@ -838,6 +838,43 @@ class utils {
 
     }
 
+    /**
+     * Return the number of files the user selected for upload.
+     *
+     * @param {string} id the id of the control
+     * @returns {number}
+     *
+     * @see Server.fileUploadSend
+     * @see getFileUploadFormData
+     */
+    static getFileUploadCount(id) {
+        let ctl = $('#'+id);
+        let file_list = ctl.get(0).files;
+        return file_list.length;
+    }
+
+    /**
+     * Creates and initializes a FormData instance used for file uploading.
+     * Before the FormData instance is sent, arbitrary additional data may be added
+     * by using <code>fd.append(name, data)</code>
+     * <br><br>
+     * where <code>fd</code> is the object return by this call.
+     *
+     * @param {string} id the id of the control
+     * @returns {FormData}
+     *
+     * @see Server.fileUploadSend
+     * @see getFileUploadCount
+     */
+    static getFileUploadFormData(id) {
+        let ctl = $('#'+id);
+        let file_list = ctl.get(0).files;
+        let data = new FormData();
+        for (let i=0 ; i < file_list.length ; i++)
+            data.append('file-'+i, file_list[i]);
+        return data;
+    }
+
 }
 
 utils.count = 1;

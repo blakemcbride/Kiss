@@ -91,12 +91,15 @@ to be authenticated to communicate.
 
 The method used to communicate is named @code{Server.call()}. It is passed the
 path to the REST service, the REST service method name, and a JSON
-object that is send to the back-end method.  A @code{promise} is
+object that is send to the back-end method.  A @code{Promise} is
 returned that is used to obtain the result of the call.  This
 can also be used with @code{async/await}.
 
 There is also a @code{logout} method that simply erases the
 login token so that future communications cannot occur.
+
+The @code{Server} class also includes a method (@code{fileUploadSend})
+that makes it easy to upload files.
 
 @section Kiss Components
 
@@ -194,6 +197,63 @@ close the popup indicated by the @code{id}
 @noindent
 Your defined responses to the buttons on the popup determines your dealing with the
 data on the popup and when to close it.
+
+@section File Uploads
+
+@emph{Kiss} includes facilities that make it easy to upload a file or
+multiple files.  The way to use it is as follows:
+
+The HTML would contain two controls; a file input and a button.  The file
+input looks as follows:
+
+@example
+<input id="myUpload" type="file">
+@end example
+
+@noindent
+The file input control allows the user to select the file or files to
+be uploaded.  If multiple files are to be allowed the @code{multiple}
+attribute should be added to the HTML.
+
+The button is used to activate the upload process.  Your code that
+sends the file(s) to the server should be attached to this button.
+
+The @code{utils} class contains the helper functions @code{getFileUploadCount}
+and @code{getFileUploadFormData}, and the main function used to
+send the files is @code{fileUploadSend} in the @code{Server} class.
+The code would look like the following:
+
+@example
+if (!utils.getFileUploadCount('myUpload')) @{
+    utils.showMessage("Error", "No file specified.");
+    return;
+@}
+let data = utils.getFileUploadFormData('myUpload');
+
+data.append('add1', miscAdditionalData);  // misc data
+data.append('add2', miscAdditionalData2); // misc data
+
+Server.fileUploadSend('TheService', 'theMethod', data);
+@end example
+
+@noindent
+Back-end code would look like this:
+
+@example
+public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet) throws Exception @{
+    String add1 = inJson.getString("add1");
+    String add2 = inJson.getString("add2");
+    if (servlet.getUploadFileCount() == 0)
+        throw new Exception("No file specified.");
+    String originalFileName = servlet.getUploadFileName(0);
+    String path = servlet.getRealPath();
+    BufferedInputStream bis = servlet.getUploadBufferedInputStream(0);
+    saveToFile(path, originalFileName, bis);
+    bis.close();
+@}
+@end example
+
+
 
 
 @section Utilities

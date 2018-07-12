@@ -128,9 +128,10 @@ ul.no-bullet {list-style: none}
     <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.2.1 Tagless Components</a></li>
   </ul></li>
   <li><a name="toc-Modal-Popup-Windows" href="#Modal-Popup-Windows">5.3 Modal Popup Windows</a></li>
-  <li><a name="toc-Utilities" href="#Utilities">5.4 Utilities</a></li>
-  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.5 Controlling Browser Cache</a></li>
-  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.6 Additional Resources</a></li>
+  <li><a name="toc-File-Uploads" href="#File-Uploads">5.4 File Uploads</a></li>
+  <li><a name="toc-Utilities" href="#Utilities">5.5 Utilities</a></li>
+  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.6 Controlling Browser Cache</a></li>
+  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.7 Additional Resources</a></li>
 </ul></li>
 <li><a name="toc-Back_002dend-API" href="#Back_002dend-API">6 Back-end API</a>
 <ul class="no-bullet">
@@ -1021,12 +1022,15 @@ to be authenticated to communicate.
 </p>
 <p>The method used to communicate is named <code>Server.call()</code>. It is passed the
 path to the REST service, the REST service method name, and a JSON
-object that is send to the back-end method.  A <code>promise</code> is
+object that is send to the back-end method.  A <code>Promise</code> is
 returned that is used to obtain the result of the call.  This
 can also be used with <code>async/await</code>.
 </p>
 <p>There is also a <code>logout</code> method that simply erases the
 login token so that future communications cannot occur.
+</p>
+<p>The <code>Server</code> class also includes a method (<code>fileUploadSend</code>)
+that makes it easy to upload files.
 </p>
 <a name="Kiss-Components"></a>
 <h3 class="section">5.2 Kiss Components</h3>
@@ -1130,9 +1134,65 @@ the body of the grid.
 <p>Your defined responses to the buttons on the popup determines your dealing with the
 data on the popup and when to close it.
 </p>
+<a name="File-Uploads"></a>
+<h3 class="section">5.4 File Uploads</h3>
+
+<p><em>Kiss</em> includes facilities that make it easy to upload a file or
+multiple files.  The way to use it is as follows:
+</p>
+<p>The HTML would contain two controls; a file input and a button.  The file
+input looks as follows:
+</p>
+<div class="example">
+<pre class="example">&lt;input id=&quot;myUpload&quot; type=&quot;file&quot;&gt;
+</pre></div>
+
+<p>The file input control allows the user to select the file or files to
+be uploaded.  If multiple files are to be allowed the <code>multiple</code>
+attribute should be added to the HTML.
+</p>
+<p>The button is used to activate the upload process.  Your code that
+sends the file(s) to the server should be attached to this button.
+</p>
+<p>The <code>utils</code> class contains the helper functions <code>getFileUploadCount</code>
+and <code>getFileUploadFormData</code>, and the main function used to
+send the files is <code>fileUploadSend</code> in the <code>Server</code> class.
+The code would look like the following:
+</p>
+<div class="example">
+<pre class="example">if (!utils.getFileUploadCount('myUpload')) {
+    utils.showMessage(&quot;Error&quot;, &quot;No file specified.&quot;);
+    return;
+}
+let data = utils.getFileUploadFormData('myUpload');
+
+data.append('add1', miscAdditionalData);  // misc data
+data.append('add2', miscAdditionalData2); // misc data
+
+Server.fileUploadSend('TheService', 'theMethod', data);
+</pre></div>
+
+<p>Back-end code would look like this:
+</p>
+<div class="example">
+<pre class="example">public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet) throws Exception {
+    String add1 = inJson.getString(&quot;add1&quot;);
+    String add2 = inJson.getString(&quot;add2&quot;);
+    if (servlet.getUploadFileCount() == 0)
+        throw new Exception(&quot;No file specified.&quot;);
+    String originalFileName = servlet.getUploadFileName(0);
+    String path = servlet.getRealPath();
+    BufferedInputStream bis = servlet.getUploadBufferedInputStream(0);
+    saveToFile(path, originalFileName, bis);
+    bis.close();
+}
+</pre></div>
+
+
+
 
 <a name="Utilities"></a>
-<h3 class="section">5.4 Utilities</h3>
+<h3 class="section">5.5 Utilities</h3>
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code>src/main/webapp/kiss</code> directory and have names such as
@@ -1140,7 +1200,7 @@ These utilities are located under the <code>src/main/webapp/kiss</code> director
 are documented in the front-end API documentation.
 </p>
 <a name="Controlling-Browser-Cache-1"></a>
-<h3 class="section">5.5 Controlling Browser Cache</h3>
+<h3 class="section">5.6 Controlling Browser Cache</h3>
 
 <p>Browser&rsquo;s have a mind of their own in term of deciding when to use
 their cache for a file and when to download a new one.  This can cause
@@ -1164,7 +1224,7 @@ the browser cache will work as normal to maximally cache the files until the nex
 <code>softwareVersion</code> change.
 </p>
 <a name="Additional-Resources"></a>
-<h3 class="section">5.6 Additional Resources</h3>
+<h3 class="section">5.7 Additional Resources</h3>
 
 <p>Although not a part of the <em>Kiss</em> system, there are some very valuable technologies and libraries that
 have been used with <em>Kiss</em> in order to create some very powerful solutions.

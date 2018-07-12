@@ -4,13 +4,17 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 
 import javax.servlet.ServletContext;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 import java.beans.PropertyVetoException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.stream.Collectors;
 
 
@@ -19,6 +23,7 @@ import java.util.stream.Collectors;
  * Date: 5/4/18
  */
 @WebServlet("/rest")
+@MultipartConfig
 public class MainServlet extends ServiceBase {
 
     private static final transient Logger logger = Logger.getLogger(MainServlet.class);
@@ -27,6 +32,7 @@ public class MainServlet extends ServiceBase {
     static final int CheckCacheDelay = 60;  // how often to check to unload microservices in seconds
     private static boolean systemInitialized = false;
     private ServletContext servletContext;
+    private HttpServletRequest request;
 
     enum ExecutionReturn {
         Success,
@@ -52,14 +58,105 @@ public class MainServlet extends ServiceBase {
         return servletContext.getRealPath("/");
     }
 
+    /**
+     * Returns the ServletContext.
+     *
+     * @return
+     */
+    public ServletContext getServletContext() {
+        return servletContext;
+    }
+
+    /**
+     * Returns the HttpServletRequest.
+     *
+     * @return
+     */
+    public HttpServletRequest getRequest() {
+        return request;
+    }
+
+    /**
+     * Return the number of files being uploaded.
+     *
+     * @return
+     *
+     * @see #getUploadFileName(int)
+     * @see #getUploadBufferedInputStream(int)
+     */
+    public int getUploadFileCount() {
+        int i = 0;
+        for ( ; true ; i++) {
+            Part filePart = null;
+            try {
+                filePart = request.getPart("file-" + i);
+            } catch (Exception e) {
+            }
+            if (filePart == null)
+                break;
+        }
+        return i;
+    }
+
+    private String getFileName(final Part part) {
+        final String partHeader = part.getHeader("content-disposition");
+        for (String content : part.getHeader("content-disposition").split(";")) {
+            if (content.trim().startsWith("filename")) {
+                return content.substring(
+                        content.indexOf('=') + 1).trim().replace("\"", "");
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the name of the file being uploaded.
+     *
+     * @param i beginning at 0
+     * @return
+     *
+     * @see #getUploadFileCount()
+     * @see #getUploadBufferedInputStream(int)
+     */
+    public String getUploadFileName(int i) {
+        try {
+            Part filePart = request.getPart("file-" + i);
+            return getFileName(filePart);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * In file upload scenarios, this method returns a BufferedInputStream
+     * associated with file number i.  When done, the stream must be
+     * closed by the application.
+     *
+     * @param i starting from 0
+     * @return
+     *
+     * @see BufferedInputStream#close()
+     * @see #getUploadFileCount()
+     * @see #getUploadFileName(int)
+     */
+    public BufferedInputStream getUploadBufferedInputStream(int i) {
+        try {
+            Part filePart = request.getPart("file-" + i);
+            return new BufferedInputStream(filePart.getInputStream());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String instr = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-        JSONObject injson = new JSONObject(instr);
+        this.request = request;
+        servletContext = request.getServletContext();
+        String _className;
+        String _method;
+        JSONObject injson;
         JSONObject outjson = new JSONObject();
         ExecutionReturn res;
-
-        servletContext = request.getServletContext();
 
         if (!systemInitialized) {
             try {
@@ -81,8 +178,23 @@ public class MainServlet extends ServiceBase {
             return;
         }
 
-        final String _className = injson.getString("_class");
-        final String _method = injson.getString("_method");
+        _className = request.getParameter("_class");
+        if (_className != null) {
+            //  is file upload
+            _method = request.getParameter("_method");
+            injson = new JSONObject();
+            Enumeration<String> names = request.getParameterNames();
+            while (names.hasMoreElements()) {
+                String name = names.nextElement();
+                String value = request.getParameter(name);
+                injson.put(name, value);
+            }
+        } else {
+            String instr = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            injson = new JSONObject(instr);
+            _className = injson.getString("_class");
+            _method = injson.getString("_method");
+        }
 
         if (_className.isEmpty() && _method.equals("Login"))
             try {

@@ -80,6 +80,48 @@ class Server {
             doCall(cls, meth, injson, 1, resolve, reject);
         });
     }
+
+    /**
+     * Send the file upload to the server.
+     * This method displays a wait message and a final status message.
+     *
+     * @param {string} cls
+     * @param {string} meth
+     * @param {FormData} data
+     *
+     * @see utils.getFileUploadCount
+     * @see utils.getFileUploadFormData
+     */
+    static fileUploadSend(cls, meth, data) {
+        return new Promise(function (resolve, reject) {
+            data.append('_class', cls);
+            data.append('_method', meth);
+            utils.waitMessage("File upload in progress.");
+            $.ajax({
+                url: Server.url + '/rest',
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                data: data,
+                dataType: 'json',  // what is coming back
+                cache: false,
+                success: function (res, status, hdr) {
+                    utils.waitMessageEnd();
+                    if (res._Success)
+                        utils.showMessage("Information", "Upload successful.");
+                    else
+                        utils.showMessage("Error", res._ErrorMessage);
+                    resolve(res);
+                },
+                error: function (hdr, status, error) {
+                    utils.waitMessageEnd();
+                    utils.showMessage("Error", hdr._ErrorMessage);
+                    resolve(res);
+                }
+            });
+        });
+    }
+
 }
 
 Server.contextCreated = false;
