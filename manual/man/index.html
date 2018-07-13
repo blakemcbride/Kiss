@@ -547,15 +547,18 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 <h3 class="section">2.6 Setup And Configuration</h3>
 
 <p>Given that Kiss is for business applications, it authenticates its
-users.  In order for this to work, there must be a database of valid
+users.  In order for this to work, there is usually a database of valid
 users.  This information is persisted in an SQL database.  Therefore a
-database will need to be created.  As shipped, the system comes
-configured as follows:
+database is normally required.  However, for testing purposes, if no
+database is configured, the system will still run and allow any
+username and password to succeed.
+</p>
+<p>As shipped, the system comes configured as follows:
 </p>
 <table>
 <tr><td>Database type</td><td>PostgreSQL</td></tr>
 <tr><td>Host</td><td>localhost</td></tr>
-<tr><td>Database</td><td>kiss</td></tr>
+<tr><td>Database</td><td>not configured</td></tr>
 <tr><td>Database user</td><td>postgres</td></tr>
 <tr><td>Database user password</td><td>postgres</td></tr>
 </table>
@@ -573,13 +576,17 @@ Valid options for the Database type are as follows:
 
 <p>Support for other databases is easy to add.
 </p>
-<p>The remaining parameters should be self-explanatory.  Use the format shown in the example.
+<p>The remaining parameters should be self-explanatory.  Use the format
+shown in the example.
 </p>
 <p>Create the database (named &ldquo;kiss&rdquo; above or whatever name you
 configured).  After that, you can run the script file <code>init.sql</code>
 to create the table and some initial data.
 </p>
-<p>The default username is <em>kiss</em>, and the default password is <em>password</em>
+<p>The default username is <em>kiss</em>, and the default password is
+<em>password</em>
+</p>
+<p>Changes to  <code>KissInit.groovy</code> require a server reboot.
 </p>
 <a name="Building-The-System"></a>
 <h3 class="section">2.7 Building The System</h3>

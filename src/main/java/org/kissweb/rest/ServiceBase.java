@@ -18,15 +18,16 @@ import java.time.LocalDateTime;
 public class ServiceBase extends HttpServlet {
 
     private static Connection.ConnectionType connectionType;
-    private static String host;
-    private static String database;
-    private static String user;
-    private static String password;
+    private static String host;                      // set by KissInit.groovy
+    private static String database;                  // set by KissInit.groovy
+    private static String user;                      // set by KissInit.groovy
+    private static String password;                  // set by KissInit.groovy
     private static String applicationPath;
     private static boolean underIDE = false;
     private static String IDEPath;
     private static ComboPooledDataSource cpds;
-    protected static boolean debug = false;
+    protected static boolean debug = false;          // set by KissInit.groovy
+    protected static boolean hasDatabase;            // determined by KissInit.groovy
     protected Connection DB;
 
     public static String getApplicationPath() {
@@ -90,11 +91,15 @@ public class ServiceBase extends HttpServlet {
     }
 
     protected String login(String user, String password) throws Exception {
-        Record rec = DB.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", user, password);
-        if (rec == null)
-            throw new Exception("Invalid login.");
-        UserCache.UserData ud = UserCache.newUser(user, password);
-        ud.user_id = rec.getInt("user_id");
+        UserCache.UserData ud;
+        if (hasDatabase) {
+            Record rec = DB.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", user, password);
+            if (rec == null)
+                throw new Exception("Invalid login.");
+            ud = UserCache.newUser(user, password);
+            ud.user_id = rec.getInt("user_id");
+        } else
+            ud = UserCache.newUser(user, password);
         return ud.uuid;
     }
 
@@ -104,7 +109,7 @@ public class ServiceBase extends HttpServlet {
             throw new Exception("Login timed out; please re-login.");
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime timeout = ud.lastAccessDate.plusSeconds(120);  // cache user data for 120 seconds
-        if (now.isAfter(timeout)) {
+        if (hasDatabase && now.isAfter(timeout)) {
             Record rec = DB.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", ud.username, ud.password);
             if (rec == null) {
                 UserCache.removeUser(uuid);
@@ -140,6 +145,10 @@ public class ServiceBase extends HttpServlet {
     }
 
     protected void makeDatabaseConnection () throws PropertyVetoException, SQLException, ClassNotFoundException {
+        if (!hasDatabase) {
+            System.err.println("* * * No database configured; bypassing login requirements");
+            return;
+        }
         if (cpds == null) {
             System.out.println("* * * Attempting to connect to database " + host + ":" + database + ":" + user);
             String cstr = Connection.makeConnectionString(connectionType, host, database, user, password);
@@ -165,6 +174,8 @@ public class ServiceBase extends HttpServlet {
     }
 
     protected void newDatabaseConnection () throws SQLException {
+        if (!hasDatabase)
+            return;
         if (debug)
             System.err.println("Previous open database connections = " + cpds.getNumBusyConnections());
         DB = new Connection(cpds.getConnection());

@@ -91,10 +91,26 @@ public class GroovyService {
                     return MainServlet.ExecutionReturn.Error;
                 }
 
+                Method meth;
+
+                try {
+                    if (ServiceBase.debug)
+                        System.err.println("Searching for method " + _method);
+                    meth = ci.gclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, MainServlet.class);
+                } catch (Exception e) {
+                    ms.errorReturn(response, fileName + " " + _method + "()", e);
+                    if (ServiceBase.debug) {
+                        System.err.println("Method not found");
+                        System.err.println(e.getMessage());
+                    }
+                    return MainServlet.ExecutionReturn.Error;
+                }
+
+
                 try {
                     if (ServiceBase.debug)
                         System.err.println("Evoking method " + _method);
-                    ci.gclass.invoke(_method, instance, injson, outjson, ms.DB, ms);
+                    meth.invoke(instance, injson, outjson, ms.DB, ms);
                 } catch (Exception e) {
                     ms.errorReturn(response, fileName + " " + _method + "()", e);
                     if (ServiceBase.debug) {

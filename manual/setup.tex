@@ -163,24 +163,25 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 @anchor{Setup And Configuration}@section Setup And Configuration
 
 Given that Kiss is for business applications, it authenticates its
-users.  In order for this to work, there must be a database of valid
+users.  In order for this to work, there is usually a database of valid
 users.  This information is persisted in an SQL database.  Therefore a
-database will need to be created.  As shipped, the system comes
-configured as follows:
+database is normally required.  However, for testing purposes, if no
+database is configured, the system will still run and allow any
+username and password to succeed.
+
+As shipped, the system comes configured as follows:
 
 @multitable {Database user password} {PostgreSQL} 
-
 @item Database type
 @tab PostgreSQL
 @item Host
 @tab localhost
 @item Database
-@tab kiss
+@tab not configured
 @item Database user
 @tab postgres
 @item Database user password
 @tab postgres
-
 @end multitable
 
 This can be configured in the file @code{src/main/application/KissInit.groovy}
@@ -201,13 +202,17 @@ SQLite
 
 Support for other databases is easy to add.
 
-The remaining parameters should be self-explanatory.  Use the format shown in the example.
+The remaining parameters should be self-explanatory.  Use the format
+shown in the example.
 
 Create the database (named ``kiss'' above or whatever name you
 configured).  After that, you can run the script file @code{init.sql}
 to create the table and some initial data.
 
-The default username is @emph{kiss}, and the default password is @emph{password}
+The default username is @emph{kiss}, and the default password is
+@emph{password}
+
+Changes to  @code{KissInit.groovy} require a server reboot.
 
 @section Building The System
 

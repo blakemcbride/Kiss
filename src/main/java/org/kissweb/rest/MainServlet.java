@@ -44,7 +44,10 @@ public class MainServlet extends ServiceBase {
         setApplicationPath(request);
         ExecutionReturn res = (new GroovyService()).internalGroovy(this, response, null, "KissInit", "init");
         if (res == ExecutionReturn.Success) {
-            makeDatabaseConnection();
+            String database = getDatabase();
+            hasDatabase = database != null  &&  !database.isEmpty();
+            if (hasDatabase)
+                makeDatabaseConnection();
             systemInitialized = true;
         }
     }
@@ -200,23 +203,30 @@ public class MainServlet extends ServiceBase {
                 System.err.println("Enter back-end seeking REST service " + _className + "." + _method + "()");
         }
 
-        if (_className.isEmpty() && _method.equals("Login")) {
-            if (debug)
-                System.err.println("Attempting user login for " + injson.getString("username"));
-            try {
-                String uuid = login(injson.getString("username"), injson.getString("password"));
-                outjson.put("uuid", uuid);
+        if (_className.isEmpty())
+            if (_method.equals("LoginRequired")) {
+                if (debug)
+                    System.err.println("Login is " + (hasDatabase ? "" : "not ") + "required");
+                outjson.put("LoginRequired", hasDatabase);
                 successReturn(response, outjson);
-                if (debug)
-                    System.err.println("Login successful");
                 return;
-            } catch (Exception e) {
-                errorReturn(response, "Login failure", e);
+            } else if (_method.equals("Login")) {
                 if (debug)
-                    System.err.println("Login failure");
-                return;
-            }
-        } else {
+                    System.err.println("Attempting user login for " + injson.getString("username"));
+                try {
+                    String uuid = login(injson.getString("username"), injson.getString("password"));
+                    outjson.put("uuid", uuid);
+                    successReturn(response, outjson);
+                    if (debug)
+                        System.err.println("Login successful");
+                    return;
+                } catch (Exception e) {
+                    errorReturn(response, "Login failure", e);
+                    if (debug)
+                        System.err.println("Login failure");
+                    return;
+                }
+            } else if (hasDatabase) {
             try {
                 if (debug)
                     System.err.println("Validating uuid " + injson.getString("_uuid"));
@@ -227,10 +237,10 @@ public class MainServlet extends ServiceBase {
                 errorReturn(response, "Login failure", e);
                 return;
             }
+            if (debug)
+                System.err.println("Login success");
         }
-        if (debug)
-            System.err.println("Login success");
-        res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
+         res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
         if (res == ExecutionReturn.Error)
             return;
 
@@ -264,7 +274,8 @@ public class MainServlet extends ServiceBase {
 
     private void successReturn(HttpServletResponse response, JSONObject outjson) throws IOException {
         try {
-            DB.commit();
+            if (DB != null)
+                DB.commit();
         } catch (SQLException e) {
 
         }

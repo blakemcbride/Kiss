@@ -7,7 +7,7 @@ class KissInit {
     static void init() {
         ServiceBase.setConnectionType Connection.ConnectionType.PostgreSQL
         ServiceBase.setHost "localhost"
-        ServiceBase.setDatabase "kiss"
+        ServiceBase.setDatabase ""
         ServiceBase.setUser "postgres"            // database user (not application user login)
         ServiceBase.setPassword "postgres"        // database password (not application user password)
 

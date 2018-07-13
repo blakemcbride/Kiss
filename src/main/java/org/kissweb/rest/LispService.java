@@ -64,7 +64,7 @@ public class LispService {
         try {
             if (once) {
                 if (ServiceBase.debug)
-                    System.err.println("Performing Lisp initialization");
+                    System.err.println("Performing one-time Lisp initialization");
                 ABCL.init();
                 once = false;
             } else if (ServiceBase.isUnderIDE())
