@@ -166,10 +166,10 @@ public class ServiceBase extends HttpServlet {
 
     protected void newDatabaseConnection () throws SQLException {
         if (debug)
-            System.err.println("newDatabaseConnection 1 (" + cpds.getNumBusyConnections() + ")");
+            System.err.println("Previous open database connections = " + cpds.getNumBusyConnections());
         DB = new Connection(cpds.getConnection());
         if (debug)
-            System.err.println("newDatabaseConnection 2");
+            System.err.println("New database connection obtained");
     }
 
     public static Connection.ConnectionType getConnectionType() {
