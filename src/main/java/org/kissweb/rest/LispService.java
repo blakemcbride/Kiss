@@ -51,12 +51,20 @@ public class LispService {
     ExecutionReturn tryLisp(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         String lispFileName = _className.replace(".", "/") + ".lisp";
         LispObject args;
+        String fileName = getApplicationPath() + lispFileName;
 
-        if (!(new File(getApplicationPath() + lispFileName)).exists())
+        if (ServiceBase.debug)
+            System.err.println("Attempting to load " + fileName);
+        if (!(new File(fileName)).exists()) {
+            if (ServiceBase.debug)
+                System.err.println("Not found");
             return ExecutionReturn.NotFound;
+        }
 
         try {
             if (once) {
+                if (ServiceBase.debug)
+                    System.err.println("Performing Lisp initialization");
                 ABCL.init();
                 once = false;
             } else if (ServiceBase.isUnderIDE())
@@ -74,8 +82,12 @@ public class LispService {
 
         LispPackageInfo res;
         try {
+            if (ServiceBase.debug)
+                System.err.println("Loading Lisp file");
             res = loadLispFile(_className, lispFileName, true);
         } catch (Exception e) {
+            if (ServiceBase.debug)
+                System.err.println("Loading failed: " + e.getMessage());
             ms.errorReturn(response, "Error loading Lisp " + lispFileName, e);
             res = null;
         }
@@ -86,14 +98,19 @@ public class LispService {
 
         try {
             res.executing++;
+            if (ServiceBase.debug)
+                System.err.println("Executing lisp function " + _method);
             ABCL.executeLisp(_className, _method, lispIn, lispOut, lispHSU, lispThis);
         } catch (Exception e) {
             ms.errorReturn(response, "Error executing Lisp " + lispFileName + " " + _method + "()", e);
+            if (ServiceBase.debug)
+                System.err.println("Executing failed: " + e.getMessage());
             return ExecutionReturn.Error;
         } finally {
             res.executing--;
         }
-
+        if (ServiceBase.debug)
+            System.err.println("Execution completed successfully");
         return ExecutionReturn.Success;
     }
 

@@ -75,8 +75,12 @@ public class GroovyService {
     MainServlet.ExecutionReturn tryGroovy(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         GroovyClassInfo ci;
         String fileName = ServiceBase.getApplicationPath() + _className.replace(".", "/") + ".groovy";
+        if (ServiceBase.debug)
+            System.err.println("Attempting to load " + fileName);
         ci = loadGroovyClass(fileName, false);
         if (ci != null) {
+            if (ServiceBase.debug)
+                System.err.println("Found");
             try {
                 ci.executing++;
                 Object instance;
@@ -88,16 +92,26 @@ public class GroovyService {
                 }
 
                 try {
+                    if (ServiceBase.debug)
+                        System.err.println("Evoking method " + _method);
                     ci.gclass.invoke(_method, instance, injson, outjson, ms.DB, ms);
                 } catch (Exception e) {
                     ms.errorReturn(response, fileName + " " + _method + "()", e);
+                    if (ServiceBase.debug) {
+                        System.err.println("Method failed");
+                        System.err.println(e.getMessage());
+                    }
                     return MainServlet.ExecutionReturn.Error;
                 }
+                if (ServiceBase.debug)
+                    System.err.println("Method completed successfully");
                 return MainServlet.ExecutionReturn.Success;
             } finally {
                 ci.executing--;
             }
         }
+        if (ServiceBase.debug)
+            System.err.println("Not found");
         return MainServlet.ExecutionReturn.NotFound;
     }
 

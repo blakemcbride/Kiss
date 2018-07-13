@@ -26,6 +26,7 @@ public class ServiceBase extends HttpServlet {
     private static boolean underIDE = false;
     private static String IDEPath;
     private static ComboPooledDataSource cpds;
+    protected static boolean debug = false;
     protected Connection DB;
 
     public static String getApplicationPath() {
@@ -164,9 +165,11 @@ public class ServiceBase extends HttpServlet {
     }
 
     protected void newDatabaseConnection () throws SQLException {
-      //  System.err.println("newDatabaseConnection 1 (" + cpds.getNumBusyConnections() + ")");
+        if (debug)
+            System.err.println("newDatabaseConnection 1 (" + cpds.getNumBusyConnections() + ")");
         DB = new Connection(cpds.getConnection());
-      //  System.err.println("newDatabaseConnection 2");
+        if (debug)
+            System.err.println("newDatabaseConnection 2");
     }
 
     public static Connection.ConnectionType getConnectionType() {
@@ -207,5 +210,13 @@ public class ServiceBase extends HttpServlet {
 
     public static void setPassword(String password) {
         ServiceBase.password = password;
+    }
+
+    public static boolean isDebug() {
+        return debug;
+    }
+
+    public static void setDebug(boolean debug) {
+        ServiceBase.debug = debug;
     }
 }

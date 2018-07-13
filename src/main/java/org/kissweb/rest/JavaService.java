@@ -52,20 +52,27 @@ public class JavaService {
     MainServlet.ExecutionReturn tryJava(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         JavaClassInfo ci;
         String fileName = getApplicationPath() + _className.replace(".", "/") + ".java";
+        if (ServiceBase.debug)
+            System.err.println("Attempting to load " + fileName);
         try {
             ci = loadJavaClass(_className, fileName, false);
         } catch (ClassNotFoundException e) {
             ms.errorReturn(response, "Class not found: " + e.getMessage(), null);
+            if (ServiceBase.debug)
+                System.err.println("Not found");
             return MainServlet.ExecutionReturn.Error;
         } catch (Throwable e) {
             ms.errorReturn(response, e.getMessage(), null);
+            if (ServiceBase.debug)
+                System.err.println("Not found");
             return MainServlet.ExecutionReturn.Error;
         }
         if (ci != null) {
-
             Object instance;
-
             Method meth;
+
+            if (ServiceBase.debug)
+                System.err.println("Found");
             try {
                 instance = ci.jclass.newInstance();
             } catch (Exception e) {
@@ -73,19 +80,35 @@ public class JavaService {
                 return MainServlet.ExecutionReturn.Error;
             }
             try {
+                if (ServiceBase.debug)
+                    System.err.println("Seeking method " + _method);
                 meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, MainServlet.class);
             } catch (NoSuchMethodException e) {
                 ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
+                if (ServiceBase.debug) {
+                    System.err.println("Method failed");
+                    System.err.println(e.getMessage());
+                }
                 return MainServlet.ExecutionReturn.Error;
             }
             try {
+                if (ServiceBase.debug)
+                    System.err.println("Evoking method " + _method);
                 meth.invoke(instance, injson, outjson, ms.DB, ms);
             } catch (Exception e) {
                 ms.errorReturn(response, fileName + " " + _method + "()", e);
+                if (ServiceBase.debug) {
+                    System.err.println("Method failed");
+                    System.err.println(e.getMessage());
+                }
                 return MainServlet.ExecutionReturn.Error;
             }
+            if (ServiceBase.debug)
+                System.err.println("Method completed successfully");
             return MainServlet.ExecutionReturn.Success;
         }
+        if (ServiceBase.debug)
+            System.err.println("Not found");
         return MainServlet.ExecutionReturn.NotFound;
     }
 

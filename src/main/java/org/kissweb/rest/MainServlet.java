@@ -182,6 +182,8 @@ public class MainServlet extends ServiceBase {
         if (_className != null) {
             //  is file upload
             _method = request.getParameter("_method");
+            if (debug)
+                System.err.println("Enter back-end seeking UPLOAD service " + _className + "." + _method + "()");
             injson = new JSONObject();
             Enumeration<String> names = request.getParameterNames();
             while (names.hasMoreElements()) {
@@ -194,26 +196,40 @@ public class MainServlet extends ServiceBase {
             injson = new JSONObject(instr);
             _className = injson.getString("_class");
             _method = injson.getString("_method");
+            if (debug)
+                System.err.println("Enter back-end seeking REST service " + _className + "." + _method + "()");
         }
 
-        if (_className.isEmpty() && _method.equals("Login"))
+        if (_className.isEmpty() && _method.equals("Login")) {
+            if (debug)
+                System.err.println("Attempting user login for " + injson.getString("username"));
             try {
                 String uuid = login(injson.getString("username"), injson.getString("password"));
                 outjson.put("uuid", uuid);
                 successReturn(response, outjson);
+                if (debug)
+                    System.err.println("Login successful");
                 return;
             } catch (Exception e) {
                 errorReturn(response, "Login failure", e);
+                if (debug)
+                    System.err.println("Login failure");
                 return;
             }
-        else
+        } else {
             try {
+                if (debug)
+                    System.err.println("Validating uuid " + injson.getString("_uuid"));
                 checkLogin(injson.getString("_uuid"));
             } catch (Exception e) {
+                if (debug)
+                    System.err.println("Login failure");
                 errorReturn(response, "Login failure", e);
                 return;
             }
-
+        }
+        if (debug)
+            System.err.println("Login success");
         res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
         if (res == ExecutionReturn.Error)
             return;
@@ -235,10 +251,15 @@ public class MainServlet extends ServiceBase {
                 return;
         }
 
-        if (res == ExecutionReturn.NotFound)
+        if (res == ExecutionReturn.NotFound) {
+            if (debug)
+                System.err.println("No back-end code found for " + _className);
             errorReturn(response, "No back-end code found for " + _className, null);
-        else
+        } else {
+            if (debug)
+                System.err.println("REST service " + _className + "." + _method + "() executed successfully");
             successReturn(response, outjson);
+        }
     }
 
     private void successReturn(HttpServletResponse response, JSONObject outjson) throws IOException {

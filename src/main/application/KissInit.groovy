@@ -12,5 +12,7 @@ class KissInit {
         ServiceBase.setPassword "postgres"        // database password (not application user password)
 
         UserCache.setInactiveUserMaxSeconds 900   // seconds user is allowed to be idle before auto-logoff
+
+        ServiceBase.setDebug false                // if true print debug info
     }
 }
