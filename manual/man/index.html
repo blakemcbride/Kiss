@@ -636,11 +636,13 @@ an apt production environment.  It is simply good as a quick check.  The followi
 
 <p>IntelliJ is a good IDE.  The free version may be inadequate for
 <em>Kiss</em> however.  IntelliJ should be configured with support for
-<em>Gradle</em> and <code>tomcat</code>.  You may set it up as follows:
+<code>Gradle</code>, <code>tomcat</code>, and <code>Groovy</code>.  You may set it up as follows:
 </p>
 <ol>
 <li> Get a fresh clone
-</li><li> If you just entered IntelliJ select &ldquo;Import Project&rdquo;, or if already in a project select New / Project from existing source.
+</li><li> If you just entered IntelliJ select <code>Import Project</code>, 
+or if already in a project select <code>New</code> / <code>Project</code>
+from existing source.
 </li><li> Select the file <em>build.gradle</em>
 </li><li> Accept all defaults
 </li><li> Go to Run / Edit Configurations
@@ -651,6 +653,8 @@ an apt production environment.  It is simply good as a quick check.  The followi
 </li><li> Click the Green + in the upper right quadrant of the screen (not the upper left)
 </li><li> Select <em>Artifact</em> and then <em>Kiss.war</em> (exploded)
 </li><li> Click &quot;OK&quot;
+</li><li> Right-click the <code>application</code> directory in the <em>Project</em> window.
+Select <em>Mark Directory as</em> and then <em>Sources Root</em>.
 </li></ol>
 
 <p>To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 

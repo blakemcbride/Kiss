@@ -254,13 +254,15 @@ an apt production environment.  It is simply good as a quick check.  The followi
 
 IntelliJ is a good IDE.  The free version may be inadequate for
 @emph{Kiss} however.  IntelliJ should be configured with support for
-@emph{Gradle} and @code{tomcat}.  You may set it up as follows:
+@code{Gradle}, @code{tomcat}, and @code{Groovy}.  You may set it up as follows:
 
 @enumerate
 @item
 Get a fresh clone
 @item
-If you just entered IntelliJ select ``Import Project'', or if already in a project select New / Project from existing source.
+If you just entered IntelliJ select @code{Import Project}, 
+or if already in a project select @code{New} / @code{Project}
+from existing source.
 @item
 Select the file @emph{build.gradle}
 @item
@@ -281,6 +283,9 @@ Click the Green + in the upper right quadrant of the screen (not the upper left)
 Select @emph{Artifact} and then @emph{Kiss.war} (exploded)
 @item
 Click "OK"
+@item
+Right-click the @code{application} directory in the @emph{Project} window.
+Select @emph{Mark Directory as} and then @emph{Sources Root}.
 @end enumerate
 
 To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 
