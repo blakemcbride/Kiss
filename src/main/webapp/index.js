@@ -2,9 +2,8 @@
 'use strict';
 
 utils.afterComponentsLoaded(function () {
-    var href = window.location.href;
-    var len = href.lastIndexOf('/');
-    var url = href.substr(0, len);
+    let href = window.location.href;
+    let url = href.match(/^\w+:\/\/[^/]+/)[0];
     url = url.replace('8000', '8080');
 
     Server.setURL(url);
