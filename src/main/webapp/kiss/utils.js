@@ -46,7 +46,7 @@ function $$(id) {
 class utils {
 
     /**
-     * Display a popup windoe with a message to the user.  The user will click "Ok" when they have read the message.
+     * Display a popup window with a message to the user.  The user will click "Ok" when they have read the message.
      * If the title is 'Error' the popup will appear in red.
      *
      * @param {string} title appears on the title bar of the message window
@@ -701,7 +701,7 @@ class utils {
      * Also, the loaded code is processed for custom tags / components.
      *
      * @param {string} page path to the page to be loaded.
-     * @param {string} optional ID of div to fill (if empty "body" tag is used)
+     * @param {string} tag optional ID of div to fill (if empty "body" tag is used)
      */
     static loadPage(page, tag) {
         if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
