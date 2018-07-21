@@ -52,6 +52,14 @@
             jqObj.click();
         };
 
+        newElm.getValue = function () {
+            return jqObj.val();
+        };
+
+        newElm.setValue = function (val) {
+            jqObj.val(val);
+        };
+
         newElm.disable = function () {
             jqObj.prop('disabled', true);
         };

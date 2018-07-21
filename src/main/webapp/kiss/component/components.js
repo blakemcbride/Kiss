@@ -213,8 +213,10 @@ class components {
      *     <tr><td>    click()     </td><td>     simulate a button click               </td></tr>
      *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the label on the push button             </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
      *     <tr><td>    onclick(fun)     </td><td>     <code>fun</code> is executed when the user clicks on the button               </td></tr>
+     *     <tr><td>    setValue(val)     </td><td>     sets the label on the push button              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      * </table>
      */
