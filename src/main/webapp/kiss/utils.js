@@ -875,6 +875,21 @@ class utils {
         return data;
     }
 
+    /**
+     * Displays a report given a URL from the back-end.
+     * Correctly handles dual server development situations.
+     *
+     * @param url {string} report url
+     */
+    static showReport(url) {
+        let path;
+        if (window.location.href.search("localhost:8000") !== -1) // if debugging with a local server
+            path = "http://localhost:8080" + url;
+        else
+            path = url;
+        window.open(path, "_blank");
+    }
+
 }
 
 utils.count = 1;

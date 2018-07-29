@@ -119,6 +119,7 @@ ul.no-bullet {list-style: none}
     <li><a name="toc-Programming-Languages" href="#Programming-Languages">4.1.3 Programming Languages</a></li>
   </ul></li>
   <li><a name="toc-Front_002dend-Development-1" href="#Front_002dend-Development-1">4.2 Front-end Development</a></li>
+  <li><a name="toc-Reports-And-Exports" href="#Reports-And-Exports">4.3 Reports And Exports</a></li>
 </ul></li>
 <li><a name="toc-Front_002dend-API" href="#Front_002dend-API">5 Front-end API</a>
 <ul class="no-bullet">
@@ -971,10 +972,30 @@ DevTools is open)</code>
 <p>You can now develop the front-end portion of your application by
 editing files under the <code>src/main/webapp</code> directory.
 </p>
+<a name="Reports-And-Exports"></a>
+<h3 class="section">4.3 Reports And Exports</h3>
 
-
-
-
+<p>Creating reports and exports requires both front-end and back-end components.
+The back-end usually creates the file to be sent to the front-end.  It then returns
+a path that the front-end can use to download the file.
+</p>
+<p><em>Kiss</em> provides the infrastructure needed to support this facility.
+<em>Kiss</em> also manages and cleans up report files that are no longer needed.
+</p>
+<p>In terms of producing reports, <em>Kiss</em> leverages the facilities
+provided by the common groff/tbl/mm utilities publicly available.
+These facilities automatically handle paging, titles, page numbering,
+tables, and overall formatting of your reports. See
+<a href="https://www.gnu.org/software/groff">https://www.gnu.org/software/groff</a>
+</p>
+<p>In terms of producing CSV export files, see the back-end
+<code>DelimitedFileWriter</code> class.
+</p>
+<p>When files are produced by the back-end, they are sent to the
+front-end by just providing the URL to the file.  At that point, the
+front-end <code>utils.showReport</code> takes the URL returned by the back-end
+and downloads the file.
+</p>
 
 
 <a name="Front_002dend-API"></a>
@@ -1384,6 +1405,11 @@ with the return data.  Useful JSON utilities include the following:
 <a name="Utilities-1"></a>
 <h3 class="section">6.3 Utilities</h3>
 
+<p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
+These utilities are located under the <code>src/main/java/org/kissweb</code> directory and have names such as
+<code>DateTime.java</code>, <code>NumberFormat</code>, etc.  These utilities
+are documented in the JavaDocs.
+</p>
 
 <a name="Method_002c-Macro_002c-Function-And-Variable-Index"></a>
 <h2 class="unnumbered">Method, Macro, Function And Variable Index</h2>

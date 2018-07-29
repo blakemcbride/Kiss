@@ -198,6 +198,25 @@ DevTools is open)}
 You can now develop the front-end portion of your application by
 editing files under the @code{src/main/webapp} directory.
 
+@section Reports And Exports
 
+Creating reports and exports requires both front-end and back-end components.
+The back-end usually creates the file to be sent to the front-end.  It then returns
+a path that the front-end can use to download the file.
 
+@emph{Kiss} provides the infrastructure needed to support this facility.
+@emph{Kiss} also manages and cleans up report files that are no longer needed.
 
+In terms of producing reports, @emph{Kiss} leverages the facilities
+provided by the common groff/tbl/mm utilities publicly available.
+These facilities automatically handle paging, titles, page numbering,
+tables, and overall formatting of your reports. See
+@uref{https://www.gnu.org/software/groff}
+
+In terms of producing CSV export files, see the back-end
+@code{DelimitedFileWriter} class.
+
+When files are produced by the back-end, they are sent to the
+front-end by just providing the URL to the file.  At that point, the
+front-end @code{utils.showReport} takes the URL returned by the back-end
+and downloads the file.
