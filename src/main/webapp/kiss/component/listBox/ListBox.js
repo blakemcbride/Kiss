@@ -65,6 +65,7 @@
             jqObj.append($('<option></option>').attr('value', val).text(label));
             if (data)
                 dataStore[val] = data;
+            return this;
         };
 
         newElm.getValue = function () {
