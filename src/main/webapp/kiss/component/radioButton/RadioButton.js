@@ -98,6 +98,7 @@ Kiss.RadioButtons.onChange = function (group, fun) {
  */
 Kiss.RadioButtons.resetGroups = function () {
     Kiss.RadioButtons.groups = {};
+    return this;
 };
 
 

@@ -59,6 +59,7 @@
         newElm.clear = function () {
             jqObj.empty();
             dataStore = {};
+            return this;
         };
 
         newElm.add = function (val, label, data) {
@@ -74,6 +75,7 @@
 
         newElm.setValue = function (val) {
             jqObj.val(val).change();
+            return this;
         };
 
         newElm.getLabel = function () {
@@ -86,18 +88,22 @@
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
+            return this;
         };
 
         newElm.enable = function () {
             jqObj.prop('disabled', false);
+            return this;
         };
 
         newElm.hide = function () {
             jqObj.hide();
+            return this;
         };
 
         newElm.show = function () {
             jqObj.show();
+            return this;
         };
 
         newElm.isError = function (desc) {
@@ -124,6 +130,7 @@
                     }, 300);
                 }
             });
+            return this;
         };
 
         newElm.onDblClick = function (fun) {
@@ -136,6 +143,7 @@
                     fun(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
                 }
             });
+            return this;
         };
 
         newElm.size = function () {
@@ -149,6 +157,7 @@
         newElm.removeByIndex = function (idx) {
             if (idx < jqObj.children('option').length)
                 jqObj.find('option').eq(idx).remove();
+            return this;
         };
 
     };

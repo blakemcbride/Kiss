@@ -48,30 +48,37 @@
 
         newElm.setValue = function (val) {
             jqObj.prop('checked', !!val);
+            return this;
         };
 
         newElm.clear = function () {
             jqObj.prop('checked', false);
+            return this;
         };
 
         newElm.onChange = function (fun) {
             jqObj.change(fun);
+            return this;
         };
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
+            return this;
         };
 
         newElm.enable = function () {
             jqObj.prop('disabled', false);
+            return this;
         };
 
         newElm.hide = function () {
             jqObj.hide();
+            return this;
         };
 
         newElm.show = function () {
             jqObj.show();
+            return this;
         };
 
     };

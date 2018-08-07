@@ -69,7 +69,9 @@ Components are accessed via the <code>$$</code> global function.  For example, i
  <br><br>
  &nbsp;&nbsp;&nbsp;&nbsp; <code>&lt;text-input Attributes&gt;Content&lt;/text-input&gt;</code>
  <br><br>
- The <em>API</em> is what is used within JavaScript.</div>
+ The <em>API</em> is what is used within JavaScript.
+ <br><br>
+ Functions that don't have a meaningful result otherwise, return 'this' so that function chaining can occur.</div>
         
     
 </header>
@@ -95,7 +97,7 @@ Components are accessed via the <code>$$</code> global function.  For example, i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line36">line 36</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line38">line 38</a>
     </li></ul></dd>
     
 
@@ -197,7 +199,7 @@ Components are accessed via the <code>$$</code> global function.  For example, i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line66">line 66</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line68">line 68</a>
     </li></ul></dd>
     
 
@@ -301,7 +303,7 @@ Components are accessed via the <code>$$</code> global function.  For example, i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line98">line 98</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line100">line 100</a>
     </li></ul></dd>
     
 
@@ -412,7 +414,7 @@ Components are accessed via the <code>$$</code> global function.  For example, i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line131">line 131</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line133">line 133</a>
     </li></ul></dd>
     
 
@@ -524,7 +526,7 @@ Components are accessed via the <code>$$</code> global function.  For example, i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line166">line 166</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line168">line 168</a>
     </li></ul></dd>
     
 
@@ -638,7 +640,7 @@ Components are accessed via the <code>$$</code> global function.  For example, i
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line200">line 200</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line202">line 202</a>
     </li></ul></dd>
     
 
@@ -683,9 +685,9 @@ only accept numbers, can verify decimal places, and formats the number when the 
 <br><br>
 <table>
     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-    <tr><td>    decimal-places="2"     </td><td>     controls the maximum number of digits past the decimal point               </td></tr>
+    <tr><td>    decimal-places="2"     </td><td>     controls the maximum number of digits past the decimal point (default 0) </td></tr>
     <tr><td>    dollar-sign     </td><td>     adds a dollar sign when formatting the number               </td></tr>
-    <tr><td>    min="20"     </td><td>     sets the minimum acceptable value               </td></tr>
+    <tr><td>    min="20"     </td><td>     sets the minimum acceptable value (default 0)   </td></tr>
     <tr><td>    max="200"     </td><td>     sets the maximum acceptable value               </td></tr>
     <tr><td>    money     </td><td>     sets <code>min="o" dollar-sign decimal-places="2"</code>               </td></tr>
     <tr><td>    required     </td><td>     an entry is required               </td></tr>
@@ -751,7 +753,7 @@ only accept numbers, can verify decimal places, and formats the number when the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line223">line 223</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line225">line 225</a>
     </li></ul></dd>
     
 
@@ -853,7 +855,7 @@ only accept numbers, can verify decimal places, and formats the number when the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line255">line 255</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line257">line 257</a>
     </li></ul></dd>
     
 
@@ -964,7 +966,7 @@ same group name.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line317">line 317</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line319">line 319</a>
     </li></ul></dd>
     
 
@@ -1074,7 +1076,7 @@ same group name.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line286">line 286</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line288">line 288</a>
     </li></ul></dd>
     
 
@@ -1184,7 +1186,7 @@ same group name.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line349">line 349</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line351">line 351</a>
     </li></ul></dd>
     
 
@@ -1296,7 +1298,7 @@ The values this control interacs with is a plain integer in the form HHMM in a 2
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Sat Jul 28 2018 20:26:37 GMT-0500 (CDT) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 07 2018 07:20:51 GMT-0500 (CDT) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

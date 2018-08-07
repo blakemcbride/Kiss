@@ -46,10 +46,12 @@
             // the unbind is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
             // but it also limits to a single callback function
             jqObj.unbind('click').click(fun);
+            return this;
         };
 
         newElm.click = function () {
             jqObj.click();
+            return this;
         };
 
         newElm.getValue = function () {
@@ -58,22 +60,27 @@
 
         newElm.setValue = function (val) {
             jqObj.val(val);
+            return this;
         };
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
+            return this;
         };
 
         newElm.enable = function () {
             jqObj.prop('disabled', false);
+            return this;
         };
 
         newElm.hide = function () {
             jqObj.hide();
+            return this;
         };
 
         newElm.show = function () {
             jqObj.show();
+            return this;
         };
 
     };

@@ -93,36 +93,43 @@
                     val = 0;
                 else {
                     jqObj.val('');
-                    return;
+                    return this;
                 }
             if (typeof val === 'string')
                 val = Number(val);
             var str = utils.format(val, "C"+(dollar?"D":"")+(show_zero?"":"B"), 0, Number(dp));
             jqObj.val(str);
+            return this;
         };
 
         newElm.clear = function () {
             jqObj.val('');
+            return this;
         };
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
+            return this;
         };
 
         newElm.enable = function () {
             jqObj.prop('disabled', false);
+            return this;
         };
 
         newElm.hide = function () {
             jqObj.hide();
+            return this;
         };
 
         newElm.show = function () {
             jqObj.show();
+            return this;
         };
 
         newElm.focus = function () {
             jqObj.focus();
+            return this;
         };
 
         newElm.isError = function (desc) {

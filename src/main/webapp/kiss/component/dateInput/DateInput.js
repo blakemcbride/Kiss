@@ -77,30 +77,37 @@
                 jqObj.val(val);
             else if (typeof val === 'object')  // Date
                 jqObj.val(val);
+            return this;
         };
 
         newElm.clear = function () {
             jqObj.val('');
+            return this;
         };
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
+            return this;
         };
 
         newElm.enable = function () {
             jqObj.prop('disabled', false);
+            return this;
         };
 
         newElm.hide = function () {
             jqObj.hide();
+            return this;
         };
 
         newElm.show = function () {
             jqObj.show();
+            return this;
         };
 
         newElm.focus = function () {
             jqObj.focus();
+            return this;
         };
 
         newElm.isError = function (desc) {

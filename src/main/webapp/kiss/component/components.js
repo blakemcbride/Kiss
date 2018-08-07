@@ -30,6 +30,8 @@
  *  &nbsp;&nbsp;&nbsp;&nbsp; <code>&lt;text-input Attributes&gt;Content&lt;/text-input&gt;</code>
  *  <br><br>
  *  The <em>API</em> is what is used within JavaScript.
+ *  <br><br>
+ *  Functions that don't have a meaningful result otherwise, return 'this' so that function chaining can occur.
  *
  *
  */
@@ -171,9 +173,9 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-     *     <tr><td>    decimal-places="2"     </td><td>     controls the maximum number of digits past the decimal point               </td></tr>
+     *     <tr><td>    decimal-places="2"     </td><td>     controls the maximum number of digits past the decimal point (default 0) </td></tr>
      *     <tr><td>    dollar-sign     </td><td>     adds a dollar sign when formatting the number               </td></tr>
-     *     <tr><td>    min="20"     </td><td>     sets the minimum acceptable value               </td></tr>
+     *     <tr><td>    min="20"     </td><td>     sets the minimum acceptable value (default 0)   </td></tr>
      *     <tr><td>    max="200"     </td><td>     sets the maximum acceptable value               </td></tr>
      *     <tr><td>    money     </td><td>     sets <code>min="o" dollar-sign decimal-places="2"</code>               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>

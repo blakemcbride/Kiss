@@ -59,6 +59,7 @@
             if (default_option)
                 newElm.add('', default_option);
             dataStore = {};
+            return this;
         };
 
         newElm.add = function (val, label, data) {
@@ -74,6 +75,7 @@
 
         newElm.setValue = function (val) {
             jqObj.val(val).change();
+            return this;
         };
 
         newElm.getLabel = function () {
@@ -89,22 +91,27 @@
                 // func gets passed the selected value, label
                 func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
             });
+            return this;
         };
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
+            return this;
         };
 
         newElm.enable = function () {
             jqObj.prop('disabled', false);
+            return this;
         };
 
         newElm.hide = function () {
             jqObj.hide();
+            return this;
         };
 
         newElm.show = function () {
             jqObj.show();
+            return this;
         };
 
         newElm.size = function () {
