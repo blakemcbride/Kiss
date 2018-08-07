@@ -12,7 +12,7 @@
         var dollar = false;
         var show_zero = false;
         var required = false;
-        var min = null;
+        var min = 0;
         var max = null;
         if (attr.style)
             nstyle = attr.style;
