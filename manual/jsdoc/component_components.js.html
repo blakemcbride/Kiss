@@ -71,7 +71,19 @@
  *  The &lt;em>API&lt;/em> is what is used within JavaScript.
  *  &lt;br>&lt;br>
  *  Functions that don't have a meaningful result otherwise, return 'this' so that function chaining can occur.
- *
+ *  &lt;br>&lt;br>
+ *  All of the controls support all of the standard HTML global attributes.  The following lists some of the attributes commonly used:
+ *  &lt;br>&lt;br>
+ *  &lt;table>
+ *    &lt;tr>&lt;th align="left" style="padding-right: 120px;">Common Attributes&lt;/th>&lt;/tr>
+ *    &lt;tr>&lt;td>    autofocus     &lt;/td>&lt;/tr>
+ *    &lt;tr>&lt;td>    class="class-name"     &lt;/td>&lt;/tr>
+ *    &lt;tr>&lt;td>    disabled     &lt;/td>&lt;/tr>
+ *    &lt;tr>&lt;td>    hidden     &lt;/td>&lt;/tr>
+ *    &lt;tr>&lt;td>    id="control-id"     &lt;/td>&lt;/tr>
+ *    &lt;tr>&lt;td>    readonly     &lt;/td>&lt;/tr>
+ *    &lt;tr>&lt;td>    style="..."     &lt;/td>&lt;/tr>
+ *  &lt;/table>
  *
  */
 class components {
@@ -82,12 +94,13 @@ class components {
     constructor() {}
 
     /**
-     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided checkbox.
+     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided &lt;code>checkbox&lt;/code> tag.
      * &lt;br>&lt;br>
-     * &lt;strong>Attributes&lt;/strong>
-     * &lt;br>&lt;br>
-     *     This element contains no attributes in addition to those supplied by an HTML checkbox input type.
-     * &lt;br>&lt;br>
+     * &lt;table>
+     *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    checked     &lt;/td>&lt;td>     pre-selects the element               &lt;/td>&lt;/tr>
+     * &lt;/table>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the label assoiated with the checkbox.
@@ -111,11 +124,11 @@ class components {
      * &lt;br>&lt;br>
      * &lt;table>
      *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
-     *     &lt;tr>&lt;td>    min="20180101"     &lt;/td>&lt;td>     the minimum date allowed               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    max="20181231"     &lt;/td>&lt;td>     the maximum date allowed               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    min="20180101"     &lt;/td>&lt;td>     the minimum date allowed               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -139,14 +152,14 @@ class components {
     static date_input() {}
 
     /**
-     * This HTML tag, "drop-down", adds functionality and a consistent and convenient API to the HTML provided select.
+     * This HTML tag, "drop-down", adds functionality and a consistent and convenient API to the HTML provided &lt;code>select&lt;/code> tag.
      * &lt;br>&lt;br>
      * &lt;table>
      *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
      *     &lt;tr>&lt;td>    default-option="label"     &lt;/td>&lt;td>     what is shown before the user makes a selection.  This would often be something like "(choose)"               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the HTML that would normally be inside an HTML &lt;code>select&lt;/code> element.  This would only be used
@@ -172,13 +185,15 @@ class components {
     static drop_down() {}
 
     /**
-     * This HTML tag, "list-box", adds functionality and a consistent and convenient API to the HTML provided select.
+     * This HTML tag, "list-box", adds functionality and a consistent and convenient API to the HTML provided &lt;code>select&lt;/code> tag.
      * &lt;br>&lt;br>
      * &lt;table>
      *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    multiple     &lt;/td>&lt;td>     multiple entries may be selected (an array will be returned)               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    size="20"     &lt;/td>&lt;td>    the number of visible options (vertical size in lines)               &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the HTML that would normally be inside an HTML &lt;code>select&lt;/code> element.  This would only be used
@@ -192,7 +207,7 @@ class components {
      *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getData()     &lt;/td>&lt;td>     returns the data associated to the selected option             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getLabel()     &lt;/td>&lt;td>     returns the label associated to the selected option             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option (returns an array if &lt;code>multiple&lt;/code> attribute included)            &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isError(desc)     &lt;/td>&lt;td>     used for error checking. If error, display error message and return &lt;code>true&lt;/code>.  &lt;code>desc&lt;/code> is a description of the user field.               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onClick(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user clicks on an item. &lt;code>fun&lt;/code> is called as follows &lt;code>fun(val, lbl, data)&lt;/code>              &lt;/td>&lt;/tr>
@@ -216,11 +231,12 @@ class components {
      *     &lt;tr>&lt;td>    dollar-sign     &lt;/td>&lt;td>     adds a dollar sign when formatting the number               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    min="20"     &lt;/td>&lt;td>     sets the minimum acceptable value (default 0)   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    max="200"     &lt;/td>&lt;td>     sets the maximum acceptable value               &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    money     &lt;/td>&lt;td>     sets &lt;code>min="o" dollar-sign decimal-places="2"&lt;/code>               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    money     &lt;/td>&lt;td>     sets &lt;code>min="0" dollar-sign decimal-places="2"&lt;/code>               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    show-zero     &lt;/td>&lt;td>    show zero values (instead of blank if zero)               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    size="20"     &lt;/td>&lt;td>     width of control in number of characters (default 20)              &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -264,7 +280,7 @@ class components {
     static push_button() {}
 
     /**
-     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided radio input element.
+     * This HTML tag, "radio-button", adds functionality and a consistent and convenient API to the HTML provided radio input element.
      * &lt;br>&lt;br>
      * One thing that makes this control different from the others is that it is referred to with the &lt;code>$$&lt;/code> function
      * by its group name rather than the element &lt;code>id&lt;/code>.  All the radio buttons in the same group shouls share the
@@ -273,11 +289,12 @@ class components {
      * &lt;table>
      *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
      *     &lt;tr>&lt;td>    group="name"     &lt;/td>&lt;td>     the name of the group this radio button is a part of (the same for each radio button in a group)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    checked     &lt;/td>&lt;td>    pre-selects the particular radio button             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    name="name"     &lt;/td>&lt;td>     this is an alternate to the &lt;code>group&lt;/code> attribute for HTML consistency               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    value="name"     &lt;/td>&lt;td>     required unique value associate with each radio button (different for each radio button)               &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     This is the label associated with the radio button.
@@ -300,13 +317,15 @@ class components {
      * &lt;br>&lt;br>
      * &lt;table>
      *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
+     *     &lt;tr>&lt;td>    cols="25"     &lt;/td>&lt;td>     sets the number of visible columns               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    minlength="5"     &lt;/td>&lt;td>     sets the minimum acceptable string length               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    maxlength="200"     &lt;/td>&lt;td>     sets the maximum number of characters               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    password     &lt;/td>&lt;td>     the character are not shown on the screen              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required (at least 1 character)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    rows="20"     &lt;/td>&lt;td>     sets the number of visible rows              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    upcase     &lt;/td>&lt;td>     when the user enters text, it is auto-upcased               &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -335,9 +354,10 @@ class components {
      *     &lt;tr>&lt;td>    maxlength="20"     &lt;/td>&lt;td>     sets the maximum number of characters               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    password     &lt;/td>&lt;td>     the character are not shown on the screen              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required (at least 1 character)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    size="20"     &lt;/td>&lt;td>     width of control in number of characters (default 20)              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    upcase     &lt;/td>&lt;td>     when the user enters text, it is auto-upcased               &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -366,9 +386,10 @@ class components {
      *     &lt;tr>&lt;td>    min="0800"     &lt;/td>&lt;td>     the minimum time allowed               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    min="1800"     &lt;/td>&lt;td>     the maximum time allowed               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    size="20"     &lt;/td>&lt;td>     width of control in number of characters (default 20)              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    zero-fill     &lt;/td>&lt;td>     zero fill the display               &lt;/td>&lt;/tr>
      * &lt;/table>
-     * &lt;br>&lt;br>
+     * &lt;br>
      * &lt;strong>Content&lt;/strong>
      * &lt;br>&lt;br>
      *     The &lt;em>Content&lt;/em> represents the HTML that would normally be inside an HTML &lt;code>select&lt;/code> element.  This would only be used
@@ -402,7 +423,7 @@ class components {
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Aug 07 2018 07:20:51 GMT-0500 (CDT) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Aug 09 2018 14:08:15 GMT-0500 (CDT) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
 </footer>
 
 <script>prettyPrint();</script>

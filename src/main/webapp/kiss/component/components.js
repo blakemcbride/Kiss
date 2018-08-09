@@ -32,7 +32,19 @@
  *  The <em>API</em> is what is used within JavaScript.
  *  <br><br>
  *  Functions that don't have a meaningful result otherwise, return 'this' so that function chaining can occur.
- *
+ *  <br><br>
+ *  All of the controls support all of the standard HTML global attributes.  The following lists some of the attributes commonly used:
+ *  <br><br>
+ *  <table>
+ *    <tr><th align="left" style="padding-right: 120px;">Common Attributes</th></tr>
+ *    <tr><td>    autofocus     </td></tr>
+ *    <tr><td>    class="class-name"     </td></tr>
+ *    <tr><td>    disabled     </td></tr>
+ *    <tr><td>    hidden     </td></tr>
+ *    <tr><td>    id="control-id"     </td></tr>
+ *    <tr><td>    readonly     </td></tr>
+ *    <tr><td>    style="..."     </td></tr>
+ *  </table>
  *
  */
 class components {
@@ -43,12 +55,13 @@ class components {
     constructor() {}
 
     /**
-     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided checkbox.
+     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided <code>checkbox</code> tag.
      * <br><br>
-     * <strong>Attributes</strong>
-     * <br><br>
-     *     This element contains no attributes in addition to those supplied by an HTML checkbox input type.
-     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    checked     </td><td>     pre-selects the element               </td></tr>
+     * </table>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the label assoiated with the checkbox.
@@ -72,11 +85,11 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-     *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed               </td></tr>
      *     <tr><td>    max="20181231"     </td><td>     the maximum date allowed               </td></tr>
+     *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -100,14 +113,14 @@ class components {
     static date_input() {}
 
     /**
-     * This HTML tag, "drop-down", adds functionality and a consistent and convenient API to the HTML provided select.
+     * This HTML tag, "drop-down", adds functionality and a consistent and convenient API to the HTML provided <code>select</code> tag.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    default-option="label"     </td><td>     what is shown before the user makes a selection.  This would often be something like "(choose)"               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the HTML that would normally be inside an HTML <code>select</code> element.  This would only be used
@@ -133,13 +146,15 @@ class components {
     static drop_down() {}
 
     /**
-     * This HTML tag, "list-box", adds functionality and a consistent and convenient API to the HTML provided select.
+     * This HTML tag, "list-box", adds functionality and a consistent and convenient API to the HTML provided <code>select</code> tag.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    multiple     </td><td>     multiple entries may be selected (an array will be returned)               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
+     *     <tr><td>    size="20"     </td><td>    the number of visible options (vertical size in lines)               </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the HTML that would normally be inside an HTML <code>select</code> element.  This would only be used
@@ -153,7 +168,7 @@ class components {
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
      *     <tr><td>    getData()     </td><td>     returns the data associated to the selected option             </td></tr>
      *     <tr><td>    getLabel()     </td><td>     returns the label associated to the selected option             </td></tr>
-     *     <tr><td>    getValue()     </td><td>     returns the value associated to the selected option             </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the value associated to the selected option (returns an array if <code>multiple</code> attribute included)            </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
      *     <tr><td>    onClick(fun)     </td><td>     execute <code>fun</code>whenever the user clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
@@ -177,11 +192,12 @@ class components {
      *     <tr><td>    dollar-sign     </td><td>     adds a dollar sign when formatting the number               </td></tr>
      *     <tr><td>    min="20"     </td><td>     sets the minimum acceptable value (default 0)   </td></tr>
      *     <tr><td>    max="200"     </td><td>     sets the maximum acceptable value               </td></tr>
-     *     <tr><td>    money     </td><td>     sets <code>min="o" dollar-sign decimal-places="2"</code>               </td></tr>
+     *     <tr><td>    money     </td><td>     sets <code>min="0" dollar-sign decimal-places="2"</code>               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    show-zero     </td><td>    show zero values (instead of blank if zero)               </td></tr>
+     *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -225,7 +241,7 @@ class components {
     static push_button() {}
 
     /**
-     * This HTML tag, "check-box", adds functionality and a consistent and convenient API to the HTML provided radio input element.
+     * This HTML tag, "radio-button", adds functionality and a consistent and convenient API to the HTML provided radio input element.
      * <br><br>
      * One thing that makes this control different from the others is that it is referred to with the <code>$$</code> function
      * by its group name rather than the element <code>id</code>.  All the radio buttons in the same group shouls share the
@@ -234,11 +250,12 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    group="name"     </td><td>     the name of the group this radio button is a part of (the same for each radio button in a group)              </td></tr>
+     *     <tr><td>    checked     </td><td>    pre-selects the particular radio button             </td></tr>
      *     <tr><td>    name="name"     </td><td>     this is an alternate to the <code>group</code> attribute for HTML consistency               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    value="name"     </td><td>     required unique value associate with each radio button (different for each radio button)               </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     This is the label associated with the radio button.
@@ -261,13 +278,15 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    cols="25"     </td><td>     sets the number of visible columns               </td></tr>
      *     <tr><td>    minlength="5"     </td><td>     sets the minimum acceptable string length               </td></tr>
      *     <tr><td>    maxlength="200"     </td><td>     sets the maximum number of characters               </td></tr>
      *     <tr><td>    password     </td><td>     the character are not shown on the screen              </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required (at least 1 character)              </td></tr>
+     *     <tr><td>    rows="20"     </td><td>     sets the number of visible rows              </td></tr>
      *     <tr><td>    upcase     </td><td>     when the user enters text, it is auto-upcased               </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -296,9 +315,10 @@ class components {
      *     <tr><td>    maxlength="20"     </td><td>     sets the maximum number of characters               </td></tr>
      *     <tr><td>    password     </td><td>     the character are not shown on the screen              </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required (at least 1 character)              </td></tr>
+     *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
      *     <tr><td>    upcase     </td><td>     when the user enters text, it is auto-upcased               </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
@@ -327,9 +347,10 @@ class components {
      *     <tr><td>    min="0800"     </td><td>     the minimum time allowed               </td></tr>
      *     <tr><td>    min="1800"     </td><td>     the maximum time allowed               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
+     *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
      *     <tr><td>    zero-fill     </td><td>     zero fill the display               </td></tr>
      * </table>
-     * <br><br>
+     * <br>
      * <strong>Content</strong>
      * <br><br>
      *     The <em>Content</em> represents the HTML that would normally be inside an HTML <code>select</code> element.  This would only be used
