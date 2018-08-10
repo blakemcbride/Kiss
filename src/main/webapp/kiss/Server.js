@@ -114,9 +114,10 @@ class Server {
                     resolve(res);
                 },
                 error: function (hdr, status, error) {
+                    const msg = 'Error communicating with the server.';
                     utils.waitMessageEnd();
-                    utils.showMessage("Error", hdr._ErrorMessage);
-                    resolve(res);
+                    utils.showMessage("Error", msg);
+                    resolve({_Success: false, _ErrorMessage: msg});
                 }
             });
         });
