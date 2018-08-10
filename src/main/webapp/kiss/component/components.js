@@ -152,7 +152,7 @@ class components {
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    multiple     </td><td>     multiple entries may be selected (an array will be returned)               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
-     *     <tr><td>    size="20"     </td><td>    the number of visible options (vertical size in lines)               </td></tr>
+     *     <tr><td>    size="20"     </td><td>    the <em>minimum</em> number of visible lines (will expand to fill the area it is in) </td></tr>
      * </table>
      * <br>
      * <strong>Content</strong>
@@ -278,12 +278,11 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-     *     <tr><td>    cols="25"     </td><td>     sets the number of visible columns               </td></tr>
      *     <tr><td>    minlength="5"     </td><td>     sets the minimum acceptable string length               </td></tr>
      *     <tr><td>    maxlength="200"     </td><td>     sets the maximum number of characters               </td></tr>
      *     <tr><td>    password     </td><td>     the character are not shown on the screen              </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required (at least 1 character)              </td></tr>
-     *     <tr><td>    rows="20"     </td><td>     sets the number of visible rows              </td></tr>
+     *     <tr><td>    rows="20"     </td><td>     sets the <em>minimum</em> number of visible rows (it will expand to fill the area it is in) </td></tr>
      *     <tr><td>    upcase     </td><td>     when the user enters text, it is auto-upcased               </td></tr>
      * </table>
      * <br>

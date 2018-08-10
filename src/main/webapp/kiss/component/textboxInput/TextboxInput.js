@@ -15,6 +15,7 @@
             nstyle = attr.style;
         else
             nstyle = '';
+        nstyle = 'resize: none; ' + nstyle;
 
         var nattrs = '';
         var id;
