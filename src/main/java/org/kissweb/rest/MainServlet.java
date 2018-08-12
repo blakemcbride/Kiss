@@ -2,6 +2,7 @@ package org.kissweb.rest;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.kissweb.FileUtils;
 
 import javax.servlet.ServletContext;
 import javax.servlet.annotation.MultipartConfig;
@@ -10,9 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 import java.beans.PropertyVetoException;
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.stream.Collectors;
@@ -86,6 +85,7 @@ public class MainServlet extends ServiceBase {
      *
      * @see #getUploadFileName(int)
      * @see #getUploadBufferedInputStream(int)
+     * @see #saveUploadFile(int)
      */
     public int getUploadFileCount() {
         int i = 0;
@@ -120,6 +120,7 @@ public class MainServlet extends ServiceBase {
      *
      * @see #getUploadFileCount()
      * @see #getUploadBufferedInputStream(int)
+     * @see #saveUploadFile(int)
      */
     public String getUploadFileName(int i) {
         try {
@@ -141,6 +142,7 @@ public class MainServlet extends ServiceBase {
      * @see BufferedInputStream#close()
      * @see #getUploadFileCount()
      * @see #getUploadFileName(int)
+     * @see #saveUploadFile(int)
      */
     public BufferedInputStream getUploadBufferedInputStream(int i) {
         try {
@@ -149,6 +151,29 @@ public class MainServlet extends ServiceBase {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Reads upload file "n", saves it to a temporary file, and returns the path to that file.
+     *
+     * @param n
+     * @return
+     * @throws IOException
+     *
+     * @see #getUploadFileName(int)
+     * @see #getUploadBufferedInputStream(int)
+     */
+    public String saveUploadFile(int n) throws IOException {
+        File f = FileUtils.createTempFile("save", "tmp");
+        try (
+                BufferedInputStream bis = getUploadBufferedInputStream(n);
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
+        ) {
+            int c;
+            while (-1 != (c = bis.read()))
+                bos.write(c);
+        }
+        return f.getAbsolutePath();
     }
 
     @Override

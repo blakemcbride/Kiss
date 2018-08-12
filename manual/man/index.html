@@ -1212,11 +1212,17 @@ Server.fileUploadSend('TheService', 'theMethod', data);
     String add2 = inJson.getString(&quot;add2&quot;);
     if (servlet.getUploadFileCount() == 0)
         throw new Exception(&quot;No file specified.&quot;);
+        
     String originalFileName = servlet.getUploadFileName(0);
-    String path = servlet.getRealPath();
+    
+    
     BufferedInputStream bis = servlet.getUploadBufferedInputStream(0);
-    saveToFile(path, originalFileName, bis);
+    // do something with the file stream
     bis.close();
+    
+         -or-
+         
+    String localFileName = servlet.saveUploadFile(0);
 }
 </pre></div>
 
