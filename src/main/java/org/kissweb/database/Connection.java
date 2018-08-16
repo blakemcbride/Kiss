@@ -340,6 +340,31 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * Fetch all (but no more than max) of the records and close it.
+     * No records can be updated or deleted.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
+     * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
+     * within the same connection occurring.  Remember, each REST service has its own connection.
+     *
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     *
+     * @see Command#fetchAll(String, Object...)
+     */
+    public List<Record> fetchAll(int max, String sql, Object... args) throws SQLException {
+        try (Command cmd = newCommand()) {
+            return cmd.fetchAll(max, sql, args);
+        }
+    }
+
+    /**
      * Return the name of the column that is the table's primary key.  Throws an exception of
      * the table has a composite primary key.
      *
@@ -469,5 +494,30 @@ public class Connection implements AutoCloseable {
      */
     public java.sql.Connection getSQLConnection() {
         return conn;
+    }
+
+    /**
+     * Modifies an SQL statement to limit the number of rows returned.
+     * This is needed since different databases do it differently.
+     *
+     * This method assumes that the SQL statement is not ending in any closing character (like ";").
+     *
+     * @param max the limit of number of records to return
+     * @param sql the SQL statement to be modified
+     * @return the modified SQL statement
+     */
+    public String limit(int max, String sql) {
+        switch (ctype) {
+            case PostgreSQL:
+            case MySQL:
+            case SQLite:
+                return sql + " limit " + max;
+            case MicrosoftServer:
+                return "select top " + max + sql.trim().substring(6);
+            case Oracle:
+                return "select * from (" + sql + ") qv2279 where rownum <= " + max;
+            default:
+                return sql;
+        }
     }
 }

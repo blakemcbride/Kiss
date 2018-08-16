@@ -157,7 +157,7 @@ public class Command implements AutoCloseable {
      * @see #execute(String, Object...)
      */
     public Record fetchOne(String sql, Object ... args) throws SQLException {
-        try (Cursor c = query(sql, args)) {
+        try (Cursor c = query(conn.limit(1, sql), args)) {
             return c.fetchOne();
         }
     }
@@ -181,6 +181,27 @@ public class Command implements AutoCloseable {
      */
     public List<Record> fetchAll(String sql, Object ... args) throws SQLException {
         return query(sql, args).fetchAll();
+    }
+
+    /**
+     * Fetch all (but no more than max) of the records and close the cursor.
+     * No records can be updated or deleted.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     *
+     * @param sql SQL statement with ? parameters
+     * @param args the parameter values
+     * @return
+     * @throws SQLException
+     *
+     * @see #fetchOne(String, Object...)
+     * @see #execute(String, Object...)
+     */
+    public List<Record> fetchAll(int max, String sql, Object ... args) throws SQLException {
+        return query(conn.limit(max, sql), args).fetchAll();
     }
 
     List<String> getPriColumns(Cursor c) {
