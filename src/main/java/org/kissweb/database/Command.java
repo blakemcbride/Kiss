@@ -117,6 +117,7 @@ public class Command implements AutoCloseable {
      *
      * @see #fetchAll(String, Object...)
      * @see #fetchOne(String, Object...)
+     * @see #query(int, String, Object...)
      */
     public Cursor query(String sql, Object ... args) throws SQLException {
         if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
@@ -134,6 +135,32 @@ public class Command implements AutoCloseable {
         if (lastSQL == null)
             lastSQL = sql;
         return c;
+    }
+
+    /**
+     * Execute a select statement returning a Cursor that may be used to
+     * obtain each subsequent row.
+     * The max number of return records is given by max.
+     * This is useful when a large number of records
+     * is possible and fetching all into memory at one time is unneeded.  This can
+     * save a significant amount of memory since only one record is in memory at a time.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     *
+     * @param sql the sql statement with ? parameters
+     * @param args the parameter values
+     * @return
+     * @throws SQLException
+     *
+     * @see #fetchAll(String, Object...)
+     * @see #fetchOne(String, Object...)
+     * @see #query(String, Object...)
+     */
+    public Cursor query(int max, String sql, Object ... args) throws SQLException {
+        return query(conn.limit(max, sql), args);
     }
 
     /**
@@ -176,6 +203,7 @@ public class Command implements AutoCloseable {
      * @return
      * @throws SQLException
      *
+     * @see #fetchAll(int, String, Object...)
      * @see #fetchOne(String, Object...)
      * @see #execute(String, Object...)
      */
@@ -197,6 +225,7 @@ public class Command implements AutoCloseable {
      * @return
      * @throws SQLException
      *
+     * @see #fetchAll(String, Object...)
      * @see #fetchOne(String, Object...)
      * @see #execute(String, Object...)
      */

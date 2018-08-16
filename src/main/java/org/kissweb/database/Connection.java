@@ -349,6 +349,7 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      *
      * @see Command#fetchAll(String, Object...)
+     * @see #fetchAll(int, String, Object...)
      */
     public List<Record> fetchAll(String sql, Object... args) throws SQLException {
         try (Command cmd = newCommand()) {
@@ -374,6 +375,7 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      *
      * @see Command#fetchAll(String, Object...)
+     * @see #fetchAll(String, Object...)
      */
     public List<Record> fetchAll(int max, String sql, Object... args) throws SQLException {
         try (Command cmd = newCommand()) {
