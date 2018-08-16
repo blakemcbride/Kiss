@@ -80,6 +80,23 @@ public class Connection implements AutoCloseable {
         externalConnection = true;
         try {
             dmd = conn.getMetaData();
+            switch (dmd.getDatabaseProductName()) {
+                case "PostgreSQL":
+                    ctype = ConnectionType.PostgreSQL;
+                    break;
+                case "Microsoft SQL Server":
+                    ctype = ConnectionType.MicrosoftServer;
+                    break;
+                case "Oracle":
+                    ctype = ConnectionType.Oracle;
+                    break;
+                case "MySQL":
+                    ctype = ConnectionType.MySQL;
+                    break;
+                case "SQLite":
+                    ctype = ConnectionType.SQLite;
+                    break;
+            }
         } catch (SQLException e) {
         }
     }
