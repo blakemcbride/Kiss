@@ -63,7 +63,7 @@ public class Connection implements AutoCloseable {
 
     java.sql.Connection conn;
     DatabaseMetaData dmd;
-    ConnectionType ctype;
+    private ConnectionType ctype;
 
     /**
      * Create a Connection out of a pre-opened JDBC connection.
@@ -538,5 +538,14 @@ public class Connection implements AutoCloseable {
             default:
                 return sql;
         }
+    }
+
+    /**
+     * Returns the database type.
+     *
+     * @return
+     */
+    public ConnectionType getDBType() {
+        return ctype;
     }
 }
