@@ -45,7 +45,7 @@ task explodedWar(type: Sync) {
 } 
 
 task copyToLib(type: Copy) {
-	into "lib"
+	into "libs"
 	from configurations.runtime
 }
 
