@@ -117,3 +117,4 @@ atlassian-ide-plugin.xml
 /manual/*.vr
 /manual/Kiss.pdf
 
+/nbproject/private/
