@@ -254,7 +254,10 @@ an apt production environment.  It is simply good as a quick check.  The followi
 
 IntelliJ is a good IDE.  The free version may be inadequate for
 @emph{Kiss} however.  IntelliJ should be configured with support for
-@code{Gradle}, @code{tomcat}, and @code{Groovy}.  You may set it up as follows:
+@code{Gradle}, @code{tomcat}, and @code{Groovy}.  These instructions
+need only be done once.
+
+You may set it up as follows:
 
 @enumerate
 @item
@@ -295,7 +298,21 @@ the front-end and back-end are served by different servers is recommended.    @x
 
 @subsection NetBeans
 
-The @emph{Kiss} system works well with NetBeans.  These instructions are for NetBeans 8.2.
+The @emph{Kiss} system works well with NetBeans.  These instructions
+are for NetBeans 8.2.  These instructions need only be done once.
+
+When installing NetBeans, be sure to select the following Runtimes:
+
+@itemize @bullet
+@item
+Java EE
+@item
+HTML5 / JavaScript
+@item
+Groovy
+@item
+Apache Tomcat
+@end itemize
 
 Start these instructions after you've checked out @emph{Kiss}, but before you go into NetBeans.   
 Start from a command prompt at the root directory of the checked out @emph{Kiss} system and type the following.
@@ -311,7 +328,7 @@ gradle copyToLibs
 git checkout libs
 @end enumerate
 
-Go into NetBeans and open the @emph{Kiss} project.  You can now run the system in debug mode by clickong on the debug icon.
+Go into NetBeans and @emph{open} the @emph{Kiss} project.  You can now run the system in debug mode by clickong on the debug icon.
 Although this is the recommended setup for the back-end portion during development, it is not recommended
 for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
 the front-end and back-end are served by different servers is recommended.  @xref{Front-end Development}

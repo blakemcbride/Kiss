@@ -638,7 +638,10 @@ an apt production environment.  It is simply good as a quick check.  The followi
 
 <p>IntelliJ is a good IDE.  The free version may be inadequate for
 <em>Kiss</em> however.  IntelliJ should be configured with support for
-<code>Gradle</code>, <code>tomcat</code>, and <code>Groovy</code>.  You may set it up as follows:
+<code>Gradle</code>, <code>tomcat</code>, and <code>Groovy</code>.  These instructions
+need only be done once.
+</p>
+<p>You may set it up as follows:
 </p>
 <ol>
 <li> Get a fresh clone
@@ -667,8 +670,18 @@ the front-end and back-end are served by different servers is recommended.    Se
 <a name="NetBeans"></a>
 <h4 class="subsection">2.7.3 NetBeans</h4>
 
-<p>The <em>Kiss</em> system works well with NetBeans.  These instructions are for NetBeans 8.2.
+<p>The <em>Kiss</em> system works well with NetBeans.  These instructions
+are for NetBeans 8.2.  These instructions need only be done once.
 </p>
+<p>When installing NetBeans, be sure to select the following Runtimes:
+</p>
+<ul>
+<li> Java EE
+</li><li> HTML5 / JavaScript
+</li><li> Groovy
+</li><li> Apache Tomcat
+</li></ul>
+
 <p>Start these instructions after you&rsquo;ve checked out <em>Kiss</em>, but before you go into NetBeans.   
 Start from a command prompt at the root directory of the checked out <em>Kiss</em> system and type the following.
 </p>
@@ -679,7 +692,7 @@ Start from a command prompt at the root directory of the checked out <em>Kiss</e
 </li><li> git checkout libs
 </li></ol>
 
-<p>Go into NetBeans and open the <em>Kiss</em> project.  You can now run the system in debug mode by clickong on the debug icon.
+<p>Go into NetBeans and <em>open</em> the <em>Kiss</em> project.  You can now run the system in debug mode by clickong on the debug icon.
 Although this is the recommended setup for the back-end portion during development, it is not recommended
 for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
 the front-end and back-end are served by different servers is recommended.  See <a href="#Front_002dend-Development">Front-end Development</a>
