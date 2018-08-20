@@ -47,8 +47,5 @@ task explodedWar(type: Sync) {
 task copyToLibs(type: Copy) {
 	into "libs"
 	from configurations.runtime
-eachFile { fcd ->
-     println fcd.file.absolutePath + " -> " + fcd.relativePath
-   }
 }
 

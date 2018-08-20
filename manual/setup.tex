@@ -291,9 +291,35 @@ Select @emph{Mark Directory as} and then @emph{Sources Root}.
 To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 
 in a debug mode.  Although this is the recommended setup for the back-end portion during development, it is not recommended
 for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.  
+the front-end and back-end are served by different servers is recommended.    @xref{Front-end Development}
 
-@subsection NetBeans, eclipse, etc.
+@subsection NetBeans
+
+The @emph{Kiss} system works well with NetBeans.  These instructions are for NetBeans 8.2.
+
+Start these instructions after you've checked out @emph{Kiss}, but before you go into NetBeans.   
+Start from a command prompt at the root directory of the checked out @emph{Kiss} system and type the following.
+
+@enumerate
+@item
+gradle war
+@item
+gradle clean
+@item
+gradle copyToLibs
+@item
+git checkout libs
+@end enumerate
+
+Go into NetBeans and open the @emph{Kiss} project.  You can now run the system in debug mode by clickong on the debug icon.
+Although this is the recommended setup for the back-end portion during development, it is not recommended
+for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
+the front-end and back-end are served by different servers is recommended.  @xref{Front-end Development}
+
+
+
+
+@subsection eclipse, etc.
 
 Other IDE's that can import @emph{gradle} projects should run equally well.  More detailed instruction will follow.
 

@@ -96,7 +96,8 @@ ul.no-bullet {list-style: none}
   <ul class="no-bullet">
     <li><a name="toc-Gradle" href="#Gradle">2.7.1 Gradle</a></li>
     <li><a name="toc-IntelliJ-Ultimate" href="#IntelliJ-Ultimate">2.7.2 IntelliJ Ultimate</a></li>
-    <li><a name="toc-NetBeans_002c-eclipse_002c-etc_002e" href="#NetBeans_002c-eclipse_002c-etc_002e">2.7.3 NetBeans, eclipse, etc.</a></li>
+    <li><a name="toc-NetBeans" href="#NetBeans">2.7.3 NetBeans</a></li>
+    <li><a name="toc-eclipse_002c-etc_002e" href="#eclipse_002c-etc_002e">2.7.4 eclipse, etc.</a></li>
   </ul></li>
   <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.8 What Do I Do With It Now?</a></li>
 </ul></li>
@@ -661,10 +662,33 @@ Select <em>Mark Directory as</em> and then <em>Sources Root</em>.
 <p>To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 
 in a debug mode.  Although this is the recommended setup for the back-end portion during development, it is not recommended
 for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.  
+the front-end and back-end are served by different servers is recommended.    See <a href="#Front_002dend-Development">Front-end Development</a>
 </p>
-<a name="NetBeans_002c-eclipse_002c-etc_002e"></a>
-<h4 class="subsection">2.7.3 NetBeans, eclipse, etc.</h4>
+<a name="NetBeans"></a>
+<h4 class="subsection">2.7.3 NetBeans</h4>
+
+<p>The <em>Kiss</em> system works well with NetBeans.  These instructions are for NetBeans 8.2.
+</p>
+<p>Start these instructions after you&rsquo;ve checked out <em>Kiss</em>, but before you go into NetBeans.   
+Start from a command prompt at the root directory of the checked out <em>Kiss</em> system and type the following.
+</p>
+<ol>
+<li> gradle war
+</li><li> gradle clean
+</li><li> gradle copyToLibs
+</li><li> git checkout libs
+</li></ol>
+
+<p>Go into NetBeans and open the <em>Kiss</em> project.  You can now run the system in debug mode by clickong on the debug icon.
+Although this is the recommended setup for the back-end portion during development, it is not recommended
+for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
+the front-end and back-end are served by different servers is recommended.  See <a href="#Front_002dend-Development">Front-end Development</a>
+</p>
+
+
+
+<a name="eclipse_002c-etc_002e"></a>
+<h4 class="subsection">2.7.4 eclipse, etc.</h4>
 
 <p>Other IDE&rsquo;s that can import <em>gradle</em> projects should run equally well.  More detailed instruction will follow.
 </p>

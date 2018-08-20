@@ -69,8 +69,8 @@
             </web-module-libraries>
             <web-module-additional-libraries/>
             <source-roots>
-                <root id="src.dir" name="Source Packages"/>
-                <root id="src.dir2" name="Source Packages"/>
+                <root id="src.dir" name="Application Source"/>
+                <root id="src.dir2" name="Kiss kernal source"/>
             </source-roots>
             <test-roots/>
         </data>
