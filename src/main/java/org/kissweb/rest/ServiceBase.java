@@ -58,7 +58,9 @@ public class ServiceBase extends HttpServlet {
         String path = request.getServletContext().getRealPath("/");
         path = path.replaceAll("\\\\", "/");  // for Windows
         System.out.println("* * * Context path = " + path);
-        if (path.endsWith(".war/")) {
+        if (path.endsWith(".war/")  // intelliJ
+                || path.endsWith("build/web/")  // NetBeans
+                ) {
             underIDE = true;
             IDEPath = path.substring(0, path.length()-1);
             IDEPath = IDEPath.substring(IDEPath.lastIndexOf('/')+1);
