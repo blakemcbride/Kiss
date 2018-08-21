@@ -23,8 +23,8 @@ man/index.html :  $(TEXFILES)
 	makeinfo --html Kiss.tex
 
 jsdoc/index.html: ../src/main/webapp/kiss/*.js ../src/main/webapp/kiss/component/components.js
-	rm -rf manual/jsdoc
-	jsdoc -t /usr/local/lib/node_modules/docdash -d jsdoc $^
+	rm -rf jsdoc
+	jsdoc -t /usr/local/lib/node_modules/docdash -c conf.json -d jsdoc $^
 
 clean:
 	rm -f *.cp *.fn *.fns *.ky *.pg *.toc *.tp *.vr *.aux *.log
