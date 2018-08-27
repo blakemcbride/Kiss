@@ -20,7 +20,7 @@
             nstyle = '';
         nstyle += ' text-align: right;';
 
-        var dp = '0';
+        var dp = 0;
         var nattrs = '';
         var id;
         for (var prop in attr) {
@@ -29,7 +29,7 @@
                 // new attributes
 
                 case 'decimal-places':
-                    dp = utils.removeQuotes(attr[prop]);
+                    dp = Number(utils.removeQuotes(attr[prop]));
                     break;
                 case 'dollar-sign':
                     dollar = true;
@@ -49,7 +49,7 @@
                 case 'money':
                     min = 0;
                     dollar = true;
-                    dp = '2';
+                    dp = 2;
                     break;
                     
                 // pre-existing attributes
@@ -75,7 +75,7 @@
         });
         var jqObj = newElm.jqObj;
 
-        newElm.elementInfo.dp = dp = Number(dp);
+        newElm.elementInfo.dp = dp;
         newElm.elementInfo.dollarSign = dollar;
         newElm.elementInfo.blankIfZero = show_zero;
         newElm.elementInfo.min = min;
