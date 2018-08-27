@@ -75,7 +75,7 @@
         });
         var jqObj = newElm.jqObj;
 
-        newElm.elementInfo.dp = Number(dp);
+        newElm.elementInfo.dp = dp = Number(dp);
         newElm.elementInfo.dollarSign = dollar;
         newElm.elementInfo.blankIfZero = show_zero;
         newElm.elementInfo.min = min;
@@ -97,7 +97,7 @@
                 }
             if (typeof val === 'string')
                 val = Number(val);
-            var str = utils.format(val, "C"+(dollar?"D":"")+(show_zero?"":"B"), 0, Number(dp));
+            var str = utils.format(val, "C"+(dollar?"D":"")+(show_zero?"":"B"), 0, dp);
             jqObj.val(str);
             return this;
         };
