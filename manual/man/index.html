@@ -1139,17 +1139,19 @@ CSS, and JavaScript code.
 <p>Let&rsquo;s say you have a pop-up window that allows a user to search for employees, or product, or whatever.
 The user gets a variety of search capabilities and the selected item is returned. Let&rsquo;s further say
 that you need this functionality in several places within your application.  These are tagless
-components.  They aren&rsquo;t places with a custom tag.  They are a response to an event like a button push.
+components.  They aren&rsquo;t placed with a custom tag.  They are a response to an event like a button push.
 Tagless components allow you to encapsulate a block of functionality (including pop-up windows) into
 a neat package that can be re-used in any number of places.
 </p>
 <p>The method used to load tagless components is
 <code>utils.useTaglessComponent</code>.  Later, when the tagless component
-is needed, one would execute <code>Kiss.MyComponent.run()</code> (where
-<code>MyComponent</code> is the name of your tagless component.  When the
-tagless component was loaded (with <code>utils.useTaglessComponent</code>)
-you specify what happens when the component completes.
+is needed, one would execute <code>Kiss.MyComponent.run(in_data, on_exit)</code> (where
+<code>MyComponent</code> is the name of your tagless component.  
+<code>in_data</code> represents possible data passed to the component on entry.
+<code>on_exit</code> is a function that gets executed when the component exits.
+Arguments passed to <code>on_exit</code> are determined by the component.
 </p>
+
 <a name="Modal-Popup-Windows"></a>
 <h3 class="section">5.3 Modal Popup Windows</h3>
 

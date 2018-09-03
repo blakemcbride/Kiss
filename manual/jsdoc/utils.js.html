@@ -591,22 +591,14 @@ class utils {
      * Initialize a tagless component.
      *
      * @param {string} path back-end path to the component
-     * @param {function} onentry function that gets run when the component starts up (or null)
-     * @param {function} onexit function that gets executed when the component completes (or null)
-     * @param {function} onload function that gets run after the component loads (or null)
      */
-    static useTaglessComponent(path, onentry, onexit, onload) {
+    static useTaglessComponent(path) {
 
         var npath;
 
         var loadScript = function (arg) {
             $.getScript(npath + '.js' + arg, function (data, textStatus, jqxhr) {
-                if (onentry || onexit) {
-                    var code = 'Component.' + path.charAt(0).toUpperCase() + path.substr(1) + '.setup(onentry, onexit);';
-                    eval(code);
-                }
-                if (onload)
-                    onload();
+
             });
         };
 
