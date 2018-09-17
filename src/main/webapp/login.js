@@ -15,7 +15,7 @@ $$('login').onclick(async function () {
         let res = await Server.call('', 'Login', data);
         if (res._Success) {
             Server.setUUID(res.uuid);
-            utils.loadPage('page1/page1');
+            utils.loadPage('MainMenu/MainMenu');
         }
     }
 
