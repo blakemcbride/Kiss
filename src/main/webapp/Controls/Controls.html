@@ -1,0 +1,69 @@
+<div>
+
+    <style>
+        #controls-scrn {
+            display: grid;
+            grid-template-columns: 120px 300px;
+            grid-column-gap: 15px;
+            grid-row-gap: 25px;
+            margin-top: 30px;
+            margin-left: 10px;
+        }
+
+        #controls-scrn span {
+            text-align: right;
+            padding-top: 4px;
+        }
+
+        #controls-scrn span:after {
+            content: ":";
+        }
+    </style>
+
+    <h3 style="margin-top: 0;">Controls</h3>
+
+    <div id="controls-scrn">
+
+        <span>Text</span>
+        <text-input id="ctl-text" maxlength="40" required></text-input>
+
+        <span>Numeric</span>
+        <numeric-input min="10" max="100" id="ctl-number" decimal-places="2" style="width: 80px;" required></numeric-input>
+
+        <span>Date</span>
+        <date-input id="ctl-date" style="width: 150px;"></date-input>
+
+        <span>Time</span>
+        <time-input id="ctl-time" style="width: 70px;"></time-input>
+
+        <span style="padding-top: 0;">CheckBox</span>
+        <check-box id="ctl-chkbox">My checkbox</check-box>
+
+        <span style="padding-top: 0;">Radio Button</span>
+        <div style="display: inline-block;">
+            <radio-button group="rb1" id="ctl-rbyes">Yes</radio-button>
+            <radio-button group="rb1" id="ctl-rbno">No</radio-button>
+        </div>
+
+        <span style="padding-top: 0;">DropDown List</span>
+        <drop-down id="ctl-dropdown">
+            <option value="1">Option 1</option>
+            <option value="2">Option 2</option>
+            <option value="3">Option 3</option>
+        </drop-down>
+
+        <span style="padding-top: 0;">List Box</span>
+        <list-box id="ctl-listbox" size="3">
+            <option value="1">Option 1</option>
+            <option value="2">Option 2</option>
+            <option value="3">Option 3</option>
+        </list-box>
+
+        <span style="padding-top: 0;">Text Box</span>
+        <textbox-input id="ctl-txtbox" rows="3"></textbox-input>
+
+    </div>
+
+    <push-button id="ok" style="margin-top: 30px; margin-left: 120px;">Ok</push-button>
+
+</div>
