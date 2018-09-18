@@ -51,7 +51,7 @@ Kiss.RadioButtons.groups = {};
         if (required)
             Kiss.RadioButtons.groups[group].required = true;
 
-        var nhtml = utils.tagReplace('<input type="radio" style="{style}" {attr} name="{name}">{content}', {
+        var nhtml = utils.tagReplace('<div style="display: inline-block;"><input type="radio" style="{style}" {attr} name="{name}">{content}</div>', {
             style: nstyle,
             attr: nattrs,
             name: group,

@@ -35,7 +35,7 @@
             }
         }
 
-        var newElm = utils.replaceHTML(id, elm, '<input type="checkbox" style="{style}" {attr} id="{id}">{content}', {
+        var newElm = utils.replaceHTML(id, elm, '<div style="display: inline-block;"><input type="checkbox" style="{style}" {attr} id="{id}">{content}</div>', {
             style: nstyle,
             attr: nattrs,
             content: content ? content : ''
