@@ -2,6 +2,7 @@ package org.kissweb.rest;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import org.kissweb.DateUtils;
 import org.kissweb.FileUtils;
 
 import javax.servlet.ServletContext;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
 @MultipartConfig
 public class MainServlet extends ServiceBase {
 
-    private static final transient Logger logger = Logger.getLogger(MainServlet.class);
+    private static final Logger logger = Logger.getLogger(MainServlet.class);
 
     static final int MaxHold = 600;         // number of seconds to cache microservices before unloading them
     static final int CheckCacheDelay = 60;  // how often to check to unload microservices in seconds
@@ -337,6 +338,7 @@ public class MainServlet extends ServiceBase {
         }
         outjson.put("_ErrorMessage", finalMsg);
         PrintWriter out = null;
+        log_error(finalMsg, e);
         try {
             out = response.getWriter();
         } catch (IOException e1) {
@@ -352,5 +354,13 @@ public class MainServlet extends ServiceBase {
         return (str == null || str.equals(""));
     }
 
+    private void log_error(final String str, final Throwable e) {
+        String time = DateUtils.todayDate() + " ";
+        logger.error(time + str, e);
+        e.printStackTrace();
+        final StringWriter sw = new StringWriter();
+        e.printStackTrace(new PrintWriter(sw));
+        logger.error(sw.toString());
+    }
 
 }
