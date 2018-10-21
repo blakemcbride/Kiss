@@ -34,58 +34,21 @@ public class ServiceBase extends HttpServlet {
         return applicationPath;
     }
 
-    private static File search(File f) {
-        File[] list = f.listFiles();
-        if (list != null)
-            for (File f2 : list)
-                if (f2.isDirectory()) {
-                    String fname = f2.getName();
-                    if (fname.equals(".git") || fname.equals(".svn"))
-                        continue;
-                    if (underIDE && fname.equals(IDEPath))
-                        continue;
-                    //System.out.println("Searching " + f2.getAbsolutePath());
-                    File f3 = search(f2);
-                    if (f3 != null)
-                        return f3;
-                } else if (f2.getName().equals("KissInit.groovy")) {
-                    return f2;
-                }
-        return null;
-    }
-
     static void setApplicationPath(HttpServletRequest request) {
-        String path = request.getServletContext().getRealPath("/");
-        path = path.replaceAll("\\\\", "/");  // for Windows
-        System.out.println("* * * Context path = " + path);
-        if (path.endsWith(".war/")  // intelliJ
-                || path.endsWith("build/web/")  // NetBeans
-                ) {
-            underIDE = true;
-            IDEPath = path.substring(0, path.length()-1);
-            IDEPath = IDEPath.substring(IDEPath.lastIndexOf('/')+1);
-            System.out.println("* * * Is running under IDE");
-        } else
-            System.out.println("* * * Is not running under IDE");
-        File f;
-        boolean once = underIDE;
-        do {
-            path = path.substring(0, path.lastIndexOf('/'));
-            if (once) {
-                path = path.substring(0, path.lastIndexOf('/'));
-                once = false;
-            }
-            f = search(new File(path));
-        } while (f == null  &&  path.lastIndexOf('/') > 0);
-
-        if (f == null)
-            return;
-
-        path = f.getAbsolutePath();
-        path = path.substring(0, path.lastIndexOf('/'));
-
-        ServiceBase.applicationPath = path + "/";
-        System.out.println("* * * Application path set to " + path);
+    	String cpath = request.getServletContext().getRealPath("/");
+    	System.out.println("* * * Context path = " + cpath);
+    	ServiceBase.applicationPath = System.getenv("KISS_DEBUG_ROOT");
+    	if (ServiceBase.applicationPath == null  ||  ServiceBase.applicationPath.isEmpty()) {
+    		underIDE = false;
+    		System.out.println("* * * Is not running under IDE");
+    		ServiceBase.applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
+    	} else {
+    		System.out.println("* * * Is running under IDE");
+    		underIDE = true;
+        	ServiceBase.applicationPath = ServiceBase.applicationPath.replaceAll("\\\\", "/");
+        	ServiceBase.applicationPath = ServiceBase.applicationPath + (ServiceBase.applicationPath.endsWith("/") ? "" : "/") + "src/main/application/";
+    	}
+    	System.out.println("* * * Application path set to " + ServiceBase.applicationPath);
     }
 
     public static boolean isUnderIDE() {

@@ -864,11 +864,19 @@ utilized.
 environments.  Although in both environments back-end and front-end
 changes take effect immediately, setup of the production environment
 copies all files into the production environment, whereas in a
-development environment the souce and production code are split.  In
+development environment the source and production code are split.  In
 order to facilitate rapid and easy development, it is important that
-souce files be used rather than the production copies during the
-development process.
+source files be used rather than the production copies during the
+development process.  
 </p>
+<p>In order for the system to know where the source code to the
+application is, a system environment variable (<code>KISS_DEBUG_ROOT</code>) must
+be set.  The value of this environment variable should be the absolute
+path of the root of the application source code.  The directory it indicates
+should have a sub-directory named <code>src/main/application</code>.
+</p>
+
+
 <a name="REST-Server"></a>
 <h4 class="subsection">4.1.1 REST Server</h4>
 
