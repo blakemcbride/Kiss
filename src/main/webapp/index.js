@@ -3,7 +3,7 @@
 
 utils.afterComponentsLoaded(function () {
     let href = window.location.href;
-    let url = href.match(/^\w+:\/\/[^/]+/)[0];
+    let url = href.substr(0, href.lastIndexOf('/'));
     url = url.replace('8000', '8080');
 
     Server.setURL(url);
