@@ -1,4 +1,6 @@
 
+/* global $$ */
+
 'use strict';
 
 $$('ok').onclick(function () {

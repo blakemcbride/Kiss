@@ -1,4 +1,6 @@
 
+/* global $$, Server */
+
 'use strict';
 
 $$('groovy-button').onclick(async function () {

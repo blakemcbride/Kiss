@@ -23,13 +23,13 @@ import java.util.Set;
  */
 public class ABCL {
     private static Interpreter interpreter;
-	private static boolean invertCase = false;
-	private static Function makeWebServiceArgs;
+    private static boolean invertCase = false;
+    private static Function makeWebServiceArgs;
     private static Function makeRestServiceArgs;
-	private static int lispRelease = 0;
-	private static final String UtilsSource = "../java/org/kissweb/lisp/";
+    private static int lispRelease = 0;
+    private static final String UtilsSource = "../java/org/kissweb/lisp/";
 
-	public static void init() {
+    public static void init() {
 		interpreter = Interpreter.createInstance();
 		invertCase();
 
@@ -298,6 +298,7 @@ public class ABCL {
 	private static void installDebuggerHook() {
 		Symbol.DEBUGGER_HOOK
 				.setSymbolValue(new Function() {
+                                        @Override
 					public LispObject execute(LispObject c, LispObject h) {
 						throw translateCondition(c);}});
 	}

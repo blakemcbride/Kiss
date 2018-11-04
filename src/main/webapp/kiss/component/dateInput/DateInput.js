@@ -3,6 +3,8 @@
       Date:  4/22/18
  */
 
+/* global utils, dateutils */
+
 'use strict';
 
 

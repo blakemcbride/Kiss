@@ -3,7 +3,7 @@ package org.kissweb.rest;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public class UserCache {
 
-    private static final Hashtable<String, UserData> uuidTable = new Hashtable<>();
+    private static final HashMap<String, UserData> uuidTable = new HashMap<>();
     private static LocalDateTime lastPurge = LocalDateTime.now();
     private static int inactiveUserMaxSeconds;
 

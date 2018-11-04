@@ -34,7 +34,7 @@ package org.kissweb.database;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,7 +58,7 @@ public class Connection implements AutoCloseable {
 
     private ConcurrentHashMap<String, String> primaryColName = new ConcurrentHashMap<>();  // table name, auto-inc primary key column name
     private ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();  // table name, primary key column names
-    private Hashtable<String, Boolean> TableExistanceCache = new Hashtable<>();
+    private HashMap<String, Boolean> TableExistanceCache = new HashMap<>();
     private boolean externalConnection = false;
 
     java.sql.Connection conn;
@@ -369,6 +369,7 @@ public class Connection implements AutoCloseable {
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
      *
+     * @param max
      * @param sql
      * @param args
      * @return
@@ -459,7 +460,7 @@ public class Connection implements AutoCloseable {
     public boolean tableExists(String table) {
         String schema = null;
 
-        table = table.replaceAll("[", "");
+        table = table.replaceAll("\\[", "");
         table = table.replaceAll("]", "");
         if (table.indexOf('.') >= 0) {
             String[] parts = table.split(".");
@@ -467,7 +468,7 @@ public class Connection implements AutoCloseable {
             table = parts[parts.length - 1];
         }
 
-        if (TableExistanceCache.contains(table))
+        if (TableExistanceCache.containsKey(table))
             return TableExistanceCache.get(table);
         boolean res = false;
         try (Command cmd = newCommand()) {
@@ -495,14 +496,14 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      */
     public int getColumnSize(String table, String cname) throws SQLException {
-        ResultSet columns = dmd.getColumns(null, null, table, cname);
         int size;
-        if (columns.next()) {
-            String s = columns.getString("COLUMN_SIZE");
-            size = Integer.parseInt(s);
-        } else
-            size = -1;
-        columns.close();
+        try (ResultSet columns = dmd.getColumns(null, null, table, cname)) {
+            if (columns.next()) {
+                String s = columns.getString("COLUMN_SIZE");
+                size = Integer.parseInt(s);
+            } else
+                size = -1;
+        }
         return size;
     }
 

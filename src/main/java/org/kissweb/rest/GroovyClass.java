@@ -27,7 +27,7 @@ public class GroovyClass {
 
 	private static GroovyClassLoader groovyLoader;
 	
-	private Class groovyClass;
+	private final Class groovyClass;
 
 	/**
 	 * Load a groovy source file.  If the file was previously loaded the old version will be

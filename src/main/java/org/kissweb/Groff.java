@@ -13,10 +13,10 @@ import java.io.*;
  */
 public class Groff {
 
-    private PrintWriter pw;
-    private String pdfname;
-    private String mmfname;
-    private boolean landscape;
+    private final PrintWriter pw;
+    private final String pdfname;
+    private final String mmfname;
+    private final boolean landscape;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files

@@ -1,3 +1,5 @@
+/* global dateutils, timeutils */
+
 /**
 * Created by Blake McBride on 6/16/18.
 */

@@ -60,7 +60,7 @@ public class Cursor implements AutoCloseable {
     String tname;
     PreparedStatement ustmt;
     private ResultSet rset;
-    private ResultSetMetaData mdata;
+    private final ResultSetMetaData mdata;
     StringBuilder prevsql;
     private Record lastRec;
 
@@ -161,7 +161,7 @@ public class Cursor implements AutoCloseable {
      * @throws SQLException
      */
     public List<Record> fetchAll() throws SQLException {
-        List<Record> r = new ArrayList<Record>();
+        List<Record> r = new ArrayList<>();
         Record rec;
         while (null != (rec=next()))
             r.add(rec);

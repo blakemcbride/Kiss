@@ -1,4 +1,6 @@
 
+/* global $$, Server, utils */
+
 'use strict';
 
 $$('login').onclick(async function () {

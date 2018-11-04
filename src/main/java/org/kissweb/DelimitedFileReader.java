@@ -34,7 +34,7 @@ package org.kissweb;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -51,13 +51,13 @@ public class DelimitedFileReader implements AutoCloseable {
     private char delimiter;
     private String delimeterString;
     private char quote;
-    private ArrayList<String> lineValues = new ArrayList();
+    private final ArrayList<String> lineValues = new ArrayList();
     private int fieldPos = 0;
     private int fieldCountCheck = -1;
     private BufferedReader fr;
     private File fyle;
     private String originalRow;
-    private Hashtable<String,Integer> nameMap;
+    private HashMap<String,Integer> nameMap;
 
     /**
      * Open an existing CSV file with the specified delimiter and quote character.
@@ -112,6 +112,7 @@ public class DelimitedFileReader implements AutoCloseable {
      *
      * Note that this method will be called automatically if the try-with-resource Java facility is utilized.
      */
+    @Override
     public void close() {
         try {
             if (fr != null)
@@ -192,13 +193,11 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Read the first row and map column title names to indexes.
      *
-     * @throws IOException
-     * @throws Exception
      */
     public void readHeader() {
         originalRow = null;
         lineValues.clear();
-        nameMap = new Hashtable<String, Integer>();
+        nameMap = new HashMap<String, Integer>();
         try {
             nextLine();
             for (int i = 0; i < lineValues.size(); i++) {

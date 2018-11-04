@@ -66,6 +66,7 @@ public class MainServlet extends ServiceBase {
      *
      * @return
      */
+    @Override
     public ServletContext getServletContext() {
         return servletContext;
     }
@@ -341,11 +342,11 @@ public class MainServlet extends ServiceBase {
         log_error(finalMsg, e);
         try {
             out = response.getWriter();
+            out.print(outjson);
+            out.flush();
         } catch (IOException e1) {
             // ignore
         }
-        out.print(outjson);
-        out.flush();
         response.setContentType("application/json");
         response.setStatus(200);
     }

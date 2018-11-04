@@ -1,4 +1,6 @@
 
+/* global utils, Server */
+
 'use strict';
 
 utils.afterComponentsLoaded(function () {

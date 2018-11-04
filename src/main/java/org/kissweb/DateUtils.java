@@ -1,5 +1,6 @@
 package org.kissweb;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -469,7 +470,7 @@ public class DateUtils {
                 return toInt(new SimpleDateFormat("MM/dd/yyyy").parse(date));
             else if (date.matches(DATE_FORMAT_MM_DD_YY))
                 return toInt(new SimpleDateFormat("MM/dd/yyyy").parse(normalizeDate(date)));
-        } catch (Exception ex) {
+        } catch (ParseException ex) {
             return 0;
         }
         return 0;

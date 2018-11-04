@@ -7,10 +7,7 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 
 
 import static org.kissweb.rest.MainServlet.ExecutionReturn;
@@ -27,7 +24,7 @@ public class LispService {
 
     private static final transient Logger logger = Logger.getLogger(LispService.class);
 
-    private static final Hashtable<String, LispPackageInfo> lispPackageCache = new Hashtable<>();
+    private static final HashMap<String, LispPackageInfo> lispPackageCache = new HashMap<>();
 
     private static boolean once = true;
 

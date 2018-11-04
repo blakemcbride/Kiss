@@ -8,10 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Author: Blake McBride
@@ -23,7 +20,7 @@ public class GroovyService {
     private static final transient Logger logger = Logger.getLogger(GroovyService.class);
 
 
-    private static final Hashtable<String, GroovyClassInfo> groovyClassCache = new Hashtable<>();
+    private static final HashMap<String, GroovyClassInfo> groovyClassCache = new HashMap<>();
 
 
     private static class GroovyClassInfo {

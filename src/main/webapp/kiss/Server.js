@@ -1,3 +1,5 @@
+/* global utils */
+
 /**
  * Created by Blake McBride on 9/24/16.
  */

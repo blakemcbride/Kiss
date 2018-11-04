@@ -125,16 +125,17 @@ public class DelimitedFileWriter implements AutoCloseable {
      *
      * Note that this method will be called automatically if the try-with-resource Java facility is utilized.
      */
+        @Override
 	public void close() {
 	    try {
-            if (fw != null) {
-                fw.flush();
-                fw.close();
-            }
-        } catch (Exception e) {
-        } finally {
+                if (fw != null) {
+                    fw.flush();
+                    fw.close();
+                }
+            } catch (IOException e) {
+            } finally {
 	        fw = null;
-        }
+            }
 	}
 
 	private void writeWithQuote(String x) throws IOException {

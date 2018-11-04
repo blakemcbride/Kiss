@@ -3,6 +3,8 @@
       Date:  6/18/18
  */
 
+/* global utils, timeutils, Component */
+
 'use strict';
 
 (function () {
@@ -199,7 +201,7 @@
                 });
                 return true;
             }
-            if (min !== null  &&  val < min  ||  max != null && val > max) {
+            if (min !== null  &&  val < min  ||  max !== null && val > max) {
                 var msg;
                 if ((min || min === 0) && (max || max === 0))
                     msg = desc + ' must be between ' + timeutils.format(min) +

@@ -150,6 +150,7 @@ public class Command implements AutoCloseable {
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
      *
+     * @param max
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
      * @return
@@ -220,6 +221,7 @@ public class Command implements AutoCloseable {
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
      *
+     * @param max
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
      * @return

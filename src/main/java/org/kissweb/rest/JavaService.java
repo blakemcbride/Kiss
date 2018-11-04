@@ -8,16 +8,12 @@ import org.json.JSONObject;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.Map;
+import java.util.*;
 
 
 import static org.kissweb.rest.MainServlet.getApplicationPath;
@@ -31,7 +27,7 @@ public class JavaService {
 
     private static final transient Logger logger = Logger.getLogger(JavaService.class);
 
-    private static final Hashtable<String, JavaClassInfo> javaClassCache = new Hashtable<>();
+    private static final HashMap<String, JavaClassInfo> javaClassCache = new HashMap<>();
 
     private static class JavaClassInfo {
         static long cacheLastChecked = 0;   // last time cache unload checked

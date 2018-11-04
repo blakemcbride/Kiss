@@ -3,6 +3,8 @@
       Date:  4/25/18
  */
 
+/* global utils */
+
 'use strict';
 
 (function () {

@@ -495,7 +495,7 @@ class utils {
     /**
      * Get the extension of the file name.  So, "abc.def" would return "def".
      *
-     * @param {string}filename
+     * @param {string} filename
      * @returns {string}
      */
     static fileNameExtension(filename) {

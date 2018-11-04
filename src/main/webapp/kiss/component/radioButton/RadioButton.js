@@ -3,6 +3,8 @@
       Date:  4/23/18
  */
 
+/* global Kiss, utils */
+
 'use strict';
 
 Kiss.RadioButtons = {};

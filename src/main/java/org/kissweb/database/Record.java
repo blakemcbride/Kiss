@@ -34,6 +34,7 @@ package org.kissweb.database;
 
 import java.sql.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 
 /**
@@ -58,15 +59,15 @@ import java.util.*;
 public class Record implements AutoCloseable {
     LinkedHashMap<String,Object> cols;
     private HashMap<String,Object> ocols;
-    private Connection conn;
+    private final Connection conn;
     private Cursor cursor;
-    private String table;
+    private final String table;
     private PreparedStatement pstmt;
 
     Record(Connection c, String tbl) {
         conn = c;
         table = tbl.toLowerCase();
-        cols = new LinkedHashMap<String, Object>();
+        cols = new LinkedHashMap<>();
     }
 
     Record(Connection c, Cursor cursor, HashMap<String,Object> ocols, LinkedHashMap<String,Object> cols) {
@@ -288,14 +289,15 @@ public class Record implements AutoCloseable {
             throw new RuntimeException("Can't update record; not in select");
         if (table == null)
             throw new RuntimeException("Can't update record; no table name");
-        LinkedList<AbstractMap.SimpleEntry<String,Object>> cf = new LinkedList<AbstractMap.SimpleEntry<String,Object>>();
-        for (Map.Entry<String,Object> item : cols.entrySet()) {
+        LinkedList<AbstractMap.SimpleEntry<String,Object>> cf = new LinkedList<>();
+        cols.entrySet().forEach((Map.Entry<String, Object> item) -> {
             String key = item.getKey();
             Object val = item.getValue();
-            if (!ocols.containsKey(key) || ocols.get(key) != val)
-                cf.addFirst(new AbstractMap.SimpleEntry<String, Object>(key, val));
-        }
-        if (cf.size() != 0) {
+            if (!ocols.containsKey(key) || ocols.get(key) != val) {
+                cf.addFirst(new AbstractMap.SimpleEntry<>(key, val));
+            }
+        });
+        if (!cf.isEmpty()) {
             StringBuilder sql = new StringBuilder("update " + table + " set ");
             boolean needComma = false;
             for (AbstractMap.SimpleEntry<String,Object> fld : cf) {
