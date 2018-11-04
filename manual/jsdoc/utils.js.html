@@ -534,7 +534,7 @@ class utils {
     /**
      * Get the extension of the file name.  So, "abc.def" would return "def".
      *
-     * @param {string}filename
+     * @param {string} filename
      * @returns {string}
      */
     static fileNameExtension(filename) {
@@ -597,7 +597,7 @@ class utils {
         var npath;
 
         var loadScript = function (arg) {
-            $.getScript(npath + '.js' + arg, function (data, textStatus, jqxhr) {
+            getScript(npath + '.js' + arg, function (data, textStatus, jqxhr) {
 
             });
         };
@@ -655,7 +655,7 @@ class utils {
         Component.ComponentsBeingLoaded++;
 
         var loadScript = function (arg) {
-            $.getScript(npath + '.js' + arg, function () {
+            getScript(npath + '.js' + arg, function () {
                 if (!--Component.ComponentsBeingLoaded &amp;&amp; Component.AfterAllComponentsLoaded) {
                     utils.rescan();  // does all the tag replacement
                     Component.AfterAllComponentsLoaded();
@@ -743,7 +743,7 @@ class utils {
             else
                 $('body').html(text);
             utils.rescan();  // does all the tag replacement
-            $.getScript(page + '.js' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function () {
+            getScript(page + '.js' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function () {
             });
         });
     }
