@@ -558,7 +558,7 @@ class utils {
         var npath;
 
         var loadScript = function (arg) {
-            $.getScript(npath + '.js' + arg, function (data, textStatus, jqxhr) {
+            getScript(npath + '.js' + arg, function (data, textStatus, jqxhr) {
 
             });
         };
@@ -616,7 +616,7 @@ class utils {
         Component.ComponentsBeingLoaded++;
 
         var loadScript = function (arg) {
-            $.getScript(npath + '.js' + arg, function () {
+            getScript(npath + '.js' + arg, function () {
                 if (!--Component.ComponentsBeingLoaded && Component.AfterAllComponentsLoaded) {
                     utils.rescan();  // does all the tag replacement
                     Component.AfterAllComponentsLoaded();
@@ -704,7 +704,7 @@ class utils {
             else
                 $('body').html(text);
             utils.rescan();  // does all the tag replacement
-            $.getScript(page + '.js' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function () {
+            getScript(page + '.js' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function () {
             });
         });
     }
