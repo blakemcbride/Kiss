@@ -41,7 +41,10 @@ public class ServiceBase extends HttpServlet {
     	if (ServiceBase.applicationPath == null  ||  ServiceBase.applicationPath.isEmpty()) {
     		underIDE = false;
     		System.out.println("* * * Is not running under IDE");
-    		ServiceBase.applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
+    		if (cpath.endsWith("/build/inplaceWebapp/"))
+                ServiceBase.applicationPath = cpath + "../../src/main/application/";  // gradle tomcatRun
+    		else
+                ServiceBase.applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
     	} else {
     		System.out.println("* * * Is running under IDE");
     		underIDE = true;
