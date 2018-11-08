@@ -7,6 +7,7 @@ import org.kissweb.database.Record;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyVetoException;
+import java.io.File;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
@@ -34,23 +35,30 @@ public class ServiceBase extends HttpServlet {
     }
 
     static void setApplicationPath(HttpServletRequest request) {
-    	String cpath = request.getServletContext().getRealPath("/");
-    	System.out.println("* * * Context path = " + cpath);
-    	ServiceBase.applicationPath = System.getenv("KISS_DEBUG_ROOT");
-    	if (ServiceBase.applicationPath == null  ||  ServiceBase.applicationPath.isEmpty()) {
-    		underIDE = false;
-    		System.out.println("* * * Is not running under IDE");
-    		if (cpath.endsWith("/build/inplaceWebapp/"))
+        String cpath = request.getServletContext().getRealPath("/");
+        System.out.println("* * * Context path = " + cpath);
+        ServiceBase.applicationPath = System.getenv("KISS_DEBUG_ROOT");
+        if (ServiceBase.applicationPath == null || ServiceBase.applicationPath.isEmpty()) {
+            if (cpath.endsWith("/build/inplaceWebapp/"))
                 ServiceBase.applicationPath = cpath + "../../src/main/application/";  // gradle tomcatRun
-    		else
+            else
                 ServiceBase.applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
-    	} else {
-    		System.out.println("* * * Is running under IDE");
-    		underIDE = true;
-        	ServiceBase.applicationPath = ServiceBase.applicationPath.replaceAll("\\\\", "/");
-        	ServiceBase.applicationPath = ServiceBase.applicationPath + (ServiceBase.applicationPath.endsWith("/") ? "" : "/") + "src/main/application/";
-    	}
-    	System.out.println("* * * Application path set to " + ServiceBase.applicationPath);
+
+            if (!(new File(ServiceBase.applicationPath + "KissInit.groovy")).exists()) {
+                ServiceBase.applicationPath = cpath + "../../src/main/application/";  // NetBeans
+                underIDE = true;
+                System.out.println("* * * Is running under IDE");
+            } else {
+                underIDE = false;
+                System.out.println("* * * Is not running under IDE");
+            }
+        } else {
+            System.out.println("* * * Is running under IDE");
+            underIDE = true;
+            ServiceBase.applicationPath = ServiceBase.applicationPath.replaceAll("\\\\", "/");
+            ServiceBase.applicationPath = ServiceBase.applicationPath + (ServiceBase.applicationPath.endsWith("/") ? "" : "/") + "src/main/application/";
+        }
+        System.out.println("* * * Application path set to " + ServiceBase.applicationPath);
     }
 
     public static boolean isUnderIDE() {
@@ -111,7 +119,7 @@ public class ServiceBase extends HttpServlet {
         return "";
     }
 
-    protected void makeDatabaseConnection () throws PropertyVetoException, SQLException, ClassNotFoundException {
+    protected void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
         if (!hasDatabase) {
             System.err.println("* * * No database configured; bypassing login requirements");
             return;
@@ -134,13 +142,13 @@ public class ServiceBase extends HttpServlet {
 
             cpds.setJdbcUrl(cstr);
 
-            cpds.setDriverClass( Connection.getDriverName(connectionType) );
+            cpds.setDriverClass(Connection.getDriverName(connectionType));
 
-            cpds.setMaxStatements( 180 );
+            cpds.setMaxStatements(180);
         }
     }
 
-    protected void newDatabaseConnection () throws SQLException {
+    protected void newDatabaseConnection() throws SQLException {
         if (!hasDatabase)
             return;
         if (debug)
