@@ -34,6 +34,11 @@ war {
     }
 }
 
+gretty {
+  debugPort = 5005      // default
+  debugSuspend = true   // default
+}
+
 //javadoc {
 //    destinationDir = new File('manual/javadoc')
 //}
