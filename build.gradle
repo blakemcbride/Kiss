@@ -1,9 +1,8 @@
+
 plugins {
     id 'war'  
-    id 'org.akhikhl.gretty' version '1.4.2'
+    id 'org.gretty' version '2.2.0'
 }
-
-import org.akhikhl.gretty.AppStartTask
 
 repositories {
     jcenter()
