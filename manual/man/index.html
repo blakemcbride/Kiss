@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 5.2, http://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 6.1, http://www.gnu.org/software/texinfo/ -->
 <head>
 <title>Kiss Manual</title>
 
@@ -14,16 +14,16 @@
 <style type="text/css">
 <!--
 a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
 blockquote.smallquotation {font-size: smaller}
 div.display {margin-left: 3.2em}
 div.example {margin-left: 3.2em}
-div.indentedblock {margin-left: 3.2em}
 div.lisp {margin-left: 3.2em}
 div.smalldisplay {margin-left: 3.2em}
 div.smallexample {margin-left: 3.2em}
-div.smallindentedblock {margin-left: 3.2em; font-size: smaller}
 div.smalllisp {margin-left: 3.2em}
-kbd {font-style:oblique}
+kbd {font-style: oblique}
 pre.display {font-family: inherit}
 pre.format {font-family: inherit}
 pre.menu-comment {font-family: serif}
@@ -32,10 +32,9 @@ pre.smalldisplay {font-family: inherit; font-size: smaller}
 pre.smallexample {font-size: smaller}
 pre.smallformat {font-family: inherit; font-size: smaller}
 pre.smalllisp {font-size: smaller}
-span.nocodebreak {white-space:nowrap}
-span.nolinebreak {white-space:nowrap}
-span.roman {font-family:serif; font-weight:normal}
-span.sansserif {font-family:sans-serif; font-weight:normal}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
 ul.no-bullet {list-style: none}
 -->
 </style>
@@ -43,7 +42,7 @@ ul.no-bullet {list-style: none}
 
 </head>
 
-<body lang="en" bgcolor="#FFFFFF" text="#000000" link="#0000FF" vlink="#800080" alink="#FF0000">
+<body lang="en">
 <h1 class="settitle" align="center">Kiss Manual</h1>
 
 
@@ -95,9 +94,13 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Building-The-System" href="#Building-The-System">2.7 Building The System</a>
   <ul class="no-bullet">
     <li><a name="toc-Gradle" href="#Gradle">2.7.1 Gradle</a></li>
-    <li><a name="toc-IntelliJ-Ultimate" href="#IntelliJ-Ultimate">2.7.2 IntelliJ Ultimate</a></li>
-    <li><a name="toc-NetBeans" href="#NetBeans">2.7.3 NetBeans</a></li>
-    <li><a name="toc-eclipse" href="#eclipse">2.7.4 eclipse</a></li>
+    <li><a name="toc-IntelliJ" href="#IntelliJ">2.7.2 IntelliJ</a></li>
+    <li><a name="toc-Community-Edition-Too" href="#Community-Edition-Too">2.7.3 Community Edition Too</a>
+    <ul class="no-bullet">
+      <li><a name="toc-Ultimate-Edition" href="#Ultimate-Edition">2.7.3.1 Ultimate Edition</a></li>
+    </ul></li>
+    <li><a name="toc-NetBeans" href="#NetBeans">2.7.4 NetBeans</a></li>
+    <li><a name="toc-eclipse_002c-VSCode_002c-and-Others" href="#eclipse_002c-VSCode_002c-and-Others">2.7.5 eclipse, VSCode, and Others</a></li>
   </ul></li>
   <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.8 What Do I Do With It Now?</a></li>
 </ul></li>
@@ -601,9 +604,10 @@ debugger.  This section will outline usage of some of these scenarios.
 <a name="Gradle"></a>
 <h4 class="subsection">2.7.1 Gradle</h4>
 
-<p>While not the best choice when in development mode, <em>Gradle</em> is a
-good choice when generating the JavaDocs and possibly also when
-generating the final <em>WAR</em> file.  <em>Gradle</em> may be used as follows:
+<p><em>Gradle</em> is a build system that describes and automates the build process.
+<em>Kiss</em> utilizes <em>Gradle</em> to automate its build and debug processes.
+Most IDE&rsquo;s are able to utilize the <em>Gradle</em> build system.
+<em>Gradle</em> may be used as follows:
 (Note, this is not a list of command you should run in order to get the system running.  
 See <a href="#Quick_002dstart-Checklist">Quick-start Checklist</a>.
 </p>
@@ -627,30 +631,63 @@ directory.
 <dd><p>Runs a sample server serving up the application.  The system will be
 available from your local browser at
 <code>http://localhost:8080/Kiss</code>.  Use <code>^C</code> to exit.
-(Note two things about this.  First, this will not run unless you created the database described in the previous section.
-Also, although <code>gradle tomcatRun</code> is nice to do a quick check, this is neither an apt development environment nor
-an apt production environment.  It is simply good as a quick check.  The following sections detail apt development and production environments.)  
+</p></dd>
+<dt><code>gradle tomcatRunDebug</code></dt>
+<dd><p>Runs a sample server serving up the application.  The system will be
+available from your local browser at
+<code>http://localhost:8080/Kiss</code>.  Use <code>^C</code> to exit. Once <em>Kiss</em> is running in debug mode,
+you may debug the application by attaching to the running <em>tomcat</em> server at port 5005.
 </p></dd>
 </dl>
 
-<a name="IntelliJ-Ultimate"></a>
-<h4 class="subsection">2.7.2 IntelliJ Ultimate</h4>
+<a name="IntelliJ"></a>
+<h4 class="subsection">2.7.2 IntelliJ</h4>
 
-<p>IntelliJ is a good IDE.  The free version may be inadequate for
-<em>Kiss</em> however.  IntelliJ should be configured with support for
-<code>Gradle</code>, <code>tomcat</code>, and <code>Groovy</code>.  These instructions
-need only be done once.
+<p>IntelliJ is a good IDE.  It is the only IDE that supports debugging
+<em>Groovy</em> as microservices.  The free, community version is adequate for developing
+and debugging with <em>Kiss</em>.  IntelliJ should be configured with
+support for <code>Gradle</code>, <code>tomcat</code>, and <code>Groovy</code>.  If using the Community Edition, all of the install defaults are correct. 
 </p>
-<p>You may set it up as follows:
+<p>The following should be done for the Community or Ultimate Editions:
 </p>
 <ol>
-<li> Get a fresh clone
-</li><li> If you just entered IntelliJ select <code>Import Project</code>, 
-or if already in a project select <code>New</code> / <code>Project</code>
-from existing source.
-</li><li> Select the file <em>build.gradle</em>
+<li> Get a fresh clone of <em>Kiss</em>
+</li><li> When you first enter IntelliJ, select <code>Import Project</code> and select the root of your <em>Kiss</em> clone.
+</li><li> Select Import project from external model, then select <em>Gradle</em>.
 </li><li> Accept all defaults
-</li><li> Go to Run / Edit Configurations
+</li></ol>
+
+<p>In order to do front-end and back-end development at the same time, a dual server setup where
+the front-end and back-end are served by different servers is recommended.  See <a href="#Front_002dend-Development">Front-end Development</a>
+This section documents the back-end portion.
+</p>
+<a name="Community-Edition-Too"></a>
+<h4 class="subsection">2.7.3 Community Edition Too</h4>
+
+<p>The following is applicable to both the Community Edition and the Ultimate Editions of IntelliJ.
+</p>
+<p>In the upper right hand corner of the IDE there is a tab labeled <em>Gradle</em>.  When that tab is expanded you may execute <em>Gradle</em> tasks that you select.
+Expand <em>Tasks</em> and then <em>gretty</em>.  The main task you will be interested in is <em>tomcatStartDebug</em>.  That task starts <em>Kiss</em>
+in debug mode suitable for debugging the back-end portion of <em>Kiss</em>.  Double-clicking on that task builds the system and launched the integrated <em>tomcat</em>
+server.  
+</p>
+<p>When the output windows says &ldquo;Listening for transport dt_socket at address: 5005&rdquo; then select <em>Run</em> an then <em>Attach to process...</em>.
+A window asking you to select what to attach to will appear.  It will only contain a single item.  Select it. You can then go to the following URL
+on your browser:  <a href="http://localhost:8080/Kiss">http://localhost:8080/Kiss</a>  (Note the capital &ldquo;K&rdquo;)  You can now debug the application.
+</p>
+<p>Note two tabs on the bottom of the IDE labeled <em>Run</em> and <em>Debug</em>.  These two tabs are very useful during debugging.
+</p>
+
+
+<a name="Ultimate-Edition"></a>
+<h4 class="subsubsection">2.7.3.1 Ultimate Edition</h4>
+
+<p>Additionally, the following steps may be used to simplify debugging when using the <em>Ultimate</em> (paid) version of <em>IntelliJ</em>:
+</p>
+
+
+<ol>
+<li> Go to Run / Edit Configurations
 </li><li> Click the &ldquo;+&rdquo; in the upper left corner
 </li><li> Select <em>Tomcat Server</em> / <em>Local</em>
 </li><li> Change the Name to Kiss
@@ -668,10 +705,11 @@ for front-end development.  In order to do front-end and back-end development at
 the front-end and back-end are served by different servers is recommended.    See <a href="#Front_002dend-Development">Front-end Development</a>
 </p>
 <a name="NetBeans"></a>
-<h4 class="subsection">2.7.3 NetBeans</h4>
+<h4 class="subsection">2.7.4 NetBeans</h4>
 
-<p>The <em>Kiss</em> system works well with NetBeans.  These instructions
-are for NetBeans 8.2.  These instructions need only be done once.
+<p>The <em>Kiss</em> system works with NetBeans.  The only shortcoming is
+that <em>Groovy</em> code can not be debugged.  These instructions are
+for NetBeans 8.2.  These instructions need only be done once.
 </p>
 <p>When installing NetBeans, be sure to select the following Runtimes:
 </p>
@@ -682,28 +720,35 @@ are for NetBeans 8.2.  These instructions need only be done once.
 </li><li> Apache Tomcat
 </li></ul>
 
-<p>Start these instructions after you&rsquo;ve checked out <em>Kiss</em>, but before you go into NetBeans.   
-Start from a command prompt at the root directory of the checked out <em>Kiss</em> system and type the following.
+<p>Go into NetBeans and select <em>File</em> and <em>Open Project</em>.
+Select the root of the <em>Kiss</em> project.  From the <em>Projects</em>
+pane, you can right-click on the project root.  You will then see an
+option labeled <em>Tasks</em>.  That is where you can execute
+<em>Gradle</em> tasks.  To build and debug the application, select
+<em>tomcat</em> and then <em>tomcatRunDebug</em>.  You will then see a
+message &ldquo;Listening for transport dt_socket at address: 5005&rdquo;.  From
+the top menu, select <em>Debug</em> and then <em>Attach Debugger</em>.
+The defaults should be correct.  Accept the popup.  You may then go to
+the following URL on your browser: <a href="http://localhost:8080/Kiss">http://localhost:8080/Kiss</a>
+(Note the capital &ldquo;K&rdquo;) You can now debug the application.
 </p>
-<ol>
-<li> gradle war
-</li><li> gradle clean
-</li><li> gradle copyToLibs
-</li><li> git checkout libs
-</li></ol>
+<p>The <em>Output</em> tab on the bottom will display helpful information.
+</p>
 
-<p>Go into NetBeans and <em>open</em> the <em>Kiss</em> project.  You can now run the system in debug mode by clickong on the debug icon.
-Although this is the recommended setup for the back-end portion during development, it is not recommended
-for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.  See <a href="#Front_002dend-Development">Front-end Development</a>
+<p>Although this is the recommended setup for the back-end portion during
+development, it is not recommended for front-end development.  In
+order to do front-end and back-end development at the same time, a
+dual server setup where the front-end and back-end are served by
+different servers is recommended.  See <a href="#Front_002dend-Development">Front-end Development</a>
 </p>
 
 
-<a name="eclipse"></a>
-<h4 class="subsection">2.7.4 eclipse</h4>
+<a name="eclipse_002c-VSCode_002c-and-Others"></a>
+<h4 class="subsection">2.7.5 eclipse, VSCode, and Others</h4>
 
-<p><em>eclipse</em>, as of Photon, does not appear to support recent JavaScript standards such as ES6.  For this reason, eclipse would not be
-a good IDE choice.
+<p>Other IDE&rsquo;s that support <em>Gradle</em> should work fine.  In
+particular, <em>VSCode</em> and <em>eclipse</em> have been tested and are
+known to work.
 </p>
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
 <h3 class="section">2.8 What Do I Do With It Now?</h3>

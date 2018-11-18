@@ -223,9 +223,10 @@ debugger.  This section will outline usage of some of these scenarios.
 
 @subsection Gradle 
 
-While not the best choice when in development mode, @emph{Gradle} is a
-good choice when generating the JavaDocs and possibly also when
-generating the final @emph{WAR} file.  @emph{Gradle} may be used as follows:
+@emph{Gradle} is a build system that describes and automates the build process.
+@emph{Kiss} utilizes @emph{Gradle} to automate its build and debug processes.
+Most IDE's are able to utilize the @emph{Gradle} build system.
+@emph{Gradle} may be used as follows:
 (Note, this is not a list of command you should run in order to get the system running.  
 @xref{Quick-start Checklist}.
 
@@ -245,31 +246,61 @@ Removes all the generated files.
 Runs a sample server serving up the application.  The system will be
 available from your local browser at
 @code{http://localhost:8080/Kiss}.  Use @code{^C} to exit.
-(Note two things about this.  First, this will not run unless you created the database described in the previous section.
-Also, although @code{gradle tomcatRun} is nice to do a quick check, this is neither an apt development environment nor
-an apt production environment.  It is simply good as a quick check.  The following sections detail apt development and production environments.)  
+@item gradle tomcatRunDebug
+Runs a sample server serving up the application.  The system will be
+available from your local browser at
+@code{http://localhost:8080/Kiss}.  Use @code{^C} to exit. Once @emph{Kiss} is running in debug mode,
+you may debug the application by attaching to the running @emph{tomcat} server at port 5005.
 @end table
 
-@subsection IntelliJ Ultimate
+@subsection IntelliJ
 
-IntelliJ is a good IDE.  The free version may be inadequate for
-@emph{Kiss} however.  IntelliJ should be configured with support for
-@code{Gradle}, @code{tomcat}, and @code{Groovy}.  These instructions
-need only be done once.
+IntelliJ is a good IDE.  It is the only IDE that supports debugging
+@emph{Groovy} as microservices.  The free, community version is adequate for developing
+and debugging with @emph{Kiss}.  IntelliJ should be configured with
+support for @code{Gradle}, @code{tomcat}, and @code{Groovy}.  If using the Community Edition, all of the install defaults are correct. 
 
-You may set it up as follows:
+The following should be done for the Community or Ultimate Editions:
 
 @enumerate
 @item
-Get a fresh clone
+Get a fresh clone of @emph{Kiss}
 @item
-If you just entered IntelliJ select @code{Import Project}, 
-or if already in a project select @code{New} / @code{Project}
-from existing source.
+When you first enter IntelliJ, select @code{Import Project} and select the root of your @emph{Kiss} clone.
 @item
-Select the file @emph{build.gradle}
+Select Import project from external model, then select @emph{Gradle}.
 @item
 Accept all defaults
+@end enumerate
+
+In order to do front-end and back-end development at the same time, a dual server setup where
+the front-end and back-end are served by different servers is recommended.  @xref{Front-end Development}
+This section documents the back-end portion.
+
+@subsection Community Edition Too
+
+The following is applicable to both the Community Edition and the Ultimate Editions of IntelliJ.
+
+In the upper right hand corner of the IDE there is a tab labeled @emph{Gradle}.  When that tab is expanded you may execute @emph{Gradle} tasks that you select.
+Expand @emph{Tasks} and then @emph{gretty}.  The main task you will be interested in is @emph{tomcatStartDebug}.  That task starts @emph{Kiss}
+in debug mode suitable for debugging the back-end portion of @emph{Kiss}.  Double-clicking on that task builds the system and launched the integrated @emph{tomcat}
+server.  
+
+When the output windows says ``Listening for transport dt_socket at address: 5005'' then select @emph{Run} an then @emph{Attach to process...}.
+A window asking you to select what to attach to will appear.  It will only contain a single item.  Select it. You can then go to the following URL
+on your browser:  @uref{http://localhost:8080/Kiss}  (Note the capital ``K'')  You can now debug the application.
+
+Note two tabs on the bottom of the IDE labeled @emph{Run} and @emph{Debug}.  These two tabs are very useful during debugging.
+
+
+
+@subsubsection Ultimate Edition
+
+Additionally, the following steps may be used to simplify debugging when using the @emph{Ultimate} (paid) version of @emph{IntelliJ}:
+
+
+
+@enumerate
 @item
 Go to Run / Edit Configurations
 @item
@@ -298,8 +329,9 @@ the front-end and back-end are served by different servers is recommended.    @x
 
 @subsection NetBeans
 
-The @emph{Kiss} system works well with NetBeans.  These instructions
-are for NetBeans 8.2.  These instructions need only be done once.
+The @emph{Kiss} system works with NetBeans.  The only shortcoming is
+that @emph{Groovy} code can not be debugged.  These instructions are
+for NetBeans 8.2.  These instructions need only be done once.
 
 When installing NetBeans, be sure to select the following Runtimes:
 
@@ -314,31 +346,34 @@ Groovy
 Apache Tomcat
 @end itemize
 
-Start these instructions after you've checked out @emph{Kiss}, but before you go into NetBeans.   
-Start from a command prompt at the root directory of the checked out @emph{Kiss} system and type the following.
+Go into NetBeans and select @emph{File} and @emph{Open Project}.
+Select the root of the @emph{Kiss} project.  From the @emph{Projects}
+pane, you can right-click on the project root.  You will then see an
+option labeled @emph{Tasks}.  That is where you can execute
+@emph{Gradle} tasks.  To build and debug the application, select
+@emph{tomcat} and then @emph{tomcatRunDebug}.  You will then see a
+message ``Listening for transport dt_socket at address: 5005''.  From
+the top menu, select @emph{Debug} and then @emph{Attach Debugger}.
+The defaults should be correct.  Accept the popup.  You may then go to
+the following URL on your browser: @uref{http://localhost:8080/Kiss}
+(Note the capital ``K'') You can now debug the application.
 
-@enumerate
-@item
-gradle war
-@item
-gradle clean
-@item
-gradle copyToLibs
-@item
-git checkout libs
-@end enumerate
-
-Go into NetBeans and @emph{open} the @emph{Kiss} project.  You can now run the system in debug mode by clickong on the debug icon.
-Although this is the recommended setup for the back-end portion during development, it is not recommended
-for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.  @xref{Front-end Development}
+The @emph{Output} tab on the bottom will display helpful information.
 
 
+Although this is the recommended setup for the back-end portion during
+development, it is not recommended for front-end development.  In
+order to do front-end and back-end development at the same time, a
+dual server setup where the front-end and back-end are served by
+different servers is recommended.  @xref{Front-end Development}
 
-@subsection eclipse
 
-@emph{eclipse}, as of Photon, does not appear to support recent JavaScript standards such as ES6.  For this reason, eclipse would not be
-a good IDE choice.
+
+@subsection eclipse, VSCode, and Others
+
+Other IDE's that support @emph{Gradle} should work fine.  In
+particular, @emph{VSCode} and @emph{eclipse} have been tested and are
+known to work.
 
 @section What Do I Do With It Now?
 
