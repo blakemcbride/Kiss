@@ -44,6 +44,7 @@ war {
 }
 
 gretty {
+  contextPath = "/"
   debugPort = 5005      // default
   debugSuspend = true   // default
 }

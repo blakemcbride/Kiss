@@ -44,7 +44,7 @@ The following enumerates the steps necessary to get the system up and running:
 @item
 Run the server by running @code{gradle tomcatRun}
 @item
-You can access the server by going to @code{http://localhost:8080/Kiss}
+You can access the server by going to @code{http://localhost:8080}
 @end enumerate
 
 @noindent Use @code{^C} to stop the server.
@@ -245,11 +245,11 @@ Removes all the generated files.
 @item gradle tomcatRun
 Runs a sample server serving up the application.  The system will be
 available from your local browser at
-@code{http://localhost:8080/Kiss}.  Use @code{^C} to exit.
+@code{http://localhost:8080}.  Use @code{^C} to exit.
 @item gradle tomcatRunDebug
 Runs a sample server serving up the application.  The system will be
 available from your local browser at
-@code{http://localhost:8080/Kiss}.  Use @code{^C} to exit. Once @emph{Kiss} is running in debug mode,
+@code{http://localhost:8080}.  Use @code{^C} to exit. Once @emph{Kiss} is running in debug mode,
 you may debug the application by attaching to the running @emph{tomcat} server at port 5005.
 @end table
 
@@ -288,7 +288,7 @@ server.
 
 When the output windows says ``Listening for transport dt_socket at address: 5005'' then select @emph{Run} an then @emph{Attach to process...}.
 A window asking you to select what to attach to will appear.  It will only contain a single item.  Select it. You can then go to the following URL
-on your browser:  @uref{http://localhost:8080/Kiss}  (Note the capital ``K'')  You can now debug the application.
+on your browser:  @uref{http://localhost:8080}  You can now debug the application.
 
 Note two tabs on the bottom of the IDE labeled @emph{Run} and @emph{Debug}.  These two tabs are very useful during debugging.
 
@@ -355,8 +355,8 @@ option labeled @emph{Tasks}.  That is where you can execute
 message ``Listening for transport dt_socket at address: 5005''.  From
 the top menu, select @emph{Debug} and then @emph{Attach Debugger}.
 The defaults should be correct.  Accept the popup.  You may then go to
-the following URL on your browser: @uref{http://localhost:8080/Kiss}
-(Note the capital ``K'') You can now debug the application.
+the following URL on your browser: @uref{http://localhost:8080}
+You can now debug the application.
 
 The @emph{Output} tab on the bottom will display helpful information.
 
