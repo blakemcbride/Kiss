@@ -41,6 +41,10 @@ war {
     from("src/main/application") {
         into("WEB-INF/application")
     }
+    from("src/main/java/org/kissweb/lisp") {
+        include("*.lisp")
+        into("WEB-INF/classes/org/kissweb/lisp")
+    }
 }
 
 gretty {
