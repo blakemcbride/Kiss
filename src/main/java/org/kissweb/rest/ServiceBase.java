@@ -24,7 +24,6 @@ public class ServiceBase extends HttpServlet {
     private static String password;                  // set by KissInit.groovy
     private static String applicationPath;
     private static boolean underIDE = false;
-    private static String IDEPath;
     private static ComboPooledDataSource cpds;
     protected static boolean debug = false;          // set by KissInit.groovy
     protected static boolean hasDatabase;            // determined by KissInit.groovy
@@ -39,25 +38,22 @@ public class ServiceBase extends HttpServlet {
         System.out.println("* * * Context path = " + cpath);
         ServiceBase.applicationPath = System.getenv("KISS_DEBUG_ROOT");
         if (ServiceBase.applicationPath == null || ServiceBase.applicationPath.isEmpty()) {
-            if (cpath.endsWith("/build/inplaceWebapp/"))
-                ServiceBase.applicationPath = cpath + "../../src/main/application/";  // gradle tomcatRun
-            else
-                ServiceBase.applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
-
-            if (!(new File(ServiceBase.applicationPath + "KissInit.groovy")).exists()) {
-                ServiceBase.applicationPath = cpath + "../../src/main/application/";  // NetBeans
+            if ((new File(cpath + "../../src/main/application/" + "KissInit.groovy")).exists()) {
+                ServiceBase.applicationPath = cpath + "../../src/main/application/";
                 underIDE = true;
-                System.out.println("* * * Is running under IDE");
+            } else if ((new File(cpath + "../../../../src/main/application/" + "KissInit.groovy")).exists()) {
+                    ServiceBase.applicationPath = cpath + "../../../../src/main/application/";
+                    underIDE = true;
             } else {
+                ServiceBase.applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
                 underIDE = false;
-                System.out.println("* * * Is not running under IDE");
             }
         } else {
-            System.out.println("* * * Is running under IDE");
             underIDE = true;
             ServiceBase.applicationPath = ServiceBase.applicationPath.replaceAll("\\\\", "/");
             ServiceBase.applicationPath = ServiceBase.applicationPath + (ServiceBase.applicationPath.endsWith("/") ? "" : "/") + "src/main/application/";
         }
+        System.out.println(underIDE ? "* * * Is running with source" : "* * * Is not running with source");
         System.out.println("* * * Application path set to " + ServiceBase.applicationPath);
     }
 

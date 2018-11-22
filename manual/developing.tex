@@ -56,10 +56,11 @@ order to facilitate rapid and easy development, it is important that
 source files be used rather than the production copies during the
 development process.  
 
-In order for the system to know where the source code to the
-application is, a system environment variable (@code{KISS_DEBUG_ROOT}) must
-be set.  The value of this environment variable should be the absolute
-path of the root of the application source code.  The directory it indicates
+The system automatically detects the location of the application
+source in all known configurations.  However, this may be explicitly
+set via a system environment variable (@code{KISS_DEBUG_ROOT}).  The
+value of this environment variable should be the absolute path of the
+root of the application source code.  The directory it indicates
 should have a sub-directory named @code{src/main/application}.
 
 

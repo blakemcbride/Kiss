@@ -27,11 +27,16 @@ public class ABCL {
     private static Function makeWebServiceArgs;
     private static Function makeRestServiceArgs;
     private static int lispRelease = 0;
-    private static final String UtilsSource = "../java/org/kissweb/lisp/";
+    private static String UtilsSource;
 
     public static void init() {
 		interpreter = Interpreter.createInstance();
 		invertCase();
+
+		if (ServiceBase.isUnderIDE())
+            UtilsSource = "../java/org/kissweb/lisp/";
+		else
+            UtilsSource = "../classes/org/kissweb/lisp/";
 
         installDebuggerHook();
 		eval("(let ((error-orig #'error))"

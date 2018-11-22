@@ -48,9 +48,10 @@ war {
 }
 
 gretty {
-  contextPath = "/"
-  debugPort = 5005      // default
-  debugSuspend = true   // default
+    contextPath = "/"
+    debugPort = 5005      // default
+    debugSuspend = true   // default
+    reloadOnClassChange = false
 }
 
 //javadoc {
