@@ -55,7 +55,7 @@
         var newElm = utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} placeholder="{placeholder}" id="{id}"></textarea>', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content
+            placeholder: content ? content.trim() : ''
         });
         var jqObj = newElm.jqObj;
         

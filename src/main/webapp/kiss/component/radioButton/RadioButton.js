@@ -57,7 +57,7 @@ Kiss.RadioButtons.groups = {};
             style: nstyle,
             attr: nattrs,
             name: group,
-            content: content
+            content: content ? content.trim() : ''
         });
 
         elm.replaceWith(nhtml);

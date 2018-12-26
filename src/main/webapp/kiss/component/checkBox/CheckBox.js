@@ -40,7 +40,7 @@
         var newElm = utils.replaceHTML(id, elm, '<div style="display: inline-block;"><input type="checkbox" style="{style}" {attr} id="{id}">{content}</div>', {
             style: nstyle,
             attr: nattrs,
-            content: content ? content : ''
+            content: content ? content.trim() : ''
         });
         var jqObj = newElm.jqObj;
 

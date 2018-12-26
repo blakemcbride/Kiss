@@ -54,7 +54,7 @@
         var newElm = utils.replaceHTML(id, elm, '<input type="date" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content
+            placeholder: content ? content.trim() : ''
         });
         var jqObj = newElm.jqObj;
 

@@ -40,7 +40,7 @@
         var newElm = utils.replaceHTML(id, elm, '<input type="button" style="{style}" {attr} value="{value}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
-            value: content ? content : ''
+            value: content ? content.trim() : ''
         });
         var jqObj = newElm.jqObj;
 

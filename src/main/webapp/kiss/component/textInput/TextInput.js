@@ -59,7 +59,7 @@
             type: password ? 'password' : 'text',
             style: nstyle,
             attr: nattrs,
-            placeholder: content
+            placeholder: content ? content.trim() : ''
         });
         var jqObj = newElm.jqObj;
         
