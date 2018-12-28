@@ -793,7 +793,7 @@ class utils {
 
             both_parts = content.children();
             header = both_parts.first();
-            header.wrapInner('<div style="margin-top: 3px;"></div>div>');
+            header.wrapInner('<div style="margin-top: 5px; font-weight: bold;"></div>div>');
             body = header.next();
             header.addClass('popup-modal-header');
             header.css('cursor', 'all-scroll');
