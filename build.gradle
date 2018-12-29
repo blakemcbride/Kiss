@@ -68,3 +68,19 @@ task copyToLibs(type: Copy) {
 	from configurations.runtime
 }
 
+static void loadFile(String url, String tdir, String fname) {
+    File folder = new File(tdir)
+    if (!folder.exists())
+        folder.mkdirs()
+    File f = new File(tdir + '/' + fname)
+    if (!f.exists())
+        new URL(url).withInputStream{ i -> f.withOutputStream{ it << i }}
+}
+
+loadFile 'https://code.jquery.com/jquery-3.3.1.min.js', 'src/main/webapp/lib', 'jquery-3.3.1.min.js'
+
+clean {
+    doLast {
+        (new File('src/main/webapp/lib')).deleteDir()
+    }
+}
