@@ -48,6 +48,8 @@ public class MainServlet extends ServiceBase {
             hasDatabase = database != null  &&  !database.isEmpty();
             if (hasDatabase)
                 makeDatabaseConnection();
+            else
+                System.out.println("* * * No database configured; bypassing login requirements");
             systemInitialized = true;
         }
     }
