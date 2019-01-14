@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyVetoException;
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
@@ -42,8 +43,8 @@ public class ServiceBase extends HttpServlet {
                 ServiceBase.applicationPath = cpath + "../../src/main/application/";
                 underIDE = true;
             } else if ((new File(cpath + "../../../../src/main/application/" + "KissInit.groovy")).exists()) {
-                    ServiceBase.applicationPath = cpath + "../../../../src/main/application/";
-                    underIDE = true;
+                ServiceBase.applicationPath = cpath + "../../../../src/main/application/";
+                underIDE = true;
             } else {
                 ServiceBase.applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
                 underIDE = false;
@@ -52,6 +53,11 @@ public class ServiceBase extends HttpServlet {
             underIDE = true;
             ServiceBase.applicationPath = ServiceBase.applicationPath.replaceAll("\\\\", "/");
             ServiceBase.applicationPath = ServiceBase.applicationPath + (ServiceBase.applicationPath.endsWith("/") ? "" : "/") + "src/main/application/";
+        }
+        try {
+            ServiceBase.applicationPath = (new File(ServiceBase.applicationPath)).getCanonicalPath() + "/";
+        } catch (IOException e) {
+            // ignore
         }
         System.out.println(underIDE ? "* * * Is running with source" : "* * * Is not running with source");
         System.out.println("* * * Application path set to " + ServiceBase.applicationPath);
@@ -117,7 +123,7 @@ public class ServiceBase extends HttpServlet {
 
     protected void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
         if (!hasDatabase) {
-            System.err.println("* * * No database configured; bypassing login requirements");
+            System.out.println("* * * No database configured; bypassing login requirements");
             return;
         }
         if (cpds == null) {
