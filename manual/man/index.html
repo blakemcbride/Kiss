@@ -85,24 +85,25 @@ ul.no-bullet {list-style: none}
 </ul></li>
 <li><a name="toc-System-Setup" href="#System-Setup">2 System Setup</a>
 <ul class="no-bullet">
-  <li><a name="toc-Quick_002dstart-Checklist-1" href="#Quick_002dstart-Checklist-1">2.1 Quick-start Checklist</a></li>
-  <li><a name="toc-Runtime-Environments" href="#Runtime-Environments">2.2 Runtime Environments</a></li>
-  <li><a name="toc-Pre_002drequisites-1" href="#Pre_002drequisites-1">2.3 Pre-requisites</a></li>
-  <li><a name="toc-Download-Kiss-1" href="#Download-Kiss-1">2.4 Download Kiss</a></li>
-  <li><a name="toc-Documentation" href="#Documentation">2.5 Documentation</a></li>
-  <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.6 Setup And Configuration</a></li>
-  <li><a name="toc-Building-The-System" href="#Building-The-System">2.7 Building The System</a>
+  <li><a name="toc-Important-1" href="#Important-1">2.1 Important</a></li>
+  <li><a name="toc-Quick_002dstart-Checklist-1" href="#Quick_002dstart-Checklist-1">2.2 Quick-start Checklist</a></li>
+  <li><a name="toc-Runtime-Environments" href="#Runtime-Environments">2.3 Runtime Environments</a></li>
+  <li><a name="toc-Pre_002drequisites-1" href="#Pre_002drequisites-1">2.4 Pre-requisites</a></li>
+  <li><a name="toc-Download-Kiss-1" href="#Download-Kiss-1">2.5 Download Kiss</a></li>
+  <li><a name="toc-Documentation" href="#Documentation">2.6 Documentation</a></li>
+  <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.7 Setup And Configuration</a></li>
+  <li><a name="toc-Building-The-System" href="#Building-The-System">2.8 Building The System</a>
   <ul class="no-bullet">
-    <li><a name="toc-Gradle" href="#Gradle">2.7.1 Gradle</a></li>
-    <li><a name="toc-IntelliJ" href="#IntelliJ">2.7.2 IntelliJ</a></li>
-    <li><a name="toc-Community-Edition-Too" href="#Community-Edition-Too">2.7.3 Community Edition Too</a>
+    <li><a name="toc-Gradle" href="#Gradle">2.8.1 Gradle</a></li>
+    <li><a name="toc-IntelliJ" href="#IntelliJ">2.8.2 IntelliJ</a></li>
+    <li><a name="toc-Community-Edition-Too" href="#Community-Edition-Too">2.8.3 Community Edition Too</a>
     <ul class="no-bullet">
-      <li><a name="toc-Ultimate-Edition" href="#Ultimate-Edition">2.7.3.1 Ultimate Edition</a></li>
+      <li><a name="toc-Ultimate-Edition" href="#Ultimate-Edition">2.8.3.1 Ultimate Edition</a></li>
     </ul></li>
-    <li><a name="toc-NetBeans" href="#NetBeans">2.7.4 NetBeans</a></li>
-    <li><a name="toc-eclipse_002c-VSCode_002c-and-Others" href="#eclipse_002c-VSCode_002c-and-Others">2.7.5 eclipse, VSCode, and Others</a></li>
+    <li><a name="toc-NetBeans" href="#NetBeans">2.8.4 NetBeans</a></li>
+    <li><a name="toc-eclipse_002c-VSCode_002c-and-Others" href="#eclipse_002c-VSCode_002c-and-Others">2.8.5 eclipse, VSCode, and Others</a></li>
   </ul></li>
-  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.8 What Do I Do With It Now?</a></li>
+  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.9 What Do I Do With It Now?</a></li>
 </ul></li>
 <li><a name="toc-Orientation" href="#Orientation">3 Orientation</a>
 <ul class="no-bullet">
@@ -426,9 +427,29 @@ I am using a modified version included with the system)
 <a name="System-Setup"></a>
 <h2 class="chapter">2 System Setup</h2>
 
+<a name="Important"></a><a name="Important-1"></a>
+<h3 class="section">2.1 Important</h3>
+
+<p>The <em>Kiss</em> system uses <em>gradle</em> as its build system.  This
+works under Linux, Mac, Windows, etc.  Although you need to install
+Java before anything will work, you do not need to install
+<em>gradle</em>.  When you first try to build the system, it will detect
+that you hadn&rsquo;t installed <em>gradle</em> and it will download it and
+install it for you.  This means it will take a bit longer on first
+build.  <em>Gradle</em> also downloads allof the required libraries the
+first time too.  So again, the first build will be slow.  Subsequent
+builds are fast, and since <em>Kiss</em> uses microservices, most of the
+time you don&rsquo;t even have to build at all.
+</p>
+<p>The program that runs <em>gradle</em> is &ldquo;<em>gradlew</em>&rdquo; under Unix like
+systems and &ldquo;<em>gradlew.bat</em>&rdquo; under Windows.  In this manual,
+&ldquo;<em>gradlew</em>&rdquo; will be shown as &ldquo;<em>./gradlew</em>&rdquo;.  The &ldquo;./&rdquo; is
+required under Linux and Mac but not under Windows.  When running on
+Windows, use &ldquo;gradlew&rdquo; rather than &ldquo;./gradlew&rdquo;.
+</p>
 
 <a name="Quick_002dstart-Checklist"></a><a name="Quick_002dstart-Checklist-1"></a>
-<h3 class="section">2.1 Quick-start Checklist</h3>
+<h3 class="section">2.2 Quick-start Checklist</h3>
 
 <p>The following enumerates the steps necessary to get the system up and running:
 </p>
@@ -436,14 +457,14 @@ I am using a modified version included with the system)
 <li> See <a href="#Pre_002drequisites">Pre-requisites</a>
 </li><li> See <a href="#Download-Kiss">Download Kiss</a>
 </li><li> See <a href="#Setup-And-Configuration">Setup And Configuration</a>
-</li><li> Run the server by running <code>gradle tomcatRun</code>
+</li><li> Run the server by running <code>./gradlew tomcatRun</code>
 </li><li> You can access the server by going to <code>http://localhost:8080</code>
 </li></ol>
 
 <p>Use <code>^C</code> to stop the server.
 </p>
 <a name="Runtime-Environments"></a>
-<h3 class="section">2.2 Runtime Environments</h3>
+<h3 class="section">2.3 Runtime Environments</h3>
 
 <p>As shipped, there are three different environments that <em>Kiss</em> may
 run in as follows:
@@ -454,12 +475,12 @@ run in as follows:
 </li><li> Production
 </li></ol>
 
-<p>The <em>Test</em> environment is started with <code>gradle tomcatRun</code> but
+<p>The <em>Test</em> environment is started with <code>./gradlew tomcatRun</code> but
 is only good for a quick test to see if the system is running.  It is
 neither good in a development nor production environment.
 </p>
 <p>The <em>Production</em> scenario is created with a single command 
-(<code>gradle war</code>) and produces a single <code>war</code> file that
+(<code>./gradlew war</code>) and produces a single <code>war</code> file that
 can be deployed.
 </p>
 <p>Unfortunately, the <em>Development</em> environment takes many steps to
@@ -485,13 +506,12 @@ Debugging is normally done through the browser debugger.
 There is no setup, and it runs by executing a single command.
 </p>
 <a name="Pre_002drequisites"></a><a name="Pre_002drequisites-1"></a>
-<h3 class="section">2.3 Pre-requisites</h3>
+<h3 class="section">2.4 Pre-requisites</h3>
 
 <p>You should download and install the following pre-requisites.
 </p>
 <ol>
 <li> Java JDK 8 from <a href="https://www.oracle.com/java/index.html">https://www.oracle.com/java/index.html</a>
-</li><li> Gradle from <a href="https://gradle.org">https://gradle.org</a>
 </li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL, Oracle, SQLite)
 </li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, Netbeans, eclipse)
 </li><li> GIT source code control system
@@ -500,12 +520,16 @@ There is no setup, and it runs by executing a single command.
 <p>The system was built and tested with JDK 8, <a href="https://www.postgresql.org">PostgreSQL</a>, <a href="https://www.jetbrains.com/idea">IntelliJ</a>, and 
 <a href="http://tomcat.apache.org">tomcat</a>.  Other environments such as IIS, Glassfish, eclipse, should work fine but may require some configuration.
 </p>
+<p><em>Gradle</em> is the build system used.  The <em>Kiss</em> system
+automatically installs <em>gradle</em> so you need not do anything
+special.  See <a href="#Important">Important</a>
+</p>
 <p>Install the above per their instructions.
 </p>
 <p>With the proper plugins, all of the IDE&rsquo;s can import the Gradle build files.
 </p>
 <a name="Download-Kiss"></a><a name="Download-Kiss-1"></a>
-<h3 class="section">2.4 Download Kiss</h3>
+<h3 class="section">2.5 Download Kiss</h3>
 
 
 <p>Kiss is located at <a href="https://github.com/kiss-web/Kiss">https://github.com/kiss-web/Kiss</a>
@@ -515,7 +539,7 @@ There is no setup, and it runs by executing a single command.
 <p><code>git clone https://github.com/kiss-web/Kiss.git</code>
 </p>
 <a name="Documentation"></a>
-<h3 class="section">2.5 Documentation</h3>
+<h3 class="section">2.6 Documentation</h3>
 
 <p>The <em>Kiss</em> documentation consists of three parts; this manual, the detailed back-end API documentation contained in the JavaDocs,
 and the detailed front-end API documentation.
@@ -549,7 +573,7 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 </pre></div>
 
 <a name="Setup-And-Configuration"></a><a name="Setup-And-Configuration-1"></a>
-<h3 class="section">2.6 Setup And Configuration</h3>
+<h3 class="section">2.7 Setup And Configuration</h3>
 
 <p>Given that Kiss is for business applications, it authenticates its
 users.  In order for this to work, there is usually a database of valid
@@ -594,7 +618,7 @@ to create the table and some initial data.
 <p>Changes to  <code>KissInit.groovy</code> require a server reboot.
 </p>
 <a name="Building-The-System"></a>
-<h3 class="section">2.7 Building The System</h3>
+<h3 class="section">2.8 Building The System</h3>
 
 <p>The system may be built in several way.  It can be build from the
 command line using <em>Gradle</em>, or it can be build from within your
@@ -602,37 +626,37 @@ favorite IDE.  Using an IDE has the great advantage of a built-in
 debugger.  This section will outline usage of some of these scenarios.
 </p>
 <a name="Gradle"></a>
-<h4 class="subsection">2.7.1 Gradle</h4>
+<h4 class="subsection">2.8.1 Gradle</h4>
 
 <p><em>Gradle</em> is a build system that describes and automates the build process.
 <em>Kiss</em> utilizes <em>Gradle</em> to automate its build and debug processes.
 Most IDE&rsquo;s are able to utilize the <em>Gradle</em> build system.
 <em>Gradle</em> may be used as follows:
-(Note, this is not a list of command you should run in order to get the system running.  
-See <a href="#Quick_002dstart-Checklist">Quick-start Checklist</a>.
+(Note, this is not a list of command you should run in order to get the system running.) 
+See <a href="#Important">Important</a> and See <a href="#Quick_002dstart-Checklist">Quick-start Checklist</a>.
 </p>
 <dl compact="compact">
-<dt><code>gradle javadoc</code></dt>
+<dt><code>./gradlew javadoc</code></dt>
 <dd><p>JavaDocs end up in the <code>build/docs/javadoc</code> directory.
 </p></dd>
-<dt><code>gradle war</code></dt>
+<dt><code>./gradlew war</code></dt>
 <dd><p>The WAR file ends up in the <code>build/libs</code> directory.  
 This file can be just placed in the webapps directory of tomcat to deploy.
 </p></dd>
-<dt><code>gradle explodedWar</code></dt>
+<dt><code>./gradlew explodedWar</code></dt>
 <dd><p>This builds a set of files that would have been placed in the deployment WAR file.  It is used, when needed,
 to run the entire system from a local directory.  The files are placed in the <code>build/exploded/kiss</code>
 directory.
 </p></dd>
-<dt><code>gradle clean</code></dt>
+<dt><code>./gradlew clean</code></dt>
 <dd><p>Removes all the generated files.
 </p></dd>
-<dt><code>gradle tomcatRun</code></dt>
+<dt><code>./gradlew tomcatRun</code></dt>
 <dd><p>Runs a sample server serving up the application.  The system will be
 available from your local browser at
 <code>http://localhost:8080</code>.  Use <code>^C</code> to exit.
 </p></dd>
-<dt><code>gradle tomcatRunDebug</code></dt>
+<dt><code>./gradlew tomcatRunDebug</code></dt>
 <dd><p>Runs a sample server serving up the application.  The system will be
 available from your local browser at
 <code>http://localhost:8080</code>.  Use <code>^C</code> to exit. Once <em>Kiss</em> is running in debug mode,
@@ -641,7 +665,7 @@ you may debug the application by attaching to the running <em>tomcat</em> server
 </dl>
 
 <a name="IntelliJ"></a>
-<h4 class="subsection">2.7.2 IntelliJ</h4>
+<h4 class="subsection">2.8.2 IntelliJ</h4>
 
 <p>IntelliJ is a good IDE.  It is the only IDE that supports debugging
 <em>Groovy</em> as microservices.  The free, community version is adequate for developing
@@ -662,7 +686,7 @@ the front-end and back-end are served by different servers is recommended.  See 
 This section documents the back-end portion.
 </p>
 <a name="Community-Edition-Too"></a>
-<h4 class="subsection">2.7.3 Community Edition Too</h4>
+<h4 class="subsection">2.8.3 Community Edition Too</h4>
 
 <p>The following is applicable to both the Community Edition and the Ultimate Editions of IntelliJ.
 </p>
@@ -680,7 +704,7 @@ on your browser:  <a href="http://localhost:8080">http://localhost:8080</a>  You
 
 
 <a name="Ultimate-Edition"></a>
-<h4 class="subsubsection">2.7.3.1 Ultimate Edition</h4>
+<h4 class="subsubsection">2.8.3.1 Ultimate Edition</h4>
 
 <p>Additionally, the following steps may be used to simplify debugging when using the <em>Ultimate</em> (paid) version of <em>IntelliJ</em>:
 </p>
@@ -704,7 +728,7 @@ for front-end development.  In order to do front-end and back-end development at
 the front-end and back-end are served by different servers is recommended.    See <a href="#Front_002dend-Development">Front-end Development</a>
 </p>
 <a name="NetBeans"></a>
-<h4 class="subsection">2.7.4 NetBeans</h4>
+<h4 class="subsection">2.8.4 NetBeans</h4>
 
 <p>The <em>Kiss</em> system works with NetBeans.  The only shortcoming is
 that <em>Groovy</em> code can not be debugged.  These instructions are
@@ -743,14 +767,14 @@ different servers is recommended.  See <a href="#Front_002dend-Development">Fron
 
 
 <a name="eclipse_002c-VSCode_002c-and-Others"></a>
-<h4 class="subsection">2.7.5 eclipse, VSCode, and Others</h4>
+<h4 class="subsection">2.8.5 eclipse, VSCode, and Others</h4>
 
 <p>Other IDE&rsquo;s that support <em>Gradle</em> should work fine.  In
 particular, <em>VSCode</em> and <em>eclipse</em> have been tested and are
 known to work.
 </p>
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
-<h3 class="section">2.8 What Do I Do With It Now?</h3>
+<h3 class="section">2.9 What Do I Do With It Now?</h3>
 
 <p>What you have at this point is the beginnings of your new application.
 <em>Kiss</em> is provided as a running and deployable system.  It is
@@ -847,7 +871,7 @@ occur.
 following command: 
 </p>
 <div class="example">
-<pre class="example">gradle javadoc
+<pre class="example">./gradlew javadoc
 </pre></div>
 
 <p>The JavaDoc files end up in the <code>build/docs/javadoc</code> directory.
@@ -858,7 +882,7 @@ following command:
 
 <p>The only file needed to deply the application is <code>Kiss.war</code> It
 can either be built by your IDE, or at can be build by typing
-<code>gradle war</code> at a command prompt.  In the case of Gradle,
+<code>./gradlew war</code> at a command prompt.  In the case of Gradle,
 <code>Kiss.war</code> ends up in the <code>build/libs</code> directory.
 </p>
 <p>If using <em>tomcat</em>, <code>Kiss.war</code> should be placed in the

@@ -29,6 +29,25 @@
 
 @chapter System Setup
 
+@anchor{Important}@section Important
+
+The @emph{Kiss} system uses @emph{gradle} as its build system.  This
+works under Linux, Mac, Windows, etc.  Although you need to install
+Java before anything will work, you do not need to install
+@emph{gradle}.  When you first try to build the system, it will detect
+that you hadn't installed @emph{gradle} and it will download it and
+install it for you.  This means it will take a bit longer on first
+build.  @emph{Gradle} also downloads allof the required libraries the
+first time too.  So again, the first build will be slow.  Subsequent
+builds are fast, and since @emph{Kiss} uses microservices, most of the
+time you don't even have to build at all.
+
+The program that runs @emph{gradle} is ``@emph{gradlew}'' under Unix like
+systems and ``@emph{gradlew.bat}'' under Windows.  In this manual,
+``@emph{gradlew}'' will be shown as ``@emph{./gradlew}''.  The ``./'' is
+required under Linux and Mac but not under Windows.  When running on
+Windows, use ``gradlew'' rather than ``./gradlew''.
+
 
 @anchor{Quick-start Checklist}@section Quick-start Checklist
 
@@ -42,7 +61,7 @@ The following enumerates the steps necessary to get the system up and running:
 @item
 @xref{Setup And Configuration}
 @item
-Run the server by running @code{gradle tomcatRun}
+Run the server by running @code{./gradlew tomcatRun}
 @item
 You can access the server by going to @code{http://localhost:8080}
 @end enumerate
@@ -63,12 +82,12 @@ Development
 Production
 @end enumerate
 
-The @emph{Test} environment is started with @code{gradle tomcatRun} but
+The @emph{Test} environment is started with @code{./gradlew tomcatRun} but
 is only good for a quick test to see if the system is running.  It is
 neither good in a development nor production environment.
 
 The @emph{Production} scenario is created with a single command 
-(@code{gradle war}) and produces a single @code{war} file that
+(@code{./gradlew war}) and produces a single @code{war} file that
 can be deployed.
 
 Unfortunately, the @emph{Development} environment takes many steps to
@@ -101,8 +120,6 @@ You should download and install the following pre-requisites.
 @item
 Java JDK 8 from @uref{https://www.oracle.com/java/index.html}
 @item
-Gradle from @uref{https://gradle.org}
-@item
 An SQL database server (e.g.@ PostgreSQL, Microsoft SQL Server, MySQL, Oracle, SQLite)
 @item
 IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, Netbeans, eclipse)
@@ -112,6 +129,10 @@ GIT source code control system
 
 The system was built and tested with JDK 8, @uref{https://www.postgresql.org,PostgreSQL}, @uref{https://www.jetbrains.com/idea,IntelliJ}, and 
 @uref{http://tomcat.apache.org,tomcat}.  Other environments such as IIS, Glassfish, eclipse, should work fine but may require some configuration.
+
+@emph{Gradle} is the build system used.  The @emph{Kiss} system
+automatically installs @emph{gradle} so you need not do anything
+special.  @xref{Important}
 
 Install the above per their instructions.
 
@@ -227,26 +248,26 @@ debugger.  This section will outline usage of some of these scenarios.
 @emph{Kiss} utilizes @emph{Gradle} to automate its build and debug processes.
 Most IDE's are able to utilize the @emph{Gradle} build system.
 @emph{Gradle} may be used as follows:
-(Note, this is not a list of command you should run in order to get the system running.  
-@xref{Quick-start Checklist}.
+(Note, this is not a list of command you should run in order to get the system running.) 
+@xref{Important} and @xref{Quick-start Checklist}.
 
 @table @code
-@item gradle javadoc
+@item ./gradlew javadoc
 JavaDocs end up in the @code{build/docs/javadoc} directory.
-@item gradle war
+@item ./gradlew war
 The WAR file ends up in the @code{build/libs} directory.  
 This file can be just placed in the webapps directory of tomcat to deploy.
-@item gradle explodedWar
+@item ./gradlew explodedWar
 This builds a set of files that would have been placed in the deployment WAR file.  It is used, when needed,
 to run the entire system from a local directory.  The files are placed in the @code{build/exploded/kiss}
 directory.
-@item gradle clean
+@item ./gradlew clean
 Removes all the generated files.
-@item gradle tomcatRun
+@item ./gradlew tomcatRun
 Runs a sample server serving up the application.  The system will be
 available from your local browser at
 @code{http://localhost:8080}.  Use @code{^C} to exit.
-@item gradle tomcatRunDebug
+@item ./gradlew tomcatRunDebug
 Runs a sample server serving up the application.  The system will be
 available from your local browser at
 @code{http://localhost:8080}.  Use @code{^C} to exit. Once @emph{Kiss} is running in debug mode,
