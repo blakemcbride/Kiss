@@ -221,7 +221,7 @@
         Component.TimeInput.$formattime = function (elm) {
             var val = newElm.getValue();
             if (val === null)
-                return elm;
+                return '';
             return timeutils.format(val, elm.kiss.elementInfo.zero_fill);
         };
 
