@@ -71,9 +71,7 @@
             return c >= '0' && c <= '9';
         };
 
-        newElm.getValue$ = function () {
-            let sval = jqObj.val();
-
+        newElm.getValue$ = function (sval) {
             if (!sval)
                 return null;
             sval = sval.trim();
@@ -147,7 +145,7 @@
         };
 
         newElm.getValue = function () {
-            var val = newElm.getValue$();
+            var val = newElm.getValue$(newElm.jqObj.val());
             if (val === null)
                 return val;
             var hours = Math.floor(val/100);
@@ -186,7 +184,7 @@
         };
 
         newElm.isError = function (desc) {
-            var val = newElm.getValue$();
+            var val = newElm.getValue$(newElm.jqObj.val());
             if (required && val === null) {
                 utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
@@ -219,7 +217,7 @@
         };
 
         Component.TimeInput.$formattime = function (elm) {
-            var val = newElm.getValue();
+            var val = newElm.getValue$(elm.value.trim());
             if (val === null)
                 return '';
             return timeutils.format(val, elm.kiss.elementInfo.zero_fill);
