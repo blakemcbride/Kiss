@@ -8,7 +8,7 @@
  * the actual tag they represent would have a dash instead.
  * <br><br>
  * In addition to the additional capabilities offered by some of these controls, many are enhancements over features already provided by HTML.
- * These enhancements offer significant additioanl functionality as well as a more consistent interface.
+ * These enhancements offer significant additional functionality as well as a more consistent interface.
  * <br><br>
  * In addition to the tag attributes and content documented here, most of these new HTML tags also support the standard attributes
  * that HTML normally supports (such as "style" and "id").  Each of these controls (except <code>radio-button</code>) <em>require</em> the "id" attribute in order
@@ -18,7 +18,7 @@
  * <br><br>
  *     &nbsp;&nbsp;&nbsp;&nbsp; <code>&lt;text-input id="fname"&gt;&lt;/text-input&gt;</code>
  *  <br><br>
- *  You would acces that control in your code with <code>$$('fname')</code>  Methods available withing that control are
+ *  You would access that control in your code with <code>$$('fname')</code>  Methods available withing that control are
  *  accessed from that point.  For example, one method available to <code>text-input</code> is <code>hide()</code>.
  *  This method can be accessed as follows:
  *  <br><br>
@@ -64,7 +64,7 @@ class components {
      * <br>
      * <strong>Content</strong>
      * <br><br>
-     *     The <em>Content</em> represents the label assoiated with the checkbox.
+     *     The <em>Content</em> represents the label associated with the checkbox.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
