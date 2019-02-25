@@ -352,4 +352,18 @@ public class Cursor implements AutoCloseable {
         return s.charAt(0);
     }
 
+    /**
+     * Return the <code>byte[]</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Record#get(String)
+     */
+    public byte [] getByteArray(String cname) throws SQLException {
+        return (byte []) get(cname);
+    }
+
 }

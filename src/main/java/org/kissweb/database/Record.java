@@ -258,6 +258,20 @@ public class Record implements AutoCloseable {
     }
 
     /**
+     * Return the <code>byte[]</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor#get(String)
+     */
+    public byte [] getByteArray(String cname) throws SQLException {
+        return (byte []) get(cname);
+    }
+
+    /**
      * Erases all the column information associated with a <code>Record</code> instance.
      *
      * @return this
