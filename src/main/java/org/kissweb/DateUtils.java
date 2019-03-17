@@ -476,6 +476,91 @@ public class DateUtils {
         return 0;
     }
 
+    /**
+     * Convert a date into the number of days since a certain date (julian date)
+     *
+     * @param dt YYYYMMDD
+     * @return number of days since some early start date
+     */
+    public static long julian(int dt) {
+        /* This can't be done some of the more obvious ways because of changes in daylight savings time.  */
+        long d, y, m;
+
+        if (dt <= 0)
+            return dt;
+        y = dt / 10000L;
+        m = (dt % 10000L) / 100L;
+        d = dt % 100L;
+        d += (long) (.5 + (m - 1L) * 30.57);
+        if (m >	2L)
+            d--;
+		if (0L != y % 400L  &&  (0L != y % 4L  ||  0L == y % 100L))
+			d--;
+        d += (long) (365.25 * --y);
+        d += y / 400L;
+        d -= y / 100L;
+        return d;
+    }
+
+    /**
+     * Convert a julian date back into a standard date.
+     *
+     * @param d
+     * @return YYYYMMDD
+     */
+    public static long calendar(long d)
+    {
+        long	y, m, t;
+
+        if (d <= 0L)
+            return d;
+        y = (long)(1.0 + d / 365.2425);
+        t = y -	1L;
+        d -= (long) (t * 365.25);
+        d -= t / 400L;
+        d += t / 100L;
+        if (d >	59L  &&	 0L != y % 400L	 &&  (0L != y %	4  ||  0L == y % 100L))
+            d++;
+        if (d >	60L)
+            d++;
+        m = (long)((d + 30L) / 30.57);
+        d -= (long) Math.floor(.5 + (m - 1L) * 30.57);
+        if (m == 13)  {
+            m = 1;
+            ++y;
+        }  else  if (m == 0L)  {
+            m = 12;
+            --y;
+        }
+        return 10000L * y + m * 100L + d;
+    }
+
+    /**
+     * Returns the full month name.
+     *
+     * @param dt YYYYMMDD
+     * @return
+     */
+    public static String DayOfWeek(int dt) {
+        if (dt <= 0)
+            return "";
+        switch ((int)(julian(dt) % 7L)) {
+            case 0:  return "January";
+            case 1:  return "February";
+            case 2:  return "March";
+            case 3:  return "April";
+            case 4:  return "May";
+            case 5:  return "June";
+            case 6:  return "July";
+            case 7:  return "August";
+            case 8:  return "September";
+            case 9:  return "October";
+            case 10:  return "November";
+            case 11:  return "December";
+            default:  return "";
+        }
+    }
+
     public static void main(String [] argv) {
         System.out.println(parse("6/8/2018"));
     }
