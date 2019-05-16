@@ -84,7 +84,7 @@ public class NumberFormat {
         } else
             sign = 0;
 
-		/*  round number  */
+        /*  round number  */
 
         if (dp >= 0) {
             double r = Math.pow(dbase, (double) dp);
@@ -122,7 +122,7 @@ public class NumberFormat {
                 if (1E-5 >= n)
                     break;
                 dp++;
-				/*  round n to 5 places	 */
+                /*  round n to 5 places	 */
                 double r = Math.pow(10.0, 5.0);
                 r = Math.floor(.5 + Math.abs(n * base * r)) / r;
                 n = n < 0.0 ? -r : r;
@@ -131,8 +131,8 @@ public class NumberFormat {
         blnk = comma = left = paren = zfill = dol = ucase = percent = 0;
         if (msk != null) {
             char [] t2 = msk.toCharArray();
-            for (int i2 = 0; i2 < t2.length; i2++)
-                switch (t2[i2]) {
+            for (char c : t2)
+                switch (c) {
                     case 'B':  // blank if zero
                         blnk = 1;
                         break;
@@ -159,7 +159,7 @@ public class NumberFormat {
                         break;
                 }
         }
-		/*  calculate what the number should take up	*/
+        /*  calculate what the number should take up	*/
 
         ez = num < 1.0 ? 1 : 0;
         tw = dol + paren + comma + sign + dl + dp + (dp == 0 ? 0 : 1) + ez + percent;
@@ -197,7 +197,6 @@ public class NumberFormat {
             return new String(buf);
         }
         si = wth;
-
 
         if (left != 0 && wth > tw) {
             i = wth - tw;
@@ -243,25 +242,24 @@ public class NumberFormat {
             while (si > i)
                 buf[--si] = '0';
         }
+        if (dol != 0 && si != 0)
+            buf[--si] = '$';
         if (sign != 0)
             if (si != 0)
                 buf[--si] = (paren != 0 ? '(' : '-');
             else
                 num = 1.0;	/*  signal error condition	*/
 
-        if (dol != 0 && si != 0)
-            buf[--si] = '$';
-
         while (si != 0)
             buf[--si] = ' ';
 
         if (num != 0.0)         /*  should never happen. but just in case	*/
-
             for (i = 0; i < wth;)
                 buf[i++] = '*';
 
         return new String(buf);
     }
+
     /**
      *  Numeric	formatter.  Takes a double and converts it to a nicely formatted String (for number in base 10).
      *
