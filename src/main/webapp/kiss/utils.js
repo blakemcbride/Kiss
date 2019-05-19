@@ -443,15 +443,14 @@ class utils {
         if (zfill)
             for (i = sign + dol; si > i;)
                 buf[--si] = '0';
+        if (dol && si)
+            buf[--si] = '$';
         if (sign)
             if (si)
                 buf[--si] = paren ? '(' : '-';
             else
                 num = 1.0;
         /*  signal error condition */
-
-        if (dol && si)
-            buf[--si] = '$';
 
         while (si)
             buf[--si] = ' ';
