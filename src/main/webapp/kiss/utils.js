@@ -409,12 +409,10 @@ class utils {
         if (left && wth > tw)
             for (i = wth - tw; i--;)
                 buf[--si] = ' ';
-        if (percent)
-            buf[--si] = '%';
-
         if (paren)
             buf[--si] = sign ? ')' : ' ';
-
+        if (percent)
+            buf[--si] = '%';
         for (nd = 0; nd < dp && si; nd++) {
             num /= dbase;
             i = Math.floor(dbase * (num - Math.floor(num)) + .5);

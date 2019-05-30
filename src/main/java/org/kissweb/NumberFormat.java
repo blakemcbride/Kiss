@@ -203,12 +203,10 @@ public class NumberFormat {
             while (i-- != 0)
                 buf[--si] = ' ';
         }
-        if (percent != 0)
-            buf[--si] = '%';
-
         if (paren != 0)
             buf[--si] = (sign != 0 ? ')' : ' ');
-
+        if (percent != 0)
+            buf[--si] = '%';
         for (nd = 0; nd < dp && si != 0; nd++) {
             num /= dbase;
             i = (int) Math.floor(dbase * (num - Math.floor(num)) + .5);
