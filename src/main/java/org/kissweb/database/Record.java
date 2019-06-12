@@ -34,7 +34,6 @@ package org.kissweb.database;
 
 import java.sql.*;
 import java.util.*;
-import java.util.function.Consumer;
 
 
 /**
