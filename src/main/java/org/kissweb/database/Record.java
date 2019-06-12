@@ -304,12 +304,9 @@ public class Record implements AutoCloseable {
         if (table == null)
             throw new RuntimeException("Can't update record; no table name");
         LinkedList<AbstractMap.SimpleEntry<String,Object>> cf = new LinkedList<>();
-        cols.entrySet().forEach((Map.Entry<String, Object> item) -> {
-            String key = item.getKey();
-            Object val = item.getValue();
-            if (!ocols.containsKey(key) || ocols.get(key) != val) {
+        cols.forEach((key, val) -> {
+            if (!ocols.containsKey(key) || ocols.get(key) != val)
                 cf.addFirst(new AbstractMap.SimpleEntry<>(key, val));
-            }
         });
         if (!cf.isEmpty()) {
             StringBuilder sql = new StringBuilder("update " + table + " set ");
@@ -416,7 +413,6 @@ public class Record implements AutoCloseable {
      * @see #addRecord()
      */
     public Object addRecordAutoInc() throws SQLException {
-        String colname = conn.getPrimaryColumnName(table);
         if (pstmt == null) {
             StringBuilder sql = new StringBuilder("insert into " + table + " (");
             boolean needComma = false;
@@ -502,6 +498,33 @@ public class Record implements AutoCloseable {
     }
 
     /**
+     * Copy all columns from rec to 'this' that have the same column names and types
+     *
+     * @param rec the record to be copied from
+     */
+    public void copyCorresponding(Record rec) {
+        for (Map.Entry<String,Object> entry : rec.cols.entrySet()) {
+            String key = entry.getKey();
+            if (!cols.containsKey(key))
+                continue;
+            Object src = entry.getValue();
+            Object dest = cols.get(key);
+            if (dest == null  ||  src == null  ||  dest.getClass() == src.getClass())
+                cols.replace(key, src);
+        }
+    }
+
+    /**
+     * Copy all columns from rec to 'this'
+     *
+     * @param rec the record to be copied from
+     */
+    public void copy(Record rec) {
+        for (Map.Entry<String,Object> entry : rec.cols.entrySet())
+            cols.put(entry.getKey(), entry.getValue());
+    }
+
+    /**
      * Closes any open prepared statements against this record.  It is not normally needed since
      * this class implements the AutoCloseable interface.
      */
@@ -527,7 +550,7 @@ public class Record implements AutoCloseable {
 
     /**
      * Returns the name of the table associated to this <code>Record</code> instance.
-     * 
+     *
      * @return
      */
     public String getTableName() {
