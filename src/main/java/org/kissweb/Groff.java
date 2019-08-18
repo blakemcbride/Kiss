@@ -21,7 +21,7 @@ public class Groff {
     /**
      * Initialize a new report.  The files it uses are put in temporary files
      * that are auto-cleaned and in a place that can be servied to the front-end.
-     * On the front-end side, see JavaScript utils.showReport()
+     * On the front-end side, see JavaScript Utils.showReport()
      *
      * @param fnamePrefix file name prefix
      * @param title     report title

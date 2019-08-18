@@ -1,16 +1,16 @@
 
-/* global $$, utils, Server */
+/* global $$, Utils, Server */
 
 'use strict';
 
 
 
 $$('rest-services').onclick(function () {
-    utils.loadPage('RestServices/RestServices', 'app-screen-area');
+    Utils.loadPage('RestServices/RestServices', 'app-screen-area');
 });
 
 $$('controls').onclick(function () {
-    utils.loadPage('Controls/Controls', 'app-screen-area');
+    Utils.loadPage('Controls/Controls', 'app-screen-area');
 });
 
 

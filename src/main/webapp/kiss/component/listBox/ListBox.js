@@ -3,7 +3,7 @@
       Date:  5/25/18
  */
 
-/* global utils */
+/* global Utils */
 
 'use strict';
 
@@ -36,7 +36,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 case 'size':
                     size = attr[prop];
@@ -49,7 +49,7 @@
         if (!size)
             size = '2';  // make sure it isn't a dropdown
 
-        var newElm = utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}" size="{size}">{content}</select>', {
+        var newElm = Utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}" size="{size}">{content}</select>', {
             style: nstyle,
             attr: nattrs,
             content: content,
@@ -113,7 +113,7 @@
                 return false;
             var val = newElm.getValue();
             if (!val) {
-                utils.showMessage('Error', desc + ' selection is required.', function () {
+                Utils.showMessage('Error', desc + ' selection is required.', function () {
                     jqObj.focus();
                 });
                 return true;
@@ -169,7 +169,7 @@
         tag: 'list-box',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
 })();
 

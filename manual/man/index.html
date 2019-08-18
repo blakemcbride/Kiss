@@ -1,7 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 6.1, http://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
 <head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Kiss Manual</title>
 
 <meta name="description" content="Kiss Manual">
@@ -9,7 +10,6 @@
 <meta name="resource-type" content="document">
 <meta name="distribution" content="global">
 <meta name="Generator" content="makeinfo">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <link href="#SEC_Contents" rel="contents" title="Table of Contents">
 <style type="text/css">
 <!--
@@ -330,7 +330,7 @@ if (res._Success) {
 <p>Add to JavaScript:
 </p>
 <div class="example">
-<pre class="example">utils.useComponent('MyComponent');
+<pre class="example">Utils.useComponent('MyComponent');
 </pre></div>
     
 <p>The component can put any HTML in the component location, have any
@@ -1107,7 +1107,7 @@ tables, and overall formatting of your reports. See
 </p>
 <p>When files are produced by the back-end, they are sent to the
 front-end by just providing the URL to the file.  At that point, the
-front-end <code>utils.showReport</code> takes the URL returned by the back-end
+front-end <code>Utils.showReport</code> takes the URL returned by the back-end
 and downloads the file.
 </p>
 
@@ -1130,7 +1130,7 @@ browser makes a lot of sense for the following reasons:
 <ol>
 <li> Minimize the dependence the front-end and back-end have on each other.  This means that one end can be changed without necessitating
 the need for the other to change.  In other words, they are minimally dependent on each other.
-<ol>
+<ol type="a" start="1">
 <li> In this rapidly changing environment, minimizing dependencies means minimizing the amount of code that has to be changed as technology changes.
 </li><li> Code is easier to understand and maintain since you don&rsquo;t have four totally different languages in the same file.
 </li></ol>
@@ -1191,14 +1191,14 @@ functionality.
 <p><em>Kiss</em> provides the ability to create your own custom HTML tags
 or elements as well as use those provided by <em>Kiss</em>.  There are
 two principal user methods that make this work.
-<code>utils.useComponent</code> is used to load either a <em>Kiss</em> defined
+<code>Utils.useComponent</code> is used to load either a <em>Kiss</em> defined
 component or one you define yourself (there is no difference).  This
 loads the JavaScript file that defines the new tag.  All of the
 components that come with the <em>Kiss</em> system are under the
 <code>src/main/webapp/kiss/component</code> directory.  You can see those
 files for examples of how custom tags are defined.
 </p>
-<p>New application pages are loaded with the <code>utils.loadPage</code>
+<p>New application pages are loaded with the <code>Utils.loadPage</code>
 method.  In addition to loading the HTML and JavaScript code
 associated with that page, this method performs the processing
 necessary to make the components work.  It does this intelligently so
@@ -1221,7 +1221,7 @@ Tagless components allow you to encapsulate a block of functionality (including 
 a neat package that can be re-used in any number of places.
 </p>
 <p>The method used to load tagless components is
-<code>utils.useTaglessComponent</code>.  Later, when the tagless component
+<code>Utils.useTaglessComponent</code>.  Later, when the tagless component
 is needed, one would execute <code>Kiss.MyComponent.run(in_data, on_exit)</code> (where
 <code>MyComponent</code> is the name of your tagless component.  
 <code>in_data</code> represents possible data passed to the component on entry.
@@ -1271,10 +1271,10 @@ the body of the grid.
 <p>There are only two JavaScript functions used to control the popup.
 </p>
 <dl compact="compact">
-<dt><code>utils.popup_open(id [, focus-id])</code></dt>
+<dt><code>Utils.popup_open(id [, focus-id])</code></dt>
 <dd><p>open the popup indicated by the <code>id</code>, and if <code>focus-id</code> is present, set initial focus to that control
 </p></dd>
-<dt><code>utils.popup_close(id)</code></dt>
+<dt><code>Utils.popup_close(id)</code></dt>
 <dd><p>close the popup indicated by the <code>id</code>
 </p></dd>
 </dl>
@@ -1302,17 +1302,17 @@ attribute should be added to the HTML.
 <p>The button is used to activate the upload process.  Your code that
 sends the file(s) to the server should be attached to this button.
 </p>
-<p>The <code>utils</code> class contains the helper functions <code>getFileUploadCount</code>
+<p>The <code>Utils</code> class contains the helper functions <code>getFileUploadCount</code>
 and <code>getFileUploadFormData</code>, and the main function used to
 send the files is <code>fileUploadSend</code> in the <code>Server</code> class.
 The code would look like the following:
 </p>
 <div class="example">
-<pre class="example">if (!utils.getFileUploadCount('myUpload')) {
-    utils.showMessage(&quot;Error&quot;, &quot;No file specified.&quot;);
+<pre class="example">if (!Utils.getFileUploadCount('myUpload')) {
+    Utils.showMessage(&quot;Error&quot;, &quot;No file specified.&quot;);
     return;
 }
-let data = utils.getFileUploadFormData('myUpload');
+let data = Utils.getFileUploadFormData('myUpload');
 
 data.append('add1', miscAdditionalData);  // misc data
 data.append('add2', miscAdditionalData2); // misc data
@@ -1350,7 +1350,7 @@ Server.fileUploadSend('TheService', 'theMethod', data);
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code>src/main/webapp/kiss</code> directory and have names such as
-<code>datetimeutils.js</code>, <code>dateutils</code>, <code>timeutils</code>, <code>utils</code>, etc.  These utilities
+<code>DateTimeUtils.js</code>, <code>DateUtils</code>, <code>TimeUtils</code>, <code>Utils</code>, etc.  These utilities
 are documented in the front-end API documentation.
 </p>
 <a name="Controlling-Browser-Cache-1"></a>

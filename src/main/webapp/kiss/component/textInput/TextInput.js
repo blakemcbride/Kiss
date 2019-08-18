@@ -3,7 +3,7 @@
       Date:  4/18/18
  */
 
-/* global utils, Component */
+/* global Utils, Component */
 
 'use strict';
 
@@ -26,7 +26,7 @@
 
                 // new attributes
                 case 'minlength':
-                    min = Number(utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    min = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
                 case 'upcase':
                     upcase = true;
@@ -45,7 +45,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
@@ -55,7 +55,7 @@
 
         nattrs += ' oninput="this.value=Component.TextInput.$textinput(this)" autocorrect="off" autocapitalize="off" spellcheck="false"';
 
-        var newElm = utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
+        var newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             type: password ? 'password' : 'text',
             style: nstyle,
             attr: nattrs,
@@ -118,7 +118,7 @@
                         msg = desc + ' is required.';
                     else
                         msg = desc + ' must be at least ' + min + ' characters long.';
-                    utils.showMessage('Error', msg, function () {
+                    Utils.showMessage('Error', msg, function () {
                         jqObj.focus();
                     });
                     return true;
@@ -134,7 +134,7 @@
         tag: 'text-input',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
 
     Component.TextInput.$textinput = function (elm) {

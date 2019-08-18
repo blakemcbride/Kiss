@@ -1,4 +1,4 @@
-/* global dateutils, timeutils */
+/* global DateUtils, TimeUtils */
 
 /**
 * Created by Blake McBride on 6/16/18.
@@ -11,7 +11,7 @@
  * Class to deal with dates and times together.
  *
  */
-class datetimeutils {
+class DateTimeUtils {
 
     /**
      * Format a Date to a string representation looking like mm/dd/yyyy hh:mm
@@ -49,8 +49,8 @@ class datetimeutils {
     static formatInt(dt, time) {
         if (!dt && (time === undefined || time === null || time === ''))
             return '';
-        var res = dateutils.intToStr4(dt);
-        var tf = timeutils.format(time);
+        var res = DateUtils.intToStr4(dt);
+        var tf = TimeUtils.format(time);
         if (res && tf)
             return res + ' ' + tf;
         else
@@ -59,4 +59,4 @@ class datetimeutils {
 }
 
 
-//# sourceURL=kiss/datetimeutils.js
+//# sourceURL=kiss/DateTimeUtils.js

@@ -3,7 +3,7 @@
       Date:  6/18/18
  */
 
-/* global utils, timeutils, Component */
+/* global Utils, TimeUtils, Component */
 
 'use strict';
 
@@ -28,10 +28,10 @@
                 // new attributes
 
                 case 'min':
-                    min = Number(utils.removeQuotes(attr[prop]));
+                    min = Number(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'max':
-                    max = Number(utils.removeQuotes(attr[prop]));
+                    max = Number(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'required':
                     required = true;
@@ -45,7 +45,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
@@ -56,7 +56,7 @@
         nattrs += ' oninput="this.value=Component.TimeInput.$timeinput(this)"';
         nattrs += ' onfocusout="this.value=Component.TimeInput.$formattime(this)"';
 
-        var newElm = utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
+        var newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
@@ -140,7 +140,7 @@
                 jqObj.val('');
                 return this;
             }
-            jqObj.val(timeutils.format(val, zero_fill));
+            jqObj.val(TimeUtils.format(val, zero_fill));
             return this;
         };
 
@@ -186,7 +186,7 @@
         newElm.isError = function (desc) {
             var val = newElm.getValue$(newElm.jqObj.val());
             if (required && val === null) {
-                utils.showMessage('Error', desc + ' is required.', function () {
+                Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
@@ -194,7 +194,7 @@
             let hours = Math.floor(val/100);
             let minutes = val % 100;
             if (hours > 23  ||  minutes > 59) {
-                utils.showMessage('Error', desc + ' is not a valid date.', function () {
+                Utils.showMessage('Error', desc + ' is not a valid date.', function () {
                     jqObj.focus();
                 });
                 return true;
@@ -202,13 +202,13 @@
             if (min !== null  &&  val < min  ||  max !== null && val > max) {
                 var msg;
                 if ((min || min === 0) && (max || max === 0))
-                    msg = desc + ' must be between ' + timeutils.format(min) +
-                        ' and ' + timeutils.format(max) + '.';
+                    msg = desc + ' must be between ' + TimeUtils.format(min) +
+                        ' and ' + TimeUtils.format(max) + '.';
                 else if (min  ||  min === 0)
-                    msg = desc + ' must be greater than or equal to ' + timeutils.format(min) + '.';
+                    msg = desc + ' must be greater than or equal to ' + TimeUtils.format(min) + '.';
                 else
-                    msg = desc + ' must be less than or equal to ' + timeutils.format(max) + '.';
-                utils.showMessage('Error', msg, function () {
+                    msg = desc + ' must be less than or equal to ' + TimeUtils.format(max) + '.';
+                Utils.showMessage('Error', msg, function () {
                     jqObj.focus();
                 });
                 return true;
@@ -220,7 +220,7 @@
             var val = newElm.getValue$(elm.value.trim());
             if (val === null)
                 return '';
-            return timeutils.format(val, elm.kiss.elementInfo.zero_fill);
+            return TimeUtils.format(val, elm.kiss.elementInfo.zero_fill);
         };
 
     };
@@ -230,13 +230,13 @@
         tag: 'time-input',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
     Component.TimeInput.$timeinput = function (elm) {
         var val1 = elm.value.trim();
         var val2 = val1.replace(/[^0-9 :ampAMP]/g,'');  // remove characters
         if (val1 !== val2) {
-            utils.beep();
+            Utils.beep();
             return val2;
         }
         var nc = 0;
@@ -244,7 +244,7 @@
             var c = val2.charAt(i);
             if (c === ':')
                 if (++nc > 1) {
-                    utils.beep();
+                    Utils.beep();
                     return val2;
                 }
         }

@@ -3,7 +3,7 @@
       Date:  4/18/18
  */
 
-/* global utils, Component */
+/* global Utils, Component */
 
 'use strict';
 
@@ -31,16 +31,16 @@
                 // new attributes
 
                 case 'decimal-places':
-                    dp = Number(utils.removeQuotes(attr[prop]));
+                    dp = Number(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'dollar-sign':
                     dollar = true;
                     break;
                 case 'min':
-                    min = Number(utils.removeQuotes(attr[prop]));
+                    min = Number(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'max':
-                    max = Number(utils.removeQuotes(attr[prop]));
+                    max = Number(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'show-zero':
                     show_zero = true;
@@ -59,7 +59,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
@@ -70,7 +70,7 @@
         nattrs += ' oninput="this.value=Component.NumericInput.$numberinput(this)"';
         nattrs += ' onfocusout="this.value=Component.NumericInput.$formatnumber(this)"';
 
-        var newElm = utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
+        var newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
@@ -99,7 +99,7 @@
                 }
             if (typeof val === 'string')
                 val = Number(val);
-            var str = utils.format(val, "C"+(dollar?"D":"")+(show_zero?"":"B"), 0, dp);
+            var str = Utils.format(val, "C"+(dollar?"D":"")+(show_zero?"":"B"), 0, dp);
             jqObj.val(str);
             return this;
         };
@@ -137,7 +137,7 @@
         newElm.isError = function (desc) {
             var val = newElm.getValue();
             if (required && !val) {
-                utils.showMessage('Error', desc + ' is required.', function () {
+                Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
@@ -145,13 +145,13 @@
             if (min !== null  &&  val < min  ||  max !== null && val > max) {
                 var msg;
                 if ((min || min === 0) && (max || max === 0))
-                    msg = desc + ' must be between ' + utils.format(min, "C"+(dollar?"D":""), 0, dp) +
-                        ' and ' + utils.format(max, "C"+(dollar?"D":""), 0, dp) + '.';
+                    msg = desc + ' must be between ' + Utils.format(min, "C"+(dollar?"D":""), 0, dp) +
+                        ' and ' + Utils.format(max, "C"+(dollar?"D":""), 0, dp) + '.';
                 else if (min  ||  min === 0)
-                    msg = desc + ' must be greater than or equal to ' + utils.format(min, "C"+(dollar?"D":""), 0, dp) + '.';
+                    msg = desc + ' must be greater than or equal to ' + Utils.format(min, "C"+(dollar?"D":""), 0, dp) + '.';
                 else
-                    msg = desc + ' must be less than or equal to ' + utils.format(max, "C"+(dollar?"D":""), 0, dp) + '.';
-                utils.showMessage('Error', msg, function () {
+                    msg = desc + ' must be less than or equal to ' + Utils.format(max, "C"+(dollar?"D":""), 0, dp) + '.';
+                Utils.showMessage('Error', msg, function () {
                     jqObj.focus();
                 });
                 return true;
@@ -166,7 +166,7 @@
         tag: 'numeric-input',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
     Component.NumericInput.$numberinput = function (elm) {
         var val = elm.value.trim();
@@ -184,7 +184,7 @@
         var ndr = 0;  // number of digits to the right of the decimal point
         var andp = elm.kiss.elementInfo.dp;
         if (elm.value.trim() !== val)
-            utils.beep();
+            Utils.beep();
         for (var i=0 ; i < val.length ; i++) {
             var c = val.charAt(i);
             if (c === '.') {
@@ -192,13 +192,13 @@
                     ndp++;
                     ret += c;
                 } else
-                    utils.beep();
+                    Utils.beep();
             } else if (ndp) {
                 if (ndr < andp  ||  andp < 0) {
                     ndr++;
                     ret += c;
                 } else
-                    utils.beep();
+                    Utils.beep();
             } else
                 ret += c;
         }
@@ -212,7 +212,7 @@
         if (!sval.length)
             return sval;
         var nval = Number(sval);
-        return utils.format(nval, "C" + (elm.kiss.elementInfo.dollarSign ? 'D' : '')+(elm.kiss.elementInfo.blankIfZero?"":"B"), 0, ndp);
+        return Utils.format(nval, "C" + (elm.kiss.elementInfo.dollarSign ? 'D' : '')+(elm.kiss.elementInfo.blankIfZero?"":"B"), 0, ndp);
     };
 
 })();

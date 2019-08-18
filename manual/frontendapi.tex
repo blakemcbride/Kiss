@@ -113,14 +113,14 @@ functionality.
 @emph{Kiss} provides the ability to create your own custom HTML tags
 or elements as well as use those provided by @emph{Kiss}.  There are
 two principal user methods that make this work.
-@code{utils.useComponent} is used to load either a @emph{Kiss} defined
+@code{Utils.useComponent} is used to load either a @emph{Kiss} defined
 component or one you define yourself (there is no difference).  This
 loads the JavaScript file that defines the new tag.  All of the
 components that come with the @emph{Kiss} system are under the
 @code{src/main/webapp/kiss/component} directory.  You can see those
 files for examples of how custom tags are defined.
 
-New application pages are loaded with the @code{utils.loadPage}
+New application pages are loaded with the @code{Utils.loadPage}
 method.  In addition to loading the HTML and JavaScript code
 associated with that page, this method performs the processing
 necessary to make the components work.  It does this intelligently so
@@ -142,7 +142,7 @@ Tagless components allow you to encapsulate a block of functionality (including 
 a neat package that can be re-used in any number of places.
 
 The method used to load tagless components is
-@code{utils.useTaglessComponent}.  Later, when the tagless component
+@code{Utils.useTaglessComponent}.  Later, when the tagless component
 is needed, one would execute @code{Kiss.MyComponent.run(in_data, on_exit)} (where
 @code{MyComponent} is the name of your tagless component.  
 @code{in_data} represents possible data passed to the component on entry.
@@ -190,9 +190,9 @@ An examples is as follows:
 There are only two JavaScript functions used to control the popup.
 
 @table @code
-@item utils.popup_open(id [, focus-id])
+@item Utils.popup_open(id [, focus-id])
 open the popup indicated by the @code{id}, and if @code{focus-id} is present, set initial focus to that control
-@item utils.popup_close(id)
+@item Utils.popup_close(id)
 close the popup indicated by the @code{id}
 @end table
 
@@ -220,17 +220,17 @@ attribute should be added to the HTML.
 The button is used to activate the upload process.  Your code that
 sends the file(s) to the server should be attached to this button.
 
-The @code{utils} class contains the helper functions @code{getFileUploadCount}
+The @code{Utils} class contains the helper functions @code{getFileUploadCount}
 and @code{getFileUploadFormData}, and the main function used to
 send the files is @code{fileUploadSend} in the @code{Server} class.
 The code would look like the following:
 
 @example
-if (!utils.getFileUploadCount('myUpload')) @{
-    utils.showMessage("Error", "No file specified.");
+if (!Utils.getFileUploadCount('myUpload')) @{
+    Utils.showMessage("Error", "No file specified.");
     return;
 @}
-let data = utils.getFileUploadFormData('myUpload');
+let data = Utils.getFileUploadFormData('myUpload');
 
 data.append('add1', miscAdditionalData);  // misc data
 data.append('add2', miscAdditionalData2); // misc data
@@ -268,7 +268,7 @@ public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet
 
 @emph{Kiss} includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the @code{src/main/webapp/kiss} directory and have names such as
-@code{datetimeutils.js}, @code{dateutils}, @code{timeutils}, @code{utils}, etc.  These utilities
+@code{DateTimeUtils.js}, @code{DateUtils}, @code{TimeUtils}, @code{Utils}, etc.  These utilities
 are documented in the front-end API documentation.
 
 @section Controlling Browser Cache

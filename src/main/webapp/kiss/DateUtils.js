@@ -1,4 +1,4 @@
-/* global utils */
+/* global Utils */
 
 /**
  * Created by Blake McBride on 3/15/18.
@@ -17,7 +17,7 @@
      SQL          "2018-03-22"
      Date         JavaScript Date object
  */
-class dateutils {
+class DateUtils {
 
     /**
      * Converts a string date "mM/dD/yyYY" to an integer of the form YYYYMMDD.
@@ -114,7 +114,7 @@ class dateutils {
             val = $.trim(val);
         if (!val)
             return false;
-        var dt = dateutils.strToInt(val);
+        var dt = DateUtils.strToInt(val);
         return !!dt;
     }
 
@@ -129,7 +129,7 @@ class dateutils {
             val = $.trim(val);
         if (!val)
             return false;
-        var dt = dateutils.SQLtoInt(val);
+        var dt = DateUtils.SQLtoInt(val);
         return !!dt;
     }
 
@@ -146,7 +146,7 @@ class dateutils {
         dt -= y * 10000;
         var m = Math.floor(dt / 100);
         var d = Math.floor(dt - m * 100);
-        return utils.take(m.toString(), -2) + '/' + utils.zeroPad(d, 2) + '/' + utils.zeroPad(y, 4);
+        return Utils.take(m.toString(), -2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 4);
     }
 
     /**
@@ -162,7 +162,7 @@ class dateutils {
         dt -= y * 10000;
         var m = Math.floor(dt / 100);
         var d = Math.floor(dt - m * 100);
-        return utils.format(y, "Z", 4, 0) + '-' + utils.format(m, "Z", 2, 0) + '-' + utils.format(d, "Z", 2, 0);
+        return Utils.format(y, "Z", 4, 0) + '-' + Utils.format(m, "Z", 2, 0) + '-' + Utils.format(d, "Z", 2, 0);
     }
 
     /**
@@ -179,7 +179,7 @@ class dateutils {
         y %= 100;
         var m = Math.floor(dt / 100);
         var d = Math.floor(dt - m * 100);
-        return utils.take(m.toString(), -2) + '/' + utils.zeroPad(d, 2) + '/' + utils.zeroPad(y, 2);
+        return Utils.take(m.toString(), -2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 2);
     }
 
     /**
@@ -228,7 +228,7 @@ class dateutils {
      * @returns {int}
      */
     static intAddDays(dt, days) {
-        return dateutils.dateToInt(dateutils.dateAddDays(dateutils.intToDate(dt), days));
+        return DateUtils.dateToInt(DateUtils.dateAddDays(DateUtils.intToDate(dt), days));
     }
 
 }
@@ -236,5 +236,5 @@ class dateutils {
 
 
 
-//# sourceURL=kiss/dateutils.js
+//# sourceURL=kiss/DateUtils.js
 

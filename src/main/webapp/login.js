@@ -1,5 +1,5 @@
 
-/* global $$, Server, utils */
+/* global $$, Server, Utils */
 
 'use strict';
 
@@ -17,7 +17,7 @@ $$('login').onclick(async function () {
         let res = await Server.call('', 'Login', data);
         if (res._Success) {
             Server.setUUID(res.uuid);
-            utils.loadPage('MainMenu/MainMenu');
+            Utils.loadPage('MainMenu/MainMenu');
         }
     }
 

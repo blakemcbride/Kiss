@@ -3,7 +3,7 @@
       Date:  4/25/18
  */
 
-/* global utils, Component */
+/* global Utils, Component */
 
 'use strict';
 
@@ -26,7 +26,7 @@
 
                 // new attributes
                 case 'minlength':
-                    min = Number(utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    min = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
                 case 'upcase':
                     upcase = true;
@@ -42,7 +42,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
@@ -52,7 +52,7 @@
 
         nattrs += ' oninput="this.value=Component.TextboxInput.$textinput(this)"';
 
-        var newElm = utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} placeholder="{placeholder}" id="{id}"></textarea>', {
+        var newElm = Utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} placeholder="{placeholder}" id="{id}"></textarea>', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
@@ -114,7 +114,7 @@
                         msg = desc + ' is required.';
                     else
                         msg = desc + ' must be at least ' + min + ' characters long.';
-                    utils.showMessage('Error', msg, function () {
+                    Utils.showMessage('Error', msg, function () {
                         jqObj.focus();
                     });
                     return true;
@@ -130,7 +130,7 @@
         tag: 'textbox-input',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
 
     Component.TextboxInput.$textinput = function (elm) {

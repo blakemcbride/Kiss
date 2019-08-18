@@ -3,7 +3,7 @@
       Date:  4/22/18
  */
 
-/* global utils */
+/* global Utils */
 
 'use strict';
 
@@ -37,7 +37,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
@@ -48,7 +48,7 @@
         if (!content  &&  default_option)
             content = '<option value="">' + default_option + '</option>';
 
-        var newElm = utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}">{content}</select>', {
+        var newElm = Utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}">{content}</select>', {
             style: nstyle,
             attr: nattrs,
             content: content
@@ -125,7 +125,7 @@
                 return false;
             var val = newElm.getValue();
             if (!val) {
-                utils.showMessage('Error', desc + ' selection is required.', function () {
+                Utils.showMessage('Error', desc + ' selection is required.', function () {
                     jqObj.focus();
                 });
                 return true;
@@ -139,7 +139,7 @@
         tag: 'drop-down',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
 })();
 

@@ -3,7 +3,7 @@
       Date:  4/24/18
  */
 
-/* global utils */
+/* global Utils */
 
 'use strict';
 
@@ -29,7 +29,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
@@ -37,7 +37,7 @@
             }
         }
 
-        var newElm = utils.replaceHTML(id, elm, '<div style="display: inline-block;"><input type="checkbox" style="{style}" {attr} id="{id}">{content}</div>', {
+        var newElm = Utils.replaceHTML(id, elm, '<div style="display: inline-block;"><input type="checkbox" style="{style}" {attr} id="{id}">{content}</div>', {
             style: nstyle,
             attr: nattrs,
             content: content ? content.trim() : ''
@@ -90,7 +90,7 @@
         tag: 'check-box',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
 })();
 

@@ -3,7 +3,7 @@
       Date:  4/22/18
  */
 
-/* global utils, dateutils */
+/* global Utils, DateUtils */
 
 'use strict';
 
@@ -29,10 +29,10 @@
                 // new attributes
 
                 case 'min':
-                    min = Number(utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    min = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
                 case 'max':
-                    max = Number(utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
                 case 'required':
                     required = true;
@@ -43,7 +43,7 @@
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
-                    id = utils.removeQuotes(attr[prop]);
+                    id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
@@ -51,7 +51,7 @@
             }
         }
 
-        var newElm = utils.replaceHTML(id, elm, '<input type="date" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
+        var newElm = Utils.replaceHTML(id, elm, '<input type="date" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
@@ -59,7 +59,7 @@
         var jqObj = newElm.jqObj;
 
         newElm.getIntValue = function () {
-            return dateutils.SQLtoInt(jqObj.val());
+            return DateUtils.SQLtoInt(jqObj.val());
         };
 
         newElm.getSQLValue = function () {
@@ -67,14 +67,14 @@
         };
 
         newElm.getDateValue = function () {
-            return dateutils.intToDate(dateutils.SQLtoInt(jqObj.val()));
+            return DateUtils.intToDate(DateUtils.SQLtoInt(jqObj.val()));
         };
 
         newElm.setValue = function (val) {
             if (!val)
                 jqObj.val('');
             else if (typeof val === 'number')
-                jqObj.val(dateutils.intToSQL(val));
+                jqObj.val(DateUtils.intToSQL(val));
             else if (typeof val === 'string')
                 jqObj.val(val);
             else if (typeof val === 'object')  // Date
@@ -115,7 +115,7 @@
         newElm.isError = function (desc) {
             var val = newElm.getIntValue();
             if (required && !val) {
-                utils.showMessage('Error', desc + ' is required.', function () {
+                Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
@@ -123,12 +123,12 @@
             if (val && (min !== null && val < min || max !== null && val > max)) {
                 var msg;
                 if ((min || min === 0) && (max || max === 0))
-                    msg = desc + ' must be between ' + dateutils.intToStr4(min) + ' and ' + dateutils.intToStr4(max) + '.';
+                    msg = desc + ' must be between ' + DateUtils.intToStr4(min) + ' and ' + DateUtils.intToStr4(max) + '.';
                 else if (min && min !== 0)
-                    msg = desc + ' must be greater than or equal to ' + dateutils.intToStr4(min) + '.';
+                    msg = desc + ' must be greater than or equal to ' + DateUtils.intToStr4(min) + '.';
                 else
-                    msg = desc + ' must be less than or equal to ' + dateutils.intToStr4(max) + '.';
-                utils.showMessage('Error', msg, function () {
+                    msg = desc + ' must be less than or equal to ' + DateUtils.intToStr4(max) + '.';
+                Utils.showMessage('Error', msg, function () {
                     jqObj.focus();
                 });
                 return true;
@@ -142,7 +142,7 @@
         tag: 'date-input',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
 })();
 

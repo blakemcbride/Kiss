@@ -1,4 +1,4 @@
-/* global utils */
+/* global Utils */
 
 /**
  * Created by Blake McBride on 9/24/16.
@@ -62,7 +62,7 @@ class Server {
                 dataType: 'json',
                 success: function (data, status, hdr) {
                     if (!data._Success)
-                        utils.showMessage('Error', data._ErrorMessage);
+                        Utils.showMessage('Error', data._ErrorMessage);
                     resolve(data);
                 },
                 error: function (error, status) {
@@ -71,7 +71,7 @@ class Server {
                         return;
                     }
                     const msg = 'Error communicating with the server.';
-                    utils.showMessage('Error', msg);
+                    Utils.showMessage('Error', msg);
                     resolve({_Success: false, _ErrorMessage: msg});
                     //reject(error, status);
                 }
@@ -91,14 +91,14 @@ class Server {
      * @param {string} meth
      * @param {FormData} data
      *
-     * @see utils.getFileUploadCount
-     * @see utils.getFileUploadFormData
+     * @see Utils.getFileUploadCount
+     * @see Utils.getFileUploadFormData
      */
     static fileUploadSend(cls, meth, data) {
         return new Promise(function (resolve, reject) {
             data.append('_class', cls);
             data.append('_method', meth);
-            utils.waitMessage("File upload in progress.");
+            Utils.waitMessage("File upload in progress.");
             $.ajax({
                 url: Server.url + '/rest',
                 type: 'POST',
@@ -108,17 +108,17 @@ class Server {
                 dataType: 'json',  // what is coming back
                 cache: false,
                 success: function (res, status, hdr) {
-                    utils.waitMessageEnd();
+                    Utils.waitMessageEnd();
                     if (res._Success)
-                        utils.showMessage("Information", "Upload successful.");
+                        Utils.showMessage("Information", "Upload successful.");
                     else
-                        utils.showMessage("Error", res._ErrorMessage);
+                        Utils.showMessage("Error", res._ErrorMessage);
                     resolve(res);
                 },
                 error: function (hdr, status, error) {
                     const msg = 'Error communicating with the server.';
-                    utils.waitMessageEnd();
-                    utils.showMessage("Error", msg);
+                    Utils.waitMessageEnd();
+                    Utils.showMessage("Error", msg);
                     resolve({_Success: false, _ErrorMessage: msg});
                 }
             });

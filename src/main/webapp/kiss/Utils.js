@@ -43,7 +43,7 @@ function $$(id) {
 /**
  * General utilities class
  */
-class utils {
+class Utils {
 
     /**
      * Display a popup window with a message to the user.  The user will click "Ok" when they have read the message.
@@ -214,7 +214,7 @@ class utils {
         } else {
             n = -n;
             if (n < s.length)
-                return utils.drop(s, s.length - n);
+                return Utils.drop(s, s.length - n);
             var sb = '';
             for (n -= s.length; n-- > 0;)
                 sb += ' ';
@@ -262,7 +262,7 @@ class utils {
      *<p>
      * Example:
      *<br><br>
-     *    var r = utils.formatb(-12345.348, 10, "CP", 12, 2);
+     *    var r = Utils.formatb(-12345.348, 10, "CP", 12, 2);
      *<br><br>
      *    result in r:   "(12,345.35)"
      * </p>
@@ -480,13 +480,13 @@ class utils {
      *<p>
      * example:
      *<br><br>
-     *    var r = utils.format(-12345.348, "CP", 12, 2);
+     *    var r = Utils.format(-12345.348, "CP", 12, 2);
      *<br><br>
      *    result in r:  "(12,345.35)"
      * </p>
      */
     static format(num, msk, wth, dp) {
-        return utils.formatb(num, 10, msk, wth, dp);
+        return Utils.formatb(num, 10, msk, wth, dp);
     }
 
     /**
@@ -565,7 +565,7 @@ class utils {
             npath = '/kiss/component/' + npath;
             loadScript(arg);
         };
-        loadComponent(utils.controlCache ? '?ver=' + utils.softwareVersion : '');
+        loadComponent(Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
     }
 
     // internal
@@ -594,7 +594,7 @@ class utils {
                 if (ci.tag)
                     $(ci.tag).each(function () {
                         var elm = $(this);
-                        ci.processor(elm, utils.getAllAttributes(elm), elm.html());
+                        ci.processor(elm, Utils.getAllAttributes(elm), elm.html());
                         n++;
                     });
             }
@@ -615,7 +615,7 @@ class utils {
         var loadScript = function (arg) {
             getScript(npath + '.js' + arg, function () {
                 if (!--Component.ComponentsBeingLoaded && Component.AfterAllComponentsLoaded) {
-                    utils.rescan();  // does all the tag replacement
+                    Utils.rescan();  // does all the tag replacement
                     Component.AfterAllComponentsLoaded();
                     Component.AfterAllComponentsLoaded = null;
                 }
@@ -628,7 +628,7 @@ class utils {
             loadScript(arg);
         };
 
-        loadComponent(utils.controlCache ? '?ver=' + utils.softwareVersion : '');
+        loadComponent(Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
     }
 
     static getAllAttributes(elm) {
@@ -668,14 +668,14 @@ class utils {
     }
 
     static nextID() {
-        return "ID-" + utils.count++;
+        return "ID-" + Utils.count++;
     }
 
     static replaceHTML(id, elm, template, rplobj) {
         if (!id)
-            id = utils.nextID();
+            id = Utils.nextID();
         rplobj.id = id;
-        var newHTML = utils.tagReplace(template, rplobj);
+        var newHTML = Utils.tagReplace(template, rplobj);
         elm.replaceWith(newHTML);
         var jqObj = $('#' + id);
         var newElm = jqObj[0];
@@ -695,13 +695,13 @@ class utils {
     static loadPage(page, tag) {
         if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
             Kiss.RadioButtons.resetGroups();
-        $.get(page + '.html' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function (text) {
+        $.get(page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function (text) {
             if (tag)
                 $('#' + tag).html(text);
             else
                 $('body').html(text);
-            utils.rescan();  // does all the tag replacement
-            getScript(page + '.js' + (utils.controlCache ? '?ver=' + utils.softwareVersion : ''), function () {
+            Utils.rescan();  // does all the tag replacement
+            getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function () {
             });
         });
     }
@@ -772,7 +772,7 @@ class utils {
 
         if (!w.hasClass('popup-modal')) {
             w.addClass('popup-modal');
-            w.css('z-index', utils.popup_zindex++);
+            w.css('z-index', Utils.popup_zindex++);
 
             let width = w.css('width');
             let height = w.css('height');
@@ -783,7 +783,7 @@ class utils {
             content = w.children();
 
             // content.css('position', 'absolute');
-            content.css('z-index', utils.popup_zindex++);
+            content.css('z-index', Utils.popup_zindex++);
             content.css('top', '50%');
             content.css('left', '50%');
             content.css('transform', 'translate(-50%, -50%)');
@@ -821,9 +821,9 @@ class utils {
      */
     static popup_close(id) {
         $('#' + id).hide();
-        utils.popup_zindex -= 2;
-        if (utils.popup_zindex < 10)
-            utils.popup_zindex = 10;
+        Utils.popup_zindex -= 2;
+        if (Utils.popup_zindex < 10)
+            Utils.popup_zindex = 10;
 
     }
 
@@ -881,9 +881,9 @@ class utils {
 
 }
 
-utils.count = 1;
+Utils.count = 1;
 
-utils.popup_zindex = 10;
+Utils.popup_zindex = 10;
 
 
-//# sourceURL=kiss/utils.js
+//# sourceURL=kiss/Utils.js

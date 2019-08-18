@@ -3,7 +3,7 @@
       Date:  4/23/18
  */
 
-/* global Kiss, utils */
+/* global Kiss, Utils */
 
 'use strict';
 
@@ -30,7 +30,7 @@ Kiss.RadioButtons.groups = {};
 
                 case 'group':
                 case 'name':
-                    group = utils.removeQuotes(attr[prop]);
+                    group = Utils.removeQuotes(attr[prop]);
                     break;
                 case 'required':
                     required = true;
@@ -53,7 +53,7 @@ Kiss.RadioButtons.groups = {};
         if (required)
             Kiss.RadioButtons.groups[group].required = true;
 
-        var nhtml = utils.tagReplace('<div style="display: inline-block;"><input type="radio" style="{style}" {attr} name="{name}">{content}</div>', {
+        var nhtml = Utils.tagReplace('<div style="display: inline-block;"><input type="radio" style="{style}" {attr} name="{name}">{content}</div>', {
             style: nstyle,
             attr: nattrs,
             name: group,
@@ -68,7 +68,7 @@ Kiss.RadioButtons.groups = {};
         tag: 'radio-button',
         processor: processor
     };
-    utils.newComponent(componentInfo);
+    Utils.newComponent(componentInfo);
 
 })();
 
@@ -85,7 +85,7 @@ Kiss.RadioButtons.isError = function (group, desc) {
         return false;
     var val = $('input[type=radio][name=' + group + ']:checked').val();
     if (!val) {
-        utils.showMessage('Error', 'A ' + desc + ' selection is required.');
+        Utils.showMessage('Error', 'A ' + desc + ' selection is required.');
         return true;
     }
     return false;

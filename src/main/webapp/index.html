@@ -9,7 +9,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="kiss/utils.css">
+    <link rel="stylesheet" href="kiss/Utils.css">
 
 
     <style>
@@ -69,8 +69,8 @@
             var controlCache = true;     // normally true but use false during debugging
 
             var afterLoad = function () {
-                utils.softwareVersion = softwareVersion;
-                utils.controlCache = controlCache;
+                Utils.softwareVersion = softwareVersion;
+                Utils.controlCache = controlCache;
                 loadScript("index.js", function () {
                     // do nothing
                 });
@@ -91,10 +91,10 @@
             };
 
             var loadUtils = function () {
-                loadScript("kiss/utils.js");
-                loadScript("kiss/dateutils.js");
-                loadScript("kiss/datetimeutils.js");
-                loadScript("kiss/timeutils.js");
+                loadScript("kiss/Utils.js");
+                loadScript("kiss/DateUtils.js");
+                loadScript("kiss/DateTimeUtils.js");
+                loadScript("kiss/TimeUtils.js");
                 loadScript("kiss/Server.js");
             };
 

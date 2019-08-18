@@ -1,4 +1,4 @@
-/* global utils */
+/* global Utils */
 
 /**
  * Created by Blake McBride on 6/18/18.
@@ -10,7 +10,7 @@
  * Time utilities.
  *
  */
-class timeutils {
+class TimeUtils {
 
     /**
      * Format time.
@@ -34,13 +34,13 @@ class timeutils {
             msk = '';
         }
         if (hours === 0)
-            return utils.format(hours + 12, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + ' AM';
+            return Utils.format(hours + 12, msk, width, 0) + ':' + Utils.format(minutes, 'Z', 2, 0) + ' AM';
         if (hours >= 13)
-            return utils.format(hours - 12, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + ' PM';
+            return Utils.format(hours - 12, msk, width, 0) + ':' + Utils.format(minutes, 'Z', 2, 0) + ' PM';
         else
-            return utils.format(hours, msk, width, 0) + ':' + utils.format(minutes, 'Z', 2, 0) + (hours === 12 ? ' PM' : ' AM');
+            return Utils.format(hours, msk, width, 0) + ':' + Utils.format(minutes, 'Z', 2, 0) + (hours === 12 ? ' PM' : ' AM');
     }
 
 }
 
-//# sourceURL=kiss/timeutils.js
+//# sourceURL=kiss/timeUtils.js
