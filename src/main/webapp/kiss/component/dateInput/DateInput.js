@@ -11,7 +11,7 @@
 (function () {
 
     var processor = function (elm, attr, content) {
-
+        var originalValue;
         var nstyle;
         var min = null;
         var max = null;
@@ -58,6 +58,8 @@
         });
         var jqObj = newElm.jqObj;
 
+        //--
+
         newElm.getIntValue = function () {
             return DateUtils.SQLtoInt(jqObj.val());
         };
@@ -79,13 +81,37 @@
                 jqObj.val(val);
             else if (typeof val === 'object')  // Date
                 jqObj.val(val);
+            jqObj.change();
+            originalValue = newElm.getIntValue();
             return this;
+        };
+
+        newElm.isDirty = function () {
+            return originalValue !== newElm.getIntValue();
         };
 
         newElm.clear = function () {
             jqObj.val('');
+            originalValue = newElm.getIntValue();
             return this;
         };
+
+
+        //--
+
+        newElm.readOnly = function () {
+            jqObj.attr('readonly', true);
+        };
+
+        newElm.readWrite = function () {
+            jqObj.attr('readonly', false);
+        };
+
+        newElm.isReadOnly = function () {
+            return jqObj.attr('readonly');
+        };
+
+        //--
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
@@ -97,6 +123,12 @@
             return this;
         };
 
+        newElm.isDisabled = function () {
+            return !!jqObj.attr('disabled');
+        };
+
+        //--
+
         newElm.hide = function () {
             jqObj.hide();
             return this;
@@ -107,24 +139,41 @@
             return this;
         };
 
+        newElm.isHidden = function () {
+            return jqObj.is(':hidden');
+        };
+
+        newElm.isVisible = function () {
+            return jqObj.is(':visible');
+        };
+
+        //--
+
         newElm.focus = function () {
             jqObj.focus();
             return this;
         };
 
+        newElm.onChange = function (func) {
+            jqObj.on('change', function () {
+                func(jqObj.val());
+            });
+            return this;
+        };
+
         newElm.isError = function (desc) {
             var val = newElm.getIntValue();
-            if (required && !val) {
+            if (required  &&  !val) {
                 Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
             }
-            if (val && (min !== null && val < min || max !== null && val > max)) {
+            if (val  &&  (min !== null  &&  val < min  ||  max !== null  &&  val > max)) {
                 var msg;
-                if ((min || min === 0) && (max || max === 0))
+                if ((min  ||  min === 0)  &&  (max  ||  max === 0))
                     msg = desc + ' must be between ' + DateUtils.intToStr4(min) + ' and ' + DateUtils.intToStr4(max) + '.';
-                else if (min && min !== 0)
+                else if (min  &&  min !== 0)
                     msg = desc + ' must be greater than or equal to ' + DateUtils.intToStr4(min) + '.';
                 else
                     msg = desc + ' must be less than or equal to ' + DateUtils.intToStr4(max) + '.';
@@ -145,7 +194,6 @@
     Utils.newComponent(componentInfo);
 
 })();
-
 
 
 //# sourceURL=kiss/component/dateInput/DateInput.js

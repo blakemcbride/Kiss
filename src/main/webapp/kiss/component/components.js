@@ -104,8 +104,15 @@ class components {
      *     <tr><td>    getIntValue()     </td><td>     returns the date as an integer with the "YYYYMMDD" format             </td></tr>
      *     <tr><td>    getSQLValue()     </td><td>     returns the date as a string with the "YYYY-MM-DD" format             </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    true if the user changed the value       </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    true if the control is disabled       </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>   true if the control is hidden (not visible)    </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>   true if the control is read-only    </td></tr>
+     *     <tr><td>    isVisible()     </td><td>   true if the control is visible (not hidden)    </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.               </td></tr>
+     *     <tr><td>    readOnly()     </td><td>    set control to read-only  </td></tr>
+     *     <tr><td>    readWrite()     </td><td>    set control to read-write     </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the control value.  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      * </table>
