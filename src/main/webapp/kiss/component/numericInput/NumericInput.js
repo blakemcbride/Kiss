@@ -10,7 +10,7 @@
 (function () {
 
     var processor = function (elm, attr, content) {
-        var nstyle;
+        var nstyle, originalValue;
         var dollar = false;
         var show_zero = false;
         var required = false;
@@ -53,7 +53,7 @@
                     dollar = true;
                     dp = 2;
                     break;
-                    
+
                 // pre-existing attributes
 
                 case 'style':
@@ -83,13 +83,16 @@
         newElm.elementInfo.min = min;
         newElm.elementInfo.max = max;
 
+        //--
+
         newElm.getValue = function () {
             var sval = jqObj.val();
-            sval = sval.replace(/[^0-9\.-]/g,'');  // remove commas and other characters
+            sval = sval.replace(/[^0-9.-]/g, '');  // remove commas and other characters
             return sval ? Number(sval) : 0;
         };
 
         newElm.setValue = function (val) {
+            originalValue = val;
             if (!val)
                 if (show_zero)
                     val = 0;
@@ -99,15 +102,36 @@
                 }
             if (typeof val === 'string')
                 val = Number(val);
-            var str = Utils.format(val, "C"+(dollar?"D":"")+(show_zero?"":"B"), 0, dp);
+            var str = Utils.format(val, "C" + (dollar ? "D" : "") + (show_zero ? "" : "B"), 0, dp);
             jqObj.val(str);
             return this;
         };
 
         newElm.clear = function () {
             jqObj.val('');
+            originalValue = 0;
             return this;
         };
+
+        newElm.isDirty = function () {
+            return originalValue !== newElm.getValue();
+        };
+
+        //--
+
+        newElm.readOnly = function () {
+            jqObj.attr('readonly', true);
+        };
+
+        newElm.readWrite = function () {
+            jqObj.attr('readonly', false);
+        };
+
+        newElm.isReadOnly = function () {
+            return !!jqObj.attr('readonly');
+        };
+
+        //--
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
@@ -119,6 +143,12 @@
             return this;
         };
 
+        newElm.isDisabled = function () {
+            return !!jqObj.attr('disabled');
+        };
+
+        //--
+
         newElm.hide = function () {
             jqObj.hide();
             return this;
@@ -129,6 +159,16 @@
             return this;
         };
 
+        newElm.isHidden = function () {
+            return jqObj.is(':hidden');
+        };
+
+        newElm.isVisible = function () {
+            return jqObj.is(':visible');
+        };
+
+        //--
+
         newElm.focus = function () {
             jqObj.focus();
             return this;
@@ -136,21 +176,21 @@
 
         newElm.isError = function (desc) {
             var val = newElm.getValue();
-            if (required && !val) {
+            if (required  &&  !val) {
                 Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
             }
-            if (min !== null  &&  val < min  ||  max !== null && val > max) {
+            if (min !== null  &&  val < min  ||  max !== null  &&  val > max) {
                 var msg;
-                if ((min || min === 0) && (max || max === 0))
-                    msg = desc + ' must be between ' + Utils.format(min, "C"+(dollar?"D":""), 0, dp) +
-                        ' and ' + Utils.format(max, "C"+(dollar?"D":""), 0, dp) + '.';
+                if ((min  ||  min === 0)  &&  (max  ||  max === 0))
+                    msg = desc + ' must be between ' + Utils.format(min, "C" + (dollar ? "D" : ""), 0, dp) +
+                        ' and ' + Utils.format(max, "C" + (dollar ? "D" : ""), 0, dp) + '.';
                 else if (min  ||  min === 0)
-                    msg = desc + ' must be greater than or equal to ' + Utils.format(min, "C"+(dollar?"D":""), 0, dp) + '.';
+                    msg = desc + ' must be greater than or equal to ' + Utils.format(min, "C" + (dollar ? "D" : ""), 0, dp) + '.';
                 else
-                    msg = desc + ' must be less than or equal to ' + Utils.format(max, "C"+(dollar?"D":""), 0, dp) + '.';
+                    msg = desc + ' must be less than or equal to ' + Utils.format(max, "C" + (dollar ? "D" : ""), 0, dp) + '.';
                 Utils.showMessage('Error', msg, function () {
                     jqObj.focus();
                 });
@@ -171,24 +211,24 @@
     Component.NumericInput.$numberinput = function (elm) {
         var val = elm.value.trim();
         if (elm.kiss.elementInfo.dollarSign)
-            if ($.isNumeric(elm.kiss.elementInfo.min) && elm.kiss.elementInfo.min >= 0)
-                val = val.replace(/[^0-9\.,$]/g,'');  // remove characters
+            if ($.isNumeric(elm.kiss.elementInfo.min)  &&  elm.kiss.elementInfo.min >= 0)
+                val = val.replace(/[^0-9.,$]/g, '');  // remove characters
             else
-                val = val.replace(/[^0-9\.,$-]/g,'');  // remove characters
-        else if ($.isNumeric(elm.kiss.elementInfo.min) && elm.kiss.elementInfo.min >= 0)
-            val = val.replace(/[^0-9\.,]/g,'');  // remove characters
+                val = val.replace(/[^0-9.,$-]/g, '');  // remove characters
+        else if ($.isNumeric(elm.kiss.elementInfo.min)  &&  elm.kiss.elementInfo.min >= 0)
+            val = val.replace(/[^0-9.,]/g, '');  // remove characters
         else
-            val = val.replace(/[^0-9\.,-]/g,'');  // remove characters
+            val = val.replace(/[^0-9.,-]/g, '');  // remove characters
         var ret = '';
         var ndp = 0;  // number of decimal points
         var ndr = 0;  // number of digits to the right of the decimal point
         var andp = elm.kiss.elementInfo.dp;
         if (elm.value.trim() !== val)
             Utils.beep();
-        for (var i=0 ; i < val.length ; i++) {
+        for (var i = 0; i < val.length; i++) {
             var c = val.charAt(i);
             if (c === '.') {
-                if (!ndp && andp !== 0) {
+                if (!ndp  &&  andp !== 0) {
                     ndp++;
                     ret += c;
                 } else
@@ -208,11 +248,11 @@
     Component.NumericInput.$formatnumber = function (elm) {
         var sval = elm.value;
         var ndp = elm.kiss.elementInfo.dp;
-        sval = sval.replace(/[^0-9\.-]/g,'');  // remove commas and other characters
+        sval = sval.replace(/[^0-9.-]/g, '');  // remove commas and other characters
         if (!sval.length)
             return sval;
         var nval = Number(sval);
-        return Utils.format(nval, "C" + (elm.kiss.elementInfo.dollarSign ? 'D' : '')+(elm.kiss.elementInfo.blankIfZero?"":"B"), 0, ndp);
+        return Utils.format(nval, "C" + (elm.kiss.elementInfo.dollarSign ? 'D' : '') + (elm.kiss.elementInfo.blankIfZero ? "" : "B"), 0, ndp);
     };
 
 })();

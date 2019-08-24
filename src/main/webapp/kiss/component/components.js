@@ -210,7 +210,14 @@ class components {
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the numeric value of the control             </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>     did user change control content?   </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     is control disabled?   </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>     is control hidden?   </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     is control read-only?    </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     is control visible?   </td></tr>
+     *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
+     *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the numeric value of the control              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      * </table>
