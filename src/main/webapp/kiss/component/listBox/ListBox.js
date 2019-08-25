@@ -10,7 +10,7 @@
 (function () {
 
     var processor = function (elm, attr, content) {
-        var nstyle;
+        var nstyle, originalValue = null;
         var required = false;
         var size = null;
         if (attr.style)
@@ -21,6 +21,7 @@
 
         var nattrs = '';
         var id;
+        var default_option;
         for (var prop in attr) {
             switch (prop) {
 
@@ -29,7 +30,9 @@
                 case 'required':
                     required = true;
                     break;
-
+                case 'default-option':
+                    default_option = attr[prop];
+                    break;
 
                 // pre-existing attributes
 
@@ -49,6 +52,9 @@
         if (!size)
             size = '2';  // make sure it isn't a dropdown
 
+        if (!content  &&  default_option)
+            content = '<option value="">' + default_option + '</option>';
+
         var newElm = Utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}" size="{size}">{content}</select>', {
             style: nstyle,
             attr: nattrs,
@@ -58,9 +64,14 @@
         var jqObj = newElm.jqObj;
         var dataStore = {};
 
+        //--
+
         newElm.clear = function () {
             jqObj.empty();
+            if (default_option)
+                newElm.add('', default_option);
             dataStore = {};
+            originalValue = null;
             return this;
         };
 
@@ -68,8 +79,15 @@
             jqObj.append($('<option></option>').attr('value', val).text(label));
             if (data)
                 dataStore[val] = data;
+            originalValue = jqObj.val();
             return this;
         };
+
+        newElm.size = function () {
+            return jqObj.children('option').length;
+        };
+
+        //--
 
         newElm.getValue = function () {
             return jqObj.val();
@@ -77,6 +95,7 @@
 
         newElm.setValue = function (val) {
             jqObj.val(val).change();
+            originalValue = jqObj.val();
             return this;
         };
 
@@ -88,6 +107,28 @@
             return dataStore[jqObj.val()];
         };
 
+        newElm.isDirty = function () {
+            return originalValue !== jqObj.val();
+        };
+
+        //--
+
+        newElm.readOnly = function () {
+            jqObj.attr('readonly', true);
+            return this;
+        };
+
+        newElm.readWrite = function () {
+            jqObj.attr('readonly', false);
+            return this;
+        };
+
+        newElm.isReadOnly = function () {
+            return !!jqObj.attr('readonly');
+        };
+
+        //--
+
         newElm.disable = function () {
             jqObj.prop('disabled', true);
             return this;
@@ -98,6 +139,12 @@
             return this;
         };
 
+        newElm.isDisabled = function () {
+            return !!jqObj.attr('disabled');
+        };
+
+        //--
+
         newElm.hide = function () {
             jqObj.hide();
             return this;
@@ -105,6 +152,21 @@
 
         newElm.show = function () {
             jqObj.show();
+            return this;
+        };
+
+        newElm.isHidden = function () {
+            return jqObj.is(':hidden');
+        };
+
+        newElm.isVisible = function () {
+            return jqObj.is(':visible');
+        };
+
+        //--
+
+        newElm.focus = function () {
+            jqObj.focus();
             return this;
         };
 
@@ -148,10 +210,6 @@
             return this;
         };
 
-        newElm.size = function () {
-            return jqObj.children('option').length;
-        };
-
         newElm.selectedIndex = function () {
             return jqObj.prop('selectedIndex');
         };
@@ -159,6 +217,7 @@
         newElm.removeByIndex = function (idx) {
             if (idx < jqObj.children('option').length)
                 jqObj.find('option').eq(idx).remove();
+            originalValue = jqObj.val();
             return this;
         };
 

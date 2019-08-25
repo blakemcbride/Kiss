@@ -10,7 +10,7 @@
 (function () {
 
     var processor = function (elm, attr, content) {
-        var nStyle, originalValue;
+        var nStyle, originalValue = null;
         var required = false;
         if (attr.style)
             nStyle = attr.style;

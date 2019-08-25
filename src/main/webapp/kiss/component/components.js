@@ -173,6 +173,7 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    default-option="label"     </td><td>     what is the default selection     </td></tr>
      *     <tr><td>    multiple     </td><td>     multiple entries may be selected (an array will be returned)               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    size="20"     </td><td>    the <em>minimum</em> number of visible lines (will expand to fill the area it is in) </td></tr>
@@ -189,13 +190,21 @@ class components {
      *     <tr><td>    clear()     </td><td>     remove the list contents except the <code>default-option</code>               </td></tr>
      *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    focus()     </td><td>    sets focus on control            </td></tr>
      *     <tr><td>    getData()     </td><td>     returns the data associated to the selected option             </td></tr>
      *     <tr><td>    getLabel()     </td><td>     returns the label associated to the selected option             </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the value associated to the selected option (returns an array if <code>multiple</code> attribute included)            </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    true if user has changed control value     </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    true if control is disabled     </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    true if control is hidden (not visible)     </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     true if control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    true if control is visible (not hidden)     </td></tr>
      *     <tr><td>    onClick(fun)     </td><td>     execute <code>fun</code>whenever the user clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
      *     <tr><td>    onDblClick(fun)     </td><td>     execute <code>fun</code>whenever the user double-clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
+     *     <tr><td>    readOnly()     </td><td>     sets control to read-only    </td></tr>
+     *     <tr><td>    readWrite()     </td><td>     sets control to read-write    </td></tr>
      *     <tr><td>    removeByIndex(idx)     </td><td>     remove the indicated row              </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     selects the row that contains the value specified by <code>val</code>              </td></tr>
      *     <tr><td>    selectedIndex()     </td><td>     returns the index of the selected item  (-1 if none)             </td></tr>
