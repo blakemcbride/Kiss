@@ -147,12 +147,20 @@ class components {
      *     <tr><td>    clear()     </td><td>     remove the list contents except the <code>default-option</code>               </td></tr>
      *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    focus()     </td><td>    sets focus on the control        </td></tr>
      *     <tr><td>    getData()     </td><td>     returns the data associated to the selected option             </td></tr>
      *     <tr><td>    getLabel()     </td><td>     returns the label associated to the selected option             </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the value associated to the selected option             </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>     true if user changed value      </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     true if control is disabled      </td></tr>
+     *     <tr><td>    isHidden()     </td><td>     true if control is hidden (not visible)      </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     true if control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     true if control is visible (not hidden)      </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
+     *     <tr><td>    readOnly()     </td><td>    make control read-only      </td></tr>
+     *     <tr><td>    readWrite()     </td><td>    make control read-write      </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     selects the row that contains the value specified by <code>val</code>              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      *     <tr><td>    size()     </td><td>    returns the number of rows in the list (including <code>default-option</code>              </td></tr>
