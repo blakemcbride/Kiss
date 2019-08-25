@@ -16,27 +16,77 @@ var Kiss = {};
 /**
  * This is how components are accessed.
  *
- * @param {string} id  id of the component
+ * @param {string} id  for radio buttons this is the id of the group, for other controls this is the control's id
  * @returns {*} the component object
  */
 function $$(id) {
+    let self = this;
     if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined' && Kiss.RadioButtons.groups[id]) {
-        var rbobj = {};
-        rbobj.getValue = function () {
+        let rbObj = {};
+        let originalValue;
+        rbObj.getValue = function () {
             return Kiss.RadioButtons.getValue(id);
         };
-        rbobj.setValue = function (val) {
+        rbObj.setValue = function (val) {
             Kiss.RadioButtons.setValue(id, val);
+            originalValue = rbObj.getValue();
+            return self;
         };
-        rbobj.onChange = function (fun) {
+        rbObj.clear = function () {
+            Kiss.RadioButtons.clear(id);
+            originalValue = rbObj.getValue();
+            return self;
+        };
+        rbObj.isDirty = function () {
+            return originalValue !== rbObj.getValue(id);
+        };
+        rbObj.readOnly = function () {
+            Kiss.RadioButtons.readOnly(id);
+            return self;
+        };
+        rbObj.readWrite = function () {
+            Kiss.RadioButtons.readWrite(id);
+            return self;
+        };
+        rbObj.isReadOnly = function () {
+            return Kiss.RadioButtons.isReadOnly(id);
+        };
+        rbObj.onChange = function (fun) {
             Kiss.RadioButtons.onChange(id, fun);
+            return self;
         };
-        rbobj.isError = function (lbl) {
+        rbObj.isError = function (lbl) {
             return Kiss.RadioButtons.isError(id, lbl);
         };
-        return rbobj;
+        rbObj.enable = function (id) {
+            Kiss.RadioButtons.enable(id);
+            return self;
+        };
+        rbObj.disable = function (id) {
+            Kiss.RadioButtons.disable(id);
+            return self;
+        };
+        rbObj.hide = function (id) {
+            Kiss.RadioButtons.hide(id);
+            return self;
+        };
+        rbObj.show = function (id) {
+            Kiss.RadioButtons.show(id);
+            return self;
+        };
+        rbObj.isHidden = function () {
+            return Kiss.RadioButtons.isHidden(id);
+        };
+        rbObj.isVisible = function () {
+            return Kiss.RadioButtons.isVisible(id);
+        };
+        rbObj.focus = function (id) {
+            Kiss.RadioButtons.focus(id);
+            return self;
+        };
+        return rbObj;
     }
-    var e = $((id.charAt(0) === '#' ? '' : '#') + id);
+    let e = $((id.charAt(0) === '#' ? '' : '#') + id);
     return e.length ? e[0].kiss : null;
 }
 

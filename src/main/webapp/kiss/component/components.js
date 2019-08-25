@@ -289,14 +289,20 @@ class components {
     /**
      * This HTML tag, "radio-button", adds functionality and a consistent and convenient API to the HTML provided radio input element.
      * <br><br>
-     * One thing that makes this control different from the others is that it is referred to with the <code>$$</code> function
-     * by its group name rather than the element <code>id</code>.  All the radio buttons in the same group shouls share the
+     * One thing that makes this control different from the others is that it can be referred to with the <code>$$</code> function
+     * by its group name or the individual radio button id.  When the group name is used, the entire group is effected.  When an
+     * individual radio button is addressed by its id, only that control is effected.
+     * <br><br>
+     * All the radio buttons in the same group should share the
      * same group name.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    align-horizontal     </td><td>    align the buttons horizontally (default)             </td></tr>
+     *     <tr><td>    align-vertical     </td><td>    align the buttons vertically         </td></tr>
      *     <tr><td>    group="name"     </td><td>     the name of the group this radio button is a part of (the same for each radio button in a group)              </td></tr>
      *     <tr><td>    checked     </td><td>    pre-selects the particular radio button             </td></tr>
+     *     <tr><td>    label-style="style"     </td><td>    style used for the label           </td></tr>
      *     <tr><td>    name="name"     </td><td>     this is an alternate to the <code>group</code> attribute for HTML consistency               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    value="name"     </td><td>     required unique value associate with each radio button (different for each radio button)               </td></tr>
@@ -310,10 +316,23 @@ class components {
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
-     *     <tr><td>    getValue()     </td><td>     the value of the selected ratio button               </td></tr>
+     *     <tr><td>    clear()     </td><td>    sets the radio button group to none selected   </td></tr>
+     *     <tr><td>    disable()     </td><td>    set the control to disabled    </td></tr>
+     *     <tr><td>    enable()     </td><td>    set the control to enabled            </td></tr>
+     *     <tr><td>    focus()     </td><td>    set focus on the current control           </td></tr>
+     *     <tr><td>    getValue()     </td><td>     the value of the selected ratio button group               </td></tr>
+     *     <tr><td>    hide()     </td><td>    hides the control             </td></tr>
+     *     <tr><td>    isDirty()     </td><td>     true if the user changed the value             </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     true if the control is disabled            </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isHidden(desc)     </td><td>     true if the control is hidden (not visible)   </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     true if the control is read-only           </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     true if the control is visible (not hidden)           </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.               </td></tr>
+     *     <tr><td>    readOnly()     </td><td>    sets the control to read-only               </td></tr>
+     *     <tr><td>    readWrite()     </td><td>    sets the control to read-write        </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     selects the button with the associated value               </td></tr>
+     *     <tr><td>    show()     </td><td>    sets the control to show (not hide)           </td></tr>
      * </table>
      * </table>
      */
