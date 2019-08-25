@@ -56,7 +56,7 @@
         nattrs += ' oninput="this.value=Component.TimeInput.$timeinput(this)"';
         nattrs += ' onfocusout="this.value=Component.TimeInput.$formattime(this)"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
-        
+
         var newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,
             attr: nattrs,

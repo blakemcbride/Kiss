@@ -71,7 +71,7 @@ Kiss.RadioButtons.groups = {};
         if (!align_vertical)
             div_style = 'display: inline-block;';
 
-        let newElm = Utils.replaceHTML(id, elm, '<div style="{div_style}"><input type="radio" {attr} style="{style} name="{name} id="{id}"><label style="{label_style}">{content}</label></div>', {
+        let newElm = Utils.replaceHTML(id, elm, '<div style="{div_style}"><input type="radio" {attr} style="{style}" name="{name}" id="{id}"><label style="{label_style}">{content}</label></div>', {
             style: nStyle,
             attr: nAttrs,
             name: group,
