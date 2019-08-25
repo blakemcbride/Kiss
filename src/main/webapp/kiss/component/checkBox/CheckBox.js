@@ -9,16 +9,16 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var nstyle;
+    let processor = function (elm, attr, content) {
+        let nStyle, originalValue;
         if (attr.style)
-            nstyle = attr.style;
+            nStyle = attr.style;
         else
-            nstyle = '';
+            nStyle = '';
 
-        var nattrs = '';
-        var id;
-        for (var prop in attr) {
+        let nAttrs = '';
+        let id;
+        for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
@@ -32,17 +32,19 @@
                     id = Utils.removeQuotes(attr[prop]);
                     break;
                 default:
-                    nattrs += ' ' + prop + '="' + attr[prop] + '"';
+                    nAttrs += ' ' + prop + '="' + attr[prop] + '"';
                     break;
             }
         }
 
-        var newElm = Utils.replaceHTML(id, elm, '<div style="display: inline-block;"><input type="checkbox" style="{style}" {attr} id="{id}">{content}</div>', {
-            style: nstyle,
-            attr: nattrs,
+        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input type="checkbox" {attr} id="{id}"><label>{content}</label></div>', {
+            style: nStyle,
+            attr: nAttrs,
             content: content ? content.trim() : ''
         });
-        var jqObj = newElm.jqObj;
+        let jqObj = newElm.jqObj;
+
+        //--
 
         newElm.getValue = function () {
             return jqObj.prop('checked');
@@ -50,18 +52,37 @@
 
         newElm.setValue = function (val) {
             jqObj.prop('checked', !!val);
+            originalValue = newElm.getValue();
             return this;
         };
 
         newElm.clear = function () {
             jqObj.prop('checked', false);
+            originalValue = newElm.getValue();
             return this;
         };
 
-        newElm.onChange = function (fun) {
-            jqObj.change(fun);
+        newElm.isDirty = function () {
+            return originalValue !== newElm.getValue();
+        };
+
+        //--
+
+        newElm.readOnly = function () {
+            jqObj.attr('readonly', true);
             return this;
         };
+
+        newElm.readWrite = function () {
+            jqObj.attr('readonly', false);
+            return this;
+        };
+
+        newElm.isReadOnly = function () {
+            return !!jqObj.attr('readonly');
+        };
+
+        //--
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
@@ -73,6 +94,12 @@
             return this;
         };
 
+        newElm.isDisabled = function () {
+            return !!jqObj.attr('disabled');
+        };
+
+        //--
+
         newElm.hide = function () {
             jqObj.hide();
             return this;
@@ -83,18 +110,35 @@
             return this;
         };
 
+        newElm.isHidden = function () {
+            return jqObj.is(':hidden');
+        };
+
+        newElm.isVisible = function () {
+            return jqObj.is(':visible');
+        };
+
+        //--
+
+        newElm.onChange = function (fun) {
+            jqObj.change(fun);
+            return this;
+        };
+
+        newElm.focus = function () {
+            jqObj.focus();
+            return this;
+        };
     };
 
-    var componentInfo = {
+    let componentInfo = {
         name: 'CheckBox',
         tag: 'check-box',
         processor: processor
     };
+
     Utils.newComponent(componentInfo);
-
 })();
-
-
 
 
 //# sourceURL=kiss/component/checkBox/CheckBox.js

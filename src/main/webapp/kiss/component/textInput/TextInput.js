@@ -93,10 +93,12 @@
 
         newElm.readOnly = function () {
             jqObj.attr('readonly', true);
+            return this;
         };
 
         newElm.readWrite = function () {
             jqObj.attr('readonly', false);
+            return this;
         };
 
         newElm.isReadOnly = function () {
