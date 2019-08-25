@@ -110,8 +110,7 @@
         };
 
         newElm.isReadOnly = function () {
-            return jqObj.attr('readonly');
-            return this;
+            return !!jqObj.attr('readonly');
         };
 
         //--

@@ -10,7 +10,7 @@
 (function () {
 
     var processor = function (elm, attr, content) {
-        var nstyle;
+        var nstyle, originalValue;
         var required = false;
         var min = null;
         var max = null;
@@ -68,7 +68,7 @@
         newElm.elementInfo.zero_fill = zero_fill;
 
         var isDigit = function (c) {
-            return c >= '0' && c <= '9';
+            return c >= '0'  &&  c <= '9';
         };
 
         newElm.getValue$ = function (sval) {
@@ -81,7 +81,7 @@
             let i = 0;
 
             // hours
-            for (; i < sval.length ; i++) {
+            for (; i < sval.length; i++) {
                 let c = sval.charAt(i);
                 if (!isDigit(c))
                     break;
@@ -93,16 +93,16 @@
             else
                 hours = parseInt(buf);
 
-            for ( ; i < sval.length  ; i++) {
+            for (; i < sval.length; i++) {
                 let c = sval.charAt(i);
-                if (c !== ' ' && c !== ':')
+                if (c !== ' '  &&  c !== ':')
                     break;
             }
 
             let minutes;
-            if (i < sval.length && isDigit(sval.charAt(i))) {
+            if (i < sval.length  &&  isDigit(sval.charAt(i))) {
                 buf = '';
-                for (; i < sval.length ; i++) {
+                for (; i < sval.length; i++) {
                     let c = sval.charAt(i);
                     if (!isDigit(c))
                         break;
@@ -112,7 +112,7 @@
             } else
                 minutes = 0;
 
-            for ( ; i < sval.length  &&  sval.charAt(i) === ' '; i++);
+            for (; i < sval.length  &&  sval.charAt(i) === ' '; i++) ;
 
             let part;
             if (i >= sval.length)
@@ -128,35 +128,61 @@
             }
 
             if (part === 'A'  &&  hours === 12)
-                return (hours-12) * 100 + minutes;
+                return (hours - 12) * 100 + minutes;
             if (!part  ||  part === 'A'  ||  hours === 12)
                 return hours * 100 + minutes;
             else
                 return (hours + 12) * 100 + minutes;
         };
 
-        newElm.setValue = function (val) {
-            if (val === undefined  ||  val === null  ||  val === '') {
-                jqObj.val('');
-                return this;
-            }
-            jqObj.val(TimeUtils.format(val, zero_fill));
-            return this;
-        };
+        //--
 
         newElm.getValue = function () {
             var val = newElm.getValue$(newElm.jqObj.val());
             if (val === null)
                 return val;
-            var hours = Math.floor(val/100);
+            var hours = Math.floor(val / 100);
             var minutes = val % 100;
             return hours > 23  ||  minutes > 59 ? null : val;
         };
 
-        newElm.clear = function () {
-            jqObj.val('');
+        newElm.setValue = function (val) {
+            if (val === undefined  ||  val === null  ||  val === '') {
+                jqObj.val('');
+                originalValue = newElm.getValue();
+                return this;
+            }
+            jqObj.val(TimeUtils.format(val, zero_fill));
+            originalValue = newElm.getValue();
             return this;
         };
+
+        newElm.clear = function () {
+            newElm.setValue('');
+            return this;
+        };
+
+        newElm.isDirty = function () {
+            return originalValue !== newElm.getValue();
+        };
+
+        //--
+
+        newElm.readOnly = function () {
+            jqObj.attr('readonly', true);
+            return this;
+        };
+
+        newElm.readWrite = function () {
+            jqObj.attr('readonly', false);
+            return this;
+        };
+
+        newElm.isReadOnly = function () {
+            return !!jqObj.attr('readonly');
+        };
+
+        //--
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
@@ -168,6 +194,12 @@
             return this;
         };
 
+        newElm.isDisabled = function () {
+            return !!jqObj.attr('disabled');
+        };
+
+        //--
+
         newElm.hide = function () {
             jqObj.hide();
             return this;
@@ -178,6 +210,16 @@
             return this;
         };
 
+        newElm.isHidden = function () {
+            return jqObj.is(':hidden');
+        };
+
+        newElm.isVisible = function () {
+            return jqObj.is(':visible');
+        };
+
+        //--
+
         newElm.focus = function () {
             jqObj.focus();
             return this;
@@ -185,13 +227,13 @@
 
         newElm.isError = function (desc) {
             var val = newElm.getValue$(newElm.jqObj.val());
-            if (required && val === null) {
+            if (required  &&  val === null) {
                 Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
             }
-            let hours = Math.floor(val/100);
+            let hours = Math.floor(val / 100);
             let minutes = val % 100;
             if (hours > 23  ||  minutes > 59) {
                 Utils.showMessage('Error', desc + ' is not a valid date.', function () {
@@ -199,9 +241,9 @@
                 });
                 return true;
             }
-            if (min !== null  &&  val < min  ||  max !== null && val > max) {
+            if (min !== null  &&  val < min  ||  max !== null  &&  val > max) {
                 var msg;
-                if ((min || min === 0) && (max || max === 0))
+                if ((min  ||  min === 0)  &&  (max  ||  max === 0))
                     msg = desc + ' must be between ' + TimeUtils.format(min) +
                         ' and ' + TimeUtils.format(max) + '.';
                 else if (min  ||  min === 0)
@@ -234,13 +276,13 @@
 
     Component.TimeInput.$timeinput = function (elm) {
         var val1 = elm.value.trim();
-        var val2 = val1.replace(/[^0-9 :ampAMP]/g,'');  // remove characters
+        var val2 = val1.replace(/[^0-9 :ampAMP]/g, '');  // remove characters
         if (val1 !== val2) {
             Utils.beep();
             return val2;
         }
         var nc = 0;
-        for (var i=0 ; i < val2.length ; i++) {
+        for (var i = 0; i < val2.length; i++) {
             var c = val2.charAt(i);
             if (c === ':')
                 if (++nc > 1) {
