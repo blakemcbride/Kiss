@@ -65,6 +65,24 @@
             return this;
         };
 
+        //--
+
+        newElm.readOnly = function () {
+            jqObj.attr('readonly', true);
+            return this;
+        };
+
+        newElm.readWrite = function () {
+            jqObj.attr('readonly', false);
+            return this;
+        };
+
+        newElm.isReadOnly = function () {
+            return !!jqObj.attr('readonly');
+        };
+
+        //--
+
         newElm.disable = function () {
             jqObj.prop('disabled', true);
             return this;
@@ -74,6 +92,12 @@
             jqObj.prop('disabled', false);
             return this;
         };
+
+        newElm.isDisabled = function () {
+            return !!jqObj.attr('disabled');
+        };
+
+        //--
 
         newElm.hide = function () {
             jqObj.hide();
@@ -85,6 +109,20 @@
             return this;
         };
 
+        newElm.isHidden = function () {
+            return jqObj.is(':hidden');
+        };
+
+        newElm.isVisible = function () {
+            return jqObj.is(':visible');
+        };
+
+        //--
+
+        newElm.focus = function () {
+            jqObj.focus();
+            return this;
+        }
     };
 
     var componentInfo = {

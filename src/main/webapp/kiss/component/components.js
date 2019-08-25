@@ -270,8 +270,15 @@ class components {
      *     <tr><td>    click()     </td><td>     simulate a button click               </td></tr>
      *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    focus()     </td><td>    sets focus to control           </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the label on the push button             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    hide()     </td><td>     hides the control               </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     true if control is disabled               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    true if control is hidden (not visible)           </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>    true if control is read-only              </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    true if control is visible (not hidden)        </td></tr>
+     *     <tr><td>    readOnly()     </td><td>     sets control to read-only              </td></tr>
+     *     <tr><td>    readWrite()     </td><td>    sets control to read-write          </td></tr>
      *     <tr><td>    onclick(fun)     </td><td>     <code>fun</code> is executed when the user clicks on the button               </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the label on the push button              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
