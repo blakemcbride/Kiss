@@ -10,7 +10,7 @@
 (function () {
 
     var processor = function (elm, attr, content) {
-        var nstyle;
+        var nstyle, originalValue;
         var min = null;
         var upcase = false;
         if (attr.style)
@@ -58,8 +58,10 @@
             placeholder: content ? content.trim() : ''
         });
         var jqObj = newElm.jqObj;
-        
+
         newElm.elementInfo.upcase = upcase;
+
+        //--
 
         newElm.getValue = function () {
             var sval = jqObj.val();
@@ -68,17 +70,39 @@
 
         newElm.setValue = function (val) {
             if (val !== 0  &&  !val) {
-                jqObj.val('');
+                jqObj.val(originalValue='');
                 return this;
             }
-            jqObj.val(val);
+            jqObj.val(originalValue=val);
             return this;
         };
 
         newElm.clear = function () {
-            jqObj.val('');
+            newElm.setValue('');
             return this;
         };
+
+        newElm.isDirty = function () {
+            return originalValue !== newElm.getValuel();
+        };
+
+        //--
+
+        newElm.readOnly = function () {
+            jqObj.attr('readonly', true);
+            return this;
+        };
+
+        newElm.readWrite = function () {
+            jqObj.attr('readonly', false);
+            return this;
+        };
+
+        newElm.isReadOnly = function () {
+            return !!jqObj.attr('readonly');
+        };
+
+        //--
 
         newElm.disable = function () {
             jqObj.prop('disabled', true);
@@ -90,6 +114,12 @@
             return this;
         };
 
+        newElm.isDisabled = function () {
+            return !!jqObj.attr('disabled');
+        };
+
+        //--
+
         newElm.hide = function () {
             jqObj.hide();
             return this;
@@ -100,8 +130,28 @@
             return this;
         };
 
+        newElm.isHidden = function () {
+            return jqObj.is(':hidden');
+        };
+
+        newElm.isVisible = function () {
+            return jqObj.is(':visible');
+        };
+
+        //--
+
         newElm.focus = function () {
             jqObj.focus();
+            return this;
+        };
+
+        newElm.onKeyDown = function (fun) {
+            jqObj.unbind('keydown').keydown(fun);
+            return this;
+        };
+
+        newElm.onChange = function (fun) {
+            jqObj.unbind('change').change(fun);
             return this;
         };
 
