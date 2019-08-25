@@ -25,6 +25,7 @@ Utils.afterComponentsLoaded(function () {
     Utils.useComponent("RadioButton");
     Utils.useComponent("TextboxInput");
     Utils.useComponent("TextInput");
+    Utils.useComponent("TextLabel");
     Utils.useComponent("TimeInput");
 })();
 

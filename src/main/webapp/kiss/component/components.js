@@ -402,6 +402,26 @@ class components {
     static text_input() {}
 
     /**
+     * This HTML tag, "text-label", adds functionality and a consistent and convenient API to the HTML provided label tag.
+     * <br><br>
+     * <strong>Content</strong>
+     * <br><br>
+     *     The <em>Content</em> represents the content of the label.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    clear()     </td><td>     erases the contents of the control               </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the string associated with the control             </td></tr>
+     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    isHidden()     </td><td> is the control hidden? </td></tr>
+     *     <tr><td>    isVisible()     </td><td> is the control visible?   </td></tr>
+      *    <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
+     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     * </table>
+     */
+    static text_label() {}
+
+    /**
      * This HTML tag, "time-input", provides a control where the user can enter a time.  The time appear like "3:30 PM".  A 24 hour clock is also supported automatically (like 14:30).
      * The values this control interacs with is a plain integer in the form HHMM in a 24 hour clock.  So, "1:30 PM" would be <code>1330</code>.
      * <br><br>
