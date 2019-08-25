@@ -36,7 +36,6 @@
                         min = 1;
                     break;
 
-
                 // pre-existing attributes
 
                 case 'style':
@@ -51,6 +50,7 @@
         }
 
         nattrs += ' oninput="this.value=Component.TextboxInput.$textinput(this)"';
+        nattrs += ' data-lpignore="true"';  // kill lastpass
 
         var newElm = Utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} placeholder="{placeholder}" id="{id}"></textarea>', {
             style: nstyle,

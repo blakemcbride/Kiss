@@ -69,6 +69,7 @@
 
         nattrs += ' oninput="this.value=Component.NumericInput.$numberinput(this)"';
         nattrs += ' onfocusout="this.value=Component.NumericInput.$formatnumber(this)"';
+        nattrs += ' data-lpignore="true"';  // kill lastpass
 
         var newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,

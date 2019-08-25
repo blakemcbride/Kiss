@@ -54,6 +54,7 @@
         }
 
         nattrs += ' oninput="this.value=Component.TextInput.$textinput(this)" autocorrect="off" autocapitalize="off" spellcheck="false"';
+        nattrs += ' data-lpignore="true"';  // kill lastpass
 
         var newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             type: password ? 'password' : 'text',
