@@ -72,7 +72,11 @@ public class Command implements AutoCloseable {
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
      * @return false is a normal result
@@ -82,6 +86,9 @@ public class Command implements AutoCloseable {
      * @see #fetchAll(String, Object...)
      */
     public boolean execute(String sql, Object ... args) throws SQLException {
+        // The following two lines allows args to be a variable argument array or a passed in ArrayList of arguments
+        if (args != null  &&  args.length == 1  &&  args[0] instanceof ArrayList)
+            args = ((ArrayList) args[0]).toArray();
         if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
             if (pstat != null)
                 pstat.close();
@@ -109,7 +116,11 @@ public class Command implements AutoCloseable {
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
      * @return
@@ -120,6 +131,9 @@ public class Command implements AutoCloseable {
      * @see #query(int, String, Object...)
      */
     public Cursor query(String sql, Object ... args) throws SQLException {
+        // The following two lines allows args to be a variable argument array or a passed in ArrayList of arguments
+        if (args != null  &&  args.length == 1  &&  args[0] instanceof ArrayList)
+            args = ((ArrayList) args[0]).toArray();
         if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
             if (pstat != null)
                 pstat.close();
@@ -149,8 +163,11 @@ public class Command implements AutoCloseable {
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
-     *
-     * @param max
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
      * @return
@@ -175,7 +192,11 @@ public class Command implements AutoCloseable {
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
      * @return
@@ -198,7 +219,11 @@ public class Command implements AutoCloseable {
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
      * @return
@@ -220,8 +245,11 @@ public class Command implements AutoCloseable {
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
      * in the SQL statement. An SQL prepared statement is used.
-     *
-     * @param max
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
      * @return
@@ -258,7 +286,7 @@ public class Command implements AutoCloseable {
             try {
                 pstat.close();
             } catch (SQLException e) {
-               // e.printStackTrace();
+                // e.printStackTrace();
             }
             pstat = null;
             lastSQL = null;

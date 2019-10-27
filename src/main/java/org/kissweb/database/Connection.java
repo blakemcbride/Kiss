@@ -279,7 +279,11 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql the SQL statement to execute
      * @param args
      * @throws SQLException
@@ -317,7 +321,11 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql
      * @param args
      * @return
@@ -342,7 +350,11 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param sql
      * @param args
      * @return
@@ -368,7 +380,11 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
      * within the same connection occurring.  Remember, each REST service has its own connection.
-     *
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
      * @param max
      * @param sql
      * @param args

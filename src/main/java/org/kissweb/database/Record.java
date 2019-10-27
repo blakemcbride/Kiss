@@ -79,15 +79,101 @@ public class Record implements AutoCloseable {
 
     /**
      * Set the value of a column in the record.
+     * This method should not be used with dates or times.
      *
      * @param name the column name
      * @param val the value to set.  Can be any type.
      * @return
      *
      * @see Cursor#set(String, Object)
+     * @see #setDateOnly(String, java.util.Date)
+     * @see #setDateTime(String, java.util.Date)
      */
     public Object set(String name, Object val) {
         cols.put(name.toLowerCase(), val);
+        return val;
+    }
+
+    /**
+     * Set the date portion of the Date only (no time info) value of a column in the record.
+     *
+     * @param name the column name
+     * @param val the value to set.
+     * @return
+     *
+     * @see Cursor#set(String, Object)
+     * @see #set(String, Object)
+     * @see #setDateTime(String, java.util.Date)
+     * @see #setDateOnly(String, int)
+     * @see #setTime(String, long)
+     */
+    public Object setDateOnly(String name, java.util.Date val) {
+        cols.put(name.toLowerCase(), new java.sql.Date(val.getTime()));
+        return val;
+    }
+
+    /**
+     * Set the date portion of the Date only (no time info) value of a column in the record.
+     *
+     * @param name the column name
+     * @param dat the value to set. Format is YYYYMMDD
+     * @return
+     *
+     * @see #setDateOnly(String, java.util.Date)
+     * @see #setTime(String, long)
+     * @see Cursor#set(String, Object)
+     * @see #set(String, Object)
+     * @see #setDateTime(String, java.util.Date)
+     */
+    public int setDateOnly(String name, int dat) {
+        if (dat == 0) {
+            cols.put(name.toLowerCase(), null);
+            return 0;
+        }
+        int y = dat / 10000;
+        int m = (dat % 10000) / 100;
+        int d = dat % 100;
+        java.util.Date val = new GregorianCalendar(y, m-1, d).getTime();
+        cols.put(name.toLowerCase(), new java.sql.Date(val.getTime()));
+        return dat;
+    }
+
+    /**
+     * Set the time value in milliseconds
+     *
+     * @param name the column name
+     * @param dat the value to set in milliseconds
+     * @return
+     *
+     * @see #setDateOnly(String, java.util.Date)
+     * @see Cursor#set(String, Object)
+     * @see #set(String, Object)
+     * @see #setDateTime(String, java.util.Date)
+     */
+    public long setTime(String name, long dat) {
+        if (dat == 0) {
+            cols.put(name.toLowerCase(), null);
+            return 0;
+        }
+        java.util.Date val = new java.util.Date(dat);
+        cols.put(name.toLowerCase(), new java.sql.Time(val.getTime()));
+        return dat;
+    }
+
+    /**
+     * Set the date and time value of a column in the record.
+     *
+     * @param name the column name
+     * @param val the value to set.
+     * @return
+     *
+     * @see Cursor#set(String, Object)
+     * @see #setDateOnly(String, java.util.Date)
+     * @see #setTime(String, long)
+     * @see #set(String, Object)
+     */
+    public Object setDateTime(String name, java.util.Date val) {
+        cols.put(name.toLowerCase(), new java.sql.Timestamp(val.getTime()));
         return val;
     }
 
@@ -184,43 +270,81 @@ public class Record implements AutoCloseable {
     }
 
     /**
-     * Return the <code>Date</code> value of the named column.
+     * Return the <code>java.util.Date</code> value of the named column.
+     * Just a date and no time.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
      * @param cname
      * @return
      * @throws SQLException
      *
-     * @see Cursor#getDate(String)
+     * @see #getDateAsInt(String)
+     * @see Cursor#getDateOnly(String)
+     * @see #getDateTime(String)
      */
-    public java.sql.Date getDate(String cname) throws SQLException {
-        return (java.sql.Date) get(cname);
+    public java.util.Date getDateOnly(String cname) throws SQLException {
+        java.sql.Date dt = (java.sql.Date) get(cname);
+        if (dt == null)
+            return null;
+        return new java.util.Date(dt.getTime());
     }
 
     /**
-     * Return the <code>Timestamp</code> value of the named column.
-     * A <code>null</code> is returned on <code>null</code> valued columns.
+     * Return the date in an int formatted as YYYYMMDD for the named column.
+     * A <code>0</code> is returned on <code>null</code> valued columns.
      *
      * @param cname
-     * @return
+     * @return date format YYYYMMDD
      * @throws SQLException
      *
+     * @see #getDateOnly(String)
+     * @see Cursor#getDateOnly(String)
+     * @see #getDateTime(String)
      */
-    public Timestamp getTimestamp(String cname) throws SQLException {
-        return (Timestamp) get(cname);
+    public int getDateAsInt(String cname) throws SQLException {
+        java.sql.Date dt = (java.sql.Date) get(cname);
+        if (dt == null)
+            return 0;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(dt);
+        return cal.get(Calendar.DAY_OF_MONTH) + ((cal.get(Calendar.MONTH) + 1) * 100) + ((cal.get(Calendar.YEAR)) * 10000);
     }
 
     /**
-     * Return the <code>Time</code> value of the named column.
+     * Return the <code>java.util.Date</code> value of the named column.
+     * Date and time information.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
      * @param cname
      * @return
      * @throws SQLException
      *
+     * @see Cursor#getDateOnly(String)
+     * @see #getTime(String)
      */
-    public java.sql.Time getTime(String cname) throws SQLException {
-        return (java.sql.Time) get(cname);
+    public java.util.Date getDateTime(String cname) throws SQLException {
+        Timestamp ts = (Timestamp) get(cname);
+        if (ts == null)
+            return null;
+        return new java.util.Date(ts.getTime());
+    }
+
+    /**
+     * Return the <code>long</code> value of the named column.
+     * Only time information is returned.
+     * A <code>0</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return time in milliseconds
+     * @throws SQLException
+     *
+     * @see #getDateOnly(String)
+     */
+    public long getTime(String cname) throws SQLException {
+        java.sql.Time ts = (java.sql.Time) get(cname);
+        if (ts == null)
+            return 0;
+        return ts.getTime();
     }
 
     /**
@@ -283,14 +407,6 @@ public class Record implements AutoCloseable {
         return this;
     }
 
-    private Object fixDate(Object val) {
-        if (val == null)
-            return null;
-        if (val.getClass() == java.util.Date.class)
-            val = new java.sql.Date(((java.util.Date) val).getTime());
-        return val;
-    }
-
     /**
      * Performs an SQL update on the record.  This is done by creating an actual update statement and
      * executing it against the database.  It does not affect any cursors.
@@ -338,9 +454,9 @@ public class Record implements AutoCloseable {
                 cursor.ustmt.clearParameters();
             int i = 1;
             for (AbstractMap.SimpleEntry<String,Object> fld : cf)
-                cursor.ustmt.setObject(i++, fixDate(fld.getValue()));
+                cursor.ustmt.setObject(i++, fld.getValue());
             for (String pcol : cursor.cmd.getPriColumns(cursor))
-                cursor.ustmt.setObject(i++, fixDate(ocols.get(pcol)));
+                cursor.ustmt.setObject(i++, ocols.get(pcol));
             cursor.ustmt.execute();
         }
     }
@@ -374,7 +490,7 @@ public class Record implements AutoCloseable {
             try (PreparedStatement ustmt = conn.conn.prepareStatement(sql.toString())) {
                 int i = 1;
                 for (String pcol : conn.getPrimaryColumns(table))
-                    ustmt.setObject(i++, fixDate(cols.get(pcol)));
+                    ustmt.setObject(i++, cols.get(pcol));
                 ustmt.execute();
             }
             return;
@@ -398,7 +514,7 @@ public class Record implements AutoCloseable {
             cursor.ustmt.clearParameters();
         int i = 1;
         for (String pcol : cursor.cmd.getPriColumns(cursor))
-            cursor.ustmt.setObject(i++, fixDate(ocols.get(pcol)));
+            cursor.ustmt.setObject(i++, ocols.get(pcol));
         cursor.ustmt.execute();
     }
 
@@ -444,7 +560,7 @@ public class Record implements AutoCloseable {
             pstmt.clearParameters();
         int i = 1;
         for (Object val : cols.values())
-            pstmt.setObject(i++, fixDate(val));
+            pstmt.setObject(i++, val);
 //        ResultSet rset = pstmt.executeQuery();
         pstmt.executeUpdate();
         Object nextId = null;
@@ -492,7 +608,7 @@ public class Record implements AutoCloseable {
             pstmt.clearParameters();
         int i = 1;
         for (Object val : cols.values())
-            pstmt.setObject(i++, fixDate(val));
+            pstmt.setObject(i++, val);
         return pstmt.execute();
     }
 

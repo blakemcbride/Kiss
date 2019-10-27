@@ -278,7 +278,7 @@ public class DateUtils {
     /**
      * Returns year portion of a date.
      *
-     * @param dt YYYYMMDD
+     * @param dt YYYYMMDD or YYMMDD
      * @return  YYYY
      */
     public static int year(int dt) {
