@@ -52,7 +52,7 @@ public class JsonTemplate {
      *
      * If <code>jstr</code> is a file name, the json will be taken from the file.
      *
-     * @param jstr the json object
+     * @param jobj the json object
      * @param map a map mapping variable name to replacement text.
      * @return
      * @throws IOException
