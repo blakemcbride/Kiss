@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,9 +30,9 @@ public class JsonTemplate {
      * @return
      * @throws IOException
      * 
-     * @see #fill(JSONObject, HashMap)
+     * @see #fill(JSONObject, Map)
      */
-    public static JSONObject fill(String jstr, HashMap<String,String> map) throws IOException {
+    public static JSONObject fill(String jstr, Map<String,String> map) throws IOException {
         if (jstr == null  ||  jstr.isEmpty())
             return null;
         if (jstr.charAt(0) != '{')
@@ -57,14 +58,14 @@ public class JsonTemplate {
      * @return
      * @throws IOException
      *
-     * @see #fill(String, HashMap) 
+     * @see #fill(String, Map)
      */
-    public static JSONObject fill(JSONObject jobj, HashMap<String,String> map) throws IOException {
+    public static JSONObject fill(JSONObject jobj, Map<String,String> map) throws IOException {
         return fill(jobj.toString(), map);
     }
 
     public static void main(String [] argv) throws IOException {
-        HashMap<String,String> map = new HashMap<>();
+        Map<String,String> map = new HashMap<>();
         map.put("appId", "the actual id");
         JSONObject jobj = fill(JsonPath.toJson("input.json").toString(), map);
     }
