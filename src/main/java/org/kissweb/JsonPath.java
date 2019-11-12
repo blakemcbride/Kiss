@@ -23,7 +23,7 @@ public class JsonPath {
      * This takes a JSON string or a file name (containing JSON) and
      * returns a JSON object.
      *
-     * If in a string, the string must start with "{"
+     * If in a string, the string must start with "{" or space character
      *
      * @param str the json string or file name containing a json string
      * @return
@@ -32,7 +32,8 @@ public class JsonPath {
     public static JSONObject toJson(String str) throws IOException {
         if (str == null  ||  str.isEmpty())
             return new JSONObject();
-        if (str.charAt(0) != '{') {
+        char c = str.charAt(0);
+        if (c != '{'  &&  !Character.isWhitespace(c)) {
             // from a file
             str = new String(Files.readAllBytes(Paths.get(str)));
         }

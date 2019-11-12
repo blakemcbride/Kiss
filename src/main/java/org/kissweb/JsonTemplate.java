@@ -29,13 +29,14 @@ public class JsonTemplate {
      * @param map a map mapping variable name to replacement text.
      * @return
      * @throws IOException
-     * 
+     *
      * @see #fill(JSONObject, Map)
      */
     public static JSONObject fill(String jstr, Map<String,String> map) throws IOException {
         if (jstr == null  ||  jstr.isEmpty())
             return null;
-        if (jstr.charAt(0) != '{')
+        char c = jstr.charAt(0);
+        if (c != '{'  &&  !Character.isWhitespace(c))
             jstr = new String(Files.readAllBytes(Paths.get(jstr)));
         Matcher m = Pattern.compile("\\$\\{[^}]+}").matcher(jstr);
         while (m.find()) {
