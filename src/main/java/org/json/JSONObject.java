@@ -1790,12 +1790,14 @@ public class JSONObject {
                 w.write('\\');
                 w.write(c);
                 break;
+                /*
             case '/':
                 if (b == '<') {
                     w.write('\\');
                 }
                 w.write(c);
                 break;
+                 */
             case '\b':
                 w.write("\\b");
                 break;
