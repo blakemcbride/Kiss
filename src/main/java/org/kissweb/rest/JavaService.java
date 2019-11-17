@@ -117,7 +117,7 @@ class JavaService {
                 1) directory change watchers don't work on sub-directories
                 2) there is no notification for file moves
              */
-            long lastModified = ((new File(fileName)).lastModified());
+            long lastModified = (new File(fileName)).lastModified();
             if (lastModified == 0L) {
                 javaClassCache.remove(fileName);
                 logger.error(fileName + " not found");
