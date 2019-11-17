@@ -14,7 +14,7 @@ import java.util.*;
  * Author: Blake McBride
  * Date: 5/5/18
  */
-public class GroovyService {
+class GroovyService {
 
 
     private static final transient Logger logger = Logger.getLogger(GroovyService.class);
@@ -25,7 +25,7 @@ public class GroovyService {
 
     private static class GroovyClassInfo {
         static long cacheLastChecked = 0;   // last time cache unload checked
-        public GroovyClass gclass;
+        GroovyClass gclass;
         long lastModified;
         long lastAccess;
         int executing;
@@ -42,7 +42,7 @@ public class GroovyService {
         GroovyClassInfo ci;
         final String _fullClassPath = _package != null ? _package + "." + _className : _className;
         String fileName = ServiceBase.getApplicationPath() + "/" + _fullClassPath.replace(".", "/") + ".groovy";
-        ci = loadGroovyClass(fileName, false);
+        ci = loadGroovyClass(fileName);
         if (ci != null) {
             Class[] ca = {
             };
@@ -74,10 +74,10 @@ public class GroovyService {
         String fileName = ServiceBase.getApplicationPath() + _className.replace(".", "/") + ".groovy";
         if (ServiceBase.debug)
             System.err.println("Attempting to load " + fileName);
-        ci = loadGroovyClass(fileName, false);
+        ci = loadGroovyClass(fileName);
         if (ci != null) {
             if (ServiceBase.debug)
-                System.err.println("Found");
+                System.err.println("Found and loaded");
             try {
                 ci.executing++;
                 Object instance;
@@ -96,10 +96,8 @@ public class GroovyService {
                     meth = ci.gclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, MainServlet.class);
                 } catch (Exception e) {
                     ms.errorReturn(response, fileName + " " + _method + "()", e);
-                    if (ServiceBase.debug) {
-                        System.err.println("Method not found");
-                        System.err.println(e.getMessage());
-                    }
+                    System.err.println("Method not found");
+                    System.err.println(e.getMessage());
                     return MainServlet.ExecutionReturn.Error;
                 }
 
@@ -110,10 +108,8 @@ public class GroovyService {
                     meth.invoke(instance, injson, outjson, ms.DB, ms);
                 } catch (Exception e) {
                     ms.errorReturn(response, fileName + " " + _method + "()", e);
-                    if (ServiceBase.debug) {
-                        System.err.println("Method failed");
-                        System.err.println(e.getMessage());
-                    }
+                    System.err.println("Method failed");
+                    System.err.println(e.getMessage());
                     return MainServlet.ExecutionReturn.Error;
                 }
                 if (ServiceBase.debug)
@@ -123,12 +119,11 @@ public class GroovyService {
                 ci.executing--;
             }
         }
-        if (ServiceBase.debug)
-            System.err.println("Not found");
+        System.err.println("Error loading or not found");
         return MainServlet.ExecutionReturn.NotFound;
     }
 
-    private synchronized static GroovyClassInfo loadGroovyClass(String fileName, boolean report) {
+    private synchronized static GroovyClassInfo loadGroovyClass(String fileName) {
         GroovyClass gclass;
         GroovyClassInfo ci;
         if (groovyClassCache.containsKey(fileName)) {
@@ -137,7 +132,13 @@ public class GroovyService {
                 1) directory change watchers don't work on sub-directories
                 2) there is no notification for file moves
              */
-            if (((new File(fileName)).lastModified()) == ci.lastModified) {
+            long lastModified = ((new File(fileName)).lastModified());
+            if (lastModified == 0L) {
+                groovyClassCache.remove(fileName);
+                logger.error(fileName + " not found");
+                return null;
+            }
+            if (lastModified == ci.lastModified) {
                 ci.lastAccess = (new Date()).getTime() / 1000L;
                 cleanGroovyCache();
                 return ci;
@@ -149,13 +150,8 @@ public class GroovyService {
             GroovyClass.reset();
             gclass = new GroovyClass(false, fileName);
             groovyClassCache.put(fileName, ci = new GroovyClassInfo(gclass, (new File(fileName)).lastModified()));
-        } catch (FileNotFoundException e) {
-            if (report)
-                logger.error("File " + fileName + " not found", e);
-            return null;
         } catch (Exception e) {
-            if (report)
-                logger.error("Error loading " + fileName, e);
+            logger.error("Error loading " + fileName, e);
             return null;
         }
         return ci;

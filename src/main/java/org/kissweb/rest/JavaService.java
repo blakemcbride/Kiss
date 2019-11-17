@@ -23,7 +23,7 @@ import static org.kissweb.rest.MainServlet.getApplicationPath;
  * Author: Blake McBride
  * Date: 5/5/18
  */
-public class JavaService {
+class JavaService {
 
     private static final transient Logger logger = Logger.getLogger(JavaService.class);
 
@@ -51,16 +51,14 @@ public class JavaService {
         if (ServiceBase.debug)
             System.err.println("Attempting to load " + fileName);
         try {
-            ci = loadJavaClass(_className, fileName, false);
+            ci = loadJavaClass(_className, fileName);
         } catch (ClassNotFoundException e) {
             ms.errorReturn(response, "Class not found: " + e.getMessage(), null);
-            if (ServiceBase.debug)
-                System.err.println("Not found");
+            System.err.println("Not found");
             return MainServlet.ExecutionReturn.Error;
         } catch (Throwable e) {
             ms.errorReturn(response, e.getMessage(), null);
-            if (ServiceBase.debug)
-                System.err.println("Not found");
+            System.err.println("Not found");
             return MainServlet.ExecutionReturn.Error;
         }
         if (ci != null) {
@@ -81,10 +79,8 @@ public class JavaService {
                 meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, MainServlet.class);
             } catch (NoSuchMethodException e) {
                 ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
-                if (ServiceBase.debug) {
-                    System.err.println("Method failed");
-                    System.err.println(e.getMessage());
-                }
+                System.err.println("Method failed");
+                System.err.println(e.getMessage());
                 return MainServlet.ExecutionReturn.Error;
             }
             try {
@@ -93,18 +89,15 @@ public class JavaService {
                 meth.invoke(instance, injson, outjson, ms.DB, ms);
             } catch (Exception e) {
                 ms.errorReturn(response, fileName + " " + _method + "()", e);
-                if (ServiceBase.debug) {
-                    System.err.println("Method failed");
-                    System.err.println(e.getMessage());
-                }
+                System.err.println("Method failed");
+                System.err.println(e.getMessage());
                 return MainServlet.ExecutionReturn.Error;
             }
             if (ServiceBase.debug)
                 System.err.println("Method completed successfully");
             return MainServlet.ExecutionReturn.Success;
         }
-        if (ServiceBase.debug)
-            System.err.println("Not found");
+        System.err.println("Not found or not loaded");
         return MainServlet.ExecutionReturn.NotFound;
     }
 
@@ -115,7 +108,7 @@ public class JavaService {
 
     }
 
-    private synchronized static JavaClassInfo loadJavaClass(String className, String fileName, boolean report) throws Exception {
+    private synchronized static JavaClassInfo loadJavaClass(String className, String fileName) throws Exception {
         Class jclass;
         JavaClassInfo ci;
         if (javaClassCache.containsKey(fileName)) {
@@ -124,7 +117,13 @@ public class JavaService {
                 1) directory change watchers don't work on sub-directories
                 2) there is no notification for file moves
              */
-            if (((new File(fileName)).lastModified()) == ci.lastModified) {
+            long lastModified = ((new File(fileName)).lastModified());
+            if (lastModified == 0L) {
+                javaClassCache.remove(fileName);
+                logger.error(fileName + " not found");
+                return null;
+            }
+            if (lastModified == ci.lastModified) {
                 ci.lastAccess = (new Date()).getTime() / 1000L;
                 cleanJavaCache();
                 return ci;
@@ -142,12 +141,10 @@ public class JavaService {
 
             javaClassCache.put(fileName, ci = new JavaClassInfo(jclass, (new File(fileName)).lastModified()));
         } catch (FileNotFoundException | NoSuchFileException e) {
-            if (report)
-                logger.error("File " + fileName + " not found", e);
+            logger.error("File " + fileName + " not found", e);
             return null;
         } catch (Exception e) {
-            if (report)
-                logger.error("Error loading " + fileName, e);
+            logger.error("Error loading " + fileName, e);
             throw e;
         }
         return ci;

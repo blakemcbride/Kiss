@@ -20,7 +20,7 @@ import static org.kissweb.rest.MainServlet.CheckCacheDelay;
  * Author: Blake McBride
  * Date: 5/5/18
  */
-public class LispService {
+class LispService {
 
     private static final transient Logger logger = Logger.getLogger(LispService.class);
 
@@ -53,8 +53,7 @@ public class LispService {
         if (ServiceBase.debug)
             System.err.println("Attempting to load " + fileName);
         if (!(new File(fileName)).exists()) {
-            if (ServiceBase.debug)
-                System.err.println("Not found");
+            System.err.println(fileName + " not found");
             return ExecutionReturn.NotFound;
         }
 
@@ -83,8 +82,7 @@ public class LispService {
                 System.err.println("Loading Lisp file");
             res = loadLispFile(_className, lispFileName, true);
         } catch (Exception e) {
-            if (ServiceBase.debug)
-                System.err.println("Loading failed: " + e.getMessage());
+            System.err.println("Loading failed: " + e.getMessage());
             ms.errorReturn(response, "Error loading Lisp " + lispFileName, e);
             res = null;
         }
@@ -100,8 +98,7 @@ public class LispService {
             ABCL.executeLisp(_className, _method, lispIn, lispOut, lispHSU, lispThis);
         } catch (Exception e) {
             ms.errorReturn(response, "Error executing Lisp " + lispFileName + " " + _method + "()", e);
-            if (ServiceBase.debug)
-                System.err.println("Executing failed: " + e.getMessage());
+            System.err.println("Executing failed: " + e.getMessage());
             return ExecutionReturn.Error;
         } finally {
             res.executing--;
