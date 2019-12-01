@@ -43,7 +43,7 @@ public class GroovyClass {
 	 * @param sourceFile
 	 * @throws Exception 
 	 */
-	public GroovyClass(boolean calculatePath, String sourceFile) throws Exception {
+	GroovyClass(boolean calculatePath, String sourceFile) throws Exception {
 		String path;
 		if (calculatePath)
 			path = ServiceBase.getApplicationPath();
@@ -60,17 +60,17 @@ public class GroovyClass {
 	 * Be careful with this.  If one Groovy file causes the load of a second Groovy file,
 	 * and the second file causes a reload of the groovyLoader, then the first file will have been erased.
 	 */
-	public static void reset() {
+	static void reset() {
 		groovyLoader = null;
 	}
 
-	public Method getMethod(String methodName, Class ... argTypes) throws Exception {
+	Method getMethod(String methodName, Class... argTypes) throws Exception {
 		@SuppressWarnings("unchecked")
 		Method methp = groovyClass.getMethod(methodName, argTypes);
 		return methp;
 	}
 
-	public Method getMethod(String methodName, Object ... args) throws Exception {
+	private Method getMethod(String methodName, Object... args) throws Exception {
 		Class[] argTypes = new Class[args.length];
 		for (int i = 0; i < args.length; i++)
 			argTypes[i] = args[i].getClass();  //   Object.class;
@@ -102,14 +102,14 @@ public class GroovyClass {
 	}
 		
 	@SuppressWarnings("unchecked")
-	public Constructor getConstructor(Object ... args) throws Exception {
+	private Constructor getConstructor(Object... args) throws Exception {
 		Class[] argTypes = new Class[args.length];
 		for (int i = 0; i < args.length; i++)
 			argTypes[i] = args[i].getClass();  //   Object.class;
 		return groovyClass.getConstructor(argTypes);
 	}
 		
-	public Object invokeConstructor(Object ... args) throws Exception {
+	Object invokeConstructor(Object... args) throws Exception {
 		Constructor c = getConstructor(args);
 		return c.newInstance(args);
 	}

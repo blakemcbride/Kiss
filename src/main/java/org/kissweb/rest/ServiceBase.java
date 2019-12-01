@@ -4,7 +4,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.kissweb.database.Connection;
 import org.kissweb.database.Record;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import java.beans.PropertyVetoException;
 import java.io.File;
@@ -16,7 +15,7 @@ import java.time.LocalDateTime;
  * Author: Blake McBride
  * Date: 5/4/18
  */
-public class ServiceBase extends HttpServlet {
+public class ServiceBase {
 
     private static Connection.ConnectionType connectionType;
     private static String host;                      // set by KissInit.groovy

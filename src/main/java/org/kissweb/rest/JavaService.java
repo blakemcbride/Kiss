@@ -16,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-import static org.kissweb.rest.MainServlet.getApplicationPath;
+import static org.kissweb.rest.ProcessServlet.getApplicationPath;
 
 
 /**
@@ -45,7 +45,7 @@ class JavaService {
     }
 
     @SuppressWarnings("unchecked")
-    MainServlet.ExecutionReturn tryJava(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
+    ProcessServlet.ExecutionReturn tryJava(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         JavaClassInfo ci;
         String fileName = getApplicationPath() + _className.replace(".", "/") + ".java";
         if (ServiceBase.debug)
@@ -55,11 +55,11 @@ class JavaService {
         } catch (ClassNotFoundException e) {
             ms.errorReturn(response, "Class not found: " + e.getMessage(), null);
             System.err.println("Not found");
-            return MainServlet.ExecutionReturn.Error;
+            return ProcessServlet.ExecutionReturn.Error;
         } catch (Throwable e) {
             ms.errorReturn(response, e.getMessage(), null);
             System.err.println("Not found");
-            return MainServlet.ExecutionReturn.Error;
+            return ProcessServlet.ExecutionReturn.Error;
         }
         if (ci != null) {
             Object instance;
@@ -71,17 +71,17 @@ class JavaService {
                 instance = ci.jclass.newInstance();
             } catch (Exception e) {
                 ms.errorReturn(response, "Error creating instance of of " + fileName, null);
-                return MainServlet.ExecutionReturn.Error;
+                return ProcessServlet.ExecutionReturn.Error;
             }
             try {
                 if (ServiceBase.debug)
                     System.err.println("Seeking method " + _method);
-                meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, MainServlet.class);
+                meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, ProcessServlet.class);
             } catch (NoSuchMethodException e) {
                 ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
                 System.err.println("Method failed");
                 System.err.println(e.getMessage());
-                return MainServlet.ExecutionReturn.Error;
+                return ProcessServlet.ExecutionReturn.Error;
             }
             try {
                 if (ServiceBase.debug)
@@ -91,14 +91,14 @@ class JavaService {
                 ms.errorReturn(response, fileName + " " + _method + "()", e);
                 System.err.println("Method failed");
                 System.err.println(e.getMessage());
-                return MainServlet.ExecutionReturn.Error;
+                return ProcessServlet.ExecutionReturn.Error;
             }
             if (ServiceBase.debug)
                 System.err.println("Method completed successfully");
-            return MainServlet.ExecutionReturn.Success;
+            return ProcessServlet.ExecutionReturn.Success;
         }
         System.err.println("Not found or not loaded");
-        return MainServlet.ExecutionReturn.NotFound;
+        return ProcessServlet.ExecutionReturn.NotFound;
     }
 
     private static class CustomClassLoader extends ClassLoader {
@@ -131,6 +131,11 @@ class JavaService {
             javaClassCache.remove(fileName);
         }
         cleanJavaCache();
+        if (!(new File(fileName)).exists()) {
+            if (ServiceBase.debug)
+                logger.error("File " + fileName + " not found");
+            return null;
+        }
         try {
             String code = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
 
@@ -152,13 +157,13 @@ class JavaService {
 
     private static void cleanJavaCache() {
         long current = (new Date()).getTime() / 1000L;
-        if (current - JavaClassInfo.cacheLastChecked > MainServlet.CheckCacheDelay) {
+        if (current - JavaClassInfo.cacheLastChecked > ProcessServlet.CheckCacheDelay) {
             ArrayList<String> keys = new ArrayList<>();
             for (Map.Entry<String, JavaClassInfo> itm : javaClassCache.entrySet()) {
                 JavaClassInfo ci = itm.getValue();
                 if (ci.executing > 0)
                     ci.lastAccess = current;
-                else if (current - ci.lastAccess > MainServlet.MaxHold)
+                else if (current - ci.lastAccess > ProcessServlet.MaxHold)
                     keys.add(itm.getKey());
             }
             for (String key : keys)

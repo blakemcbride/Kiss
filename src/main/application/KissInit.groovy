@@ -13,6 +13,6 @@ class KissInit {
 
         UserCache.setInactiveUserMaxSeconds 900   // seconds user is allowed to be idle before auto-logoff
 
-        ServiceBase.setDebug false                // if true print debug info
+        ServiceBase.setDebug true                // if true print debug info
     }
 }

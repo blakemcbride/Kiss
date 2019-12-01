@@ -10,10 +10,10 @@ import java.io.File;
 import java.util.*;
 
 
-import static org.kissweb.rest.MainServlet.ExecutionReturn;
-import static org.kissweb.rest.MainServlet.getApplicationPath;
-import static org.kissweb.rest.MainServlet.MaxHold;
-import static org.kissweb.rest.MainServlet.CheckCacheDelay;
+import static org.kissweb.rest.ProcessServlet.ExecutionReturn;
+import static org.kissweb.rest.ProcessServlet.getApplicationPath;
+import static org.kissweb.rest.ProcessServlet.MaxHold;
+import static org.kissweb.rest.ProcessServlet.CheckCacheDelay;
 
 
 /**
@@ -45,7 +45,7 @@ class LispService {
         }
     }
 
-    ExecutionReturn tryLisp(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
+    ExecutionReturn tryLisp(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         String lispFileName = _className.replace(".", "/") + ".lisp";
         LispObject args;
         String fileName = getApplicationPath() + lispFileName;
@@ -77,6 +77,11 @@ class LispService {
         LispObject lispThis = args.NTH(3);
 
         LispPackageInfo res;
+        if (!(new File(fileName)).exists()) {
+            if (ServiceBase.debug)
+                logger.error("File " + fileName + " not found");
+            return ExecutionReturn.NotFound;
+        }
         try {
             if (ServiceBase.debug)
                 System.err.println("Loading Lisp file");

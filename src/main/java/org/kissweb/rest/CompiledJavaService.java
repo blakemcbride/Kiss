@@ -14,10 +14,10 @@ import java.lang.reflect.Method;
 public class CompiledJavaService {
 
 
-    MainServlet.ExecutionReturn tryCompiledJava(MainServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
+    ProcessServlet.ExecutionReturn tryCompiledJava(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
 
         if (true)
-            return MainServlet.ExecutionReturn.NotFound;   // not done yet
+            return ProcessServlet.ExecutionReturn.NotFound;   // not done yet
 
 
         Class cls = null;
@@ -27,7 +27,7 @@ public class CompiledJavaService {
                 dynamicClassPath += "/";
             String classPath = dynamicClassPath + _className.replace(".", "/") + "/";
             try {
-                cls = MainServlet.class.getClassLoader().loadClass(_className);
+                cls = ProcessServlet.class.getClassLoader().loadClass(_className);
             } catch (Throwable e) {
                 // ignore
             }
@@ -43,7 +43,7 @@ public class CompiledJavaService {
                     JSONObject.class,
                     JSONObject.class,
                     Connection.class,
-                    MainServlet.class
+                    ProcessServlet.class
             };
 
             Method methp;
@@ -53,16 +53,16 @@ public class CompiledJavaService {
                 methp = tmethp;  // had to use tmethp to be able to use @SuppressWarnings
             } catch (Exception e) {
                 ms.errorReturn(response, "Java method " + _method + " not found in class " + this.getClass().getName(), e);
-                return MainServlet.ExecutionReturn.Error;
+                return ProcessServlet.ExecutionReturn.Error;
             }
             try {
                 methp.invoke(null, injson, outjson, ms.DB, this);
             } catch (Exception e) {
                 ms.errorReturn(response, "Error executing Java method " + _method + " not found in class " + this.getClass().getName(), e);
-                return MainServlet.ExecutionReturn.Error;
+                return ProcessServlet.ExecutionReturn.Error;
             }
         }
-        return MainServlet.ExecutionReturn.NotFound;
+        return ProcessServlet.ExecutionReturn.NotFound;
     }
 
 

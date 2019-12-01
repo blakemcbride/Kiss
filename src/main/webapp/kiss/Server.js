@@ -36,17 +36,63 @@ class Server {
     /**
      * Evoke a back-end REST service.
      *
-     * This function is typically called with an await and returns the resule of the call.
+     * This function is typically called with an await and returns the result of the call.
      *
      * @param {string} cls the web service to be called
      * @param {string} meth  the web method
      * @param {object} injson data to be passed to the back-end
      *
-     * @returns {Promise<any>} data returned from the back-end
+     * @returns data returned from the back-end
      */
-    static call(cls, meth, injson) {
+    static async call(cls, meth, injson) {
 
-        const doCall = function (cls, meth, injson, pass, resolve, reject) {
+        const path = "rest";  // path to servlet
+        if (!injson)
+            injson = {};
+        injson._uuid = Server.uuid;
+        injson._method = meth;
+        injson._class = cls;
+
+        const doCall = async function (cls, meth, injson, pass) {
+            let response;
+            try {
+                response = await fetch(Server.url + '/' + path, {
+                    method: 'POST',
+                    body: JSON.stringify(injson),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (err) {
+                return await processError(cls, meth, injson, 1, err);
+            }
+            let a = 1;
+            try {
+                let b = 1;
+                let c = await response.json();
+                let d = 1;
+                return c;
+            } catch (err) {
+                return await processError(cls, meth, injson, 1, err);
+            }
+        };
+
+        const processError = async function(cls, meth, injson, pass, err) {
+            if (pass < 3)
+                return await doCall(cls, meth, injson, pass + 1);
+            const msg = 'Error communicating with the server.';
+            Utils.showMessage('Error', msg);
+            return {_Success: false, _ErrorMessage: msg};
+        };
+
+        let r = await doCall(cls, meth, injson, 1);
+        let g = 1;
+        return r;
+
+
+        //////////////
+
+        const doCall_old = function (cls, meth, injson, pass, resolve, reject) {
             const path = "rest";  // path to servlet
             if (!injson)
                 injson = {};
@@ -67,7 +113,7 @@ class Server {
                 },
                 error: function (error, status) {
                     if (pass < 3) {
-                        doCall(cls, meth, injson, pass + 1, resolve, reject);
+                        doCall_old(cls, meth, injson, pass + 1, resolve, reject);
                         return;
                     }
                     const msg = 'Error communicating with the server.';
@@ -79,7 +125,7 @@ class Server {
         };
 
         return new Promise(function (resolve, reject) {
-            doCall(cls, meth, injson, 1, resolve, reject);
+            doCall_old(cls, meth, injson, 1, resolve, reject);
         });
     }
 
