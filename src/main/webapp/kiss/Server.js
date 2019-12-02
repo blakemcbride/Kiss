@@ -64,7 +64,7 @@ class Server {
                     }
                 });
             } catch (err) {
-                return await processError(cls, meth, injson, 1, err);
+                return await processError(cls, meth, injson, pass, err);
             }
             let a = 1;
             try {
@@ -73,7 +73,7 @@ class Server {
                 let d = 1;
                 return c;
             } catch (err) {
-                return await processError(cls, meth, injson, 1, err);
+                return await processError(cls, meth, injson, pass, err);
             }
         };
 
