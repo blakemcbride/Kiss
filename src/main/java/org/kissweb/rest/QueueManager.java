@@ -1,11 +1,12 @@
 package org.kissweb.rest;
 
-import org.apache.log4j.Level;
+
 import org.apache.log4j.Logger;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.PrintWriter;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -23,19 +24,15 @@ class QueueManager {
     private final ExecutorService pool;
 
     QueueManager(int maxThreads) {
-        logger.setLevel(Level.ALL);
-        logger.trace("new 1");
         queue = new LinkedBlockingDeque<>();
         pool = Executors.newFixedThreadPool(maxThreads);
-        logger.trace("new 2");
         Dispatcher dispatcher = new Dispatcher();
         Thread thread = new Thread(dispatcher);
         thread.start();
-        logger.trace("new 3");
     }
 
-    void add(HttpServletRequest request, HttpServletResponse response) {
-        queue.addLast(new Packet(request, response));
+    void add(HttpServletRequest request, HttpServletResponse response, PrintWriter out) {
+        queue.addLast(new Packet(request, response, out));
     }
 
     private class Dispatcher implements Runnable {
@@ -44,13 +41,9 @@ class QueueManager {
         public void run() {
             while (true) {
                 try {
-                    logger.trace("run 1");
                     Packet packet = queue.takeFirst();
-                    logger.trace("run 2");
                     Runnable r = new ProcessServlet(packet);
-                    logger.trace("run 3");
                     pool.execute(r);
-                    logger.trace("run 4");
                 } catch (InterruptedException e) {
                     break;
                 }
@@ -60,8 +53,10 @@ class QueueManager {
 
     static class Packet {
         AsyncContext asyncContext;
+        PrintWriter out;
 
-        Packet(HttpServletRequest request, HttpServletResponse response) {
+        Packet(HttpServletRequest request, HttpServletResponse response, PrintWriter out) {
+            this.out = out;
             asyncContext = request.startAsync(request, response);
         }
     }

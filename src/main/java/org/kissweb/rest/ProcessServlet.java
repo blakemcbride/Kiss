@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.kissweb.DateUtils;
 import org.kissweb.FileUtils;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,33 +24,32 @@ import java.util.stream.Collectors;
 public class ProcessServlet extends ServiceBase implements Runnable {
 
     private static final Logger logger = Logger.getLogger(ProcessServlet.class);
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-
-    ProcessServlet(QueueManager.Packet packet) {
-        request = (HttpServletRequest) packet.asyncContext.getRequest();
-        response = (HttpServletResponse) packet.asyncContext.getResponse();
-    }
-
-    @Override
-    public void run() {
-        logger.setLevel(Level.ALL);
-        logger.trace("run 1");
-        try {
-            run2();
-            logger.trace("run 2");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////
-
 
     static final int MaxHold = 600;         // number of seconds to cache microservices before unloading them
     static final int CheckCacheDelay = 60;  // how often to check to unload microservices in seconds
     private static boolean systemInitialized = false;
     private ServletContext servletContext;
+
+    private HttpServletRequest request;
+    private HttpServletResponse response;
+    private AsyncContext asyncContext;
+    private PrintWriter out;
+
+    ProcessServlet(QueueManager.Packet packet) {
+        request = (HttpServletRequest) packet.asyncContext.getRequest();
+        response = (HttpServletResponse) packet.asyncContext.getResponse();
+        asyncContext = packet.asyncContext;
+        out = packet.out;
+    }
+
+    @Override
+    public void run() {
+        try {
+            run2();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     enum ExecutionReturn {
         Success,
@@ -322,14 +322,14 @@ public class ProcessServlet extends ServiceBase implements Runnable {
         } catch (SQLException e) {
 
         }
-        outjson.put("_Success", true);
-        PrintWriter out = response.getWriter();
-        out.print(outjson);
-        out.flush();
-        out.close();
         response.setContentType("application/json");
         response.setStatus(200);
+        outjson.put("_Success", true);
+        out.print(outjson);
+        out.flush();
+        out.close();     // this causes the second response
         closeSession();
+        asyncContext.complete();
     }
 
     void errorReturn(HttpServletResponse response, String msg, Exception e) {
@@ -340,6 +340,8 @@ public class ProcessServlet extends ServiceBase implements Runnable {
             }
         }
         closeSession();
+        response.setContentType("application/json");
+        response.setStatus(200);
         JSONObject outjson = new JSONObject();
         outjson.put("_Success", false);
         String finalMsg = msg;
@@ -355,18 +357,11 @@ public class ProcessServlet extends ServiceBase implements Runnable {
             }
         }
         outjson.put("_ErrorMessage", finalMsg);
-        PrintWriter out = null;
         log_error(finalMsg, e);
-        try {
-            out = response.getWriter();
-            out.print(outjson);
-            out.flush();
-            out.close();
-        } catch (IOException e1) {
-            // ignore
-        }
-        response.setContentType("application/json");
-        response.setStatus(200);
+        out.print(outjson);
+        out.flush();
+        out.close();  //  this causes the second response
+        asyncContext.complete();
     }
 
     boolean isEmpty(final String str) {

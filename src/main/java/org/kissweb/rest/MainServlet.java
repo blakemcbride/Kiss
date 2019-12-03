@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 
 /**
@@ -31,17 +32,16 @@ public class MainServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        logger.setLevel(Level.ALL);
-        logger.trace("doPost 1");
-
         if (queueManager == null) {
-            logger.trace("doPost 2");
             queueManager = new QueueManager(MAX_THREADS);
             ServiceBase.setApplicationPath(request);
         }
 
-        queueManager.add(request, response);
-        logger.trace("doPost 4");
+        PrintWriter out = response.getWriter();
+        response.setStatus(202);
+        out.flush();  //  this causes the first response
+
+        queueManager.add(request, response, out);
     }
 
 
