@@ -11,7 +11,6 @@ import java.util.*;
 
 
 import static org.kissweb.rest.ProcessServlet.ExecutionReturn;
-import static org.kissweb.rest.ProcessServlet.getApplicationPath;
 import static org.kissweb.rest.ProcessServlet.MaxHold;
 import static org.kissweb.rest.ProcessServlet.CheckCacheDelay;
 
@@ -48,9 +47,9 @@ class LispService {
     ExecutionReturn tryLisp(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         String lispFileName = _className.replace(".", "/") + ".lisp";
         LispObject args;
-        String fileName = getApplicationPath() + lispFileName;
+        String fileName = MainServlet.getApplicationPath() + lispFileName;
 
-        if (ServiceBase.debug)
+        if (MainServlet.isDebug())
             System.err.println("Attempting to load " + fileName);
         if (!(new File(fileName)).exists()) {
             System.err.println(fileName + " not found");
@@ -59,11 +58,11 @@ class LispService {
 
         try {
             if (once) {
-                if (ServiceBase.debug)
+                if (MainServlet.isDebug())
                     System.err.println("Performing one-time Lisp initialization");
                 ABCL.init();
                 once = false;
-            } else if (ServiceBase.isUnderIDE())
+            } else if (MainServlet.isUnderIDE())
                 ABCL.reset();
             args = ABCL.executeLispFunction(ABCL.getMakeRestServiceArgs(), injson, outjson, ms.DB, ms);
         } catch (Exception e) {
@@ -78,12 +77,12 @@ class LispService {
 
         LispPackageInfo res;
         if (!(new File(fileName)).exists()) {
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 logger.error("File " + fileName + " not found");
             return ExecutionReturn.NotFound;
         }
         try {
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 System.err.println("Loading Lisp file");
             res = loadLispFile(_className, lispFileName, true);
         } catch (Exception e) {
@@ -98,7 +97,7 @@ class LispService {
 
         try {
             res.executing++;
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 System.err.println("Executing lisp function " + _method);
             ABCL.executeLisp(_className, _method, lispIn, lispOut, lispHSU, lispThis);
         } catch (Exception e) {
@@ -108,7 +107,7 @@ class LispService {
         } finally {
             res.executing--;
         }
-        if (ServiceBase.debug)
+        if (MainServlet.isDebug())
             System.err.println("Execution completed successfully");
         return ExecutionReturn.Success;
     }
@@ -121,7 +120,7 @@ class LispService {
                 1) directory change watchers don't work on sub-directories
                 2) there is no notification for file moves
              */
-            if (((new File(getApplicationPath() + fileName)).lastModified()) == ci.lastModified) {
+            if (((new File(MainServlet.getApplicationPath() + fileName)).lastModified()) == ci.lastModified) {
                 ci.lastAccess = (new Date()).getTime() / 1000L;
                 cleanLispCache();
                 return ci;

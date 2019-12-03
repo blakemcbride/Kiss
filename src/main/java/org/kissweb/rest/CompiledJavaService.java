@@ -21,7 +21,7 @@ public class CompiledJavaService {
 
 
         Class cls = null;
-        String dynamicClassPath = ServiceBase.getDynamicClassPath();
+        String dynamicClassPath = MainServlet.getDynamicClassPath();
         if (!ms.isEmpty(dynamicClassPath)) {
             if (dynamicClassPath.charAt(dynamicClassPath.length() - 1) != '/')
                 dynamicClassPath += "/";

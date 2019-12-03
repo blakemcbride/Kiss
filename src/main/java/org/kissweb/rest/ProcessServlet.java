@@ -1,19 +1,20 @@
 package org.kissweb.rest;
 
-import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.kissweb.DateUtils;
 import org.kissweb.FileUtils;
+import org.kissweb.database.Connection;
+import org.kissweb.database.Record;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
-import java.beans.PropertyVetoException;
 import java.io.*;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.stream.Collectors;
 
@@ -21,19 +22,19 @@ import java.util.stream.Collectors;
  * Author: Blake McBride
  * Date: 11/26/19
  */
-public class ProcessServlet extends ServiceBase implements Runnable {
+public class ProcessServlet implements Runnable {
 
     private static final Logger logger = Logger.getLogger(ProcessServlet.class);
 
     static final int MaxHold = 600;         // number of seconds to cache microservices before unloading them
     static final int CheckCacheDelay = 60;  // how often to check to unload microservices in seconds
-    private static boolean systemInitialized = false;
     private ServletContext servletContext;
 
     private HttpServletRequest request;
     private HttpServletResponse response;
     private AsyncContext asyncContext;
     private PrintWriter out;
+    protected Connection DB;
 
     ProcessServlet(QueueManager.Packet packet) {
         request = (HttpServletRequest) packet.asyncContext.getRequest();
@@ -57,24 +58,8 @@ public class ProcessServlet extends ServiceBase implements Runnable {
         Error
     }
 
-    private void initializeSystem(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, PropertyVetoException, SQLException {
-        setApplicationPath(request);
-        ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(this, response, null, "KissInit", "init");
-        if (res == ProcessServlet.ExecutionReturn.Success) {
-            String database = getDatabase();
-            hasDatabase = database != null  &&  !database.isEmpty();
-            if (hasDatabase)
-                makeDatabaseConnection();
-            else
-                System.out.println("* * * No database configured; bypassing login requirements");
-            systemInitialized = true;
-        }
-    }
-
     /**
      * Get the absolute path of the root of the back-end application.
-     *
-     * @return
      */
     public String getRealPath() {
         return servletContext.getRealPath("/");
@@ -82,8 +67,6 @@ public class ProcessServlet extends ServiceBase implements Runnable {
 
     /**
      * Returns the ServletContext.
-     *
-     * @return
      */
     public ServletContext getServletContext() {
         return servletContext;
@@ -91,8 +74,6 @@ public class ProcessServlet extends ServiceBase implements Runnable {
 
     /**
      * Returns the HttpServletRequest.
-     *
-     * @return
      */
     public HttpServletRequest getRequest() {
         return request;
@@ -100,8 +81,6 @@ public class ProcessServlet extends ServiceBase implements Runnable {
 
     /**
      * Return the number of files being uploaded.
-     *
-     * @return
      *
      * @see #getUploadFileName(int)
      * @see #getUploadBufferedInputStream(int)
@@ -136,7 +115,6 @@ public class ProcessServlet extends ServiceBase implements Runnable {
      * Returns the name of the file being uploaded.
      *
      * @param i beginning at 0
-     * @return
      *
      * @see #getUploadFileCount()
      * @see #getUploadBufferedInputStream(int)
@@ -157,7 +135,6 @@ public class ProcessServlet extends ServiceBase implements Runnable {
      * closed by the application.
      *
      * @param i starting from 0
-     * @return
      *
      * @see BufferedInputStream#close()
      * @see #getUploadFileCount()
@@ -176,7 +153,7 @@ public class ProcessServlet extends ServiceBase implements Runnable {
     /**
      * Reads upload file "n", saves it to a temporary file, and returns the path to that file.
      *
-     * @param n
+     * @param n file number
      * @return
      * @throws IOException
      *
@@ -204,16 +181,6 @@ public class ProcessServlet extends ServiceBase implements Runnable {
         JSONObject outjson = new JSONObject();
         ProcessServlet.ExecutionReturn res;
 
-        if (!systemInitialized) {
-            try {
-                initializeSystem(request, response);
-                if (!systemInitialized)
-                    return;
-            } catch (Exception e) {
-                return;
-            }
-        }
-
         try {
             newDatabaseConnection();
         } catch (Throwable e) {
@@ -228,7 +195,7 @@ public class ProcessServlet extends ServiceBase implements Runnable {
         if (_className != null) {
             //  is file upload
             _method = request.getParameter("_method");
-            if (debug)
+            if (MainServlet.isDebug())
                 System.err.println("Enter back-end seeking UPLOAD service " + _className + "." + _method + "()");
             injson = new JSONObject();
             Enumeration<String> names = request.getParameterNames();
@@ -242,45 +209,45 @@ public class ProcessServlet extends ServiceBase implements Runnable {
             injson = new JSONObject(instr);
             _className = injson.getString("_class");
             _method = injson.getString("_method");
-            if (debug)
+            if (MainServlet.isDebug())
                 System.err.println("Enter back-end seeking REST service " + _className + "." + _method + "()");
         }
 
         if (_className.isEmpty())
             if (_method.equals("LoginRequired")) {
-                if (debug)
-                    System.err.println("Login is " + (hasDatabase ? "" : "not ") + "required");
-                outjson.put("LoginRequired", hasDatabase);
+                if (MainServlet.isDebug())
+                    System.err.println("Login is " + (MainServlet.hasDatabase() ? "" : "not ") + "required");
+                outjson.put("LoginRequired", MainServlet.hasDatabase());
                 successReturn(response, outjson);
                 return;
             } else if (_method.equals("Login")) {
-                if (debug)
+                if (MainServlet.isDebug())
                     System.err.println("Attempting user login for " + injson.getString("username"));
                 try {
                     String uuid = login(injson.getString("username"), injson.getString("password"));
                     outjson.put("uuid", uuid);
                     successReturn(response, outjson);
-                    if (debug)
+                    if (MainServlet.isDebug())
                         System.err.println("Login successful");
                     return;
                 } catch (Exception e) {
                     errorReturn(response, "Login failure", e);
-                    if (debug)
+                    if (MainServlet.isDebug())
                         System.err.println("Login failure");
                     return;
                 }
-            } else if (hasDatabase) {
+            } else if (MainServlet.hasDatabase()) {
                 try {
-                    if (debug)
+                    if (MainServlet.isDebug())
                         System.err.println("Validating uuid " + injson.getString("_uuid"));
                     checkLogin(injson.getString("_uuid"));
                 } catch (Exception e) {
-                    if (debug)
+                    if (MainServlet.isDebug())
                         System.err.println("Login failure");
                     errorReturn(response, "Login failure", e);
                     return;
                 }
-                if (debug)
+                if (MainServlet.isDebug())
                     System.err.println("Login success");
             }
         res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
@@ -305,11 +272,11 @@ public class ProcessServlet extends ServiceBase implements Runnable {
         }
 
         if (res == ProcessServlet.ExecutionReturn.NotFound) {
-            if (debug)
+            if (MainServlet.isDebug())
                 System.err.println("No back-end code found for " + _className);
             errorReturn(response, "No back-end code found for " + _className, null);
         } else {
-            if (debug)
+            if (MainServlet.isDebug())
                 System.err.println("REST service " + _className + "." + _method + "() executed successfully");
             successReturn(response, outjson);
         }
@@ -375,6 +342,66 @@ public class ProcessServlet extends ServiceBase implements Runnable {
         final StringWriter sw = new StringWriter();
         e.printStackTrace(new PrintWriter(sw));
         logger.error(sw.toString());
+    }
+
+    private String login(String user, String password) throws Exception {
+        UserCache.UserData ud;
+        if (MainServlet.hasDatabase()) {
+            Record rec = DB.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", user, password);
+            if (rec == null)
+                throw new Exception("Invalid login.");
+            ud = UserCache.newUser(user, password);
+            ud.user_id = rec.getInt("user_id");
+        } else
+            ud = UserCache.newUser(user, password);
+        return ud.uuid;
+    }
+
+    private int checkLogin(String uuid) throws Exception {
+        UserCache.UserData ud = UserCache.findUser(uuid);
+        if (ud == null)
+            throw new Exception("Login timed out; please re-login.");
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime timeout = ud.lastAccessDate.plusSeconds(120);  // cache user data for 120 seconds
+        if (MainServlet.hasDatabase() && now.isAfter(timeout)) {
+            Record rec = DB.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", ud.username, ud.password);
+            if (rec == null) {
+                UserCache.removeUser(uuid);
+                throw new Exception("Invalid login.");
+            }
+        }
+        ud.lastAccessDate = LocalDateTime.now();
+        return ud.user_id;
+    }
+
+    private void newDatabaseConnection() throws SQLException {
+        if (!MainServlet.hasDatabase())
+            return;
+        if (MainServlet.isDebug())
+            System.err.println("Previous open database connections = " + MainServlet.getCpds().getNumBusyConnections());
+        DB = new Connection(MainServlet.getCpds().getConnection());
+        if (MainServlet.isDebug())
+            System.err.println("New database connection obtained");
+    }
+
+    private void closeSession() {
+        java.sql.Connection sconn = null;
+        try {
+            if (DB != null) {
+                sconn = DB.getSQLConnection();
+                DB.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DB = null;
+        }
+        try {
+            if (sconn != null)
+                sconn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }

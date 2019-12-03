@@ -3,12 +3,10 @@
  *  All Rights Reserved.
 */
 
-
-
 package org.kissweb.lisp;
 
-import org.kissweb.rest.ServiceBase;
 import org.armedbear.lisp.*;
+import org.kissweb.rest.MainServlet;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
@@ -33,7 +31,7 @@ public class ABCL {
 		interpreter = Interpreter.createInstance();
 		invertCase();
 
-		if (ServiceBase.isUnderIDE())
+		if (MainServlet.isUnderIDE())
             UtilsSource = "../java/org/kissweb/lisp/";
 		else
             UtilsSource = "../classes/org/kissweb/lisp/";
@@ -124,16 +122,16 @@ public class ABCL {
 	}
 
 	public static LispObject load(String fileName) {
-	    return eval("(load \"" + ServiceBase.getApplicationPath() + fileName + "\")");
+	    return eval("(load \"" + MainServlet.getApplicationPath() + fileName + "\")");
 	}
 
 	public static LispObject compileFile(String fileName) {
-		return eval("(compile-file \"" + ServiceBase.getApplicationPath() + fileName + "\")");
+		return eval("(compile-file \"" + MainServlet.getApplicationPath() + fileName + "\")");
 	}
 
 	public static void loadPackage(String lispPackage, String fileName) throws Exception {
 		try {
-			eval("(package-lru:load-package \"" + lispPackage + "\" \"" + ServiceBase.getApplicationPath() + fileName + "\")");
+			eval("(package-lru:load-package \"" + lispPackage + "\" \"" + MainServlet.getApplicationPath() + fileName + "\")");
 		} catch (Throwable t) {
 			// Convert Throwable to Exception
 			throw new Exception("Error loading lisp file " + fileName, t);
@@ -141,7 +139,7 @@ public class ABCL {
 	}
 
 	public static void packageDone(String lispPackage) {
-		if (ServiceBase.isUnderIDE())
+		if (MainServlet.isUnderIDE())
 			eval("(package-lru:package-done-unload \"" + lispPackage + "\")");
 		else
 			eval("(package-lru:package-done \"" + lispPackage + "\")");

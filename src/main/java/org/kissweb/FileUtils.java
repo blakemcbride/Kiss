@@ -1,6 +1,6 @@
 package org.kissweb;
 
-import org.kissweb.rest.ServiceBase;
+import org.kissweb.rest.MainServlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,7 @@ public class FileUtils {
     public static File createTempFile(final String prefix, final String suffix)
     {
         deleteOldFiles(1);
-        File dir = new File(ServiceBase.getApplicationPath(), "temp");
+        File dir = new File(MainServlet.getApplicationPath(), "temp");
         dir.mkdir();
         final File f;
         try {
@@ -45,7 +45,7 @@ public class FileUtils {
 
             nDaysAgo -= daysOld * (24L * 60L * 60L * 1000L);
 
-            final File[] fyles = new File(ServiceBase.getApplicationPath(), "temp").listFiles();
+            final File[] fyles = new File(MainServlet.getApplicationPath(), "temp").listFiles();
 
             if (fyles != null)
                 for (final File element : fyles)

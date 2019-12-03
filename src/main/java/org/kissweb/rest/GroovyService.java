@@ -6,7 +6,6 @@ import org.json.JSONObject;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -16,12 +15,9 @@ import java.util.*;
  */
 class GroovyService {
 
-
     private static final transient Logger logger = Logger.getLogger(GroovyService.class);
 
-
     private static final HashMap<String, GroovyClassInfo> groovyClassCache = new HashMap<>();
-
 
     private static class GroovyClassInfo {
         static long cacheLastChecked = 0;   // last time cache unload checked
@@ -41,7 +37,7 @@ class GroovyService {
     ProcessServlet.ExecutionReturn internalGroovy(ProcessServlet ms, HttpServletResponse response, String _package, String _className, String _method) {
         GroovyClassInfo ci;
         final String _fullClassPath = _package != null ? _package + "." + _className : _className;
-        String fileName = ServiceBase.getApplicationPath() + "/" + _fullClassPath.replace(".", "/") + ".groovy";
+        String fileName = MainServlet.getApplicationPath() + "/" + _fullClassPath.replace(".", "/") + ".groovy";
         ci = loadGroovyClass(fileName);
         if (ci != null) {
             Class[] ca = {
@@ -51,7 +47,8 @@ class GroovyService {
                 @SuppressWarnings("unchecked")
                 Method methp = ci.gclass.getMethod(_method, ca);
                 if (methp == null) {
-                    ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
+                    if (ms != null)
+                        ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
                     return ProcessServlet.ExecutionReturn.Error;
                 }
                 try {
@@ -62,7 +59,8 @@ class GroovyService {
                 }
                 return ProcessServlet.ExecutionReturn.Success;
             } catch (Exception e) {
-                ms.errorReturn(response, "Error running method " + _method + " in class " + this.getClass().getName(), e);
+                if (ms != null)
+                    ms.errorReturn(response, "Error running method " + _method + " in class " + this.getClass().getName(), e);
                 return ProcessServlet.ExecutionReturn.Error;
             }
         }
@@ -71,12 +69,12 @@ class GroovyService {
 
     ProcessServlet.ExecutionReturn tryGroovy(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         GroovyClassInfo ci;
-        String fileName = ServiceBase.getApplicationPath() + _className.replace(".", "/") + ".groovy";
-        if (ServiceBase.debug)
+        String fileName = MainServlet.getApplicationPath() + _className.replace(".", "/") + ".groovy";
+        if (MainServlet.isDebug())
             System.err.println("Attempting to load " + fileName);
         ci = loadGroovyClass(fileName);
         if (ci != null) {
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 System.err.println("Found and loaded");
             try {
                 ci.executing++;
@@ -91,7 +89,7 @@ class GroovyService {
                 Method meth;
 
                 try {
-                    if (ServiceBase.debug)
+                    if (MainServlet.isDebug())
                         System.err.println("Searching for method " + _method);
                     meth = ci.gclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, ProcessServlet.class);
                 } catch (Exception e) {
@@ -103,7 +101,7 @@ class GroovyService {
 
 
                 try {
-                    if (ServiceBase.debug)
+                    if (MainServlet.isDebug())
                         System.err.println("Evoking method " + _method);
                     meth.invoke(instance, injson, outjson, ms.DB, ms);
                 } catch (Exception e) {
@@ -112,7 +110,7 @@ class GroovyService {
                     System.err.println(e.getMessage());
                     return ProcessServlet.ExecutionReturn.Error;
                 }
-                if (ServiceBase.debug)
+                if (MainServlet.isDebug())
                     System.err.println("Method completed successfully");
                 return ProcessServlet.ExecutionReturn.Success;
             } finally {
@@ -148,7 +146,7 @@ class GroovyService {
         cleanGroovyCache();
         File fyle = new File(fileName);
         if (!fyle.exists()) {
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 logger.error(fileName + " not found");
             return null;
         }

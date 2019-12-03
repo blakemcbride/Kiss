@@ -257,6 +257,7 @@ the system can better scale.
 </li><li> Web services may be written in Groovy, Java or Common Lisp.  Python,
 JavaScript, Ruby, and Scala are expected to follow soon.
 </li><li> User authentication
+</li><li> Asynchronous back-end REST services (via a queue and thread pool) provide support for heavy loads and high throughput.
 </li></ol>
 
 <a name="Front_002dend-Highlights"></a>
@@ -575,6 +576,9 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 <a name="Setup-And-Configuration"></a><a name="Setup-And-Configuration-1"></a>
 <h3 class="section">2.7 Setup And Configuration</h3>
 
+<p>The system is configured by the contents of a single file <code>src/main/application/KissInit.groovy</code>
+A reboot of the web server is required if any of the parameters in this file are changed.
+</p>
 <p>Given that Kiss is for business applications, it authenticates its
 users.  In order for this to work, there is usually a database of valid
 users.  This information is persisted in an SQL database.  Therefore a
@@ -592,8 +596,7 @@ username and password to succeed.
 <tr><td>Database user password</td><td>postgres</td></tr>
 </table>
 
-<p>This can be configured in the file <code>src/main/application/KissInit.groovy</code>
-Valid options for the Database type are as follows:
+<p>Valid options for the Database type are as follows:
 </p>
 <ul>
 <li> PostgreSQL
@@ -605,6 +608,10 @@ Valid options for the Database type are as follows:
 
 <p>Support for other databases is easy to add.
 </p>
+<p><em>setMaxWorkerThreads</em> defines how many REST services may be processed in parallel.  Service requests
+beyond this are placed in a FIFO queue and processed as worker threads become available.  This capability
+drastically improves the system&rsquo;s ability to handle a large number of simultaneous users.
+</p>
 <p>The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 </p>
@@ -614,8 +621,6 @@ to create the table and some initial data.
 </p>
 <p>The default username is <em>kiss</em>, and the default password is
 <em>password</em>
-</p>
-<p>Changes to  <code>KissInit.groovy</code> require a server reboot.
 </p>
 <a name="Building-The-System"></a>
 <h3 class="section">2.8 Building The System</h3>
@@ -801,7 +806,7 @@ of concern when building an application as follows.
 
 <dl compact="compact">
 <dt><code>src/main/application/KissInit.groovy</code></dt>
-<dd><p>This file is used to configure the system.
+<dd><p>This file is used to configure the system. See <a href="#Setup-And-Configuration">Setup And Configuration</a>
 </p></dd>
 <dt><code>src/main/application</code></dt>
 <dd><p>All other files under this directory represent the application

@@ -97,8 +97,9 @@ class Server {
         injson._class = cls;
 
         const doCall = async function (cls, meth, injson, pass) {
+            let response;
             try {
-                const response = await fetch(Server.url + '/' + path, {
+                response = await fetch(Server.url + '/' + path, {
                     method: 'POST',
                     body: JSON.stringify(injson),
                     headers: {
@@ -106,24 +107,30 @@ class Server {
                     }
                 });
             } catch (err) {
-                return processError(cls, meth, injson, 1, err);
+                return await processError(cls, meth, injson, pass, err);
             }
+            let a = 1;
             try {
-                return await response.json();
+                let b = 1;
+                let c = await response.json();
+                let d = 1;
+                return c;
             } catch (err) {
-                return processError(cls, meth, injson, 1, err);
+                return await processError(cls, meth, injson, pass, err);
             }
         };
 
-        const processError = function(cls, meth, injson, pass, err) {
+        const processError = async function(cls, meth, injson, pass, err) {
             if (pass &lt; 3)
-                return doCall(cls, meth, injson, pass + 1);
+                return await doCall(cls, meth, injson, pass + 1);
             const msg = 'Error communicating with the server.';
             Utils.showMessage('Error', msg);
             return {_Success: false, _ErrorMessage: msg};
         };
 
-        return doCall(cls, meth, injson, 1);
+        let r = await doCall(cls, meth, injson, 1);
+        let g = 1;
+        return r;
 
 
         //////////////

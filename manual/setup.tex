@@ -183,6 +183,9 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 
 @anchor{Setup And Configuration}@section Setup And Configuration
 
+The system is configured by the contents of a single file @code{src/main/application/KissInit.groovy}
+A reboot of the web server is required if any of the parameters in this file are changed.
+
 Given that Kiss is for business applications, it authenticates its
 users.  In order for this to work, there is usually a database of valid
 users.  This information is persisted in an SQL database.  Therefore a
@@ -205,7 +208,6 @@ As shipped, the system comes configured as follows:
 @tab postgres
 @end multitable
 
-This can be configured in the file @code{src/main/application/KissInit.groovy}
 Valid options for the Database type are as follows:
 
 @itemize @bullet
@@ -223,6 +225,10 @@ SQLite
 
 Support for other databases is easy to add.
 
+@emph{setMaxWorkerThreads} defines how many REST services may be processed in parallel.  Service requests
+beyond this are placed in a FIFO queue and processed as worker threads become available.  This capability
+drastically improves the system's ability to handle a large number of simultaneous users.
+
 The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 
@@ -232,8 +238,6 @@ to create the table and some initial data.
 
 The default username is @emph{kiss}, and the default password is
 @emph{password}
-
-Changes to  @code{KissInit.groovy} require a server reboot.
 
 @section Building The System
 

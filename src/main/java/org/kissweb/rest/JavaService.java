@@ -16,9 +16,6 @@ import java.nio.file.Paths;
 import java.util.*;
 
 
-import static org.kissweb.rest.ProcessServlet.getApplicationPath;
-
-
 /**
  * Author: Blake McBride
  * Date: 5/5/18
@@ -47,8 +44,8 @@ class JavaService {
     @SuppressWarnings("unchecked")
     ProcessServlet.ExecutionReturn tryJava(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         JavaClassInfo ci;
-        String fileName = getApplicationPath() + _className.replace(".", "/") + ".java";
-        if (ServiceBase.debug)
+        String fileName = MainServlet.getApplicationPath() + _className.replace(".", "/") + ".java";
+        if (MainServlet.isDebug())
             System.err.println("Attempting to load " + fileName);
         try {
             ci = loadJavaClass(_className, fileName);
@@ -65,7 +62,7 @@ class JavaService {
             Object instance;
             Method meth;
 
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 System.err.println("Found");
             try {
                 instance = ci.jclass.newInstance();
@@ -74,7 +71,7 @@ class JavaService {
                 return ProcessServlet.ExecutionReturn.Error;
             }
             try {
-                if (ServiceBase.debug)
+                if (MainServlet.isDebug())
                     System.err.println("Seeking method " + _method);
                 meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, ProcessServlet.class);
             } catch (NoSuchMethodException e) {
@@ -84,7 +81,7 @@ class JavaService {
                 return ProcessServlet.ExecutionReturn.Error;
             }
             try {
-                if (ServiceBase.debug)
+                if (MainServlet.isDebug())
                     System.err.println("Evoking method " + _method);
                 meth.invoke(instance, injson, outjson, ms.DB, ms);
             } catch (Exception e) {
@@ -93,7 +90,7 @@ class JavaService {
                 System.err.println(e.getMessage());
                 return ProcessServlet.ExecutionReturn.Error;
             }
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 System.err.println("Method completed successfully");
             return ProcessServlet.ExecutionReturn.Success;
         }
@@ -132,7 +129,7 @@ class JavaService {
         }
         cleanJavaCache();
         if (!(new File(fileName)).exists()) {
-            if (ServiceBase.debug)
+            if (MainServlet.isDebug())
                 logger.error("File " + fileName + " not found");
             return null;
         }

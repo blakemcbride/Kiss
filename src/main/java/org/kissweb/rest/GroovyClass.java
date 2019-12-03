@@ -46,7 +46,7 @@ public class GroovyClass {
 	GroovyClass(boolean calculatePath, String sourceFile) throws Exception {
 		String path;
 		if (calculatePath)
-			path = ServiceBase.getApplicationPath();
+			path = MainServlet.getApplicationPath();
 		else
 			path = "";
 

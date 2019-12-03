@@ -778,6 +778,48 @@ class Utils {
         return newElm.kiss;
     }
 
+    static async getHTML( url, callback ) {
+
+        let response;
+        try {
+            response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-type': 'text/plain'
+                }
+            });
+            let y = 1;
+        } catch (err) {
+            let x = 1;
+        }
+        try {
+            let r = await response.text();
+            callback(r);
+        } catch (err) {
+            let z = 1;
+        }
+        return;
+
+        // Feature detection
+        if ( !window.XMLHttpRequest ) return;
+
+        // Create new request
+        var xhr = new XMLHttpRequest();
+
+        // Setup callback
+        xhr.onload = function() {
+            if ( callback &amp;&amp; typeof( callback ) === 'function' ) {
+                callback( this.responseText );
+            }
+        }
+
+        // Get the HTML
+        xhr.open( 'GET', url );
+ //       xhr.responseType = 'document';
+        xhr.responseType = 'text';
+        xhr.send();
+        let x = 1;
+    };
     /**
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
      * Also, the loaded code is processed for custom tags / components.
@@ -788,13 +830,16 @@ class Utils {
     static loadPage(page, tag) {
         if (typeof Kiss !== 'undefined' &amp;&amp; typeof Kiss.RadioButtons !== 'undefined')
             Kiss.RadioButtons.resetGroups();
-        $.get(page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function (text) {
+        let pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
+//        $.get(pg, function (text) {
+        this.getHTML(pg, function (text) {
             if (tag)
                 $('#' + tag).html(text);
             else
                 $('body').html(text);
             Utils.rescan();  // does all the tag replacement
             getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function () {
+                let x = 1;
             });
         });
     }
