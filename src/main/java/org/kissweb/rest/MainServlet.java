@@ -55,10 +55,8 @@ public class MainServlet extends HttpServlet {
                 return;
             }
         }
-        if (queueManager == null) {
+        if (queueManager == null)
             queueManager = new QueueManager(maxWorkerThreads);
-            setApplicationPath(request);
-        }
 
         PrintWriter out = response.getWriter();
         response.setStatus(202);
