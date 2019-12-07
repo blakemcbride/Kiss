@@ -1,6 +1,7 @@
 package org.kissweb.rest;
 
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import javax.servlet.AsyncContext;
@@ -23,6 +24,10 @@ class QueueManager {
     private final BlockingDeque<Packet> queue;
     private final ExecutorService pool;
 
+    private static int maxQueueSize = 1;
+    private final static Object lock = new Object();
+
+
     QueueManager(int maxThreads) {
         queue = new LinkedBlockingDeque<>();
         pool = Executors.newFixedThreadPool(maxThreads);
@@ -33,6 +38,18 @@ class QueueManager {
 
     void add(HttpServletRequest request, HttpServletResponse response, PrintWriter out) {
         queue.addLast(new Packet(request, response, out));
+
+        // keep track of how large the queue is getting
+        synchronized (lock) {
+            int m = queue.size();
+            if (m > maxQueueSize) {
+                maxQueueSize = m;
+                Level lvl = logger.getLevel();
+                logger.setLevel(Level.ALL);
+                logger.info("Max queue size = " + maxQueueSize);
+                logger.setLevel(lvl);
+            }
+        }
     }
 
     private class Dispatcher implements Runnable {
