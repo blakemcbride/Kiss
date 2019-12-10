@@ -206,11 +206,22 @@ public class ProcessServlet implements Runnable {
             }
         } else {
             String instr = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-            injson = new JSONObject(instr);
+            try {
+                injson = new JSONObject(instr);
+            } catch (Exception e) {
+                errorReturn(response, "Unable to parse request json", e);
+                return;
+            }
             _className = injson.getString("_class");
             _method = injson.getString("_method");
             if (MainServlet.isDebug())
                 System.err.println("Enter back-end seeking REST service " + _className + "." + _method + "()");
+        }
+
+        if (_method == null  ||  _method.isEmpty()) {
+            System.err.println("Missing _method");
+            errorReturn(response, "missing _method", null);
+            return;
         }
 
         if (_className.isEmpty())
