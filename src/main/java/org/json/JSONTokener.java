@@ -315,8 +315,10 @@ public class JSONTokener {
             c = this.next();
             switch (c) {
             case 0:
+                /*
             case '\n':
             case '\r':
+                 */
                 throw this.syntaxError("Unterminated string");
             case '\\':
                 c = this.next();
