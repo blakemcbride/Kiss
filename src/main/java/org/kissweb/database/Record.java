@@ -200,7 +200,7 @@ public class Record implements AutoCloseable {
     }
 
     /**
-     * Return the <code>Integer</code> value of the named column.
+     * Return the <code>Short</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
      * @param cname
@@ -209,8 +209,8 @@ public class Record implements AutoCloseable {
      *
      * @see Cursor#getShort(String)
      */
-    public Integer getShort(String cname) throws SQLException {
-        return (Integer) get(cname);
+    public Short getShort(String cname) throws SQLException {
+        return (Short) get(cname);
     }
 
     /**
