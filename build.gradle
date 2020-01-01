@@ -77,7 +77,7 @@ static void loadFile(String url, String tdir, String fname) {
         new URL(url).withInputStream{ i -> f.withOutputStream{ it << i }}
 }
 
-loadFile 'https://code.jquery.com/jquery-3.3.1.min.js', 'src/main/webapp/lib', 'jquery-3.3.1.min.js'
+loadFile 'https://code.jquery.com/jquery-3.4.1.min.js', 'src/main/webapp/lib', 'jquery-3.4.1.min.js'
 
 clean {
     doLast {
