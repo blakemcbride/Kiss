@@ -20,4 +20,3 @@ $$('logout').onclick(function () {
 });
 
 
-//# sourceURL=MainMenu/MainMenu.js

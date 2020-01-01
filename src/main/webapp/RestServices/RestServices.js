@@ -45,4 +45,3 @@ $$('logout').onclick(function () {
 });
 
 
-//# sourceURL=RestServices/RestServices.js

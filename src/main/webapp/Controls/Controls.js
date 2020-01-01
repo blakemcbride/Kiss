@@ -19,4 +19,3 @@ $$('ok').onclick(function () {
 });
 
 
-//# sourceURL=Controls/Controls.js

@@ -29,4 +29,3 @@ Utils.afterComponentsLoaded(function () {
     Utils.useComponent("TimeInput");
 })();
 
-//# sourceURL=index.js

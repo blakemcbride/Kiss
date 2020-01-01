@@ -141,4 +141,3 @@
 })();
 
 
-//# sourceURL=kiss/component/checkBox/CheckBox.js

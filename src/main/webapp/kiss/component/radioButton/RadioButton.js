@@ -221,4 +221,3 @@ Kiss.RadioButtons.focus = function (group) {
     $('input[type=radio][name=]' + group + ']').focus();
 };
 
-//# sourceURL=kiss/component/radioButton/RadioButton.js

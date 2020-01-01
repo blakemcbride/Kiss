@@ -25,5 +25,3 @@ $$('login').onclick(async function () {
 
 $$('username').focus();
 
-
-//# sourceURL=login.js
