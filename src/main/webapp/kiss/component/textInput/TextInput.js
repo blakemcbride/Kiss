@@ -87,7 +87,7 @@
         };
 
         newElm.clear = function () {
-            return jqObj.setValue('');
+            return newElm.setValue('');
         };
 
         //--

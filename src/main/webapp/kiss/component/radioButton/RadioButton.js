@@ -153,33 +153,33 @@ Kiss.RadioButtons.clear = function (group) {
 //--
 
 Kiss.RadioButtons.readOnly = function (group) {
-    $('input[type=radio][name=]' + group + ']').attr('readonly', true);
+    $('input[type=radio][name=' + group + ']').attr('readonly', true);
 };
 
 Kiss.RadioButtons.readWrite = function (group) {
-    $('input[type=radio][name=]' + group + ']').attr('readonly', false);
+    $('input[type=radio][name=' + group + ']').attr('readonly', false);
 };
 
 Kiss.RadioButtons.isReadOnly = function (group) {
-    return !!$('input[type=radio][name=]' + group + ']').attr('readonly');
+    return !!$('input[type=radio][name=' + group + ']').attr('readonly');
 };
 
 //--
 
 Kiss.RadioButtons.hide = function (group) {
-    $('input[type=radio][name=]' + group + ']').attr('readonly', true);
+    $('input[type=radio][name=' + group + ']').attr('readonly', true);
 };
 
 Kiss.RadioButtons.show = function (group) {
-    $('input[type=radio][name=]' + group + ']').attr('readonly', false);
+    $('input[type=radio][name=' + group + ']').attr('readonly', false);
 };
 
 Kiss.RadioButtons.isHidden = function (group) {
-    return $('input[type=radio][name=]' + group + ']').is(':hitten');
+    return $('input[type=radio][name=' + group + ']').is(':hitten');
 };
 
 Kiss.RadioButtons.isVisible = function (group) {
-    return $('input[type=radio][name=]' + group + ']').is(':visible');
+    return $('input[type=radio][name=' + group + ']').is(':visible');
 };
 
 //--
@@ -206,18 +206,18 @@ Kiss.RadioButtons.resetGroups = function () {
 };
 
 Kiss.RadioButtons.enable = function (group) {
-    $('input[type=radio][name=]' + group + ']').attr('disabled', false);
+    $('input[type=radio][name=' + group + ']').attr('disabled', false);
 };
 
 Kiss.RadioButtons.disable = function (group) {
-    $('input[type=radio][name=]' + group + ']').attr('disabled', true);
+    $('input[type=radio][name=' + group + ']').attr('disabled', true);
 };
 
 Kiss.RadioButtons.isDisabled = function (group) {
-    return !!$('input[type=radio][name=]' + group + ']').attr('disabled');
+    return !!$('input[type=radio][name=' + group + ']').attr('disabled');
 };
 
 Kiss.RadioButtons.focus = function (group) {
-    $('input[type=radio][name=]' + group + ']').focus();
+    $('input[type=radio][name=' + group + ']').focus();
 };
 

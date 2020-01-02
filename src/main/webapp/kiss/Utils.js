@@ -58,19 +58,19 @@ function $$(id) {
         rbObj.isError = function (lbl) {
             return Kiss.RadioButtons.isError(id, lbl);
         };
-        rbObj.enable = function (id) {
+        rbObj.enable = function () {
             Kiss.RadioButtons.enable(id);
             return self;
         };
-        rbObj.disable = function (id) {
+        rbObj.disable = function () {
             Kiss.RadioButtons.disable(id);
             return self;
         };
-        rbObj.hide = function (id) {
+        rbObj.hide = function () {
             Kiss.RadioButtons.hide(id);
             return self;
         };
-        rbObj.show = function (id) {
+        rbObj.show = function () {
             Kiss.RadioButtons.show(id);
             return self;
         };
@@ -80,7 +80,7 @@ function $$(id) {
         rbObj.isVisible = function () {
             return Kiss.RadioButtons.isVisible(id);
         };
-        rbObj.focus = function (id) {
+        rbObj.focus = function () {
             Kiss.RadioButtons.focus(id);
             return self;
         };

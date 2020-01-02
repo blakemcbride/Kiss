@@ -109,8 +109,7 @@
         };
 
         newElm.clear = function () {
-            jqObj.val('');
-            originalValue = 0;
+            newElm.setValue('');
             return this;
         };
 
