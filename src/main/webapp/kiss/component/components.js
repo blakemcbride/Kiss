@@ -300,9 +300,10 @@ class components {
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    align-horizontal     </td><td>    align the buttons horizontally (default)             </td></tr>
      *     <tr><td>    align-vertical     </td><td>    align the buttons vertically         </td></tr>
-     *     <tr><td>    group="name"     </td><td>     the name of the group this radio button is a part of (the same for each radio button in a group)              </td></tr>
+     *     <tr><td>    button-style="style"     </td><td>    style used for the button portion of the radio button           </td></tr>
      *     <tr><td>    checked     </td><td>    pre-selects the particular radio button             </td></tr>
-     *     <tr><td>    label-style="style"     </td><td>    style used for the label           </td></tr>
+     *     <tr><td>    group="name"     </td><td>     the name of the group this radio button is a part of (the same for each radio button in a group)              </td></tr>
+     *     <tr><td>    label-style="style"     </td><td>    style used for the label portion of the radio button          </td></tr>
      *     <tr><td>    name="name"     </td><td>     this is an alternate to the <code>group</code> attribute for HTML consistency               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    value="name"     </td><td>     required unique value associate with each radio button (different for each radio button)               </td></tr>

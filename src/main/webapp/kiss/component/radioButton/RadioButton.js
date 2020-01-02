@@ -13,16 +13,17 @@ Kiss.RadioButtons.groups = {};
 (function () {
 
     let processor = function (elm, attr, content) {
-        let nStyle;
+        let div_style;
+        let button_style = '';
         let id;
         let group;
         let required = false;
         let label_style = '';
-        let align_vertical, div_style='';
+        let align_vertical;
         if (attr.style)
-            nStyle = attr.style;
+            div_style = attr.style;
         else
-            nStyle = '';
+            div_style = '';
 
         let nAttrs = '';
         for (let prop in attr) {
@@ -36,6 +37,9 @@ Kiss.RadioButtons.groups = {};
                     break;
                 case 'required':
                     required = true;
+                    break;
+                case 'button-style':
+                    button_style = Utils.removeQuotes(attr[prop]);
                     break;
                 case 'label-style':
                     label_style = Utils.removeQuotes(attr[prop]);
@@ -69,12 +73,12 @@ Kiss.RadioButtons.groups = {};
             Kiss.RadioButtons.groups[group].required = true;
 
         if (!align_vertical)
-            div_style = 'display: inline-block;';
+            div_style = 'display: inline-block;' + div_style;
 
-        let newElm = Utils.replaceHTML(id, elm, '<div style="{div_style}"><input type="radio" {attr} style="{style}" name="{name}" id="{id}"><label style="{label_style}">{content}</label></div>', {
-            style: nStyle,
+        let newElm = Utils.replaceHTML(id, elm, '<div style="{div_style}"><input type="radio" {attr} style="{button_style}" name="{name}" id="{id}"><label style="{label_style}">{content}</label></div>', {
             attr: nAttrs,
             name: group,
+            button_style: button_style,
             label_style: label_style,
             div_style: div_style,
             content: content ? content.trim() : ''
