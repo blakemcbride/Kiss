@@ -18,4 +18,10 @@ $$('ok').onclick(function () {
     //  all tests passed
 });
 
+$$('my-popup-button').onclick(function () {
+    Utils.popup_open("my-popup", null);
+});
 
+$$('popup-ok').onclick(function () {
+   Utils.popup_close("my-popup");
+});

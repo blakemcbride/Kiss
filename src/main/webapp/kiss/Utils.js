@@ -865,8 +865,8 @@ class Utils {
                 .on('mousemove', handle_dragging);
         }
 
-        if (!w.hasClass('popup-modal')) {
-            w.addClass('popup-modal');
+        if (!w.hasClass('popup-background')) {
+            w.addClass('popup-background');
             w.css('z-index', Utils.popup_zindex++);
 
             let width = w.css('width');
@@ -874,22 +874,16 @@ class Utils {
             w.css('width', '100%');
             w.css('height', '100%');
 
-            w.wrapInner('<div class="popup-modal-content"></div>');
+            w.wrapInner('<div></div>');
             content = w.children();
-
-            // content.css('position', 'absolute');
+            content.addClass('popup-content');
             content.css('z-index', Utils.popup_zindex++);
-            content.css('top', '50%');
-            content.css('left', '50%');
-            content.css('transform', 'translate(-50%, -50%)');
 
             both_parts = content.children();
             header = both_parts.first();
-            header.wrapInner('<div style="margin-top: 5px; font-weight: bold;"></div>div>');
+            header.addClass('popup-header');
             body = header.next();
-            header.addClass('popup-modal-header');
-            header.css('cursor', 'all-scroll');
-            body.addClass('popup-modal-body');
+            body.addClass('popup-body');
             content.css('width', width);
             body.css('height', height);
         } else {
