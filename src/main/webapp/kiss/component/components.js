@@ -201,6 +201,7 @@ class components {
      *     <tr><td>    isHidden()     </td><td>    true if control is hidden (not visible)     </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>     true if control is read-only     </td></tr>
      *     <tr><td>    isVisible()     </td><td>    true if control is visible (not hidden)     </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
      *     <tr><td>    onClick(fun)     </td><td>     execute <code>fun</code>whenever the user clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
      *     <tr><td>    onDblClick(fun)     </td><td>     execute <code>fun</code>whenever the user double-clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
      *     <tr><td>    readOnly()     </td><td>     sets control to read-only    </td></tr>

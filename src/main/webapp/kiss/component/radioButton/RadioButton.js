@@ -75,7 +75,7 @@ Kiss.RadioButtons.groups = {};
         if (!align_vertical)
             div_style = 'display: inline-block;' + div_style;
 
-        let newElm = Utils.replaceHTML(id, elm, '<div style="{div_style}"><input type="radio" {attr} style="{button_style}" name="{name}" id="{id}"><label style="{label_style}">{content}</label></div>', {
+        let newElm = Utils.replaceHTML(id, elm, '<div style="{div_style}"><input type="radio" {attr} style="{button_style}" name="{name}" id="{id}"><label for="{id}" style="{label_style}">{content}</label></div>', {
             attr: nAttrs,
             name: group,
             button_style: button_style,
@@ -84,6 +84,10 @@ Kiss.RadioButtons.groups = {};
             content: content ? content.trim() : ''
         });
         let jqObj = newElm.jqObj;
+
+        jqObj.on('change', function () {
+            Utils.someControlValueChanged();
+        });
 
         /*
            RadioButtons have the ability to control a single radio button or a group of radio buttons.

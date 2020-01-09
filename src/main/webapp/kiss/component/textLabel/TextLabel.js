@@ -30,7 +30,7 @@
             }
         }
 
-        var newElm = Utils.replaceHTML(id, elm, `<label style="{style}" {attr} id="{id}">${content ? content.trim() : ''}</label>`, {
+        var newElm = Utils.replaceHTML(id, elm, `<span style="{style}" {attr} id="{id}">${content ? content.trim() : ''}</span>`, {
             style: nstyle,
             attr: nattrs
         });

@@ -64,6 +64,10 @@
         var jqObj = newElm.jqObj;
         var dataStore = {};
 
+        jqObj.on('change', function () {
+            Utils.someControlValueChanged();
+        });
+
         //--
 
         newElm.clear = function () {
@@ -94,7 +98,7 @@
         };
 
         newElm.setValue = function (val) {
-            jqObj.val(val).change();
+            jqObj.val(val);
             originalValue = jqObj.val();
             return this;
         };
@@ -181,6 +185,14 @@
                 return true;
             }
             return false;
+        };
+
+        newElm.onChange = function (func) {
+            jqObj.on('change', function () {
+                // func gets passed the selected value, label
+                func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
+            });
+            return this;
         };
 
         var timeout;

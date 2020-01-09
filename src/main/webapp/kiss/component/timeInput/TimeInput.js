@@ -68,6 +68,10 @@
         newElm.elementInfo.max = max;
         newElm.elementInfo.zero_fill = zero_fill;
 
+        jqObj.on('change', function () {
+            Utils.someControlValueChanged();
+        });
+
         var isDigit = function (c) {
             return c >= '0'  &&  c <= '9';
         };

@@ -37,14 +37,16 @@
             }
         }
 
-        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input type="checkbox" {attr} id="{id}"><label>{content}</label></div>', {
+        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input type="checkbox" {attr} id="{id}"><label for="{id}">{content}</label></div>', {
             style: nStyle,
             attr: nAttrs,
             content: content ? content.trim() : ''
         });
         let jqObj = newElm.jqObj;
 
-        //--
+        jqObj.change(function () {
+            Utils.someControlValueChanged();
+        });
 
         newElm.getValue = function () {
             return jqObj.prop('checked');
@@ -98,8 +100,6 @@
             return !!jqObj.attr('disabled');
         };
 
-        //--
-
         newElm.hide = function () {
             jqObj.hide();
             return this;
@@ -117,8 +117,6 @@
         newElm.isVisible = function () {
             return jqObj.is(':visible');
         };
-
-        //--
 
         newElm.onChange = function (fun) {
             jqObj.change(fun);

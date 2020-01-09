@@ -56,6 +56,10 @@
         var jqObj = newElm.jqObj;
         var dataStore = {};
 
+        jqObj.on('change', function () {
+            Utils.someControlValueChanged();
+        });
+
         //--
 
         newElm.clear = function () {
@@ -79,14 +83,12 @@
             return jqObj.children('option').length;
         };
 
-        //--
-
         newElm.getValue = function () {
             return jqObj.val();
         };
 
         newElm.setValue = function (val) {
-            jqObj.val(val).change();
+            jqObj.val(val);
             originalValue = jqObj.val();
             return this;
         };
@@ -103,8 +105,6 @@
             return originalValue !== jqObj.val();
         };
 
-        //--
-
         newElm.readOnly = function () {
             jqObj.attr('readonly', true);
             return this;
@@ -119,8 +119,6 @@
             return !!jqObj.attr('readonly');
         };
 
-        //--
-
         newElm.disable = function () {
             jqObj.prop('disabled', true);
             return this;
@@ -134,8 +132,6 @@
         newElm.isDisabled = function () {
             return !!jqObj.attr('disabled');
         };
-
-        //--
 
         newElm.hide = function () {
             jqObj.hide();
@@ -154,8 +150,6 @@
         newElm.isVisible = function () {
             return jqObj.is(':visible');
         };
-
-        //--
 
         newElm.onChange = function (func) {
             jqObj.on('change', function () {

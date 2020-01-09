@@ -66,6 +66,10 @@
 
         newElm.elementInfo.upcase = upcase;
 
+        jqObj.on('change', function () {
+            Utils.someControlValueChanged();
+        });
+
         //--
 
         newElm.getValue = function () {

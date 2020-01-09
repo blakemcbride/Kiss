@@ -58,6 +58,10 @@
         });
         var jqObj = newElm.jqObj;
 
+        jqObj.on('change', function () {
+            Utils.someControlValueChanged();
+        });
+
         //--
 
         newElm.getIntValue = function () {
@@ -81,7 +85,6 @@
                 jqObj.val(val);
             else if (typeof val === 'object')  // Date
                 jqObj.val(val);
-            jqObj.change();
             originalValue = newElm.getIntValue();
             return this;
         };
@@ -95,9 +98,6 @@
             originalValue = newElm.getIntValue();
             return this;
         };
-
-
-        //--
 
         newElm.readOnly = function () {
             jqObj.attr('readonly', true);
@@ -113,8 +113,6 @@
             return !!jqObj.attr('readonly');
         };
 
-        //--
-
         newElm.disable = function () {
             jqObj.prop('disabled', true);
             return this;
@@ -128,8 +126,6 @@
         newElm.isDisabled = function () {
             return !!jqObj.attr('disabled');
         };
-
-        //--
 
         newElm.hide = function () {
             jqObj.hide();
@@ -148,8 +144,6 @@
         newElm.isVisible = function () {
             return jqObj.is(':visible');
         };
-
-        //--
 
         newElm.focus = function () {
             jqObj.focus();
