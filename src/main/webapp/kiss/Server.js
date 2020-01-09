@@ -88,45 +88,6 @@ class Server {
         let r = await doCall(cls, meth, injson, 1);
         let g = 1;
         return r;
-
-
-        //////////////
-
-        const doCall_old = function (cls, meth, injson, pass, resolve, reject) {
-            const path = "rest";  // path to servlet
-            if (!injson)
-                injson = {};
-            injson._uuid = Server.uuid;
-            injson._method = meth;
-            injson._class = cls;
-
-            jQuery.ajax({
-                type: 'POST',
-                url: Server.url + '/' + path,
-                data: JSON.stringify(injson),
-                contentType: 'application/json',
-                dataType: 'json',
-                success: function (data, status, hdr) {
-                    if (!data._Success)
-                        Utils.showMessage('Error', data._ErrorMessage);
-                    resolve(data);
-                },
-                error: function (error, status) {
-                    if (pass < 3) {
-                        doCall_old(cls, meth, injson, pass + 1, resolve, reject);
-                        return;
-                    }
-                    const msg = 'Error communicating with the server.';
-                    Utils.showMessage('Error', msg);
-                    resolve({_Success: false, _ErrorMessage: msg});
-                    //reject(error, status);
-                }
-            });
-        };
-
-        return new Promise(function (resolve, reject) {
-            doCall_old(cls, meth, injson, 1, resolve, reject);
-        });
     }
 
     /**
