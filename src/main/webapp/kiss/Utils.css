@@ -108,15 +108,12 @@ div.vert-input label:after { content: ":"; }
 .msg-modal-body {
     padding: 2px 16px;
     margin-top: 10px;
+    font-size: 16px;
 }
 
 .msg-modal-footer {
-    /*
-    padding: 2px 16px;
-    background-color: #5cb85c;
-    color: white;
-    */
-    text-align: center;
+    display: flex;
+    justify-content: center;
 }
 
 .popup-background {

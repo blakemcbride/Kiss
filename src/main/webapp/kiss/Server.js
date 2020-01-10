@@ -86,7 +86,6 @@ class Server {
         };
 
         let r = await doCall(cls, meth, injson, 1);
-        let g = 1;
         return r;
     }
 
