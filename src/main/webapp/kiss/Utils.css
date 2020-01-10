@@ -49,7 +49,8 @@ div.vert-input label:after { content: ":"; }
     -webkit-animation-name: animatetop;
     -webkit-animation-duration: 0.4s;
     animation-name: animatetop;
-    animation-duration: 0.4s
+    animation-duration: 0.4s;
+    border-radius: 4px;
 }
 
 /* Wait Modal Content (animation sometimes causes message not to show) */
@@ -63,6 +64,7 @@ div.vert-input label:after { content: ":"; }
     /*display: inline-block; */
     width: 400px;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    border-radius: 4px;
 }
 
 /* Add Animation */
@@ -103,6 +105,8 @@ div.vert-input label:after { content: ":"; }
     padding-bottom: 1px;
     line-height: 1;
     height: 25px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
 }
 
 .msg-modal-body {
