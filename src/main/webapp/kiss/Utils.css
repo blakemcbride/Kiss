@@ -68,6 +68,7 @@ div.vert-input label:after { content: ":"; }
 }
 
 /* Add Animation */
+/*
 @-webkit-keyframes animatetop {
     from {top:-300px; opacity:0}
     to {top:0; opacity:1}
@@ -77,6 +78,7 @@ div.vert-input label:after { content: ":"; }
     from {top:-300px; opacity:0}
     to {top:0; opacity:1}
 }
+*/
 
 /* The Close Button */
 .msg-close {
@@ -148,7 +150,6 @@ div.vert-input label:after { content: ":"; }
     border-top-right-radius: 4px;
     padding: 6px;
     line-height: 1;
-    cursor: all-scroll;
 }
 
 .popup-body {

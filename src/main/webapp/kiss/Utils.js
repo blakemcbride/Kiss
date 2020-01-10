@@ -108,7 +108,7 @@ class Utils {
             $('body').append(
                 '<div id="msg-modal" class="msg-modal">' +
                 '  <!-- Modal content -->' +
-                '  <div class="msg-modal-content">' +
+                '  <div class="msg-modal-content" id="msg-modal-content-tab">' +
                 '    <div class="msg-modal-header" id="msg-modal-header-tab">' +
                 '      <span id="msg-close-btn" class="msg-close">&times;</span>' +
                 '      <p id="msg-header" style="margin-top: 2px;">Modal Header</p>' +
@@ -124,6 +124,7 @@ class Utils {
         }
 
         $('#msg-header').text(title);
+        this.makeDraggable($('#msg-modal-header-tab'), $('#msg-modal-content-tab'));
         $('#msg-message').text(message);
         var modal = $('#msg-modal');
         var span = $('#msg-close-btn');
@@ -158,8 +159,8 @@ class Utils {
             $('body').append(
                 '<div id="yesno-modal" class="msg-modal">' +
                 '  <!-- Modal content -->' +
-                '  <div class="msg-modal-content">' +
-                '    <div class="msg-modal-header">' +
+                '  <div class="msg-modal-content" id="yesno-popup-content">' +
+                '    <div class="msg-modal-header" id="yesno-popup-header">' +
                 '      <span id="yesno-close-btn" class="msg-close">&times;</span>' +
                 '      <p id="yesno-header" style="margin-top: 2px;">Modal Header</p>' +
                 '    </div>' +
@@ -167,12 +168,13 @@ class Utils {
                 '      <p id="yesno-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
                 '    </div>' +
                 '    <div class="msg-modal-footer">' +
-                '      <input type="button" value="Yes" id="yesno-yes" style="margin-top: 5px; margin-bottom: 10px;"">' +
-                '      <input type="button" value="No" id="yesno-no" style="margin-top: 5px; margin-bottom: 10px;"">' +
+                '      <input type="button" value="Yes" id="yesno-yes" style="margin-top: 5px; margin-bottom: 10px;">' +
+                '      <input type="button" value="No" id="yesno-no" style="margin-top: 5px; margin-bottom: 10px; margin-left: 10px;">' +
                 '    </div>' +
                 '  </div>' +
                 '</div>');
         }
+        this.makeDraggable($('#yesno-popup-header'), $('#yesno-popup-content'));
 
         $('#yesno-header').text(title);
         $('#yesno-message').text(message);
@@ -207,14 +209,14 @@ class Utils {
             $('body').append(
                 '<div id="wmsg-modal" class="msg-modal">' +
                 '  <!-- Modal content -->' +
-                '  <div class="wmsg-modal-content">' +
+                '  <div class="wmsg-modal-content" id="wait-msg-content">' +
                 '    <div class="msg-modal-body">' +
                 '      <p id="wmsg-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
                 '    </div>' +
                 '  </div>' +
                 '</div>');
         }
-
+        this.makeDraggable($('#wait-msg-content'), $('#wait-msg-content'));
         $('#wmsg-message').text(message);
         var modal = $('#wmsg-modal');
         modal.show();
@@ -828,6 +830,45 @@ class Utils {
     }
 
     /**
+     * This makes a window draggable.
+     *
+     * @param header jQuery object
+     * @param content jQuery object
+     */
+    static makeDraggable(header, content) {
+
+        function handle_mousedown(e)
+        {
+            let body = $('body');
+            let drag = {};
+            drag.pageX0 = e.pageX;
+            drag.pageY0 = e.pageY;
+            drag.elem = content;
+            drag.offset0 = $(this).offset();
+
+            function handle_dragging(e) {
+                let left = drag.offset0.left + (e.pageX - drag.pageX0);
+                let top = drag.offset0.top + (e.pageY - drag.pageY0);
+                $(drag.elem)
+                    .offset({top: top, left: left});
+            }
+
+            function handle_mouseup(e) {
+                body
+                    .off('mousemove', handle_dragging)
+                    .off('mouseup', handle_mouseup);
+            }
+
+            body
+                .on('mouseup', handle_mouseup)
+                .on('mousemove', handle_dragging);
+        }
+
+        header.css('cursor', 'all-scroll');
+        header.mousedown(handle_mousedown);
+    }
+
+    /**
      * Open a modal popup window identified by id <code>id</code>.
      *
      * @param {string} id the id of the popup to evoke
@@ -841,29 +882,6 @@ class Utils {
         let both_parts;
         let header;
         let body;
-        let drag = {};
-
-        function handle_mousedown(e){
-            let body = $('body');
-            drag.pageX0 = e.pageX;
-            drag.pageY0 = e.pageY;
-            drag.elem = content;
-            drag.offset0 = $(this).offset();
-            function handle_dragging(e){
-                let left = drag.offset0.left + (e.pageX - drag.pageX0);
-                let top = drag.offset0.top + (e.pageY - drag.pageY0);
-                $(drag.elem)
-                    .offset({top: top, left: left});
-            }
-            function handle_mouseup(e){
-                body
-                    .off('mousemove', handle_dragging)
-                    .off('mouseup', handle_mouseup);
-            }
-            body
-                .on('mouseup', handle_mouseup)
-                .on('mousemove', handle_dragging);
-        }
 
         if (!w.hasClass('popup-background')) {
             w.addClass('popup-background');
@@ -895,7 +913,7 @@ class Utils {
 
         w.show();
 
-        header.mousedown(handle_mousedown);
+        this.makeDraggable(header, content);
 
         if (focus_ctl)
             $('#' + focus_ctl).focus();
