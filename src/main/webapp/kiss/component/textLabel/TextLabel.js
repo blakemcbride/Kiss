@@ -9,6 +9,8 @@
 (function () {
     let processor = (elm, attr, content) => {
         let nstyle;
+        let hasFor = false;
+
         if (attr.style)
             nstyle = attr.style;
         else
@@ -24,16 +26,26 @@
                 case 'id':
                     id = Utils.removeQuotes(attr[prop]);
                     break;
+                case 'for':
+                    hasFor = true;
+                    // no break
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
                     break;
             }
         }
 
-        var newElm = Utils.replaceHTML(id, elm, `<span style="{style}" {attr} id="{id}">${content ? content.trim() : ''}</span>`, {
-            style: nstyle,
-            attr: nattrs
-        });
+        let newElm;
+        if (hasFor)
+            newElm = Utils.replaceHTML(id, elm, `<label style="{style}" {attr} id="{id}">${content ? content.trim() : ''}</label>`, {
+                style: nstyle,
+                attr: nattrs
+            });
+        else
+            newElm = Utils.replaceHTML(id, elm, `<span style="{style}" {attr} id="{id}">${content ? content.trim() : ''}</span>`, {
+                style: nstyle,
+                attr: nattrs
+            });
 
         var jqObj = newElm.jqObj;
 

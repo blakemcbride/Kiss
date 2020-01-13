@@ -423,7 +423,8 @@ class components {
     static text_input() {}
 
     /**
-     * This HTML tag, "text-label", adds functionality and a consistent and convenient API to the HTML provided label tag.
+     * This HTML tag, "text-label", adds functionality and a consistent and convenient API to the HTML provided label tag when the 'for' attribute is
+     * used or the 'span' tag otherwise.
      * <br><br>
      * <strong>Content</strong>
      * <br><br>
