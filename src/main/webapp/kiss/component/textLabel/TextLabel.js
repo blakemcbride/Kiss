@@ -50,21 +50,21 @@
         var jqObj = newElm.jqObj;
 
         newElm.getValue = function () {
-            var sval = jqObj.val();
+            var sval = jqObj.text();
             return sval ? sval : '';
         };
 
         newElm.setValue = function (val) {
             if (val !== 0  &&  !val) {
-                jqObj.val('');
+                jqObj.text('');
                 return this;
             }
-            jqObj.val(val);
+            jqObj.text(val);
             return this;
         };
 
         newElm.clear = function () {
-            jqObj.val('');
+            jqObj.text('');
             return this;
         };
 
