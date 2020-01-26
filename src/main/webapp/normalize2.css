@@ -1,0 +1,26 @@
+
+/* This is an attempt to make Kiss controls appear the same across all browsers.  */
+
+
+span, label, h1, h2, h3, h4, h5, h6, p, div {
+    font-family: "Times New Roman";
+}
+
+input[type=button] {
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-width: 1px;
+    border-color: #a5a5a5;
+    border-style: solid;
+    font-family: Arial;
+    font-size: 13.3333px;
+}
+
+select {
+    padding: 0;
+    border: 1px solid rgb(169, 169, 169);
+    font-family: Arial;
+    font-size: small;
+}

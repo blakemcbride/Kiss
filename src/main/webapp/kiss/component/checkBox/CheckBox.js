@@ -14,7 +14,7 @@
         if (attr.style)
             nStyle = attr.style;
         else
-            nStyle = '';
+            nStyle = 'margin-left: 8px;';
 
         let nAttrs = '';
         let id;
@@ -37,7 +37,7 @@
             }
         }
 
-        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input type="checkbox" {attr} id="{id}"><label for="{id}">{content}</label></div>', {
+        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input type="checkbox" {attr} id="{id}"><label for="{id}" style="margin-left: 4px;">{content}</label></div>', {
             style: nStyle,
             attr: nAttrs,
             content: content ? content.trim() : ''

@@ -14,11 +14,11 @@ Kiss.RadioButtons.groups = {};
 
     let processor = function (elm, attr, content) {
         let div_style;
-        let button_style = '';
+        let button_style = 'margin-left: 8px;';
         let id;
         let group;
         let required = false;
-        let label_style = '';
+        let label_style = 'margin-left: 4px;';
         let align_vertical;
         if (attr.style)
             div_style = attr.style;
