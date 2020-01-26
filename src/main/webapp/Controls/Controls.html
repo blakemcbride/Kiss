@@ -16,51 +16,48 @@
             margin-right: 0;
         }
 
-        #controls-scrn span:after, #controls-scrn label:after {
-            content: ":";
-        }
     </style>
 
     <h3 style="margin-top: 0;">Controls</h3>
 
     <div id="controls-scrn">
 
-        <text-label for="ctl-text">Text</text-label>
+        <text-label for="ctl-text">Text:</text-label>
         <text-input id="ctl-text" maxlength="40" required></text-input>
 
-        <text-label for="ctl-number">Numeric</text-label>
+        <text-label for="ctl-number">Numeric:</text-label>
         <numeric-input min="10" max="100" id="ctl-number" decimal-places="2" style="width: 80px;" required></numeric-input>
 
-        <text-label for="ctl-date">Date</text-label>
+        <text-label for="ctl-date">Date:</text-label>
         <date-input id="ctl-date" style="width: 150px;"></date-input>
 
-        <text-label for="ctl-time">Time</text-label>
+        <text-label for="ctl-time">Time:</text-label>
         <time-input id="ctl-time" style="width: 70px;"></time-input>
 
-        <text-label for="ctl-chkbox" style="padding-top: 0;">CheckBox</text-label>
+        <text-label for="ctl-chkbox" style="padding-top: 0;">CheckBox:</text-label>
         <check-box id="ctl-chkbox">My checkbox</check-box>
 
-        <text-label style="padding-top: 0;">Radio Button</text-label>
+        <text-label style="padding-top: 0;">Radio Button:</text-label>
         <div style="display: inline-block;">
             <radio-button group="rb1" id="ctl-rbyes">Yes</radio-button>
             <radio-button group="rb1" id="ctl-rbno">No</radio-button>
         </div>
 
-        <text-label for="ctl-dropdown" style="padding-top: 0;">DropDown List</text-label>
+        <text-label for="ctl-dropdown" style="padding-top: 0;">DropDown List:</text-label>
         <drop-down id="ctl-dropdown">
             <option value="1">Option 1</option>
             <option value="2">Option 2</option>
             <option value="3">Option 3</option>
         </drop-down>
 
-        <text-label for="ctl-listbox" style="padding-top: 0;">List Box</text-label>
+        <text-label for="ctl-listbox" style="padding-top: 0;">List Box:</text-label>
         <list-box id="ctl-listbox" size="3">
             <option value="1">Option 1</option>
             <option value="2">Option 2</option>
             <option value="3">Option 3</option>
         </list-box>
 
-        <text-label for="ctl-txtbox" style="padding-top: 0;">Text Box</text-label>
+        <text-label for="ctl-txtbox" style="padding-top: 0;">Text Box:</text-label>
         <textbox-input id="ctl-txtbox" rows="3"></textbox-input>
 
     </div>
