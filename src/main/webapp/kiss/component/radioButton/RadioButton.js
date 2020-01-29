@@ -149,8 +149,7 @@ Kiss.RadioButtons.getValue = function (group) {
 };
 
 Kiss.RadioButtons.setValue = function (group, val) {
-    let jqObj = $('input[type=radio][name=' + group + ']');
-    let res = jqObj.prop('checked', val);
+    $('input[type=radio][name=' + group + '][value='+val+']').prop('checked', true);
 };
 
 Kiss.RadioButtons.clear = function (group) {
