@@ -87,6 +87,15 @@
             return this;
         };
 
+        newElm.addItems = function (items, valField, labelField) {
+            items = Utils.assureArray(items);
+            const len = items.length;
+            for (let i=0 ; i < len ; i++)
+                jqObj.append($('<option></option>').attr('value', items[i][valField]).text(items[i][labelField]));
+            originalValue = jqObj.val();
+            return this;
+        };
+
         newElm.size = function () {
             return jqObj.children('option').length;
         };
