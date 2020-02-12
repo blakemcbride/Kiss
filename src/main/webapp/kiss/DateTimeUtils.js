@@ -56,6 +56,18 @@ class DateTimeUtils {
         else
             return res + tf;
     }
+
+    /**
+     * Convert a Date object into in integer time
+     *
+     * @param {Date} dt
+     * @returns {number}
+     */
+    static dateToIntTime(dt) {
+        let hours = dt.getHours();
+        let minutes = dt.getMinutes();
+        return hours * 100 + minutes;
+    }
 }
 
 

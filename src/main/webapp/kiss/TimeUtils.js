@@ -22,6 +22,8 @@ class TimeUtils {
     static format(val, zero_fill) {
         if (val === null || val === undefined || val === '')
             return '';
+        if (typeof val === 'object')
+            val = DateTimeUtils.dateToIntTime(val);
         let hours = Math.floor(val / 100);
         let minutes = val % 100;
         let width;

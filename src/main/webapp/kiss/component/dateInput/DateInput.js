@@ -84,7 +84,7 @@
             else if (typeof val === 'string')
                 jqObj.val(val);
             else if (typeof val === 'object')  // Date
-                jqObj.val(val);
+                jqObj.val(DateUtils.intToSQL(DateUtils.dateToInt(val)));
             originalValue = newElm.getIntValue();
             return this;
         };
