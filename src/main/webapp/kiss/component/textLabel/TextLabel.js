@@ -68,7 +68,12 @@
             return this;
         };
 
-        //--
+        newElm.onclick = function (fun) {
+            // the unbind is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
+            // but it also limits to a single callback function
+            jqObj.unbind('click').click(fun);
+            return this;
+        };
 
         newElm.hide = function () {
             jqObj.hide();
