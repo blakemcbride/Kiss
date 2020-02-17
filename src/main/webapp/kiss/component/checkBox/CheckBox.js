@@ -12,9 +12,9 @@
     let processor = function (elm, attr, content) {
         let nStyle, originalValue;
         if (attr.style)
-            nStyle = attr.style;
+            nStyle = 'display: inline-flex; ' + attr.style;
         else
-            nStyle = 'margin-left: 8px;';
+            nStyle = 'margin-left: 8px; display: inline-flex;';
 
         let nAttrs = '';
         let id;
