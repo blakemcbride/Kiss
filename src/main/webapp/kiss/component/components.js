@@ -440,7 +440,8 @@ class components {
      *     <tr><td>    isHidden()     </td><td> is the control hidden? </td></tr>
      *     <tr><td>    isVisible()     </td><td> is the control visible?   </td></tr>
      *     <tr><td>    onclick(fun)     </td><td>     <code>fun</code> is executed when the user clicks on the text   </td></tr>
-     *    <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
+     *     <tr><td>    setColor(val)     </td><td>     sets the color of the text              </td></tr>
+     *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      * </table>
      */

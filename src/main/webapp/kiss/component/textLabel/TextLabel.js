@@ -92,6 +92,11 @@
         newElm.isVisible = function () {
             return jqObj.is(':visible');
         };
+        
+        newElm.setColor = function (color) {
+            jqObj.css('color', color);
+            return this;
+        };
     };
 
     var componentInfo = {
