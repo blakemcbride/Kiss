@@ -1,0 +1,7 @@
+#
+if [ ! -f builder/builder/Tasks.class ]; then
+	cd builder
+	javac -cp "libs/*" builder/*.java
+	cd ..
+fi
+java -cp "builder:builder/libs/*" builder.BuildUtils "$@"

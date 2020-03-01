@@ -68,10 +68,12 @@ Auto handling for cases of cursor interference on nested queries
 Supports transactions out-of-the-box
 @end itemize
 
-As shipped, this library supports PostgreSQL, Microsoft Server, Oracle, MySQL, and SQLite.
+As shipped, this library supports PostgreSQL, Microsoft Server,
+Oracle, MySQL, and SQLite.
 
 The detailed documentation for the database utilities are in the
-JavaDocs which you must generate. (@xref{javadoc,,Creating JavaDocs}.) This section provides an overview.
+JavaDocs which you must generate. (@xref{javadoc,,Creating JavaDocs}.)
+This section provides an overview.
 
 The @emph{Kiss} database routines revolve around four main classes as follows:
 
@@ -81,7 +83,8 @@ This represents a connection to an SQL database.
 @item Command
 This represents a single action or command against the database.
 @item Cursor
-If the action is a @code{select}, the @code{Cursor} represents a pointer into the result set.
+If the action is a @code{select}, the @code{Cursor} represents a
+pointer into the result set.
 @item Record
 This class represents a single row within a table or result set.
 @end table

@@ -1,3 +1,0 @@
-#
-gradle clean
-rm -rf build .gradle out *~ .nb-gradle .idea .classpath .gradle .project .settings out .vscode

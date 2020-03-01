@@ -1,0 +1,3 @@
+#
+cd builder
+javac -cp "libs/*" builder/*.java

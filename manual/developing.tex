@@ -43,7 +43,8 @@ front-end files can be edited and saved.  Their changes take effect
 immediately.
 
 Of course, in a production environment, only a single server would be
-utilized.
+utilized and front-end and back-end changes take effect immediately
+there too.
 
 @section Back-end Development
 
@@ -57,8 +58,8 @@ source files be used rather than the production copies during the
 development process.  
 
 The system automatically detects the location of the application
-source in all known configurations.  However, this may be explicitly
-set via a system environment variable (@code{KISS_DEBUG_ROOT}).  The
+source in most configurations.  However, this may be explicitly
+set via a system environment variable (@code{KISS_ROOT}).  The
 value of this environment variable should be the absolute path of the
 root of the application source code.  The directory it indicates
 should have a sub-directory named @code{src/main/application}.
@@ -66,6 +67,20 @@ should have a sub-directory named @code{src/main/application}.
 
 
 @subsection REST Server
+
+There are two different methods of running the back-end REST server as
+follows.
+
+@subsubsection IDE
+
+Running of the IDE back-end requires the following:
+
+@enumerate
+@item
+The IDE is completely configured.
+@item
+The system was build with the IDE
+@end enumerate
 
 Typically, the IDE manages a tomcat instance and serves up the core
 back-end code serving the REST services.  That code detects that it is
@@ -79,7 +94,29 @@ they were compiled before the system was booted.
 Once the back-end server is up, application files changed under the
 @code{src/main/application} directory will take effect immediately.
 
-The back-end server should be started before the front-end server.
+@subsubsection BLD
+
+Utilizing the included @emph{Kiss build system (bld)} the many steps required 
+to install and configure tomcat and the IDE are unnecessary.  The whole process
+(for the back-end portion) can be done as follows:
+
+@enumerate
+@item
+From any stage (including having just downloaded the @emph{Kiss} system) type
+the following:  @code{./bld develop}
+
+Note 1.  You may have to first perform the one-time task of building
+the @emph{bld} system by typing: @code{./build-builder}
+
+Note 2.  Remember that all commands that start with @code{./} would drop
+the @code{./} under Windows.
+@end enumerate
+At this point, the back-end will be running.  From within your IDE you
+can attach to the process at port 9000 to debug the back-end (including
+breakpoints, etc.)
+
+Remember, however, that you won't be able to use or debug the application until
+the front-end server is started too.
 
 @subsection Application Code
 
@@ -122,7 +159,7 @@ The requested web service is identified (and loaded and compiled if needed).
 @item
 The @code{outjson} object that is filled in by the web service that is to be returned to the front-end.
 @item
-Upon completion of the REST service, @emph{Kiss} commits the transaction, closes the databse connection, and returns @code{outjson} to the front-end.
+Upon completion of the REST service, @emph{Kiss} commits the transaction, closes the database connection, and returns @code{outjson} to the front-end.
 @item
 If, however, the REST service threw an exception, @emph{Kiss} rolls back the transaction, closes the database, and sends an error return to the front-end.
 @end enumerate
@@ -134,7 +171,7 @@ Of course during this process, @code{Kiss} handles many possible error condition
 
 @subsection Programming Languages
 
-At this point, @emph{Kiss} supports the develpment of back-end REST
+At this point, @emph{Kiss} supports the development of back-end REST
 services in the Java, Groovy, or Common Lisp languages.  Groovy was
 added first because it was easy, worked with the IDE well, and did all
 that was needed.  Java was added simply due to its natural integration
@@ -144,7 +181,7 @@ With @emph{Kiss}, different web services can be written in different
 languages.  You are not forced to use one or the other.
 
 Common Lisp (ABCL) was added due to this author's love of that
-language.  Unlike Groovy and Java, Lisp has an impedence mismatch with
+language.  Unlike Groovy and Java, Lisp has an impedance mismatch with
 the core @emph{Kiss} system that is written in Java.  For example, in
 Java, one can have two methods with the same name in the same class
 that differ only by their argument types.  This is not part of the
@@ -163,17 +200,22 @@ especially if there are requests.
 
 @anchor{Front-end Development}@section Front-end Development
 
-The front-end can be debugged through your browser debugger (F12 on Chrome).
-
 A separate server is used so that development files will be served
 rather than the front-end that was present when the back-end server
-was started.  In order to make this work, there are two steps that
+was started.  This is the same whether your are using the IDE or
+@emph{bld} back-end server modes.
+
+Once the back-end and front-end servers are running, the front-end can
+be debugged through your browser debugger (F12 on Chrome).
+
+In order to make this work, there are two steps that
 need to be followed.
 
 @enumerate
 @item
-The front-end needs to know where the back-end is located.  This is controlled in the file @code{src/main/webapp/index.js}.
-That file contains a line that looks as follows:
+The front-end needs to know where the back-end is located.  This is
+controlled in the file @code{src/main/webapp/index.js}.  That file
+contains a line that looks as follows:
 @example
     Server.setURL('http://localhost:8080');
 @end example
@@ -192,17 +234,18 @@ or on Windows:
    serve.cmd
 @end example
 @end enumerate
+(Source code to this simple server is available at 
+@uref{https://github.com/blakemcbride/SimpleWebServer})
 
-The back-end server should be started before the front-end server.
-
-Once the front-end server is up, you can access the development
+Once the front-end and back-end servers are up, you can access the development
 environment through your browser at @code{http://localhost:8000}
 
-If you disable the browser cache, changes you make to the front-end
-will appear by just reloading the page.  On Chrome, for example, the
-browser cache can be turned off by going into the page debugger (F12),
-then @code{settings}, and then select @code{Disable cache (while
-DevTools is open)}
+If you disable the browser cache through the browser developer console
+settings, changes you make to the front-end will appear by just
+reloading the page.  On Chrome, for example, the browser cache can be
+turned off by going into the page debugger (F12), then
+@code{settings}, and then select @code{Disable cache (while DevTools
+is open)}
 
 You can now develop the front-end portion of your application by
 editing files under the @code{src/main/webapp} directory.

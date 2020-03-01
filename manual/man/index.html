@@ -94,14 +94,11 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.7 Setup And Configuration</a></li>
   <li><a name="toc-Building-The-System" href="#Building-The-System">2.8 Building The System</a>
   <ul class="no-bullet">
-    <li><a name="toc-Gradle" href="#Gradle">2.8.1 Gradle</a></li>
-    <li><a name="toc-IntelliJ" href="#IntelliJ">2.8.2 IntelliJ</a></li>
-    <li><a name="toc-Community-Edition-Too" href="#Community-Edition-Too">2.8.3 Community Edition Too</a>
+    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.8.1 Using an IDE</a>
     <ul class="no-bullet">
-      <li><a name="toc-Ultimate-Edition" href="#Ultimate-Edition">2.8.3.1 Ultimate Edition</a></li>
+      <li><a name="toc-IntelliJ-_0028Ultimate_0029" href="#IntelliJ-_0028Ultimate_0029">2.8.1.1 IntelliJ (Ultimate)</a></li>
+      <li><a name="toc-NetBeans" href="#NetBeans">2.8.1.2 NetBeans</a></li>
     </ul></li>
-    <li><a name="toc-NetBeans" href="#NetBeans">2.8.4 NetBeans</a></li>
-    <li><a name="toc-eclipse_002c-VSCode_002c-and-Others" href="#eclipse_002c-VSCode_002c-and-Others">2.8.5 eclipse, VSCode, and Others</a></li>
   </ul></li>
   <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.9 What Do I Do With It Now?</a></li>
 </ul></li>
@@ -119,7 +116,11 @@ ul.no-bullet {list-style: none}
 <ul class="no-bullet">
   <li><a name="toc-Back_002dend-Development" href="#Back_002dend-Development">4.1 Back-end Development</a>
   <ul class="no-bullet">
-    <li><a name="toc-REST-Server" href="#REST-Server">4.1.1 REST Server</a></li>
+    <li><a name="toc-REST-Server" href="#REST-Server">4.1.1 REST Server</a>
+    <ul class="no-bullet">
+      <li><a name="toc-IDE" href="#IDE">4.1.1.1 IDE</a></li>
+      <li><a name="toc-BLD" href="#BLD">4.1.1.2 BLD</a></li>
+    </ul></li>
     <li><a name="toc-Application-Code" href="#Application-Code">4.1.2 Application Code</a></li>
     <li><a name="toc-Programming-Languages" href="#Programming-Languages">4.1.3 Programming Languages</a></li>
   </ul></li>
@@ -167,7 +168,7 @@ simplicity and development speed.  By being simple to develop in,
 development and support of the application can occur more rapidly.
 Simplicity is achieved by abstracting away as much common
 functionality as possible so that developer lines of code are
-maximally for the application solution rather than infrastructure and
+maximally applicable to the application solution rather than infrastructure and
 support of the framework.  Throughout the framework, business-normal
 defaults have been employed in order to minimize commonly needed
 functionality.
@@ -248,28 +249,41 @@ the system can better scale.
 
 <ol>
 <li> Micro services - add, change, or delete a web service on a running system.
-</li><li> Each web-method is in a single file and are very simple.  No configuration files or setup code needed.
-</li><li> Easy access to common SQL databases with support for nested queries without cursor interference.
-</li><li> All REST services are stateless.  However, the system fully authenticates each request.
-</li><li> Changes to web services occur immediately, on a running system, without the need to reboot the application.
+</li><li> Each web-method is in a single file and are very simple.  No
+configuration files or setup code needed.
+</li><li> Easy access to common SQL databases with support for nested queries
+without cursor interference.
+</li><li> All REST services are stateless.  However, the system fully
+authenticates each request.
+</li><li> Changes to web services occur immediately, on a running system,
+without the need to reboot the application.
 </li><li> A growing class library to handle common business application needs.
-</li><li> Back-end framework is written in Java, and the system is portable to Linux or Windows servers.
+</li><li> Back-end framework is written in Java, and the system is portable to
+Linux or Windows servers.
 </li><li> Web services may be written in Groovy, Java or Common Lisp.  Python,
 JavaScript, Ruby, and Scala are expected to follow soon.
 </li><li> User authentication
-</li><li> Asynchronous back-end REST services (via a queue and thread pool) provide support for heavy loads and high throughput.
+</li><li> Asynchronous back-end REST services (via a queue and thread pool)
+provide support for heavy loads and high throughput.
+</li><li> A powerful and convenient class library for dealing with SQL persistence that
+supports PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 </li></ol>
 
 <a name="Front_002dend-Highlights"></a>
 <h4 class="subsection">1.1.2 Front-end Highlights</h4>
 
 <ol>
-<li> Build your own HTML components thus encapsulating any amount of code into a simple, custom HTML tag.
+<li> Build your own HTML components thus encapsulating any amount of code
+into a simple, custom HTML tag.
 </li><li> Browser cache control.  Never ask your users to clear their browser cache again.
-</li><li> All code written in JavaScript/HTML/CSS.  No need for a complex build and debug process, nor any need to learn yet another language.
-</li><li> Growing list of included business oriented components designed to provide simple access to fully functional business components.
-</li><li> Straight forward means of designing your own components without a lot of hidden and unpredictable magic.
-</li><li> System is small and concise, rather then hundreds of megabytes other systems take up.
+</li><li> All code written in JavaScript/HTML/CSS.  No need for a complex build
+and debug process, nor any need to learn yet another language.
+</li><li> Growing list of included business oriented components designed to
+provide simple access to fully functional business components.
+</li><li> Straight forward means of designing your own components without a lot
+of hidden and unpredictable magic.
+</li><li> System is small and concise, rather then hundreds of megabytes other
+systems take up.
 </li><li> Consistent and simple API.
 </li></ol>
 
@@ -405,8 +419,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <a name="Acknowledgments"></a>
 <h3 class="section">1.6 Acknowledgments</h3>
 
-<p>The Kiss design, code, documentation, and web site were written by Blake
-McBride.  The author gratefully acknowledges and appreciates, among others, the following:
+<p>The Kiss design, code, documentation, and web site were written by
+Blake McBride.  The author gratefully acknowledges and appreciates,
+among others, the following:
 </p>
 
 <p>Apache Groovy located at <a href="http://groovy-lang.org">http://groovy-lang.org</a>
@@ -431,22 +446,32 @@ I am using a modified version included with the system)
 <a name="Important"></a><a name="Important-1"></a>
 <h3 class="section">2.1 Important</h3>
 
-<p>The <em>Kiss</em> system uses <em>gradle</em> as its build system.  This
-works under Linux, Mac, Windows, etc.  Although you need to install
-Java before anything will work, you do not need to install
-<em>gradle</em>.  When you first try to build the system, it will detect
-that you hadn&rsquo;t installed <em>gradle</em> and it will download it and
-install it for you.  This means it will take a bit longer on first
-build.  <em>Gradle</em> also downloads allof the required libraries the
-first time too.  So again, the first build will be slow.  Subsequent
-builds are fast, and since <em>Kiss</em> uses microservices, most of the
-time you don&rsquo;t even have to build at all.
+<p>The <em>Kiss</em> system comes with its own build system, so it doesn&rsquo;t
+use build systems such as <em>ant</em>, <em>maven</em>, or <em>gradle</em>.
+It works under Linux, Mac, Windows, etc. This included build system
+will make things such as downloading remote libraries, installing and
+configuring a web server, building <em>Kiss</em>, and running
+<em>Kiss</em> for development purposes easy, intelligent, and automatic.
+This new build system can be used in conjunction with your favorite IDE.
 </p>
-<p>The program that runs <em>gradle</em> is &ldquo;<em>gradlew</em>&rdquo; under Unix like
-systems and &ldquo;<em>gradlew.bat</em>&rdquo; under Windows.  In this manual,
-&ldquo;<em>gradlew</em>&rdquo; will be shown as &ldquo;<em>./gradlew</em>&rdquo;.  The &ldquo;./&rdquo; is
+<p>The build system (I call it <em>bld</em>) is small and
+written in Java.  Its source code is included with the <em>Kiss</em>
+source code.  So, a Java compiler will be needed before anything will
+work.  At this point, Java version 8 is being used.  Later Java
+versions should work as well.
+</p>
+<p>When building the system for the first time, <em>BLD</em> will
+automatically download and cache required libraries (jar files), install and
+configure the development server (tomcat), build the system, and it
+can even be used to launch the development-mode server.  After building
+the system the first time, application development proceeds without
+any need for re-compiles or re-builds.
+</p>
+<p>The program that runs <em>BLD</em> is &ldquo;<em>bld</em>&rdquo; under Unix-like
+systems and &ldquo;<em>bld.cmd</em>&rdquo; under Windows.  In this manual,
+&ldquo;<em>bld</em>&rdquo; will be shown as &ldquo;<em>./bld</em>&rdquo;.  The &ldquo;./&rdquo; is
 required under Linux and Mac but not under Windows.  When running on
-Windows, use &ldquo;gradlew&rdquo; rather than &ldquo;./gradlew&rdquo;.
+Windows, use &ldquo;bld.cmd&rdquo; rather than &ldquo;./bld&rdquo;.
 </p>
 
 <a name="Quick_002dstart-Checklist"></a><a name="Quick_002dstart-Checklist-1"></a>
@@ -458,53 +483,57 @@ Windows, use &ldquo;gradlew&rdquo; rather than &ldquo;./gradlew&rdquo;.
 <li> See <a href="#Pre_002drequisites">Pre-requisites</a>
 </li><li> See <a href="#Download-Kiss">Download Kiss</a>
 </li><li> See <a href="#Setup-And-Configuration">Setup And Configuration</a>
-</li><li> Run the server by running <code>./gradlew tomcatRun</code>
-</li><li> You can access the server by going to <code>http://localhost:8080</code>
-</li></ol>
+</li><li> The development server can be run without an IDE by running: <code>./bld develop</code>
+</li><li> Once the server starts up, you can access it on your browser by going to 
+<code>http://localhost:8080/Kiss</code>  You can also debug the back-end by
+attaching to the process at port 9000.
 
-<p>Use <code>^C</code> to stop the server.
+<p>Alternatively, your IDE can be configured to run the development
+process entirely through it.
+</p></li></ol>
+
+<p>Once the development server is running under <em>bld</em>, you can stop it 
+by hitting any key.
 </p>
 <a name="Runtime-Environments"></a>
 <h3 class="section">2.3 Runtime Environments</h3>
 
-<p>As shipped, there are three different environments that <em>Kiss</em> may
+<p>As shipped, there are two different environments that <em>Kiss</em> may
 run in as follows:
 </p>
 <ol>
-<li> Test
-</li><li> Development
+<li> Development
 </li><li> Production
 </li></ol>
 
-<p>The <em>Test</em> environment is started with <code>./gradlew tomcatRun</code> but
-is only good for a quick test to see if the system is running.  It is
-neither good in a development nor production environment.
+<p>The <em>Production</em> scenario is created with a single command
+(<code>./bld war</code>) and produces a single <code>war</code> file (located in
+the <code>build.work</code> directory) that can be deployed to your production
+environment.
 </p>
-<p>The <em>Production</em> scenario is created with a single command 
-(<code>./gradlew war</code>) and produces a single <code>war</code> file that
-can be deployed.
+<p>Before doing anything with the <em>Development</em> environment, it is
+important that you have the <em>JAVA_HOME</em> environment variable set
+correctly to the root of your JDK (Java Developer Kit).  Doing this
+varies according to the OS you are using and various other Java
+installation possibilities.  There are plenty of instructions on the
+Internet for this.
 </p>
-<p>Unfortunately, the <em>Development</em> environment takes many steps to
-setup.  This is largely due to the complexity and variations between
-IDE&rsquo;s.  However, once the environment is setup, developing with
-<em>Kiss</em> is smooth and easy.
+<p>The <em>Development</em> environment consists of two servers.  One
+serves the back-end REST services, and the second serves the front-end
+HTML, CSS, and JavaScript files.  By using this method, both front-end
+and back-end source files can be changed on a running system and take
+effect immediately without any builds, compiles, server reboots,
+re-deploys, or file copies.  (This is also true of a production
+environment &ndash; with a single server &ndash; when the new files are put in place.)
 </p>
-<p>The <em>Development</em> environment consists of two servers.  One serves
-the back-end REST services, and the second serves the front-end HTML, CSS, 
-and JavaScript files.  By using this method, both front-end and back-end
-source files can be changed on a running system and take effect immediately
-without any server reboots, re-deploys, or file copies.  (This is also
-true of a production environment when the new files are put in place.)
-</p>
-<p>Back-end REST services are served, debugged, and edited through the IDE.
+<p>Back-end REST services are debugged, and edited through the IDE.
 Saving a source file is all that is needed to have it take effect.
-Unfortunately, setting up IDE&rsquo;s to do this takes several steps and is different
-for each IDE.
 </p>
 <p>The front-end (HTML, CSS, and JavaScript files) are served by a simple
-server supplied with the <em>Kiss</em> system.  See <a href="#Front_002dend-Development">Front-end Development</a>.
-Debugging is normally done through the browser debugger.
-There is no setup, and it runs by executing a single command.
+server supplied with the <em>Kiss</em> system.  See <a href="#Front_002dend-Development">Front-end Development</a>.  (Source code to this server is available at
+<a href="https://github.com/blakemcbride/SimpleWebServer">https://github.com/blakemcbride/SimpleWebServer</a>) Debugging the
+front-end is done through the browser debugger.  There is no setup,
+and the front-end server runs by executing a single command.
 </p>
 <a name="Pre_002drequisites"></a><a name="Pre_002drequisites-1"></a>
 <h3 class="section">2.4 Pre-requisites</h3>
@@ -513,25 +542,29 @@ There is no setup, and it runs by executing a single command.
 </p>
 <ol>
 <li> Java JDK 8 from <a href="https://www.oracle.com/java/index.html">https://www.oracle.com/java/index.html</a>
-</li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL, Oracle, SQLite)
-</li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, Netbeans, eclipse)
+</li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL,
+Oracle, SQLite)
+</li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, NetBeans, eclipse)
 </li><li> GIT source code control system
 </li></ol>
 
-<p>The system was built and tested with JDK 8, <a href="https://www.postgresql.org">PostgreSQL</a>, <a href="https://www.jetbrains.com/idea">IntelliJ</a>, and 
-<a href="http://tomcat.apache.org">tomcat</a>.  Other environments such as IIS, Glassfish, eclipse, should work fine but may require some configuration.
+<p>Correctly setting the <em>JAVA_HOME</em> environment variable to the root of your
+JDK is necessary.  Setting this varies from OS to OS and also depends on where it
+gets installed.  Instructions for setting this variable are all over the Internet.
 </p>
-<p><em>Gradle</em> is the build system used.  The <em>Kiss</em> system
-automatically installs <em>gradle</em> so you need not do anything
-special.  See <a href="#Important">Important</a>
+<p>The system was built and tested with JDK 8,
+<a href="https://www.postgresql.org">PostgreSQL</a>,
+<a href="https://www.jetbrains.com/idea">IntelliJ</a>, and
+<a href="http://tomcat.apache.org">tomcat</a>.  Other environments such as
+IIS, Glassfish, eclipse, should work fine but may require some
+configuration.
 </p>
-<p>Install the above per their instructions.
+<p><em>Kiss</em> comes with its own build system.  See <a href="#Important">Important</a>
 </p>
-<p>With the proper plugins, all of the IDE&rsquo;s can import the Gradle build files.
+<p>Install the above according to their instructions.
 </p>
 <a name="Download-Kiss"></a><a name="Download-Kiss-1"></a>
 <h3 class="section">2.5 Download Kiss</h3>
-
 
 <p>Kiss is located at <a href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
 </p>
@@ -542,33 +575,37 @@ special.  See <a href="#Important">Important</a>
 <a name="Documentation"></a>
 <h3 class="section">2.6 Documentation</h3>
 
-<p>The <em>Kiss</em> documentation consists of three parts; this manual, the detailed back-end API documentation contained in the JavaDocs,
-and the detailed front-end API documentation.
-The JavaDocs do not come with the system, but you can generate them yourself with what is provided.  See <a href="#javadoc">Creating JavaDocs</a>.
+<p>The <em>Kiss</em> documentation consists of three parts; this manual,
+the detailed back-end API documentation contained in the JavaDocs, and
+the detailed front-end API documentation.  The JavaDocs do not come
+with the system, but you can generate them yourself with what is
+provided.  See <a href="#javadoc">Creating JavaDocs</a>.
 </p>
 <p>This manual may be created in two forms.  The first is in an HTML
 form.  The system comes with this.  You can also generate a nicely
-formatted PDF file with the following commands (if you have all of the tools installed):
+formatted PDF file with the following commands (if you have all of the
+formatting tools installed):
 </p>
 <div class="example">
 <pre class="example">cd manual
 make Kiss.pdf
 </pre></div>
 
-<p>Updated to the HTML file are achieved with the following commands:
+<p>Updates to the HTML file are achieved with the following commands:
 </p><div class="example">
 <pre class="example">cd manual
 make
 </pre></div>
 
-<p>All of the documentation can be accessed with your browser.  For example,
-if the root of <em>Kiss</em> is located at <code>/my/home/path/kiss</code> then you will be able to access the three
+<p>All of the documentation can be accessed with your browser.  For
+example, if the root of <em>Kiss</em> is located at
+<code>/my/home/path/kiss</code> then you will be able to access the three
 manuals at the following URL&rsquo;s:
 </p>
 <div class="example">
 <pre class="example">file:///my/home/path/kiss/manual/man/index.html
 
-file:///my/home/path/kiss/build/docs/javadoc/index.html
+file:///my/home/path/kiss/build.work/javadoc/index.html
 
 file:///my/home/path/kiss/manual/jsdoc/index.html
 </pre></div>
@@ -576,10 +613,11 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 <a name="Setup-And-Configuration"></a><a name="Setup-And-Configuration-1"></a>
 <h3 class="section">2.7 Setup And Configuration</h3>
 
-<p>The system is configured by the contents of a single file <code>src/main/application/KissInit.groovy</code>
-A reboot of the web server is required if any of the parameters in this file are changed.
+<p>The system is configured by the contents of a single file
+<code>src/main/application/KissInit.groovy</code> A reboot of the web server
+is required if any of the parameters in this file are changed.
 </p>
-<p>Given that Kiss is for business applications, it authenticates its
+<p>Given that <em>Kiss</em> is for business applications, it authenticates its
 users.  In order for this to work, there is usually a database of valid
 users.  This information is persisted in an SQL database.  Therefore a
 database is normally required.  However, for testing purposes, if no
@@ -608,16 +646,19 @@ username and password to succeed.
 
 <p>Support for other databases is easy to add.
 </p>
-<p><em>setMaxWorkerThreads</em> defines how many REST services may be processed in parallel.  Service requests
-beyond this are placed in a FIFO queue and processed as worker threads become available.  This capability
-drastically improves the system&rsquo;s ability to handle a large number of simultaneous users.
+<p><em>setMaxWorkerThreads</em> defines how many REST services may be
+processed in parallel.  Service requests beyond this are placed in a
+FIFO queue and processed as worker threads become available.  This
+capability drastically improves the system&rsquo;s ability to handle a large
+number of simultaneous users.
 </p>
 <p>The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 </p>
 <p>Create the database (named &ldquo;kiss&rdquo; above or whatever name you
 configured).  After that, you can run the script file <code>init.sql</code>
-to create the table and some initial data.
+to create the needed table and some initial data.  You may add any
+application specific tabled needed.
 </p>
 <p>The default username is <em>kiss</em>, and the default password is
 <em>password</em>
@@ -625,170 +666,293 @@ to create the table and some initial data.
 <a name="Building-The-System"></a>
 <h3 class="section">2.8 Building The System</h3>
 
-<p>The system may be built in several way.  It can be build from the
-command line using <em>Gradle</em>, or it can be build from within your
-favorite IDE.  Using an IDE has the great advantage of a built-in
-debugger.  This section will outline usage of some of these scenarios.
+<p>Although the system may be built with the included build system
+(called <em>bld</em>) <em>or</em> your favorite IDE, the <em>bld</em>
+system should be used for the initial step which downloads the external
+dependencies (jar files).
 </p>
-<a name="Gradle"></a>
-<h4 class="subsection">2.8.1 Gradle</h4>
-
-<p><em>Gradle</em> is a build system that describes and automates the build process.
-<em>Kiss</em> utilizes <em>Gradle</em> to automate its build and debug processes.
-Most IDE&rsquo;s are able to utilize the <em>Gradle</em> build system.
-<em>Gradle</em> may be used as follows:
-(Note, this is not a list of command you should run in order to get the system running.) 
-See <a href="#Important">Important</a> and See <a href="#Quick_002dstart-Checklist">Quick-start Checklist</a>.
+<p>The build system included with <em>Kiss</em> (called <em>bld</em>) has
+been tested on Linux, Mac, and Windows.  The system also includes an
+<em>Ant</em> build file (named <em>build.xml</em>) that is only used for
+IDE integration with the included <em>bld</em> system.
+</p>
+<p>The build system included with Kiss is written in Java and located
+under the <em>builder</em> directory.  This build system also includes
+two driver batch files / shell scripts used to build and run the build
+system.  All that is needed to use this system is a Java compiler.
+(As a side note - this build system is generic and can be used to
+build other types of projects.)
+</p>
+<p>The build process is run from the command-line.  No IDE is necessary.
+There is no specific IDE integration.  None is needed because the system
+is rarely built.  After the first build, application development is done
+without any build process.
+</p>
+<p>The build system, which comes in source form, must be built before it
+can be used to build <em>Kiss</em>.  The build system may be built by
+running one of the the following command from the root of the
+<em>Kiss</em> system:
 </p>
 <dl compact="compact">
-<dt><code>./gradlew javadoc</code></dt>
-<dd><p>JavaDocs end up in the <code>build/docs/javadoc</code> directory.
+<dt><code>Linux, Mac, etc.</code></dt>
+<dd><p>./build-builder
 </p></dd>
-<dt><code>./gradlew war</code></dt>
-<dd><p>The WAR file ends up in the <code>build/libs</code> directory.  
-This file can be just placed in the webapps directory of tomcat to deploy.
-</p></dd>
-<dt><code>./gradlew explodedWar</code></dt>
-<dd><p>This builds a set of files that would have been placed in the deployment WAR file.  It is used, when needed,
-to run the entire system from a local directory.  The files are placed in the <code>build/exploded/kiss</code>
-directory.
-</p></dd>
-<dt><code>./gradlew clean</code></dt>
-<dd><p>Removes all the generated files.
-</p></dd>
-<dt><code>./gradlew tomcatRun</code></dt>
-<dd><p>Runs a sample server serving up the application.  The system will be
-available from your local browser at
-<code>http://localhost:8080</code>.  Use <code>^C</code> to exit.
-</p></dd>
-<dt><code>./gradlew tomcatRunDebug</code></dt>
-<dd><p>Runs a sample server serving up the application.  The system will be
-available from your local browser at
-<code>http://localhost:8080</code>.  Use <code>^C</code> to exit. Once <em>Kiss</em> is running in debug mode,
-you may debug the application by attaching to the running <em>tomcat</em> server at port 5005.
+<dt><code>Windows</code></dt>
+<dd><p>build-builder.cmd
 </p></dd>
 </dl>
 
-<a name="IntelliJ"></a>
-<h4 class="subsection">2.8.2 IntelliJ</h4>
-
-<p>IntelliJ is a good IDE.  It is the only IDE that supports debugging
-<em>Groovy</em> as microservices.  The free, community version is adequate for developing
-and debugging with <em>Kiss</em>.  IntelliJ should be configured with
-support for <code>Gradle</code>, <code>tomcat</code>, and <code>Groovy</code>.  If using the Community Edition, all of the install defaults are correct. 
+<p>Once the build system has been built, you can see what operations it
+can perform by typing:
 </p>
-<p>The following should be done for the Community or Ultimate Editions:
+<div class="example">
+<pre class="example">    ./bld listTasks
+</pre></div>
+
+<p>Those tasks that require prior tasks will evoke the dependent tasks
+automatically.  The system is smart enough not to repeat tasks that
+are unneeded.
+</p>
+<p>The main tasks that will be of interest to you are as follows:
+</p>
+<dl compact="compact">
+<dt><code>libs</code></dt>
+<dd><p>This task is only required if you intend to use your IDE to build the
+remainder of the system.  It installs the required dependencies.
+</p></dd>
+<dt><code>develop</code></dt>
+<dd><p>This will cause the entire system to build (not repeating unnecessary
+steps) and start up a tomcat instance to run the system in a
+development mode.  The system will be available from your local
+browser at <code>http://localhost:8080</code>.  You may debug the
+application by attaching to the running <em>tomcat</em> server at port
+9000.
+</p></dd>
+<dt><code>war</code></dt>
+<dd><p>This will cause the system to generate the single file needed by a
+production system.  It will end up in <em>build.work/Kiss.war</em>
+</p></dd>
+</dl>
+
+<p>Other tasks which may be useful are as follows:
+</p>
+<dl compact="compact">
+<dt><code>clean</code></dt>
+<dd><p>This task removes all files built but retains files that were downloaded from
+repositories (although <em>bld</em> caches those files anyway.)
+</p></dd>
+<dt><code>realclean</code></dt>
+<dd><p>This removes all built and downloaded files so the system should be everything
+you need to build it without any extraneous files
+</p></dd>
+<dt><code>all</code></dt>
+<dd><p>This performs all of the steps necessary to setup and build the system but
+doesn&rsquo;t start up the tomcat server.
+</p></dd>
+<dt><code>javadoc</code></dt>
+<dd><p>This task creates the javadoc files that end up in <code>build.work/javadoc</code>
+</p></dd>
+</dl>
+
+<p>See <a href="#Important">Important</a> and See <a href="#Quick_002dstart-Checklist">Quick-start Checklist</a>.
+</p>
+<a name="Using-an-IDE"></a>
+<h4 class="subsection">2.8.1 Using an IDE</h4>
+
+<p>Most IDE&rsquo;s can be used to develop and debug the application.  There are two
+way to do this as follows:
 </p>
 <ol>
-<li> Get a fresh clone of <em>Kiss</em>
-</li><li> When you first enter IntelliJ, select <code>Import Project</code> and select the root of your <em>Kiss</em> clone.
-</li><li> Select Import project from external model, then select <em>Gradle</em>.
-</li><li> Accept all defaults
+<li> Using <em>bld</em> to build and run the development environment.
+</li><li> Using your IDE to build and run the development environment.
 </li></ol>
 
-<p>In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.  See <a href="#Front_002dend-Development">Front-end Development</a>
-This section documents the back-end portion.
+<p>Using <em>bld</em> to build and run the development environment is the
+easiest to start off with but is somewhat klunky on an ongoing basis.
+Its main advantage is that it is portable and doesn&rsquo;t require a lot of
+IDE configuration.  The back-end development server is configured and
+started by <em>bld</em> by simply running <em>./bld develop</em> After
+that, the IDE can be used to debug it by <em>attaching</em> to port
+9000.
 </p>
-<a name="Community-Edition-Too"></a>
-<h4 class="subsection">2.8.3 Community Edition Too</h4>
-
-<p>The following is applicable to both the Community Edition and the Ultimate Editions of IntelliJ.
+<p>Using your IDE to run the entire process is a bit tedious to initially
+setup but makes the entire process simpler from that point forward.
+Unfortunately, configuring your IDE is completely different for each
+IDE.  Instructions for setting up the Ultimate (commercial) version of
+IntelliJ and NetBeans are included as follows.  Other IDE&rsquo;s may be
+configured according to the instructions that are typically associated
+with the IDE.
 </p>
-<p>In the upper right hand corner of the IDE there is a tab labeled <em>Gradle</em>.  When that tab is expanded you may execute <em>Gradle</em> tasks that you select.
-Expand <em>Tasks</em> and then <em>gretty</em>.  The main task you will be interested in is <em>tomcatStartDebug</em>.  That task starts <em>Kiss</em>
-in debug mode suitable for debugging the back-end portion of <em>Kiss</em>.  Double-clicking on that task builds the system and launched the integrated <em>tomcat</em>
-server.  
-</p>
-<p>When the output windows says &ldquo;Listening for transport dt_socket at address: 5005&rdquo; then select <em>Run</em> an then <em>Attach to process...</em>.
-A window asking you to select what to attach to will appear.  It will only contain a single item.  Select it. You can then go to the following URL
-on your browser:  <a href="http://localhost:8080">http://localhost:8080</a>  You can now debug the application.
-</p>
-<p>Note two tabs on the bottom of the IDE labeled <em>Run</em> and <em>Debug</em>.  These two tabs are very useful during debugging.
-</p>
-
-
-<a name="Ultimate-Edition"></a>
-<h4 class="subsubsection">2.8.3.1 Ultimate Edition</h4>
-
-<p>Additionally, the following steps may be used to simplify debugging when using the <em>Ultimate</em> (paid) version of <em>IntelliJ</em>:
+<p>Also, bear this in mind, the build process used by <em>bld</em> and that
+of the IDE are not the same.  Use one or the other.
 </p>
 
+<a name="IntelliJ-_0028Ultimate_0029"></a>
+<h4 class="subsubsection">2.8.1.1 IntelliJ (Ultimate)</h4>
 
+<p>Although the Ultimate (commercial) version of IntelliJ costs money, it
+is probably the most powerful, reliable, and best supported IDE.
+<em>Kiss</em> works well with it.  On the other hand, like other IDE&rsquo;s,
+IntelliJ can be a bit tedious to configure properly.  The following
+steps can be used to configure IntelliJ.
+</p>
 <ol>
-<li> Go to Run / Edit Configurations
-</li><li> Click the &ldquo;+&rdquo; in the upper left corner
-</li><li> Select <em>Tomcat Server</em> / <em>Local</em>
-</li><li> Change the Name to Kiss
-</li><li> Click the Deployment tab
-</li><li> Click the &ldquo;+&rdquo; in the upper right quadrant of the screen (not the upper left)
-</li><li> Select <em>Artifact</em> and then <em>Kiss.war</em> (exploded)
-</li><li> Set &ldquo;Application context:&rdquo; to &ldquo;/&rdquo;
-</li><li> Click &quot;OK&quot;
+<li> Download dependencies.  Even though IntelliJ will be used to build,
+debug, and maintain the system, the <em>Kiss</em> build system
+(<em>bld</em>) should initially be used to install the dependencies.
+And even before that, the build system itself must be built.  All this
+can be accomplished with the following commands:
+<ol type="a" start="1">
+<li> ./build-builder
+</li><li> ./bld libs
+</li></ol>
+</li><li> Install tomcat.  You must install a copy of the <em>tomcat</em> server.
+You can do this by either installing it in a typical way from the
+Apache Tomcat site, or you can execute the following <em>bld</em>
+command to create a local tomcat installation for you:
+<ol type="a" start="1">
+<li> ./bld setupTomcat
+</li></ol>
+<p>If <em>bld</em> is used, it will setup tomcat in a directory named
+<em>tomcat</em> under the root of the <em>Kiss</em> installation.
+</p></li><li> Configure IDE for tomcat.  This can be done from within the IDE by:
+<ol type="a" start="1">
+<li> Go to File / Settings / Build, Execution, Deployment / Application Servers.
+</li><li> Click the + in the upper middle of the popup, and then select <em>Tomcat Server</em>
+</li><li> The home and base should both be set to the root of the tomcat directory.  This
+will be an absolute rather than a relative path.
+</li></ol>
+</li><li> Import the project.  From within the IDE:
+<ol type="a" start="1">
+<li> Select <em>Import Project</em>
+</li><li> Select the root directory of the <em>Kiss</em> system.
+</li><li> Select <em>Create project from existing sources</em>
+</li><li> Accept defaults but when you get to the <em>Source files</em> page, de-select the 
+<em>builder</em> directory.
+</li><li> On the libraries page, de-select <em>commons</em> and <em>SimpleWebServer</em>.
+</li><li> Accept the remaining defaults until the project is created.
+</li></ol>
+</li><li> Configure artifact.  The artifact is the end files that IntelliJ deploys to tomcat.  
+These are the files that typically end up in a WAR file used by tomcat.  Configuring
+this is done with the following IntelliJ steps:
+<ol type="a" start="1">
+<li> Right-click on the top node in the <em>Projects</em> pane and select
+<em>Open Module Settings</em>.
+</li><li> Select <em>Artifacts</em>
+</li><li> Click the + in the upper middle of the popup and then select <em>Web
+Application: Exploded</em> / <em>From Module</em> and then select the only module.
+</li><li> Check <em>Include in project build</em>
+</li><li> Expand <em>Kiss</em> under <em>Available Elements</em> and double-click on <em>libs</em>
+</li><li> Click <em>OK</em>
+</li></ol>
+</li><li> Add a run configuration.  From within the IDE:
+<ol type="a" start="1">
+<li> Select <em>Run</em> / <em>Edit configurations...</em>
+</li><li> Click the + in the upper left corner of the popup and select <em>Tomcat Server</em> / 
+<em>Local</em>.
+</li><li> Change Name to <em>Kiss</em>
+</li><li> Verify the <em>Application server</em> (use the tomcat we configured for this project).
+The other defaults should be correct.
+</li><li> Click the <em>Deployment</em> tab
+</li><li> Click the + on the right side of the popup and select <em>Artifact...</em>
+</li><li> Click on the <em>Startup/Connection</em> tab
+</li><li> Under the <em>Debug</em> configuration and then <em>again</em> under the
+<em>Run</em> configuration, add an environment variable named
+<em>KISS_ROOT</em> and set its value to the path of the root of your
+<em>Kiss</em> system.
+</li></ol>
 </li></ol>
 
-<p>To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 
-in a debug mode.  Although this is the recommended setup for the back-end portion during development, it is not recommended
-for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.    See <a href="#Front_002dend-Development">Front-end Development</a>
+<p>After this configuration is performed, you can use the IDE&rsquo;s native
+build and debug processes for development.  However, <em>bld</em> should
+still be used to produce the production WAR file.
 </p>
+
 <a name="NetBeans"></a>
-<h4 class="subsection">2.8.4 NetBeans</h4>
+<h4 class="subsubsection">2.8.1.2 NetBeans</h4>
 
-<p>The <em>Kiss</em> system works with NetBeans.  The only shortcoming is
-that <em>Groovy</em> code can not be debugged.  These instructions are
-for NetBeans 8.2.  These instructions need only be done once.
+<p>NetBeans is currently under significant transition since it joined the Apache
+organization.  NetBeans 11.2 did not work correctly with tomcat, however,
+the nightly build as of February 28, 2020 did.  So, we expect that any version 
+<em>after</em> 11.2 should work.  This is how we configured the IDE.  In all cases,
+when not specified otherwise. leave the defaults.
 </p>
-<p>When installing NetBeans, be sure to select the following Runtimes:
-</p>
-<ul>
-<li> Java EE
-</li><li> HTML5 / JavaScript
-</li><li> Groovy
-</li><li> Apache Tomcat
-</li></ul>
+<ol>
+<li> Download dependencies.  Even though NetBeans will be used to build,
+debug, and maintain the system, the <em>Kiss</em> build system
+(<em>bld</em>) should initially be used to install the dependencies.
+And even before that, the build system itself must be built.  All this
+can be accomplished with the following commands:
+<ol type="a" start="1">
+<li> ./build-builder
+</li><li> ./bld libs
+</li></ol>
+</li><li> Install tomcat.  You must install a copy of the <em>tomcat</em> server.
+You can do this by either installing it in a typical way from the
+Apache Tomcat site, or you can execute the following <em>bld</em>
+command to create a local tomcat installation for you:
+<ol type="a" start="1">
+<li> ./bld setupTomcat
+</li></ol>
+<p>If <em>bld</em> is used, it will setup tomcat in a directory named <em>tomcat</em> under
+the root of the <em>Kiss</em> installation.
+</p></li><li> Configure tomcat.  From within NetBeans, do the following:
+<ol type="a" start="1">
+<li> Select <em>Tools</em> and then <em>Servers</em>
+</li><li> Click <em>Add Server...</em>, and then select <em>Apache Tomcat or TomEE</em>
+</li><li> Select the server location.  <em>Catalina Base</em> should be blank.
+</li><li> Set both the <em>Username</em> and <em>Password</em> to <em>admin</em>, and then click 
+<em>Finish</em>
+</li></ol>
+</li><li> Import the Project through the IDE as follows:
+<ol type="a" start="1">
+<li> Select <em>File</em> and then <em>New Project</em>
+</li><li> Select <em>Java Web</em> under <em>Java with Ant</em>, and then select
+<em>Web Application with Existing Sources</em> on the right, and then
+click <em>Next</em>
+</li><li> Under <em>Location</em> select the root of the <em>Kiss</em> system.  The
+remaining defaults on that tab are fine.  Click <em>Next</em>.
+</li><li> On the <em>Server and Settings</em> tab, be sure to select the
+appropriate tomcat server.
+</li><li> The following should be set on the <em>Existing Sources and Libraries</em> page:
+<ol type="A" start="1">
+<li> Set the <em>Web Pages Folder</em> by selecting the <code>src/main/webapp</code>
+directory.
+</li><li> Set the <em>WEB-INF Content</em> by selecting the <code>src/main/java</code> directory.
+</li><li> Set the <em>Libraries Folder</em> by selecting the <code>libs</code> folder
+under the <em>Kiss</em> root.
+</li><li> Remove what is in the <em>Sources Package Folders</em> section and add the two paths
+<em>src/main/application</em> and <em>src/main/java</em>, and then click <em>Finish</em>.
+</li></ol>
+</li></ol>
+</li><li> Set the source folder names by:
+<ol type="a" start="1">
+<li> Right-click on the root of the project in the <em>Projects</em> pane and
+select <em>Properties</em>.
+</li><li> On the <em>Sources</em> page, you will see two labels in the
+<em>Source Package Folders</em> section that we need to change.  Change
+the <em>application</em> one to <em>Application</em> and the second to <em>Kiss Core</em>.
+</li><li> Click <em>OK</em>
+</li></ol>
+</li></ol>
 
-<p>Go into NetBeans and select <em>File</em> and <em>Open Project</em>.
-Select the root of the <em>Kiss</em> project.  From the <em>Projects</em>
-pane, you can right-click on the project root.  You will then see an
-option labeled <em>Tasks</em>.  That is where you can execute
-<em>Gradle</em> tasks.  To build and debug the application, select
-<em>tomcat</em> and then <em>tomcatRunDebug</em>.  You will then see a
-message &ldquo;Listening for transport dt_socket at address: 5005&rdquo;.  From
-the top menu, select <em>Debug</em> and then <em>Attach Debugger</em>.
-The defaults should be correct.  Accept the popup.  You may then go to
-the following URL on your browser: <a href="http://localhost:8080">http://localhost:8080</a>
-You can now debug the application.
-</p>
-<p>The <em>Output</em> tab on the bottom will display helpful information.
+
+<p>After this configuration is performed, you can use the IDE&rsquo;s native
+build and debug processes for development.  However, <em>bld</em> should
+still be used to produce the production WAR file.
 </p>
 
-<p>Although this is the recommended setup for the back-end portion during
-development, it is not recommended for front-end development.  In
-order to do front-end and back-end development at the same time, a
-dual server setup where the front-end and back-end are served by
-different servers is recommended.  See <a href="#Front_002dend-Development">Front-end Development</a>
-</p>
-
-
-<a name="eclipse_002c-VSCode_002c-and-Others"></a>
-<h4 class="subsection">2.8.5 eclipse, VSCode, and Others</h4>
-
-<p>Other IDE&rsquo;s that support <em>Gradle</em> should work fine.  In
-particular, <em>VSCode</em> and <em>eclipse</em> have been tested and are
-known to work.
-</p>
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
 <h3 class="section">2.9 What Do I Do With It Now?</h3>
 
 <p>What you have at this point is the beginnings of your new application.
 <em>Kiss</em> is provided as a running and deployable system.  It is
-expected that you would modify what&rsquo;s here to suit your application
+expected that you would modify what&rsquo;s there to suit your application
 needs.
 </p>
 <p>Besides this narrative, you would need the JavaDocs located under the
-<code>build/docs/javadoc</code> directory for API specific documentation.
-(Which you must generate via <em>Gradle</em> as described. See <a href="#javadoc">Creating JavaDocs</a>.
+<code>build.work/javadoc</code> directory for back-end API specific documentation and
+front-end API reference located in the <em>manual/jsdoc</em> directory.
 </p>
 
 
@@ -854,7 +1018,9 @@ is loaded.
 <a name="Controlling-Browser-Cache"></a>
 <h3 class="section">3.4 Controlling Browser Cache</h3>
 
-<p>The user&rsquo;s browser cache can be controlled from the file <code>src/main/webapp/index.html</code>  In that file you will see two lines that look as follows:
+<p>The user&rsquo;s browser cache can be controlled from the file
+<code>src/main/webapp/index.html</code> In that file you will see two lines
+that look as follows:
 </p>
 <div class="example">
 <pre class="example">var softwareVersion = &quot;1&quot;;  // version of the entire system
@@ -872,23 +1038,27 @@ occur.
 <a name="javadoc"></a><a name="Creating-JavaDocs"></a>
 <h3 class="section">3.5 Creating JavaDocs</h3>
 
-<p>JavaDocs for the <em>Kiss</em> system will need to be created.  It is created from the command line using <em>Gradle</em> by issuing the
-following command: 
+<p>JavaDocs for the <em>Kiss</em> system will need to be created.  It is
+created from the command line using <em>Gradle</em> by issuing the
+following command:
 </p>
 <div class="example">
-<pre class="example">./gradlew javadoc
+<pre class="example">./bld javadoc
 </pre></div>
 
-<p>The JavaDoc files end up in the <code>build/docs/javadoc</code> directory.
+<p>The JavaDoc files end up in the <code>build.work/javadoc</code> directory.
 </p>
 
 <a name="Deploying-A-Kiss-Application"></a>
 <h3 class="section">3.6 Deploying A Kiss Application</h3>
 
 <p>The only file needed to deply the application is <code>Kiss.war</code> It
-can either be built by your IDE, or at can be build by typing
-<code>./gradlew war</code> at a command prompt.  In the case of Gradle,
-<code>Kiss.war</code> ends up in the <code>build/libs</code> directory.
+can be built by typing <code>./bld war</code> at a command prompt.
+<code>Kiss.war</code> ends up in the <code>build.work</code> directory.  If you
+have your IDE create the <code>Kiss.war</code> file, it will likely not
+work.  The <em>Kiss</em> system requires a special build process because
+application files are distributed in source form.  Therefore, <code>bld</code>
+should be used to create the production WAR file.
 </p>
 <p>If using <em>tomcat</em>, <code>Kiss.war</code> should be placed in the
 <code>webapps</code> directory.  When <em>tomcat</em> starts, it will see the
@@ -905,7 +1075,7 @@ the application path to change to <code>[HOST]/ABC</code>
 function, in terms of the back-end, look at files in the
 <code>src/main/application/services</code> directory.  With <code>Kiss</code> you can
 develop applications in several different languages.  The <code>services</code>
-example shows the same code in all of the suported languages.
+example shows the same code in all of the supported languages.
 </p>
 <p>In terms of the front-end, see the example files under <code>src/main/webapp/page1</code>
 </p>
@@ -928,7 +1098,8 @@ front-end files can be edited and saved.  Their changes take effect
 immediately.
 </p>
 <p>Of course, in a production environment, only a single server would be
-utilized.
+utilized and front-end and back-end changes take effect immediately
+there too.
 </p>
 <a name="Back_002dend-Development"></a>
 <h3 class="section">4.1 Back-end Development</h3>
@@ -943,8 +1114,8 @@ source files be used rather than the production copies during the
 development process.  
 </p>
 <p>The system automatically detects the location of the application
-source in all known configurations.  However, this may be explicitly
-set via a system environment variable (<code>KISS_DEBUG_ROOT</code>).  The
+source in most configurations.  However, this may be explicitly
+set via a system environment variable (<code>KISS_ROOT</code>).  The
 value of this environment variable should be the absolute path of the
 root of the application source code.  The directory it indicates
 should have a sub-directory named <code>src/main/application</code>.
@@ -953,6 +1124,19 @@ should have a sub-directory named <code>src/main/application</code>.
 
 <a name="REST-Server"></a>
 <h4 class="subsection">4.1.1 REST Server</h4>
+
+<p>There are two different methods of running the back-end REST server as
+follows.
+</p>
+<a name="IDE"></a>
+<h4 class="subsubsection">4.1.1.1 IDE</h4>
+
+<p>Running of the IDE back-end requires the following:
+</p>
+<ol>
+<li> The IDE is completely configured.
+</li><li> The system was build with the IDE
+</li></ol>
 
 <p>Typically, the IDE manages a tomcat instance and serves up the core
 back-end code serving the REST services.  That code detects that it is
@@ -966,7 +1150,29 @@ they were compiled before the system was booted.
 <p>Once the back-end server is up, application files changed under the
 <code>src/main/application</code> directory will take effect immediately.
 </p>
-<p>The back-end server should be started before the front-end server.
+<a name="BLD"></a>
+<h4 class="subsubsection">4.1.1.2 BLD</h4>
+
+<p>Utilizing the included <em>Kiss build system (bld)</em> the many steps required 
+to install and configure tomcat and the IDE are unnecessary.  The whole process
+(for the back-end portion) can be done as follows:
+</p>
+<ol>
+<li> From any stage (including having just downloaded the <em>Kiss</em> system) type
+the following:  <code>./bld develop</code>
+
+<p>Note 1.  You may have to first perform the one-time task of building
+the <em>bld</em> system by typing: <code>./build-builder</code>
+</p>
+<p>Note 2.  Remember that all commands that start with <code>./</code> would drop
+the <code>./</code> under Windows.
+</p></li></ol>
+<p>At this point, the back-end will be running.  From within your IDE you
+can attach to the process at port 9000 to debug the back-end (including
+breakpoints, etc.)
+</p>
+<p>Remember, however, that you won&rsquo;t be able to use or debug the application until
+the front-end server is started too.
 </p>
 <a name="Application-Code"></a>
 <h4 class="subsection">4.1.2 Application Code</h4>
@@ -1007,7 +1213,7 @@ for that web service.  Each web method is passed four arguments as follows:
 </li><li> A new database connection is formed, and a new database transaction is started.
 </li><li> The requested web service is identified (and loaded and compiled if needed).
 </li><li> The <code>outjson</code> object that is filled in by the web service that is to be returned to the front-end.
-</li><li> Upon completion of the REST service, <em>Kiss</em> commits the transaction, closes the databse connection, and returns <code>outjson</code> to the front-end.
+</li><li> Upon completion of the REST service, <em>Kiss</em> commits the transaction, closes the database connection, and returns <code>outjson</code> to the front-end.
 </li><li> If, however, the REST service threw an exception, <em>Kiss</em> rolls back the transaction, closes the database, and sends an error return to the front-end.
 </li></ol>
 
@@ -1019,7 +1225,7 @@ be defined and used within web service classes.
 <a name="Programming-Languages"></a>
 <h4 class="subsection">4.1.3 Programming Languages</h4>
 
-<p>At this point, <em>Kiss</em> supports the develpment of back-end REST
+<p>At this point, <em>Kiss</em> supports the development of back-end REST
 services in the Java, Groovy, or Common Lisp languages.  Groovy was
 added first because it was easy, worked with the IDE well, and did all
 that was needed.  Java was added simply due to its natural integration
@@ -1029,7 +1235,7 @@ with the rest of the system.
 languages.  You are not forced to use one or the other.
 </p>
 <p>Common Lisp (ABCL) was added due to this author&rsquo;s love of that
-language.  Unlike Groovy and Java, Lisp has an impedence mismatch with
+language.  Unlike Groovy and Java, Lisp has an impedance mismatch with
 the core <em>Kiss</em> system that is written in Java.  For example, in
 Java, one can have two methods with the same name in the same class
 that differ only by their argument types.  This is not part of the
@@ -1049,16 +1255,21 @@ especially if there are requests.
 <a name="Front_002dend-Development"></a><a name="Front_002dend-Development-1"></a>
 <h3 class="section">4.2 Front-end Development</h3>
 
-<p>The front-end can be debugged through your browser debugger (F12 on Chrome).
-</p>
 <p>A separate server is used so that development files will be served
 rather than the front-end that was present when the back-end server
-was started.  In order to make this work, there are two steps that
+was started.  This is the same whether your are using the IDE or
+<em>bld</em> back-end server modes.
+</p>
+<p>Once the back-end and front-end servers are running, the front-end can
+be debugged through your browser debugger (F12 on Chrome).
+</p>
+<p>In order to make this work, there are two steps that
 need to be followed.
 </p>
 <ol>
-<li> The front-end needs to know where the back-end is located.  This is controlled in the file <code>src/main/webapp/index.js</code>.
-That file contains a line that looks as follows:
+<li> The front-end needs to know where the back-end is located.  This is
+controlled in the file <code>src/main/webapp/index.js</code>.  That file
+contains a line that looks as follows:
 <div class="example">
 <pre class="example">    Server.setURL('http://localhost:8080');
 </pre></div>
@@ -1076,17 +1287,18 @@ system, run the following command to run the front-end server:
 <pre class="example">   serve.cmd
 </pre></div>
 </li></ol>
-
-<p>The back-end server should be started before the front-end server.
+<p>(Source code to this simple server is available at 
+<a href="https://github.com/blakemcbride/SimpleWebServer">https://github.com/blakemcbride/SimpleWebServer</a>)
 </p>
-<p>Once the front-end server is up, you can access the development
+<p>Once the front-end and back-end servers are up, you can access the development
 environment through your browser at <code>http://localhost:8000</code>
 </p>
-<p>If you disable the browser cache, changes you make to the front-end
-will appear by just reloading the page.  On Chrome, for example, the
-browser cache can be turned off by going into the page debugger (F12),
-then <code>settings</code>, and then select <code>Disable cache (while
-DevTools is open)</code>
+<p>If you disable the browser cache through the browser developer console
+settings, changes you make to the front-end will appear by just
+reloading the page.  On Chrome, for example, the browser cache can be
+turned off by going into the page debugger (F12), then
+<code>settings</code>, and then select <code>Disable cache (while DevTools
+is open)</code>
 </p>
 <p>You can now develop the front-end portion of your application by
 editing files under the <code>src/main/webapp</code> directory.
@@ -1431,10 +1643,12 @@ the following benefits:
 </li><li> Supports transactions out-of-the-box
 </li></ul>
 
-<p>As shipped, this library supports PostgreSQL, Microsoft Server, Oracle, MySQL, and SQLite.
+<p>As shipped, this library supports PostgreSQL, Microsoft Server,
+Oracle, MySQL, and SQLite.
 </p>
 <p>The detailed documentation for the database utilities are in the
-JavaDocs which you must generate. (See <a href="#javadoc">Creating JavaDocs</a>.) This section provides an overview.
+JavaDocs which you must generate. (See <a href="#javadoc">Creating JavaDocs</a>.)
+This section provides an overview.
 </p>
 <p>The <em>Kiss</em> database routines revolve around four main classes as follows:
 </p>
@@ -1446,7 +1660,8 @@ JavaDocs which you must generate. (See <a href="#javadoc">Creating JavaDocs</a>.
 <dd><p>This represents a single action or command against the database.
 </p></dd>
 <dt><code>Cursor</code></dt>
-<dd><p>If the action is a <code>select</code>, the <code>Cursor</code> represents a pointer into the result set.
+<dd><p>If the action is a <code>select</code>, the <code>Cursor</code> represents a
+pointer into the result set.
 </p></dd>
 <dt><code>Record</code></dt>
 <dd><p>This class represents a single row within a table or result set.

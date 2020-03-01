@@ -31,22 +31,32 @@
 
 @anchor{Important}@section Important
 
-The @emph{Kiss} system uses @emph{gradle} as its build system.  This
-works under Linux, Mac, Windows, etc.  Although you need to install
-Java before anything will work, you do not need to install
-@emph{gradle}.  When you first try to build the system, it will detect
-that you hadn't installed @emph{gradle} and it will download it and
-install it for you.  This means it will take a bit longer on first
-build.  @emph{Gradle} also downloads allof the required libraries the
-first time too.  So again, the first build will be slow.  Subsequent
-builds are fast, and since @emph{Kiss} uses microservices, most of the
-time you don't even have to build at all.
+The @emph{Kiss} system comes with its own build system, so it doesn't
+use build systems such as @emph{ant}, @emph{maven}, or @emph{gradle}.
+It works under Linux, Mac, Windows, etc. This included build system
+will make things such as downloading remote libraries, installing and
+configuring a web server, building @emph{Kiss}, and running
+@emph{Kiss} for development purposes easy, intelligent, and automatic.
+This new build system can be used in conjunction with your favorite IDE.
 
-The program that runs @emph{gradle} is ``@emph{gradlew}'' under Unix like
-systems and ``@emph{gradlew.bat}'' under Windows.  In this manual,
-``@emph{gradlew}'' will be shown as ``@emph{./gradlew}''.  The ``./'' is
+The build system (I call it @emph{bld}) is small and
+written in Java.  Its source code is included with the @emph{Kiss}
+source code.  So, a Java compiler will be needed before anything will
+work.  At this point, Java version 8 is being used.  Later Java
+versions should work as well.
+
+When building the system for the first time, @emph{BLD} will
+automatically download and cache required libraries (jar files), install and
+configure the development server (tomcat), build the system, and it
+can even be used to launch the development-mode server.  After building
+the system the first time, application development proceeds without
+any need for re-compiles or re-builds.
+
+The program that runs @emph{BLD} is ``@emph{bld}'' under Unix-like
+systems and ``@emph{bld.cmd}'' under Windows.  In this manual,
+``@emph{bld}'' will be shown as ``@emph{./bld}''.  The ``./'' is
 required under Linux and Mac but not under Windows.  When running on
-Windows, use ``gradlew'' rather than ``./gradlew''.
+Windows, use ``bld.cmd'' rather than ``./bld''.
 
 
 @anchor{Quick-start Checklist}@section Quick-start Checklist
@@ -61,56 +71,60 @@ The following enumerates the steps necessary to get the system up and running:
 @item
 @xref{Setup And Configuration}
 @item
-Run the server by running @code{./gradlew tomcatRun}
+The development server can be run without an IDE by running: @code{./bld develop}
 @item
-You can access the server by going to @code{http://localhost:8080}
+Once the server starts up, you can access it on your browser by going to 
+@code{http://localhost:8080/Kiss}  You can also debug the back-end by
+attaching to the process at port 9000.
+
+Alternatively, your IDE can be configured to run the development
+process entirely through it.
 @end enumerate
 
-@noindent Use @code{^C} to stop the server.
+@noindent Once the development server is running under @emph{bld}, you can stop it 
+by hitting any key.
 
 @section Runtime Environments
 
-As shipped, there are three different environments that @emph{Kiss} may
+As shipped, there are two different environments that @emph{Kiss} may
 run in as follows:
 
 @enumerate
-@item
-Test
 @item
 Development
 @item 
 Production
 @end enumerate
 
-The @emph{Test} environment is started with @code{./gradlew tomcatRun} but
-is only good for a quick test to see if the system is running.  It is
-neither good in a development nor production environment.
+The @emph{Production} scenario is created with a single command
+(@code{./bld war}) and produces a single @code{war} file (located in
+the @code{build.work} directory) that can be deployed to your production
+environment.
 
-The @emph{Production} scenario is created with a single command 
-(@code{./gradlew war}) and produces a single @code{war} file that
-can be deployed.
+Before doing anything with the @emph{Development} environment, it is
+important that you have the @emph{JAVA_HOME} environment variable set
+correctly to the root of your JDK (Java Developer Kit).  Doing this
+varies according to the OS you are using and various other Java
+installation possibilities.  There are plenty of instructions on the
+Internet for this.
 
-Unfortunately, the @emph{Development} environment takes many steps to
-setup.  This is largely due to the complexity and variations between
-IDE's.  However, once the environment is setup, developing with
-@emph{Kiss} is smooth and easy.
+The @emph{Development} environment consists of two servers.  One
+serves the back-end REST services, and the second serves the front-end
+HTML, CSS, and JavaScript files.  By using this method, both front-end
+and back-end source files can be changed on a running system and take
+effect immediately without any builds, compiles, server reboots,
+re-deploys, or file copies.  (This is also true of a production
+environment -- with a single server -- when the new files are put in place.)
 
-The @emph{Development} environment consists of two servers.  One serves
-the back-end REST services, and the second serves the front-end HTML, CSS, 
-and JavaScript files.  By using this method, both front-end and back-end
-source files can be changed on a running system and take effect immediately
-without any server reboots, re-deploys, or file copies.  (This is also
-true of a production environment when the new files are put in place.)
-
-Back-end REST services are served, debugged, and edited through the IDE.
+Back-end REST services are debugged, and edited through the IDE.
 Saving a source file is all that is needed to have it take effect.
-Unfortunately, setting up IDE's to do this takes several steps and is different
-for each IDE.
 
 The front-end (HTML, CSS, and JavaScript files) are served by a simple
-server supplied with the @emph{Kiss} system.  @xref{Front-end Development}.
-Debugging is normally done through the browser debugger.
-There is no setup, and it runs by executing a single command.
+server supplied with the @emph{Kiss} system.  @xref{Front-end
+Development}.  (Source code to this server is available at
+@uref{https://github.com/blakemcbride/SimpleWebServer}) Debugging the
+front-end is done through the browser debugger.  There is no setup,
+and the front-end server runs by executing a single command.
 
 @anchor{Pre-requisites}@section Pre-requisites
 
@@ -120,26 +134,30 @@ You should download and install the following pre-requisites.
 @item
 Java JDK 8 from @uref{https://www.oracle.com/java/index.html}
 @item
-An SQL database server (e.g.@ PostgreSQL, Microsoft SQL Server, MySQL, Oracle, SQLite)
+An SQL database server (e.g.@ PostgreSQL, Microsoft SQL Server, MySQL,
+Oracle, SQLite)
 @item
-IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, Netbeans, eclipse)
+IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, NetBeans, eclipse)
 @item
 GIT source code control system
 @end enumerate
 
-The system was built and tested with JDK 8, @uref{https://www.postgresql.org,PostgreSQL}, @uref{https://www.jetbrains.com/idea,IntelliJ}, and 
-@uref{http://tomcat.apache.org,tomcat}.  Other environments such as IIS, Glassfish, eclipse, should work fine but may require some configuration.
+Correctly setting the @emph{JAVA_HOME} environment variable to the root of your
+JDK is necessary.  Setting this varies from OS to OS and also depends on where it
+gets installed.  Instructions for setting this variable are all over the Internet.
 
-@emph{Gradle} is the build system used.  The @emph{Kiss} system
-automatically installs @emph{gradle} so you need not do anything
-special.  @xref{Important}
+The system was built and tested with JDK 8,
+@uref{https://www.postgresql.org,PostgreSQL},
+@uref{https://www.jetbrains.com/idea,IntelliJ}, and
+@uref{http://tomcat.apache.org,tomcat}.  Other environments such as
+IIS, Glassfish, eclipse, should work fine but may require some
+configuration.
 
-Install the above per their instructions.
+@emph{Kiss} comes with its own build system.  @xref{Important}
 
-With the proper plugins, all of the IDE's can import the Gradle build files.
+Install the above according to their instructions.
 
 @anchor{Download Kiss}@section Download Kiss
-
 
 Kiss is located at @uref{https://github.com/blakemcbride/Kiss}
 
@@ -149,13 +167,16 @@ It can be downloaded via the following command:
 
 @section Documentation
 
-The @emph{Kiss} documentation consists of three parts; this manual, the detailed back-end API documentation contained in the JavaDocs,
-and the detailed front-end API documentation.
-The JavaDocs do not come with the system, but you can generate them yourself with what is provided.  @xref{javadoc,,Creating JavaDocs}.
+The @emph{Kiss} documentation consists of three parts; this manual,
+the detailed back-end API documentation contained in the JavaDocs, and
+the detailed front-end API documentation.  The JavaDocs do not come
+with the system, but you can generate them yourself with what is
+provided.  @xref{javadoc,,Creating JavaDocs}.
 
 This manual may be created in two forms.  The first is in an HTML
 form.  The system comes with this.  You can also generate a nicely
-formatted PDF file with the following commands (if you have all of the tools installed):
+formatted PDF file with the following commands (if you have all of the
+formatting tools installed):
 
 @example
 cd manual
@@ -163,30 +184,32 @@ make Kiss.pdf
 @end example
 
 @noindent
-Updated to the HTML file are achieved with the following commands:
+Updates to the HTML file are achieved with the following commands:
 @example
 cd manual
 make
 @end example
 
-All of the documentation can be accessed with your browser.  For example,
-if the root of @emph{Kiss} is located at @code{/my/home/path/kiss} then you will be able to access the three
+All of the documentation can be accessed with your browser.  For
+example, if the root of @emph{Kiss} is located at
+@code{/my/home/path/kiss} then you will be able to access the three
 manuals at the following URL's:
 
 @example
 file:///my/home/path/kiss/manual/man/index.html
 
-file:///my/home/path/kiss/build/docs/javadoc/index.html
+file:///my/home/path/kiss/build.work/javadoc/index.html
 
 file:///my/home/path/kiss/manual/jsdoc/index.html
 @end example
 
 @anchor{Setup And Configuration}@section Setup And Configuration
 
-The system is configured by the contents of a single file @code{src/main/application/KissInit.groovy}
-A reboot of the web server is required if any of the parameters in this file are changed.
+The system is configured by the contents of a single file
+@code{src/main/application/KissInit.groovy} A reboot of the web server
+is required if any of the parameters in this file are changed.
 
-Given that Kiss is for business applications, it authenticates its
+Given that @emph{Kiss} is for business applications, it authenticates its
 users.  In order for this to work, there is usually a database of valid
 users.  This information is persisted in an SQL database.  Therefore a
 database is normally required.  However, for testing purposes, if no
@@ -225,187 +248,354 @@ SQLite
 
 Support for other databases is easy to add.
 
-@emph{setMaxWorkerThreads} defines how many REST services may be processed in parallel.  Service requests
-beyond this are placed in a FIFO queue and processed as worker threads become available.  This capability
-drastically improves the system's ability to handle a large number of simultaneous users.
+@emph{setMaxWorkerThreads} defines how many REST services may be
+processed in parallel.  Service requests beyond this are placed in a
+FIFO queue and processed as worker threads become available.  This
+capability drastically improves the system's ability to handle a large
+number of simultaneous users.
 
 The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 
 Create the database (named ``kiss'' above or whatever name you
 configured).  After that, you can run the script file @code{init.sql}
-to create the table and some initial data.
+to create the needed table and some initial data.  You may add any
+application specific tabled needed.
 
 The default username is @emph{kiss}, and the default password is
 @emph{password}
 
 @section Building The System
 
-The system may be built in several way.  It can be build from the
-command line using @emph{Gradle}, or it can be build from within your
-favorite IDE.  Using an IDE has the great advantage of a built-in
-debugger.  This section will outline usage of some of these scenarios.
+Although the system may be built with the included build system
+(called @emph{bld}) @emph{or} your favorite IDE, the @emph{bld}
+system should be used for the initial step which downloads the external
+dependencies (jar files).
 
-@subsection Gradle 
+The build system included with @emph{Kiss} (called @emph{bld}) has
+been tested on Linux, Mac, and Windows.  The system also includes an
+@emph{Ant} build file (named @emph{build.xml}) that is only used for
+IDE integration with the included @emph{bld} system.
 
-@emph{Gradle} is a build system that describes and automates the build process.
-@emph{Kiss} utilizes @emph{Gradle} to automate its build and debug processes.
-Most IDE's are able to utilize the @emph{Gradle} build system.
-@emph{Gradle} may be used as follows:
-(Note, this is not a list of command you should run in order to get the system running.) 
-@xref{Important} and @xref{Quick-start Checklist}.
+The build system included with Kiss is written in Java and located
+under the @emph{builder} directory.  This build system also includes
+two driver batch files / shell scripts used to build and run the build
+system.  All that is needed to use this system is a Java compiler.
+(As a side note - this build system is generic and can be used to
+build other types of projects.)
+
+The build process is run from the command-line.  No IDE is necessary.
+There is no specific IDE integration.  None is needed because the system
+is rarely built.  After the first build, application development is done
+without any build process.
+
+The build system, which comes in source form, must be built before it
+can be used to build @emph{Kiss}.  The build system may be built by
+running one of the the following command from the root of the
+@emph{Kiss} system:
 
 @table @code
-@item ./gradlew javadoc
-JavaDocs end up in the @code{build/docs/javadoc} directory.
-@item ./gradlew war
-The WAR file ends up in the @code{build/libs} directory.  
-This file can be just placed in the webapps directory of tomcat to deploy.
-@item ./gradlew explodedWar
-This builds a set of files that would have been placed in the deployment WAR file.  It is used, when needed,
-to run the entire system from a local directory.  The files are placed in the @code{build/exploded/kiss}
-directory.
-@item ./gradlew clean
-Removes all the generated files.
-@item ./gradlew tomcatRun
-Runs a sample server serving up the application.  The system will be
-available from your local browser at
-@code{http://localhost:8080}.  Use @code{^C} to exit.
-@item ./gradlew tomcatRunDebug
-Runs a sample server serving up the application.  The system will be
-available from your local browser at
-@code{http://localhost:8080}.  Use @code{^C} to exit. Once @emph{Kiss} is running in debug mode,
-you may debug the application by attaching to the running @emph{tomcat} server at port 5005.
+@item Linux, Mac, etc.
+./build-builder
+@item Windows
+build-builder.cmd
 @end table
 
-@subsection IntelliJ
+Once the build system has been built, you can see what operations it
+can perform by typing:
 
-IntelliJ is a good IDE.  It is the only IDE that supports debugging
-@emph{Groovy} as microservices.  The free, community version is adequate for developing
-and debugging with @emph{Kiss}.  IntelliJ should be configured with
-support for @code{Gradle}, @code{tomcat}, and @code{Groovy}.  If using the Community Edition, all of the install defaults are correct. 
+@example
+    ./bld listTasks
+@end example
 
-The following should be done for the Community or Ultimate Editions:
+Those tasks that require prior tasks will evoke the dependent tasks
+automatically.  The system is smart enough not to repeat tasks that
+are unneeded.
+
+The main tasks that will be of interest to you are as follows:
+
+@table @code
+@item libs
+This task is only required if you intend to use your IDE to build the
+remainder of the system.  It installs the required dependencies.
+@item develop
+This will cause the entire system to build (not repeating unnecessary
+steps) and start up a tomcat instance to run the system in a
+development mode.  The system will be available from your local
+browser at @code{http://localhost:8080}.  You may debug the
+application by attaching to the running @emph{tomcat} server at port
+9000.
+@item war
+This will cause the system to generate the single file needed by a
+production system.  It will end up in @emph{build.work/Kiss.war}
+@end table
+
+Other tasks which may be useful are as follows:
+
+@table @code
+@item clean
+This task removes all files built but retains files that were downloaded from
+repositories (although @emph{bld} caches those files anyway.)
+@item realclean
+This removes all built and downloaded files so the system should be everything
+you need to build it without any extraneous files
+@item all
+This performs all of the steps necessary to setup and build the system but
+doesn't start up the tomcat server.
+@item javadoc
+This task creates the javadoc files that end up in @code{build.work/javadoc}
+@end table
+
+@xref{Important} and @xref{Quick-start Checklist}.
+
+@subsection Using an IDE
+
+Most IDE's can be used to develop and debug the application.  There are two
+way to do this as follows:
 
 @enumerate
 @item
-Get a fresh clone of @emph{Kiss}
+Using @emph{bld} to build and run the development environment.
 @item
-When you first enter IntelliJ, select @code{Import Project} and select the root of your @emph{Kiss} clone.
-@item
-Select Import project from external model, then select @emph{Gradle}.
-@item
-Accept all defaults
+Using your IDE to build and run the development environment.
 @end enumerate
 
-In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.  @xref{Front-end Development}
-This section documents the back-end portion.
+Using @emph{bld} to build and run the development environment is the
+easiest to start off with but is somewhat klunky on an ongoing basis.
+Its main advantage is that it is portable and doesn't require a lot of
+IDE configuration.  The back-end development server is configured and
+started by @emph{bld} by simply running @emph{./bld develop} After
+that, the IDE can be used to debug it by @emph{attaching} to port
+9000.
 
-@subsection Community Edition Too
+Using your IDE to run the entire process is a bit tedious to initially
+setup but makes the entire process simpler from that point forward.
+Unfortunately, configuring your IDE is completely different for each
+IDE.  Instructions for setting up the Ultimate (commercial) version of
+IntelliJ and NetBeans are included as follows.  Other IDE's may be
+configured according to the instructions that are typically associated
+with the IDE.
 
-The following is applicable to both the Community Edition and the Ultimate Editions of IntelliJ.
-
-In the upper right hand corner of the IDE there is a tab labeled @emph{Gradle}.  When that tab is expanded you may execute @emph{Gradle} tasks that you select.
-Expand @emph{Tasks} and then @emph{gretty}.  The main task you will be interested in is @emph{tomcatStartDebug}.  That task starts @emph{Kiss}
-in debug mode suitable for debugging the back-end portion of @emph{Kiss}.  Double-clicking on that task builds the system and launched the integrated @emph{tomcat}
-server.  
-
-When the output windows says ``Listening for transport dt_socket at address: 5005'' then select @emph{Run} an then @emph{Attach to process...}.
-A window asking you to select what to attach to will appear.  It will only contain a single item.  Select it. You can then go to the following URL
-on your browser:  @uref{http://localhost:8080}  You can now debug the application.
-
-Note two tabs on the bottom of the IDE labeled @emph{Run} and @emph{Debug}.  These two tabs are very useful during debugging.
-
-
-
-@subsubsection Ultimate Edition
-
-Additionally, the following steps may be used to simplify debugging when using the @emph{Ultimate} (paid) version of @emph{IntelliJ}:
+Also, bear this in mind, the build process used by @emph{bld} and that
+of the IDE are not the same.  Use one or the other.
 
 
+@subsubsection IntelliJ (Ultimate)
+
+Although the Ultimate (commercial) version of IntelliJ costs money, it
+is probably the most powerful, reliable, and best supported IDE.
+@emph{Kiss} works well with it.  On the other hand, like other IDE's,
+IntelliJ can be a bit tedious to configure properly.  The following
+steps can be used to configure IntelliJ.
 
 @enumerate
 @item
-Go to Run / Edit Configurations
+Download dependencies.  Even though IntelliJ will be used to build,
+debug, and maintain the system, the @emph{Kiss} build system
+(@emph{bld}) should initially be used to install the dependencies.
+And even before that, the build system itself must be built.  All this
+can be accomplished with the following commands:
+@enumerate a
 @item
-Click the ``+'' in the upper left corner
+./build-builder
 @item
-Select @emph{Tomcat Server} / @emph{Local}
+./bld libs
+@end enumerate
 @item
-Change the Name to Kiss
+Install tomcat.  You must install a copy of the @emph{tomcat} server.
+You can do this by either installing it in a typical way from the
+Apache Tomcat site, or you can execute the following @emph{bld}
+command to create a local tomcat installation for you:
+@enumerate a
 @item
-Click the Deployment tab
+./bld setupTomcat
+@end enumerate
+If @emph{bld} is used, it will setup tomcat in a directory named
+@emph{tomcat} under the root of the @emph{Kiss} installation.
 @item
-Click the ``+'' in the upper right quadrant of the screen (not the upper left)
+Configure IDE for tomcat.  This can be done from within the IDE by:
+@enumerate a
 @item
-Select @emph{Artifact} and then @emph{Kiss.war} (exploded)
+Go to File / Settings / Build, Execution, Deployment / Application Servers.
 @item
-Set ``Application context:'' to ``/''
+Click the + in the upper middle of the popup, and then select @emph{Tomcat Server}
 @item
-Click "OK"
+The home and base should both be set to the root of the tomcat directory.  This
+will be an absolute rather than a relative path.
+@end enumerate
+@item
+Import the project.  From within the IDE:
+@enumerate a
+@item
+Select @emph{Import Project}
+@item
+Select the root directory of the @emph{Kiss} system.
+@item
+Select @emph{Create project from existing sources}
+@item
+Accept defaults but when you get to the @emph{Source files} page, de-select the 
+@emph{builder} directory.
+@item
+On the libraries page, de-select @emph{commons} and @emph{SimpleWebServer}.
+@item
+Accept the remaining defaults until the project is created.
+@end enumerate
+@item
+Configure artifact.  The artifact is the end files that IntelliJ deploys to tomcat.  
+These are the files that typically end up in a WAR file used by tomcat.  Configuring
+this is done with the following IntelliJ steps:
+@enumerate a
+@item
+Right-click on the top node in the @emph{Projects} pane and select
+@emph{Open Module Settings}.
+@item
+Select @emph{Artifacts}
+@item
+Click the + in the upper middle of the popup and then select @emph{Web
+Application: Exploded} / @emph{From Module} and then select the only module.
+@item
+Check @emph{Include in project build}
+@item
+Expand @emph{Kiss} under @emph{Available Elements} and double-click on @emph{libs}
+@item
+Click @emph{OK}
+@end enumerate
+@item
+Add a run configuration.  From within the IDE:
+@enumerate a
+@item
+Select @emph{Run} / @emph{Edit configurations...}
+@item
+Click the + in the upper left corner of the popup and select @emph{Tomcat Server} / 
+@emph{Local}.
+@item
+Change Name to @emph{Kiss}
+@item
+Verify the @emph{Application server} (use the tomcat we configured for this project).
+The other defaults should be correct.
+@item
+Click the @emph{Deployment} tab
+@item
+Click the + on the right side of the popup and select @emph{Artifact...}
+@item
+Click on the @emph{Startup/Connection} tab
+@item
+Under the @emph{Debug} configuration and then @emph{again} under the
+@emph{Run} configuration, add an environment variable named
+@emph{KISS_ROOT} and set its value to the path of the root of your
+@emph{Kiss} system.
+@end enumerate
 @end enumerate
 
-To run the app in debug mode just click the green bug at the top of the screen.  This will run the front-end and back-end 
-in a debug mode.  Although this is the recommended setup for the back-end portion during development, it is not recommended
-for front-end development.  In order to do front-end and back-end development at the same time, a dual server setup where
-the front-end and back-end are served by different servers is recommended.    @xref{Front-end Development}
+After this configuration is performed, you can use the IDE's native
+build and debug processes for development.  However, @emph{bld} should
+still be used to produce the production WAR file.
 
-@subsection NetBeans
 
-The @emph{Kiss} system works with NetBeans.  The only shortcoming is
-that @emph{Groovy} code can not be debugged.  These instructions are
-for NetBeans 8.2.  These instructions need only be done once.
+@subsubsection NetBeans
 
-When installing NetBeans, be sure to select the following Runtimes:
+NetBeans is currently under significant transition since it joined the Apache
+organization.  NetBeans 11.2 did not work correctly with tomcat, however,
+the nightly build as of February 28, 2020 did.  So, we expect that any version 
+@emph{after} 11.2 should work.  This is how we configured the IDE.  In all cases,
+when not specified otherwise. leave the defaults.
 
-@itemize @bullet
+@enumerate
 @item
-Java EE
+Download dependencies.  Even though NetBeans will be used to build,
+debug, and maintain the system, the @emph{Kiss} build system
+(@emph{bld}) should initially be used to install the dependencies.
+And even before that, the build system itself must be built.  All this
+can be accomplished with the following commands:
+@enumerate a
 @item
-HTML5 / JavaScript
+./build-builder
 @item
-Groovy
+./bld libs
+@end enumerate
 @item
-Apache Tomcat
-@end itemize
+Install tomcat.  You must install a copy of the @emph{tomcat} server.
+You can do this by either installing it in a typical way from the
+Apache Tomcat site, or you can execute the following @emph{bld}
+command to create a local tomcat installation for you:
+@enumerate a
+@item
+./bld setupTomcat
+@end enumerate
+If @emph{bld} is used, it will setup tomcat in a directory named @emph{tomcat} under
+the root of the @emph{Kiss} installation.
+@item
+Configure tomcat.  From within NetBeans, do the following:
+@enumerate a
+@item
+Select @emph{Tools} and then @emph{Servers}
+@item
+Click @emph{Add Server...}, and then select @emph{Apache Tomcat or TomEE}
+@item
+Select the server location.  @emph{Catalina Base} should be blank.
+@item
+Set both the @emph{Username} and @emph{Password} to @emph{admin}, and then click 
+@emph{Finish}
+@end enumerate
+@item
+Import the Project through the IDE as follows:
+@enumerate a
+@item
+Select @emph{File} and then @emph{New Project}
+@item
+Select @emph{Java Web} under @emph{Java with Ant}, and then select
+@emph{Web Application with Existing Sources} on the right, and then
+click @emph{Next}
+@item
+Under @emph{Location} select the root of the @emph{Kiss} system.  The
+remaining defaults on that tab are fine.  Click @emph{Next}.
+@item
+On the @emph{Server and Settings} tab, be sure to select the
+appropriate tomcat server.
+@item
+The following should be set on the @emph{Existing Sources and Libraries} page:
+@enumerate A
+@item
+Set the @emph{Web Pages Folder} by selecting the @code{src/main/webapp}
+directory.
+@item
+Set the @emph{WEB-INF Content} by selecting the @code{src/main/java} directory.
+@item
+Set the @emph{Libraries Folder} by selecting the @code{libs} folder
+under the @emph{Kiss} root.
+@item
+Remove what is in the @emph{Sources Package Folders} section and add the two paths
+@emph{src/main/application} and @emph{src/main/java}, and then click @emph{Finish}.
+@end enumerate
+@end enumerate
+@item
+Set the source folder names by:
+@enumerate a
+@item
+Right-click on the root of the project in the @emph{Projects} pane and
+select @emph{Properties}.
+@item
+On the @emph{Sources} page, you will see two labels in the
+@emph{Source Package Folders} section that we need to change.  Change
+the @emph{application} one to @emph{Application} and the second to @emph{Kiss Core}.
+@item
+Click @emph{OK}
+@end enumerate
+@end enumerate
 
-Go into NetBeans and select @emph{File} and @emph{Open Project}.
-Select the root of the @emph{Kiss} project.  From the @emph{Projects}
-pane, you can right-click on the project root.  You will then see an
-option labeled @emph{Tasks}.  That is where you can execute
-@emph{Gradle} tasks.  To build and debug the application, select
-@emph{tomcat} and then @emph{tomcatRunDebug}.  You will then see a
-message ``Listening for transport dt_socket at address: 5005''.  From
-the top menu, select @emph{Debug} and then @emph{Attach Debugger}.
-The defaults should be correct.  Accept the popup.  You may then go to
-the following URL on your browser: @uref{http://localhost:8080}
-You can now debug the application.
 
-The @emph{Output} tab on the bottom will display helpful information.
+After this configuration is performed, you can use the IDE's native
+build and debug processes for development.  However, @emph{bld} should
+still be used to produce the production WAR file.
 
-
-Although this is the recommended setup for the back-end portion during
-development, it is not recommended for front-end development.  In
-order to do front-end and back-end development at the same time, a
-dual server setup where the front-end and back-end are served by
-different servers is recommended.  @xref{Front-end Development}
-
-
-
-@subsection eclipse, VSCode, and Others
-
-Other IDE's that support @emph{Gradle} should work fine.  In
-particular, @emph{VSCode} and @emph{eclipse} have been tested and are
-known to work.
 
 @section What Do I Do With It Now?
 
 What you have at this point is the beginnings of your new application.
 @emph{Kiss} is provided as a running and deployable system.  It is
-expected that you would modify what's here to suit your application
+expected that you would modify what's there to suit your application
 needs.
 
 Besides this narrative, you would need the JavaDocs located under the
-@code{build/docs/javadoc} directory for API specific documentation.
-(Which you must generate via @emph{Gradle} as described. @xref{javadoc,,Creating JavaDocs}.
+@code{build.work/javadoc} directory for back-end API specific documentation and
+front-end API reference located in the @emph{manual/jsdoc} directory.

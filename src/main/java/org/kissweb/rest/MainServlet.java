@@ -85,16 +85,19 @@ public class MainServlet extends HttpServlet {
     private static void setApplicationPath(HttpServletRequest request) {
         String cpath = request.getServletContext().getRealPath("/");
         System.out.println("* * * Context path = " + cpath);
-        applicationPath = System.getenv("KISS_DEBUG_ROOT");
+        applicationPath = System.getenv("KISS_ROOT");
         if (applicationPath == null || applicationPath.isEmpty()) {
-            if ((new File(cpath + "../../src/main/application/" + "KissInit.groovy")).exists()) {
+            if ((new File(cpath + "../../../src/main/application/" + "KissInit.groovy")).exists()) {
+                applicationPath = cpath + "../../../src/main/application/";
+                underIDE = true;
+            } else if ((new File(cpath + "../../src/main/application/" + "KissInit.groovy")).exists()) {
                 applicationPath = cpath + "../../src/main/application/";
                 underIDE = true;
             } else if ((new File(cpath + "../../../../src/main/application/" + "KissInit.groovy")).exists()) {
                 applicationPath = cpath + "../../../../src/main/application/";
                 underIDE = true;
             } else {
-                applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
+                applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/";
                 underIDE = false;
             }
         } else {

@@ -1,7 +1,23 @@
+build.work
+builder/builder/*.class
+apache-tomcat-*
+tomcat
+libs/c3p0-*.jar
+libs/groovy-all-*.jar
+libs/javax.servlet-api-*.jar
+libs/log4j-*.jar
+libs/mchange-commons-java-*.jar
+libs/mssql-*.jar
+libs/mysql-*.jar
+libs/ojdbc*.jar
+libs/postgresql-*.jar
+libs/slf4j-*.jar
+libs/sqlite-jdbc-*.jar
+
+
 # Gradle
 # ------
 .gradle
-/build
 /buildSrc/build
 /buildSrc/subprojects/*/build
 /subprojects/*/build
@@ -122,3 +138,4 @@ atlassian-ide-plugin.xml
 
 src/main/webapp/lib
 
+/build/

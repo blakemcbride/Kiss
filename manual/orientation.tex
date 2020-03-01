@@ -82,7 +82,9 @@ is loaded.
 
 @section Controlling Browser Cache
 
-The user's browser cache can be controlled from the file @code{src/main/webapp/index.html}  In that file you will see two lines that look as follows:
+The user's browser cache can be controlled from the file
+@code{src/main/webapp/index.html} In that file you will see two lines
+that look as follows:
 
 @example
 var softwareVersion = "1";  // version of the entire system
@@ -99,23 +101,27 @@ occur.
 
 @anchor{javadoc} @section Creating JavaDocs
 
-JavaDocs for the @emph{Kiss} system will need to be created.  It is created from the command line using @emph{Gradle} by issuing the
-following command: 
+JavaDocs for the @emph{Kiss} system will need to be created.  It is
+created from the command line using @emph{Gradle} by issuing the
+following command:
 
 @example
-./gradlew javadoc
+./bld javadoc
 @end example
 
 @noindent
-The JavaDoc files end up in the @code{build/docs/javadoc} directory.
+The JavaDoc files end up in the @code{build.work/javadoc} directory.
 
 
 @section Deploying A Kiss Application
 
 The only file needed to deply the application is @code{Kiss.war} It
-can either be built by your IDE, or at can be build by typing
-@code{./gradlew war} at a command prompt.  In the case of Gradle,
-@code{Kiss.war} ends up in the @code{build/libs} directory.
+can be built by typing @code{./bld war} at a command prompt.
+@code{Kiss.war} ends up in the @code{build.work} directory.  If you
+have your IDE create the @code{Kiss.war} file, it will likely not
+work.  The @emph{Kiss} system requires a special build process because
+application files are distributed in source form.  Therefore, @code{bld}
+should be used to create the production WAR file.
 
 If using @emph{tomcat}, @code{Kiss.war} should be placed in the
 @code{webapps} directory.  When @emph{tomcat} starts, it will see the
@@ -131,6 +137,6 @@ In order to start getting a feel for how @code{Kiss} applications
 function, in terms of the back-end, look at files in the
 @code{src/main/application/services} directory.  With @code{Kiss} you can
 develop applications in several different languages.  The @code{services}
-example shows the same code in all of the suported languages.
+example shows the same code in all of the supported languages.
 
 In terms of the front-end, see the example files under @code{src/main/webapp/page1}

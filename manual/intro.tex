@@ -40,7 +40,7 @@ simplicity and development speed.  By being simple to develop in,
 development and support of the application can occur more rapidly.
 Simplicity is achieved by abstracting away as much common
 functionality as possible so that developer lines of code are
-maximally for the application solution rather than infrastructure and
+maximally applicable to the application solution rather than infrastructure and
 support of the framework.  Throughout the framework, business-normal
 defaults have been employed in order to minimize commonly needed
 functionality.
@@ -121,41 +121,55 @@ Some highlights of the @emph{Kiss} system include:
 @item
 Micro services - add, change, or delete a web service on a running system.
 @item
-Each web-method is in a single file and are very simple.  No configuration files or setup code needed.
+Each web-method is in a single file and are very simple.  No
+configuration files or setup code needed.
 @item
-Easy access to common SQL databases with support for nested queries without cursor interference.
+Easy access to common SQL databases with support for nested queries
+without cursor interference.
 @item
-All REST services are stateless.  However, the system fully authenticates each request.
+All REST services are stateless.  However, the system fully
+authenticates each request.
 @item
-Changes to web services occur immediately, on a running system, without the need to reboot the application.
+Changes to web services occur immediately, on a running system,
+without the need to reboot the application.
 @item
 A growing class library to handle common business application needs.
 @item
-Back-end framework is written in Java, and the system is portable to Linux or Windows servers.
+Back-end framework is written in Java, and the system is portable to
+Linux or Windows servers.
 @item
 Web services may be written in Groovy, Java or Common Lisp.  Python,
 JavaScript, Ruby, and Scala are expected to follow soon.
 @item
 User authentication
 @item
-Asynchronous back-end REST services (via a queue and thread pool) provide support for heavy loads and high throughput.
+Asynchronous back-end REST services (via a queue and thread pool)
+provide support for heavy loads and high throughput.
+@item
+A powerful and convenient class library for dealing with SQL persistence that
+supports PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 @end enumerate
 
 @subsection Front-end Highlights
 
 @enumerate
 @item
-Build your own HTML components thus encapsulating any amount of code into a simple, custom HTML tag.
+Build your own HTML components thus encapsulating any amount of code
+into a simple, custom HTML tag.
 @item
 Browser cache control.  Never ask your users to clear their browser cache again.
 @item
-All code written in JavaScript/HTML/CSS.  No need for a complex build and debug process, nor any need to learn yet another language.
+All code written in JavaScript/HTML/CSS.  No need for a complex build
+and debug process, nor any need to learn yet another language.
 @item
-Growing list of included business oriented components designed to provide simple access to fully functional business components.
+Growing list of included business oriented components designed to
+provide simple access to fully functional business components.
 @item
-Straight forward means of designing your own components without a lot of hidden and unpredictable magic.
+Straight forward means of designing your own components without a lot
+of hidden and unpredictable magic.
 @item
-System is small and concise, rather then hundreds of megabytes other systems take up.
+System is small and concise, rather then hundreds of megabytes other
+systems take up.
 @item
 Consistent and simple API.
 @end enumerate
@@ -290,8 +304,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 @section Acknowledgments
 
-The Kiss design, code, documentation, and web site were written by Blake
-McBride.  The author gratefully acknowledges and appreciates, among others, the following:
+The Kiss design, code, documentation, and web site were written by
+Blake McBride.  The author gratefully acknowledges and appreciates,
+among others, the following:
 
 
 Apache Groovy located at @uref{http://groovy-lang.org}

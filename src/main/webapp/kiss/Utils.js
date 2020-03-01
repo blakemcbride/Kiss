@@ -749,7 +749,6 @@ class Utils {
             });
             let y = 1;
         } catch (err) {
-            let x = 1;
         }
         try {
             let r = await response.text();
@@ -777,7 +776,6 @@ class Utils {
  //       xhr.responseType = 'document';
         xhr.responseType = 'text';
         xhr.send();
-        let x = 1;
     };
     /**
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
@@ -798,7 +796,6 @@ class Utils {
                 $('body').html(text);
             Utils.rescan();  // does all the tag replacement
             getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function () {
-                let x = 1;
             });
         });
     }
