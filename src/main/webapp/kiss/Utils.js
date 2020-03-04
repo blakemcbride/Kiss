@@ -626,7 +626,7 @@ class Utils {
             var val = rpl[prop];
             if (!val && val !== 0)
                 val = '';
-            inp = inp.replace('{' + prop + '}', val);
+            inp = inp.replace(new RegExp('{' + prop + '}', 'g'), val);
         }
         return inp;
     }
