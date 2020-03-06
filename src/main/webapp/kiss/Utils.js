@@ -881,14 +881,12 @@ class Utils {
         let body;
 
         if (!w.hasClass('popup-background')) {
-            w.addClass('popup-background');
-            w.css('z-index', Utils.popup_zindex++);
-
             let width = w.css('width');
             let height = w.css('height');
+            w.addClass('popup-background');
+            w.css('z-index', Utils.popup_zindex++);
             w.css('width', '100%');
             w.css('height', '100%');
-
             w.wrapInner('<div></div>');
             content = w.children();
             content.addClass('popup-content');
