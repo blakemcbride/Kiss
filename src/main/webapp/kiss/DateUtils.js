@@ -231,6 +231,24 @@ class DateUtils {
         return DateUtils.dateToInt(DateUtils.dateAddDays(DateUtils.intToDate(dt), days));
     }
 
+    /**
+     * Return the number of months between two dates.
+     *
+     * @param idt1 {number} Date or integer date YYYYMMDD
+     * @param idt2 {number} Date or integer date YYYYMMDD
+     * @returns {number} number of months between the two dates
+     */
+    static monthsDifference(idt1, idt2) {
+        let dt1 = idt1 instanceof Date ? idt1 : DateUtils.intToDate(idt1);
+        let dt2 = idt2 instanceof Date ? idt2 : DateUtils.intToDate(idt2);
+        let months = (dt2.getFullYear() - dt1.getFullYear()) * 12;
+        months -= dt1.getMonth() + 1;
+        months += dt2.getMonth() + 1;
+        if (dt1.getDate() > dt2.getDate())
+            months--;
+        return months <= 0 ? 0 : months;
+    }
+    
 }
 
 
