@@ -1,5 +1,5 @@
 #
-if [ ! -f builder/builder/Tasks.class ]; then
+if [ builder/builder/Tasks.java -nt builder/builder/Tasks.class ] || [ builder/builder/BuildUtils.java -nt builder/builder/BuildUtils.class ]; then
 	cd builder
 	javac -cp "libs/*" builder/*.java
 	cd ..
