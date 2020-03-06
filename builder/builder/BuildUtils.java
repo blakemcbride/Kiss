@@ -168,19 +168,22 @@ public class BuildUtils {
     }
 
     public static void downloadAll(ForeignDependencies deps) {
-        deps.forEach(dep -> {
-            download(dep.filename, dep.targetPath, dep.source);
-        });
+        deps.forEach(dep -> download(dep.filename, dep.targetPath, dep.source));
     }
 
     public static void delete(ForeignDependencies deps) {
-        deps.forEach(dep -> {
-            rm(dep.targetPath + File.separator + dep.filename);
-        });
+        deps.forEach(dep -> rm(dep.targetPath + File.separator + dep.filename));
     }
 
     public static void println(String str) {
         System.out.println(str == null ? "" : str);
+    }
+
+    private static void mkdir(File d) {
+        if (d.exists()  &&  d.isDirectory())
+            return;
+        if (!d.mkdirs())
+            throw new RuntimeException("error creating directory " + d.getAbsolutePath());
     }
 
     /**
@@ -191,11 +194,7 @@ public class BuildUtils {
     public static void mkdir(String dname) {
         if (dname == null  ||  dname.isEmpty()  ||  dname.equals("."))
             return;
-        File d = new File(dname);
-        if (d.exists()  &&  d.isDirectory())
-            return;
-        if (!d.mkdirs())
-            throw new RuntimeException("error creating directory " + dname);
+        mkdir(new File(dname));
     }
 
     /**
@@ -274,6 +273,7 @@ public class BuildUtils {
     }
 
     public static void copyTree(String source, String dest) {
+        mkdir(dest);
         File sf = new File(source);
         File df = new File(dest);
         if (!sf.exists())
@@ -365,6 +365,7 @@ public class BuildUtils {
     public static void writeToFile(String fname, String txt) {
         File f = new File(fname);
         if (!f.exists()) {
+            mkdir(f.getParentFile());
             try {
                 Files.write(Paths.get(fname), txt.getBytes());
             } catch (IOException e) {
@@ -493,6 +494,7 @@ public class BuildUtils {
     }
 
     public static void buildJava(String srcPath, String destDir, LocalDependencies localLibs, ForeignDependencies foreignLibs) {
+        mkdir(destDir);
         ArrayList<File> allFiles = allSourceFiles(srcPath, ".java");
         ArrayList<File> ood = outOfDateSourceFiles(allFiles, srcPath, destDir, ".java", ".class");
         if (ood != null  &&  !ood.isEmpty()) {
@@ -711,7 +713,7 @@ public class BuildUtils {
         }
 
         public void forEach(DepInt fun) {
-            deps.forEach(dep -> fun.forEach(dep));
+            deps.forEach(fun::forEach);
         }
 
         public boolean isEmpty() {

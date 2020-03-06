@@ -38,19 +38,15 @@ public class Tasks {
     }
 
     void libs() {
-        mkdir(LIBS);
         downloadAll(foreignLibs);
     }
 
     void war() {
         libs();
         copyTree("src/main/webapp", explodedDir);
-        mkdir(explodedDir + "/META-INF");
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
         copyTree("src/main/application", explodedDir + "/WEB-INF");
-        mkdir(explodedDir + "/WEB-INF/lib");
         copyTree("libs", explodedDir + "/WEB-INF/lib");
-        mkdir(explodedDir + "/WEB-INF/classes");
         buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         copyRegex("src/main/java/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp");
