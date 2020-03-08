@@ -15,7 +15,7 @@ class TimeUtils {
     /**
      * Format time.
      *
-     * @param {number} val HHMM
+     * @param  val integer HHMM or Date object
      * @param {boolean} zero_fill
      * @returns {string}
      */
