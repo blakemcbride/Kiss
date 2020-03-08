@@ -61,7 +61,7 @@
 
         newElm.elementInfo.upcase = upcase;
 
-        jqObj.on('change', function () {
+        jqObj.keydown(function () {
             Utils.someControlValueChanged();
         });
 

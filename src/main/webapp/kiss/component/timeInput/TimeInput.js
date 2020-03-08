@@ -68,7 +68,7 @@
         newElm.elementInfo.max = max;
         newElm.elementInfo.zero_fill = zero_fill;
 
-        jqObj.on('change', function () {
+        jqObj.keydown(function () {
             Utils.someControlValueChanged();
         });
 

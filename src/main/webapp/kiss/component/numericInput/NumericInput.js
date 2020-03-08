@@ -84,7 +84,7 @@
         newElm.elementInfo.min = min;
         newElm.elementInfo.max = max;
 
-        jqObj.on('change', function () {
+        jqObj.keydown(function () {
             Utils.someControlValueChanged();
         });
 
