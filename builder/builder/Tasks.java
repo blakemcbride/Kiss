@@ -26,7 +26,7 @@ public class Tasks {
     final String LIBS = "libs";
     final ForeignDependencies foreignLibs = buildForeignDependencies();
     final LocalDependencies localLibs = buildLocalDependencies();
-    final String tomcatTarFile = "apache-tomcat-9.0.31.tar.gz";
+    final String tomcatTarFile = "apache-tomcat-9.0.33.tar.gz";
     final String BUILDDIR = "build.work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
 
@@ -39,6 +39,14 @@ public class Tasks {
 
     void libs() {
         downloadAll(foreignLibs);
+    }
+
+    void jar() {
+        libs();
+        buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
+        rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
+        createJar(explodedDir + "/WEB-INF/classes", BUILDDIR + "/Kiss.jar");
+        //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
     }
 
     void war() {
@@ -60,7 +68,7 @@ public class Tasks {
 
     void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "http://mirrors.advancedhosters.com/apache/tomcat/tomcat-9/v9.0.31/bin");
+            download(tomcatTarFile, ".", "https://apache.cs.utah.edu/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz");  
             gunzip(tomcatTarFile, "tomcat", 1);
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
         }
@@ -162,6 +170,7 @@ public class Tasks {
         final LocalDependencies dep = new LocalDependencies();
         dep.add("libs/abcl.jar");
         dep.add("libs/dynamic-loader-1.4-SNAPSHOT.jar");
+        dep.add("libs/json.jar");
         return dep;
     }
 
