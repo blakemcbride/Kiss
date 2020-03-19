@@ -153,11 +153,11 @@ public class Command implements AutoCloseable {
 
     /**
      * Execute a select statement returning a Cursor that may be used to
-     * obtain each subsequent row.The max number of return records is given by max.
+     * obtain each subsequent row.  The max number of return records is given by max.
      * This is useful when a large number of records
- is possible and fetching all into memory at one time is unneeded.  This can
- save a significant amount of memory since only one record is in memory at a time.
- <br><br>
+     * is possible and fetching all into memory at one time is unneeded.  This can
+     * save a significant amount of memory since only one record is in memory at a time.
+     * <br><br>
      * The SQL string may contain parameters indicated by the '?' character.
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
@@ -238,7 +238,9 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Fetch all (but no more than max) of the records and close the cursor.No records can be updated or deleted.<br><br>
+     * Fetch all (but no more than max) of the records and close the cursor.
+     * No records can be updated or deleted.
+     * <br><br>
      * The SQL string may contain parameters indicated by the '?' character.
      * A variable number of arguments to this method are used to fill those parameters.
      * Each argument gets applied to each '?' parameter in the same order as they appear
