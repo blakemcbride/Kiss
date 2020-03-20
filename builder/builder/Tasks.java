@@ -157,11 +157,12 @@ public class Tasks {
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
         dep.add("mssql-jdbc-8.2.0.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/8.2.0.jre8/mssql-jdbc-8.2.0.jre8.jar");
         dep.add("mysql-connector-java-8.0.19.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.19/mysql-connector-java-8.0.19.jar");
-        dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
+	// dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
         dep.add("postgresql-42.2.10.jar", LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.10/postgresql-42.2.10.jar");
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
         dep.add("sqlite-jdbc-3.30.1.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.30.1/sqlite-jdbc-3.30.1.jar");
+        dep.add("dynamic-loader-2.0.jar", LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/2.0/dynamic-loader-2.0.jar");
         dep.add("jquery-3.4.1.min.js", "src/main/webapp/lib", "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js");
         return dep;
     }
@@ -169,7 +170,6 @@ public class Tasks {
     private LocalDependencies buildLocalDependencies() {
         final LocalDependencies dep = new LocalDependencies();
         dep.add("libs/abcl.jar");
-        dep.add("libs/dynamic-loader-1.4-SNAPSHOT.jar");
         dep.add("libs/json.jar");
         return dep;
     }
