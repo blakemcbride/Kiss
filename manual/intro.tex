@@ -270,15 +270,22 @@ dependencies (those included with @emph{Kiss}):
 @table @code
 @item abcl.jar
 https://common-lisp.net/project/armedbear
-@item dynamic-loader-1.4-SNAPSHOT.jar
-https://github.com/dvare/dynamic-loader
 @item json.jar
 https://github.com/blakemcbride/JSON-java
 @item SimpleWebServer.jar
 https://github.com/blakemcbride/SimpleWebServer
 @end table
 
+@section Oracle Database Support
 
+Although @emph{Kiss} supports the Oracle DBMS out-of-the-box, the
+@emph{Kiss} build system does not automatically load the Oracle JDBC
+JAR files.  This is because Oracle JDBC is not downloadable without a
+login, password, and accepting their license -- all of which must be
+done manually.
+
+Once the Oracle JDBC libraries are manually installed, @emph{Kiss}
+will support the Oracle database as-is.
 
 @section Contact And Links
 

@@ -80,9 +80,10 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-HTML-component-usage" href="#HTML-component-usage">1.2 HTML component usage</a></li>
   <li><a name="toc-System-Maturity-And-Future" href="#System-Maturity-And-Future">1.3 System Maturity And Future</a></li>
   <li><a name="toc-Getting-All-Source-Code" href="#Getting-All-Source-Code">1.4 Getting All Source Code</a></li>
-  <li><a name="toc-Contact-And-Links" href="#Contact-And-Links">1.5 Contact And Links</a></li>
-  <li><a name="toc-License" href="#License">1.6 License</a></li>
-  <li><a name="toc-Acknowledgments" href="#Acknowledgments">1.7 Acknowledgments</a></li>
+  <li><a name="toc-Oracle-Database-Support" href="#Oracle-Database-Support">1.5 Oracle Database Support</a></li>
+  <li><a name="toc-Contact-And-Links" href="#Contact-And-Links">1.6 Contact And Links</a></li>
+  <li><a name="toc-License" href="#License">1.7 License</a></li>
+  <li><a name="toc-Acknowledgments" href="#Acknowledgments">1.8 Acknowledgments</a></li>
 </ul></li>
 <li><a name="toc-System-Setup" href="#System-Setup">2 System Setup</a>
 <ul class="no-bullet">
@@ -386,9 +387,6 @@ dependencies (those included with <em>Kiss</em>):
 <dt><code>abcl.jar</code></dt>
 <dd><p>https://common-lisp.net/project/armedbear
 </p></dd>
-<dt><code>dynamic-loader-1.4-SNAPSHOT.jar</code></dt>
-<dd><p>https://github.com/dvare/dynamic-loader
-</p></dd>
 <dt><code>json.jar</code></dt>
 <dd><p>https://github.com/blakemcbride/JSON-java
 </p></dd>
@@ -397,10 +395,20 @@ dependencies (those included with <em>Kiss</em>):
 </p></dd>
 </dl>
 
+<a name="Oracle-Database-Support"></a>
+<h3 class="section">1.5 Oracle Database Support</h3>
 
-
+<p>Although <em>Kiss</em> supports the Oracle DBMS out-of-the-box, the
+<em>Kiss</em> build system does not automatically load the Oracle JDBC
+JAR files.  This is because Oracle JDBC is not downloadable without a
+login, password, and accepting their license &ndash; all of which must be
+done manually.
+</p>
+<p>Once the Oracle JDBC libraries are manually installed, <em>Kiss</em>
+will support the Oracle database as-is.
+</p>
 <a name="Contact-And-Links"></a>
-<h3 class="section">1.5 Contact And Links</h3>
+<h3 class="section">1.6 Contact And Links</h3>
 
 <p>The <em>Kiss</em> main web site is at <a href="http://kissweb.org">http://kissweb.org</a>
 </p>
@@ -413,7 +421,7 @@ dependencies (those included with <em>Kiss</em>):
 <p>Commercial support is available.  Contact us via email at <a href="mailto:kissweb.org@gmail.com">kissweb.org@gmail.com</a>
 </p>
 <a name="License"></a>
-<h3 class="section">1.6 License</h3>
+<h3 class="section">1.7 License</h3>
 
 <p>Copyright (c) 2018 Blake McBride (blake@mcbride.name)
 </p>
@@ -445,7 +453,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </p>
 <a name="Acknowledgments"></a>
-<h3 class="section">1.7 Acknowledgments</h3>
+<h3 class="section">1.8 Acknowledgments</h3>
 
 <p>The Kiss design, code, documentation, and web site were written by
 Blake McBride.  The author gratefully acknowledges and appreciates,
