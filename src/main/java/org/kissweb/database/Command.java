@@ -199,7 +199,7 @@ public class Command implements AutoCloseable {
      * <br><br>
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
-     * @return
+     * @return the Record or null if none
      * @throws SQLException
      *
      * @see #fetchAll(String, Object...)

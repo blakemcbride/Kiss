@@ -132,8 +132,8 @@ public class Cursor implements AutoCloseable {
                 ocols.put(name, val);
             }
             return lastRec = new Record(cmd.conn, this, ocols, cols);
-        } else
-            close();
+        }
+        close();
         return lastRec = null;
     }
 
@@ -141,7 +141,7 @@ public class Cursor implements AutoCloseable {
      * Read in a single record and close the read cursor (no more records can be read).
      * The record read can be updated or deleted.
      *
-     * @return
+     * @return the Record or null if none
      * @throws SQLException
      */
     public Record fetchOne() throws SQLException {
