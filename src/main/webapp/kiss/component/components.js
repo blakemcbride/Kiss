@@ -133,7 +133,7 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    default-option="label"     </td><td>     what is shown before the user makes a selection.  This would often be something like "(choose)"               </td></tr>
-     *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
+     *     <tr><td>    required     </td><td>     a selection is required               </td></tr>
      * </table>
      * <br>
      * <strong>Content</strong>
@@ -176,7 +176,7 @@ class components {
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    default-option="label"     </td><td>     what is the default selection     </td></tr>
      *     <tr><td>    multiple     </td><td>     multiple entries may be selected (an array will be returned)               </td></tr>
-     *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
+     *     <tr><td>    required     </td><td>     a selection is required               </td></tr>
      *     <tr><td>    size="20"     </td><td>    the <em>minimum</em> number of visible lines (will expand to fill the area it is in) </td></tr>
      * </table>
      * <br>
@@ -308,7 +308,7 @@ class components {
      *     <tr><td>    group="name"     </td><td>     the name of the group this radio button is a part of (the same for each radio button in a group)              </td></tr>
      *     <tr><td>    label-style="style"     </td><td>    style used for the label portion of the radio button          </td></tr>
      *     <tr><td>    name="name"     </td><td>     this is an alternate to the <code>group</code> attribute for HTML consistency               </td></tr>
-     *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
+     *     <tr><td>    required     </td><td>     a selection is required               </td></tr>
      *     <tr><td>    value="name"     </td><td>     required unique value associate with each radio button (different for each radio button)               </td></tr>
      * </table>
      * <br>
