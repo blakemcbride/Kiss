@@ -13,6 +13,9 @@ import java.io.IOException;
  */
 public class FileUtils {
 
+    private final static String TempDir = "temp";
+    private final static int DaysOld = 1;
+
     /**
      * Create a new file in a server accessible temp directory.  The file returned is guaranteed
      * to be new.  The name of the file uses the supplied prefix and suffix but with a random
@@ -26,8 +29,8 @@ public class FileUtils {
      */
     public static File createTempFile(final String prefix, final String suffix)
     {
-        deleteOldFiles(1);
-        File dir = new File(MainServlet.getApplicationPath(), "temp");
+        deleteOldFiles(DaysOld);
+        File dir = new File(MainServlet.getApplicationPath(), TempDir);
         dir.mkdir();
         final File f;
         try {
@@ -45,7 +48,7 @@ public class FileUtils {
 
             nDaysAgo -= daysOld * (24L * 60L * 60L * 1000L);
 
-            final File[] fyles = new File(MainServlet.getApplicationPath(), "temp").listFiles();
+            final File[] fyles = new File(MainServlet.getApplicationPath(), TempDir).listFiles();
 
             if (fyles != null)
                 for (final File element : fyles)
@@ -53,6 +56,25 @@ public class FileUtils {
                         element.delete();
         } catch (Exception e) {
         }
+    }
+
+    /**
+     * Takes a previously obtained File and returns what path the front-end should use to access the file.
+     */
+    public static String getHTTPPath(File f) {
+        String name1 = f.getName();
+        f = f.getParentFile();
+        if (f == null)
+            return name1;
+        String name2 = f.getName();
+        return name2 + "/" + name1;
+    }
+
+    /**
+     * Takes a path to a file and returns what path the front-end should use to access the file.
+     */
+    public static String getHTTPPath(String fn) {
+        return getHTTPPath(new File(fn));
     }
 
 }

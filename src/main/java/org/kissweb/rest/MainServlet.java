@@ -82,6 +82,16 @@ public class MainServlet extends HttpServlet {
         return applicationPath;
     }
 
+    /**
+     * Set the application path when it is determined outside of Kiss.
+     * This is needed when an application is using the Kiss library but not its REST server.
+     *
+     * @param path
+     */
+    public static void setApplicationPath(String path) {
+        applicationPath = path;
+    }
+
     private static void setApplicationPath(HttpServletRequest request) {
         String cpath = request.getServletContext().getRealPath("/");
         System.out.println("* * * Context path = " + cpath);

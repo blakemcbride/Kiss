@@ -17,10 +17,12 @@ public class Groff {
     private final String pdfname;
     private final String mmfname;
     private final boolean landscape;
+    private String title;
+    private boolean once = true;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
-     * that are auto-cleaned and in a place that can be servied to the front-end.
+     * that are auto-cleaned and in a place that can be served to the front-end.
      * On the front-end side, see JavaScript Utils.showReport()
      *
      * @param fnamePrefix file name prefix
@@ -34,7 +36,7 @@ public class Groff {
         this.pdfname = fyle.getAbsolutePath();
         mmfname = pdfname.replaceAll("\\.pdf$", ".mm");
         pw = new PrintWriter(new BufferedWriter(new FileWriter(mmfname)));
-        writeHeader(title);
+        this.title = title;
     }
 
     private void writeHeader(String title) {
@@ -42,7 +44,7 @@ public class Groff {
         pw.println(".PF \"''Page \\\\\\\\nP''\"");
 
         pw.println(".de TP");
-        pw.println("'SP .7i");
+        pw.println("'SP .5i");
         pw.println("'tl '''Run date: " + DateTime.currentDateTimeFormatted());
         pw.println("'tl ''\\s(14" + title + "\\s0''");
         pw.println("'SP");
@@ -58,19 +60,27 @@ public class Groff {
      * @param str
      */
     public void out(String str) {
+        if (once) {
+            writeHeader(title);
+            once = false;
+        }
         pw.println(str);
     }
 
     /**
      * Process the groff/tbl/mm input, produce the PDF output file, and return the path to the PDF file.
      *
+     * @param sideMargin size of the margin on the left side of the page in inches
      * @return
      * @throws IOException
      * @throws InterruptedException
      */
-    public String process() throws IOException, InterruptedException {
-        int sideMargin = 1;
+    public String process(float sideMargin) throws IOException, InterruptedException {
         ProcessBuilder builder;
+        if (once) {
+            writeHeader(title);
+            once = false;
+        }
         pw.flush();
         pw.close();
         if (landscape)
@@ -81,7 +91,18 @@ public class Groff {
         Process p = builder.start();
         p.waitFor();
         (new File(mmfname)).delete();
-        return "/temp/" + (new File(pdfname)).getName();
+        return FileUtils.getHTTPPath(pdfname);
     }
 
+    /**
+     * Process the groff/tbl/mm input, produce the PDF output file, and return the path to the PDF file.
+     * Defaults to a 1 inch side margin.
+     *
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public String process() throws IOException, InterruptedException {
+        return process(1f);
+    }
 }
