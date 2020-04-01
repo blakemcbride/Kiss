@@ -10,6 +10,6 @@ site for a more detailed description at
 Home for the code is at:  [https://github.com/blakemcbride/Kiss](https://github.com/blakemcbride/Kiss)
 
 For build and usage instructions see the manual at `manual/man/index.html`
-Or, the user manual can be read online at [http://htmlpreview.github.io/?https://github.com/blakemcbride/Kiss/blob/master/manual/man/index.html](http://htmlpreview.github.io/?https://github.com/blakemcbride/Kiss/blob/master/manual/man/index.html)
+Or, the user manual can be read online at [Kiss Online User Manual](http://htmlpreview.github.io/?https://github.com/blakemcbride/Kiss/blob/master/manual/man/index.html)
 
 
