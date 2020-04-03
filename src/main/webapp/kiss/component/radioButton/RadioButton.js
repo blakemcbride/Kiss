@@ -20,6 +20,8 @@ Kiss.RadioButtons.groups = {};
         let required = false;
         let label_style = 'margin-left: 4px;';
         let align_vertical;
+        let checked = false;
+        let value;
         if (attr.style)
             div_style = attr.style;
         else
@@ -50,6 +52,14 @@ Kiss.RadioButtons.groups = {};
                 case 'align-vertical':
                     align_vertical = true;
                     break;
+                case 'checked':
+                    checked = true;
+                    nAttrs += ' checked';
+                    break;
+                case 'value':
+                    value = attr[prop];
+                    nAttrs += ' ' + prop + '="' + value + '"';
+                    break;
 
                 // pre-existing attributes
 
@@ -68,7 +78,8 @@ Kiss.RadioButtons.groups = {};
             Kiss.RadioButtons.groups[group] = {};
             Kiss.RadioButtons.groups[group].required = false;
         }
-
+        if (checked)
+            Kiss.RadioButtons.groups[group].default_value = value;
         if (required)
             Kiss.RadioButtons.groups[group].required = true;
 
@@ -154,7 +165,10 @@ Kiss.RadioButtons.setValue = function (group, val) {
 
 Kiss.RadioButtons.clear = function (group) {
     let jqObj = $('input[type=radio][name=' + group + ']');
-    jqObj.attr('checked', false);
+    if (Kiss.RadioButtons.groups[group].default_value !== undefined)
+        Kiss.RadioButtons.setValue(group, Kiss.RadioButtons.groups[group].default_value);
+    else
+        jqObj.attr('checked', false);
 };
 
 //--
