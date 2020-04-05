@@ -53,7 +53,7 @@ public class Tasks {
         libs();
         copyTree("src/main/webapp", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
-        copyTree("src/main/application", explodedDir + "/WEB-INF");
+        copyTree("src/main/application", explodedDir + "/WEB-INF/application");
         copyTree("libs", explodedDir + "/WEB-INF/lib");
         buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
