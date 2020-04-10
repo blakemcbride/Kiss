@@ -37,6 +37,18 @@ public class Tasks {
         javadoc();
     }
 
+    void kisscmd() {
+        final String targetPath = BUILDDIR + "/cmdline";
+        final String manifest = targetPath + "/META-INF/MANIFEST.MF";
+        final String jarFile = BUILDDIR + "/kisscmd.jar";
+        libs();
+        unJarAllLibs(targetPath, localLibs, foreignLibs);
+        buildJava("src/main/java", targetPath, localLibs, foreignLibs);
+        rmTree(targetPath + "/META-INF");
+        createManifest(manifest, "org.kissweb.Main");
+        createJar(targetPath, jarFile);
+    }
+
     void libs() {
         downloadAll(foreignLibs);
     }

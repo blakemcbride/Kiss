@@ -27,10 +27,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -367,11 +364,19 @@ public class BuildUtils {
         if (!f.exists()) {
             mkdir(f.getParentFile());
             try {
-                Files.write(Paths.get(fname), txt.getBytes());
+                Files.write(Paths.get(fname), txt.getBytes(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             } catch (IOException e) {
                throw new RuntimeException("error creating/writing " + fname);
             }
         }
+    }
+
+    public static void createManifest(String manifest, String mainClass) {
+        writeToFile(manifest, "Manifest-Version: 1.0\n" +
+                "Main-Class: " + mainClass + "\n");
+        String fname = mainClass.replaceAll("\\.", "/") + ".class";
+        File mc = new File((new File(manifest)).getParentFile().getParentFile(), fname);
+        touch(manifest, mc.lastModified());
     }
 
     public static void makeExecutable(String file) {
@@ -530,18 +535,21 @@ public class BuildUtils {
      * @param showOutput true if output should be shown
      * @param cmd
      */
-    public static void run(boolean showOutput, String cmd) {
+    public static void run(boolean showOutput, String startDir, String cmd) {
         println(cmd);
         try {
             Process proc;
             String[] mscmd = new String[3];
+            File sdir = null;
+            if (startDir != null)
+                sdir = new File(startDir);
             if (isWindows) {
                 mscmd[0] = "cmd.exe";
                 mscmd[1] = "/C";
                 mscmd[2] = cmd;
-                proc = Runtime.getRuntime().exec(mscmd);
+                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
             } else
-                proc = Runtime.getRuntime().exec(cmd);
+                proc = Runtime.getRuntime().exec(cmd, null, sdir);
             if (showOutput) {
                 (new StreamGobbler(proc.getErrorStream(), "ERROR")).start();
                 (new StreamGobbler(proc.getInputStream(), "OUTPUT")).start();
@@ -551,6 +559,10 @@ public class BuildUtils {
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("error executing " + cmd);
         }
+    }
+
+    public static void run(boolean showOutput, String cmd) {
+        run(showOutput, null, cmd);
     }
 
     private static long getLatestFileDate(File f, long dt) {
@@ -581,8 +593,60 @@ public class BuildUtils {
             if (latestFileTime <= jf.lastModified())
                 return;
         }
-        String cmd = "jar cf " + jarFile + " -C " + rootDir + " .";
+        String manifest = rootDir + "/META-INF/MANIFEST.MF";
+        String cmd;
+        if ((new File(manifest)).exists())
+            cmd = "jar cmf " + manifest + " " + jarFile + " -C " + rootDir + " .";
+        else
+            cmd = "jar cf " + jarFile + " -C " + rootDir + " .";
         run(false, cmd);
+    }
+
+    /**
+     * Unpack a JAR file.
+     *
+     * A tag file is also created in order to track the date of the unjar vs. the date of the jar file.
+     *
+     * @param rootDir where to unjar the files
+     * @param jarFile the jar file
+     */
+    public static void unJar(String rootDir, String jarFile) {
+        final String tagDir = ".tags";
+        File jarf = new File(jarFile);
+        File tagf = new File(new File(rootDir, tagDir), jarf.getName() + ".tag");
+        if (tagf.exists() && tagf.lastModified() >= jarf.lastModified())
+            return;
+        (new File(rootDir, tagDir)).mkdirs();
+        String cmd = "jar xf " + jarf.getAbsolutePath();
+        run(false, rootDir, cmd);
+        touch(tagf.getAbsolutePath());
+    }
+
+    public static void touch(String fname, long millisecs) {
+        File f = new File(fname);
+        if (!f.exists()) {
+            f.getParentFile().mkdirs();
+            try {
+                new FileOutputStream(f).close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        f.setLastModified(millisecs);
+    }
+
+    public static void touch(String fname) {
+        touch(fname, System.currentTimeMillis());
+    }
+
+    public static void unJarAllLibs(final String rootDir, LocalDependencies ld, ForeignDependencies fd) {
+        if (ld != null)
+            ld.forEach(dep -> unJar(rootDir, dep));
+        if (fd != null)
+            fd.forEach(dep -> {
+                if (dep.filename.endsWith(".jar"))
+                    unJar(rootDir, dep.targetPath + "/" + dep.filename);
+            });
     }
 
     public static void javac(LocalDependencies ldep, ForeignDependencies fdep, String sourcePath, String destPath, String filelist) {
