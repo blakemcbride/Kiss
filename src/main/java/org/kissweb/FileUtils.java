@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class FileUtils {
 
-    private final static String TempDir = "temp";
+    private final static String TempDir = "temporary";
     private final static int DaysOld = 1;
 
     /**
