@@ -49,9 +49,9 @@
         });
 
         newElm.onclick = function (fun) {
-            // the unbind is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
+            // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
             // but it also limits to a single callback function
-            jqObj.unbind('click').click(fun);
+            jqObj.off('click').click(fun);
             return this;
         };
 

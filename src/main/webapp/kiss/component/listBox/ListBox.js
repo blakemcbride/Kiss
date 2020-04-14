@@ -197,7 +197,8 @@
         };
 
         newElm.onChange = function (func) {
-            jqObj.on('change', function () {
+            jqObj.off('change').on('change', function () {
+                Utils.someControlValueChanged();
                 // func gets passed the selected value, label
                 func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
             });
@@ -207,7 +208,7 @@
         var timeout;
 
         newElm.onClick = function (fun) {
-            jqObj.click(function () {
+            jqObj.off('click').click(function () {
                 if (jqObj.val()) {
                     timeout = setTimeout(function () {
                         if (timeout)
@@ -219,7 +220,7 @@
         };
 
         newElm.onDblClick = function (fun) {
-            jqObj.dblclick(function () {
+            jqObj.off('dblclick').dblclick(function () {
                 if (jqObj.val()) {
                     if (timeout) {
                         clearTimeout(timeout);

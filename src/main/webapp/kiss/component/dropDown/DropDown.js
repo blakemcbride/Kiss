@@ -161,7 +161,8 @@
         };
 
         newElm.onChange = function (func) {
-            jqObj.on('change', function () {
+            jqObj.off('change').on('change', function () {
+                Utils.someControlValueChanged();
                 // func gets passed the selected value, label
                 func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
             });

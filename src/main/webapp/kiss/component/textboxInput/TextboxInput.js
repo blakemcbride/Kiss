@@ -150,12 +150,12 @@
         };
 
         newElm.onKeyDown = function (fun) {
-            jqObj.unbind('keydown').keydown(fun);
+            jqObj.off('keydown').keydown(fun);
             return this;
         };
 
         newElm.onChange = function (fun) {
-            jqObj.unbind('change').change(fun);
+            jqObj.off('change').change(fun);
             return this;
         };
 

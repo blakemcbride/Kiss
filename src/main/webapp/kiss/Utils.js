@@ -138,10 +138,10 @@ class Utils {
             if (afterFun)
                 afterFun();
         };
-        span.unbind('click').click(function () {
+        span.off('click').click(function () {
             endfun();
         });
-        $('#message-ok').unbind('click').click(function () {
+        $('#message-ok').off('click').click(function () {
             endfun();
         });
     }
@@ -181,17 +181,17 @@ class Utils {
         var modal = $('#yesno-modal');
         var span = $('#yesno-close-btn');
         modal.show();
-        span.unbind('click').click(function () {
+        span.off('click').click(function () {
             modal.hide();
             if (noFun)
                 noFun();
         });
-        $('#yesno-yes').unbind('click').click(function () {
+        $('#yesno-yes').off('click').click(function () {
             modal.hide();
             if (yesFun)
                 yesFun();
         });
-        $('#yesno-no').unbind('click').click(function () {
+        $('#yesno-no').off('click').click(function () {
             modal.hide();
             if (noFun)
                 noFun();

@@ -151,7 +151,8 @@
         };
 
         newElm.onChange = function (func) {
-            jqObj.on('change', function () {
+            jqObj.off('change').on('change', function () {
+                Utils.someControlValueChanged();
                 func(jqObj.val());
             });
             return this;

@@ -28,7 +28,7 @@
                     break;
                 case 'for':
                     hasFor = true;
-                    // no break
+                // no break
                 default:
                     nattrs += ' ' + prop + '="' + attr[prop] + '"';
                     break;
@@ -69,9 +69,9 @@
         };
 
         newElm.onclick = function (fun) {
-            // the unbind is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
+            // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
             // but it also limits to a single callback function
-            jqObj.unbind('click').click(fun);
+            jqObj.off('click').click(fun);
             return this;
         };
 
@@ -92,7 +92,7 @@
         newElm.isVisible = function () {
             return jqObj.is(':visible');
         };
-        
+
         newElm.setColor = function (color) {
             jqObj.css('color', color);
             return this;
