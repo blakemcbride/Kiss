@@ -115,7 +115,7 @@ public class Tasks {
             run(true, "tomcat\\bin\\debug.cmd");
         else
             run(true, "tomcat/bin/debug");
-	println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out");
+        println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out");
         println("You can browse to http://localhost:8080/Kiss");
         println("The app can also be debugged at port 9000");
         println("hit any key to stop tomcat");
@@ -133,14 +133,18 @@ public class Tasks {
 
     void clean() {
         rmTree(BUILDDIR);
+        rm("manual/Kiss.log");
+        rm("manual/Kiss.aux");
+        rm("manual/Kiss.toc");
     }
 
     void realclean() {
         clean();
-	rmTree("src/main/webapp/lib");
+        rmTree("src/main/webapp/lib");
         delete(foreignLibs);
         rmTree("tomcat");
         rm(tomcatTarFile);
+        rm("manual/Kiss.pdf");
 
         rmRegex("builder/builder", ".*\\.class");
 
@@ -148,10 +152,10 @@ public class Tasks {
         rmTree(".settings");
         rmTree(".vscode");
 
-	// intelliJ
+        // intelliJ
         rmTree(".idea");
         rmTree("out");
-	rmRegex(".", ".*\\.iml");
+        rmRegex(".", ".*\\.iml");
 	
         // NetBeans
         rmTree("dist");
@@ -169,7 +173,7 @@ public class Tasks {
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
         dep.add("mssql-jdbc-8.2.0.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/8.2.0.jre8/mssql-jdbc-8.2.0.jre8.jar");
         dep.add("mysql-connector-java-8.0.19.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.19/mysql-connector-java-8.0.19.jar");
-	// dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
+	//  dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
         dep.add("postgresql-42.2.10.jar", LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.10/postgresql-42.2.10.jar");
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
