@@ -156,6 +156,7 @@ public class Tasks {
         rmTree(".idea");
         rmTree("out");
         rmRegex(".", ".*\\.iml");
+        rmRegex("src", ".*\\.iml");
 	
         // NetBeans
         rmTree("dist");
