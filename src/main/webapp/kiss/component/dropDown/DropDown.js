@@ -79,11 +79,14 @@
             return this;
         };
 
-        newElm.addItems = function (items, valField, labelField) {
+        newElm.addItems = function (items, valField, labelField, dataField) {
             items = Utils.assureArray(items);
             const len = items.length;
-            for (let i=0 ; i < len ; i++)
+            for (let i=0 ; i < len ; i++) {
                 jqObj.append($('<option></option>').attr('value', items[i][valField]).text(items[i][labelField]));
+                if (dataField)
+                    dataStore[items[i][valField]] = items[i][dataField];
+            }
             originalValue = jqObj.val();
             return this;
         };
