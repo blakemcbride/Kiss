@@ -26,7 +26,7 @@ public class Tasks {
     final String LIBS = "libs";
     final ForeignDependencies foreignLibs = buildForeignDependencies();
     final LocalDependencies localLibs = buildLocalDependencies();
-    final String tomcatTarFile = "apache-tomcat-9.0.33.tar.gz";
+    final String tomcatTarFile = "apache-tomcat-9.0.34.tar.gz";
     final String BUILDDIR = "build.work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
 
@@ -80,7 +80,7 @@ public class Tasks {
 
     void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "https://apache.cs.utah.edu/tomcat/tomcat-9/v9.0.33/bin/apache-tomcat-9.0.33.tar.gz");  
+            download(tomcatTarFile, ".", "https://apache.cs.utah.edu/tomcat/tomcat-9/v9.0.34/bin/apache-tomcat-9.0.34.tar.gz");  
             gunzip(tomcatTarFile, "tomcat", 1);
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
         }
