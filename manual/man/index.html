@@ -88,21 +88,22 @@ ul.no-bullet {list-style: none}
 <li><a name="toc-System-Setup" href="#System-Setup">2 System Setup</a>
 <ul class="no-bullet">
   <li><a name="toc-Important-1" href="#Important-1">2.1 Important</a></li>
-  <li><a name="toc-Quick_002dstart-Checklist-1" href="#Quick_002dstart-Checklist-1">2.2 Quick-start Checklist</a></li>
-  <li><a name="toc-Runtime-Environments" href="#Runtime-Environments">2.3 Runtime Environments</a></li>
-  <li><a name="toc-Pre_002drequisites-1" href="#Pre_002drequisites-1">2.4 Pre-requisites</a></li>
-  <li><a name="toc-Download-Kiss-1" href="#Download-Kiss-1">2.5 Download Kiss</a></li>
-  <li><a name="toc-Documentation" href="#Documentation">2.6 Documentation</a></li>
-  <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.7 Setup And Configuration</a></li>
-  <li><a name="toc-Building-The-System" href="#Building-The-System">2.8 Building The System</a>
+  <li><a name="toc-Super_002dQuick_002dStart" href="#Super_002dQuick_002dStart">2.2 Super-Quick-Start</a></li>
+  <li><a name="toc-Quick_002dStart-Checklist-1" href="#Quick_002dStart-Checklist-1">2.3 Quick-Start Checklist</a></li>
+  <li><a name="toc-Runtime-Environments" href="#Runtime-Environments">2.4 Runtime Environments</a></li>
+  <li><a name="toc-Pre_002drequisites-1" href="#Pre_002drequisites-1">2.5 Pre-requisites</a></li>
+  <li><a name="toc-Download-Kiss-1" href="#Download-Kiss-1">2.6 Download Kiss</a></li>
+  <li><a name="toc-Documentation" href="#Documentation">2.7 Documentation</a></li>
+  <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.8 Setup And Configuration</a></li>
+  <li><a name="toc-Building-The-System" href="#Building-The-System">2.9 Building The System</a>
   <ul class="no-bullet">
-    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.8.1 Using an IDE</a>
+    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.9.1 Using an IDE</a>
     <ul class="no-bullet">
-      <li><a name="toc-IntelliJ-_0028Ultimate_0029" href="#IntelliJ-_0028Ultimate_0029">2.8.1.1 IntelliJ (Ultimate)</a></li>
-      <li><a name="toc-NetBeans" href="#NetBeans">2.8.1.2 NetBeans</a></li>
+      <li><a name="toc-IntelliJ-_0028Ultimate_0029" href="#IntelliJ-_0028Ultimate_0029">2.9.1.1 IntelliJ (Ultimate)</a></li>
+      <li><a name="toc-NetBeans" href="#NetBeans">2.9.1.2 NetBeans</a></li>
     </ul></li>
   </ul></li>
-  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.9 What Do I Do With It Now?</a></li>
+  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.10 What Do I Do With It Now?</a></li>
 </ul></li>
 <li><a name="toc-Orientation" href="#Orientation">3 Orientation</a>
 <ul class="no-bullet">
@@ -509,10 +510,53 @@ systems and &ldquo;<em>bld.cmd</em>&rdquo; under Windows.  In this manual,
 required under Linux and Mac but not under Windows.  When running on
 Windows, use &ldquo;bld.cmd&rdquo; rather than &ldquo;./bld&rdquo;.
 </p>
+<a name="Super_002dQuick_002dStart"></a>
+<h3 class="section">2.2 Super-Quick-Start</h3>
 
-<a name="Quick_002dstart-Checklist"></a><a name="Quick_002dstart-Checklist-1"></a>
-<h3 class="section">2.2 Quick-start Checklist</h3>
+<p>This is the simplest and shortest path to a running system.  It assumes:
+</p>
+<ol>
+<li> you have a JDK installed
+</li><li> you have an Internet connection
+</li></ol>
 
+<p>After doing a <code>git clone</code> all that is needed is the following,
+single command:
+</p>
+<div class="example">
+<pre class="example">    ./bld  develop
+</pre></div>
+
+<p>This will build the system, install tomcat, deploy the app, and run
+the server.  At this point you will be able to go your browser at the
+following URL:
+</p>
+<div class="example">
+<pre class="example">    http://localhost:8080/Kiss
+</pre></div>
+
+<p>(Note that the &ldquo;K&rdquo; in the URL above is uppercase.)
+</p>
+<p>At this point, you can do all development without any build
+procedures.  You can add or change anything on the front-end or
+back-end while the system is running.
+</p>
+<p>All application back-end code is located under the <code>src/main/application</code>
+directory.
+</p>
+<p>All application front-end code is located under the <code>src/main/webapp</code>
+directory.
+</p>
+<p>If you change anything in either place, the system will notice the change 
+and deliver it with the next request.
+</p>
+
+<a name="Quick_002dStart-Checklist"></a><a name="Quick_002dStart-Checklist-1"></a>
+<h3 class="section">2.3 Quick-Start Checklist</h3>
+
+<p>This is a more detailed and expanded description of the same
+super-quick-start.
+</p>
 <p>The following enumerates the steps necessary to get the system up and running:
 </p>
 <ol>
@@ -532,7 +576,7 @@ process entirely through it.
 by hitting any key.
 </p>
 <a name="Runtime-Environments"></a>
-<h3 class="section">2.3 Runtime Environments</h3>
+<h3 class="section">2.4 Runtime Environments</h3>
 
 <p>As shipped, there are two different environments that <em>Kiss</em> may
 run in as follows:
@@ -572,7 +616,7 @@ front-end is done through the browser debugger.  There is no setup,
 and the front-end server runs by executing a single command.
 </p>
 <a name="Pre_002drequisites"></a><a name="Pre_002drequisites-1"></a>
-<h3 class="section">2.4 Pre-requisites</h3>
+<h3 class="section">2.5 Pre-requisites</h3>
 
 <p>You should download and install the following pre-requisites.
 </p>
@@ -600,7 +644,7 @@ configuration.
 <p>Install the above according to their instructions.
 </p>
 <a name="Download-Kiss"></a><a name="Download-Kiss-1"></a>
-<h3 class="section">2.5 Download Kiss</h3>
+<h3 class="section">2.6 Download Kiss</h3>
 
 <p>Kiss is located at <a href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
 </p>
@@ -609,7 +653,7 @@ configuration.
 <p><code>git clone https://github.com/blakemcbride/Kiss.git</code>
 </p>
 <a name="Documentation"></a>
-<h3 class="section">2.6 Documentation</h3>
+<h3 class="section">2.7 Documentation</h3>
 
 <p>The <em>Kiss</em> documentation consists of three parts; this manual,
 the detailed back-end API documentation contained in the JavaDocs, and
@@ -647,7 +691,7 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 </pre></div>
 
 <a name="Setup-And-Configuration"></a><a name="Setup-And-Configuration-1"></a>
-<h3 class="section">2.7 Setup And Configuration</h3>
+<h3 class="section">2.8 Setup And Configuration</h3>
 
 <p>The system is configured by the contents of a single file
 <code>src/main/application/KissInit.groovy</code> A reboot of the web server
@@ -700,7 +744,7 @@ application specific tabled needed.
 <em>password</em>
 </p>
 <a name="Building-The-System"></a>
-<h3 class="section">2.8 Building The System</h3>
+<h3 class="section">2.9 Building The System</h3>
 
 <p>Although the system may be built with the included build system
 (called <em>bld</em>) <em>or</em> your favorite IDE, the <em>bld</em>
@@ -795,10 +839,10 @@ JAR cannot be used in any web environment.  See <code>src/main/java/org/kissweb/
 </p></dd>
 </dl>
 
-<p>See <a href="#Important">Important</a> and See <a href="#Quick_002dstart-Checklist">Quick-start Checklist</a>.
+<p>See <a href="#Important">Important</a> and See <a href="#Quick_002dStart-Checklist">Quick-Start Checklist</a>.
 </p>
 <a name="Using-an-IDE"></a>
-<h4 class="subsection">2.8.1 Using an IDE</h4>
+<h4 class="subsection">2.9.1 Using an IDE</h4>
 
 <p>Most IDE&rsquo;s can be used to develop and debug the application.  There are two
 way to do this as follows:
@@ -829,7 +873,7 @@ of the IDE are not the same.  Use one or the other.
 </p>
 
 <a name="IntelliJ-_0028Ultimate_0029"></a>
-<h4 class="subsubsection">2.8.1.1 IntelliJ (Ultimate)</h4>
+<h4 class="subsubsection">2.9.1.1 IntelliJ (Ultimate)</h4>
 
 <p>Although the Ultimate (commercial) version of IntelliJ costs money, it
 is probably the most powerful, reliable, and best supported IDE.
@@ -910,7 +954,7 @@ still be used to produce the production WAR file.
 </p>
 
 <a name="NetBeans"></a>
-<h4 class="subsubsection">2.8.1.2 NetBeans</h4>
+<h4 class="subsubsection">2.9.1.2 NetBeans</h4>
 
 <p>NetBeans is currently under significant transition since it joined the Apache
 organization.  NetBeans 11.2 did not work correctly with tomcat, however,
@@ -984,7 +1028,7 @@ still be used to produce the production WAR file.
 </p>
 
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
-<h3 class="section">2.9 What Do I Do With It Now?</h3>
+<h3 class="section">2.10 What Do I Do With It Now?</h3>
 
 <p>What you have at this point is the beginnings of your new application.
 <em>Kiss</em> is provided as a running and deployable system.  It is

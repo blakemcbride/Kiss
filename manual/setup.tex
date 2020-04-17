@@ -58,8 +58,52 @@ systems and ``@emph{bld.cmd}'' under Windows.  In this manual,
 required under Linux and Mac but not under Windows.  When running on
 Windows, use ``bld.cmd'' rather than ``./bld''.
 
+@section Super-Quick-Start
 
-@anchor{Quick-start Checklist}@section Quick-start Checklist
+This is the simplest and shortest path to a running system.  It assumes:
+
+@enumerate
+@item
+you have a JDK installed
+@item
+you have an Internet connection
+@end enumerate
+
+After doing a @code{git clone} all that is needed is the following,
+single command:
+
+@example
+    ./bld  develop
+@end example
+
+This will build the system, install tomcat, deploy the app, and run
+the server.  At this point you will be able to go your browser at the
+following URL:
+
+@example
+    http://localhost:8080/Kiss
+@end example
+
+(Note that the ``K'' in the URL above is uppercase.)
+
+At this point, you can do all development without any build
+procedures.  You can add or change anything on the front-end or
+back-end while the system is running.
+
+All application back-end code is located under the @code{src/main/application}
+directory.
+
+All application front-end code is located under the @code{src/main/webapp}
+directory.
+
+If you change anything in either place, the system will notice the change 
+and deliver it with the next request.
+
+
+@anchor{Quick-Start Checklist}@section Quick-Start Checklist
+
+This is a more detailed and expanded description of the same
+super-quick-start.
 
 The following enumerates the steps necessary to get the system up and running:
 
@@ -350,7 +394,7 @@ This is useful when creating applications that perform various utility functions
 JAR cannot be used in any web environment.  See @code{src/main/java/org/kissweb/Main.java}
 @end table
 
-@xref{Important} and @xref{Quick-start Checklist}.
+@xref{Important} and @xref{Quick-Start Checklist}.
 
 @subsection Using an IDE
 
