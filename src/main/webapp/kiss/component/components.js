@@ -251,6 +251,7 @@ class components {
      *     <tr><td>    isHidden()     </td><td>     is control hidden?   </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>     is control read-only?    </td></tr>
      *     <tr><td>    isVisible()     </td><td>     is control visible?   </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control               </td></tr>
      *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
      *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the numeric value of the control              </td></tr>

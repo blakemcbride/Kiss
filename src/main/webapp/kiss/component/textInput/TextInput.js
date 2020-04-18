@@ -9,19 +9,18 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var nstyle, originalValue;
-        var min = null;
-        var password = false;
-        var upcase = false;
+    let processor = function (elm, attr, content) {
+        let nstyle, originalValue;
+        let min = null;
+        let password = false;
+        let upcase = false;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
-
-        var nattrs = '';
-        var id;
-        for (var prop in attr) {
+        let nattrs = '';
+        let id;
+        for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
@@ -53,18 +52,16 @@
             }
         }
 
-        nattrs += ' oninput="this.value=Component.TextInput.$textinput(this)" autocorrect="off" autocapitalize="off" spellcheck="false"';
+        nattrs += ' autocorrect="off" autocapitalize="off" spellcheck="false"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
-        var newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
+        let newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             type: password ? 'password' : 'text',
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
-        var jqObj = newElm.jqObj;
-
-        newElm.elementInfo.upcase = upcase;
+        let jqObj = newElm.jqObj;
 
         jqObj.keydown(function () {
             Utils.someControlValueChanged();
@@ -73,7 +70,7 @@
         //--
 
         newElm.getValue = function () {
-            var sval = jqObj.val();
+            let sval = jqObj.val();
             return sval ? sval : '';
         };
 
@@ -82,6 +79,8 @@
                 jqObj.val(originalValue = '');
                 return this;
             }
+            if (upcase)
+                val = val.toUpperCase();
             jqObj.val(originalValue = val);
             return this;
         };
@@ -165,9 +164,9 @@
 
         newElm.isError = function (desc) {
             if (min) {
-                var val = newElm.getValue();
+                let val = newElm.getValue();
                 if (val.length < min) {
-                    var msg;
+                    let msg;
                     if (min === 1)
                         msg = desc + ' is required.';
                     else
@@ -180,21 +179,19 @@
             }
             return false;
         };
+
+        jqObj.on('input', function () {
+            let val = jqObj.val().replace(/^\s+/, "");
+            jqObj.val(upcase ? val.toUpperCase() : val);
+        });
     };
 
-    var componentInfo = {
+    let componentInfo = {
         name: 'TextInput',
         tag: 'text-input',
         processor: processor
     };
     Utils.newComponent(componentInfo);
-
-
-    Component.TextInput.$textinput = function (elm) {
-        var val = elm.value.replace(/^\s+/, "");
-        return elm.kiss.elementInfo.upcase ? val.toUpperCase() : val;
-    };
-
 
 })();
 
