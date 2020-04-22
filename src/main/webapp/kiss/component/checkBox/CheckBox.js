@@ -15,6 +15,7 @@
             nStyle = 'display: inline-flex; ' + attr.style;
         else
             nStyle = 'margin-left: 8px; display: inline-flex;';
+        let cls = '';
 
         let nAttrs = '';
         let id;
@@ -28,6 +29,9 @@
 
                 case 'style':
                     break;  // already dealing with this
+                case 'class':
+                    cls = attr[prop];
+                    break;
                 case 'id':
                     id = Utils.removeQuotes(attr[prop]);
                     break;
@@ -37,8 +41,9 @@
             }
         }
 
-        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input type="checkbox" {attr} id="{id}"><label for="{id}" style="margin-left: 4px;">{content}</label></div>', {
+        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}" class="{class}"><input type="checkbox" {attr} id="{id}"><label for="{id}" style="margin-left: 4px;">{content}</label></div>', {
             style: nStyle,
+            class: cls,
             attr: nAttrs,
             content: content ? content.trim() : ''
         });
