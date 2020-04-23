@@ -347,7 +347,7 @@ class Utils {
         switch (base) {
             case 10:
                 cf = 3;
-                dl = num < 1.0 ? 0 : 1 + Math.floor(Math.log(num) / Math.LN10);
+                dl = num < 1.0 ? 0 : 1 + Math.floor(Math.log(num) / 2.3025850929940357);
                 /* # of digits left of .  */
                 break;
             case 2:
