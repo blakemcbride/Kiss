@@ -16,6 +16,7 @@ Utils.afterComponentsLoaded(function () {
 
 
 (function () {
+    Utils.useComponent('Popup');
     Utils.useComponent('CheckBox');
     Utils.useComponent('DateInput');
     Utils.useComponent('DropDown');

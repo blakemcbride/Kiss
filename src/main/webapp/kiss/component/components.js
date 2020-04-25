@@ -261,6 +261,18 @@ class components {
     static numeric_input() {}
 
     /**
+     * This HTML tag, "popup", adds the ability to define a popup window.  Within it, the tags "popup-title" and "popup-body"
+     * should be used to define the respective parts of the popup window.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    height="400px"     </td><td>     sets the height of the body of the popup window   </td></tr>
+     *     <tr><td>    width="200px"     </td><td>     sets the width of the body of the popup window     </td></tr>
+     * </table>
+     */
+    static popup() {}
+
+    /**
      * This HTML tag, "push-button", adds functionality and a consistent and convenient API to the HTML provided button input.
      * <br><br>
      *     No new attributes are defined.

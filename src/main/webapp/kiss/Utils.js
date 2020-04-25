@@ -636,16 +636,30 @@ class Utils {
         Component.AfterAllComponentsLoaded = fun;
     }
 
-    // internal
+    /* (internal)
+     * Rescan the HTML file and replace KISS components with HTML components.
+     * This needs to be done each time new KISS controls are attached.
+     */
     static rescan() {
-        var n = -1;
+        let n = -1;
         while (n) {  // keep replacing until nothing left to replace
             n = 0;
-            for (var i = 0; i < Component.ComponentList.length; i++) {
-                var ci = Component.ComponentList[i];
-                if (ci.tag)
+            for (let i = 0; i < Component.ComponentList.length; i++) {
+                let ci = Component.ComponentList[i];
+                if (ci.tag && ci.name === 'Popup') {
                     $(ci.tag).each(function () {
-                        var elm = $(this);
+                        let elm = $(this);
+                        ci.processor(elm, Utils.getAllAttributes(elm), elm.html());
+                        n++;
+                    });
+                    break;
+                }
+            }
+            for (let i = 0; i < Component.ComponentList.length; i++) {
+                let ci = Component.ComponentList[i];
+                if (ci.tag && ci.name !== "Popup")
+                    $(ci.tag).each(function () {
+                        let elm = $(this);
                         ci.processor(elm, Utils.getAllAttributes(elm), elm.html());
                         n++;
                     });
@@ -777,6 +791,7 @@ class Utils {
         xhr.responseType = 'text';
         xhr.send();
     };
+
     /**
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
      * Also, the loaded code is processed for custom tags / components.
@@ -1040,7 +1055,7 @@ class Utils {
      * a control value has changed, and <code>false</code> if the state is
      * being reset.
      *
-     * @param fun
+     * @param fun {function}  the function to be executed
      */
     static setSomeControlValueChangeFunction(fun) {
         Utils.someControlValueChangedFun = fun;
