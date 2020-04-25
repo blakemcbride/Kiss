@@ -9,16 +9,16 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var nstyle;
+    const processor = function (elm, attr, content) {
+        let nstyle;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
 
-        var nattrs = '';
-        var id;
-        for (var prop in attr) {
+        let nattrs = '';
+        let id;
+        for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
@@ -37,12 +37,12 @@
             }
         }
 
-        var newElm = Utils.replaceHTML(id, elm, '<input type="button" style="{style}" {attr} value="{value}" id="{id}">', {
+        const newElm = Utils.replaceHTML(id, elm, '<input type="button" style="{style}" {attr} value="{value}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
             value: content ? content.trim() : ''
         });
-        var jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         jqObj.on('change', function () {
             Utils.someControlValueChanged();
@@ -129,7 +129,7 @@
         }
     };
 
-    var componentInfo = {
+    const componentInfo = {
         name: 'PushButton',
         tag: 'push-button',
         processor: processor
@@ -137,7 +137,4 @@
     Utils.newComponent(componentInfo);
 
 })();
-
-
-
 

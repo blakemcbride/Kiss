@@ -9,20 +9,20 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var nstyle, originalValue = null;
-        var required = false;
-        var size = null;
+    const processor = function (elm, attr, content) {
+        let nstyle, originalValue = null;
+        let required = false;
+        let size = null;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
         nstyle = 'overflow-y: auto; ' + nstyle;  // cause vertical scrollbar only when necessary
 
-        var nattrs = '';
-        var id;
-        var default_option;
-        for (var prop in attr) {
+        let nattrs = '';
+        let id;
+        let default_option;
+        for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
@@ -55,14 +55,14 @@
         if (!content  &&  default_option)
             content = '<option value="">' + default_option + '</option>';
 
-        var newElm = Utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}" size="{size}">{content}</select>', {
+        const newElm = Utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}" size="{size}">{content}</select>', {
             style: nstyle,
             attr: nattrs,
             content: content,
             size: size
         });
-        var jqObj = newElm.jqObj;
-        var dataStore = {};
+        const jqObj = newElm.jqObj;
+        let dataStore = {};
 
         jqObj.on('change', function () {
             Utils.someControlValueChanged();
@@ -189,7 +189,7 @@
         newElm.isError = function (desc) {
             if (!required)
                 return false;
-            var val = newElm.getValue();
+            let val = newElm.getValue();
             if (!val) {
                 Utils.showMessage('Error', desc + ' selection is required.', function () {
                     jqObj.focus();
@@ -208,7 +208,7 @@
             return this;
         };
 
-        var timeout;
+        let timeout;
 
         newElm.onClick = function (fun) {
             jqObj.off('click').click(function () {
@@ -248,7 +248,7 @@
 
     };
 
-    var componentInfo = {
+    const componentInfo = {
         name: 'ListBox',
         tag: 'list-box',
         processor: processor

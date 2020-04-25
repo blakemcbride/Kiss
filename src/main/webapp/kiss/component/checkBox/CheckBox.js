@@ -9,7 +9,7 @@
 
 (function () {
 
-    let processor = function (elm, attr, content) {
+    const processor = function (elm, attr, content) {
         let nStyle, originalValue;
         if (attr.style)
             nStyle = 'display: inline-flex; ' + attr.style;
@@ -41,13 +41,13 @@
             }
         }
 
-        let newElm = Utils.replaceHTML(id, elm, '<div style="{style}" class="{class}"><input type="checkbox" {attr} id="{id}"><label for="{id}" style="margin-left: 4px;">{content}</label></div>', {
+        const newElm = Utils.replaceHTML(id, elm, '<div style="{style}" class="{class}"><input type="checkbox" {attr} id="{id}"><label for="{id}" style="margin-left: 4px;">{content}</label></div>', {
             style: nStyle,
             class: cls,
             attr: nAttrs,
             content: content ? content.trim() : ''
         });
-        let jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         jqObj.change(function () {
             Utils.someControlValueChanged();
@@ -134,7 +134,7 @@
         };
     };
 
-    let componentInfo = {
+    const componentInfo = {
         name: 'CheckBox',
         tag: 'check-box',
         processor: processor

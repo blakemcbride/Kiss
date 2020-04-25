@@ -22,8 +22,8 @@ class DateTimeUtils {
     static formatDate(dt) {
         if (!dt)
             return '';
-        var hours = dt.getHours();
-        var sf;
+        let hours = dt.getHours();
+        let sf;
         if (hours > 12)
             hours -= 12;
         if (hours >= 12)
@@ -32,7 +32,7 @@ class DateTimeUtils {
             sf = ' AM';
         if (!hours)
             hours = 12;
-        var min = dt.getMinutes();
+        let min = dt.getMinutes();
         if (min < 10)
             min = '0' + min.toString();
         else
@@ -49,8 +49,8 @@ class DateTimeUtils {
     static formatInt(dt, time) {
         if (!dt && (time === undefined || time === null || time === ''))
             return '';
-        var res = DateUtils.intToStr4(dt);
-        var tf = TimeUtils.format(time);
+        const res = DateUtils.intToStr4(dt);
+        const tf = TimeUtils.format(time);
         if (res && tf)
             return res + ' ' + tf;
         else
@@ -64,8 +64,8 @@ class DateTimeUtils {
      * @returns {number}
      */
     static dateToIntTime(dt) {
-        let hours = dt.getHours();
-        let minutes = dt.getMinutes();
+        const hours = dt.getHours();
+        const minutes = dt.getMinutes();
         return hours * 100 + minutes;
     }
 }

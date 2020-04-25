@@ -9,20 +9,20 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var nstyle, originalValue;
-        var required = false;
-        var min = null;
-        var max = null;
-        var zero_fill = false;
+    const processor = function (elm, attr, content) {
+        let nstyle, originalValue;
+        let required = false;
+        let min = null;
+        let max = null;
+        let zero_fill = false;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
 
-        var nattrs = '';
-        var id;
-        for (var prop in attr) {
+        let nattrs = '';
+        let id;
+        for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
@@ -57,12 +57,12 @@
         nattrs += ' onfocusout="this.value=Component.TimeInput.$formattime(this)"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
-        var newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
+        const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
-        var jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         newElm.elementInfo.min = min;
         newElm.elementInfo.max = max;
@@ -72,7 +72,7 @@
             Utils.someControlValueChanged();
         });
 
-        var isDigit = function (c) {
+        let isDigit = function (c) {
             return c >= '0'  &&  c <= '9';
         };
 
@@ -123,7 +123,7 @@
             if (i >= sval.length)
                 part = null;
             else {
-                let c = sval.charAt(i);
+                const c = sval.charAt(i);
                 if (c === 'a'  ||  c === 'A')
                     part = 'A';
                 else if (c === 'p'  ||  c === 'P')
@@ -143,11 +143,11 @@
         //--
 
         newElm.getValue = function () {
-            var val = newElm.getValue$(newElm.jqObj.val());
+            const val = newElm.getValue$(newElm.jqObj.val());
             if (val === null)
                 return val;
-            var hours = Math.floor(val / 100);
-            var minutes = val % 100;
+            const hours = Math.floor(val / 100);
+            const minutes = val % 100;
             return hours > 23  ||  minutes > 59 ? null : val;
         };
 
@@ -231,15 +231,15 @@
         };
 
         newElm.isError = function (desc) {
-            var val = newElm.getValue$(newElm.jqObj.val());
+            const val = newElm.getValue$(newElm.jqObj.val());
             if (required  &&  val === null) {
                 Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
                 });
                 return true;
             }
-            let hours = Math.floor(val / 100);
-            let minutes = val % 100;
+            const hours = Math.floor(val / 100);
+            const minutes = val % 100;
             if (hours > 23  ||  minutes > 59) {
                 Utils.showMessage('Error', desc + ' is not a valid date.', function () {
                     jqObj.focus();
@@ -247,7 +247,7 @@
                 return true;
             }
             if (min !== null  &&  val < min  ||  max !== null  &&  val > max) {
-                var msg;
+                let msg;
                 if ((min  ||  min === 0)  &&  (max  ||  max === 0))
                     msg = desc + ' must be between ' + TimeUtils.format(min) +
                         ' and ' + TimeUtils.format(max) + '.';
@@ -264,7 +264,7 @@
         };
 
         Component.TimeInput.$formattime = function (elm) {
-            var val = newElm.getValue$(elm.value.trim());
+            const val = newElm.getValue$(elm.value.trim());
             if (val === null)
                 return '';
             return TimeUtils.format(val, elm.kiss.elementInfo.zero_fill);
@@ -272,7 +272,7 @@
 
     };
 
-    var componentInfo = {
+    const componentInfo = {
         name: 'TimeInput',
         tag: 'time-input',
         processor: processor
@@ -280,15 +280,15 @@
     Utils.newComponent(componentInfo);
 
     Component.TimeInput.$timeinput = function (elm) {
-        var val1 = elm.value.trim();
-        var val2 = val1.replace(/[^0-9 :ampAMP]/g, '');  // remove characters
+        const val1 = elm.value.trim();
+        const val2 = val1.replace(/[^0-9 :ampAMP]/g, '');  // remove characters
         if (val1 !== val2) {
             Utils.beep();
             return val2;
         }
-        var nc = 0;
-        for (var i = 0; i < val2.length; i++) {
-            var c = val2.charAt(i);
+        let nc = 0;
+        for (let i = 0; i < val2.length; i++) {
+            let c = val2.charAt(i);
             if (c === ':')
                 if (++nc > 1) {
                     Utils.beep();

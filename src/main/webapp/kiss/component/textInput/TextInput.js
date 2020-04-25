@@ -9,7 +9,7 @@
 
 (function () {
 
-    let processor = function (elm, attr, content) {
+    const processor = function (elm, attr, content) {
         let nstyle, originalValue;
         let min = null;
         let password = false;
@@ -55,13 +55,13 @@
         nattrs += ' autocorrect="off" autocapitalize="off" spellcheck="false"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
-        let newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
+        const newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             type: password ? 'password' : 'text',
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
-        let jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         jqObj.keydown(function () {
             Utils.someControlValueChanged();
@@ -186,7 +186,7 @@
         });
     };
 
-    let componentInfo = {
+    const componentInfo = {
         name: 'TextInput',
         tag: 'text-input',
         processor: processor

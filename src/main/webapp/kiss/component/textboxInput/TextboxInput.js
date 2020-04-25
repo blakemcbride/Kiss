@@ -9,19 +9,19 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var nstyle, originalValue;
-        var min = null;
-        var upcase = false;
+    const processor = function (elm, attr, content) {
+        let nstyle, originalValue;
+        let min = null;
+        let upcase = false;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
         nstyle = 'resize: none; ' + nstyle;
 
-        var nattrs = '';
-        var id;
-        for (var prop in attr) {
+        let nattrs = '';
+        let id;
+        for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
@@ -52,12 +52,12 @@
         nattrs += ' oninput="this.value=Component.TextboxInput.$textinput(this)"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
-        var newElm = Utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} placeholder="{placeholder}" id="{id}"></textarea>', {
+        const newElm = Utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} placeholder="{placeholder}" id="{id}"></textarea>', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
-        var jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         newElm.elementInfo.upcase = upcase;
 
@@ -68,7 +68,7 @@
         //--
 
         newElm.getValue = function () {
-            var sval = jqObj.val();
+            let sval = jqObj.val();
             return sval ? sval : '';
         };
 
@@ -161,9 +161,9 @@
 
         newElm.isError = function (desc) {
             if (min) {
-                var val = newElm.getValue();
+                let val = newElm.getValue();
                 if (val.length < min) {
-                    var msg;
+                    let msg;
                     if (min === 1)
                         msg = desc + ' is required.';
                     else
@@ -179,7 +179,7 @@
 
     };
 
-    var componentInfo = {
+    const componentInfo = {
         name: 'TextboxInput',
         tag: 'textbox-input',
         processor: processor
@@ -188,7 +188,7 @@
 
 
     Component.TextboxInput.$textinput = function (elm) {
-        var val = elm.value.replace(/^\s+/, "");
+        let val = elm.value.replace(/^\s+/, "");
         return elm.kiss.elementInfo.upcase ? val.toUpperCase() : val;
     };
 

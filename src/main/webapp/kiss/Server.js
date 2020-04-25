@@ -66,12 +66,8 @@ class Server {
             } catch (err) {
                 return await processError(cls, meth, injson, pass, err);
             }
-            let a = 1;
             try {
-                let b = 1;
-                let c = await response.json();
-                let d = 1;
-                return c;
+                return await response.json();
             } catch (err) {
                 return await processError(cls, meth, injson, pass, err);
             }
@@ -85,8 +81,7 @@ class Server {
             return {_Success: false, _ErrorMessage: msg};
         };
 
-        let r = await doCall(cls, meth, injson, 1);
-        return r;
+        return await doCall(cls, meth, injson, 1);
     }
 
     /**

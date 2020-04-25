@@ -49,14 +49,14 @@
 
         content = content.replace(/popup-title/g, 'div').replace(/popup-body/g, 'div');
 
-        let newElm = Utils.replaceHTML(id, elm, '<div id="{id}" style="{style}" {attr}>{content}</div>', {
+        Utils.replaceHTML(id, elm, '<div id="{id}" style="{style}" {attr}>{content}</div>', {
             style: nstyle,
             attr: nattrs,
             content: content
         });
     };
 
-    let componentInfo = {
+    const componentInfo = {
         name: 'Popup',
         tag: 'popup',
         processor: processor

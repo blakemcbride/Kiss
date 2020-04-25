@@ -5,13 +5,13 @@
 'use strict';
 
 
-var Component = {};
+let Component = {};
 
 Component.ComponentsBeingLoaded = 0;
 
 Component.ComponentList = [];
 
-var Kiss = {};
+let Kiss = {};
 
 /**
  * This is how components are accessed.
@@ -20,9 +20,9 @@ var Kiss = {};
  * @returns {*} the component object
  */
 function $$(id) {
-    let self = this;
+    const self = this;
     if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined' && Kiss.RadioButtons.groups[id]) {
-        let rbObj = {};
+        const rbObj = {};
         let originalValue;
         rbObj.getValue = function () {
             return Kiss.RadioButtons.getValue(id);
@@ -86,7 +86,7 @@ function $$(id) {
         };
         return rbObj;
     }
-    let e = $((id.charAt(0) === '#' ? '' : '#') + id);
+    const e = $((id.charAt(0) === '#' ? '' : '#') + id);
     return e.length ? e[0].kiss : null;
 }
 
@@ -126,14 +126,14 @@ class Utils {
         $('#msg-header').text(title);
         this.makeDraggable($('#msg-modal-header-tab'), $('#msg-modal-content-tab'));
         $('#msg-message').text(message);
-        var modal = $('#msg-modal');
-        var span = $('#msg-close-btn');
+        const modal = $('#msg-modal');
+        const span = $('#msg-close-btn');
         if (title === 'Error')
             $('#msg-modal-header-tab').css('background-color', 'red');
         else
             $('#msg-modal-header-tab').css('background-color', '#6495ed');
         modal.show();
-        var endfun = function () {
+        let endfun = function () {
             modal.hide();
             if (afterFun)
                 afterFun();
@@ -178,8 +178,8 @@ class Utils {
 
         $('#yesno-header').text(title);
         $('#yesno-message').text(message);
-        var modal = $('#yesno-modal');
-        var span = $('#yesno-close-btn');
+        const modal = $('#yesno-modal');
+        const span = $('#yesno-close-btn');
         modal.show();
         span.off('click').click(function () {
             modal.hide();
@@ -218,8 +218,7 @@ class Utils {
         }
         this.makeDraggable($('#wait-msg-content'), $('#wait-msg-content'));
         $('#wmsg-message').text(message);
-        var modal = $('#wmsg-modal');
-        modal.show();
+        $('#wmsg-modal').show();
     }
 
     /**
@@ -230,7 +229,7 @@ class Utils {
     }
 
     static getID(id) {
-        var e = $('#' + id);
+        let e = $('#' + id);
         if (!e.length) {
             id = id.replace(/_/g, '-');
             e = $('#' + id);
@@ -243,7 +242,7 @@ class Utils {
     }
 
     static zeroPad(num, places) {
-        var zero = places - num.toString().length + 1;
+        const zero = places - num.toString().length + 1;
         return Array(+(zero > 0 && zero)).join("0") + num;
     }
 
@@ -267,7 +266,7 @@ class Utils {
             n = -n;
             if (n < s.length)
                 return Utils.drop(s, s.length - n);
-            var sb = '';
+            let sb = '';
             for (n -= s.length; n-- > 0;)
                 sb += ' ';
             sb += s;
@@ -314,7 +313,7 @@ class Utils {
      *<p>
      * Example:
      *<br><br>
-     *    var r = Utils.formatb(-12345.348, 10, "CP", 12, 2);
+     *    let r = Utils.formatb(-12345.348, 10, "CP", 12, 2);
      *<br><br>
      *    result in r:   "(12,345.35)"
      * </p>
@@ -322,10 +321,10 @@ class Utils {
      * @see format
      */
     static formatb(num, base, msk, wth, dp) {
-        var si, i, r, n;
-        var sign, blnk, comma, left, paren, zfill, nd, dol, tw, dl, ez, ucase, cf, percent;
-        var dbase;
-        var alpha = '0123456789abcdefghijklmnopqrstuvwxyz';
+        let si, i, r, n;
+        let sign, blnk, comma, left, paren, zfill, nd, dol, tw, dl, ez, ucase, cf, percent;
+        let dbase;
+        const alpha = '0123456789abcdefghijklmnopqrstuvwxyz';
 
         if (base < 2 || base > alpha.length)
             base = 10;
@@ -389,7 +388,7 @@ class Utils {
         blnk = comma = left = paren = zfill = dol = ucase = percent = 0;
         if (msk) {
             msk = msk.toUpperCase();
-            for (var i2 = 0; i2 < msk.length; i2++)
+            for (let i2 = 0; i2 < msk.length; i2++)
                 switch (msk.charAt(i2)) {
                     case 'B':  // blank if zero
                         blnk = 1;
@@ -443,13 +442,13 @@ class Utils {
             if (tw > wth && percent)
                 tw -= percent--;
             if (tw > wth) {
-                var tbuf = '';
+                let tbuf = '';
                 for (i = 0; i < wth; i++)
                     tbuf += '*';
                 return tbuf;
             }
         }
-        var buf = new Array(wth);
+        let buf = new Array(wth);
         num = Math.floor(.5 + num * Math.floor(.5 + Math.pow(dbase, dp)));
         if (blnk && num === 0.0) {
             for (i = 0; i < wth;)
@@ -532,7 +531,7 @@ class Utils {
      *<p>
      * example:
      *<br><br>
-     *    var r = Utils.format(-12345.348, "CP", 12, 2);
+     *    let r = Utils.format(-12345.348, "CP", 12, 2);
      *<br><br>
      *    result in r:  "(12,345.35)"
      * </p>
@@ -548,8 +547,8 @@ class Utils {
      * @returns {string}
      */
     static fileNameExtension(filename) {
-        var fileSplit = filename.split('.');
-        var fileExt = '';
+        const fileSplit = filename.split('.');
+        let fileExt = '';
         if (fileSplit.length > 1)
             fileExt = fileSplit[fileSplit.length - 1];
         return fileExt;
@@ -565,7 +564,7 @@ class Utils {
     static assureArray(x) {
         if ($.isArray(x))
             return x;
-        var r = [];
+        let r = [];
         if (x)
             r[0] = x;
         return r;
@@ -578,16 +577,15 @@ class Utils {
      * @returns {string} the parameter value or null if not there
      */
     static getURLParam(key) {
-        var url = window.location.href;
-        var args = url.split('?');
+        const url = window.location.href;
+        const args = url.split('?');
         if (args.length !== 2)
             return null;
-        var pairs = args[1].split('&');
+        const pairs = args[1].split('&');
         if (pairs.length === 0)
             return null;
-        var i;
-        for (i = 0; i < pairs.length; i++) {
-            var keyval = pairs[i].split('=');
+        for (let i = 0; i < pairs.length; i++) {
+            let keyval = pairs[i].split('=');
             if (keyval[0] === key)
                 if (keyval.length > 0)
                     return decodeURI(keyval[1]);
@@ -603,16 +601,13 @@ class Utils {
      * @param {string} path back-end path to the component
      */
     static useTaglessComponent(path) {
-
-        var npath;
-
-        var loadScript = function (arg) {
+        let npath;
+        const loadScript = function (arg) {
             getScript(npath + '.js' + arg, function (data, textStatus, jqxhr) {
-
             });
         };
 
-        var loadComponent = function (arg) {
+        const loadComponent = function (arg) {
             npath = path.charAt(0).toLowerCase() + path.substr(1) + '/' + path.charAt(0).toUpperCase() + path.substr(1);
             npath = '/kiss/component/' + npath;
             loadScript(arg);
@@ -622,8 +617,8 @@ class Utils {
 
     // internal
     static tagReplace(inp, rpl) {
-        for (var prop in rpl) {
-            var val = rpl[prop];
+        for (let prop in rpl) {
+            let val = rpl[prop];
             if (!val && val !== 0)
                 val = '';
             inp = inp.replace(new RegExp('{' + prop + '}', 'g'), val);
@@ -673,12 +668,9 @@ class Utils {
      * @param {string} path back-end path to the component HTML and JS files.
      */
     static useComponent(path) {
-
-        var npath;
-
+        let npath;
         Component.ComponentsBeingLoaded++;
-
-        var loadScript = function (arg) {
+        const loadScript = function (arg) {
             getScript(npath + '.js' + arg, function () {
                 if (!--Component.ComponentsBeingLoaded && Component.AfterAllComponentsLoaded) {
                     Utils.rescan();  // does all the tag replacement
@@ -688,7 +680,7 @@ class Utils {
             });
         };
 
-        var loadComponent = function (arg) {
+        const loadComponent = function (arg) {
             npath = path.charAt(0).toLowerCase() + path.substr(1) + '/' + path.charAt(0).toUpperCase() + path.substr(1);
             npath = 'kiss/component/' + npath;
             loadScript(arg);
@@ -698,7 +690,7 @@ class Utils {
     }
 
     static getAllAttributes(elm) {
-        var ret = {};
+        const ret = {};
         $.each(elm[0].attributes, function () {
             ret[this.name] = this.value;
         });
@@ -708,7 +700,7 @@ class Utils {
     static removeQuotes(s) {
         if (!s || !s.length)
             return '';
-        var c = s.charAt(0);
+        let c = s.charAt(0);
         if (c === '"' || c === "'")
             s = s.substr(1);
         if (!s.length)
@@ -729,7 +721,7 @@ class Utils {
      *
      */
     static beep() {
-        var snd = new Audio("data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=");
+        const snd = new Audio("data:audio/wav;base64,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qJrx4KOQjahZxWbcZgztj2c49nKmkId44S71j0c8eV9yDK6uPRzx5X18eDvjvQ6yKo9ZSS6l//8elePK/Lf//IInrOF/FvDoADYAGBMGb7FtErm5MXMlmPAJQVgWta7Zx2go+8xJ0UiCb8LHHdftWyLJE0QIAIsI+UbXu67dZMjmgDGCGl1H+vpF4NSDckSIkk7Vd+sxEhBQMRU8j/12UIRhzSaUdQ+rQU5kGeFxm+hb1oh6pWWmv3uvmReDl0UnvtapVaIzo1jZbf/pD6ElLqSX+rUmOQNpJFa/r+sa4e/pBlAABoAAAAA3CUgShLdGIxsY7AUABPRrgCABdDuQ5GC7DqPQCgbbJUAoRSUj+NIEig0YfyWUho1VBBBA//uQZB4ABZx5zfMakeAAAAmwAAAAF5F3P0w9GtAAACfAAAAAwLhMDmAYWMgVEG1U0FIGCBgXBXAtfMH10000EEEEEECUBYln03TTTdNBDZopopYvrTTdNa325mImNg3TTPV9q3pmY0xoO6bv3r00y+IDGid/9aaaZTGMuj9mpu9Mpio1dXrr5HERTZSmqU36A3CumzN/9Robv/Xx4v9ijkSRSNLQhAWumap82WRSBUqXStV/YcS+XVLnSS+WLDroqArFkMEsAS+eWmrUzrO0oEmE40RlMZ5+ODIkAyKAGUwZ3mVKmcamcJnMW26MRPgUw6j+LkhyHGVGYjSUUKNpuJUQoOIAyDvEyG8S5yfK6dhZc0Tx1KI/gviKL6qvvFs1+bWtaz58uUNnryq6kt5RzOCkPWlVqVX2a/EEBUdU1KrXLf40GoiiFXK///qpoiDXrOgqDR38JB0bw7SoL+ZB9o1RCkQjQ2CBYZKd/+VJxZRRZlqSkKiws0WFxUyCwsKiMy7hUVFhIaCrNQsKkTIsLivwKKigsj8XYlwt/WKi2N4d//uQRCSAAjURNIHpMZBGYiaQPSYyAAABLAAAAAAAACWAAAAApUF/Mg+0aohSIRobBAsMlO//Kk4soosy1JSFRYWaLC4qZBYWFRGZdwqKiwkNBVmoWFSJkWFxX4FFRQWR+LsS4W/rFRb/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////VEFHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU291bmRib3kuZGUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMjAwNGh0dHA6Ly93d3cuc291bmRib3kuZGUAAAAAAAAAACU=");
         snd.play();
     }
 
@@ -741,10 +733,10 @@ class Utils {
         if (!id)
             id = Utils.nextID();
         rplobj.id = id;
-        var newHTML = Utils.tagReplace(template, rplobj);
+        const newHTML = Utils.tagReplace(template, rplobj);
         elm.replaceWith(newHTML);
-        var jqObj = $('#' + id);
-        var newElm = jqObj[0];
+        const jqObj = $('#' + id);
+        const newElm = jqObj[0];
         newElm.kiss = {};
         newElm.kiss.jqObj = jqObj;
         newElm.kiss.elementInfo = {};
@@ -752,7 +744,6 @@ class Utils {
     }
 
     static async getHTML( url, callback ) {
-
         let response;
         try {
             response = await fetch(url, {
@@ -773,10 +764,11 @@ class Utils {
         return;
 
         // Feature detection
-        if ( !window.XMLHttpRequest ) return;
+        if (!window.XMLHttpRequest)
+            return;
 
         // Create new request
-        var xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();
 
         // Setup callback
         xhr.onload = function() {
@@ -802,7 +794,7 @@ class Utils {
     static loadPage(page, tag) {
         if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
             Kiss.RadioButtons.resetGroups();
-        let pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
+        const pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
 //        $.get(pg, function (text) {
         this.getHTML(pg, function (text) {
             if (tag)
@@ -831,7 +823,7 @@ class Utils {
      * @returns {string}
      */
     static uuid() {
-        var uuid = '', i, random;
+        let uuid = '', i, random;
         for (i = 0; i < 32; i++) {
             random = Math.random() * 16 | 0;
             if (i === 8 || i === 12 || i === 16 || i === 20)
@@ -851,16 +843,16 @@ class Utils {
 
         function handle_mousedown(e)
         {
-            let body = $('body');
-            let drag = {};
+            const body = $('body');
+            const drag = {};
             drag.pageX0 = e.pageX;
             drag.pageY0 = e.pageY;
             drag.elem = content;
             drag.offset0 = $(this).offset();
 
             function handle_dragging(e) {
-                let left = drag.offset0.left + (e.pageX - drag.pageX0);
-                let top = drag.offset0.top + (e.pageY - drag.pageY0);
+                const left = drag.offset0.left + (e.pageX - drag.pageX0);
+                const top = drag.offset0.top + (e.pageY - drag.pageY0);
                 $(drag.elem)
                     .offset({top: top, left: left});
             }
@@ -889,7 +881,7 @@ class Utils {
      * @see popup_close
      */
     static popup_open(id, focus_ctl) {
-        let w = $('#' + id);
+        const w = $('#' + id);
         let content;
         let both_parts;
         let header;
@@ -941,7 +933,6 @@ class Utils {
         Utils.popup_zindex -= 2;
         if (Utils.popup_zindex < 10)
             Utils.popup_zindex = 10;
-
     }
 
     /**
@@ -954,8 +945,8 @@ class Utils {
      * @see getFileUploadFormData
      */
     static getFileUploadCount(id) {
-        let ctl = $('#'+id);
-        let file_list = ctl.get(0).files;
+        const ctl = $('#'+id);
+        const file_list = ctl.get(0).files;
         return file_list.length;
     }
 
@@ -973,9 +964,9 @@ class Utils {
      * @see getFileUploadCount
      */
     static getFileUploadFormData(id) {
-        let ctl = $('#'+id);
-        let file_list = ctl.get(0).files;
-        let data = new FormData();
+        const ctl = $('#'+id);
+        const file_list = ctl.get(0).files;
+        const data = new FormData();
         for (let i=0 ; i < file_list.length ; i++)
             data.append('file-'+i, file_list[i]);
         return data;
@@ -1059,6 +1050,28 @@ class Utils {
      */
     static setSomeControlValueChangeFunction(fun) {
         Utils.someControlValueChangedFun = fun;
+    }
+
+    /**
+     * Return the number of user selected file in a 'file' input type.
+     *
+     * @param fld the id of the field
+     * @returns {number}
+     */
+    static numberOfUploadFiles(fld) {
+        const files = $('#' + fld);
+        return files[0].files.length;
+    }
+
+    /**
+     * Returns the name of file number idx of a 'file' input.
+     *
+     * @param fld the id of the input field
+     * @param idx the index telling which of the user selected files you want the name of
+     * @returns {string}
+     */
+    static uploadFilename(fld, idx) {
+        return $('#' + fld)[0].files[idx].name;
     }
 
 }

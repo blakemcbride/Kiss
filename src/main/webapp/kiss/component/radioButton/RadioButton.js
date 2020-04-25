@@ -12,7 +12,7 @@ Kiss.RadioButtons.groups = {};
 
 (function () {
 
-    let processor = function (elm, attr, content) {
+    const processor = function (elm, attr, content) {
         let div_style;
         let button_style = 'margin-left: 8px;';
         let id;
@@ -90,7 +90,7 @@ Kiss.RadioButtons.groups = {};
         if (!align_vertical)
             div_style = 'display: inline-block;' + div_style;
 
-        let newElm = Utils.replaceHTML(id, elm, '<div class="{class}" style="{div_style}"><input type="radio" {attr} style="{button_style}" name="{name}" id="{id}"><label for="{id}" style="{label_style}">{content}</label></div>', {
+        const newElm = Utils.replaceHTML(id, elm, '<div class="{class}" style="{div_style}"><input type="radio" {attr} style="{button_style}" name="{name}" id="{id}"><label for="{id}" style="{label_style}">{content}</label></div>', {
             attr: nAttrs,
             name: group,
             class: cls,
@@ -99,7 +99,7 @@ Kiss.RadioButtons.groups = {};
             div_style: div_style,
             content: content ? content.trim() : ''
         });
-        let jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         jqObj.on('change', function () {
             Utils.someControlValueChanged();
@@ -146,7 +146,7 @@ Kiss.RadioButtons.groups = {};
 
     };
 
-    let componentInfo = {
+    const componentInfo = {
         name: 'RadioButton',
         tag: 'radio-button',
         processor: processor

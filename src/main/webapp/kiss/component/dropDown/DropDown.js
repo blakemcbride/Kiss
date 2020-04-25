@@ -9,17 +9,17 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var nStyle, originalValue = null;
-        var required = false;
+    const processor = function (elm, attr, content) {
+        let nStyle, originalValue = null;
+        let required = false;
         if (attr.style)
             nStyle = attr.style;
         else
             nStyle = '';
-        var nAttrs = '';
-        var id;
-        var default_option;
-        for (var prop of Object.keys(attr)) {
+        let nAttrs = '';
+        let id;
+        let default_option;
+        for (let prop of Object.keys(attr)) {
             switch (prop) {
 
                 // New attributes.
@@ -47,14 +47,14 @@
         if (!content  &&  default_option)
             content = '<option value="">' + default_option + '</option>';
 
-        var newElm = Utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}">{content}</select>', {
+        const newElm = Utils.replaceHTML(id, elm, '<select style="{style}" {attr} id="{id}">{content}</select>', {
             style: nStyle,
             attr: nAttrs,
             content: content
         });
 
-        var jqObj = newElm.jqObj;
-        var dataStore = {};
+        const jqObj = newElm.jqObj;
+        let dataStore = {};
 
         jqObj.on('change', function () {
             Utils.someControlValueChanged();
@@ -180,7 +180,7 @@
         newElm.isError = function (desc) {
             if (!required)
                 return false;
-            var val = newElm.getValue();
+            let val = newElm.getValue();
             if (!val) {
                 Utils.showMessage('Error', desc + ' selection is required.', function () {
                     jqObj.focus();
@@ -191,7 +191,7 @@
         };
     };
 
-    var componentInfo = {
+    const componentInfo = {
         name: 'DropDown',
         tag: 'drop-down',
         processor: processor

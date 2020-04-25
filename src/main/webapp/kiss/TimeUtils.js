@@ -24,8 +24,8 @@ class TimeUtils {
             return '';
         if (typeof val === 'object')
             val = DateTimeUtils.dateToIntTime(val);
-        let hours = Math.floor(val / 100);
-        let minutes = val % 100;
+        const hours = Math.floor(val / 100);
+        const minutes = val % 100;
         let width;
         let msk;
         if (zero_fill) {

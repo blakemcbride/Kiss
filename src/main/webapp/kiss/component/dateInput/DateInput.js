@@ -10,20 +10,20 @@
 
 (function () {
 
-    var processor = function (elm, attr, content) {
-        var originalValue;
-        var nstyle;
-        var min = null;
-        var max = null;
-        var required = false;
+    const processor = function (elm, attr, content) {
+        let originalValue;
+        let nstyle;
+        let min = null;
+        let max = null;
+        let required = false;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
 
-        var nattrs = '';
-        var id;
-        for (var prop in attr) {
+        let nattrs = '';
+        let id;
+        for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
@@ -51,12 +51,12 @@
             }
         }
 
-        var newElm = Utils.replaceHTML(id, elm, '<input type="date" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
+        const newElm = Utils.replaceHTML(id, elm, '<input type="date" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
-        var jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         jqObj.on('change', function () {
             Utils.someControlValueChanged();
@@ -159,7 +159,7 @@
         };
 
         newElm.isError = function (desc) {
-            var val = newElm.getIntValue();
+            let val = newElm.getIntValue();
             if (required  &&  !val) {
                 Utils.showMessage('Error', desc + ' is required.', function () {
                     jqObj.focus();
@@ -167,7 +167,7 @@
                 return true;
             }
             if (val  &&  (min !== null  &&  val < min  ||  max !== null  &&  val > max)) {
-                var msg;
+                let msg;
                 if ((min  ||  min === 0)  &&  (max  ||  max === 0))
                     msg = desc + ' must be between ' + DateUtils.intToStr4(min) + ' and ' + DateUtils.intToStr4(max) + '.';
                 else if (min  &&  min !== 0)
@@ -183,7 +183,7 @@
         };
     };
 
-    var componentInfo = {
+    const componentInfo = {
         name: 'DateInput',
         tag: 'date-input',
         processor: processor

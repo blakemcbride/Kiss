@@ -7,7 +7,7 @@
 'use strict';
 
 (function () {
-    let processor = (elm, attr, content) => {
+    const processor = (elm, attr, content) => {
         let nstyle;
         let hasFor = false;
 
@@ -47,10 +47,10 @@
                 attr: nattrs
             });
 
-        var jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         newElm.getValue = function () {
-            var sval = jqObj.text();
+            let sval = jqObj.text();
             return sval ? sval : '';
         };
 
@@ -99,7 +99,7 @@
         };
     };
 
-    var componentInfo = {
+    const componentInfo = {
         name: 'TextLabel',
         tag: 'text-label',
         processor: processor
@@ -107,7 +107,6 @@
     Utils.newComponent(componentInfo);
 
     Component.TextLabel.$textlabel = function (elm) {
-        var val = elm.value.replace(/^\s+/, "");
-        return val;
+        return elm.value.replace(/^\s+/, "");
     };
 })();

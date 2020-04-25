@@ -34,22 +34,22 @@ class DateUtils {
         if (!/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString))
             return 0;
 
-        var parts = dateString.split("/");
-        var day = parseInt(parts[1], 10);
-        var month = parseInt(parts[0], 10);
-        var year = parseInt(parts[2], 10);
+        const parts = dateString.split("/");
+        const day = parseInt(parts[1], 10);
+        const month = parseInt(parts[0], 10);
+        let year = parseInt(parts[2], 10);
 
         if (year < 100) {
-            var currentYear = new Date().getFullYear();
-            var y19 = 1900 + year;
-            var y20 = 2000 + year;
+            let currentYear = new Date().getFullYear();
+            let y19 = 1900 + year;
+            let y20 = 2000 + year;
             year = Math.abs(currentYear - y19) < Math.abs(currentYear - y20) ? y19 : y20;
         }
 
         if (year < 1000 || year > 3000 || month < 1 || month > 12 || day < 1)
             return 0;
 
-        var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        const monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
         // Adjust for leap years
         if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0))
@@ -76,22 +76,22 @@ class DateUtils {
         if (!/^\d{4,4}\/\d{1,2}\/\d{1,2}$/.test(dateString))
             return 0;
 
-        var parts = dateString.split("/");
-        var day = parseInt(parts[2], 10);
-        var month = parseInt(parts[1], 10);
-        var year = parseInt(parts[0], 10);
+        const parts = dateString.split("/");
+        const day = parseInt(parts[2], 10);
+        const month = parseInt(parts[1], 10);
+        let year = parseInt(parts[0], 10);
 
         if (year < 100) {
-            var currentYear = new Date().getFullYear();
-            var y19 = 1900 + year;
-            var y20 = 2000 + year;
+            let currentYear = new Date().getFullYear();
+            let y19 = 1900 + year;
+            let y20 = 2000 + year;
             year = Math.abs(currentYear - y19) < Math.abs(currentYear - y20) ? y19 : y20;
         }
 
         if (year < 1000 || year > 3000 || month < 1 || month > 12 || day < 1)
             return 0;
 
-        var monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        let monthLength = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
         // Adjust for leap years
         if (year % 400 === 0 || (year % 100 !== 0 && year % 4 === 0))
@@ -114,8 +114,7 @@ class DateUtils {
             val = $.trim(val);
         if (!val)
             return false;
-        var dt = DateUtils.strToInt(val);
-        return !!dt;
+        return !!DateUtils.strToInt(val);
     }
 
     /**
@@ -129,8 +128,7 @@ class DateUtils {
             val = $.trim(val);
         if (!val)
             return false;
-        var dt = DateUtils.SQLtoInt(val);
-        return !!dt;
+        return !!DateUtils.SQLtoInt(val);
     }
 
     /**
@@ -142,10 +140,10 @@ class DateUtils {
     static intToStr4(dt) {
         if (!dt)
             return '';
-        var y = Math.floor(dt / 10000);
+        const y = Math.floor(dt / 10000);
         dt -= y * 10000;
-        var m = Math.floor(dt / 100);
-        var d = Math.floor(dt - m * 100);
+        const m = Math.floor(dt / 100);
+        const d = Math.floor(dt - m * 100);
         return Utils.take(m.toString(), -2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 4);
     }
 
@@ -158,10 +156,10 @@ class DateUtils {
     static intToSQL(dt) {
         if (!dt)
             return '';
-        var y = Math.floor(dt / 10000);
+        const y = Math.floor(dt / 10000);
         dt -= y * 10000;
-        var m = Math.floor(dt / 100);
-        var d = Math.floor(dt - m * 100);
+        const m = Math.floor(dt / 100);
+        const d = Math.floor(dt - m * 100);
         return Utils.format(y, "Z", 4, 0) + '-' + Utils.format(m, "Z", 2, 0) + '-' + Utils.format(d, "Z", 2, 0);
     }
 
@@ -174,11 +172,11 @@ class DateUtils {
     static intToStr2(dt) {
         if (!dt)
             return '';
-        var y = Math.floor(dt / 10000);
+        let y = Math.floor(dt / 10000);
         dt -= y * 10000;
         y %= 100;
-        var m = Math.floor(dt / 100);
-        var d = Math.floor(dt - m * 100);
+        const m = Math.floor(dt / 100);
+        const d = Math.floor(dt - m * 100);
         return Utils.take(m.toString(), -2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 2);
     }
 
@@ -199,10 +197,10 @@ class DateUtils {
      * @returns {Date}
      */
     static intToDate(dt) {
-        var y = Math.floor(dt / 10000);
+        const y = Math.floor(dt / 10000);
         dt -= y * 10000;
-        var m = Math.floor(dt / 100);
-        var d = Math.floor(dt - m * 100);
+        const m = Math.floor(dt / 100);
+        const d = Math.floor(dt - m * 100);
         return new Date(y, m - 1, d);
     }
 
@@ -214,7 +212,7 @@ class DateUtils {
      * @returns {Date}
      */
     static dateAddDays(dt, days) {
-        var result = new Date(dt);
+        const result = new Date(dt);
         result.setDate(result.getDate() + days);
         return result;
 //    return new Date(((dt.getTime() / 1000 + (60 * 60 * 24 * days)) * 1000));
@@ -239,8 +237,8 @@ class DateUtils {
      * @returns {number} number of months between the two dates
      */
     static monthsDifference(idt1, idt2) {
-        let dt1 = idt1 instanceof Date ? idt1 : DateUtils.intToDate(idt1);
-        let dt2 = idt2 instanceof Date ? idt2 : DateUtils.intToDate(idt2);
+        const dt1 = idt1 instanceof Date ? idt1 : DateUtils.intToDate(idt1);
+        const dt2 = idt2 instanceof Date ? idt2 : DateUtils.intToDate(idt2);
         let months = (dt2.getFullYear() - dt1.getFullYear()) * 12;
         months -= dt1.getMonth() + 1;
         months += dt2.getMonth() + 1;
@@ -250,8 +248,4 @@ class DateUtils {
     }
     
 }
-
-
-
-
 

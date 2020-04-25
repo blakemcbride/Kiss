@@ -4,7 +4,7 @@
 'use strict';
 
 Utils.afterComponentsLoaded(function () {
-    let href = window.location.href;
+    const href = window.location.href;
     let url = href.substr(0, href.lastIndexOf('/'));
     url = url.replace('8000', '8080');
 

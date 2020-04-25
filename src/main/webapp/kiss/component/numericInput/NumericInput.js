@@ -9,7 +9,7 @@
 
 (function () {
 
-    let processor = function (elm, attr, content) {
+    const processor = function (elm, attr, content) {
         let nstyle, originalValue;
         let dollar = false;
         let show_zero = false;
@@ -70,12 +70,12 @@
 
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
-        let newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
+        const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
-        let jqObj = newElm.jqObj;
+        const jqObj = newElm.jqObj;
 
         jqObj.keydown(function () {
             Utils.someControlValueChanged();
@@ -253,7 +253,7 @@
 
     };
 
-    let componentInfo = {
+    const componentInfo = {
         name: 'NumericInput',
         tag: 'numeric-input',
         processor: processor
