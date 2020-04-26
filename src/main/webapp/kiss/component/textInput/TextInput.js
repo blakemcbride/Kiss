@@ -148,7 +148,11 @@
         //--
 
         newElm.onKeyDown = function (fun) {
-            jqObj.off('keydown').keydown(fun);
+            jqObj.off('keydown').keydown(function (event) {
+                Utils.someControlValueChanged();
+                if (fun)
+                    fun(event);
+            });
             return this;
         };
 
