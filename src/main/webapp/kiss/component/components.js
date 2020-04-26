@@ -170,6 +170,44 @@ class components {
     static drop_down() {}
 
     /**
+     * This HTML tag, "file-upload", adds functionality and a consistent and convenient API to the HTML provided file input.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    multiple     </td><td>     the user may select multiple files              </td></tr>
+     *     <tr><td>    required     </td><td>     an entry is required (at least 1 file)              </td></tr>
+     * </table>
+     * <br>
+     * <strong>Content</strong>
+     * <br><br>
+     *     The <em>Content</em> of this control is unused.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    clear()     </td><td>     erases the contents of the control               </td></tr>
+     *     <tr><td>    click() </td><td> simulate a user click on the control </td></tr>
+     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
+     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
+     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>  has the control contents been changed by user      </td></tr>
+     *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isDisabled()     </td><td> is the control disabled? </td></tr>
+     *     <tr><td>    isHidden()     </td><td> is the control hidden? </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td> is the control read-only?    </td></tr>
+     *     <tr><td>    isVisible()     </td><td> is the control visible?   </td></tr>
+     *     <tr><td>    numberOfUploadFiles() </td><td> the number of files the user selected is returned </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>  execute fun when control changes              </td></tr>
+     *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
+     *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
+     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    uploadFile(idx) </td><td> the JavaScript <code>File</code> object of file number <code>idx</code> </td></tr>
+     *     <tr><td>    uploadFileName(idx) </td><td> the name of file number <code>idx</code> </td></tr>
+     * </table>
+     */
+    static file_upload() {}
+
+    /**
      * This HTML tag, "list-box", adds functionality and a consistent and convenient API to the HTML provided <code>select</code> tag.
      * <br><br>
      * <table>

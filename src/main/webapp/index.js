@@ -23,10 +23,11 @@ Utils.afterComponentsLoaded(function () {
     Utils.useComponent('ListBox');
     Utils.useComponent('NumericInput');
     Utils.useComponent('PushButton');
-    Utils.useComponent("RadioButton");
-    Utils.useComponent("TextboxInput");
-    Utils.useComponent("TextInput");
-    Utils.useComponent("TextLabel");
-    Utils.useComponent("TimeInput");
+    Utils.useComponent('RadioButton');
+    Utils.useComponent('TextboxInput');
+    Utils.useComponent('TextInput');
+    Utils.useComponent('TextLabel');
+    Utils.useComponent('TimeInput');
+    Utils.useComponent('FileUpload');
 })();
 

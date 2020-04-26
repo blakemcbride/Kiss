@@ -1052,28 +1052,6 @@ class Utils {
         Utils.someControlValueChangedFun = fun;
     }
 
-    /**
-     * Return the number of user selected file in a 'file' input type.
-     *
-     * @param fld the id of the field
-     * @returns {number}
-     */
-    static numberOfUploadFiles(fld) {
-        const files = $('#' + fld);
-        return files[0].files.length;
-    }
-
-    /**
-     * Returns the name of file number idx of a 'file' input.
-     *
-     * @param fld the id of the input field
-     * @param idx the index telling which of the user selected files you want the name of
-     * @returns {string}
-     */
-    static uploadFilename(fld, idx) {
-        return $('#' + fld)[0].files[idx].name;
-    }
-
 }
 
 Utils.count = 1;
