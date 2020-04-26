@@ -15,7 +15,7 @@ $$('controls').onclick(function () {
 
 
 $$('logout').onclick(function () {
-    Server.setUUID('');
+    Server.logout();
     window.onbeforeunload = null;
     history.go(0);
 });
