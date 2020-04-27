@@ -38,11 +38,3 @@ $$('lisp-button').onclick(async function () {
         $$('input-3').setValue(res.num3);
     }
 });
-
-$$('logout').onclick(function () {
-    Server.logout();
-    window.onbeforeunload = null;
-    history.go(0);
-});
-
-
