@@ -12,9 +12,9 @@
         let hasFor = false;
 
         if (attr.style)
-            nstyle = attr.style;
+            nstyle = 'cursor: default; ' + attr.style;
         else
-            nstyle = '';
+            nstyle = 'cursor: default;';
 
         let nattrs = '';
         let id;
@@ -71,7 +71,11 @@
         newElm.onclick = function (fun) {
             // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
             // but it also limits to a single callback function
-            jqObj.off('click').click(fun);
+            jqObj.off('click');
+            if (fun)
+                jqObj.css('cursor', 'pointer').click(fun);
+            else
+                jqObj.css('cursor', 'default');
             return this;
         };
 
