@@ -54,14 +54,16 @@
 
         // code to correct bug in Chrome
         let addHeight = true;
-        let tstyle = attr.style.split(';');
-        for (let i=0 ; i < tstyle.length ; i++) {
-            let s = tstyle[i].split(':');
-            if (s.length) {
-                let a = s[0].trim();
-                if (a === 'height') {
-                    addHeight = false;
-                    break;
+        if (attr.style) {
+            let tstyle = attr.style.split(';');
+            for (let i = 0; i < tstyle.length; i++) {
+                let s = tstyle[i].split(':');
+                if (s.length) {
+                    let a = s[0].trim();
+                    if (a === 'height') {
+                        addHeight = false;
+                        break;
+                    }
                 }
             }
         }
