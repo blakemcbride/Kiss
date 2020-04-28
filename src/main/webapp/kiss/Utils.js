@@ -752,14 +752,16 @@ class Utils {
                     'Content-type': 'text/plain'
                 }
             });
-            let y = 1;
         } catch (err) {
+            console.log(err.message);
+            console.log(err.stack);
         }
         try {
             let r = await response.text();
             callback(r);
         } catch (err) {
-            let z = 1;
+            console.log(err.message);
+            console.log(err.stack);
         }
         return;
 
