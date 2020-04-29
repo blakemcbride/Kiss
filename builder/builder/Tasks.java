@@ -75,13 +75,14 @@ public class Tasks {
     }
 
     private void deployWar() {
-        copy(BUILDDIR + "/Kiss.war", "tomcat/webapps");
+        copy(BUILDDIR + "/Kiss.war", "tomcat/webapps/ROOT.war");
     }
 
     void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
             download(tomcatTarFile, ".", "https://apache.cs.utah.edu/tomcat/tomcat-9/v9.0.34/bin/apache-tomcat-9.0.34.tar.gz");  
             gunzip(tomcatTarFile, "tomcat", 1);
+            rmTree("tomcat/webapps/ROOT");
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
         }
         if (isWindows) {
@@ -108,23 +109,26 @@ public class Tasks {
     }
 
     void develop() {
+        Process proc;
         war();
         setupTomcat();
         deployWar();
         if (isWindows)
-            run(true, "tomcat\\bin\\debug.cmd");
+            runWait(true, "tomcat\\bin\\debug.cmd");
         else
-            run(true, "tomcat/bin/debug");
+            runWait(true, "tomcat/bin/debug");
+        proc = runBackground("java -jar SimpleWebServer.jar -d src/main/webapp");
         println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out");
-        println("You can browse to http://localhost:8080/Kiss");
+        println("You can browse to http://localhost:8000   (do not use port 8080)");
         println("The app can also be debugged at port 9000");
         println("hit any key to stop tomcat");
         readChar();
         println("shutting down tomcat");
         if (isWindows)
-            run(true, "tomcat\\bin\\stopdebug.cmd");
+            runWait(true, "tomcat\\bin\\stopdebug.cmd");
         else
-            run(true, "tomcat/bin/shutdown.sh");
+            runWait(true, "tomcat/bin/shutdown.sh");
+        killProcess(proc);
     }
 
     void javadoc() {

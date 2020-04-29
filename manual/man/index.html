@@ -532,10 +532,13 @@ the server.  At this point you will be able to go your browser at the
 following URL:
 </p>
 <div class="example">
-<pre class="example">    http://localhost:8080/Kiss
+<pre class="example">    http://localhost:8000
 </pre></div>
 
-<p>(Note that the &ldquo;K&rdquo; in the URL above is uppercase.)
+<p>Be sure not to use port 8080.  Although port 8080 will appear to work,
+you will not be able to do front-end development while the system is
+running.  Port 8000 will allow front-end development while the system
+is running.
 </p>
 <p>At this point, you can do all development without any build
 procedures.  You can add or change anything on the front-end or
@@ -565,7 +568,7 @@ super-quick-start.
 </li><li> See <a href="#Setup-And-Configuration">Setup And Configuration</a>
 </li><li> The development server can be run without an IDE by running: <code>./bld develop</code>
 </li><li> Once the server starts up, you can access it on your browser by going to 
-<code>http://localhost:8080/Kiss</code>  You can also debug the back-end by
+<code>http://localhost:8000</code>  You can also debug the back-end by
 attaching to the process at port 9000.
 
 <p>Alternatively, your IDE can be configured to run the development

@@ -516,7 +516,7 @@ public class BuildUtils {
         if (allFiles != null  &&  !allFiles.isEmpty()  &&  indexFile.lastModified() < latestSourceDate) {
             mkdir(destDir);
             String srcFiles = writeArgsToFile(allFiles);
-            run(false, "javadoc -d " + destDir + " @" + srcFiles);
+            runWait(false, "javadoc -d " + destDir + " @" + srcFiles);
             rm(srcFiles);
         }
     }
@@ -530,12 +530,13 @@ public class BuildUtils {
     }
 
     /**
-     * Run a command in the nderlying OS.
+     * Run a command in the underlying OS in the foreground.
+     * Wait till it is done.
      *
      * @param showOutput true if output should be shown
      * @param cmd
      */
-    public static void run(boolean showOutput, String startDir, String cmd) {
+    public static void runWait(boolean showOutput, String startDir, String cmd) {
         println(cmd);
         try {
             Process proc;
@@ -561,8 +562,38 @@ public class BuildUtils {
         }
     }
 
-    public static void run(boolean showOutput, String cmd) {
-        run(showOutput, null, cmd);
+    public static void runWait(boolean showOutput, String cmd) {
+        runWait(showOutput, null, cmd);
+    }
+
+    /**
+     * Run a command in the underlying OS in the background.
+     * Does not wait till it is done.
+     * The Process is returned so that it can be killed.
+     *
+     * @param cmd the command to execute
+     * @return the Process
+     */
+    public static Process runBackground(String cmd) {
+        println(cmd);
+        try {
+            Process proc;
+            String[] mscmd = new String[3];
+            if (isWindows) {
+                mscmd[0] = "cmd.exe";
+                mscmd[1] = "/C";
+                mscmd[2] = cmd;
+                proc = Runtime.getRuntime().exec(mscmd, null, null);
+            } else
+                proc = Runtime.getRuntime().exec(cmd, null, null);
+            return proc;
+        } catch (IOException e) {
+            throw new RuntimeException("error executing " + cmd);
+        }
+    }
+
+    public static void killProcess(Process proc) {
+        proc.destroyForcibly();
     }
 
     private static long getLatestFileDate(File f, long dt) {
@@ -599,7 +630,7 @@ public class BuildUtils {
             cmd = "jar cmf " + manifest + " " + jarFile + " -C " + rootDir + " .";
         else
             cmd = "jar cf " + jarFile + " -C " + rootDir + " .";
-        run(false, cmd);
+        runWait(false, cmd);
     }
 
     /**
@@ -618,7 +649,7 @@ public class BuildUtils {
             return;
         (new File(rootDir, tagDir)).mkdirs();
         String cmd = "jar xf " + jarf.getAbsolutePath();
-        run(false, rootDir, cmd);
+        runWait(false, rootDir, cmd);
         touch(tagf.getAbsolutePath());
     }
 
@@ -656,7 +687,7 @@ public class BuildUtils {
             cmd = "javac @" + argsFile + " -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
         } else
             cmd = "javac -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
-        run(true, cmd);
+        runWait(true, cmd);
         rm(argsFile);
     }
 

@@ -81,10 +81,13 @@ the server.  At this point you will be able to go your browser at the
 following URL:
 
 @example
-    http://localhost:8080/Kiss
+    http://localhost:8000
 @end example
 
-(Note that the ``K'' in the URL above is uppercase.)
+Be sure not to use port 8080.  Although port 8080 will appear to work,
+you will not be able to do front-end development while the system is
+running.  Port 8000 will allow front-end development while the system
+is running.
 
 At this point, you can do all development without any build
 procedures.  You can add or change anything on the front-end or
@@ -118,7 +121,7 @@ The following enumerates the steps necessary to get the system up and running:
 The development server can be run without an IDE by running: @code{./bld develop}
 @item
 Once the server starts up, you can access it on your browser by going to 
-@code{http://localhost:8080/Kiss}  You can also debug the back-end by
+@code{http://localhost:8000}  You can also debug the back-end by
 attaching to the process at port 9000.
 
 Alternatively, your IDE can be configured to run the development

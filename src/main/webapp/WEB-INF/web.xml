@@ -5,23 +5,19 @@
 		<listener-class>org.kissweb.rest.StartupListener</listener-class>
 	</listener>
 
-	<!-- The following can also be turned on and off by changing between \"CONFIDENTIAL\" and \"NONE\".  -->
-
-	<!--  The following allows CORS - sometimes good in a development environment.  The down side is this code only works under tomcat. -->
-	<security-constraint>
-		<web-resource-collection>
-			<web-resource-name>securedapp</web-resource-name>
-			<url-pattern>/*</url-pattern>
-		</web-resource-collection>
-		<user-data-constraint>
-			<transport-guarantee>NONE</transport-guarantee>
-		</user-data-constraint>
-	</security-constraint>
-
+    <!--  Allow CORS on localhost for development  -->
 	<filter>
 		<filter-name>CorsFilter</filter-name>
 		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
 		<async-supported>true</async-supported>
+		<init-param>
+			<param-name>cors.allowed.origins</param-name>
+			<param-value>http://localhost:8000</param-value>
+		</init-param>
+		<init-param>
+			<param-name>cors.allowed.methods</param-name>
+			<param-value>GET,POST,HEAD,OPTIONS,PUT</param-value>
+		</init-param>
 		<init-param>
 			<param-name>cors.allowed.headers</param-name>
 			<param-value>Content-Type,X-Requested-With,Accept,Accept-Encoding,Accept-Language,Cache-Control,Connection,Host,Pragma,Origin,Referer,User-Agent,Access-Control-Request-Method,Access-Control-Request-Headers</param-value>
@@ -31,12 +27,12 @@
 			<param-value>Access-Control-Allow-Origin,Content-Length,Content-Type,Date,Server,Access-Control-Allow-Credentials</param-value>
 		</init-param>
 		<init-param>
-			<param-name>cors.allowOrigin</param-name>
-			<param-value>*</param-value>
+			<param-name>cors.support.credentials</param-name>
+			<param-value>true</param-value>
 		</init-param>
 		<init-param>
-			<param-name>cors.supportedMethods</param-name>
-			<param-value>GET, POST, HEAD, OPTIONS</param-value>
+			<param-name>cors.preflight.maxage</param-name>
+			<param-value>10</param-value>
 		</init-param>
 	</filter>
 	<filter-mapping>
