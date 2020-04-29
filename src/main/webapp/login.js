@@ -5,20 +5,19 @@
 
 $$('login').onclick(async function () {
 
-    let error = $$('username').isError('Username');
-    if (!error)
-        error = $$('password').isError('Password');
+    if ($$('username').isError('Username'))
+        return;
+    if ($$('password').isError('Password'))
+        return;
 
-    if (!error) {
-        let data = {
-            username: $$('username').getValue(),
-            password: $$('password').getValue()
-        };
-        let res = await Server.call('', 'Login', data);
-        if (res._Success) {
-            Server.setUUID(res.uuid);
-            Utils.loadPage('MainMenu/MainMenu');
-        }
+    let data = {
+        username: $$('username').getValue(),
+        password: $$('password').getValue()
+    };
+    let res = await Server.call('', 'Login', data);
+    if (res._Success) {
+        Server.setUUID(res.uuid);
+        Utils.loadPage('screens/MainMenu/MainMenu');
     }
 
 });
