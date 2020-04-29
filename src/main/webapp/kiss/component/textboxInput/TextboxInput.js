@@ -5,19 +5,24 @@
 
 /* global Utils, Component */
 
+/*
+  I need to use a div rather than a textarea because a textarea doesn't support HTML contents.  A div does.
+ */
+
 'use strict';
 
 (function () {
 
     const processor = function (elm, attr, content) {
-        let nstyle, originalValue;
+        let originalValue;
         let min = null;
         let upcase = false;
+        let disabled = false;
+        let resetContent = false;
+        let placeholder = null;
+        let nstyle = "background-color: white; border: 2px solid #d0d5d5; ";
         if (attr.style)
-            nstyle = attr.style;
-        else
-            nstyle = '';
-        nstyle = 'resize: none; ' + nstyle;
+            nstyle += attr.style;
 
         let nattrs = '';
         let id;
@@ -35,6 +40,12 @@
                     if (!min)
                         min = 1;
                     break;
+                case 'disabled':
+                    disabled = true;
+                    break;
+                case 'placeholder':
+                    placeholder = Utils.removeQuotes(attr[prop]);
+                    break;
 
                 // pre-existing attributes
 
@@ -49,40 +60,59 @@
             }
         }
 
-        nattrs += ' oninput="this.value=Component.TextboxInput.$textinput(this)"';
-        nattrs += ' data-lpignore="true"';  // kill lastpass
+        if (!disabled)
+            nattrs += ' contenteditable="true"';
 
-        const newElm = Utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} placeholder="{placeholder}" id="{id}"></textarea>', {
+        if (content)
+            content = content.trim();
+        if (placeholder  &&  !content) {
+            content = '<span style="color: gray;">' + placeholder + '</span>';
+            resetContent = true;
+        }
+
+        const newElm = Utils.replaceHTML(id, elm, '<div style="{style}" {attr} id="{id}" >{content}</div>', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content ? content.trim() : ''
+            content: content ? content.trim() : ''
         });
         const jqObj = newElm.jqObj;
 
-        newElm.elementInfo.upcase = upcase;
+        function removePlaceholder() {
+            if (resetContent) {
+                jqObj.text('');
+                resetContent = false;
+            }
+        }
 
         jqObj.keydown(function () {
+            removePlaceholder();
             Utils.someControlValueChanged();
         });
 
         //--
 
         newElm.getValue = function () {
-            let sval = jqObj.val();
+            let sval = resetContent ? '' : jqObj.text();
             return sval ? sval : '';
         };
 
         newElm.setValue = function (val) {
+            removePlaceholder();
             if (val !== 0  &&  !val) {
-                jqObj.val(originalValue='');
+                jqObj.text(originalValue='');
                 return this;
             }
-            jqObj.val(originalValue=val);
+            jqObj.text(originalValue=val);
             return this;
         };
 
         newElm.clear = function () {
             newElm.setValue('');
+            if (placeholder) {
+                let content = '<span style="color: gray;">' + placeholder + '</span>';
+                jqObj.html(content);
+                resetContent = true;
+            }
             return this;
         };
 
@@ -151,6 +181,10 @@
 
         newElm.onKeyDown = function (fun) {
             jqObj.off('keydown').keydown(function (event) {
+                if (resetContent) {
+                    jqObj.text('');
+                    resetContent = false;
+                }
                 Utils.someControlValueChanged();
                 if (fun)
                     fun(event);
@@ -181,6 +215,24 @@
             return false;
         };
 
+        jqObj.on('input', function (elm) {
+            if (upcase) {
+                const val = jqObj.text();
+                if (val) {
+                    const p = jqObj.caret();
+                    jqObj.text(val.toUpperCase());
+                    jqObj.caret(p);
+                }
+            }
+        });
+
+        jqObj.on('focus', function (elm) {
+            if (resetContent)
+                setTimeout(function () {
+                    jqObj.caret(0);
+                }, 1);
+        });
+
     };
 
     const componentInfo = {
@@ -189,13 +241,6 @@
         processor: processor
     };
     Utils.newComponent(componentInfo);
-
-
-    Component.TextboxInput.$textinput = function (elm) {
-        let val = elm.value.replace(/^\s+/, "");
-        return elm.kiss.elementInfo.upcase ? val.toUpperCase() : val;
-    };
-
 
 })();
 

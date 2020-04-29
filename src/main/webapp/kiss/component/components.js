@@ -395,12 +395,15 @@ class components {
 
     /**
      * This HTML tag, "textbox-input", adds functionality and a consistent and convenient API to the HTML provided multi-line text input.
+     *
+     * Static HTML content can be used inside this control.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    minlength="5"     </td><td>     sets the minimum acceptable string length               </td></tr>
      *     <tr><td>    maxlength="200"     </td><td>     sets the maximum number of characters               </td></tr>
      *     <tr><td>    password     </td><td>     the character are not shown on the screen              </td></tr>
+     *     <tr><td>    placeholder="" </td><td>   text to be displaced in the control until the user enters data </td><tr>
      *     <tr><td>    required     </td><td>     an entry is required (at least 1 character)              </td></tr>
      *     <tr><td>    rows="20"     </td><td>     sets the <em>minimum</em> number of visible rows (it will expand to fill the area it is in) </td></tr>
      *     <tr><td>    upcase     </td><td>     when the user enters text, it is auto-upcased               </td></tr>
