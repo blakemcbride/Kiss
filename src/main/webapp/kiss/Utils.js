@@ -1054,6 +1054,26 @@ class Utils {
         Utils.someControlValueChangedFun = fun;
     }
 
+    /**
+     * Count properties associated with an object.
+     *
+     * @param obj
+     * @returns {number}
+     */
+    static countProperties(obj) {
+        return Object.keys(obj).length;
+    }
+
+    /**
+     * Perform a shallow clone on an array.
+     *
+     * @param ary
+     * @returns { clone of ary}
+     */
+    static cloneArrayShallow(ary) {
+        return [...ary];
+    }
+
 }
 
 Utils.count = 1;
