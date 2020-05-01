@@ -97,17 +97,18 @@ public class BuildUtils {
     }
 
     private static File findJavaPathWindows(File f) {
-        File [] files = f.listFiles();
-        for (File f2 : files) {
-            String name = f2.getName();
-            if (name.equalsIgnoreCase("javac.exe"))
-                return f2;
-            if (f2.isDirectory()) {
-                File ret = findJavaPathWindows(f2);
-                if (ret != null)
-                    return ret;
+        File[] files = f.listFiles();
+        if (files != null)
+            for (File f2 : files) {
+                String name = f2.getName();
+                if (name.equalsIgnoreCase("javac.exe"))
+                    return f2;
+                if (f2.isDirectory()) {
+                    File ret = findJavaPathWindows(f2);
+                    if (ret != null)
+                        return ret;
+                }
             }
-        }
         return null;  // not found
     }
 
