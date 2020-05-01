@@ -12,4 +12,8 @@ class MyGroovyService {
         outjson.put("num3", (num1 + num2))
     }
 
+    void hasDatabase(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+        outjson.put("hasDatabase", MainServlet.hasDatabase())
+    }
+
 }

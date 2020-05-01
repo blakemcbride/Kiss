@@ -315,7 +315,7 @@ public class ABCL {
 						((Condition) c).getConditionReport())
 						: c.princToString());
 	}
-	
+
 	//  DO NOT REMOVE THIS METHOD
 	public static int getLispRelease() {
 		return lispRelease;

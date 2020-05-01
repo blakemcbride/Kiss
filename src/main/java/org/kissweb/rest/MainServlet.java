@@ -209,7 +209,7 @@ public class MainServlet extends HttpServlet {
         MainServlet.maxWorkerThreads = maxThreads;
     }
 
-    static boolean hasDatabase() {
+    public static boolean hasDatabase() {
         return hasDatabase;
     }
 

@@ -10,3 +10,13 @@ CREATE TABLE users (
 INSERT INTO users (user_name, user_password, user_active) VALUES ('kiss', 'password', 'Y');
 
 
+-- The following is only used for the SQL demo on the "SQL Access" screen
+
+CREATE TABLE test (
+    key smallint not null primary key,
+    data character varying(40)
+);
+
+INSERT INTO test (key, data) VALUES (1, 'Record one');
+INSERT INTO test (key, data) VALUES (2, 'Record two');
+INSERT INTO test (key, data) VALUES (3, 'Record three');
