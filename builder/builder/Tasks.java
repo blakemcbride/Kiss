@@ -132,7 +132,8 @@ public class Tasks {
     }
 
     void javadoc() {
-        buildJavadoc("src/main/java", BUILDDIR + "/javadoc");
+        libs();
+        buildJavadoc("src/main/java", "libs", BUILDDIR + "/javadoc");
     }
 
     void clean() {

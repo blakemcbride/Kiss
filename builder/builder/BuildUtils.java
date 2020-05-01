@@ -434,8 +434,34 @@ public class BuildUtils {
     public static String writeArgsToFile(final ArrayList<File> lst) {
         File f;
         try {
-            f = File.createTempFile("SoureFiles", ".inp");
+            f = File.createTempFile("SourceFiles", ".inp");
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
+                for (File f2 : lst) {
+                    bw.write(f2.getPath());
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            return null;
+        }
+        return f.getAbsolutePath();
+    }
+
+    public static String writeDocArgsToFile(final ArrayList<File> libs, final ArrayList<File> lst) {
+        File f;
+        try {
+            f = File.createTempFile("DocFiles", ".inp");
+            boolean colon = false;
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
+                bw.write("-cp ");
+                for (File f2 : libs) {
+                    if (colon)
+                        bw.write(isWindows ? ';' : ':');
+                    else
+                        colon = true;
+                    bw.write(f2.getPath());
+                }
+                bw.newLine();
                 for (File f2 : lst) {
                     bw.write(f2.getPath());
                     bw.newLine();
@@ -510,13 +536,13 @@ public class BuildUtils {
         }
     }
 
-    public static void buildJavadoc(String srcPath, String destDir) {
+    public static void buildJavadoc(String srcPath, String libPath, String destDir) {
         ArrayList<File> allFiles = allSourceFiles(srcPath, ".java");
         long latestSourceDate = getLatestDate(allFiles);
         File indexFile = new File(destDir + "/index.html");
         if (allFiles != null  &&  !allFiles.isEmpty()  &&  indexFile.lastModified() < latestSourceDate) {
             mkdir(destDir);
-            String srcFiles = writeArgsToFile(allFiles);
+            String srcFiles = writeDocArgsToFile(allSourceFiles(libPath, ".jar"), allFiles);
             runWait(false, "javadoc -d " + destDir + " @" + srcFiles);
             rm(srcFiles);
         }
