@@ -508,7 +508,8 @@ any need for re-compiles or re-builds.
 systems and &ldquo;<em>bld.cmd</em>&rdquo; under Windows.  In this manual,
 &ldquo;<em>bld</em>&rdquo; will be shown as &ldquo;<em>./bld</em>&rdquo;.  The &ldquo;./&rdquo; is
 required under Linux and Mac but not under Windows.  When running on
-Windows, use &ldquo;bld.cmd&rdquo; rather than &ldquo;./bld&rdquo;.
+Windows, use &ldquo;bld&rdquo; rather than &ldquo;./bld&rdquo; and the same for all the
+other commands shown.
 </p>
 <a name="Super_002dQuick_002dStart"></a>
 <h3 class="section">2.2 Super-Quick-Start</h3>
@@ -520,11 +521,13 @@ Windows, use &ldquo;bld.cmd&rdquo; rather than &ldquo;./bld&rdquo;.
 </li><li> you have an Internet connection
 </li></ol>
 
-<p>After doing a <code>git clone</code> all that is needed is the following,
-single command:
+<p>After doing a <code>git clone</code>, all that is needed is the following:
 </p>
 <div class="example">
-<pre class="example">    ./bld  develop
+<pre class="example">    ./bld  develop                      [Linux, Mac, BSD, etc.]
+         -or-
+    build-builder                       [Windows]
+    bld  develop                        [Windows]
 </pre></div>
 
 <p>This will build the system, install tomcat, deploy the app, and run
@@ -772,24 +775,21 @@ is rarely built.  After the first build, application development is done
 without any build process.
 </p>
 <p>The build system, which comes in source form, must be built before it
-can be used to build <em>Kiss</em>.  The build system may be built by
-running one of the the following command from the root of the
-<em>Kiss</em> system:
+can be used to build <em>Kiss</em>.  Under Linux, Mac, BSD, etc., the
+build system gets built automatically.  However, under Windows, the 
+following command is needed once to build the build system:
 </p>
-<dl compact="compact">
-<dt><code>Linux, Mac, etc.</code></dt>
-<dd><p>./build-builder
-</p></dd>
-<dt><code>Windows</code></dt>
-<dd><p>build-builder.cmd
-</p></dd>
-</dl>
+<div class="example">
+<pre class="example">    build-builder             [Windows]
+</pre></div>
 
 <p>Once the build system has been built, you can see what operations it
 can perform by typing:
 </p>
 <div class="example">
-<pre class="example">    ./bld listTasks
+<pre class="example">    ./bld listTasks           [Linux, Mac, BSD, etc.]
+        -or-
+    bld listTasks             [Windows]
 </pre></div>
 
 <p>Those tasks that require prior tasks will evoke the dependent tasks
@@ -807,7 +807,7 @@ remainder of the system.  It installs the required dependencies.
 <dd><p>This will cause the entire system to build (not repeating unnecessary
 steps) and start up a tomcat instance to run the system in a
 development mode.  The system will be available from your local
-browser at <code>http://localhost:8080</code>.  You may debug the
+browser at <code>http://localhost:8000</code>.  You may debug the
 application by attaching to the running <em>tomcat</em> server at port
 9000.
 </p></dd>
@@ -891,8 +891,8 @@ debug, and maintain the system, the <em>Kiss</em> build system
 And even before that, the build system itself must be built.  All this
 can be accomplished with the following commands:
 <ol type="a" start="1">
-<li> ./build-builder
-</li><li> ./bld libs
+<li> build-builder                [under Windows only]
+</li><li> ./bld libs                   [Windows without the ./]
 </li></ol>
 </li><li> Install tomcat.  You must install a copy of the <em>tomcat</em> server.
 You can do this by either installing it in a typical way from the

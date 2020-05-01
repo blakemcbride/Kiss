@@ -56,7 +56,8 @@ The program that runs @emph{BLD} is ``@emph{bld}'' under Unix-like
 systems and ``@emph{bld.cmd}'' under Windows.  In this manual,
 ``@emph{bld}'' will be shown as ``@emph{./bld}''.  The ``./'' is
 required under Linux and Mac but not under Windows.  When running on
-Windows, use ``bld.cmd'' rather than ``./bld''.
+Windows, use ``bld'' rather than ``./bld'' and the same for all the
+other commands shown.
 
 @section Super-Quick-Start
 
@@ -69,11 +70,13 @@ you have a JDK installed
 you have an Internet connection
 @end enumerate
 
-After doing a @code{git clone} all that is needed is the following,
-single command:
+After doing a @code{git clone}, all that is needed is the following:
 
 @example
-    ./bld  develop
+    ./bld  develop                      [Linux, Mac, BSD, etc.]
+         -or-
+    build-builder                       [Windows]
+    bld  develop                        [Windows]
 @end example
 
 This will build the system, install tomcat, deploy the app, and run
@@ -337,22 +340,21 @@ is rarely built.  After the first build, application development is done
 without any build process.
 
 The build system, which comes in source form, must be built before it
-can be used to build @emph{Kiss}.  The build system may be built by
-running one of the the following command from the root of the
-@emph{Kiss} system:
+can be used to build @emph{Kiss}.  Under Linux, Mac, BSD, etc., the
+build system gets built automatically.  However, under Windows, the 
+following command is needed once to build the build system:
 
-@table @code
-@item Linux, Mac, etc.
-./build-builder
-@item Windows
-build-builder.cmd
-@end table
+@example
+    build-builder             [Windows]
+@end example
 
 Once the build system has been built, you can see what operations it
 can perform by typing:
 
 @example
-    ./bld listTasks
+    ./bld listTasks           [Linux, Mac, BSD, etc.]
+        -or-
+    bld listTasks             [Windows]
 @end example
 
 Those tasks that require prior tasks will evoke the dependent tasks
@@ -369,7 +371,7 @@ remainder of the system.  It installs the required dependencies.
 This will cause the entire system to build (not repeating unnecessary
 steps) and start up a tomcat instance to run the system in a
 development mode.  The system will be available from your local
-browser at @code{http://localhost:8080}.  You may debug the
+browser at @code{http://localhost:8000}.  You may debug the
 application by attaching to the running @emph{tomcat} server at port
 9000.
 @item war
@@ -448,9 +450,9 @@ And even before that, the build system itself must be built.  All this
 can be accomplished with the following commands:
 @enumerate a
 @item
-./build-builder
+build-builder                [under Windows only]
 @item
-./bld libs
+./bld libs                   [Windows without the ./]
 @end enumerate
 @item
 Install tomcat.  You must install a copy of the @emph{tomcat} server.

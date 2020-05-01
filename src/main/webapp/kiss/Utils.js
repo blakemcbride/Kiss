@@ -1068,7 +1068,7 @@ class Utils {
      * Perform a shallow clone on an array.
      *
      * @param ary
-     * @returns { clone of ary}
+     * @returns {Array}  shallow copy of ary
      */
     static cloneArrayShallow(ary) {
         return [...ary];
