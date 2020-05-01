@@ -543,7 +543,8 @@ public class BuildUtils {
         if (allFiles != null  &&  !allFiles.isEmpty()  &&  indexFile.lastModified() < latestSourceDate) {
             mkdir(destDir);
             String srcFiles = writeDocArgsToFile(allSourceFiles(libPath, ".jar"), allFiles);
-            runWait(false, "javadoc -d " + destDir + " @" + srcFiles);
+            // for some reason, Windows hangs if we don't show the output
+            runWait(isWindows, "javadoc -d " + destDir + " @" + srcFiles);
             rm(srcFiles);
         }
     }
