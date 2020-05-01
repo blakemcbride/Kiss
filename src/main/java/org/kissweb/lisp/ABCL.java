@@ -26,6 +26,7 @@ public class ABCL {
     private static Function makeRestServiceArgs;
     private static int lispRelease = 0;
     private static String UtilsSource;
+    private static String appPath = null;
 
     public static void init() {
 		interpreter = Interpreter.createInstance();
@@ -122,16 +123,16 @@ public class ABCL {
 	}
 
 	public static LispObject load(String fileName) {
-	    return eval("(load \"" + MainServlet.getApplicationPath() + fileName + "\")");
+	    return eval("(load \"" + getAppPath() + fileName + "\")");
 	}
 
 	public static LispObject compileFile(String fileName) {
-		return eval("(compile-file \"" + MainServlet.getApplicationPath() + fileName + "\")");
+		return eval("(compile-file \"" + getAppPath() + fileName + "\")");
 	}
 
 	public static void loadPackage(String lispPackage, String fileName) throws Exception {
 		try {
-			eval("(package-lru:load-package \"" + lispPackage + "\" \"" + MainServlet.getApplicationPath() + fileName + "\")");
+			eval("(package-lru:load-package \"" + lispPackage + "\" \"" + getAppPath() + fileName + "\")");
 		} catch (Throwable t) {
 			// Convert Throwable to Exception
 			throw new Exception("Error loading lisp file " + fileName, t);
@@ -314,8 +315,7 @@ public class ABCL {
 						((Condition) c).getConditionReport())
 						: c.princToString());
 	}
-
-
+	
 	//  DO NOT REMOVE THIS METHOD
 	public static int getLispRelease() {
 		return lispRelease;
@@ -325,5 +325,13 @@ public class ABCL {
 	public static void setLispRelease(int lispRelease) {
 		ABCL.lispRelease = lispRelease;
 	}
+
+
+	private static String getAppPath() {
+		if (appPath == null)
+			appPath = MainServlet.getApplicationPath().replaceAll("\\\\", "/");  //  for Windows
+		return appPath;
+	}
+
 
 }
