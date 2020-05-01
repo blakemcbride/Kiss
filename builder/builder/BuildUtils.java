@@ -434,7 +434,7 @@ public class BuildUtils {
     public static String writeArgsToFile(final ArrayList<File> lst) {
         File f;
         try {
-            f = File.createTempFile("SourceFiles", ".inp");
+            f = File.createTempFile("SourceFiles-", ".inp");
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
                 for (File f2 : lst) {
                     bw.write(f2.getPath());
@@ -450,7 +450,7 @@ public class BuildUtils {
     public static String writeDocArgsToFile(final ArrayList<File> libs, final ArrayList<File> lst) {
         File f;
         try {
-            f = File.createTempFile("DocFiles", ".inp");
+            f = File.createTempFile("DocFiles-", ".inp");
             boolean colon = false;
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
                 bw.write("-cp ");
@@ -476,7 +476,7 @@ public class BuildUtils {
     private static String writeDependencyArgsToFile(LocalDependencies ldep, ForeignDependencies fdep) {
         File f;
         try {
-            f = File.createTempFile("Dependencies", ".inp");
+            f = File.createTempFile("Dependencies-", ".inp");
             try (final BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
                 bw.write("-cp ");
                 if (ldep != null)
