@@ -67,7 +67,10 @@ class Server {
                 return await processError(cls, meth, injson, pass, err);
             }
             try {
-                return await response.json();
+                let res =  await response.json();
+                if (!res._Success)
+                    Utils.showMessage('Error', res._ErrorMessage);
+                return res;
             } catch (err) {
                 return await processError(cls, meth, injson, pass, err);
             }
