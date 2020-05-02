@@ -8,7 +8,7 @@
       the screen is replaces with another.
 
       The entire HTML file is wrapped in a <div>.  The <div> includes any screen specific popups.  However, the Kiss
-      system has a different facility to support popups that are shared among many screens.  (See Utils.component())
+      system has an additional facility to support popups that are shared among many screens.  (See Utils.component())
  */
 
 /* global $$ */
