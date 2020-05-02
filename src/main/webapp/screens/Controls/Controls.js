@@ -15,7 +15,7 @@
 
 'use strict';
 
-(function () {
+(async function () {
 
     $$('ok').onclick(function () {
         if ($$('ctl-text').isError('Text'))

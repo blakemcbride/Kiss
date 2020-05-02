@@ -3,7 +3,7 @@
 
 'use strict';
 
-(function () {
+(async function () {
 
     $$('rest-services').onclick(function () {
         Utils.loadPage('screens/RestServices/RestServices', 'app-screen-area');
