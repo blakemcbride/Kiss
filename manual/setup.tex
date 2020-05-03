@@ -39,7 +39,7 @@ configuring a web server, building @emph{Kiss}, and running
 @emph{Kiss} for development purposes easy, intelligent, and automatic.
 This new build system can be used in conjunction with your favorite IDE.
 
-The build system (I call it @emph{bld}) is small and
+The build system (called it @emph{bld}) is small and
 written in Java.  Its source code is included with the @emph{Kiss}
 source code.  So, a Java compiler will be needed before anything will
 work.  At this point, Java version 8 is being used.  Later Java
@@ -182,7 +182,10 @@ You should download and install the following pre-requisites.
 
 @enumerate
 @item
-Java JDK 8 from @uref{https://www.oracle.com/java/index.html}
+Java JDK 8 from many sources including @uref{https://www.azul.com/downloads/zulu-community} or 
+@uref{https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html} or
+@uref{https://developers.redhat.com/products/openjdk/download} or
+@uref{https://adoptopenjdk.net}
 @item
 An SQL database server (e.g.@ PostgreSQL, Microsoft SQL Server, MySQL,
 Oracle, SQLite)
@@ -307,10 +310,10 @@ number of simultaneous users.
 The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 
-Create the database (named ``kiss'' above or whatever name you
-configured).  After that, you can run the script file @code{init.sql}
-to create the needed table and some initial data.  You may add any
-application specific tabled needed.
+Create the database (named by ``Database'' above).  After that, you
+can run the script file @code{init.sql} to create the needed tables and
+some initial data.  You may add any application specific tables
+needed.  This process also creates the tables used by the demo.
 
 The default username is @emph{kiss}, and the default password is
 @emph{password}

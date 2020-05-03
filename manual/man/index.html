@@ -491,7 +491,7 @@ configuring a web server, building <em>Kiss</em>, and running
 <em>Kiss</em> for development purposes easy, intelligent, and automatic.
 This new build system can be used in conjunction with your favorite IDE.
 </p>
-<p>The build system (I call it <em>bld</em>) is small and
+<p>The build system (called it <em>bld</em>) is small and
 written in Java.  Its source code is included with the <em>Kiss</em>
 source code.  So, a Java compiler will be needed before anything will
 work.  At this point, Java version 8 is being used.  Later Java
@@ -627,7 +627,10 @@ and the front-end server runs by executing a single command.
 <p>You should download and install the following pre-requisites.
 </p>
 <ol>
-<li> Java JDK 8 from <a href="https://www.oracle.com/java/index.html">https://www.oracle.com/java/index.html</a>
+<li> Java JDK 8 from many sources including <a href="https://www.azul.com/downloads/zulu-community">https://www.azul.com/downloads/zulu-community</a> or 
+<a href="https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html">https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html</a> or
+<a href="https://developers.redhat.com/products/openjdk/download">https://developers.redhat.com/products/openjdk/download</a> or
+<a href="https://adoptopenjdk.net">https://adoptopenjdk.net</a>
 </li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL,
 Oracle, SQLite)
 </li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, NetBeans, eclipse)
@@ -741,10 +744,10 @@ number of simultaneous users.
 <p>The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 </p>
-<p>Create the database (named &ldquo;kiss&rdquo; above or whatever name you
-configured).  After that, you can run the script file <code>init.sql</code>
-to create the needed table and some initial data.  You may add any
-application specific tabled needed.
+<p>Create the database (named by &ldquo;Database&rdquo; above).  After that, you
+can run the script file <code>init.sql</code> to create the needed tables and
+some initial data.  You may add any application specific tables
+needed.  This process also creates the tables used by the demo.
 </p>
 <p>The default username is <em>kiss</em>, and the default password is
 <em>password</em>
@@ -1127,11 +1130,12 @@ occur.
 <h3 class="section">3.5 Creating JavaDocs</h3>
 
 <p>JavaDocs for the <em>Kiss</em> system will need to be created.  It is
-created from the command line using <em>Gradle</em> by issuing the
-following command:
+created from the command line by issuing the following command:
 </p>
 <div class="example">
-<pre class="example">./bld javadoc
+<pre class="example">./bld javadoc              [Linux, Mac, BSD, etc.]
+    -or-
+bld javadoc                [Windows]
 </pre></div>
 
 <p>The JavaDoc files end up in the <code>build.work/javadoc</code> directory.
