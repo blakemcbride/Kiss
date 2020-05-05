@@ -11,6 +11,7 @@
 
     const processor = function (elm, attr, content) {
         let nstyle;
+        let waitForKeyUp = false;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -45,13 +46,28 @@
         const jqObj = newElm.jqObj;
 
         jqObj.on('change', function () {
-            Utils.someControlValueChanged();
+ //           Utils.someControlValueChanged();
         });
 
         newElm.onclick = function (fun) {
             // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
             // but it also limits to a single callback function
-            jqObj.off('click').click(fun);
+            jqObj.off('click').off('keyup').off('keydown');
+            if (fun)
+                jqObj.on('click', function (e) {
+                    if (!waitForKeyUp)
+                        fun();
+                }).on('keyup', function (e) {
+                    e.stopPropagation();
+                    if (waitForKeyUp && e.keyCode === 13) {
+                        fun();
+                        waitForKeyUp = false;
+                    }
+                }).on('keydown', function (e) {
+                    if (e.keyCode === 13)
+                        waitForKeyUp = true;
+                    e.stopPropagation();
+                });
             return this;
         };
 

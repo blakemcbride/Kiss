@@ -113,11 +113,10 @@
             return this;
         };
 
-        newElm.isError = function (desc) {
+        newElm.isError = async function (desc) {
             if (required && !jqObj[0].files.length) {
-                Utils.showMessage('Error', desc + " file selection is required.", function () {
-                    jqObj.focus();
-                });
+                await Utils.showMessage('Error', desc + " file selection is required.");
+                jqObj.focus();
                 return true;
             }
             return false;

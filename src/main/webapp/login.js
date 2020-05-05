@@ -3,24 +3,37 @@
 
 'use strict';
 
-$$('login').onclick(async function () {
+(function () {
 
-    if ($$('username').isError('Username'))
-        return;
-    if ($$('password').isError('Password'))
-        return;
+    async function login() {
+        if ($$('username').isError('Username'))
+            return;
+        if ($$('password').isError('Password'))
+            return;
 
-    let data = {
-        username: $$('username').getValue(),
-        password: $$('password').getValue()
-    };
-    let res = await Server.call('', 'Login', data);
-    if (res._Success) {
-        Server.setUUID(res.uuid);
-        Utils.loadPage('screens/MainMenu/MainMenu');
+        let data = {
+            username: $$('username').getValue(),
+            password: $$('password').getValue()
+        };
+        let res = await Server.call('', 'Login', data);
+        if (res._Success) {
+            Server.setUUID(res.uuid);
+            Utils.loadPage('screens/MainMenu/MainMenu');
+        } else {
+            $$('password').clear().focus();
+        }
     }
 
-});
+    $$('login').onclick(login);
 
-$$('username').focus();
+    $$('username').onEnter(function () {
+        $$('password').focus();
+    });
 
+    $$('password').onEnter(function () {
+        login();
+    });
+
+    $$('username').focus();
+
+})();

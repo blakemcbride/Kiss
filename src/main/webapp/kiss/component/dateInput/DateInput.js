@@ -20,7 +20,7 @@
             nstyle = attr.style;
         else
             nstyle = '';
-
+        let enterFunction = null;
         let nattrs = '';
         let id;
         for (let prop in attr) {
@@ -61,6 +61,15 @@
         jqObj.on('change', function () {
             Utils.someControlValueChanged();
         });
+
+        function keyUpHandler(event) {
+            if (enterFunction && event.keyCode === 13) {
+                event.stopPropagation();
+                enterFunction();
+            }
+        }
+
+        jqObj.keyup(keyUpHandler);
 
         //--
 
@@ -158,10 +167,15 @@
             return this;
         };
 
+        newElm.onEnter = function (fun) {
+            enterFunction = fun;
+            return this;
+        }
+
         newElm.isError = function (desc) {
             let val = newElm.getIntValue();
             if (required  &&  !val) {
-                Utils.showMessage('Error', desc + ' is required.', function () {
+                Utils.showMessage('Error', desc + ' is required.').then(function () {
                     jqObj.focus();
                 });
                 return true;
@@ -174,7 +188,7 @@
                     msg = desc + ' must be greater than or equal to ' + DateUtils.intToStr4(min) + '.';
                 else
                     msg = desc + ' must be less than or equal to ' + DateUtils.intToStr4(max) + '.';
-                Utils.showMessage('Error', msg, function () {
+                Utils.showMessage('Error', msg).then(function () {
                     jqObj.focus();
                 });
                 return true;

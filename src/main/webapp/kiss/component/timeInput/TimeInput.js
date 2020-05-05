@@ -19,7 +19,7 @@
             nstyle = attr.style;
         else
             nstyle = '';
-
+        let enterFunction = null;
         let nattrs = '';
         let id;
         for (let prop in attr) {
@@ -68,9 +68,15 @@
         newElm.elementInfo.max = max;
         newElm.elementInfo.zero_fill = zero_fill;
 
-        jqObj.keydown(function () {
+        function keyUpHandler(event) {
             Utils.someControlValueChanged();
-        });
+            if (enterFunction && event.keyCode === 13) {
+                event.stopPropagation();
+                enterFunction();
+            }
+        }
+
+        jqObj.keyup(keyUpHandler);
 
         let isDigit = function (c) {
             return c >= '0'  &&  c <= '9';
@@ -230,10 +236,15 @@
             return this;
         };
 
+        newElm.onEnter = function (fun) {
+            enterFunction = fun;
+            return this;
+        }
+
         newElm.isError = function (desc) {
             const val = newElm.getValue$(newElm.jqObj.val());
             if (required  &&  val === null) {
-                Utils.showMessage('Error', desc + ' is required.', function () {
+                Utils.showMessage('Error', desc + ' is required.').then(function () {
                     jqObj.focus();
                 });
                 return true;
@@ -241,7 +252,7 @@
             const hours = Math.floor(val / 100);
             const minutes = val % 100;
             if (hours > 23  ||  minutes > 59) {
-                Utils.showMessage('Error', desc + ' is not a valid date.', function () {
+                Utils.showMessage('Error', desc + ' is not a valid date.').then(function () {
                     jqObj.focus();
                 });
                 return true;
@@ -255,7 +266,7 @@
                     msg = desc + ' must be greater than or equal to ' + TimeUtils.format(min) + '.';
                 else
                     msg = desc + ' must be less than or equal to ' + TimeUtils.format(max) + '.';
-                Utils.showMessage('Error', msg, function () {
+                Utils.showMessage('Error', msg).then(function () {
                     jqObj.focus();
                 });
                 return true;

@@ -84,7 +84,7 @@
             }
         }
 
-        jqObj.keydown(function () {
+        jqObj.keyup(function () {
             removePlaceholder();
             Utils.someControlValueChanged();
         });
@@ -179,8 +179,8 @@
             return this;
         };
 
-        newElm.onKeyDown = function (fun) {
-            jqObj.off('keydown').keydown(function (event) {
+        newElm.onKeyUp = function (fun) {
+            jqObj.off('keyup').keyup(function (event) {
                 if (resetContent) {
                     jqObj.text('');
                     resetContent = false;
@@ -206,7 +206,7 @@
                         msg = desc + ' is required.';
                     else
                         msg = desc + ' must be at least ' + min + ' characters long.';
-                    Utils.showMessage('Error', msg, function () {
+                    Utils.showMessage('Error', msg).then(function () {
                         jqObj.focus();
                     });
                     return true;

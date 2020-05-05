@@ -209,7 +209,7 @@
                 return false;
             let val = newElm.getValue();
             if (!val) {
-                Utils.showMessage('Error', desc + ' selection is required.', function () {
+                Utils.showMessage('Error', desc + ' selection is required.').then(function () {
                     jqObj.focus();
                 });
                 return true;

@@ -17,6 +17,7 @@
         let min = 0;
         let max = null;
         let onchange;
+        let enterFunction = null;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -77,9 +78,15 @@
         });
         const jqObj = newElm.jqObj;
 
-        jqObj.keydown(function () {
+        function keyUpHandler(event) {
             Utils.someControlValueChanged();
-        });
+            if (enterFunction && event.keyCode === 13) {
+                event.stopPropagation();
+                enterFunction();
+            }
+        }
+
+        jqObj.keyup(keyUpHandler);
 
         //--
 
@@ -112,6 +119,15 @@
 
         newElm.isDirty = function () {
             return originalValue !== newElm.getValue();
+        };
+
+        newElm.onKeyUp = function (fun) {
+            jqObj.off('keyup').keyup(function (event) {
+                keyUpHandler(event);
+                if (fun)
+                    fun(event);
+            });
+            return this;
         };
 
         newElm.onChange = function (fun) {
@@ -177,10 +193,15 @@
             return this;
         };
 
+        newElm.onEnter = function (fun) {
+            enterFunction = fun;
+            return this;
+        }
+
         newElm.isError = function (desc) {
             let val = newElm.getValue();
             if (required  &&  !val) {
-                Utils.showMessage('Error', desc + ' is required.', function () {
+                Utils.showMessage('Error', desc + ' is required.').then(function () {
                     jqObj.focus();
                 });
                 return true;
@@ -194,7 +215,7 @@
                     msg = desc + ' must be greater than or equal to ' + Utils.format(min, "C" + (dollar ? "D" : ""), 0, dp) + '.';
                 else
                     msg = desc + ' must be less than or equal to ' + Utils.format(max, "C" + (dollar ? "D" : ""), 0, dp) + '.';
-                Utils.showMessage('Error', msg, function () {
+                Utils.showMessage('Error', msg).then(function () {
                     jqObj.focus();
                 });
                 return true;

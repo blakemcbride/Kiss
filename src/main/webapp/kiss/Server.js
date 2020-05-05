@@ -69,7 +69,7 @@ class Server {
             try {
                 let res =  await response.json();
                 if (!res._Success)
-                    Utils.showMessage('Error', res._ErrorMessage);
+                    await Utils.showMessage('Error', res._ErrorMessage);
                 return res;
             } catch (err) {
                 return await processError(cls, meth, injson, pass, err);
@@ -80,7 +80,7 @@ class Server {
             if (pass < 3)
                 return await doCall(cls, meth, injson, pass + 1);
             const msg = 'Error communicating with the server.';
-            Utils.showMessage('Error', msg);
+            await Utils.showMessage('Error', msg);
             return {_Success: false, _ErrorMessage: msg};
         };
 
@@ -111,18 +111,18 @@ class Server {
                 data: data,
                 dataType: 'json',  // what is coming back
                 cache: false,
-                success: function (res, status, hdr) {
+                success: async function (res, status, hdr) {
                     Utils.waitMessageEnd();
                     if (res._Success)
-                        Utils.showMessage("Information", "Upload successful.");
+                        await Utils.showMessage("Information", "Upload successful.");
                     else
-                        Utils.showMessage("Error", res._ErrorMessage);
+                        await Utils.showMessage("Error", res._ErrorMessage);
                     resolve(res);
                 },
-                error: function (hdr, status, error) {
+                error: async function (hdr, status, error) {
                     const msg = 'Error communicating with the server.';
                     Utils.waitMessageEnd();
-                    Utils.showMessage("Error", msg);
+                    await Utils.showMessage("Error", msg);
                     resolve({_Success: false, _ErrorMessage: msg});
                 }
             });

@@ -242,9 +242,9 @@ public class ProcessServlet implements Runnable {
                         System.err.println("Login successful");
                     return;
                 } catch (Exception e) {
-                    errorReturn(response, "Login failure", e);
+                    errorReturn(response, "Login failure.", e);
                     if (MainServlet.isDebug())
-                        System.err.println("Login failure");
+                        System.err.println("Login failure.");
                     return;
                 }
             } else if (MainServlet.hasDatabase()) {
@@ -254,8 +254,8 @@ public class ProcessServlet implements Runnable {
                     checkLogin(injson.getString("_uuid"));
                 } catch (Exception e) {
                     if (MainServlet.isDebug())
-                        System.err.println("Login failure");
-                    errorReturn(response, "Login failure", e);
+                        System.err.println("Login failure.");
+                    errorReturn(response, "Login failure.", e);
                     return;
                 }
                 if (MainServlet.isDebug())

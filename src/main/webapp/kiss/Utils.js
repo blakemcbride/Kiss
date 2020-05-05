@@ -101,48 +101,62 @@ class Utils {
      *
      * @param {string} title appears on the title bar of the message window
      * @param {string} message the message to be displayed
-     * @param {function} afterFun an optional function to execute when the user clicks 'Ok'
+     * @returns {Promise} when popup disappears
      */
-    static showMessage(title, message, afterFun) {
-        if (!$('#msg-modal').length) {
-            $('body').append(
-                '<div id="msg-modal" class="msg-modal">' +
-                '  <!-- Modal content -->' +
-                '  <div class="msg-modal-content" id="msg-modal-content-tab">' +
-                '    <div class="msg-modal-header" id="msg-modal-header-tab">' +
-                '      <span id="msg-close-btn" class="msg-close">&times;</span>' +
-                '      <p id="msg-header" style="margin-top: 2px;">Modal Header</p>' +
-                '    </div>' +
-                '    <div class="msg-modal-body">' +
-                '      <p id="msg-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
-                '    </div>' +
-                '    <div class="msg-modal-footer">' +
-                '      <input type="button" value="Ok" id="message-ok" style="margin-top: 5px; margin-bottom: 10px;"">' +
-                '    </div>' +
-                '  </div>' +
-                '</div>');
-        }
+    static showMessage(title, message) {
+        const self = this;
+        return new Promise(function (resolve, reject) {
+            let modal = $('#msg-modal');
+            if (!modal.length) {
+                $('body').append(
+                    '<div id="msg-modal" class="msg-modal">' +
+                    '  <!-- Modal content -->' +
+                    '  <div class="msg-modal-content" id="msg-modal-content-tab">' +
+                    '    <div class="msg-modal-header" id="msg-modal-header-tab">' +
+                    '      <span id="msg-close-btn" class="msg-close">&times;</span>' +
+                    '      <p id="msg-header" style="margin-top: 2px;">Modal Header</p>' +
+                    '    </div>' +
+                    '    <div class="msg-modal-body">' +
+                    '      <p id="msg-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
+                    '    </div>' +
+                    '    <div class="msg-modal-footer">' +
+                    '      <input type="button" value="Ok" id="message-ok" style="margin-top: 5px; margin-bottom: 10px;">' +
+                    '    </div>' +
+                    '  </div>' +
+                    '</div>');
+                modal = $('#msg-modal');  // the append changes this
+            }
 
-        $('#msg-header').text(title);
-        this.makeDraggable($('#msg-modal-header-tab'), $('#msg-modal-content-tab'));
-        $('#msg-message').text(message);
-        const modal = $('#msg-modal');
-        const span = $('#msg-close-btn');
-        if (title === 'Error')
-            $('#msg-modal-header-tab').css('background-color', 'red');
-        else
-            $('#msg-modal-header-tab').css('background-color', '#6495ed');
-        modal.show();
-        let endfun = function () {
-            modal.hide();
-            if (afterFun)
-                afterFun();
-        };
-        span.off('click').click(function () {
-            endfun();
-        });
-        $('#message-ok').off('click').click(function () {
-            endfun();
+            $('#msg-header').text(title);
+            const header = $('#msg-modal-header-tab');
+            self.makeDraggable(header, $('#msg-modal-content-tab'));
+            $('#msg-message').text(message);
+            const closeBtn = $('#msg-close-btn');
+            if (title === 'Error')
+                header.css('background-color', 'red');
+            else
+                header.css('background-color', '#6495ed');
+            function endfun() {
+                modal.hide();
+                resolve();
+            }
+            modal.show();
+            let waitForKeyUp = false;
+            closeBtn.off('click').click(function (e) {
+                endfun();
+            });
+            $('#message-ok').off('click').off('keyup').click(function (e) {
+                if (!waitForKeyUp)
+                    endfun();
+            }).focus().on('keyup', function (e) {
+                e.stopPropagation();
+                if (waitForKeyUp && e.keyCode === 13)
+                    endfun();
+            }).on('keydown', function (e) {
+                e.stopPropagation();
+                if (e.keyCode === 13)
+                     waitForKeyUp = true;
+            });
         });
     }
 
@@ -1074,15 +1088,34 @@ class Utils {
         return [...ary];
     }
 
+    /**
+     * Set a global handler for the enter/return key.
+     * If fun is null, the enter function is cancelled.
+     *
+     * @param {function} fun the new enter function handler or null
+     * @return {function} the previous enter function or null if none
+     */
+    static globalEnterHandler(fun) {
+        const prevFun = Utils.globalEnterFunction;
+        Utils.globalEnterFunction = fun;
+        const obj = $('body');
+        obj.off('keyup');
+        if (fun)
+            obj.on('keyup', function (e) {
+                if (e.keyCode === 13)
+                    fun();
+            });
+        return prevFun;
+    }
+
 }
 
+// Class variables
 Utils.count = 1;
-
 Utils.popup_zindex = 10;
-
 Utils.someControlValueChangedFlag = false;
-
 Utils.someControlValueChangedFun = null;
+Utils.globalEnterFunction = null;
 
 
 // taken from https://github.com/accursoft/caret/blob/master/jquery.caret.js

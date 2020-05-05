@@ -20,6 +20,7 @@
             nstyle = '';
         let nattrs = '';
         let id;
+        let enterFunction = null;
         for (let prop in attr) {
             switch (prop) {
 
@@ -63,9 +64,15 @@
         });
         const jqObj = newElm.jqObj;
 
-        jqObj.keydown(function () {
+        function keyUpHandler(event) {
             Utils.someControlValueChanged();
-        });
+            if (enterFunction && event.keyCode === 13) {
+                event.stopPropagation();
+                enterFunction();
+            }
+        }
+
+        jqObj.keyup(keyUpHandler);
 
         //--
 
@@ -147,9 +154,9 @@
 
         //--
 
-        newElm.onKeyDown = function (fun) {
-            jqObj.off('keydown').keydown(function (event) {
-                Utils.someControlValueChanged();
+        newElm.onKeyUp = function (fun) {
+            jqObj.off('keyup').keyup(function (event) {
+                keyUpHandler(event);
                 if (fun)
                     fun(event);
             });
@@ -166,6 +173,11 @@
             return this;
         };
 
+        newElm.onEnter = function (fun) {
+            enterFunction = fun;
+            return this;
+        }
+
         newElm.isError = function (desc) {
             if (min) {
                 let val = newElm.getValue();
@@ -175,7 +187,7 @@
                         msg = desc + ' is required.';
                     else
                         msg = desc + ' must be at least ' + min + ' characters long.';
-                    Utils.showMessage('Error', msg, function () {
+                    Utils.showMessage('Error', msg).then(function () {
                         jqObj.focus();
                     });
                     return true;
