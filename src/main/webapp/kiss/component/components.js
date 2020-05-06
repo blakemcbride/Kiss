@@ -408,7 +408,6 @@ class components {
      *     <tr><td>    password     </td><td>     the character are not shown on the screen              </td></tr>
      *     <tr><td>    placeholder="" </td><td>   text to be displaced in the control until the user enters data </td><tr>
      *     <tr><td>    required     </td><td>     an entry is required (at least 1 character)              </td></tr>
-     *     <tr><td>    rows="20"     </td><td>     sets the <em>minimum</em> number of visible rows (it will expand to fill the area it is in) </td></tr>
      *     <tr><td>    upcase     </td><td>     when the user enters text, it is auto-upcased               </td></tr>
      * </table>
      * <br>
