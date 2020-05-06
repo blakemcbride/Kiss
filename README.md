@@ -4,7 +4,7 @@
 The KISS Framework is an application development framework for
 developing web-based business applications.  Please see the main web
 site for a more detailed description at
-[http://kissweb.org](http://kissweb.org)
+[https://kissweb.org](https://kissweb.org)
 
 
 Home for the code is at:  [https://github.com/blakemcbride/Kiss](https://github.com/blakemcbride/Kiss)
