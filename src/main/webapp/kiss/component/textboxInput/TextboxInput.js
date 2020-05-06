@@ -20,7 +20,7 @@
         let disabled = false;
         let resetContent = false;
         let placeholder = null;
-        let nstyle = "background-color: white; border: 2px solid #d0d5d5; ";
+        let nstyle = "background-color: white; border: 2px solid #d0d5d5; display: inline-block; ";
         if (attr.style)
             nstyle += attr.style;
 
