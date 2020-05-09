@@ -20,7 +20,7 @@
 class DateUtils {
 
     /**
-     * Converts a string date "mM/dD/yyYY" to an integer of the form YYYYMMDD.
+     * Converts a string date "mM/dD/yyYY" or 'yyyymmdd' to an integer of the form YYYYMMDD.
      * Bad dates return 0
      *
      * @param {string} dateString
@@ -32,7 +32,7 @@ class DateUtils {
         dateString = dateString.replace(/\./g, '/');
 
         if (!/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString))
-            return 0;
+            return parseInt(dateString, 10);
 
         const parts = dateString.split("/");
         const day = parseInt(parts[1], 10);
@@ -245,6 +245,84 @@ class DateUtils {
         if (dt1.getDate() > dt2.getDate())
             months--;
         return months <= 0 ? 0 : months;
+    }
+
+    /**
+     * Convert an integer date into a julian date.
+     *
+     * @param {number} dt integer date formatted as YYYYMMDD
+     * @returns {number} the julian date
+     */
+    static julian(dt) {
+        /* This can't be done some of the more obvious ways because of changes in daylight savings time.  */
+        /* And leap years?  */
+        let d, y, m;
+
+        if (dt <= 0)
+            return dt;
+        y = Math.floor(dt / 10000);
+        m = Math.floor((dt % 10000) / 100);
+        d = Math.floor(dt % 100);
+        d += Math.floor(.5 + (m - 1) * 30.57);
+        if (m >	2)
+            d--;
+        if (0 !== y % 400  &&  (0 !== y % 4  ||  0 === y % 100))
+            d--;
+        d += Math.floor(365.25 * --y);
+        d += Math.floor(y / 400);
+        d -= Math.floor(y / 100);
+        return d;
+    }
+
+    /**
+     * Convert a julian date into an integer date.
+     *
+     * @param d {number} d the julian date
+     * @returns {number} the integer date formatted as YYYYMMDD
+     */
+    static calendar(d) {
+        let	y, m, t;
+
+        if (d <= 0)
+            return d;
+        y = Math.floor(1.0 + d / 365.2425);
+        t = y -	1;
+        d -= Math.floor(t * 365.25);
+        d -= Math.floor(t / 400);
+        d += Math.floor(t / 100);
+        if (d >	59  &&	 0 !== y % 400	 &&  (0 !== y %	4  ||  0 === y % 100))
+            d++;
+        if (d >	60)
+            d++;
+        m = Math.floor((d + 30) / 30.57);
+        d -= Math.floor(.5 + (m - 1) * 30.57);
+        if (m === 13)  {
+            m = 1;
+            ++y;
+        }  else if (m === 0)  {
+            m = 12;
+            --y;
+        }
+        return 10000 * y + m * 100 + d;
+    }
+
+    /**
+     * Takes an integer date formatted as YYYYMMDD and returns an integer
+     * indicating the day of the week.
+     *
+     * 0 Sunday
+     * 1 Monday
+     * 2 Tuesday
+     * 3 Wednesday
+     * 4 Thursday
+     * 5 Friday
+     * 6 Saturday
+     *
+     * @param {number} dt integer date formatted as YYYYMMDD
+     * @returns {number} an integer indicating the day of the week
+     */
+    static dayOfWeek(dt) {
+        return DateUtils.julian(dt) % 7;
     }
     
 }
