@@ -324,6 +324,6 @@ class DateUtils {
     static dayOfWeek(dt) {
         return DateUtils.julian(dt) % 7;
     }
-    
+
 }
 
