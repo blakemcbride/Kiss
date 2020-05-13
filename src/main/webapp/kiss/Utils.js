@@ -903,6 +903,10 @@ class Utils {
         let header;
         let body;
 
+        Utils.popup_context.push({
+            id: id,
+            globalEnterHandler: Utils.globalEnterHandler(null)
+        });
         if (!w.hasClass('popup-background')) {
             let width = w.css('width');
             let height = w.css('height');
@@ -938,14 +942,14 @@ class Utils {
     }
 
     /**
-     * Close a modal popup.
-     *
-     * @param {string} id the id of the popup to close
+     * Close the most recent modal popup.
      *
      * @see popup_open
      */
-    static popup_close(id) {
-        $('#' + id).hide();
+    static popup_close() {
+        const context = Utils.popup_context.pop();
+        $('#' + context.id).hide();
+        Utils.globalEnterHandler(context.globalEnterHandler);
         Utils.popup_zindex -= 2;
         if (Utils.popup_zindex < 10)
             Utils.popup_zindex = 10;
@@ -1113,6 +1117,7 @@ class Utils {
 // Class variables
 Utils.count = 1;
 Utils.popup_zindex = 10;
+Utils.popup_context = [];
 Utils.someControlValueChangedFlag = false;
 Utils.someControlValueChangedFun = null;
 Utils.globalEnterFunction = null;

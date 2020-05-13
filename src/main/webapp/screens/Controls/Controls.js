@@ -37,7 +37,7 @@
     });
 
     $$('popup-ok').onclick(function () {
-        Utils.popup_close("my-popup");
+        Utils.popup_close();
     });
 
 })();
