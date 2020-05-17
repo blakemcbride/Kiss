@@ -184,10 +184,7 @@ public class ProcessServlet implements Runnable {
         try {
             newDatabaseConnection();
         } catch (Throwable e) {
-            if (e instanceof Exception)
-                errorReturn(response, "Unable to connect to the database", (Exception) e);
-            else
-                errorReturn(response, "Unable to connect to the database", null);
+            errorReturn(response, "Unable to connect to the database", e);
             return;
         }
 
@@ -310,7 +307,7 @@ public class ProcessServlet implements Runnable {
         asyncContext.complete();
     }
 
-    void errorReturn(HttpServletResponse response, String msg, Exception e) {
+    void errorReturn(HttpServletResponse response, String msg, Throwable e) {
         if (DB != null) {
             try {
                 DB.rollback();

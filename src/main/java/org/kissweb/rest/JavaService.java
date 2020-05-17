@@ -50,15 +50,15 @@ class JavaService {
         try {
             ci = loadJavaClass(_className, fileName);
         } catch (ClassNotFoundException e) {
-            ms.errorReturn(response, "Class not found: " + e.getMessage(), null);
+            ms.errorReturn(response, "Class not found: " + e.getMessage(), e);
             System.err.println("Not found");
             return ProcessServlet.ExecutionReturn.Error;
         } catch (Throwable e) {
-            ms.errorReturn(response, e.getMessage(), null);
+            ms.errorReturn(response, e.getMessage(), e);
             System.err.println("Not found");
             return ProcessServlet.ExecutionReturn.Error;
         }
-        if (ci != null) {
+        if (ci != null && ci.jclass != null) {
             Object instance;
             Method meth;
 
@@ -67,7 +67,7 @@ class JavaService {
             try {
                 instance = ci.jclass.newInstance();
             } catch (Exception e) {
-                ms.errorReturn(response, "Error creating instance of " + fileName, null);
+                ms.errorReturn(response, "Error creating instance of " + fileName, e);
                 return ProcessServlet.ExecutionReturn.Error;
             }
             try {
@@ -75,7 +75,7 @@ class JavaService {
                     System.err.println("Seeking method " + _method);
                 meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, ProcessServlet.class);
             } catch (NoSuchMethodException e) {
-                ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
+                ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), e);
                 System.err.println("Method failed");
                 System.err.println(e.getMessage());
                 return ProcessServlet.ExecutionReturn.Error;
@@ -137,9 +137,11 @@ class JavaService {
             String code = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
 
             DynamicCompiler dc = new DynamicCompiler();
-            dc.addSource(className, code);
+          //  dc.addOption("--add-exports", "java.sql/java.sql=ALL-UNNAMED");
+            String cname = className.replaceAll("/", ".");
+            dc.addSource(cname, code);
             Map<String, Class<?>> compiled = dc.build();
-            jclass = compiled.get(className.replace('/', '.'));
+            jclass = compiled.get(cname);
 
             javaClassCache.put(fileName, ci = new JavaClassInfo(jclass, (new File(fileName)).lastModified()));
         } catch (FileNotFoundException | NoSuchFileException e) {
