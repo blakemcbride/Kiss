@@ -82,7 +82,7 @@ class GroovyService {
                 try {
                     instance = ci.gclass.invokeConstructor();
                 } catch (Exception e) {
-                    ms.errorReturn(response, "Error creating instance of of " + fileName, null);
+                    ms.errorReturn(response, "Error creating instance of " + fileName, null);
                     return ProcessServlet.ExecutionReturn.Error;
                 }
 

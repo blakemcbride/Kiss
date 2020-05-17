@@ -349,10 +349,12 @@ public class ProcessServlet implements Runnable {
     private void log_error(final String str, final Throwable e) {
         String time = DateUtils.todayDate() + " ";
         logger.error(time + str, e);
-        e.printStackTrace();
-        final StringWriter sw = new StringWriter();
-        e.printStackTrace(new PrintWriter(sw));
-        logger.error(sw.toString());
+        if (e != null) {
+            e.printStackTrace();
+            final StringWriter sw = new StringWriter();
+            e.printStackTrace(new PrintWriter(sw));
+            logger.error(sw.toString());
+        }
     }
 
     private String login(String user, String password) throws Exception {
