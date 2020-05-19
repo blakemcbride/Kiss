@@ -105,6 +105,14 @@ class JavaService {
 
     }
 
+    private static Boolean isJava11Flag = null;
+
+    private static boolean isJava11() {
+        if (isJava11Flag == null)
+            isJava11Flag = !System.getProperty("java.version").startsWith("1.8");
+        return isJava11Flag;
+    }
+
     private synchronized static JavaClassInfo loadJavaClass(String className, String fileName) throws Exception {
         Class jclass;
         JavaClassInfo ci;
@@ -137,7 +145,10 @@ class JavaService {
             String code = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
 
             DynamicCompiler dc = new DynamicCompiler();
-          //  dc.addOption("--add-exports", "java.sql/java.sql=ALL-UNNAMED");
+            if (isJava11()) {
+                dc.addOption("--add-exports", "java.sql/java.sql=ALL-UNNAMED");
+                dc.addOption("--add-exports", "java.base/java.util=ALL-UNNAMED");
+            }
             String cname = className.replaceAll("/", ".");
             dc.addSource(cname, code);
             Map<String, Class<?>> compiled = dc.build();
