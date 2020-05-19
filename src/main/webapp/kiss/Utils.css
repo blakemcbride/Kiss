@@ -37,7 +37,7 @@ div.vert-input label:after { content: ":"; }
 
 /* Modal Content */
 .msg-modal-content {
-    z-index: 19001; /* Sit on top */
+    z-index: 19002; /* Sit on top */
     position: relative;
     background-color: white;
     margin: auto;
