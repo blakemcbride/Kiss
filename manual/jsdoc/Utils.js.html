@@ -983,6 +983,11 @@ class Utils {
 
         if (focus_ctl)
             $('#' + focus_ctl).focus();
+        else {
+            const ctl = $(':focus');
+            if (ctl)
+                ctl.blur();
+        }
     }
 
     /**

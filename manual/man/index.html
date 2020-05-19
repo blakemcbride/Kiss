@@ -491,11 +491,11 @@ configuring a web server, building <em>Kiss</em>, and running
 <em>Kiss</em> for development purposes easy, intelligent, and automatic.
 This new build system can be used in conjunction with your favorite IDE.
 </p>
-<p>The build system (called it <em>bld</em>) is small and
-written in Java.  Its source code is included with the <em>Kiss</em>
-source code.  So, a Java compiler will be needed before anything will
-work.  At this point, Java version 8 is being used.  Later Java
-versions should work as well.
+<p>The build system (called it <em>bld</em>) is small and written in Java.
+Its source code is included with the <em>Kiss</em> source code.  So, a
+Java compiler will be needed before anything will work.  At this
+point, Java version 8 is primarily used.  Java 11 has also been
+tested.  Later Java versions should work as well.
 </p>
 <p>When building the system for the first time, <em>BLD</em> will
 automatically download and cache required libraries (jar files), install and
@@ -630,7 +630,7 @@ and the front-end server runs by executing a single command.
 <li> Java JDK 8 from many sources including <a href="https://www.azul.com/downloads/zulu-community">https://www.azul.com/downloads/zulu-community</a> or 
 <a href="https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html">https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html</a> or
 <a href="https://developers.redhat.com/products/openjdk/download">https://developers.redhat.com/products/openjdk/download</a> or
-<a href="https://adoptopenjdk.net">https://adoptopenjdk.net</a>
+<a href="https://adoptopenjdk.net">https://adoptopenjdk.net</a>  (Java 11 has also been tested.)
 </li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL,
 Oracle, SQLite)
 </li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, NetBeans, eclipse)
@@ -641,7 +641,7 @@ Oracle, SQLite)
 JDK is necessary.  Setting this varies from OS to OS and also depends on where it
 gets installed.  Instructions for setting this variable are all over the Internet.
 </p>
-<p>The system was built and tested with JDK 8,
+<p>The system was built and tested with JDK 8 and 11,
 <a href="https://www.postgresql.org">PostgreSQL</a>,
 <a href="https://www.jetbrains.com/idea">IntelliJ</a>, and
 <a href="http://tomcat.apache.org">tomcat</a>.  Other environments such as
