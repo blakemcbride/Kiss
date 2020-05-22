@@ -163,6 +163,8 @@
                 originalValue = newElm.getValue();
                 return this;
             }
+            if (typeof val !== 'number')
+                val = Utils.toNumber(val);
             jqObj.val(TimeUtils.format(val, zero_fill));
             originalValue = newElm.getValue();
             return this;

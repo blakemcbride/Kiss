@@ -105,8 +105,8 @@
                     jqObj.val('');
                     return this;
                 }
-            if (typeof val === 'string')
-                val = Number(val);
+            if (typeof val !== 'number')
+                val = Utils.toNumber(val);
             let str = Utils.format(val, "C" + (dollar ? "D" : "") + (show_zero ? "" : "B"), 0, dp);
             jqObj.val(str);
             return this;
