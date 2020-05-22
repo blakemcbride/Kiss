@@ -90,9 +90,12 @@
                 jqObj.val('');
             else if (typeof val === 'number')
                 jqObj.val(DateUtils.intToSQL(val));
-            else if (typeof val === 'string')
-                jqObj.val(val);
-            else if (typeof val === 'object')  // Date
+            else if (typeof val === 'string') {
+                if (/^\d+$/.test(val))
+                    jqObj.val(DateUtils.intToSQL(Number(val)));
+                else
+                    jqObj.val(val);
+            } else if (typeof val === 'object')  // Date
                 jqObj.val(DateUtils.intToSQL(DateUtils.dateToInt(val)));
             originalValue = newElm.getIntValue();
             return this;
