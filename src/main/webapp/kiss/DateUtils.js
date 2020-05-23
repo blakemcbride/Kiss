@@ -325,5 +325,25 @@ class DateUtils {
         return DateUtils.julian(dt) % 7;
     }
 
+    /**
+     * Takes an integer date formatted as YYYYMMDD and returns the
+     * name of the day of the week as a sring such as
+     * "Sunday", "Monday", etc.
+     *
+     * @param {number} dt integer date formatted as YYYYMMDD
+     * @returns {string} the name of the day of the week
+     */
+    static dayOfWeekName(dt) {
+        switch (DateUtils.dayOfWeek(dt)) {
+            case 0:  return "Sunday";
+            case 1:  return "Monday";
+            case 2:  return "Tuesday";
+            case 3:  return "Wednesday";
+            case 4:  return "Thursday";
+            case 5:  return "Friday";
+            case 6:  return "Saturday";
+        }
+    }
+
 }
 

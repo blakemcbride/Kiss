@@ -536,33 +536,54 @@ public class DateUtils {
     }
 
     /**
-     * Returns the full month name.
+     * Returns the full name of the week day.
      *
      * @param dt YYYYMMDD
      * @return
      */
-    public static String DayOfWeek(int dt) {
+    public static String dayOfWeekName(int dt) {
         if (dt <= 0)
             return "";
         switch ((int)(julian(dt) % 7L)) {
-            case 0:  return "January";
-            case 1:  return "February";
-            case 2:  return "March";
-            case 3:  return "April";
-            case 4:  return "May";
-            case 5:  return "June";
-            case 6:  return "July";
-            case 7:  return "August";
-            case 8:  return "September";
-            case 9:  return "October";
-            case 10:  return "November";
-            case 11:  return "December";
+            case 0:  return "Sunday";
+            case 1:  return "Monday";
+            case 2:  return "Tuesday";
+            case 3:  return "Wednesday";
+            case 4:  return "Thursday";
+            case 5:  return "Friday";
+            case 6:  return "Saturday";
+            default:  return "";
+        }
+    }
+
+    /**
+     * Returns the full name of the month of the year.
+     *
+     * @param dt YYYYMMDD
+     * @return
+     */
+    public static String monthOfYearName(int dt) {
+        if (dt <= 0)
+            return "";
+        switch (month(dt)) {
+            case 1:  return "January";
+            case 2:  return "February";
+            case 3:  return "March";
+            case 4:  return "April";
+            case 5:  return "May";
+            case 6:  return "June";
+            case 7:  return "July";
+            case 8:  return "August";
+            case 9:  return "September";
+            case 10:  return "October";
+            case 11:  return "November";
+            case 12:  return "December";
             default:  return "";
         }
     }
 
     public static void main(String [] argv) {
-        System.out.println(parse("6/8/2018"));
+        System.out.println(monthOfYearName(Integer.parseInt(argv[0])));
     }
 
 }
