@@ -183,7 +183,7 @@ public class Command implements AutoCloseable {
 
     /**
      * Read in the first record and then close the cursor.
-     * The record cannot be updated or deleted.
+     * The record can be updated or deleted.
      * <br><br>
      * Adding code to the SQL statement telling the database to limit its result set to
      * one record doesn't affect the result but it can make the query significantly faster.
@@ -213,7 +213,7 @@ public class Command implements AutoCloseable {
 
     /**
      * Fetch all of the records and close the cursor.
-     * No records can be updated or deleted.
+     * Records can be updated or deleted.
      * <br><br>
      * The SQL string may contain parameters indicated by the '?' character.
      * A variable number of arguments to this method are used to fill those parameters.
@@ -239,7 +239,7 @@ public class Command implements AutoCloseable {
 
     /**
      * Fetch all (but no more than max) of the records and close the cursor.
-     * No records can be updated or deleted.
+     * Records can be updated or deleted.
      * <br><br>
      * The SQL string may contain parameters indicated by the '?' character.
      * A variable number of arguments to this method are used to fill those parameters.

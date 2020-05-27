@@ -312,7 +312,7 @@ public class Connection implements AutoCloseable {
 
     /**
      * Read in the first record and then close it.
-     * The record cannot be updated or deleted.
+     * The record can be updated or deleted.
      * <br><br>
      * The SQL string may contain parameters indicated by the '?' character.
      * A variable number of arguments to this method are used to fill those parameters.
@@ -341,7 +341,7 @@ public class Connection implements AutoCloseable {
 
     /**
      * Fetch all of the records and close it.
-     * No records can be updated or deleted.
+     * Records can be updated or deleted.
      * <br><br>
      * The SQL string may contain parameters indicated by the '?' character.
      * A variable number of arguments to this method are used to fill those parameters.
@@ -371,7 +371,7 @@ public class Connection implements AutoCloseable {
 
     /**
      * Fetch all (but no more than max) of the records and close it.
-     * No records can be updated or deleted.
+     * Records can be updated or deleted.
      * <br><br>
      * The SQL string may contain parameters indicated by the '?' character.
      * A variable number of arguments to this method are used to fill those parameters.
