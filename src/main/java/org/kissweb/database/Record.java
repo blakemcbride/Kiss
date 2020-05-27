@@ -56,8 +56,8 @@ import java.util.*;
  * @author Blake McBride
  */
 public class Record implements AutoCloseable {
-    LinkedHashMap<String,Object> cols;
-    private HashMap<String,Object> ocols;
+    LinkedHashMap<String,Object> cols;       // current column values
+    private HashMap<String,Object> ocols;    // original column values
     private final Connection conn;
     private Cursor cursor;
     private final String table;
@@ -459,6 +459,11 @@ public class Record implements AutoCloseable {
             for (String pcol : cursor.cmd.getPriColumns(cursor))
                 cursor.ustmt.setObject(i++, ocols.get(pcol));
             cursor.ustmt.execute();
+            // now update our memory of the original values
+            ocols.clear();
+            cols.forEach((key, val) -> {
+                ocols.put(key, val);
+            });
         }
     }
 
