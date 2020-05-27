@@ -152,7 +152,9 @@ public class Cursor implements AutoCloseable {
 
     /**
      * Read in all of the records and close the cursor.
-     * Records cannot be updated or deleted.
+     * Records can be updated or deleted.
+     *
+     * If no records are found, an empty list is returned.
      *
      * @return
      * @throws SQLException
