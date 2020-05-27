@@ -195,7 +195,7 @@ public class Command implements AutoCloseable {
      * in the SQL statement. An SQL prepared statement is used.
      * <br><br>
      * This method normally takes a variable argument list representing the consecutive parameters.
-     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * However, this method also accepts a single argument (which must be an <code>Array</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * @param sql SQL statement with ? parameters
@@ -223,7 +223,7 @@ public class Command implements AutoCloseable {
      * in the SQL statement. An SQL prepared statement is used.
      * <br><br>
      * This method normally takes a variable argument list representing the consecutive parameters.
-     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * However, this method also accepts a single argument (which must be an <code>Array</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * If no records are found, an empty list is returned.
@@ -252,7 +252,7 @@ public class Command implements AutoCloseable {
      * in the SQL statement. An SQL prepared statement is used.
      * <br><br>
      * This method normally takes a variable argument list representing the consecutive parameters.
-     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * However, this method also accepts a single argument (which must be an <code>Array</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * If no records are found, an empty list is returned.

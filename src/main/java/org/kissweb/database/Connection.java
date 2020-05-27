@@ -324,7 +324,7 @@ public class Connection implements AutoCloseable {
      * within the same connection occurring.  Remember, each REST service has its own connection.
      * <br><br>
      * This method normally takes a variable argument list representing the consecutive parameters.
-     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * However, this method also accepts a single argument (which must be an <code>Array</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * @param sql
@@ -354,7 +354,7 @@ public class Connection implements AutoCloseable {
      * within the same connection occurring.  Remember, each REST service has its own connection.
      * <br><br>
      * This method normally takes a variable argument list representing the consecutive parameters.
-     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * However, this method also accepts a single argument (which must be an <code>Array</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * If no records are found, an empty list is returned.
@@ -387,7 +387,7 @@ public class Connection implements AutoCloseable {
      * within the same connection occurring.  Remember, each REST service has its own connection.
      * <br><br>
      * This method normally takes a variable argument list representing the consecutive parameters.
-     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * However, this method also accepts a single argument (which must be an <code>Array</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * If no records are found, an empty list is returned.
