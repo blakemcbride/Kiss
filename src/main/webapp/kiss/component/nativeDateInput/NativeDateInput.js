@@ -1,44 +1,42 @@
 /*
       Author: Blake McBride
-      Date:  4/18/18
+      Date:  4/22/18
  */
 
-/* global Utils, Component */
+/* global Utils, DateUtils */
 
 'use strict';
+
 
 (function () {
 
     const processor = function (elm, attr, content) {
-        let nstyle, originalValue;
+        let originalValue;
+        let nstyle;
         let min = null;
-        let password = false;
-        let upcase = false;
+        let max = null;
+        let required = false;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
+        let enterFunction = null;
         let nattrs = '';
         let id;
-        let enterFunction = null;
         for (let prop in attr) {
             switch (prop) {
 
                 // new attributes
-                case 'minlength':
+
+                case 'min':
                     min = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
-                case 'upcase':
-                    upcase = true;
+                case 'max':
+                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
                 case 'required':
-                    if (!min)
-                        min = 1;
+                    required = true;
                     break;
-                case 'password':
-                    password = true;
-                    break;
-
 
                 // pre-existing attributes
 
@@ -53,11 +51,7 @@
             }
         }
 
-        nattrs += ' autocorrect="off" autocapitalize="off" spellcheck="false"';
-        nattrs += ' data-lpignore="true"';  // kill lastpass
-
-        const newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
-            type: password ? 'password' : 'text',
+        const newElm = Utils.replaceHTML(id, elm, '<input type="date" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
@@ -77,31 +71,43 @@
 
         //--
 
-        newElm.getValue = function () {
-            let sval = jqObj.val();
-            return sval ? sval : '';
+        newElm.getIntValue = function () {
+            return DateUtils.SQLtoInt(jqObj.val());
+        };
+
+        newElm.getSQLValue = function () {
+            return jqObj.val();
+        };
+
+        newElm.getDateValue = function () {
+            return DateUtils.intToDate(DateUtils.SQLtoInt(jqObj.val()));
         };
 
         newElm.setValue = function (val) {
-            if (val !== 0  &&  !val) {
-                jqObj.val(originalValue = '');
-                return this;
-            }
-            if (upcase)
-                val = val.toUpperCase();
-            jqObj.val(originalValue = val);
+            if (!val)
+                jqObj.val('');
+            else if (typeof val === 'number')
+                jqObj.val(DateUtils.intToSQL(val));
+            else if (typeof val === 'string') {
+                if (/^\d+$/.test(val))
+                    jqObj.val(DateUtils.intToSQL(Number(val)));
+                else
+                    jqObj.val(val);
+            } else if (typeof val === 'object')  // Date
+                jqObj.val(DateUtils.intToSQL(DateUtils.dateToInt(val)));
+            originalValue = newElm.getIntValue();
             return this;
         };
 
         newElm.isDirty = function () {
-            return originalValue !== newElm.getValue();
+            return originalValue !== newElm.getIntValue();
         };
 
         newElm.clear = function () {
-            return newElm.setValue('');
+            jqObj.val('');
+            originalValue = newElm.getIntValue();
+            return this;
         };
-
-        //--
 
         newElm.readOnly = function () {
             jqObj.attr('readonly', true);
@@ -117,8 +123,6 @@
             return !!jqObj.attr('readonly');
         };
 
-        //--
-
         newElm.disable = function () {
             jqObj.prop('disabled', true);
             return this;
@@ -132,8 +136,6 @@
         newElm.isDisabled = function () {
             return !!jqObj.attr('disabled');
         };
-
-        //--
 
         newElm.hide = function () {
             jqObj.hide();
@@ -153,24 +155,16 @@
             return jqObj.is(':visible');
         };
 
-        //--
-
-        newElm.onKeyUp = function (fun) {
-            jqObj.off('keyup').keyup(function (event) {
-                keyUpHandler(event);
-                if (fun)
-                    fun(event);
-            });
-            return this;
-        };
-
-        newElm.onChange = function (fun) {
-            jqObj.off('change').change(fun);
-            return this;
-        };
-
         newElm.focus = function () {
             jqObj.focus();
+            return this;
+        };
+
+        newElm.onChange = function (func) {
+            jqObj.off('change').on('change', function () {
+                Utils.someControlValueChanged();
+                func(jqObj.val());
+            });
             return this;
         };
 
@@ -180,32 +174,33 @@
         }
 
         newElm.isError = function (desc) {
-            if (min) {
-                let val = newElm.getValue();
-                if (val.length < min) {
-                    let msg;
-                    if (min === 1)
-                        msg = desc + ' is required.';
-                    else
-                        msg = desc + ' must be at least ' + min + ' characters long.';
-                    Utils.showMessage('Error', msg).then(function () {
-                        jqObj.focus();
-                    });
-                    return true;
-                }
+            let val = newElm.getIntValue();
+            if (required  &&  !val) {
+                Utils.showMessage('Error', desc + ' is required.').then(function () {
+                    jqObj.focus();
+                });
+                return true;
+            }
+            if (val  &&  (min !== null  &&  val < min  ||  max !== null  &&  val > max)) {
+                let msg;
+                if ((min  ||  min === 0)  &&  (max  ||  max === 0))
+                    msg = desc + ' must be between ' + DateUtils.intToStr4(min) + ' and ' + DateUtils.intToStr4(max) + '.';
+                else if (min  &&  min !== 0)
+                    msg = desc + ' must be greater than or equal to ' + DateUtils.intToStr4(min) + '.';
+                else
+                    msg = desc + ' must be less than or equal to ' + DateUtils.intToStr4(max) + '.';
+                Utils.showMessage('Error', msg).then(function () {
+                    jqObj.focus();
+                });
+                return true;
             }
             return false;
         };
-
-        jqObj.on('input', function () {
-            let val = jqObj.val().replace(/^\s+/, "");
-            jqObj.val(upcase ? val.toUpperCase() : val);
-        });
     };
 
     const componentInfo = {
-        name: 'TextInput',
-        tag: 'text-input',
+        name: 'NativeDateInput',
+        tag: 'native-date-input',
         processor: processor
     };
     Utils.newComponent(componentInfo);

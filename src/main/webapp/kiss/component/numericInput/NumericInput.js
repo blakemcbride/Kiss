@@ -79,7 +79,8 @@
         const jqObj = newElm.jqObj;
 
         function keyUpHandler(event) {
-            Utils.someControlValueChanged();
+            if (Utils.isChangeChar(event.keyCode))
+                Utils.someControlValueChanged();
             if (enterFunction && event.keyCode === 13) {
                 event.stopPropagation();
                 enterFunction();

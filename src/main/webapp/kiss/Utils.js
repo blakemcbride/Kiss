@@ -1015,6 +1015,16 @@ class Utils {
     //--------------------------
 
     /**
+     * Returns true if c is the kind of keyboard character that changes the value.
+     *
+     * @param c
+     * @returns {boolean}
+     */
+    static isChangeChar(c) {
+        return c === 8 || c === 32 || c === 46  ||  c >= 48;
+    }
+
+    /**
      * This function is called to indicate to the system that <em>some</em> control value changed by the user.
      * Programmatic changed to not set this.
      * It is mainly used internally as all the Kiss controls use this function.

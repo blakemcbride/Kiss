@@ -11,7 +11,9 @@
 (function () {
 
     const processor = function (elm, attr, content) {
-        let originalValue;
+        let originalValue = 0;
+        let currentValue = 0;
+        let changeFunction;
         let nstyle;
         let min = null;
         let max = null;
@@ -51,16 +53,41 @@
             }
         }
 
-        const newElm = Utils.replaceHTML(id, elm, '<input type="date" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
+        const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
         const jqObj = newElm.jqObj;
 
-        jqObj.on('change', function () {
-            Utils.someControlValueChanged();
+        jqObj.daterangepicker({
+            singleDatePicker: true,
+            showDropdowns: true,
+            autoApply: true,
+            autoUpdateInput: true,
+            drops: 'auto',
+            minYear: 1901,
+            maxYear: 2030,
+            ranges: {
+                'Today': [moment(), moment()],
+                'Clear': [null, null]
+            },
+            showCustomRangeLabel: false
+        }, function(start, end, label) {
+            if (!start  ||  !start.isValid())
+                currentValue = 0;
+            else {
+                let dt = new Date(start.year(), start.month(), start.date());
+                currentValue = DateUtils.dateToInt(dt);
+            }
+            if (originalValue != currentValue) {
+                Utils.someControlValueChanged();
+                if (changeFunction)
+                    changeFunction(currentValue);
+            }
         });
+
+        const drp = jqObj.data('daterangepicker');
 
         function keyUpHandler(event) {
             if (enterFunction && event.keyCode === 13) {
@@ -74,40 +101,47 @@
         //--
 
         newElm.getIntValue = function () {
-            return DateUtils.SQLtoInt(jqObj.val());
+            return currentValue;
         };
 
         newElm.getSQLValue = function () {
-            return jqObj.val();
+            return DateUtils.intToSQL(currentValue);
         };
 
         newElm.getDateValue = function () {
-            return DateUtils.intToDate(DateUtils.SQLtoInt(jqObj.val()));
+            return DateUtils.intToDate(currentValue);
         };
 
         newElm.setValue = function (val) {
-            if (!val)
-                jqObj.val('');
-            else if (typeof val === 'number')
-                jqObj.val(DateUtils.intToSQL(val));
-            else if (typeof val === 'string') {
-                if (/^\d+$/.test(val))
-                    jqObj.val(DateUtils.intToSQL(Number(val)));
-                else
-                    jqObj.val(val);
-            } else if (typeof val === 'object')  // Date
-                jqObj.val(DateUtils.intToSQL(DateUtils.dateToInt(val)));
-            originalValue = newElm.getIntValue();
+            if (!val) {
+                drp.setStartDate('');
+                originalValue = currentValue = 0;
+            } else if (typeof val === 'number') {
+                drp.setStartDate(DateUtils.intToDate(val));
+                drp.setEndDate(DateUtils.intToDate(val));
+                currentValue = originalValue = val;
+            } else if (typeof val === 'string') {
+                if (/^\d+$/.test(val)) {
+                    drp.setStartDate(DateUtils.intToDate(val=Number(val)));
+                    originalValue = currentValue = val;
+                } else {
+                    drp.setStartDate(val);
+                    originalValue = currentValue = DateUtils.strToInt(val);
+                }
+            } else if (typeof val === 'object') { // Date
+                drp.setStartDate(val);
+                originalValue = currentValue = DateUtils.dateToInt(val);
+            }
             return this;
         };
 
         newElm.isDirty = function () {
-            return originalValue !== newElm.getIntValue();
+            return originalValue !== currentValue;
         };
 
         newElm.clear = function () {
-            jqObj.val('');
-            originalValue = newElm.getIntValue();
+            drp.setStartDate('');
+            currentValue = originalValue = 0;
             return this;
         };
 
@@ -163,10 +197,7 @@
         };
 
         newElm.onChange = function (func) {
-            jqObj.off('change').on('change', function () {
-                Utils.someControlValueChanged();
-                func(jqObj.val());
-            });
+            changeFunction = func;
             return this;
         };
 

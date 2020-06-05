@@ -84,7 +84,9 @@
             }
         }
 
-        jqObj.keyup(function () {
+        jqObj.keyup(function (event) {
+            if (event.code === "Tab")
+                return;
             removePlaceholder();
             Utils.someControlValueChanged();
         });
@@ -181,6 +183,8 @@
 
         newElm.onKeyUp = function (fun) {
             jqObj.off('keyup').keyup(function (event) {
+                if (!Utils.isChangeChar(event.keyCode))
+                    return;
                 if (resetContent) {
                     jqObj.text('');
                     resetContent = false;

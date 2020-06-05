@@ -69,16 +69,17 @@
         newElm.elementInfo.zero_fill = zero_fill;
 
         function keyUpHandler(event) {
-            Utils.someControlValueChanged();
             if (enterFunction && event.keyCode === 13) {
                 event.stopPropagation();
                 enterFunction();
             }
+            if (Utils.isChangeChar(event.keyCode))
+                Utils.someControlValueChanged();
         }
 
         jqObj.keyup(keyUpHandler);
 
-        let isDigit = function (c) {
+        const isDigit = function (c) {
             return c >= '0'  &&  c <= '9';
         };
 

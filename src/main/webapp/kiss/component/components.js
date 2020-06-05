@@ -89,7 +89,8 @@ class components {
     static check_box() {}
 
     /**
-     * This HTML tag, "date-input", adds functionality and a consistent and convenient API to the HTML provided date input.
+     * This HTML tag, "date-input", adds functionality and a consistent and convenient API for user date input.
+     * This control is custom and doesn't use the native browser date input offering several advantages such as significantly smaller width requirements.  Also see native-date-input tag.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
@@ -255,6 +256,47 @@ class components {
      * </table>
      */
     static list_box() {}
+
+    /**
+     * This HTML tag, "native-date-input", adds functionality and a consistent and convenient API to the HTML provided date input.
+     * Also see the date-input tag.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    max="20181231"     </td><td>     the maximum date allowed               </td></tr>
+     *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed               </td></tr>
+     *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
+     * </table>
+     * <br>
+     * <strong>Content</strong>
+     * <br><br>
+     *     The <em>Content</em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    clear()     </td><td>     clear the control value               </td></tr>
+     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
+     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
+     *     <tr><td>    getDateValue()     </td><td>     returns the date as a <code>Date</code> instance             </td></tr>
+     *     <tr><td>    getIntValue()     </td><td>     returns the date as an integer with the "YYYYMMDD" format             </td></tr>
+     *     <tr><td>    getSQLValue()     </td><td>     returns the date as a string with the "YYYY-MM-DD" format             </td></tr>
+     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    true if the user changed the value       </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    true if the control is disabled       </td></tr>
+     *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>   true if the control is hidden (not visible)    </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>   true if the control is read-only    </td></tr>
+     *     <tr><td>    isVisible()     </td><td>   true if the control is visible (not hidden)    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.  </td></tr>
+     *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
+     *     <tr><td>    readOnly()     </td><td>    set control to read-only  </td></tr>
+     *     <tr><td>    readWrite()     </td><td>    set control to read-write     </td></tr>
+     *     <tr><td>    setValue(val)     </td><td>     sets the control value.  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
+     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     * </table>
+     */
+    static native_date_input() {}
 
     /**
      * This HTML tag, "numeric-input", adds functionality and a consistent and convenient API to the HTML input text element. For example, it will
