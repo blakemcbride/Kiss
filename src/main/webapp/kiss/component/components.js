@@ -517,6 +517,7 @@ class components {
      *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when key up    </td></tr>
      *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
      *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
+     *     <tr><td>    setPassword(val)     </td><td>     if true, treat as a password control; if false, treat as text input - previous value is returned   </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      * </table>

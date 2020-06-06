@@ -75,6 +75,13 @@
 
         jqObj.keyup(keyUpHandler);
 
+        newElm.setPassword = function (val) {
+            let prev = password;
+            password = val;
+            jqObj.attr('type', password ? 'password' : 'text');
+            return prev;
+        }
+
         //--
 
         newElm.getValue = function () {
