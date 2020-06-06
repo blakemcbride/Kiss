@@ -16,6 +16,7 @@
         else
             nStyle = 'margin-left: 8px; display: inline-flex;';
         let cls = '';
+        let processChanges = true;
 
         let nAttrs = '';
         let id;
@@ -50,7 +51,8 @@
         const jqObj = newElm.jqObj;
 
         jqObj.change(function () {
-            Utils.someControlValueChanged();
+            if (processChanges)
+                Utils.someControlValueChanged();
         });
 
         newElm.getValue = function () {
@@ -72,6 +74,12 @@
         newElm.isDirty = function () {
             return originalValue !== newElm.getValue();
         };
+
+        newElm.processChanges = function (v) {
+            let p = processChanges;
+            processChanges = v;
+            return p;
+        }
 
         //--
 
