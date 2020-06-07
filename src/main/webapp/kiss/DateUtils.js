@@ -7,15 +7,15 @@
 'use strict';
 
 /**
-     Function names are meant to tell what the input and output date date types they work on.
-     In terms of understanding the data types used to represent dates:
+ Function names are meant to tell what the input and output date date types they work on.
+ In terms of understanding the data types used to represent dates:
 
-     int          20180322
-     str          "3/22/[20]18"
-     str2         "3/22/18"
-     str4         "3/22/2018"
-     SQL          "2018-03-22"
-     Date         JavaScript Date object
+ int          20180322
+ str          "3/22/[20]18"
+ str2         "3/22/18"
+ str4         "3/22/2018"
+ SQL          "2018-03-22"
+ Date         JavaScript Date object
  */
 class DateUtils {
 
@@ -31,8 +31,10 @@ class DateUtils {
         dateString = dateString.replace(/-/g, '/');
         dateString = dateString.replace(/\./g, '/');
 
-        if (!/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString))
-            return parseInt(dateString, 10);
+        if (!/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString)) {
+            const v = parseInt(dateString, 10);
+            return v ? v : 0;
+        }
 
         const parts = dateString.split("/");
         const day = parseInt(parts[1], 10);
@@ -104,17 +106,19 @@ class DateUtils {
     }
 
     /**
-     * Verify string date formatted like mM/dD/yyYY
+     * Is dt a valid date?
      *
-     * @param {string} val
-     * @returns {boolean}
+     * @param dt number, string, or date
+     * @returns {boolean} true if valid date
      */
-    static isStrDate(val) {
-        if (val)
-            val = $.trim(val);
-        if (!val)
+    static isValid(dt) {
+        if (!dt)
             return false;
-        return !!DateUtils.strToInt(val);
+        if (typeof dt === 'string')
+            dt = DateUtils.strToInt(dt);
+        else if (typeof dt === 'object')
+            dt = DateUtils.dateToInt(dt);
+        return dt === DateUtils.calendar(DateUtils.julian(dt)) && dt >= 19000101 && dt <= 21000101;
     }
 
     /**
@@ -343,6 +347,15 @@ class DateUtils {
             case 5:  return "Friday";
             case 6:  return "Saturday";
         }
+    }
+
+    /**
+     * Returns the current date as an int formatted as YYYYMMDD
+     *
+     * @returns {number}
+     */
+    static today() {
+        return DateUtils.dateToInt(new Date());
     }
 
 }

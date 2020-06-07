@@ -91,7 +91,7 @@ class components {
 
     /**
      * This HTML tag, "date-input", adds functionality and a consistent and convenient API for user date input.
-     * This control is custom and doesn't use the native browser date input offering several advantages such as significantly smaller width requirements.  Also see native-date-input tag.
+     * This control is custom and doesn't use the native browser date input offering the advantage of a significantly smaller width requirements.  Also see native-date-input tag.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>

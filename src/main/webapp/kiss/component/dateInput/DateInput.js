@@ -12,7 +12,6 @@
 
     const processor = function (elm, attr, content) {
         let originalValue = 0;
-        let currentValue = 0;
         let changeFunction;
         let nstyle;
         let min = null;
@@ -53,95 +52,89 @@
             }
         }
 
+        nattrs += ' autocorrect="off" autocapitalize="off" spellcheck="false"';
+        nattrs += ' data-lpignore="true"';  // kill lastpass
+
         const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content ? content.trim() : ''
+            placeholder: content ? content.trim() : 'mm/dd/yyyy'
         });
         const jqObj = newElm.jqObj;
 
-        jqObj.daterangepicker({
-            singleDatePicker: true,
-            showDropdowns: true,
-            autoApply: true,
-            autoUpdateInput: true,
-            drops: 'auto',
-            minYear: 1901,
-            maxYear: 2030,
-            ranges: {
-                'Today': [moment(), moment()],
-                'Clear': [null, null]
-            },
-            showCustomRangeLabel: false
-        }, function(start, end, label) {
-            if (!start  ||  !start.isValid())
-                currentValue = 0;
-            else {
-                let dt = new Date(start.year(), start.month(), start.date());
-                currentValue = DateUtils.dateToInt(dt);
-            }
-            if (originalValue != currentValue) {
-                Utils.someControlValueChanged();
-                if (changeFunction)
-                    changeFunction(currentValue);
-            }
+        jqObj.on('input', function () {
+            let val = jqObj.val().trim();
+            val = val.replace(/[^0-9./-]/g, '');  // remove characters
+            jqObj.val(val);
         });
-
-        const drp = jqObj.data('daterangepicker');
 
         function keyUpHandler(event) {
             if (enterFunction && event.keyCode === 13) {
                 event.stopPropagation();
                 enterFunction();
             }
+            if (Utils.isChangeChar(event.keyCode))
+                Utils.someControlValueChanged();
         }
 
         jqObj.keyup(keyUpHandler);
 
+        jqObj.focusout(async function () {
+            const val = jqObj.val();
+            if (!val)
+                return;
+            if (!DateUtils.isValid(val)) {
+                await Utils.showMessage('Error', 'Invalid date.');
+                jqObj.focus();
+            } else
+                jqObj.val(DateUtils.intToStr4(DateUtils.strToInt(val)).trim());
+        })
+
         //--
 
         newElm.getIntValue = function () {
-            return currentValue;
+            const val = jqObj.val();
+            if (!val)
+                return 0;
+            return DateUtils.strToInt(val);
         };
 
         newElm.getSQLValue = function () {
-            return DateUtils.intToSQL(currentValue);
+            return DateUtils.intToSQL(newElm.getIntValue());
         };
 
         newElm.getDateValue = function () {
-            return DateUtils.intToDate(currentValue);
+            return DateUtils.intToDate(newElm.getIntValue());
         };
 
         newElm.setValue = function (val) {
             if (!val) {
-                drp.setStartDate('');
-                originalValue = currentValue = 0;
+                jqObj.val('');
+                originalValue = 0;
             } else if (typeof val === 'number') {
-                drp.setStartDate(DateUtils.intToDate(val));
-                drp.setEndDate(DateUtils.intToDate(val));
-                currentValue = originalValue = val;
+                jqObj.val(DateUtils.intToStr4(val).trim())
+                originalValue = val;
             } else if (typeof val === 'string') {
                 if (/^\d+$/.test(val)) {
-                    drp.setStartDate(DateUtils.intToDate(val=Number(val)));
-                    originalValue = currentValue = val;
+                    jqObj.val(DateUtils.intToStr4(val=Number(val)).trim());
+                    originalValue = val;
                 } else {
-                    drp.setStartDate(val);
-                    originalValue = currentValue = DateUtils.strToInt(val);
+                    originalValue = DateUtils.strToInt(val);
+                    jqObj.val(DateUtils.intToStr4(originalValue).trim());
                 }
             } else if (typeof val === 'object') { // Date
-                drp.setStartDate(val);
-                originalValue = currentValue = DateUtils.dateToInt(val);
+                originalValue = DateUtils.dateToInt(val);
+                jqObj.val(DateUtils.intToStr4(originalValue).trim());
             }
             return this;
         };
 
         newElm.isDirty = function () {
-            return originalValue !== currentValue;
+            return originalValue !== newElm.getIntValue();
         };
 
         newElm.clear = function () {
-            drp.setStartDate('');
-            currentValue = originalValue = 0;
+            newElm.setValue(0);
             return this;
         };
 
