@@ -141,17 +141,17 @@
         //--
 
         newElm.disable = function () {
-            jqObj.prop('disabled', true);
+            jqObj.attr('contenteditable', false);
             return this;
         };
 
         newElm.enable = function () {
-            jqObj.prop('disabled', false);
+            jqObj.attr('contenteditable', true);
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return !!jqObj.attr('contenteditable');
         };
 
         //--
