@@ -47,7 +47,8 @@
         nattrs += ' hidden';
         nstyle = 'height: ' + height + '; width: ' + width + '; -' + nstyle;
 
-        content = content.replace(/popup-title/g, 'div').replace(/popup-body/g, 'div');
+        content = content.replace(/<popup-title/, '<div').replace(/<\/popup-title>/, '</div>');
+        content = content.replace(/<popup-body/, '<div').replace(/<\/popup-body>/, '</div>');
 
         Utils.replaceHTML(id, elm, '<div id="{id}" style="{style}" {attr}>{content}</div>', {
             style: nstyle,
