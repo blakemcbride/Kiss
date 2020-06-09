@@ -492,10 +492,11 @@ public class DateUtils {
         m = (dt % 10000L) / 100L;
         d = dt % 100L;
         d += (long) (.5 + (m - 1L) * 30.57);
-        if (m >	2L)
+        if (m >	2L) {
             d--;
-		if (0L != y % 400L  &&  (0L != y % 4L  ||  0L == y % 100L))
-			d--;
+            if (0L != y % 400L && (0L != y % 4L || 0L == y % 100L))
+                d--;
+        }
         d += (long) (365.25 * --y);
         d += y / 400L;
         d -= y / 100L;
@@ -508,12 +509,12 @@ public class DateUtils {
      * @param d
      * @return YYYYMMDD
      */
-    public static long calendar(long d)
+    public static int calendar(long d)
     {
         long	y, m, t;
 
         if (d <= 0L)
-            return d;
+            return 0;
         y = (long)(1.0 + d / 365.2425);
         t = y -	1L;
         d -= (long) (t * 365.25);
@@ -532,7 +533,7 @@ public class DateUtils {
             m = 12;
             --y;
         }
-        return 10000L * y + m * 100L + d;
+        return 10000 * (int) y + (int) m * 100 + (int) d;
     }
 
     /**
@@ -583,7 +584,12 @@ public class DateUtils {
     }
 
     public static void main(String [] argv) {
-        System.out.println(monthOfYearName(Integer.parseInt(argv[0])));
+        int dt = 20230220;
+        long jdt = julian(dt);
+        int dt2 = calendar(jdt);
+        System.out.println(dt);
+        System.out.println(jdt);
+        System.out.println(dt2);
     }
 
 }
