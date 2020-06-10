@@ -12,7 +12,6 @@
 
     const processor = function (elm, attr, content) {
         let originalValue = 0;
-        let changeFunction;
         let nstyle;
         let min = null;
         let max = null;
@@ -189,8 +188,8 @@
             return this;
         };
 
-        newElm.onChange = function (func) {
-            changeFunction = func;
+        newElm.onChange = function (fun) {
+            jqObj.off('change').change(fun);
             return this;
         };
 
