@@ -260,10 +260,7 @@ class DateUtils {
      * @returns {Date}
      */
     static dateAddDays(dt, days) {
-        const result = new Date(dt);
-        result.setDate(result.getDate() + days);
-        return result;
-//    return new Date(((dt.getTime() / 1000 + (60 * 60 * 24 * days)) * 1000));
+        return DateUtils.intToDate(DateUtils.intAddDays(DateUtils.dateToInt(dt), days));
     }
 
     /**
@@ -274,7 +271,7 @@ class DateUtils {
      * @returns {int}
      */
     static intAddDays(dt, days) {
-        return DateUtils.dateToInt(DateUtils.dateAddDays(DateUtils.intToDate(dt), days));
+        return DateUtils.calendar(DateUtils.julian(dt) + days);
     }
 
     /**
@@ -312,10 +309,11 @@ class DateUtils {
         m = Math.floor((dt % 10000) / 100);
         d = Math.floor(dt % 100);
         d += Math.floor(.5 + (m - 1) * 30.57);
-        if (m >	2)
+        if (m >	2) {
             d--;
-        if (0 !== y % 400  &amp;&amp;  (0 !== y % 4  ||  0 === y % 100))
-            d--;
+            if (0 !== y % 400 &amp;&amp; (0 !== y % 4 || 0 === y % 100))
+                d--;
+        }
         d += Math.floor(365.25 * --y);
         d += Math.floor(y / 400);
         d -= Math.floor(y / 100);
