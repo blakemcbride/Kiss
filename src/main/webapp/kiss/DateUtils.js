@@ -20,7 +20,7 @@
 class DateUtils {
 
     /**
-     * Converts a string date "mM/dD/yyYY" or 'yyyymmdd' to an integer of the form YYYYMMDD.
+     * Converts a string date "mM/dD/yyYY" or 'mmddyyyy' to an integer of the form YYYYMMDD.
      * Bad dates return 0
      *
      * @param {string} dateString
@@ -31,16 +31,24 @@ class DateUtils {
         dateString = dateString.replace(/-/g, '/');
         dateString = dateString.replace(/\./g, '/');
 
+        let day;
+        let month;
+        let year;
+
         if (!/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString)) {
-            const v = parseInt(dateString, 10);
-            return v ? v : 0;
+            if (/^\d{8}$/.test(dateString)) {
+                // assume MMDDYYYY
+                month = parseInt(dateString.substr(0, 2), 10);
+                day = parseInt(dateString.substr(2, 2), 10);
+                year = parseInt(dateString.substr(4, 4), 10)
+            } else
+                return 0;
+        } else {
+            const parts = dateString.split("/");
+            day = parseInt(parts[1], 10);
+            month = parseInt(parts[0], 10);
+            year = parseInt(parts[2], 10);
         }
-
-        const parts = dateString.split("/");
-        const day = parseInt(parts[1], 10);
-        const month = parseInt(parts[0], 10);
-        let year = parseInt(parts[2], 10);
-
         if (year < 100) {
             let currentYear = new Date().getFullYear();
             let y19 = 1900 + year;
