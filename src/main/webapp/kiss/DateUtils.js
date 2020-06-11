@@ -148,7 +148,7 @@ class DateUtils {
         dt -= y * 10000;
         const m = Math.floor(dt / 100);
         const d = Math.floor(dt - m * 100);
-        return Utils.take(m.toString(), -2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 4);
+        return Utils.zeroPad(m.toString(), 2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 4);
     }
 
     /**
@@ -181,7 +181,7 @@ class DateUtils {
         y %= 100;
         const m = Math.floor(dt / 100);
         const d = Math.floor(dt - m * 100);
-        return Utils.take(m.toString(), -2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 2);
+        return Utils.zeroPad(m.toString(), 2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 2);
     }
 
     /**
