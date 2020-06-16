@@ -153,8 +153,9 @@ class components {
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus on the control        </td></tr>
      *     <tr><td>    getData()     </td><td>     returns the data associated to the selected option             </td></tr>
+     *     <tr><td>    getIntValue()     </td><td>     returns the value associated to the selected option as an integer            </td></tr>
      *     <tr><td>    getLabel()     </td><td>     returns the label associated to the selected option             </td></tr>
-     *     <tr><td>    getValue()     </td><td>     returns the value associated to the selected option             </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the value associated to the selected option as a string           </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
      *     <tr><td>    isDirty()     </td><td>     true if user changed value      </td></tr>
      *     <tr><td>    isDisabled()     </td><td>     true if control is disabled      </td></tr>
@@ -235,8 +236,9 @@ class components {
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus on control            </td></tr>
      *     <tr><td>    getData()     </td><td>     returns the data associated to the selected option             </td></tr>
+     *     <tr><td>    getIntValue()     </td><td>     returns the integer value associated to the selected option (returns an array if <code>multiple</code> attribute included)             </td></tr>
      *     <tr><td>    getLabel()     </td><td>     returns the label associated to the selected option             </td></tr>
-     *     <tr><td>    getValue()     </td><td>     returns the value associated to the selected option (returns an array if <code>multiple</code> attribute included)            </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the string value associated to the selected option (returns an array if <code>multiple</code> attribute included)            </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
      *     <tr><td>    isDirty()     </td><td>    true if user has changed control value     </td></tr>
      *     <tr><td>    isDisabled()     </td><td>    true if control is disabled     </td></tr>
@@ -421,7 +423,8 @@ class components {
      *     <tr><td>    disable()     </td><td>    set the control to disabled    </td></tr>
      *     <tr><td>    enable()     </td><td>    set the control to enabled            </td></tr>
      *     <tr><td>    focus()     </td><td>    set focus on the current control           </td></tr>
-     *     <tr><td>    getValue()     </td><td>     the value of the selected ratio button group               </td></tr>
+     *     <tr><td>    getIntValue()     </td><td>     the integer value of the selected ratio button group               </td></tr>
+     *     <tr><td>    getValue()     </td><td>     the string value of the selected ratio button group               </td></tr>
      *     <tr><td>    hide()     </td><td>    hides the control             </td></tr>
      *     <tr><td>    isDirty()     </td><td>     true if the user changed the value             </td></tr>
      *     <tr><td>    isDisabled()     </td><td>     true if the control is disabled            </td></tr>

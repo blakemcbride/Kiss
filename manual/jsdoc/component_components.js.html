@@ -197,8 +197,9 @@ class components {
      *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>    sets focus on the control        &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getData()     &lt;/td>&lt;td>     returns the data associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getIntValue()     &lt;/td>&lt;td>     returns the value associated to the selected option as an integer            &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getLabel()     &lt;/td>&lt;td>     returns the label associated to the selected option             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option as a string           &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDirty()     &lt;/td>&lt;td>     true if user changed value      &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDisabled()     &lt;/td>&lt;td>     true if control is disabled      &lt;/td>&lt;/tr>
@@ -279,8 +280,9 @@ class components {
      *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>    sets focus on control            &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getData()     &lt;/td>&lt;td>     returns the data associated to the selected option             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getIntValue()     &lt;/td>&lt;td>     returns the integer value associated to the selected option (returns an array if &lt;code>multiple&lt;/code> attribute included)             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getLabel()     &lt;/td>&lt;td>     returns the label associated to the selected option             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option (returns an array if &lt;code>multiple&lt;/code> attribute included)            &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the string value associated to the selected option (returns an array if &lt;code>multiple&lt;/code> attribute included)            &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDirty()     &lt;/td>&lt;td>    true if user has changed control value     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDisabled()     &lt;/td>&lt;td>    true if control is disabled     &lt;/td>&lt;/tr>
@@ -465,7 +467,8 @@ class components {
      *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>    set the control to disabled    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>    set the control to enabled            &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>    set focus on the current control           &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     the value of the selected ratio button group               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getIntValue()     &lt;/td>&lt;td>     the integer value of the selected ratio button group               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     the string value of the selected ratio button group               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>    hides the control             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDirty()     &lt;/td>&lt;td>     true if the user changed the value             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDisabled()     &lt;/td>&lt;td>     true if the control is disabled            &lt;/td>&lt;/tr>

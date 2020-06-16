@@ -27,6 +27,10 @@ function $$(id) {
         rbObj.getValue = function () {
             return Kiss.RadioButtons.getValue(id);
         };
+        rbObj.getIntValue = function () {
+            let val = Kiss.RadioButtons.getValue(id);
+            return val ? Number(val) : 0;
+        };
         rbObj.setValue = function (val) {
             Kiss.RadioButtons.setValue(id, val);
             originalValue = rbObj.getValue();

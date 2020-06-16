@@ -99,6 +99,11 @@
             return jqObj.val();
         };
 
+        newElm.getIntValue = function () {
+            let val = jqObj.val();
+            return val ? Number(val) : 0;
+        };
+
         newElm.setValue = function (val) {
             jqObj.val(val);
             originalValue = jqObj.val();
