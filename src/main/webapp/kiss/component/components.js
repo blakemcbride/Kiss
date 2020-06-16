@@ -79,7 +79,7 @@ class components {
      *     <tr><td>    isHidden()     </td><td>    true if the control is hidden (not visible)    </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>    true if the control is read-only     </td></tr>
      *     <tr><td>    isVisible()     </td><td>    true if the control is visible (not hidden)     </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.               </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code> whenever the state of this control changes. <code>fun</code> is passed the value of the control.  </td></tr>
      *     <tr><td>    processChanges(flg)     </td><td> if false, checkbox should not register changes (no data was changed) See Utils.someControlValueChanged() </td></tr>
      *     <tr><td>    readOnly()     </td><td>    sets control to read-only         </td></tr>
      *     <tr><td>    readWrite()     </td><td>    sets control to read-write        </td></tr>
@@ -432,7 +432,7 @@ class components {
      *     <tr><td>    isHidden(desc)     </td><td>     true if the control is hidden (not visible)   </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>     true if the control is read-only           </td></tr>
      *     <tr><td>    isVisible()     </td><td>     true if the control is visible (not hidden)           </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.               </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code> whenever the state of this control changes.  <code>fun</code> is passed the value of the control group.  </td></tr>
      *     <tr><td>    readOnly()     </td><td>    sets the control to read-only               </td></tr>
      *     <tr><td>    readWrite()     </td><td>    sets the control to read-write        </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     selects the button with the associated value               </td></tr>

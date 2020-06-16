@@ -132,7 +132,12 @@
         };
 
         newElm.onChange = function (fun) {
-            jqObj.change(fun);
+            jqObj.off('change').change(() => {
+                if (fun)
+                    fun(jqObj.prop('checked'));
+                if (processChanges)
+                    Utils.someControlValueChanged();
+            });
             return this;
         };
 

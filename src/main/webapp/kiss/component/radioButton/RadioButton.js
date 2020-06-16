@@ -223,7 +223,12 @@ Kiss.RadioButtons.isError = function (group, desc) {
 };
 
 Kiss.RadioButtons.onChange = function (group, fun) {
-    return $('input[type=radio][name=' + group + ']').change(fun);
+    const ctl = $('input[type=radio][name=' + group + ']');
+    return ctl.off('change').change(() => {
+        if (fun)
+            fun($('input[type=radio][name=' + group + ']:checked').val());
+        Utils.someControlValueChanged();
+    });
 };
 
 Kiss.RadioButtons.resetGroups = function () {

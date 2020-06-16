@@ -123,7 +123,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>    true if the control is hidden (not visible)    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>    true if the control is read-only     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>    true if the control is visible (not hidden)     &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the state of this control changes.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code> whenever the state of this control changes. &lt;code>fun&lt;/code> is passed the value of the control.  &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    processChanges(flg)     &lt;/td>&lt;td> if false, checkbox should not register changes (no data was changed) See Utils.someControlValueChanged() &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly()     &lt;/td>&lt;td>    sets control to read-only         &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readWrite()     &lt;/td>&lt;td>    sets control to read-write        &lt;/td>&lt;/tr>
@@ -476,7 +476,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden(desc)     &lt;/td>&lt;td>     true if the control is hidden (not visible)   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>     true if the control is read-only           &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>     true if the control is visible (not hidden)           &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the state of this control changes.               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code> whenever the state of this control changes.  &lt;code>fun&lt;/code> is passed the value of the control group.  &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly()     &lt;/td>&lt;td>    sets the control to read-only               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readWrite()     &lt;/td>&lt;td>    sets the control to read-write        &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     selects the button with the associated value               &lt;/td>&lt;/tr>
