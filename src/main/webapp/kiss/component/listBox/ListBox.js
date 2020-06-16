@@ -112,6 +112,8 @@
                 jqObj.append($('<option></option>').attr('value', items[i][valField]).text(items[i][labelField]));
                 if (dataField)
                     dataStore[items[i][valField]] = items[i][dataField];
+                else
+                    dataStore[items[i][valField]] = items[i]; // store the whole thing
             }
             originalValue = jqObj.val();
             return this;

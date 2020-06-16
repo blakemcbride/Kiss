@@ -147,7 +147,7 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    add(val, lbl, data)     </td><td>     add a new list item.  <code>val</code> is the value associated to the option, <code>lbl</code> is the text shown in the list, and <code>data</data> represents optional and arbitrary data associated to the option               </td></tr>
-     *     <tr><td>    addItems(items, valField, lblField [, dataField]) </td><td>  used to add an array of items at one time. <code>items</code> is the array of items to add.  <code>valField</code> and <code>lblField</code> are the names of the fields in the array.  </td></tr>
+     *     <tr><td>    addItems(items, valField, lblField [, dataField]) </td><td>  used to add an array of items at one time. <code>items</code> is the array of items to add.  <code>valField</code> and <code>lblField</code> are the names of the fields in the array.  <code>dataField</code> is the name of a field whose data is stored along with the item.  If null, the whole item is stored. </td></tr>
      *     <tr><td>    clear()     </td><td>     remove the list contents except the <code>default-option</code>               </td></tr>
      *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
@@ -230,7 +230,7 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    add(val, lbl, data)     </td><td>     add a new list item.  <code>val</code> is the value associated to the option, <code>lbl</code> is the text shown in the list, and <code>data</data> represents optional and arbitrary data associated to the option               </td></tr>
-     *     <tr><td>    addItems(items, valField, lblField [, dataField]) </td><td>  used to add an array of items at one time. <code>items</code> is the array of items to add.  <code>valField</code> and <code>lblField</code> are the names of the fields in the array.  </td></tr>
+     *     <tr><td>    addItems(items, valField, lblField [, dataField]) </td><td>  used to add an array of items at one time. <code>items</code> is the array of items to add.  <code>valField</code> and <code>lblField</code> are the names of the fields in the array.   <code>dataField</code> is the name of a field whose data is stored along with the item.  If null, the whole item is stored. </td></tr>
      *     <tr><td>    clear()     </td><td>     remove the list contents except the <code>default-option</code>               </td></tr>
      *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
