@@ -33,8 +33,10 @@ configure, and run Kiss, tomcat, and the required JAR files:
     build-builder
     bld develop
 
-In either environment, you can then go to `http://localhost:8000` 
-within your browser to use the system.
+In either environment, you can then go to `http://localhost:8000`
+within your browser to use the system.  After that, both the front-end
+and the back-end code can be changed while the system is running. No need for
+additional compiles or deploys.
 
 The system comes with (essentially) three manuals as follows:
 
