@@ -60,6 +60,8 @@
         };
 
         newElm.setValue = function (val) {
+            if (typeof val === 'string')
+                val = val === 'true';
             jqObj.prop('checked', !!val);
             originalValue = newElm.getValue();
             return this;
