@@ -17,6 +17,6 @@ public class StartupListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         System.out.println("* * * CONTEXT DESTROYED * * *");
-	System.exit(0);
+        System.exit(0);
     }
 }
