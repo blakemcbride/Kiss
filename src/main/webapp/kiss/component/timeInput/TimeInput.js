@@ -54,7 +54,6 @@
         }
 
         nattrs += ' oninput="this.value=Component.TimeInput.$timeinput(this)"';
-        nattrs += ' onfocusout="this.value=Component.TimeInput.$formattime(this)"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
         const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
@@ -79,78 +78,10 @@
 
         jqObj.keyup(keyUpHandler);
 
-        const isDigit = function (c) {
-            return c >= '0'  &&  c <= '9';
-        };
-
-        newElm.getValue$ = function (sval) {
-            if (!sval)
-                return null;
-            sval = sval.trim();
-            if (!sval)
-                return null;
-            let buf = '';
-            let i = 0;
-
-            // hours
-            for (; i < sval.length; i++) {
-                let c = sval.charAt(i);
-                if (!isDigit(c))
-                    break;
-                buf += c;
-            }
-            let hours;
-            if (!buf)
-                hours = 0;
-            else
-                hours = parseInt(buf);
-
-            for (; i < sval.length; i++) {
-                let c = sval.charAt(i);
-                if (c !== ' '  &&  c !== ':')
-                    break;
-            }
-
-            let minutes;
-            if (i < sval.length  &&  isDigit(sval.charAt(i))) {
-                buf = '';
-                for (; i < sval.length; i++) {
-                    let c = sval.charAt(i);
-                    if (!isDigit(c))
-                        break;
-                    buf += c;
-                }
-                minutes = parseInt(buf);
-            } else
-                minutes = 0;
-
-            for (; i < sval.length  &&  sval.charAt(i) === ' '; i++) ;
-
-            let part;
-            if (i >= sval.length)
-                part = null;
-            else {
-                const c = sval.charAt(i);
-                if (c === 'a'  ||  c === 'A')
-                    part = 'A';
-                else if (c === 'p'  ||  c === 'P')
-                    part = 'P';
-                else
-                    part = null;
-            }
-
-            if (part === 'A'  &&  hours === 12)
-                return (hours - 12) * 100 + minutes;
-            if (!part  ||  part === 'A'  ||  hours === 12)
-                return hours * 100 + minutes;
-            else
-                return (hours + 12) * 100 + minutes;
-        };
-
         //--
 
         newElm.getValue = function () {
-            const val = newElm.getValue$(newElm.jqObj.val());
+            const val = TimeUtils.strToInt(newElm.jqObj.val());
             if (val === null)
                 return val;
             const hours = Math.floor(val / 100);
@@ -170,6 +101,18 @@
             originalValue = newElm.getValue();
             return this;
         };
+
+        jqObj.focusout(async function () {
+            const val = jqObj.val().trim();
+            if (!val)
+                return;
+            const ival = TimeUtils.strToInt(val);
+            if (ival === null) {
+                await Utils.showMessage('Error', 'Invalid time.');
+                jqObj.focus();
+            } else
+                jqObj.val(TimeUtils.format(ival));
+        });
 
         newElm.clear = function () {
             newElm.setValue('');
@@ -245,7 +188,7 @@
         }
 
         newElm.isError = function (desc) {
-            const val = newElm.getValue$(newElm.jqObj.val());
+            const val = TimeUtils.strToInt(newElm.jqObj.val());
             if (required  &&  val === null) {
                 Utils.showMessage('Error', desc + ' is required.').then(function () {
                     jqObj.focus();
@@ -275,13 +218,6 @@
                 return true;
             }
             return false;
-        };
-
-        Component.TimeInput.$formattime = function (elm) {
-            const val = newElm.getValue$(elm.value.trim());
-            if (val === null)
-                return '';
-            return TimeUtils.format(val, elm.kiss.elementInfo.zero_fill);
         };
 
     };
