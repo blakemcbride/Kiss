@@ -9,6 +9,8 @@
 /**
  * Time utilities.
  *
+ * Utilities to deal with times stored as an number in the form HHMM since midnight.
+ *
  */
 class TimeUtils {
 
@@ -60,43 +62,53 @@ class TimeUtils {
         };
         let buf = '';
         let i = 0;
+        let c;
+
+        let ndigits;
+        for (ndigits=0 ; ndigits < sval.length && isDigit(sval[ndigits]) ; ndigits++);
 
         // hours
-        const ndh = sval.length === 3 ? 1 : 2;
-        for (; i < sval.length; i++) {
-            let c = sval.charAt(i);
-            if (!isDigit(c) || i >= ndh)
-                break;
+        let ndh;
+        switch (ndigits) {
+            case 1:  ndh = 1;  break;
+            case 2:  ndh = 2;  break;
+            case 3:  ndh = 1;  break;
+            default: ndh = 2;  break;
+        }
+        for (; i < ndh ; i++) {
+            c = sval.charAt(i);
             buf += c;
         }
         let hours = buf ? parseInt(buf) : 0;
 
+        // skip : and space
         for (; i < sval.length; i++) {
-            let c = sval.charAt(i);
-            if (isDigit(c))
+            c = sval.charAt(i);
+            if (isDigit(c)  ||  c === 'a' || c === 'A' || c === 'p' || c === 'P')
                 break;
         }
 
-        let minutes;
-        if (i < sval.length  &&  isDigit(sval.charAt(i))) {
-            buf = '';
-            for (let n=0 ; i < sval.length; i++, n++) {
-                let c = sval.charAt(i);
-                if (!isDigit(c) || n >= 2)
-                    break;
-                buf += c;
+        let minutes = 0;
+        if (c !== 'a' && c !== 'A' && c !== 'p' && c !== 'P') {
+            if (i < sval.length && isDigit(sval.charAt(i))) {
+                buf = '';
+                for (let n = 0; i < sval.length; i++, n++) {
+                    c = sval.charAt(i);
+                    if (!isDigit(c) || n >= 2)
+                        break;
+                    buf += c;
+                }
+                minutes = parseInt(buf);
             }
-            minutes = parseInt(buf);
-        } else
-            minutes = 0;
 
-        for (; i < sval.length  &&  sval.charAt(i) === ' '; i++) ;
+            for (; i < sval.length && sval.charAt(i) === ' '; i++) ;
+        }
 
         let part;
         if (i >= sval.length)
             part = null;
         else {
-            const c = sval.charAt(i);
+            c = sval.charAt(i);
             if (c === 'a'  ||  c === 'A')
                 part = 'A';
             else if (c === 'p'  ||  c === 'P')
@@ -134,6 +146,69 @@ class TimeUtils {
         if (time !== hours * 100 + minutes)
             return false;
         return hours < 24 && hours >= 0 && minutes < 60 && minutes >= 0;
+    }
+
+    /**
+     * Returns the hours portion of a time in an integer representation formatted HHMM
+     *
+     * @param time {number} HHMM
+     * @returns {null|number}
+     */
+    static hours(time) {
+        if (typeof time !== 'number')
+            return null;
+        return Math.floor(time / 100);
+    }
+
+    /**
+     * Returns the minutes portion of a time in an integer representation formatted HHMM
+     *
+     * @param time {number} HHMM
+     * @returns {null|number}
+     */
+    static minutes(time) {
+        if (typeof time !== 'number')
+            return null;
+        return time - Math.floor(time / 100) * 100;
+    }
+
+    /**
+     * Returns the total minutes in a time.
+     *
+     * @param time {number} HHMM
+     * @returns {null|number}
+     */
+    static totalMinutes(time) {
+        if (typeof time !== 'number')
+            return null;
+        return TimeUtils.hours(time) * 60 + TimeUtils.minutes(time);
+    }
+
+    /**
+     * Returns the total minutes between two times.
+     *
+     * @param t1 {number} HHMM
+     * @param t2 {number} HHMM
+     * @returns {null|number}
+     */
+    static diff(t1, t2) {
+        if (typeof t1 !== 'number' || typeof t2 !== 'number')
+            return null;
+        return TimeUtils.totalMinutes(t1) - TimeUtils.totalMinutes(t2);
+    }
+
+    /**
+     * Convert a number of minutes into standard time format (HHMM).
+     *
+     * @param m {number} number of minutes
+     * @returns {number} HHMM
+     */
+    static minutesToTime(m) {
+        if (typeof m !== 'number')
+            return null;
+        const hours = Math.floor(m / 60);
+        const minutes = m - hours * 60;
+        return hours * 100 + minutes;
     }
 
 }

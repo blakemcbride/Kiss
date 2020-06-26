@@ -516,7 +516,7 @@ class components {
      *     <tr><td>    isHidden()     </td><td> is the control hidden? </td></tr>
      *     <tr><td>    isReadOnly()     </td><td> is the control read-only?    </td></tr>
      *     <tr><td>    isVisible()     </td><td> is the control visible?   </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>  execute fun when control changes              </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>  execute fun if control value changed, as it loses focus             </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when key up    </td></tr>
      *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
@@ -583,6 +583,7 @@ class components {
      *     <tr><td>    isHidden()     </td><td>     true if control is hidden (not visible)     </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>     true if control is read-only     </td></tr>
      *     <tr><td>    isVisible()     </td><td>     true if control is visible (not hidden)    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>  execute fun if control value changed, as it loses focus             </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly()     </td><td>   sets control to read-only   </td></tr>
      *     <tr><td>    readWrite()     </td><td>    sets control to read-write      </td></tr>

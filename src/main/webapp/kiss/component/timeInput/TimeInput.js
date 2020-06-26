@@ -187,6 +187,11 @@
             return this;
         }
 
+        newElm.onChange = function (fun) {
+            jqObj.off('change').change(fun);
+            return this;
+        };
+
         newElm.isError = function (desc) {
             const val = TimeUtils.strToInt(newElm.jqObj.val());
             if (required  &&  val === null) {
@@ -230,7 +235,7 @@
     Utils.newComponent(componentInfo);
 
     Component.TimeInput.$timeinput = function (elm) {
-        const val1 = elm.value.trim();
+        const val1 = elm.value.replace(/^\s+/, '');
         const val2 = val1.replace(/[^0-9 :ampAMP]/g, '');  // remove characters
         if (val1 !== val2) {
             Utils.beep();
