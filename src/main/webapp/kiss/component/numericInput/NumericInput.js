@@ -18,6 +18,7 @@
         let max = null;
         let onchange;
         let enterFunction = null;
+        let comma = true;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -54,6 +55,9 @@
                     min = 0;
                     dollar = true;
                     dp = 2;
+                    break;
+                case 'no-comma':
+                    comma = false;
                     break;
 
                 // pre-existing attributes
@@ -108,7 +112,7 @@
                 }
             if (typeof val !== 'number')
                 val = Utils.toNumber(val);
-            let str = Utils.format(val, "C" + (dollar ? "D" : "") + (show_zero ? "" : "B"), 0, dp);
+            let str = Utils.format(val, (comma ? "C" : "") + (dollar ? "D" : "") + (show_zero ? "" : "B"), 0, dp);
             jqObj.val(str);
             return this;
         };
@@ -210,12 +214,12 @@
             if (min !== null  &&  val < min  ||  max !== null  &&  val > max) {
                 let msg;
                 if ((min  ||  min === 0)  &&  (max  ||  max === 0))
-                    msg = desc + ' must be between ' + Utils.format(min, "C" + (dollar ? "D" : ""), 0, dp) +
-                        ' and ' + Utils.format(max, "C" + (dollar ? "D" : ""), 0, dp) + '.';
+                    msg = desc + ' must be between ' + Utils.format(min, (comma ? "C" : "") + (dollar ? "D" : ""), 0, dp) +
+                        ' and ' + Utils.format(max, (comma ? "C" : "") + (dollar ? "D" : ""), 0, dp) + '.';
                 else if (min  ||  min === 0)
-                    msg = desc + ' must be greater than or equal to ' + Utils.format(min, "C" + (dollar ? "D" : ""), 0, dp) + '.';
+                    msg = desc + ' must be greater than or equal to ' + Utils.format(min, (comma ? "C" : "") + (dollar ? "D" : ""), 0, dp) + '.';
                 else
-                    msg = desc + ' must be less than or equal to ' + Utils.format(max, "C" + (dollar ? "D" : ""), 0, dp) + '.';
+                    msg = desc + ' must be less than or equal to ' + Utils.format(max, (comma ? "C" : "") + (dollar ? "D" : ""), 0, dp) + '.';
                 Utils.showMessage('Error', msg).then(function () {
                     jqObj.focus();
                 });
@@ -270,7 +274,7 @@
             if (!sval.length)
                 return sval;
             let nval = Number(sval);
-            jqObj.val(Utils.format(nval, "C" + (dollar ? 'D' : '') + (show_zero ? "" : "B"), 0, ndp));
+            jqObj.val(Utils.format(nval, (comma ? "C" : "") + (dollar ? 'D' : '') + (show_zero ? "" : "B"), 0, ndp));
         });
 
     };

@@ -312,6 +312,7 @@ class components {
      *     <tr><td>    min="20"     </td><td>     sets the minimum acceptable value (default 0)   </td></tr>
      *     <tr><td>    max="200"     </td><td>     sets the maximum acceptable value               </td></tr>
      *     <tr><td>    money     </td><td>     sets <code>min="0" dollar-sign decimal-places="2"</code>               </td></tr>
+     *     <tr><td>    no-comma     </td><td>     do not format number with commas  </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    show-zero     </td><td>    show zero values (instead of blank if zero)               </td></tr>
      *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
