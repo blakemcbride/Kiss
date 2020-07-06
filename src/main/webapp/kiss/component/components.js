@@ -511,7 +511,6 @@ class components {
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the string associated with the control             </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    hidePassword()     </td><td>     a text input is changed to a password input </td></tr>
      *     <tr><td>    isDirty()     </td><td>  has the control contents been changed by user      </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
      *     <tr><td>    isDisabled()     </td><td> is the control disabled? </td></tr>
@@ -526,7 +525,6 @@ class components {
      *     <tr><td>    setPassword(val)     </td><td>     if true, treat as a password control; if false, treat as text input - previous value is returned   </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
-     *     <tr><td>    showPassword()     </td><td>     a password input is changed to a text input </td></tr>
      * </table>
      */
     static text_input() {}
