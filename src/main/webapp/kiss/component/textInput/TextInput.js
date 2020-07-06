@@ -160,6 +160,16 @@
             return jqObj.is(':visible');
         };
 
+        newElm.showPassword = function () {
+            jqObj.attr('type', 'text');
+            return this;
+        };
+
+        newElm.hidePassword = function () {
+            jqObj.attr('type', 'password');
+            return this;
+        };
+
         //--
 
         newElm.onKeyUp = function (fun) {
