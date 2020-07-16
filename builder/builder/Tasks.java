@@ -186,6 +186,9 @@ public class Tasks {
         dep.add("sqlite-jdbc-3.30.1.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.30.1/sqlite-jdbc-3.30.1.jar");
         dep.add("dynamic-loader-3.0.jar", LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
         dep.add("jquery-3.4.1.min.js", "src/main/webapp/lib", "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js");
+        dep.add("ag-grid-community.noStyle.min.js", "src/main/webapp/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/23.2.1/ag-grid-community.noStyle.min.js");
+        dep.add("ag-grid.min.css", "src/main/webapp/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/23.2.1/styles/ag-grid.min.css");
+        dep.add("ag-theme-balham.min.css", "src/main/webapp/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/23.2.1/styles/ag-theme-balham.min.css");
         return dep;
     }
 

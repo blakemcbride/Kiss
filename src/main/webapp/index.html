@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <!-- comment -->
+  <!-- Kiss demo application.  See https://kissweb.org -->
 
 <head>
     <title>Kiss Application</title>
@@ -13,6 +13,9 @@
     <link rel="stylesheet" href="normalize2.css">
 
     <link rel="stylesheet" href="kiss/Utils.css">
+
+    <link rel="stylesheet" href="lib/ag-grid.min.css">
+    <link rel="stylesheet" href="lib/ag-theme-balham.min.css">
 
 
     <style>
@@ -106,6 +109,7 @@
                 loadScript("kiss/DateTimeUtils.js");
                 loadScript("kiss/TimeUtils.js");
                 loadScript("kiss/Server.js");
+                loadScript("kiss/AGGrid.js");
             };
 
 
@@ -148,6 +152,7 @@
 <body onload="startup()">
 
 <script src="lib/jquery-3.4.1.min.js"></script>
+<script src="lib/ag-grid-community.noStyle.min.js"></script>
 
 </body>
 
