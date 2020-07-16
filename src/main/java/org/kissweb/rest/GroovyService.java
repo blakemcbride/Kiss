@@ -34,13 +34,68 @@ class GroovyService {
         }
     }
 
+    /**
+     * This is the method that allows Groovy to be used as a scripting language.
+     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * must also return a boxed object.
+     *
+     * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
+     *
+     * if ignoreMissing is true and the file, class, or method are missing a NULL is returned.
+     * If ignoreMissing is false and the file, class, or method are missing an exception is thrown.
+     *
+     * filePath can be an absolute path or a string containing a "~".  The "~" is replaced with the root of
+     * the application.
+     *
+     * @param ignoreMissing
+     * @param filePath
+     * @param className
+     * @param methodName
+     * @param args boxed or unboxed arguments (variable number)
+     * @return The boxed value returned by the Groovy method call
+     * @throws Exception
+     */
+    public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object ... args) throws Exception {
+        String rootPath = MainServlet.getApplicationPath();
+        if (filePath == null  ||  filePath.isEmpty())
+            filePath = "~";
+        filePath = filePath.replace("~", rootPath);
+        final String fileName = filePath + "/" + className + ".groovy";
+        if (ignoreMissing && !(new File(fileName)).exists())
+            return null;
+        final GroovyClassInfo ci = loadGroovyClass(fileName);
+        Method methp;
+        if (ci == null) {
+            if (ignoreMissing)
+                return null;
+            throw new Exception("Groovy file " + fileName + " not found.");
+        }
+        Class<?> [] ca = new Class<?>[args.length];
+        for (int i=0 ; i < args.length ; i++)
+            ca[i] = args[i].getClass();
+        try {
+            methp = ci.gclass.getMethod(methodName, ca);
+            if (methp == null) {
+                if (ignoreMissing)
+                    return null;
+                throw new Exception();
+            }
+        } catch (Exception e) {
+            throw new Exception("Method " + methodName + " not found in Groovy file " + fileName, e);
+        }
+        try {
+            return methp.invoke(null, args);
+        } catch (Exception e) {
+            throw new Exception("Error executing method " + methodName + " of Groovy file " + fileName, e);
+        }
+    }
+
     ProcessServlet.ExecutionReturn internalGroovy(ProcessServlet ms, HttpServletResponse response, String _package, String _className, String _method) {
-        GroovyClassInfo ci;
         final String _fullClassPath = _package != null ? _package + "." + _className : _className;
-        String fileName = MainServlet.getApplicationPath() + "/" + _fullClassPath.replace(".", "/") + ".groovy";
-        ci = loadGroovyClass(fileName);
+        final String fileName = MainServlet.getApplicationPath() + "/" + _fullClassPath.replace(".", "/") + ".groovy";
+        final GroovyClassInfo ci = loadGroovyClass(fileName);
         if (ci != null) {
-            Class[] ca = {
+            Class<?>[] ca = {
             };
 
             try {
