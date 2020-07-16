@@ -1,5 +1,6 @@
 package org.kissweb.rest;
 
+import org.kissweb.StringUtils;
 import org.kissweb.database.Connection;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -13,7 +14,7 @@ import java.util.*;
  * Author: Blake McBride
  * Date: 5/5/18
  */
-class GroovyService {
+public class GroovyService {
 
     private static final transient Logger logger = Logger.getLogger(GroovyService.class);
 
@@ -57,6 +58,7 @@ class GroovyService {
      */
     public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object ... args) throws Exception {
         String rootPath = MainServlet.getApplicationPath();
+        rootPath = StringUtils.drop(rootPath, -1);  //  drop the trailing slash
         if (filePath == null  ||  filePath.isEmpty())
             filePath = "~";
         filePath = filePath.replace("~", rootPath);
