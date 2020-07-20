@@ -12,7 +12,7 @@
             return;
 
         let data = {
-            username: $$('username').getValue(),
+            username: $$('username').getValue().toLowerCase(),
             password: $$('password').getValue()
         };
         let res = await Server.call('', 'Login', data);

@@ -109,11 +109,12 @@ ul.no-bullet {list-style: none}
 <ul class="no-bullet">
   <li><a name="toc-Back_002dend-Application-Files" href="#Back_002dend-Application-Files">3.1 Back-end Application Files</a></li>
   <li><a name="toc-Front_002dend-Application-Files" href="#Front_002dend-Application-Files">3.2 Front-end Application Files</a></li>
-  <li><a name="toc-Single-Page-Application" href="#Single-Page-Application">3.3 Single Page Application</a></li>
-  <li><a name="toc-Controlling-Browser-Cache" href="#Controlling-Browser-Cache">3.4 Controlling Browser Cache</a></li>
-  <li><a name="toc-Creating-JavaDocs" href="#Creating-JavaDocs">3.5 Creating JavaDocs</a></li>
-  <li><a name="toc-Deploying-A-Kiss-Application" href="#Deploying-A-Kiss-Application">3.6 Deploying A Kiss Application</a></li>
-  <li><a name="toc-Learning-The-System" href="#Learning-The-System">3.7 Learning The System</a></li>
+  <li><a name="toc-Database" href="#Database">3.3 Database</a></li>
+  <li><a name="toc-Single-Page-Application" href="#Single-Page-Application">3.4 Single Page Application</a></li>
+  <li><a name="toc-Controlling-Browser-Cache" href="#Controlling-Browser-Cache">3.5 Controlling Browser Cache</a></li>
+  <li><a name="toc-Creating-JavaDocs" href="#Creating-JavaDocs">3.6 Creating JavaDocs</a></li>
+  <li><a name="toc-Deploying-A-Kiss-Application" href="#Deploying-A-Kiss-Application">3.7 Deploying A Kiss Application</a></li>
+  <li><a name="toc-Learning-The-System" href="#Learning-The-System">3.8 Learning The System</a></li>
 </ul></li>
 <li><a name="toc-Developing" href="#Developing">4 Developing</a>
 <ul class="no-bullet">
@@ -716,11 +717,11 @@ username and password to succeed.
 <p>As shipped, the system comes configured as follows:
 </p>
 <table>
-<tr><td>Database type</td><td>PostgreSQL</td></tr>
+<tr><td>Database type</td><td>SQLite</td></tr>
 <tr><td>Host</td><td>localhost</td></tr>
-<tr><td>Database</td><td>not configured</td></tr>
-<tr><td>Database user</td><td>postgres</td></tr>
-<tr><td>Database user password</td><td>postgres</td></tr>
+<tr><td>Database</td><td>DB.sqlite</td></tr>
+<tr><td>Database user</td><td>[empty]</td></tr>
+<tr><td>Database user password</td><td>[empty]</td></tr>
 </table>
 
 <p>Valid options for the Database type are as follows:
@@ -744,10 +745,11 @@ number of simultaneous users.
 <p>The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 </p>
-<p>Create the database (named by &ldquo;Database&rdquo; above).  After that, you
-can run the script file <code>init.sql</code> to create the needed tables and
-some initial data.  You may add any application specific tables
-needed.  This process also creates the tables used by the demo.
+<p>Although <em>Kiss</em> comes with a default demo database, another one
+should be configured in live or more substantial development
+environemnts.  An SQL script file, named <code>init.sql</code>, is included
+with the system to initialize said database.  Application specific tables
+may be added to this database.
 </p>
 <p>The default username is <em>kiss</em>, and the default password is
 <em>password</em>
@@ -1092,9 +1094,27 @@ and would be modified to suit your needs.
 would be the application specific screens you create.  The included
 <code>page1</code> directory is only an example page.
 </p>
+<a name="Database"></a>
+<h3 class="section">3.3 Database</h3>
+
+<p><em>Kiss</em> supports Microsoft SQL Server, Oracle, PostgreSQL, MySQL, and
+SQLite.
+</p>
+<p>As shipped, <em>Kiss</em> comes configured with an embedded SQLite
+server and database.  While this is fine for a demo or small
+application, a real database should be configured for real use.
+The included database is located in the <code>application</code> directory 
+and is named <code>DB.sqlite</code>
+</p>
+<p>Although <em>Kiss</em> has no preferred database, PostgreSQL is strongly
+recommended because it is free, full featured, fast, rock solid, and
+portable on all major platforms.
+</p>
+<p>See <a href="#Setup-And-Configuration">Setup And Configuration</a>
+</p>
 
 <a name="Single-Page-Application"></a>
-<h3 class="section">3.3 Single Page Application</h3>
+<h3 class="section">3.4 Single Page Application</h3>
 
 <p><em>Kiss</em> applications are single page applications in the sense
 that there is a single <code>&lt;body&gt;</code> tag and all other pages
@@ -1107,7 +1127,7 @@ used, and except for browser cache, eliminates them once another page
 is loaded.
 </p>
 <a name="Controlling-Browser-Cache"></a>
-<h3 class="section">3.4 Controlling Browser Cache</h3>
+<h3 class="section">3.5 Controlling Browser Cache</h3>
 
 <p>The user&rsquo;s browser cache can be controlled from the file
 <code>src/main/webapp/index.html</code> In that file you will see two lines
@@ -1127,7 +1147,7 @@ occur.
 </p>
 
 <a name="javadoc"></a><a name="Creating-JavaDocs"></a>
-<h3 class="section">3.5 Creating JavaDocs</h3>
+<h3 class="section">3.6 Creating JavaDocs</h3>
 
 <p>JavaDocs for the <em>Kiss</em> system will need to be created.  It is
 created from the command line by issuing the following command:
@@ -1142,7 +1162,7 @@ bld javadoc                [Windows]
 </p>
 
 <a name="Deploying-A-Kiss-Application"></a>
-<h3 class="section">3.6 Deploying A Kiss Application</h3>
+<h3 class="section">3.7 Deploying A Kiss Application</h3>
 
 <p>The only file needed to deply the application is <code>Kiss.war</code> It
 can be built by typing <code>./bld war</code> at a command prompt.
@@ -1161,7 +1181,7 @@ file, unpack it, and run it.  The application will be available at
 the application path to change to <code>[HOST]/ABC</code>
 </p>
 <a name="Learning-The-System"></a>
-<h3 class="section">3.7 Learning The System</h3>
+<h3 class="section">3.8 Learning The System</h3>
 
 <p>In order to start getting a feel for how <code>Kiss</code> applications
 function, in terms of the back-end, look at files in the

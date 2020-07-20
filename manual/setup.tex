@@ -273,15 +273,15 @@ As shipped, the system comes configured as follows:
 
 @multitable {Database user password} {PostgreSQL} 
 @item Database type
-@tab PostgreSQL
+@tab SQLite
 @item Host
 @tab localhost
 @item Database
-@tab not configured
+@tab DB.sqlite
 @item Database user
-@tab postgres
+@tab [empty]
 @item Database user password
-@tab postgres
+@tab [empty]
 @end multitable
 
 Valid options for the Database type are as follows:
@@ -310,10 +310,11 @@ number of simultaneous users.
 The remaining parameters should be self-explanatory.  Use the format
 shown in the example.
 
-Create the database (named by ``Database'' above).  After that, you
-can run the script file @code{init.sql} to create the needed tables and
-some initial data.  You may add any application specific tables
-needed.  This process also creates the tables used by the demo.
+Although @emph{Kiss} comes with a default demo database, another one
+should be configured in live or more substantial development
+environemnts.  An SQL script file, named @code{init.sql}, is included
+with the system to initialize said database.  Application specific tables
+may be added to this database.
 
 The default username is @emph{kiss}, and the default password is
 @emph{password}

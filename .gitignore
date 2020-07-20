@@ -3,7 +3,7 @@ builder/builder/*.class
 apache-tomcat-*
 tomcat
 libs/c3p0-*.jar
-libs/groovy-all-*.jar
+libs/groovy-*.jar
 libs/javax.servlet-api-*.jar
 libs/log4j-*.jar
 libs/mchange-commons-java-*.jar

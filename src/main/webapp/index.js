@@ -29,5 +29,6 @@ Utils.afterComponentsLoaded(function () {
     Utils.useComponent('TextLabel');
     Utils.useComponent('TimeInput');
     Utils.useComponent('FileUpload');
+    Utils.useComponent('NativeDateInput');
 })();
 

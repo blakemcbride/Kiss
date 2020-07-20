@@ -6,11 +6,15 @@
 (async function () {
 
     $$('rest-services').onclick(function () {
-        Utils.loadPage('screens/RestServices/RestServices', 'app-screen-area');
+        Utils.loadPage('screens/RestServices/RestServices', 'app-screen-area', 'input-1');
     });
 
     $$('controls').onclick(function () {
-        Utils.loadPage('screens/Controls/Controls', 'app-screen-area');
+        Utils.loadPage('screens/Controls/Controls', 'app-screen-area', 'ctl-text');
+    });
+
+    $$('crud').onclick(function () {
+        Utils.loadPage('screens/CRUD/CRUD', 'app-screen-area');
     });
 
     $$('sql-access').onclick(function () {

@@ -810,8 +810,9 @@ class Utils {
      *
      * @param {string} page path to the page to be loaded.
      * @param {string} tag optional ID of div to fill (if empty "body" tag is used)
+     * @param {string} initialFocus optional, ID of control to set initial focus on
      */
-    static loadPage(page, tag) {
+    static loadPage(page, tag, initialFocus) {
         if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
             Kiss.RadioButtons.resetGroups();
         const pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
@@ -823,6 +824,8 @@ class Utils {
                 $('body').html(text);
             Utils.rescan();  // does all the tag replacement
             getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function () {
+                if (initialFocus)
+                    $$(initialFocus).focus();
             });
         });
     }

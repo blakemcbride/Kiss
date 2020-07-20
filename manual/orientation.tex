@@ -67,6 +67,23 @@ Other directories such as @code{page1} represent other user pages and
 would be the application specific screens you create.  The included
 @code{page1} directory is only an example page.
 
+@section Database
+
+@emph{Kiss} supports Microsoft SQL Server, Oracle, PostgreSQL, MySQL, and
+SQLite.
+
+As shipped, @emph{Kiss} comes configured with an embedded SQLite
+server and database.  While this is fine for a demo or small
+application, a real database should be configured for real use.
+The included database is located in the @code{application} directory 
+and is named @code{DB.sqlite}
+
+Although @emph{Kiss} has no preferred database, PostgreSQL is strongly
+recommended because it is free, full featured, fast, rock solid, and
+portable on all major platforms.
+
+@xref{Setup And Configuration}
+
 
 @section Single Page Application
 
