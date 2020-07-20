@@ -129,13 +129,16 @@
                 var now = getURLParameter("now");
                 if (now) {
                     var diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
-                    if (diff > 30)
+                    if (diff > 30) {
+                        window.onbeforeunload = null;
                         window.location.href = 'index.html?now=' + (new Date()).getTime();
-                    else {
+                    } else {
                         loadUtils();
                     }
-                } else
+                } else {
+                    window.onbeforeunload = null;
                     window.location.href = 'index.html?now=' + (new Date()).getTime();
+                }
             } else
                 loadUtils();
         }
