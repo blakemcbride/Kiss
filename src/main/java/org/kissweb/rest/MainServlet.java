@@ -107,7 +107,7 @@ public class MainServlet extends HttpServlet {
                 applicationPath = cpath + "../../../../src/main/application/";
                 underIDE = true;
             } else {
-                applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/";
+                applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
                 underIDE = false;
             }
         } else {
@@ -131,6 +131,8 @@ public class MainServlet extends HttpServlet {
         }
         if (cpds == null) {
             System.out.println("* * * Attempting to connect to database " + host + ":" + database + ":" + user);
+            if (connectionType == Connection.ConnectionType.SQLite  &&  database != null  &&  !database.isEmpty() &&  database.charAt(0) != '/')
+                database = applicationPath + database;
             String cstr = Connection.makeConnectionString(connectionType, host, database, user, password);
             Connection con;
             try {
