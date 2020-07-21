@@ -22,7 +22,7 @@
             window.onbeforeunload = function() {
                 return "Back button hit.";
             };
-            Utils.loadPage('screens/MainMenu/MainMenu');
+            Utils.loadPage('screens/Framework/Framework');
         } else {
             $$('password').clear().focus();
         }

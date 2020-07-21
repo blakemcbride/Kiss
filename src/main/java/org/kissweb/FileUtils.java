@@ -27,10 +27,10 @@ public class FileUtils {
      * @param suffix
      * @return
      */
-    public static File createTempFile(final String prefix, final String suffix)
+    public static File createReportFile(final String prefix, final String suffix)
     {
         deleteOldFiles(DaysOld);
-        File dir = new File(MainServlet.getApplicationPath(), TempDir);
+        File dir = new File(MainServlet.getApplicationPath() + "../webapp", TempDir);
         dir.mkdir();
         final File f;
         try {

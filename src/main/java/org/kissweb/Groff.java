@@ -31,7 +31,7 @@ public class Groff {
      * @throws IOException
      */
     public Groff(String fnamePrefix, String title, boolean landscape) throws IOException {
-        File fyle = FileUtils.createTempFile(fnamePrefix, ".pdf");
+        File fyle = FileUtils.createReportFile(fnamePrefix, ".pdf");
         this.landscape = landscape;
         this.pdfname = fyle.getAbsolutePath();
         mmfname = pdfname.replaceAll("\\.pdf$", ".mm");

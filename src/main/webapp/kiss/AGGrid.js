@@ -85,7 +85,7 @@ class AGGrid {
         else {
             eGridDiv.classList.add('ag-theme-balham');
             new agGrid.Grid(eGridDiv, this.gridOptions);
-            Framework.addGrid(this);
+            Utils.addGrid(this);
             this.gridInstantiated = true;
         }
         return this;

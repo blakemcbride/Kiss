@@ -10,3 +10,11 @@ CREATE TABLE users (
 INSERT INTO users (user_name, user_password, user_active) VALUES ('kiss', 'password', 'Y');
 
 
+CREATE TABLE phone (
+    rec_id integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+    last_name character varying(20) NOT NULL,
+    first_name character varying(20) NOT NULL,
+    phone_number character varying(25)
+);
+
+CREATE INDEX phone_name_idx ON phone (last_name, first_name);

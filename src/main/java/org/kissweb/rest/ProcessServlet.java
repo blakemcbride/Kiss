@@ -161,7 +161,7 @@ public class ProcessServlet implements Runnable {
      * @see #getUploadBufferedInputStream(int)
      */
     public String saveUploadFile(int n) throws IOException {
-        File f = FileUtils.createTempFile("save", "tmp");
+        File f = FileUtils.createReportFile("save", "tmp");
         try (
                 BufferedInputStream bis = getUploadBufferedInputStream(n);
                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));

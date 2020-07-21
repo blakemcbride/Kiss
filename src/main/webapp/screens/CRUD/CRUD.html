@@ -1,7 +1,55 @@
 <div>
 
+    <style>
+        .space {
+            margin-left: 10px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: max-content max-content;
+            grid-gap: 10px;
+            margin-top: 20px;
+            margin-left: 10px;
+        }
+
+        .grid-layout span {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 3px;
+        }
+    </style>
+
     <span>Create, Read, Update, Delete (CRUD)</span>
 
+    <div id="grid" style="margin-top: 10px; width: 100%; height: calc(100vh - 400px);"></div>
+
+    <div style="margin-top: 20px;">
+        <push-button id="new">New</push-button>
+        <push-button id="edit" class="space" disabled>Edit</push-button>
+        <push-button id="delete" class="space" disabled>Delete</push-button>
+        <push-button id="report" class="space">Report</push-button>
+    </div>
+
+    <popup id="edit-record-popup" height="170px" width="410px">
+        <popup-title><text-label id="erp-title"></text-label></popup-title>
+        <popup-body>
+            <div class="grid-layout">
+                <span>First Name:</span>
+                <text-input id="erp-first-name" style="width: 250px" maxlength="20" required></text-input>
+
+                <span>Last Name:</span>
+                <text-input id="erp-last-name" style="width: 250px" maxlength="20" required></text-input>
+
+                <span>Phone Number:</span>
+                <text-input id=erp-phone-number" style="width: 250px" maxlength="25"></text-input>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <push-button id="erp-ok">OK</push-button>
+                <push-button id="erp-cancel" style="margin-left: 10px; margin-right: 20px;">Cancel</push-button>
+            </div>
+        </popup-body>
+    </popup>
 
 </div>
 

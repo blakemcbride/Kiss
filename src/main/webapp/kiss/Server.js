@@ -44,7 +44,7 @@ class Server {
      *
      * @returns data returned from the back-end
      */
-    static async call(cls, meth, injson) {
+    static async call(cls, meth, injson=null) {
 
         const path = "rest";  // path to servlet
         if (!injson)

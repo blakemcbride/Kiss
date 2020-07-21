@@ -17,14 +17,6 @@
         Utils.loadPage('screens/CRUD/CRUD', 'app-screen-area');
     });
 
-    $$('sql-access').onclick(function () {
-        Utils.loadPage('screens/SQLAccess/SQLAccess', 'app-screen-area');
-    });
-
-    $$('report').onclick(function () {
-        Utils.loadPage('screens/Report/Report', 'app-screen-area');
-    });
-
     $$('export').onclick(function () {
         Utils.loadPage('screens/Export/Export', 'app-screen-area');
     });
