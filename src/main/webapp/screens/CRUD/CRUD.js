@@ -116,5 +116,12 @@
         }
     });
 
+    $$('export').onclick(async () => {
+        const res = await Server.call(WS, 'runExport');
+        if (res._Success) {
+            Utils.showReport(res.exportUrl);
+        }
+    });
+
 
 })();

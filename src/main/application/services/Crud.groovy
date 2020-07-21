@@ -2,6 +2,8 @@ package services
 
 import org.json.JSONArray
 import org.json.JSONObject
+import org.kissweb.DelimitedFileWriter
+import org.kissweb.FileUtils
 import org.kissweb.Groff
 import org.kissweb.database.Connection
 import org.kissweb.database.Record
@@ -70,4 +72,25 @@ class Crud {
         outjson.put("reportUrl", rpt.process())
     }
 
+    void runExport(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+        File f = FileUtils.createReportFile("PhoneList-", ".csv")
+        DelimitedFileWriter dfw = new DelimitedFileWriter(f.getAbsolutePath())
+
+        // write header
+        dfw.writeField("Last Name")
+        dfw.writeField("First Name")
+        dfw.writeField("Phone Number")
+        dfw.endRecord()
+
+        List<Record> recs = db.fetchAll("select * from phone order by last_name, first_name")
+        for (Record rec : recs) {
+            dfw.writeField(rec.getString("last_name"))
+            dfw.writeField(rec.getString("first_name"))
+            dfw.writeField(rec.getString("phone_number"))
+            dfw.endRecord()
+        }
+        dfw.close()
+        outjson.put("exportUrl", FileUtils.getHTTPPath(f))
+    }
 }
+
