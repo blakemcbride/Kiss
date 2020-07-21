@@ -29,8 +29,11 @@ public class FileUtils {
      */
     public static File createReportFile(final String prefix, final String suffix)
     {
-        deleteOldFiles(DaysOld);
-        File dir = new File(MainServlet.getApplicationPath() + "../webapp", TempDir);
+        File dir;
+        if (MainServlet.isUnderIDE())
+            dir = new File(MainServlet.getApplicationPath() + "../webapp", TempDir);
+        else
+            dir = new File(MainServlet.getRootPath(), TempDir);
         dir.mkdir();
         final File f;
         try {
@@ -39,16 +42,17 @@ public class FileUtils {
         } catch (IOException e) {
             return null;
         }
+        deleteOldFiles(dir);
         return f;
     }
 
-    private static void deleteOldFiles(long daysOld) {
+    private static void deleteOldFiles(File dir) {
         try {
             long nDaysAgo = new java.util.Date().getTime();
 
-            nDaysAgo -= daysOld * (24L * 60L * 60L * 1000L);
+            nDaysAgo -= DaysOld * (24L * 60L * 60L * 1000L);
 
-            final File[] fyles = new File(MainServlet.getApplicationPath(), TempDir).listFiles();
+            final File[] fyles = dir.listFiles();
 
             if (fyles != null)
                 for (final File element : fyles)

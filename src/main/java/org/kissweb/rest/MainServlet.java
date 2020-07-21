@@ -30,7 +30,8 @@ public class MainServlet extends HttpServlet {
     private static String database;                  // set by KissInit.groovy
     private static String user;                      // set by KissInit.groovy
     private static String password;                  // set by KissInit.groovy
-    private static String applicationPath;
+    private static String applicationPath;           // where the application files are
+    private static String rootPath;                  // the root of the entire application
     private static boolean underIDE = false;
     private static ComboPooledDataSource cpds;
     private static boolean debug = false;          // set by KissInit.groovy
@@ -78,8 +79,18 @@ public class MainServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Return the root of the application back-end source code
+     */
     public static String getApplicationPath() {
         return applicationPath;
+    }
+
+    /**
+     * Get the root path of the entire application.
+     */
+    public static String getRootPath() {
+        return rootPath;
     }
 
     /**
@@ -93,21 +104,21 @@ public class MainServlet extends HttpServlet {
     }
 
     private static void setApplicationPath(HttpServletRequest request) {
-        String cpath = request.getServletContext().getRealPath("/");
-        System.out.println("* * * Context path = " + cpath);
+        rootPath = request.getServletContext().getRealPath("/");
+        System.out.println("* * * Context path = " + rootPath);
         applicationPath = System.getenv("KISS_ROOT");
         if (applicationPath == null || applicationPath.isEmpty()) {
-            if ((new File(cpath + "../../../src/main/application/" + "KissInit.groovy")).exists()) {
-                applicationPath = cpath + "../../../src/main/application/";
+            if ((new File(rootPath + "../../../src/main/application/" + "KissInit.groovy")).exists()) {
+                applicationPath = rootPath + "../../../src/main/application/";
                 underIDE = true;
-            } else if ((new File(cpath + "../../src/main/application/" + "KissInit.groovy")).exists()) {
-                applicationPath = cpath + "../../src/main/application/";
+            } else if ((new File(rootPath + "../../src/main/application/" + "KissInit.groovy")).exists()) {
+                applicationPath = rootPath + "../../src/main/application/";
                 underIDE = true;
-            } else if ((new File(cpath + "../../../../src/main/application/" + "KissInit.groovy")).exists()) {
-                applicationPath = cpath + "../../../../src/main/application/";
+            } else if ((new File(rootPath + "../../../../src/main/application/" + "KissInit.groovy")).exists()) {
+                applicationPath = rootPath + "../../../../src/main/application/";
                 underIDE = true;
             } else {
-                applicationPath = cpath + (cpath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
+                applicationPath = rootPath + (rootPath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
                 underIDE = false;
             }
         } else {
