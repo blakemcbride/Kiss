@@ -80,7 +80,7 @@ public class Tasks {
 
     void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "https://apache.cs.utah.edu/tomcat/tomcat-9/v9.0.34/bin/apache-tomcat-9.0.34.tar.gz");  
+            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.34/bin/apache-tomcat-9.0.34.tar.gz");
             gunzip(tomcatTarFile, "tomcat", 1);
             rmTree("tomcat/webapps/ROOT");
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
