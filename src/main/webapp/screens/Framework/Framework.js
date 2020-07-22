@@ -17,10 +17,6 @@
         Utils.loadPage('screens/CRUD/CRUD', 'app-screen-area');
     });
 
-    $$('export').onclick(function () {
-        Utils.loadPage('screens/Export/Export', 'app-screen-area');
-    });
-
     $$('file-upload').onclick(function () {
         Utils.loadPage('screens/FileUpload/FileUpload', 'app-screen-area');
     });
