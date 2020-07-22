@@ -19,6 +19,7 @@ public class Groff {
     private final boolean landscape;
     private String title;
     private boolean once = true;
+    private static Boolean isMac;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -31,6 +32,8 @@ public class Groff {
      * @throws IOException
      */
     public Groff(String fnamePrefix, String title, boolean landscape) throws IOException {
+        if (isMac == null) 
+            isMac = System.getProperty("os.name").toLowerCase().startsWith("mac ");
         File fyle = FileUtils.createReportFile(fnamePrefix, ".pdf");
         this.landscape = landscape;
         this.pdfname = fyle.getAbsolutePath();
@@ -83,11 +86,18 @@ public class Groff {
         }
         pw.flush();
         pw.close();
-        if (landscape)
-            builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=8.5i", "-P-l", "-rO="+sideMargin+"i", "-rW=" + (11-2*sideMargin) + "i", mmfname);
-        else
-            builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=11i", "-rO="+sideMargin+"i", "-rW=" + (8.5-2*sideMargin) + "i", mmfname);
-        builder.redirectOutput(new File(pdfname));
+        if (isMac) 
+            if (landscape)
+                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO="+sideMargin+"i -rW=" + (11-2*sideMargin) + "i " +  mmfname + " |pstopdf -i -o " + pdfname);
+            else
+                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO="+sideMargin+"i -rW=" + (8.5-2*sideMargin) + "i " +  mmfname + " |pstopdf -i -o " + pdfname);
+        else {
+            if (landscape)
+                builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=8.5i", "-P-l", "-rO="+sideMargin+"i", "-rW=" + (11-2*sideMargin) + "i", mmfname);
+            else
+                builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=11i", "-rO="+sideMargin+"i", "-rW=" + (8.5-2*sideMargin) + "i", mmfname);
+            builder.redirectOutput(new File(pdfname));
+        }
         Process p = builder.start();
         p.waitFor();
         (new File(mmfname)).delete();
