@@ -20,6 +20,7 @@ public class Groff {
     private String title;
     private boolean once = true;
     private static Boolean isMac;
+    private static Boolean isWindows;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -32,8 +33,11 @@ public class Groff {
      * @throws IOException
      */
     public Groff(String fnamePrefix, String title, boolean landscape) throws IOException {
-        if (isMac == null) 
-            isMac = System.getProperty("os.name").toLowerCase().startsWith("mac ");
+        if (isMac == null) {
+            String os = System.getProperty("os.name").toLowerCase();
+            isMac = os.startsWith("mac ");
+            isWindows = os.startsWith("windows");
+        }
         File fyle = FileUtils.createReportFile(fnamePrefix, ".pdf");
         this.landscape = landscape;
         this.pdfname = fyle.getAbsolutePath();
@@ -80,6 +84,7 @@ public class Groff {
      */
     public String process(float sideMargin) throws IOException, InterruptedException {
         ProcessBuilder builder;
+        String psfname = null;
         if (once) {
             writeHeader(title);
             once = false;
@@ -91,7 +96,14 @@ public class Groff {
                 builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO="+sideMargin+"i -rW=" + (11-2*sideMargin) + "i " +  mmfname + " |pstopdf -i -o " + pdfname);
             else
                 builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO="+sideMargin+"i -rW=" + (8.5-2*sideMargin) + "i " +  mmfname + " |pstopdf -i -o " + pdfname);
-        else {
+        else if (isWindows) {
+            psfname = pdfname.replaceAll("\\.pdf$", ".ps");
+            if (landscape)
+                builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=8.5i", "-P-l", "-rO=" + sideMargin + "i", "-rW=" + (11 - 2 * sideMargin) + "i", mmfname);
+            else
+                builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=11i", "-rO=" + sideMargin + "i", "-rW=" + (8.5 - 2 * sideMargin) + "i", mmfname);
+            builder.redirectOutput(new File(psfname));
+        } else {
             if (landscape)
                 builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=8.5i", "-P-l", "-rO="+sideMargin+"i", "-rW=" + (11-2*sideMargin) + "i", mmfname);
             else
@@ -101,6 +113,12 @@ public class Groff {
         Process p = builder.start();
         p.waitFor();
         (new File(mmfname)).delete();
+        if (isWindows) {
+            builder = new ProcessBuilder("cmd", "/c", "ps2pdf.bat", psfname, pdfname);
+            p = builder.start();
+            p.waitFor();
+            (new File(psfname)).delete();
+        }
         return FileUtils.getHTTPPath(pdfname);
     }
 
