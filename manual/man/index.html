@@ -1581,40 +1581,40 @@ Arguments passed to <code>on_exit</code> are determined by the component.
 <a name="Modal-Popup-Windows"></a>
 <h3 class="section">5.3 Modal Popup Windows</h3>
 
-<p><em>Kiss</em> supports dragable, modal popup windows. <em>HTML</em> is used to describe the layout of the popup, and JavaScript is used
-to control the appearance of the popup.
+<p><em>Kiss</em> supports dragable, modal popup windows. <em>HTML</em> is
+used to describe the layout of the popup, and JavaScript is used to
+control the appearance of the popup.
 </p>
-<p>The <em>HTML</em> portion is represented as a top-level <code>div</code> that represents the entire popup.  Withing the top-level
-<code>div</code> there most be two child <code>div</code>&rsquo;s.  The first represents the single line header, and the second represents
-the body of the grid.
+<p>The <em>HTML</em> portion is represented as a top-level <code>popup</code> tag
+that represents the entire popup.  Withing the top-level <code>popup</code>
+there most be two child tags named <code>popup-title</code> and
+<code>popup-body</code>.  The first represents the single line header, and
+the second represents the body of the popup window.
 </p>
-<p>The top-level <code>div</code> attribute section must contain the following:
+<p>The top-level <code>popup</code> tag&rsquo;s attribute section must contain the following:
 </p>
 <dl compact="compact">
 <dt><code>id=&quot;my-popup&quot;</code></dt>
 <dd><p>an ID is needed to reference the popup
 </p></dd>
-<dt><code>style=&quot;width: 600px; height: 300px;&quot;</code></dt>
+<dt><code>width=&quot;600px&quot; height=&quot;300px&quot;</code></dt>
 <dd><p>Set the height and width of the popup
-</p></dd>
-<dt><code>hidden</code></dt>
-<dd><p>be sure the popup doesn&rsquo;t appear until requested
 </p></dd>
 </dl>
 
 <p>An examples is as follows:
 </p>
 <div class="example">
-<pre class="example">&lt;div id=&quot;my-popup&quot; style=&quot;width: 600px; height: 300px;&quot; hidden&gt;
-    &lt;div&gt;The title&lt;/div&gt;
-    &lt;div&gt;
+<pre class="example">&lt;popup id=&quot;my-popup&quot; width=&quot;600px&quot; height=&quot;300px&quot;&gt;
+    &lt;popup-title&gt;The title&lt;/popup-title&gt;
+    &lt;popup-body&gt;
         The content
         &lt;div style=&quot;display: inline-block; position: absolute; bottom: 20px; right: 20px;&quot;&gt;
             &lt;push-button id=&quot;cancel&quot; style=&quot;margin-left: 15px;&quot;&gt;Cancel&lt;/push-button&gt;
             &lt;push-button id=&quot;ok&quot; style=&quot;margin-left: 15px;&quot;&gt;Ok&lt;/push-button&gt;
         &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
+    &lt;/popup-body&gt;
+&lt;/popup&gt;
 </pre></div>
 
 <p>There are only two JavaScript functions used to control the popup.
@@ -1623,8 +1623,8 @@ the body of the grid.
 <dt><code>Utils.popup_open(id [, focus-id])</code></dt>
 <dd><p>open the popup indicated by the <code>id</code>, and if <code>focus-id</code> is present, set initial focus to that control
 </p></dd>
-<dt><code>Utils.popup_close(id)</code></dt>
-<dd><p>close the popup indicated by the <code>id</code>
+<dt><code>Utils.popup_close()</code></dt>
+<dd><p>close the most recent popup
 </p></dd>
 </dl>
 
@@ -1641,7 +1641,7 @@ multiple files.  The way to use it is as follows:
 input looks as follows:
 </p>
 <div class="example">
-<pre class="example">&lt;input id=&quot;myUpload&quot; type=&quot;file&quot;&gt;
+<pre class="example">&lt;file-upload id=&quot;myUpload&quot;&gt;Upload File&lt;/file-upload&gt;
 </pre></div>
 
 <p>The file input control allows the user to select the file or files to
@@ -1651,30 +1651,32 @@ attribute should be added to the HTML.
 <p>The button is used to activate the upload process.  Your code that
 sends the file(s) to the server should be attached to this button.
 </p>
-<p>The <code>Utils</code> class contains the helper functions <code>getFileUploadCount</code>
-and <code>getFileUploadFormData</code>, and the main function used to
-send the files is <code>fileUploadSend</code> in the <code>Server</code> class.
-The code would look like the following:
+<p>The <code>file-upload</code> control contains the helper functions
+<code>numberOfUploadedFiles</code> and <code>getFormData</code>, and the main
+function used to send the files is <code>fileUploadSend</code> in the
+<code>Server</code> class.  The code would look like the following:
 </p>
 <div class="example">
-<pre class="example">if (!Utils.getFileUploadCount('myUpload')) {
-    Utils.showMessage(&quot;Error&quot;, &quot;No file specified.&quot;);
-    return;
-}
-let data = Utils.getFileUploadFormData('myUpload');
-
-data.append('add1', miscAdditionalData);  // misc data
-data.append('add2', miscAdditionalData2); // misc data
-
-Server.fileUploadSend('TheService', 'theMethod', data);
+<pre class="example">   $$('upload').onclick(async () =&gt; {
+        if ($$('the-file').numberOfUploadFiles() &lt; 1) {
+            Utils.showMessage('Error', 'You must first select a file to upload.');
+            return;
+        }
+        const fd = $$('the-file').getFormData();
+        let data = {
+            var1: 22,    // just some random data we want to sent to the back-end
+            var2: 33
+        }
+        const r = await Server.fileUploadSend('theService, 'theMethod', fd, data);
+    });
 </pre></div>
 
 <p>Back-end code would look like this:
 </p>
 <div class="example">
 <pre class="example">public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet) throws Exception {
-    String add1 = inJson.getString(&quot;add1&quot;);
-    String add2 = inJson.getString(&quot;add2&quot;);
+    String var1 = inJson.getString(&quot;var1&quot;);
+    String var2 = inJson.getString(&quot;var2&quot;);
     if (servlet.getUploadFileCount() == 0)
         throw new Exception(&quot;No file specified.&quot;);
         

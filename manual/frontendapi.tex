@@ -152,38 +152,39 @@ Arguments passed to @code{on_exit} are determined by the component.
 
 @section Modal Popup Windows
 
-@emph{Kiss} supports dragable, modal popup windows. @emph{HTML} is used to describe the layout of the popup, and JavaScript is used
-to control the appearance of the popup.
+@emph{Kiss} supports dragable, modal popup windows. @emph{HTML} is
+used to describe the layout of the popup, and JavaScript is used to
+control the appearance of the popup.
 
-The @emph{HTML} portion is represented as a top-level @code{div} that represents the entire popup.  Withing the top-level
-@code{div} there most be two child @code{div}'s.  The first represents the single line header, and the second represents
-the body of the grid.
+The @emph{HTML} portion is represented as a top-level @code{popup} tag
+that represents the entire popup.  Withing the top-level @code{popup}
+there most be two child tags named @code{popup-title} and
+@code{popup-body}.  The first represents the single line header, and
+the second represents the body of the popup window.
 
-The top-level @code{div} attribute section must contain the following:
+The top-level @code{popup} tag's attribute section must contain the following:
 
 @table @code
 @item id="my-popup"
 an ID is needed to reference the popup
-@item style="width: 600px; height: 300px;"
+@item width="600px" height="300px"
 Set the height and width of the popup
-@item hidden
-be sure the popup doesn't appear until requested
 @end table
 
 @noindent
 An examples is as follows:
 
 @example
-<div id="my-popup" style="width: 600px; height: 300px;" hidden>
-    <div>The title</div>
-    <div>
+<popup id="my-popup" width="600px" height="300px">
+    <popup-title>The title</popup-title>
+    <popup-body>
         The content
         <div style="display: inline-block; position: absolute; bottom: 20px; right: 20px;">
             <push-button id="cancel" style="margin-left: 15px;">Cancel</push-button>
             <push-button id="ok" style="margin-left: 15px;">Ok</push-button>
         </div>
-    </div>
-</div>
+    </popup-body>
+</popup>
 @end example
 
 @noindent
@@ -192,8 +193,8 @@ There are only two JavaScript functions used to control the popup.
 @table @code
 @item Utils.popup_open(id [, focus-id])
 open the popup indicated by the @code{id}, and if @code{focus-id} is present, set initial focus to that control
-@item Utils.popup_close(id)
-close the popup indicated by the @code{id}
+@item Utils.popup_close()
+close the most recent popup
 @end table
 
 @noindent
@@ -209,7 +210,7 @@ The HTML would contain two controls; a file input and a button.  The file
 input looks as follows:
 
 @example
-<input id="myUpload" type="file">
+<file-upload id="myUpload">Upload File</file-upload>
 @end example
 
 @noindent
@@ -220,22 +221,24 @@ attribute should be added to the HTML.
 The button is used to activate the upload process.  Your code that
 sends the file(s) to the server should be attached to this button.
 
-The @code{Utils} class contains the helper functions @code{getFileUploadCount}
-and @code{getFileUploadFormData}, and the main function used to
-send the files is @code{fileUploadSend} in the @code{Server} class.
-The code would look like the following:
+The @code{file-upload} control contains the helper functions
+@code{numberOfUploadedFiles} and @code{getFormData}, and the main
+function used to send the files is @code{fileUploadSend} in the
+@code{Server} class.  The code would look like the following:
 
 @example
-if (!Utils.getFileUploadCount('myUpload')) @{
-    Utils.showMessage("Error", "No file specified.");
-    return;
-@}
-let data = Utils.getFileUploadFormData('myUpload');
-
-data.append('add1', miscAdditionalData);  // misc data
-data.append('add2', miscAdditionalData2); // misc data
-
-Server.fileUploadSend('TheService', 'theMethod', data);
+   $$('upload').onclick(async () => @{
+        if ($$('the-file').numberOfUploadFiles() < 1) @{
+            Utils.showMessage('Error', 'You must first select a file to upload.');
+            return;
+        @}
+        const fd = $$('the-file').getFormData();
+        let data = @{
+            var1: 22,    // just some random data we want to sent to the back-end
+            var2: 33
+        @}
+        const r = await Server.fileUploadSend('theService, 'theMethod', fd, data);
+    @});
 @end example
 
 @noindent
@@ -243,8 +246,8 @@ Back-end code would look like this:
 
 @example
 public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet) throws Exception @{
-    String add1 = inJson.getString("add1");
-    String add2 = inJson.getString("add2");
+    String var1 = inJson.getString("var1");
+    String var2 = inJson.getString("var2");
     if (servlet.getUploadFileCount() == 0)
         throw new Exception("No file specified.");
         
