@@ -93,22 +93,26 @@ class Server {
      *
      * @param {string} cls
      * @param {string} meth
-     * @param {FormData} data
+     * @param {FormData} fd
+     * @param {object} injson
      *
      * @see Utils.getFileUploadCount
      * @see Utils.getFileUploadFormData
      */
-    static fileUploadSend(cls, meth, data) {
+    static fileUploadSend(cls, meth, fd, injson=null) {
         return new Promise(function (resolve, reject) {
-            data.append('_class', cls);
-            data.append('_method', meth);
+            fd.append('_class', cls);
+            fd.append('_method', meth);
+            if (injson)
+                for (let key in injson)
+                    fd.append(key, injson[key]);
             Utils.waitMessage("File upload in progress.");
             $.ajax({
                 url: Server.url + '/rest',
                 type: 'POST',
                 processData: false,
                 contentType: false,
-                data: data,
+                data: fd,
                 dataType: 'json',  // what is coming back
                 cache: false,
                 success: async function (res, status, hdr) {

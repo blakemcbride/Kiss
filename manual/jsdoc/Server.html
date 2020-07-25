@@ -377,7 +377,7 @@ This function is typically called with an await and returns the result of the ca
 
     
 
-    <h4 class="name" id=".fileUploadSend"><span class="type-signature">(static) </span>fileUploadSend<span class="signature">(cls, meth, data)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".fileUploadSend"><span class="type-signature">(static) </span>fileUploadSend<span class="signature">(cls, meth, fd, injson)</span><span class="type-signature"></span></h4>
 
     
 
@@ -389,7 +389,7 @@ This function is typically called with an await and returns the result of the ca
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line101">line 101</a>
+        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line102">line 102</a>
     </li></ul></dd>
     
 
@@ -467,6 +467,8 @@ This method displays a wait message and a final status message.
         
 
         
+        <th>Default</th>
+        
 
         <th class="last">Description</th>
     </tr>
@@ -492,6 +494,10 @@ This method displays a wait message and a final status message.
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last"></td>
         </tr>
@@ -515,6 +521,10 @@ This method displays a wait message and a final status message.
             
 
             
+                <td class="default">
+                
+                </td>
+            
 
             <td class="description last"></td>
         </tr>
@@ -523,7 +533,7 @@ This method displays a wait message and a final status message.
 
         <tr>
             
-                <td class="name"><code>data</code></td>
+                <td class="name"><code>fd</code></td>
             
 
             <td class="type">
@@ -537,6 +547,39 @@ This method displays a wait message and a final status message.
 
             
 
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>injson</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    <code>null</code>
+                
+                </td>
             
 
             <td class="description last"></td>

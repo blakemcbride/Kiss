@@ -91,7 +91,7 @@ public class ProcessServlet implements Runnable {
         for ( ; true ; i++) {
             Part filePart = null;
             try {
-                filePart = request.getPart("file-" + i);
+                filePart = request.getPart("_file-" + i);
             } catch (Exception e) {
             }
             if (filePart == null)
@@ -122,7 +122,7 @@ public class ProcessServlet implements Runnable {
      */
     public String getUploadFileName(int i) {
         try {
-            Part filePart = request.getPart("file-" + i);
+            Part filePart = request.getPart("_file-" + i);
             return getFileName(filePart);
         } catch (Exception e) {
             return null;
@@ -143,7 +143,7 @@ public class ProcessServlet implements Runnable {
      */
     public BufferedInputStream getUploadBufferedInputStream(int i) {
         try {
-            Part filePart = request.getPart("file-" + i);
+            Part filePart = request.getPart("_file-" + i);
             return new BufferedInputStream(filePart.getInputStream());
         } catch (Exception e) {
             return null;

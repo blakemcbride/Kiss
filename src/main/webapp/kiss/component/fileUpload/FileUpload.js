@@ -57,6 +57,14 @@
             return jqObj[0].files[idx];
         };
 
+        newElm.getFormData = function () {
+            const fd = new FormData();
+            const n = jqObj[0].files.length;
+            for (let i=0 ; i < n ; i++)
+                fd.append('_file-' + i, jqObj[0].files[i]);
+            return fd;
+        };
+
         newElm.click = function () {
             jqObj.off('click').click();
         };

@@ -193,6 +193,7 @@ class components {
      *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
      *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
+     *     <tr><td>    getFormData() </td><td>  gets the upload file data for transmission to the back-end  </td></tr>
      *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
      *     <tr><td>    isDirty()     </td><td>  has the control contents been changed by user      </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
