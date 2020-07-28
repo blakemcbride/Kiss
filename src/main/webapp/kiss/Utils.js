@@ -20,7 +20,6 @@ let Kiss = {};
  * @returns {*} the component object
  */
 function $$(id) {
-    const self = this;
     if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined' && Kiss.RadioButtons.groups[id]) {
         const rbObj = {};
         let originalValue;
@@ -34,49 +33,49 @@ function $$(id) {
         rbObj.setValue = function (val) {
             Kiss.RadioButtons.setValue(id, val);
             originalValue = rbObj.getValue();
-            return self;
+            return rbObj;
         };
         rbObj.clear = function () {
             Kiss.RadioButtons.clear(id);
             originalValue = rbObj.getValue();
-            return self;
+            return rbObj;
         };
         rbObj.isDirty = function () {
             return originalValue !== rbObj.getValue(id);
         };
         rbObj.readOnly = function () {
             Kiss.RadioButtons.readOnly(id);
-            return self;
+            return rbObj;
         };
         rbObj.readWrite = function () {
             Kiss.RadioButtons.readWrite(id);
-            return self;
+            return rbObj;
         };
         rbObj.isReadOnly = function () {
             return Kiss.RadioButtons.isReadOnly(id);
         };
         rbObj.onChange = function (fun) {
             Kiss.RadioButtons.onChange(id, fun);
-            return self;
+            return rbObj;
         };
         rbObj.isError = function (lbl) {
-            return Kiss.RadioButtons.isError(id, lbl);
+            return rbObj.RadioButtons.isError(id, lbl);
         };
         rbObj.enable = function () {
             Kiss.RadioButtons.enable(id);
-            return self;
+            return rbObj;
         };
         rbObj.disable = function () {
             Kiss.RadioButtons.disable(id);
-            return self;
+            return rbObj;
         };
         rbObj.hide = function () {
             Kiss.RadioButtons.hide(id);
-            return self;
+            return rbObj;
         };
         rbObj.show = function () {
             Kiss.RadioButtons.show(id);
-            return self;
+            return rbObj;
         };
         rbObj.isHidden = function () {
             return Kiss.RadioButtons.isHidden(id);
@@ -86,7 +85,7 @@ function $$(id) {
         };
         rbObj.focus = function () {
             Kiss.RadioButtons.focus(id);
-            return self;
+            return rbObj;
         };
         return rbObj;
     }
