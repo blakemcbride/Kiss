@@ -235,9 +235,10 @@ class AGGrid {
         data = Utils.assureArray(data);
         if (!this.gridOptions)
             this.data = this.data.concat(data);
-        else
+        else {
             this.gridOptions.api.updateRowData({add: data});
-        this.resizeColumns();  // when vert scrollbar gets auto-added must resize columns
+            this.resizeColumns();  // when vert scrollbar gets auto-added must resize columns
+        }
         return this;
     }
 
