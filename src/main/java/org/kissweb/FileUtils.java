@@ -30,10 +30,7 @@ public class FileUtils {
     public static File createReportFile(final String prefix, final String suffix)
     {
         File dir;
-        if (MainServlet.isUnderIDE())
-            dir = new File(MainServlet.getApplicationPath() + "../webapp", TempDir);
-        else
-            dir = new File(MainServlet.getRootPath(), TempDir);
+        dir = new File(MainServlet.getRootPath(), TempDir);
         dir.mkdir();
         final File f;
         try {

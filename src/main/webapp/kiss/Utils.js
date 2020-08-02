@@ -1013,7 +1013,24 @@ class Utils {
      * @param url {string} report url
      */
     static showReport(url) {
-        window.open(url, "_blank");
+        let path;
+        if (url.charAt(0) !== '/')
+            url = '/' + url;
+        if (window.location.href.search("localhost:8000") !== -1) // if debugging with a local server
+            path = "http://localhost:8080" + url;
+        else {
+            const server = Server.url;
+            let ns = 0;  //  number of slashes
+            let ts = 0;  //  index of third slash
+            for (let i=0 ; i < server.length ; i++)
+                if (server.charAt(i) === '/')
+                    if (++ns === 3) {
+                        ts = i;
+                        break;
+                    }
+            path = ts ? server.substr(ts) + url : url;
+        }
+        window.open(path, "_blank");
     }
 
     //--------------------------
