@@ -59,7 +59,7 @@ function $$(id) {
             return rbObj;
         };
         rbObj.isError = function (lbl) {
-            return rbObj.RadioButtons.isError(id, lbl);
+            return Kiss.RadioButtons.isError(id, lbl);
         };
         rbObj.enable = function () {
             Kiss.RadioButtons.enable(id);
