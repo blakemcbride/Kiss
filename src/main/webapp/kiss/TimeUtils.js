@@ -15,6 +15,16 @@
 class TimeUtils {
 
     /**
+     * Returns the current time in HHMM format.
+     *
+     * @returns {number} HHMM
+     */
+    static current() {
+        const dt = new Date();
+        return dt.getHours() * 100 + dt.getMinutes();
+    }
+
+    /**
      * Format time.
      *
      * @param  val integer HHMM or Date object
