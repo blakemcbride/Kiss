@@ -127,9 +127,15 @@ class TimeUtils {
                 part = null;
         }
 
+        if (!part)
+            if (hours >= 6 && hours < 12)
+                part = 'A';
+            else if (hours < 13)
+                part = 'P';
+
         if (part === 'A'  &&  hours === 12)
             hours -= 12;
-        else if (part === 'P')
+        else if (part === 'P' && hours !== 12)
             hours += 12;
         return hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60 ? hours * 100 + minutes : null;
     };
