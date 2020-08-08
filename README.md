@@ -41,9 +41,9 @@ additional compiles or deploys.
 The system comes with (essentially) three manuals as follows:
 
 
-User Manual:        manual/man/index.html
+User Manual:        [manual/man/index.html](https://htmlpreview.github.io/?https://github.com/blakemcbride/Kiss/blob/master/manual/man/index.html)
 
-Front-end API:      manual/jsdoc/index.html
+Front-end API:      [manual/jsdoc/index.html](https://htmlpreview.github.io/?https://github.com/blakemcbride/Kiss/blob/master/manual/jsdoc/index.html)
 
 The back-end JavaDoc must be built by you.  This can be done by typing:
 
