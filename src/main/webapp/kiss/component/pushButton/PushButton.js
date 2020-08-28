@@ -46,7 +46,7 @@
         const jqObj = newElm.jqObj;
 
         jqObj.on('change', function () {
- //           Utils.someControlValueChanged();
+            //           Utils.someControlValueChanged();
         });
 
         newElm.onclick = function (fun) {
@@ -59,12 +59,12 @@
                         fun();
                 }).on('keyup', function (e) {
                     e.stopPropagation();
-                    if (waitForKeyUp && e.keyCode === 13) {
+                    if (waitForKeyUp && e.key === 'Enter') {
                         fun();
                         waitForKeyUp = false;
                     }
                 }).on('keydown', function (e) {
-                    if (e.keyCode === 13)
+                    if (e.key === 'Enter')
                         waitForKeyUp = true;
                     e.stopPropagation();
                 });

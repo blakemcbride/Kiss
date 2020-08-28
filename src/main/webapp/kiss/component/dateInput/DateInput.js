@@ -68,11 +68,11 @@
         });
 
         function keyUpHandler(event) {
-            if (enterFunction && event.keyCode === 13) {
+            if (enterFunction && event.key === 'Enter') {
                 event.stopPropagation();
                 enterFunction();
             }
-            if (Utils.isChangeChar(event.keyCode))
+            if (Utils.isChangeChar(event))
                 Utils.someControlValueChanged();
         }
 

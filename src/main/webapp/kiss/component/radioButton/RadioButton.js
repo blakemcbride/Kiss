@@ -216,7 +216,7 @@ Kiss.RadioButtons.isError = function (group, desc) {
 
     let val = $('input[type=radio][name=' + group + ']:checked').val();
     if (!val) {
-        Utils.showMessage('Error', 'A ' + desc + ' selection is required.');
+        Utils.showMessage('Error', desc + ' selection is required.');
         return true;
     }
     return false;

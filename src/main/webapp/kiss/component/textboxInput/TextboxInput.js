@@ -16,6 +16,7 @@
     const processor = function (elm, attr, content) {
         let originalValue;
         let min = null;
+        let max = null;
         let upcase = false;
         let disabled = false;
         let resetContent = false;
@@ -32,6 +33,9 @@
                 // new attributes
                 case 'minlength':
                     min = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    break;
+                case 'maxlength':
+                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
                 case 'upcase':
                     upcase = true;
@@ -83,6 +87,16 @@
                 resetContent = false;
             }
         }
+
+        jqObj.keydown((event) => {
+            if (max  &&  (event.key && event.key.length === 1) || event.key === 'Enter') {
+                const val = jqObj.text();
+                if (val && val.length >= max) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            }
+        });
 
         jqObj.keyup(function (event) {
             if (event.code === "Tab")
@@ -183,12 +197,9 @@
 
         newElm.onKeyUp = function (fun) {
             jqObj.off('keyup').keyup(function (event) {
-                if (!Utils.isChangeChar(event.keyCode))
+                if (!Utils.isChangeChar(event))
                     return;
-                if (resetContent) {
-                    jqObj.text('');
-                    resetContent = false;
-                }
+                removePlaceholder();
                 Utils.someControlValueChanged();
                 if (fun)
                     fun(event);

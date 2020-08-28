@@ -153,11 +153,11 @@ class Utils {
                     endfun();
             }).focus().on('keyup', function (e) {
                 e.stopPropagation();
-                if (waitForKeyUp && e.keyCode === 13)
+                if (waitForKeyUp && e.key === 'Enter')
                     endfun();
             }).on('keydown', function (e) {
                 e.stopPropagation();
-                if (e.keyCode === 13)
+                if (e.key === 'Enter')
                      waitForKeyUp = true;
             });
         });
@@ -1036,13 +1036,16 @@ class Utils {
     //--------------------------
 
     /**
-     * Returns true if c is the kind of keyboard character that changes the value.
+     * Returns true if the key hit is the kind of keyboard character that changes the value.
+     * (Textarea will need to check 'Enter' too.)
      *
-     * @param c
+     * @param event
      * @returns {boolean}
      */
-    static isChangeChar(c) {
-        return c === 8 || c === 32 || c === 46  ||  c >= 48;
+    static isChangeChar(event) {
+        if (!event || !event.key)
+            return false;
+        return event.key.length === 1 || event.key === 'Backspace' || event.key === 'Delete';
     }
 
     /**
@@ -1142,7 +1145,7 @@ class Utils {
         obj.off('keyup');
         if (fun)
             obj.on('keyup', function (e) {
-                if (e.keyCode === 13)
+                if (e.key === 'Enter')
                     fun();
             });
         return prevFun;
@@ -1236,7 +1239,7 @@ Utils.enterFunctionStack = [];       //  Save stack for enter key to handle popu
 
 
 $(document).on('keypress', function(e) {
-    if (Utils.enterFunction  &&  e.which === 13)
+    if (Utils.enterFunction  &&  e.key === 'Enter')
         Utils.enterFunction();
 });
 
