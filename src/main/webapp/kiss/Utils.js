@@ -926,12 +926,14 @@ class Utils {
             content = w.children();
             content.addClass('popup-content');
             content.css('z-index', Utils.popup_zindex++);
+            content.attr('id', id + '--width');
 
             both_parts = content.children();
             header = both_parts.first();
             header.addClass('popup-header');
             body = header.next();
             body.addClass('popup-body');
+            body.attr('id', id + '--height');
             content.css('width', width);
             body.css('height', height);
         } else {
@@ -952,6 +954,26 @@ class Utils {
             if (ctl)
                 ctl.blur();
         }
+    }
+
+    /**
+     * Dynamically change the height of a popup.
+     *
+     * @param {string} id popup id
+     * @param {string} height  like "200px"
+     */
+    static popup_set_height(id, height) {
+        $('#' + id + '--height').css('height', height);
+    }
+
+    /**
+     * Dynamically change the width of a popup.
+     *
+     * @param {string} id popup id
+     * @param {string} height  like "200px"
+     */
+    static popup_set_width(id, width) {
+        $('#' + id + '--width').css('width', width);
     }
 
     /**
