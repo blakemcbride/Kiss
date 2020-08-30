@@ -97,27 +97,57 @@
             return jqObj.children('option').length;
         };
 
-        newElm.getValue = function () {
-            return jqObj.val();
+        newElm.getValue = function (row) {
+            if (row !== 0 && !row)
+                return jqObj.val();
+            return jqObj.find('option')[row].value;
         };
 
-        newElm.getIntValue = function () {
-            let val = jqObj.val();
+        newElm.getIntValue = function (row) {
+            const val = newElm.getValue(row);
             return val ? Number(val) : 0;
         };
 
-        newElm.setValue = function (val) {
-            jqObj.val(val);
-            originalValue = jqObj.val();
+        newElm.setValue = function (val, row) {
+            if (row !== 0 && !row) {
+                jqObj.val(val);
+                originalValue = jqObj.val();
+            } else {
+                const origVal = newElm.getValue(row);
+                jqObj.find('option')[row].value = val;
+                if (origVal) {
+                    const data = dataStore[origVal];
+                    delete dataStore[origVal];
+                    dataStore[val] = data;
+                }
+            }
             return this;
         };
 
-        newElm.getLabel = function () {
-            return jqObj.find('option:selected').text();
+        newElm.getLabel = function (row) {
+            if (row !== 0 && !row)
+                return jqObj.find('option:selected').text();
+            return jqObj.find('option')[row].text;
         };
 
-        newElm.getData = function () {
-            return dataStore[jqObj.val()];
+        newElm.getAllLabels = function () {
+            const r = [];
+            jqObj.find('option').each((idx, option) => {
+                r.push(option.text);
+            });
+            return r;
+        };
+
+        newElm.setLabel = function (lbl, row) {
+            if (row !== 0 && !row)
+                jqObj.find('option:selected').text(lbl);
+            else
+                jqObj.find('option')[row].text = lbl;
+            return this;
+        };
+
+        newElm.getData = function (row) {
+            return dataStore[newElm.getValue(row)];
         };
 
         newElm.isDirty = function () {
@@ -196,6 +226,21 @@
             }
             return false;
         };
+
+        newElm.selectedIndex = function () {
+            return jqObj.prop('selectedIndex');
+        };
+
+        newElm.removeByIndex = function (idx) {
+            const val = jqObj.val();
+            if (idx < jqObj.children('option').length)
+                jqObj.find('option').eq(idx).remove();
+            if (val)
+                delete dataStore[val];
+            originalValue = jqObj.val();
+            return this;
+        };
+
     };
 
     const componentInfo = {

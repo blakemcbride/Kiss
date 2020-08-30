@@ -196,10 +196,11 @@ class components {
      *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>    sets focus on the control        &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getData()     &lt;/td>&lt;td>     returns the data associated to the selected option             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getIntValue()     &lt;/td>&lt;td>     returns the value associated to the selected option as an integer            &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getLabel()     &lt;/td>&lt;td>     returns the label associated to the selected option             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the value associated to the selected option as a string           &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getAllLabels()     &lt;/td>&lt;td>     returns an array of all the labels             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getData(idx)     &lt;/td>&lt;td>     returns the data associated to an option.  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getIntValue(idx)     &lt;/td>&lt;td>   returns the integer value associated to an option (returns an array if &lt;code>multiple&lt;/code> attribute included).  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getLabel(idx)     &lt;/td>&lt;td>     returns the label associated to an option. If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue(idx)     &lt;/td>&lt;td>     returns the string value associated to an option (returns an array if &lt;code>multiple&lt;/code> attribute included).  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDirty()     &lt;/td>&lt;td>     true if user changed value      &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDisabled()     &lt;/td>&lt;td>     true if control is disabled      &lt;/td>&lt;/tr>
@@ -210,7 +211,10 @@ class components {
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the state of this control changes. &lt;code>fun&lt;/code> is called as follows &lt;code>fun(val, lbl, data)&lt;/code>              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly()     &lt;/td>&lt;td>    make control read-only      &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readWrite()     &lt;/td>&lt;td>    make control read-write      &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     selects the row that contains the value specified by &lt;code>val&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    removeByIndex(idx)     &lt;/td>&lt;td>     remove the row indicated by &lt;code>idx&lt;/code>             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    selectedIndex()     &lt;/td>&lt;td>     returns the index of the selected item  (-1 if none)             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setLabel(lbl, idx)     &lt;/td>&lt;td>     sets a row label to &lt;code>lbl&lt;/code>.  If &lt;code>idx&lt;/code> is undefined, the selected row is affected otherwise the row indexed by &lt;code>idx&lt;/code> is updated.             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val, idx)     &lt;/td>&lt;td>     sets a row value to &lt;code>val&lt;/code>.  If &lt;code>idx&lt;/code> is undefined, the selected row is affected otherwise the row indexed by &lt;code>idx&lt;/code> is updated.  &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    size()     &lt;/td>&lt;td>    returns the number of rows in the list (including &lt;code>default-option&lt;/code>              &lt;/td>&lt;/tr>
      * &lt;/table>
@@ -280,10 +284,11 @@ class components {
      *     &lt;tr>&lt;td>    disable()     &lt;/td>&lt;td>     the control remains visible but inactive               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    enable()     &lt;/td>&lt;td>     the control is set to visible and enabled              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>    sets focus on control            &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getData()     &lt;/td>&lt;td>     returns the data associated to the selected option             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getIntValue()     &lt;/td>&lt;td>     returns the integer value associated to the selected option (returns an array if &lt;code>multiple&lt;/code> attribute included)             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getLabel()     &lt;/td>&lt;td>     returns the label associated to the selected option             &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    getValue()     &lt;/td>&lt;td>     returns the string value associated to the selected option (returns an array if &lt;code>multiple&lt;/code> attribute included)            &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getAllLabels()     &lt;/td>&lt;td>     returns an array of all the labels             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getData(idx)     &lt;/td>&lt;td>     returns the data associated to an option.  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getIntValue(idx)     &lt;/td>&lt;td>   returns the integer value associated to an option (returns an array if &lt;code>multiple&lt;/code> attribute included).  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getLabel(idx)     &lt;/td>&lt;td>     returns the label associated to an option. If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getValue(idx)     &lt;/td>&lt;td>     returns the string value associated to an option (returns an array if &lt;code>multiple&lt;/code> attribute included).  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    hide()     &lt;/td>&lt;td>     the control is hidden               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDirty()     &lt;/td>&lt;td>    true if user has changed control value     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isDisabled()     &lt;/td>&lt;td>    true if control is disabled     &lt;/td>&lt;/tr>
@@ -296,8 +301,9 @@ class components {
      *     &lt;tr>&lt;td>    onDblClick(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user double-clicks on an item. &lt;code>fun&lt;/code> is called as follows &lt;code>fun(val, lbl, data)&lt;/code>              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly()     &lt;/td>&lt;td>     sets control to read-only    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readWrite()     &lt;/td>&lt;td>     sets control to read-write    &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    removeByIndex(idx)     &lt;/td>&lt;td>     remove the indicated row              &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     selects the row that contains the value specified by &lt;code>val&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    removeByIndex(idx)     &lt;/td>&lt;td>     remove the row indicated by &lt;code>idx&lt;/code>             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setLabel(lbl, idx)     &lt;/td>&lt;td>     sets a row label to &lt;code>lbl&lt;/code>.  If &lt;code>idx&lt;/code> is undefined, the selected row is affected otherwise the row indexed by &lt;code>idx&lt;/code> is updated.             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    setValue(val, idx)     &lt;/td>&lt;td>     sets a row value to &lt;code>val&lt;/code>.  If &lt;code>idx&lt;/code> is undefined, the selected row is affected otherwise the row indexed by &lt;code>idx&lt;/code> is updated.  &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    selectedIndex()     &lt;/td>&lt;td>     returns the index of the selected item  (-1 if none)             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    show()     &lt;/td>&lt;td>     the control is made visible               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    size()     &lt;/td>&lt;td>    returns the number of rows in the list               &lt;/td>&lt;/tr>
