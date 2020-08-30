@@ -16,7 +16,7 @@ Public discussion and support is available at [Kiss Support](https://groups.goog
 
 ## Quick Start
 
-Presuming you have the JDK (tested with JDK 8 & 11), GIT, and an
+Presuming you have the Java JDK (tested with Java 8 & 11), GIT, and an
 Internet connection, you can run the following commands to download, install,
 configure, and run Kiss, tomcat, and the required JAR files:
 
