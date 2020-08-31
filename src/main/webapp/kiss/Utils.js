@@ -1067,7 +1067,7 @@ class Utils {
     static isChangeChar(event) {
         if (!event || !event.key)
             return false;
-        return event.key.length === 1 || event.key === 'Backspace' || event.key === 'Delete';
+        return !event.ctrlKey && (event.key.length === 1 || event.key === 'Backspace' || event.key === 'Delete');
     }
 
     /**
