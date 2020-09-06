@@ -211,7 +211,8 @@ class components {
      *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      *     <tr><td>    uploadFile(idx) </td><td> the JavaScript <code>File</code> object of file number <code>idx</code> </td></tr>
-     *     <tr><td>    uploadFileName(idx) </td><td> the name of file number <code>idx</code> </td></tr>
+     *     <tr><td>    uploadFileExtension(idx) </td><td> the file name extension of file number <code>idx</code> </td></tr>
+     *     <tr><td>    uploadFilename(idx) </td><td> the name of file number <code>idx</code> </td></tr>
      * </table>
      */
     static file_upload() {}

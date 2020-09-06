@@ -53,6 +53,12 @@
             return jqObj[0].files[idx].name;
         };
 
+        newElm.uploadFileExtension = function (idx) {
+            const name = jqObj[0].files[idx].name;
+            const i = name.lastIndexOf(".");
+            return i === -1 ? '' : name.substr(i+1);
+        };
+
         newElm.uploadFile = function (idx) {
             return jqObj[0].files[idx];
         };
