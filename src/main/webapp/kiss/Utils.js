@@ -868,6 +868,7 @@ class Utils {
         {
             const body = $('body');
             const drag = {};
+
             drag.pageX0 = e.pageX;
             drag.pageY0 = e.pageY;
             drag.elem = content;
@@ -882,17 +883,48 @@ class Utils {
 
             function handle_mouseup(e) {
                 body
-                    .off('mousemove', handle_dragging)
-                    .off('mouseup', handle_mouseup);
+                    .off('mousemove')
+                    .off('mouseup');
             }
 
-            body
-                .on('mouseup', handle_mouseup)
+            body.on('mouseup', handle_mouseup)
                 .on('mousemove', handle_dragging);
         }
 
+        // for mobile devices
+        function handle_touchstart(e)
+        {
+            const body = $('body');
+            const drag = {};
+
+            e.preventDefault();
+
+            drag.pageX0 = e.originalEvent.touches[0].clientX;
+            drag.pageY0 = e.originalEvent.touches[0].clientY;
+
+            drag.elem = content;
+            drag.offset0 = $(this).offset();
+
+            function handle_dragging(e) {
+                const left = drag.offset0.left + (e.originalEvent.touches[0].clientX - drag.pageX0);
+                const top = drag.offset0.top + (e.originalEvent.touches[0].clientY - drag.pageY0);
+                $(drag.elem)
+                    .offset({top: top, left: left});
+            }
+
+            function handle_mouseup(e) {
+                body
+                    .off('touchmove')
+                    .off('touchend');
+            }
+
+            body
+                .on('touchmove', handle_dragging)
+                .on('touchend', handle_mouseup);
+        }
         header.css('cursor', 'all-scroll');
-        header.mousedown(handle_mousedown);
+        header.on('mousedown', handle_mousedown);
+        header.on('touchstart', handle_touchstart);
     }
 
     /**
