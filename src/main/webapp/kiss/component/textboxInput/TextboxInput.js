@@ -89,13 +89,13 @@
         }
 
         jqObj.keydown((event) => {
-            if (event.key && event.key.length > 1)
+            if (!max || event.key && event.key.length > 1 && event.key !== 'Enter')
                 return;
 
             const html = jqObj.html();
             const txt = html ? Utils.htmlToText(html) : '';
 
-            if (max && txt && txt.length >= max) {
+            if (txt && txt.length >= max) {
                 event.preventDefault();
                 event.stopPropagation();
             }
