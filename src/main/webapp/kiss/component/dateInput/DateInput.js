@@ -59,6 +59,8 @@
             attr: nattrs,
             placeholder: content ? content.trim() : 'mm/dd/yyyy'
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         jqObj.on('input', function () {

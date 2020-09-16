@@ -54,7 +54,7 @@
         }
 
         nattrs += ' autocorrect="off" autocapitalize="off" spellcheck="false"';
-        nattrs += ' data-lpignore="true"';  // kill lastpass
+        //       nattrs += ' data-lpignore="true"';  // kill lastpass
 
         const newElm = Utils.replaceHTML(id, elm, '<input type="{type}" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             type: password ? 'password' : 'text',
@@ -62,6 +62,8 @@
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         function keyUpHandler(event) {

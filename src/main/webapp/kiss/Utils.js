@@ -754,6 +754,10 @@ class Utils {
         elm.replaceWith(newHTML);
         const jqObj = $('#' + id);
         const newElm = jqObj[0];
+        if (!newElm) {
+            console.log(elm[0].localName + ' is missing an ID');
+            return undefined;
+        }
         newElm.kiss = {};
         newElm.kiss.jqObj = jqObj;
         newElm.kiss.elementInfo = {};
@@ -1070,7 +1074,7 @@ class Utils {
         let path;
         if (url.charAt(0) !== '/')
             url = '/' + url;
-        if (window.location.href.search("localhost:8000") !== -1) // if debugging with a local server
+        if (window.location.href.search("localhost:8000") !== -1 || window.location.href.search("localhost:8001") !== -1 || window.location.href.search("localhost:8002") !== -1) // if debugging with a local server
             path = "http://localhost:8080" + url;
         else {
             const server = Server.url;

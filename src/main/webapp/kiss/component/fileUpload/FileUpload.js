@@ -43,6 +43,8 @@
             style: nstyle,
             attr: nattrs
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         newElm.numberOfUploadFiles = function () {

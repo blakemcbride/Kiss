@@ -46,7 +46,8 @@
                 style: nstyle,
                 attr: nattrs
             });
-
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         newElm.getValue = function () {

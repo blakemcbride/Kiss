@@ -43,6 +43,8 @@
             attr: nattrs,
             value: content ? content.trim() : ''
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         jqObj.on('change', function () {

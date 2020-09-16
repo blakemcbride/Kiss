@@ -56,6 +56,8 @@
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         function keyUpHandler(event) {

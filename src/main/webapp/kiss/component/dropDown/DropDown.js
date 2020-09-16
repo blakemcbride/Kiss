@@ -52,7 +52,8 @@
             attr: nAttrs,
             content: content
         });
-
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
         let dataStore = {};
 
@@ -229,6 +230,11 @@
 
         newElm.selectedIndex = function () {
             return jqObj.prop('selectedIndex');
+        };
+
+        newElm.selectIndex = function (idx) {
+            jqObj.find(':nth-child(' + (idx+1) + ')').prop('selected', true);
+            return this;
         };
 
         newElm.removeByIndex = function (idx) {

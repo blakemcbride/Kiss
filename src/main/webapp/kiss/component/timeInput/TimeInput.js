@@ -61,6 +61,8 @@
             attr: nattrs,
             placeholder: content ? content.trim() : ''
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         newElm.elementInfo.min = min;

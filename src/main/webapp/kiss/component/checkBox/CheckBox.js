@@ -48,6 +48,8 @@
             attr: nAttrs,
             content: content ? content.trim() : ''
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         jqObj.change(function () {

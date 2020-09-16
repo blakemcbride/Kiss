@@ -169,6 +169,7 @@ class components {
      *     <tr><td>    readWrite()     </td><td>    make control read-write      </td></tr>
      *     <tr><td>    removeByIndex(idx)     </td><td>     remove the row indicated by <code>idx</code>             </td></tr>
      *     <tr><td>    selectedIndex()     </td><td>     returns the index of the selected item  (-1 if none)             </td></tr>
+     *     <tr><td>    selectIndex(row)     </td><td>     selects the indicated row index            </td></tr>
      *     <tr><td>    setLabel(lbl, idx)     </td><td>     sets a row label to <code>lbl</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.             </td></tr>
      *     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
@@ -262,6 +263,7 @@ class components {
      *     <tr><td>    setLabel(lbl, idx)     </td><td>     sets a row label to <code>lbl</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.             </td></tr>
      *     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  </td></tr>
      *     <tr><td>    selectedIndex()     </td><td>     returns the index of the selected item  (-1 if none)             </td></tr>
+     *     <tr><td>    selectIndex(row)     </td><td>     selects the indicated row index            </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      *     <tr><td>    size()     </td><td>    returns the number of rows in the list               </td></tr>
      * </table>

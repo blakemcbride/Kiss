@@ -99,6 +99,8 @@ Kiss.RadioButtons.groups = {};
             div_style: div_style,
             content: content ? content.trim() : ''
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         jqObj.on('change', function () {

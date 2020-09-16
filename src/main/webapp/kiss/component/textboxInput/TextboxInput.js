@@ -79,6 +79,8 @@
             attr: nattrs,
             content: content ? content.trim() : ''
         });
+        if (!newElm)
+            return;
         const jqObj = newElm.jqObj;
 
         function removePlaceholder() {
