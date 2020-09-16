@@ -1271,6 +1271,41 @@ class Utils {
     static setEnterFunction(fun) {
         Utils.enterFunction = fun;
     }
+
+    /**
+     * Converts a text string into a string suitable to HTML.
+     *
+     * @param text
+     * @returns {string}
+     */
+    static textToHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+            .replace(/\n/g, '<br>')
+            .replace(/ /g, '&nbsp;');
+    }
+
+    /**
+     * Convert an HTML string into a text string.
+     *
+     * @param html
+     * @returns {string}
+     */
+    static htmlToText(html) {
+        return html
+            .replace(/<br>/g, '\n')
+            .replace(/&sp;/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"');
+    }
+
 }
 
 // Class variables

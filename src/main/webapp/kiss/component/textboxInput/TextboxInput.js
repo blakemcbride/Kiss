@@ -21,7 +21,7 @@
         let disabled = false;
         let resetContent = false;
         let placeholder = null;
-        let nstyle = "background-color: white; border: 2px solid #d0d5d5; display: inline-block; padding: 5px; ";
+        let nstyle = "background-color: white; border: 2px solid #d0d5d5; display: inline-block; padding: 5px; word-wrap: anywhere; ";
         if (attr.style)
             nstyle += attr.style;
 
@@ -89,12 +89,15 @@
         }
 
         jqObj.keydown((event) => {
-            if (max  &&  (event.key && event.key.length === 1) || event.key === 'Enter') {
-                const val = jqObj.text();
-                if (val && val.length >= max) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
+            if (event.key && event.key.length > 1)
+                return;
+
+            const html = jqObj.html();
+            const txt = html ? Utils.htmlToText(html) : '';
+
+            if (max && txt && txt.length >= max) {
+                event.preventDefault();
+                event.stopPropagation();
             }
         });
 
@@ -118,7 +121,7 @@
                 jqObj.text(originalValue='');
                 return this;
             }
-            jqObj.text(originalValue=val);
+            jqObj.html(Utils.textToHtml(originalValue=val));
             return this;
         };
 
