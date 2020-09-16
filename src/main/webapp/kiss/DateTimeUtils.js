@@ -1,8 +1,8 @@
 /* global DateUtils, TimeUtils */
 
 /**
-* Created by Blake McBride on 6/16/18.
-*/
+ * Created by Blake McBride on 6/16/18.
+ */
 
 'use strict';
 
