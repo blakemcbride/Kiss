@@ -1110,12 +1110,12 @@ class Utils {
      * This function is called to indicate to the system that <em>some</em> control value changed by the user.
      * Programmatic changed to not set this.
      * It is mainly used internally as all the Kiss controls use this function.
-     *
+     * <br><br>
      * If there is a function connected to some-control-value-changing via the setSomeControlValueChangeFunction
      * function, it will be executed the <em>first time only</em> that any control value is changed.
      * Subsequent changes will not trigger the some-control-value-changing function.
      * The some-control-value-changing function is passed the single argument <code>true</code>.
-     *
+     * <br><br>
      * Non-Kiss controls should call this function if their value changes.
      *
      */
@@ -1129,7 +1129,7 @@ class Utils {
 
     /**
      * This function clears the state of some control value having been changed.
-     *
+     * <br><br>
      * Also, if a function is attached (via the setSomeControlValueChangeFunction function),
      * it will be executed if some value had changed and a <code>true</code> argument is passed
      * to this function.  The some-control-value-changed function will be passed a <code>false</code>.
@@ -1156,9 +1156,9 @@ class Utils {
      * Used for setting an application specific function to be executed the first
      * time any control value is changed by the user or if the change status is cleared.
      * Other programmatic changes do not trigger this condition.
-     *
+     * <br><br>
      * A <code>null</code> value may be passed in order to clear the function.
-     *
+     * <br><br>
      * The function is passed a single boolean value.  <code>true</code> means
      * a control value has changed, and <code>false</code> if the state is
      * being reset.
@@ -1308,6 +1308,27 @@ class Utils {
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
             .replace(/&quot;/g, '"');
+    }
+
+    /**
+     * Append html (as text) to the list of children of a node.
+     *<br><br>
+     * <code>tag</code> can be the id of the control or its jQuery node.
+     * This function returns the jQuery node that can be used
+     * for additional calls to this function (so it'll be faster).
+     *
+     * @param tag {object|string} see above
+     * @param html {string} the html to be
+     * @returns {object} the jQuery node
+     */
+    static appendChild(tag, html) {
+        const node = typeof tag === 'string' ? $('#' + tag) : tag;
+        if (!node.length) {
+            console.log('tag ' + tag +' not found.');
+            return;
+        }
+        node.append(html);
+        return node;
     }
 
 }
