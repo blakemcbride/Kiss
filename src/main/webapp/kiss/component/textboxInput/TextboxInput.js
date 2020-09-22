@@ -114,7 +114,7 @@
 
         newElm.getValue = function () {
             let sval = resetContent ? '' : jqObj.text();
-            return sval ? sval : '';
+            return sval ? sval.replace(/\s+/g, ' ') : '';
         };
 
         newElm.setValue = function (val) {
