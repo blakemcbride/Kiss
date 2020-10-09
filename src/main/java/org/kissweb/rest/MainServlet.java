@@ -94,6 +94,17 @@ public class MainServlet extends HttpServlet {
     }
 
     /**
+     * Manually set root path if needed.
+     * This is needed when Kiss is not used to process the REST services.
+     * This rootPath is used by the reporting facility.
+     *
+     * @param path
+     */
+    public static void setRootPath(String path) {
+        rootPath = path;
+    }
+
+    /**
      * Set the application path when it is determined outside of Kiss.
      * This is needed when an application is using the Kiss library but not its REST server.
      *
