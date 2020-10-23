@@ -4,7 +4,7 @@
  *
  * I've found that I spend more time messing with build programs (such as Maven, Gradle, and others) than
  * the underlying application I am trying to build.  They all do the normal things very, very easily.
- * But when you try to go off their beaten path it gets real difficult real fast.  Being sick and
+ * But when you try to go off their beaten path, it gets real difficult real fast.  Being sick and
  * tired of this, and having easily built a shell script to build what I want, I needed a more portable
  * solution.  The files in this directory are that solution.
  *
@@ -185,6 +185,23 @@ public class BuildUtils {
     }
 
     /**
+     * Move a file from one location to another.
+     *
+     * @param from a file name with a path
+     * @param to a file name with a path
+     */
+	public static void move(String from, String to) {
+        try {
+            File parent = new File(to).getParentFile();
+            if (parent != null)
+                parent.mkdirs();
+            Files.move(Paths.get(from), Paths.get(to), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            throw new RuntimeException("error moving " + from + " to " + to);
+        }
+    }
+
+    /**
      * Creates a directory including any missing parent directories.
      *
      * @param dname
@@ -211,6 +228,7 @@ public class BuildUtils {
         if (!dfile.exists() || sfile.lastModified() > dfile.lastModified())
             try {
                 println("copying " + source + " -> " + dest);
+                mkdir(dfile.getParentFile());
                 Files.copy(sfile.toPath(), dfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (Exception e) {
                 throw new RuntimeException("error copying " + source + " to " +dest);
@@ -218,13 +236,14 @@ public class BuildUtils {
     }
 
     /**
-     * Copies all files that match a (Java!) regex from one directory to another.
+     * Copies all files that match a (Java!) regex from one directory to another excluding another (Java!) regex.
      *
      * @param srcDir
      * @param targetDir
-     * @param fnameRegex
+     * @param includeRegex or null if all
+     * @param excludeRegex or null of no exclusions
      */
-    public static void copyRegex(String srcDir, String targetDir, String fnameRegex) {
+    public static void copyRegex(String srcDir, String targetDir, String includeRegex, String excludeRegex) {
         File sf = new File(srcDir);
         File df = new File(targetDir);
         if (!sf.exists())
@@ -232,11 +251,16 @@ public class BuildUtils {
         mkdir(targetDir);
         boolean ret = true;
         File[] files = sf.listFiles();
+        if (includeRegex == null)
+            includeRegex = ".*";
         if (files != null) {
-            Pattern pat = Pattern.compile(fnameRegex);
+            Pattern pat = Pattern.compile(includeRegex);
+            Pattern expat = null;
+            if (excludeRegex != null)
+                expat = Pattern.compile(excludeRegex);
             for (File file : files) {
                 String fname = file.getName();
-                if (pat.matcher(fname).matches()) {
+                if (pat.matcher(fname).matches() && (excludeRegex == null || !expat.matcher(fname).matches())) {
                     File destFile = new File(df, file.getName());
                     if (!destFile.exists() || file.lastModified() > destFile.lastModified())
                         try {
@@ -652,6 +676,9 @@ public class BuildUtils {
             if (latestFileTime <= jf.lastModified())
                 return;
         }
+        File parentDir = jf.getParentFile();
+        if (parentDir != null)
+            mkdir(parentDir);
         String manifest = rootDir + "/META-INF/MANIFEST.MF";
         String cmd;
         if ((new File(manifest)).exists())
@@ -718,6 +745,16 @@ public class BuildUtils {
         runWait(true, cmd);
         rm(argsFile);
     }
+
+    // Unfinished code to create WSDL's (I don't think they're needed anymore)
+	public static void buildWS(LocalDependencies ldep, ForeignDependencies fdep, String dest, String sdir, String service) {
+        String javaHome = java.lang.System.getProperty("java.home");  // to find tools.jar
+		String deps = writeDependencyArgsToFile(ldep, fdep);
+		String cmd = "java -classpath @" + deps + " com.sun.tools.ws.WsGen -d " + dest + " -Xendorsed -keep -wsdl -r " + sdir + " -s " + sdir + " " + service;
+		mkdir(sdir);
+		runWait(true, cmd);
+		rm(deps);
+	}
 
     /**
      * gunzip and untar a .gz file into the specified directory
