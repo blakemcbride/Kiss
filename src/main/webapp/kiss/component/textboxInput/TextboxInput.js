@@ -21,7 +21,7 @@
         let disabled = false;
         let resetContent = false;
         let placeholder = null;
-        let nstyle = "background-color: white; border: 2px solid #d0d5d5; display: inline-block; padding: 5px; word-wrap: anywhere; ";
+        let nstyle = "background-color: white; border: 2px solid #d0d5d5; display: inline-block; padding: 5px; word-wrap: anywhere; overflow-y: auto; ";
         if (attr.style)
             nstyle += attr.style;
 
