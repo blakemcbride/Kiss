@@ -166,52 +166,60 @@ class Utils {
     /**
      * Display a modal popup that asks the user a yes/no question.
      *
+     * The yesFun/noFun can be used, or this function returns a promise
+     * so that is can be used with async/await.
+     *
      * @param {string} title text on the title bar of the popup
      * @param {string} message the question being asked
      * @param {function} yesFun function that gets executed if the user clicks 'Yes'
      * @param {function} noFun function that gets executed if the user clicks 'No'
      */
-    static yesNo(title, message, yesFun, noFun) {
-        if (!$('#yesno-modal').length) {
-            $('body').append(
-                '<div id="yesno-modal" class="msg-modal">' +
-                '  <!-- Modal content -->' +
-                '  <div class="msg-modal-content" id="yesno-popup-content">' +
-                '    <div class="msg-modal-header" id="yesno-popup-header">' +
-                '      <span id="yesno-close-btn" class="msg-close">&times;</span>' +
-                '      <p id="yesno-header" style="margin-top: 2px;">Modal Header</p>' +
-                '    </div>' +
-                '    <div class="msg-modal-body">' +
-                '      <p id="yesno-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
-                '    </div>' +
-                '    <div class="msg-modal-footer">' +
-                '      <input type="button" value="Yes" id="yesno-yes" style="margin-top: 5px; margin-bottom: 10px;">' +
-                '      <input type="button" value="No" id="yesno-no" style="margin-top: 5px; margin-bottom: 10px; margin-left: 10px;">' +
-                '    </div>' +
-                '  </div>' +
-                '</div>');
-        }
-        this.makeDraggable($('#yesno-popup-header'), $('#yesno-popup-content'));
+    static yesNo(title, message, yesFun = null, noFun = null) {
+        return new Promise(function(resolve, reject) {
+            if (!$('#yesno-modal').length) {
+                $('body').append(
+                    '<div id="yesno-modal" class="msg-modal">' +
+                    '  <!-- Modal content -->' +
+                    '  <div class="msg-modal-content" id="yesno-popup-content">' +
+                    '    <div class="msg-modal-header" id="yesno-popup-header">' +
+                    '      <span id="yesno-close-btn" class="msg-close">&times;</span>' +
+                    '      <p id="yesno-header" style="margin-top: 2px;">Modal Header</p>' +
+                    '    </div>' +
+                    '    <div class="msg-modal-body">' +
+                    '      <p id="yesno-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
+                    '    </div>' +
+                    '    <div class="msg-modal-footer">' +
+                    '      <input type="button" value="Yes" id="yesno-yes" style="margin-top: 5px; margin-bottom: 10px;">' +
+                    '      <input type="button" value="No" id="yesno-no" style="margin-top: 5px; margin-bottom: 10px; margin-left: 10px;">' +
+                    '    </div>' +
+                    '  </div>' +
+                    '</div>');
+            }
+            Utils.makeDraggable($('#yesno-popup-header'), $('#yesno-popup-content'));
 
-        $('#yesno-header').text(title);
-        $('#yesno-message').text(message);
-        const modal = $('#yesno-modal');
-        const span = $('#yesno-close-btn');
-        modal.show();
-        span.off('click').click(function () {
-            modal.hide();
-            if (noFun)
-                noFun();
-        });
-        $('#yesno-yes').off('click').click(function () {
-            modal.hide();
-            if (yesFun)
-                yesFun();
-        });
-        $('#yesno-no').off('click').click(function () {
-            modal.hide();
-            if (noFun)
-                noFun();
+            $('#yesno-header').text(title);
+            $('#yesno-message').text(message);
+            const modal = $('#yesno-modal');
+            const span = $('#yesno-close-btn');
+            modal.show();
+            span.off('click').click(function () {
+                modal.hide();
+                if (noFun)
+                    noFun();
+                resolve(false);
+            });
+            $('#yesno-yes').off('click').click(function () {
+                modal.hide();
+                if (yesFun)
+                    yesFun();
+                resolve(true);
+            });
+            $('#yesno-no').off('click').click(function () {
+                modal.hide();
+                if (noFun)
+                    noFun();
+                resolve(false);
+            });
         });
     }
 
