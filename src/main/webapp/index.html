@@ -23,7 +23,7 @@
         :root {
             --inner-bg-color-light: white;
             --inner-bg-color-dark: #009fff;
-            --inner-bg: linear-gradient(180deg, let(--inner-bg-color-light) 0%, let(--inner-bg-color-dark) 100%);
+            --inner-bg: linear-gradient(180deg, var(--inner-bg-color-light) 0%, var(--inner-bg-color-dark) 100%);
         }
 
         html, body {
@@ -32,7 +32,7 @@
             overflow: hidden;
             padding: 3px 3px 50px 3px;
             box-sizing: border-box;
-            background: let(--inner-bg)
+            background: var(--inner-bg)
         }
 
         label {
