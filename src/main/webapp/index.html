@@ -23,7 +23,7 @@
         :root {
             --inner-bg-color-light: white;
             --inner-bg-color-dark: #009fff;
-            --inner-bg: linear-gradient(180deg, var(--inner-bg-color-light) 0%, var(--inner-bg-color-dark) 100%);
+            --inner-bg: linear-gradient(180deg, let(--inner-bg-color-light) 0%, let(--inner-bg-color-dark) 100%);
         }
 
         html, body {
@@ -32,7 +32,7 @@
             overflow: hidden;
             padding: 3px 3px 50px 3px;
             box-sizing: border-box;
-            background: var(--inner-bg)
+            background: let(--inner-bg)
         }
 
         label {
@@ -78,10 +78,10 @@
         function startup() {
 
             // cache control
-            var softwareVersion = "1";   // version of the entire system
-            var controlCache = true;     // normally true but use false during debugging
+            let softwareVersion = "20201108";   // version of the entire system
+            let controlCache = true;            // normally true but use false during debugging
 
-            var afterLoad = function () {
+            let afterLoad = function () {
                 Utils.softwareVersion = softwareVersion;
                 Utils.controlCache = controlCache;
                 loadScript("index.js", function () {
@@ -89,9 +89,9 @@
                 });
             };
 
-            var numLoaded = 0;
+            let numLoaded = 0;
 
-            var loadScript = function (script, fun) {
+            let loadScript = function (script, fun) {
                 if (fun)
                     getScript(script + (controlCache ? '?ver=' + softwareVersion : ''), fun);
                 else {
@@ -103,7 +103,7 @@
                 }
             };
 
-            var loadUtils = function () {
+            let loadUtils = function () {
                 loadScript("kiss/Utils.js");
                 loadScript("kiss/DateUtils.js");
                 loadScript("kiss/DateTimeUtils.js");
@@ -115,20 +115,20 @@
 
             $.ajaxSetup({ cache: controlCache });  // utilize browser cache to the fullest when version hasn't changed
 
-            var getURLParameter = function (sParam) {
-                var sPageURL = window.location.search.substring(1);
-                var sURLVariables = sPageURL.split('&');
-                for (var i = 0; i < sURLVariables.length; i++)  {
-                    var sParameterName = sURLVariables[i].split('=');
+            let getURLParameter = function (sParam) {
+                let sPageURL = window.location.search.substring(1);
+                let sURLVariables = sPageURL.split('&');
+                for (let i = 0; i < sURLVariables.length; i++)  {
+                    let sParameterName = sURLVariables[i].split('=');
                     if (sParameterName[0] === sParam)
                         return sParameterName[1];
                 }
             };
 
             if (controlCache) {
-                var now = getURLParameter("now");
+                let now = getURLParameter("now");
                 if (now) {
-                    var diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
+                    let diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
                     if (diff > 30) {
                         window.onbeforeunload = null;
                         window.location.href = 'index.html?now=' + (new Date()).getTime();
