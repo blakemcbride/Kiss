@@ -42,7 +42,10 @@ import java.util.logging.Logger;
  * Read and parse a CSV file.
  * This class implements the AutoCloseable interface.
  *
- * Fields can be accessed sequentially, by index, or by field name.  Field names are obtained at the first record of the CSV file.
+ * This code attempts to conform to RFC 4180.
+ *
+ * Fields can be accessed sequentially, by index, or by field name.
+ * Field names are obtained at the first record of the CSV file.
  *
  */
 @SuppressWarnings("unchecked")
@@ -219,6 +222,13 @@ public class DelimitedFileReader implements AutoCloseable {
         return originalRow;
     }
 
+    private enum State {
+        NORMAL,
+        QUOTE,
+        BEFORE_DELIMITER,
+        AFTER_DELIMITER
+    }
+
     /**
      * Read and parse the next row in the CSV file.
      *
@@ -227,7 +237,9 @@ public class DelimitedFileReader implements AutoCloseable {
      * @throws Exception
      */
     public boolean nextLine() throws IOException, Exception {
+        State state = State.NORMAL;
         lineValues.clear();
+        final boolean ignoreSpaces = false;  // ignore spaces around the delimiter
 
         originalRow = null;
         String line = fr.readLine();
@@ -243,46 +255,71 @@ public class DelimitedFileReader implements AutoCloseable {
 
         originalRow = line;
         StringBuilder sb = new StringBuilder();
-        boolean inQuotes = false;
         do {
-            if (inQuotes) {
-                // continuing a quoted section, reappend newline
+            if (state == State.QUOTE) {
+                // continuing a multi-line quoted section, re-append newline
                 sb.append("\n");
                 line = fr.readLine();
                 if (line == null)
                     break;
                 originalRow += "\n" + line;
             }
-            for (int i = 0; i < line.length(); i++) {
+            int sz = line.length();
+            for (int i=0 ; i < sz ; i++) {
                 char c = line.charAt(i);
-                if (c == quote)
-                    // this gets complex... the quote may end a quoted block, or escape another quote.
-                    // do a 1-char lookahead:
-                    if (inQuotes // we are in quotes, therefore there can be escaped quotes in here.
-                            && line.length() > (i + 1) // there is indeed another character to check.
-                            && line.charAt(i + 1) == quote) { // ..and that char. is a quote also.
-                        // we have two quote chars in a row == one quote char, so consume them both and
-                        // put one on the token. we do *not* exit the quoted text.
-                        sb.append(line.charAt(i + 1));
-                        i++;
-                    } else {
-                        inQuotes = !inQuotes;
-                        // the tricky case of an embedded quote in the middle: a,bc"d"ef,g
-                        if (i > 2 //not on the beginning of the line
-                                && line.charAt(i - 1) != delimiter //not at the beginning of an escape sequence
-                                && line.length() > (i + 1)
-                                && line.charAt(i + 1) != this.delimiter //not at the end of an escape sequence
-                                )
+                switch (state) {
+                    case QUOTE:
+                        if (c != quote)
                             sb.append(c);
-                    }
-                else if (c == delimiter && !inQuotes) {
-                    lineValues.add(sb.toString());
-                    sb.setLength(0); // start work on next token
-                } else
-                    sb.append(c);
+                        else if (sz > (i + 1) && line.charAt(i + 1) == quote) {
+                            sb.append(c);
+                            i++;  //  skip second quote
+                        } else {
+                            state = State.BEFORE_DELIMITER;
+                            lineValues.add(sb.toString());
+                            sb.setLength(0); // start work on next token
+                        }
+                        break;
+                    case BEFORE_DELIMITER:
+                        if (c == delimiter)
+                            state = State.AFTER_DELIMITER;
+                        break;
+                    case AFTER_DELIMITER:
+                        if (c == quote)
+                            state = State.QUOTE;
+                        else if (c == delimiter) {
+                            lineValues.add("");
+                            state = State.AFTER_DELIMITER;
+                        } else if (!ignoreSpaces || c != ' ') {
+                            sb.append(c);
+                            state = State.NORMAL;
+                        }
+                        break;
+                    case NORMAL:
+                        if (c == delimiter) {
+                            if (ignoreSpaces)
+                                lineValues.add(sb.toString().trim());
+                            else
+                                lineValues.add(sb.toString());
+                            sb.setLength(0); // start work on next token
+                            state = State.AFTER_DELIMITER;
+                        } else if (c == quote) {
+                            if (sb.length() == 0 || sb.toString().trim().length() == 0) {
+                                state = State.QUOTE;
+                                sb.setLength(0);
+                            } else
+                                sb.append(c);
+                        } else
+                            sb.append(c);
+                        break;
+                }
             }
-        } while (inQuotes);
-        lineValues.add(sb.toString());
+        } while (state == State.QUOTE);
+        if (state != State.BEFORE_DELIMITER)
+            if (ignoreSpaces)
+                lineValues.add(sb.toString().trim());
+            else
+                lineValues.add(sb.toString());
 
         if (fieldCountCheck > 0 && fieldCountCheck != lineValues.size())
             throw new Exception("Bad number of records read.  Expected " + fieldCountCheck + " got " + lineValues.size());
@@ -440,5 +477,19 @@ public class DelimitedFileReader implements AutoCloseable {
      */
     public void setFieldCountCheck(int check) {
         fieldCountCheck = check;
+    }
+
+    public static void main(String [] args) throws Exception {
+        DelimitedFileReader dfr = new DelimitedFileReader("test.csv");
+        while (dfr.nextLine()) {
+            int sz = dfr.size();
+            for (int i=0 ; i < sz ; i++) {
+                if (i != 0)
+                    System.out.print(",");
+                System.out.print("\"" + dfr.getString(i) + "\"");
+            }
+            System.out.println();
+        }
+        dfr.close();
     }
 }
