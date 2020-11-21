@@ -32,6 +32,9 @@
 
 package org.kissweb.database;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.*;
 import java.util.*;
 
@@ -63,12 +66,14 @@ public class Record implements AutoCloseable {
     private final String table;
     private PreparedStatement pstmt;
 
+    // Intended to be used internally only.
     Record(Connection c, String tbl) {
         conn = c;
         table = tbl.toLowerCase();
         cols = new LinkedHashMap<>();
     }
 
+    // Intended to be used internally only.
     Record(Connection c, Cursor cursor, HashMap<String,Object> ocols, LinkedHashMap<String,Object> cols) {
         conn = c;
         this.cursor = cursor;
@@ -624,15 +629,13 @@ public class Record implements AutoCloseable {
      * @param rec the record to be copied from
      */
     public void copyCorresponding(Record rec) {
-        for (Map.Entry<String,Object> entry : rec.cols.entrySet()) {
-            String key = entry.getKey();
-            if (!cols.containsKey(key))
-                continue;
-            Object src = entry.getValue();
-            Object dest = cols.get(key);
-            if (dest == null  ||  src == null  ||  dest.getClass() == src.getClass())
-                cols.replace(key, src);
-        }
+        rec.cols.forEach((key, src) -> {
+            if (cols.containsKey(key)) {
+                Object dest = cols.get(key);
+                if (dest == null || src == null || dest.getClass() == src.getClass())
+                    cols.replace(key, src);
+            }
+        });
     }
 
     /**
@@ -641,8 +644,7 @@ public class Record implements AutoCloseable {
      * @param rec the record to be copied from
      */
     public void copy(Record rec) {
-        for (Map.Entry<String,Object> entry : rec.cols.entrySet())
-            cols.put(entry.getKey(), entry.getValue());
+        rec.cols.forEach((key, value) -> cols.put(key, value));
     }
 
     /**
@@ -676,5 +678,37 @@ public class Record implements AutoCloseable {
      */
     public String getTableName() {
         return table;
+    }
+
+    /**
+     * Returns a map of all of the columns in the record.
+     *
+     * @return
+     */
+    public AbstractMap<String,Object> getAllColumns() {
+        return cols;
+    }
+
+    /**
+     * Convert a record into a JSON object.
+     *
+     * @return
+     */
+    public JSONObject toJSON() {
+        JSONObject obj = new JSONObject();
+        cols.forEach(obj::put);
+        return obj;
+    }
+
+    /**
+     * Utility method to convert a list of Record's into a JSON array of JSON objects.
+     *
+     * @param recs
+     * @return
+     */
+    public static JSONArray toJSONArray(List<Record> recs) {
+        JSONArray ary = new JSONArray();
+        recs.forEach(rec -> ary.put(rec.toJSON()));
+        return ary;
     }
 }
