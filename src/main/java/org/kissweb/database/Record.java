@@ -701,6 +701,16 @@ public class Record implements AutoCloseable {
     }
 
     /**
+     * Add columns of a Record to an existing JSON object.
+     *
+     * @return
+     */
+    public JSONObject addToJSON(JSONObject obj) {
+        cols.forEach(obj::put);
+        return obj;
+    }
+
+    /**
      * Utility method to convert a list of Record's into a JSON array of JSON objects.
      *
      * @param recs

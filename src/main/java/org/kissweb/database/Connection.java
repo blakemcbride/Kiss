@@ -32,6 +32,9 @@
 
 package org.kissweb.database;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -341,6 +344,37 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * Same as <code>fetchOne</code> except returns a JSON object.
+     *
+     * @param sql
+     * @param args
+     * @return the JSON object or <code>null</code> if none
+     * @throws SQLException
+     * 
+     * @see #fetchOne(String, Object...) 
+     */
+    public JSONObject fetchOneJSON(String sql, Object... args) throws SQLException {
+        Record r = fetchOne(sql, args);
+        return r != null ? r.toJSON() : null;
+    }
+
+    /**
+     * Same as <code>fetchOne</code> except adds the columns to an existing JSON object passed in.
+     *
+     * @param obj
+     * @param sql
+     * @param args
+     * @return the JSON object passed in
+     * @throws SQLException
+     * 
+     * @see #fetchOne(String, Object...) 
+     */
+    public JSONObject fetchOneJSON(JSONObject obj, String sql, Object... args) throws SQLException {
+        Record r = fetchOne(sql, args);
+        return r != null ? r.addToJSON(obj) : obj;
+    }
+
+    /**
      * Fetch all of the records and close it.
      * The records can be updated or deleted if there was a single-table select and
      * the primary key was selected.
@@ -371,6 +405,20 @@ public class Connection implements AutoCloseable {
         try (Command cmd = newCommand()) {
             return cmd.fetchAll(sql, args);
         }
+    }
+
+    /**
+     * Same as <code>fetchAll</code> except returns a JSON array.
+     *
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     * 
+     * @see #fetchAll(String, Object...) 
+     */
+    public JSONArray fetchAllJSON(String sql, Object... args) throws SQLException {
+        return Record.toJSONArray(fetchAll(sql, args));
     }
 
     /**
@@ -407,6 +455,20 @@ public class Connection implements AutoCloseable {
         }
     }
 
+    /**
+     * Same as <code>fetchAll</code> except returns a JSON array.
+     *
+     * @param max
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     * 
+     * @see #fetchAll(int, String, Object...)
+     */
+    public JSONArray fetchAllJSON(int max, String sql, Object... args) throws SQLException {
+        return Record.toJSONArray(fetchAll(max, sql, args));
+    }
     /**
      * Return the name of the column that is the table's primary key.  Throws an exception of
      * the table has a composite primary key.

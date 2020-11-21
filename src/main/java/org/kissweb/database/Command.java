@@ -32,6 +32,9 @@
 
 package org.kissweb.database;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -213,6 +216,41 @@ public class Command implements AutoCloseable {
     }
 
     /**
+     * This method is the same as <cod>fetchOne</cod> except that it returns a JSON object.
+     *
+     * @param sql
+     * @param args
+     * @return the JSON object or null if no record
+     * @throws SQLException
+     *
+     * @see #fetchOne(String, Object...)
+     */
+    public JSONObject fetchOneJSON(String sql, Object ... args) throws SQLException {
+        try (Cursor c = query(conn.limit(1, sql), args)) {
+            Record r = c.fetchOne();
+            return r != null ? r.toJSON() : null;
+        }
+    }
+
+    /**
+     * This method is the same as <code>fetchOne</code> except that it adds the columns to en existing JSON object.
+     *
+     * @param obj the JSON object that is to be added to
+     * @param sql
+     * @param args
+     * @return the JSON object passed in
+     * @throws SQLException
+     *
+     * @see #fetchOne(String, Object...)
+     */
+    public JSONObject fetchOneJSON(JSONObject obj, String sql, Object ... args) throws SQLException {
+        try (Cursor c = query(conn.limit(1, sql), args)) {
+            Record r = c.fetchOne();
+            return r != null ? r.addToJSON(obj) : obj;
+        }
+    }
+
+    /**
      * Fetch all of the records and close the cursor.
      * The records can be updated or deleted if there was a single-table select and
      * the primary key was selected.
@@ -239,6 +277,21 @@ public class Command implements AutoCloseable {
      */
     public List<Record> fetchAll(String sql, Object ... args) throws SQLException {
         return query(sql, args).fetchAll();
+    }
+
+    /**
+     * This method is the same as <code>fetchAll</code> except that it return the list of records as a JSON array
+     * of JSON objects where each object represents a column.
+     * 
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     *
+     * @see #fetchAll(String, Object...)
+     */
+    public JSONArray fetchAllJSON(String sql, Object ... args) throws SQLException {
+        return Record.toJSONArray(query(sql, args).fetchAll());
     }
 
     /**
@@ -269,6 +322,21 @@ public class Command implements AutoCloseable {
      */
     public List<Record> fetchAll(int max, String sql, Object ... args) throws SQLException {
         return query(conn.limit(max, sql), args).fetchAll();
+    }
+
+    /**
+     * This method is the same as <code>fetchAll</code> except that it returns a JSON array of the records.
+     * 
+     * @param max
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     * 
+     * @see #fetchAll(int, String, Object...)
+     */
+    public JSONArray fetchAllJSON(int max, String sql, Object ... args) throws SQLException {
+        return Record.toJSONArray(query(conn.limit(max, sql), args).fetchAll());
     }
 
     List<String> getPriColumns(Cursor c) {

@@ -34,6 +34,9 @@
 package org.kissweb.database;
 
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.sql.*;
 import java.util.*;
 
@@ -139,7 +142,8 @@ public class Cursor implements AutoCloseable {
 
     /**
      * Read in a single record and close the read cursor (no more records can be read).
-     * The record read can be updated or deleted.
+     * The record read can be updated or deleted.  <code>null</code> is returned if
+     * there is no record.
      *
      * @return the Record or null if none
      * @throws SQLException
@@ -148,6 +152,35 @@ public class Cursor implements AutoCloseable {
         lastRec = next();
         partialClose();
         return lastRec;
+    }
+
+    /**
+     * This method works exactly like <code>fetchOne</code> except that it return a JSON object representing the record.
+     * <code>null</code> is returned if there is no record.
+     *
+     * @return the JSON object or <code>null</code> if none
+     * @throws SQLException
+     *
+     * @see #fetchOne()
+     */
+    public JSONObject fetchOneJSON() throws SQLException {
+        Record rec = fetchOne();
+        return rec != null ? rec.toJSON() : null;
+    }
+
+    /**
+     * This method works like <code>fetchOne</code> except that it adds the record columns to an existin JSON object
+     * passed in.
+     *
+     * @param obj
+     * @return the JSON object passed in
+     * @throws SQLException
+     */
+    public JSONObject fetchOneJSON(JSONObject obj) throws SQLException {
+        Record rec = fetchOne();
+        if (rec != null)
+            rec.addToJSON(obj);
+        return obj;
     }
 
     /**
@@ -168,6 +201,20 @@ public class Cursor implements AutoCloseable {
         lastRec = null;
         return r;
     }
+
+    /**
+     * This method does the same thing as <code>fetchAll</code> except that it return a
+     * JSON array representing all of the records.
+     *
+     * @return
+     * @throws SQLException
+     *
+     * @see #fetchAll()
+     */
+    public JSONArray fetchAllJSON() throws SQLException {
+        return Record.toJSONArray(fetchAll());
+    }
+
 
     /**
      * After this, you can edit and delete records.  You just can't read any more.
