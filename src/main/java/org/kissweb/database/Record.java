@@ -442,15 +442,15 @@ public class Record implements AutoCloseable {
             if (cursor.ustmt == null  ||  !sql.equals(cursor.prevsql)) {
                 cursor.prevsql = new StringBuilder(sql);
                 sql.append(" where ");
-                needComma = false;
+                boolean needAnd = false;
                 List<String> pc = conn.getPrimaryColumns(table);
                 if (pc == null)
                     throw new RuntimeException("Can't update table " + table + ": no primary key");
                 for (String pcol : pc) {
-                    if (needComma)
-                        sql.append(", ");
+                    if (needAnd)
+                        sql.append(" and ");
                     else
-                        needComma = true;
+                        needAnd = true;
                     sql.append(pcol).append("=?");
                 }
                 if (cursor.ustmt != null)
