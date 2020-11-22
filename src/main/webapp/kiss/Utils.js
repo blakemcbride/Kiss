@@ -279,6 +279,8 @@ class Utils {
      * @returns {string}
      */
     static take(s, n) {
+        if (!s)
+            s = '';
         if (s.length === n)
             return s;
         if (n >= 0) {
@@ -307,6 +309,8 @@ class Utils {
      * @returns {string}
      */
     static drop(s, n) {
+        if (!s)
+            s = '';
         if (!n)
             return s;
         if (n >= s.length || -n >= s.length)
