@@ -1308,6 +1308,8 @@ class Utils {
      * @returns {string}
      */
     static htmlToText(html) {
+        if (!html)
+            return '';
         return html
             .replace(/<br>/g, '\n')
             .replace(/&sp;/g, ' ')
@@ -1315,7 +1317,9 @@ class Utils {
             .replace(/&amp;/g, '&')
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
-            .replace(/&quot;/g, '"');
+            .replace(/&quot;/g, '"')
+            .replace(/<div>/g, '\n')
+            .replace(/<\/div>/g, '');
     }
 
     /**

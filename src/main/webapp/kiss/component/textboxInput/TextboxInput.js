@@ -94,8 +94,7 @@
             if (!max || event.key && event.key.length > 1 && event.key !== 'Enter')
                 return;
 
-            const html = jqObj.html();
-            const txt = html ? Utils.htmlToText(html) : '';
+            const txt = Utils.htmlToText(jqObj.html());
 
             if (txt && txt.length >= max) {
                 event.preventDefault();
@@ -113,8 +112,8 @@
         //--
 
         newElm.getValue = function () {
-            let sval = resetContent ? '' : jqObj.text();
-            return sval ? sval.replace(/\s+/g, ' ') : '';
+            let sval = resetContent ? '' : Utils.htmlToText(jqObj.html());
+            return sval ? sval.replace(/ +/g, ' ') : '';
         };
 
         newElm.setValue = function (val) {
