@@ -1322,8 +1322,14 @@ class Utils {
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
             .replace(/&quot;/g, '"')
-            .replace(/<div>/g, '\n')
-            .replace(/<\/div>/g, '');
+            .replace(/<div[^>]*>/g, '\n')
+            .replace(/<\/div>/g, '')
+            .replace(/<span[^>]*>/g, '')
+            .replace(/<\/span>/g, '')
+            .replace(/<a>/g, '')
+            .replace(/<[ap] +[^>]*>/g, '')
+            .replace(/<\/[ap]>/g, '')
+            ;
     }
 
     /**
