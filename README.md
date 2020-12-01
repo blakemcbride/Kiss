@@ -14,7 +14,7 @@ Or, the user manual can be read online at [Kiss Online User Manual](http://htmlp
 
 Public discussion and support is available at [Kiss Support](https://groups.google.com/forum/#!forum/kissweb)
 
-## YouTube Training Videos
+## Training Videos
 
 A 6-part training series on KISS is at:
 
