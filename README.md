@@ -14,6 +14,17 @@ Or, the user manual can be read online at [Kiss Online User Manual](http://htmlp
 
 Public discussion and support is available at [Kiss Support](https://groups.google.com/forum/#!forum/kissweb)
 
+## YouTube Training Videos
+
+A 6-part training series on KISS is at:
+
+* [Part I - Introduction](https://youtu.be/FAnL7dpMld4)
+* [Part 2 - Setup & Configuration](https://youtu.be/xT-C-yQo0Ec)
+* [Part 3 - Web Services](https://youtu.be/9zRZcxMjoW0)
+* [Part 4 - Front-end](https://youtu.be/zMjrp-ft_Tc)
+* [Part 5 - Data Persistence](https://youtu.be/pS7DezhYpGo)
+* [Part 6 - Deployment](https://youtu.be/fGEzv7uuJCk)
+
 ## Quick Start
 
 Presuming you have the Java JDK (tested with Java 8 & 11), GIT, and an
