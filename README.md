@@ -18,7 +18,7 @@ Public discussion and support is available at [Kiss Support](https://groups.goog
 
 A 6-part training series on KISS is at:
 
-* [Part I - Introduction](https://youtu.be/FAnL7dpMld4)
+* [Part 1 - Introduction](https://youtu.be/FAnL7dpMld4)
 * [Part 2 - Setup & Configuration](https://youtu.be/xT-C-yQo0Ec)
 * [Part 3 - Web Services](https://youtu.be/9zRZcxMjoW0)
 * [Part 4 - Front-end](https://youtu.be/zMjrp-ft_Tc)
