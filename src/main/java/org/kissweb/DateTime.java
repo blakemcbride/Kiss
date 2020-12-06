@@ -21,7 +21,16 @@ public class DateTime {
      * @return
      */
     public static String currentDateTimeFormatted() {
-        Date date = new Date();
+        return DateTime.format(new Date());
+    }
+
+    /**
+     * Format a date passed in as a string mm/dd/yyyy hh:mm AM/PM
+     * 
+     * @param date
+     * @return
+     */
+    public static String format(Date date) {
         SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mm a");
         return df.format(date);
     }

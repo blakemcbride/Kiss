@@ -210,52 +210,60 @@ class Utils {
     /**
      * Display a modal popup that asks the user a yes/no question.
      *
+     * The yesFun/noFun can be used, or this function returns a promise
+     * so that is can be used with async/await.
+     *
      * @param {string} title text on the title bar of the popup
      * @param {string} message the question being asked
      * @param {function} yesFun function that gets executed if the user clicks 'Yes'
      * @param {function} noFun function that gets executed if the user clicks 'No'
      */
-    static yesNo(title, message, yesFun, noFun) {
-        if (!$('#yesno-modal').length) {
-            $('body').append(
-                '&lt;div id="yesno-modal" class="msg-modal">' +
-                '  &lt;!-- Modal content -->' +
-                '  &lt;div class="msg-modal-content" id="yesno-popup-content">' +
-                '    &lt;div class="msg-modal-header" id="yesno-popup-header">' +
-                '      &lt;span id="yesno-close-btn" class="msg-close">&amp;times;&lt;/span>' +
-                '      &lt;p id="yesno-header" style="margin-top: 2px;">Modal Header&lt;/p>' +
-                '    &lt;/div>' +
-                '    &lt;div class="msg-modal-body">' +
-                '      &lt;p id="yesno-message" style="margin-top: 5px, margin-bottom: 5px;">&lt;/p>' +
-                '    &lt;/div>' +
-                '    &lt;div class="msg-modal-footer">' +
-                '      &lt;input type="button" value="Yes" id="yesno-yes" style="margin-top: 5px; margin-bottom: 10px;">' +
-                '      &lt;input type="button" value="No" id="yesno-no" style="margin-top: 5px; margin-bottom: 10px; margin-left: 10px;">' +
-                '    &lt;/div>' +
-                '  &lt;/div>' +
-                '&lt;/div>');
-        }
-        this.makeDraggable($('#yesno-popup-header'), $('#yesno-popup-content'));
+    static yesNo(title, message, yesFun = null, noFun = null) {
+        return new Promise(function(resolve, reject) {
+            if (!$('#yesno-modal').length) {
+                $('body').append(
+                    '&lt;div id="yesno-modal" class="msg-modal">' +
+                    '  &lt;!-- Modal content -->' +
+                    '  &lt;div class="msg-modal-content" id="yesno-popup-content">' +
+                    '    &lt;div class="msg-modal-header" id="yesno-popup-header">' +
+                    '      &lt;span id="yesno-close-btn" class="msg-close">&amp;times;&lt;/span>' +
+                    '      &lt;p id="yesno-header" style="margin-top: 2px;">Modal Header&lt;/p>' +
+                    '    &lt;/div>' +
+                    '    &lt;div class="msg-modal-body">' +
+                    '      &lt;p id="yesno-message" style="margin-top: 5px, margin-bottom: 5px;">&lt;/p>' +
+                    '    &lt;/div>' +
+                    '    &lt;div class="msg-modal-footer">' +
+                    '      &lt;input type="button" value="Yes" id="yesno-yes" style="margin-top: 5px; margin-bottom: 10px;">' +
+                    '      &lt;input type="button" value="No" id="yesno-no" style="margin-top: 5px; margin-bottom: 10px; margin-left: 10px;">' +
+                    '    &lt;/div>' +
+                    '  &lt;/div>' +
+                    '&lt;/div>');
+            }
+            Utils.makeDraggable($('#yesno-popup-header'), $('#yesno-popup-content'));
 
-        $('#yesno-header').text(title);
-        $('#yesno-message').text(message);
-        const modal = $('#yesno-modal');
-        const span = $('#yesno-close-btn');
-        modal.show();
-        span.off('click').click(function () {
-            modal.hide();
-            if (noFun)
-                noFun();
-        });
-        $('#yesno-yes').off('click').click(function () {
-            modal.hide();
-            if (yesFun)
-                yesFun();
-        });
-        $('#yesno-no').off('click').click(function () {
-            modal.hide();
-            if (noFun)
-                noFun();
+            $('#yesno-header').text(title);
+            $('#yesno-message').text(message);
+            const modal = $('#yesno-modal');
+            const span = $('#yesno-close-btn');
+            modal.show();
+            span.off('click').click(function () {
+                modal.hide();
+                if (noFun)
+                    noFun();
+                resolve(false);
+            });
+            $('#yesno-yes').off('click').click(function () {
+                modal.hide();
+                if (yesFun)
+                    yesFun();
+                resolve(true);
+            });
+            $('#yesno-no').off('click').click(function () {
+                modal.hide();
+                if (noFun)
+                    noFun();
+                resolve(false);
+            });
         });
     }
 
@@ -315,6 +323,8 @@ class Utils {
      * @returns {string}
      */
     static take(s, n) {
+        if (!s)
+            s = '';
         if (s.length === n)
             return s;
         if (n >= 0) {
@@ -343,6 +353,8 @@ class Utils {
      * @returns {string}
      */
     static drop(s, n) {
+        if (!s)
+            s = '';
         if (!n)
             return s;
         if (n >= s.length || -n >= s.length)
@@ -1344,6 +1356,8 @@ class Utils {
      * @returns {string}
      */
     static htmlToText(html) {
+        if (!html)
+            return '';
         return html
             .replace(/&lt;br>/g, '\n')
             .replace(/&amp;sp;/g, ' ')
@@ -1351,7 +1365,15 @@ class Utils {
             .replace(/&amp;amp;/g, '&amp;')
             .replace(/&amp;lt;/g, '&lt;')
             .replace(/&amp;gt;/g, '>')
-            .replace(/&amp;quot;/g, '"');
+            .replace(/&amp;quot;/g, '"')
+            .replace(/&lt;div[^>]*>/g, '\n')
+            .replace(/&lt;\/div>/g, '')
+            .replace(/&lt;span[^>]*>/g, '')
+            .replace(/&lt;\/span>/g, '')
+            .replace(/&lt;a>/g, '')
+            .replace(/&lt;[ap] +[^>]*>/g, '')
+            .replace(/&lt;\/[ap]>/g, '')
+            ;
     }
 
     /**
