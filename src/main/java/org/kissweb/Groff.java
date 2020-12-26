@@ -13,14 +13,16 @@ import java.io.*;
  */
 public class Groff {
 
+    private static Boolean isMac;
+    private static Boolean isWindows;
+
     private final PrintWriter pw;
     private final String pdfname;
     private final String mmfname;
     private final boolean landscape;
     private String title;
-    private boolean once = true;
-    private static Boolean isMac;
-    private static Boolean isWindows;
+    private boolean atTop = true;
+    private boolean autoPageHeader = true;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -46,19 +48,33 @@ public class Groff {
         this.title = title;
     }
 
-    private void writeHeader(String title) {
+    /**
+     * Do not auto-generate the page title, or if already printed, stop.
+     */
+    public void noAutoPageHeader() {
+        if (autoPageHeader)
+            autoPageHeader = false;
+        else
+            pw.println(".rm TP");
+    }
+
+    private void setDefaults1() {
         pw.println(".PH \"''''\"");
         pw.println(".PF \"''Page \\\\\\\\nP''\"");
+        pw.println(".S 11");;
+    }
 
+    private void setDefaults2() {
+        pw.println(".nf");
+    }
+
+    private void writePageHeader(String title) {
         pw.println(".de TP");
         pw.println("'SP .5i");
         pw.println("'tl '''Run date: " + DateTime.currentDateTimeFormatted());
         pw.println("'tl ''\\s(14" + title + "\\s0''");
         pw.println("'SP");
         pw.println("..");
-
-        pw.println(".S 11");
-        pw.println(".nf");
     }
 
     /**
@@ -67,11 +83,19 @@ public class Groff {
      * @param str
      */
     public void out(String str) {
-        if (once) {
-            writeHeader(title);
-            once = false;
+        boolean needDefaults2 = atTop;
+        if (atTop) {
+            setDefaults1();
+            atTop = false;
         }
-        pw.println(str);
+        if (autoPageHeader) {
+            writePageHeader(title);
+            autoPageHeader = false;
+        }
+        if (needDefaults2)
+            setDefaults2();
+        if (str != null)
+            pw.println(str);
     }
 
     /**
@@ -85,10 +109,7 @@ public class Groff {
     public String process(float sideMargin) throws IOException, InterruptedException {
         ProcessBuilder builder;
         String psfname = null;
-        if (once) {
-            writeHeader(title);
-            once = false;
-        }
+        out(null);
         pw.flush();
         pw.close();
         if (isMac) 
