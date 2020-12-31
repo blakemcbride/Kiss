@@ -135,6 +135,38 @@ class Server {
         });
     }
 
+    /**
+     * Used to call a number of simultaneous web services and wait till they're all done
+     * before processing any of their results.
+     *
+     * This function takes a variable number of arguments.
+     *
+     * The first argument is an array of the Promises from each web service call.
+     *
+     * Each remaining argument is a function that gets the result from the positionally corresponding
+     * promise in the first argument.  If any are null there is no function executed for that returned promise.
+     * Each function that gets executed gets passed the return value of the associated web service.
+     *
+     */
+    static callAll(pa /*, ... each subsequent arg is a function to handle the result of the next promise in pa */) {
+        const args = arguments;
+        return new Promise(function (resolve, reject) {
+            Promise.all(pa).then(function (ret) {
+                for (let i = 0; i < ret.length; i++)
+                    if (!ret[i]._Success) {
+                        resolve(true);  //  error
+                        return;
+                    }
+                for (let i=1 ; i < args.length  &&  i <= ret.length ; i++) {
+                    let fun = args[i];
+                    if (fun)
+                        fun(ret[i-1]);
+                }
+                resolve(false);  //  success
+            });
+        });
+    }
+
 }
 
 
