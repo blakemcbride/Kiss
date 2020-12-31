@@ -98,6 +98,24 @@ function $$(id) {
  */
 class Utils {
 
+    // Class variables
+    static count = 1;
+    static popup_zindex = 10;
+    static popup_context = [];
+    static someControlValueChangedFlag = false;
+    static someControlValueChangedFun = null;
+    static globalEnterFunction = null;
+
+
+    static gridContext = [];             //  An array of arrays.  The outer array represents a stack of contexts
+                                         //  The inner array is an array of grids that'll need to be disposed
+                                         //  Basically, each context (except the first) represents a popup
+                                         //  The first represents the current screen
+                                         //  Each inner array contains an array of grids on that context
+
+    static enterFunction = null;         //  If defined, execute function when enter key hit
+    static enterFunctionStack = [];      //  Save stack for enter key to handle popups
+
     /**
      * Display a popup window with a message to the user.  The user will click "Ok" when they have read the message.
      * If the title is 'Error' the popup will appear in red.
@@ -1349,24 +1367,6 @@ class Utils {
     }
 
 }
-
-// Class variables
-Utils.count = 1;
-Utils.popup_zindex = 10;
-Utils.popup_context = [];
-Utils.someControlValueChangedFlag = false;
-Utils.someControlValueChangedFun = null;
-Utils.globalEnterFunction = null;
-
-
-Utils.gridContext = [];              //  An array of arrays.  The outer array represents a stack of contexts
-                                     //  The inner array is an array of grids that'll need to be disposed
-                                     //  Basically, each context (except the first) represents a popup
-                                     //  The first represents the current screen
-                                     //  Each inner array contains an array of grids on that context
-
-Utils.enterFunction = null;          //  If defined, execute function when enter key hit
-Utils.enterFunctionStack = [];       //  Save stack for enter key to handle popups
 
 
 $(document).on('keypress', function(e) {
