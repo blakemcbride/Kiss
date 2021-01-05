@@ -311,6 +311,10 @@
             return this;
         };
 
+        newElm.clearSelection = function () {
+            jqObj.val(null);
+        };
+
     };
 
     const componentInfo = {
