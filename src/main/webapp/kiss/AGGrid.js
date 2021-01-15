@@ -25,9 +25,9 @@ class AGGrid {
      *
      * @param id {string} the ID of the div that represents the grid
      * @param columns an ag-grid columnDefs data structure
-     * @param keyColumn {string} the ID of the key column
+     * @param keyColumn {string} the ID of the key column (optional)
      */
-    constructor(id, columns, keyColumn) {
+    constructor(id, columns, keyColumn=undefined) {
         this.id = id;
         this.columns = columns;
         this.rowSelection = AGGrid.SINGLE_SELECTION;
@@ -74,13 +74,17 @@ class AGGrid {
                         params.api.sizeColumnsToFit();
                     })
                 })
-            },
+            }/* ,
             getRowNodeId: function (data) {
                 return data[self.keyColumn];
             }
+            */
             // Disable all warnings
             // suppressPropertyNamesCheck: true
         };
+
+        if (self.keyColumn)
+            this.gridOptions.getRowNodeId = data => data[self.keyColumn];
 
         let eGridDiv = document.querySelector('#' + this.id);
         if (!eGridDiv)
@@ -88,7 +92,7 @@ class AGGrid {
         else {
             eGridDiv.classList.add('ag-theme-balham');
             new agGrid.Grid(eGridDiv, this.gridOptions);
-            Utils.addGrid(this);
+            Framework.addGrid(this);
             this.gridInstantiated = true;
         }
         return this;
@@ -320,9 +324,7 @@ class AGGrid {
      * @returns {number}
      */
     getNumberOfRows() {
-        let rows = 0;
-        this.gridOptions.api.forEachNode(node => rows++);
-        return rows;
+        return this.gridOptions.api.rowModel.getRowCount();
     }
 
     /**
@@ -357,7 +359,7 @@ class AGGrid {
      *
      * @returns {array}
      */
-    getSelectedRowIndexs() {
+    getSelectedRowIndexes() {
         const rows = this.getAllRows();
         const selectedRows = this.getSelectedRows();
         const lst = [];
@@ -390,6 +392,15 @@ class AGGrid {
     getSelectedRow() {
         const sel = this.gridOptions.api.getSelectedRows();
         return sel.length === 1 ? sel[0] : null;
+    }
+
+    /**
+     * Returns the number of selected rows
+     *
+     * @returns {*}
+     */
+    numberOfSelectedRows() {
+        return this.gridOptions.api.getSelectedRows().length;
     }
 
     getDataItems() {
@@ -431,7 +442,7 @@ class AGGrid {
      * @returns {boolean}
      */
     isEmpty() {
-        return (this.gridOptions.api.rowModel.getRowCount() === 0);
+        return this.gridOptions.api.rowModel.getRowCount() === 0;
     }
 
     sizeColumnsToFit() {
@@ -442,6 +453,13 @@ class AGGrid {
         return this;
     }
 
+    /**
+     * Add a class that defines special cell formatting.
+     *
+     * @param tag
+     * @param cls
+     * @returns {AGGrid}
+     */
     addComponent(tag, cls) {
         this.components[tag] = cls;
         return this;
