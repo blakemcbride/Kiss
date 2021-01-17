@@ -190,7 +190,7 @@ public class BuildUtils {
      * @param from a file name with a path
      * @param to a file name with a path
      */
-	public static void move(String from, String to) {
+    public static void move(String from, String to) {
         try {
             File parent = new File(to).getParentFile();
             if (parent != null)
@@ -294,7 +294,27 @@ public class BuildUtils {
         }
     }
 
+    /**
+     * Copy one directory tree to another
+     *
+     * @param source
+     * @param dest
+     */
     public static void copyTree(String source, String dest) {
+        copyTreeRegex(source, dest, null);
+    }
+
+    /**
+     * Copy one directory tree to another
+     *
+     * The regular expression applies to file names and not directory names.
+     * If includeRegex is null, all files are included.
+     *
+     * @param source
+     * @param dest
+     * @param includeRegex regular expression for files to include or null
+     */
+    public static void copyTreeRegex(String source, String dest, String includeRegex) {
         mkdir(dest);
         File sf = new File(source);
         File df = new File(dest);
@@ -303,16 +323,22 @@ public class BuildUtils {
         mkdir(dest);
         if (!df.exists())
             throw new RuntimeException("can't create directory " + dest);
-        copyTree(new File(source), new File(dest));
+        Pattern pat;
+        if (includeRegex != null)
+            pat = Pattern.compile(includeRegex);
+        else
+            pat = null;
+        copyTree(new File(source), new File(dest), pat);
     }
 
-    private static void copyTree(File src, File dest) {
+    private static void copyTree(File src, File dest, Pattern pat) {
         File[] files = src.listFiles();
         if (files != null)
             for (File f : files) {
                 File d = new File(dest, f.getName());
                 if (f.isFile()) {
-                    if (!d.exists()  ||  d.lastModified() < f.lastModified()) {
+                    if ((pat == null || pat.matcher(f.getName()).matches())
+                            && (!d.exists()  ||  d.lastModified() < f.lastModified())) {
                         try {
                             (new File(d.getParent())).mkdirs();
                             Files.copy(f.toPath(), d.toPath(), StandardCopyOption.REPLACE_EXISTING);
@@ -321,7 +347,7 @@ public class BuildUtils {
                         }
                     }
                 } else
-                    copyTree(f, d);
+                    copyTree(f, d, pat);
             }
     }
 
@@ -391,11 +417,17 @@ public class BuildUtils {
             try {
                 Files.write(Paths.get(fname), txt.getBytes(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             } catch (IOException e) {
-               throw new RuntimeException("error creating/writing " + fname);
+                throw new RuntimeException("error creating/writing " + fname);
             }
         }
     }
 
+    /**
+     * Create a Java manifest file
+     *
+     * @param manifest
+     * @param mainClass
+     */
     public static void createManifest(String manifest, String mainClass) {
         writeToFile(manifest, "Manifest-Version: 1.0\n" +
                 "Main-Class: " + mainClass + "\n");
@@ -404,6 +436,11 @@ public class BuildUtils {
         touch(manifest, mc.lastModified());
     }
 
+    /**
+     * Set a file to executable
+     *
+     * @param file
+     */
     public static void makeExecutable(String file) {
         File f = new File(file);
         if (!f.exists())
@@ -423,8 +460,8 @@ public class BuildUtils {
                 if (f.isDirectory())
                     allSourceFiles(lst, f, ext);
                 else
-                    if (f.getName().endsWith(ext))
-                        lst.add(f);
+                if (f.getName().endsWith(ext))
+                    lst.add(f);
         return lst;
     }
 
@@ -455,6 +492,12 @@ public class BuildUtils {
         return rlst;
     }
 
+    /**
+     * Create a command line input file (used in Windows)
+     *
+     * @param lst
+     * @return
+     */
     public static String writeArgsToFile(final ArrayList<File> lst) {
         File f;
         try {
@@ -747,14 +790,14 @@ public class BuildUtils {
     }
 
     // Unfinished code to create WSDL's (I don't think they're needed anymore)
-	public static void buildWS(LocalDependencies ldep, ForeignDependencies fdep, String dest, String sdir, String service) {
+    public static void buildWS(LocalDependencies ldep, ForeignDependencies fdep, String dest, String sdir, String service) {
         String javaHome = java.lang.System.getProperty("java.home");  // to find tools.jar
-		String deps = writeDependencyArgsToFile(ldep, fdep);
-		String cmd = "java -classpath @" + deps + " com.sun.tools.ws.WsGen -d " + dest + " -Xendorsed -keep -wsdl -r " + sdir + " -s " + sdir + " " + service;
-		mkdir(sdir);
-		runWait(true, cmd);
-		rm(deps);
-	}
+        String deps = writeDependencyArgsToFile(ldep, fdep);
+        String cmd = "java -classpath @" + deps + " com.sun.tools.ws.WsGen -d " + dest + " -Xendorsed -keep -wsdl -r " + sdir + " -s " + sdir + " " + service;
+        mkdir(sdir);
+        runWait(true, cmd);
+        rm(deps);
+    }
 
     /**
      * gunzip and untar a .gz file into the specified directory
@@ -885,7 +928,7 @@ public class BuildUtils {
     }
 
     public static String cwd() {
-	    return System.getProperty("user.dir");
+        return System.getProperty("user.dir");
     }
 
     private static String cacheDir() {
