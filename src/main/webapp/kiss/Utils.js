@@ -678,9 +678,13 @@ class Utils {
         Component.AfterAllComponentsLoaded = fun;
     }
 
-    /* (internal)
+    /**
      * Rescan the HTML file and replace KISS components with HTML components.
      * This needs to be done each time new KISS controls are attached.
+     *
+     * This method is mainly used internally.  However, it may be useful when dynamically
+     * adding controls to the DOM.  At the end of those additions, this method would be called
+     * to activate the Kiss custom HTML tags.
      */
     static rescan() {
         let n = -1;
