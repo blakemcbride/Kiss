@@ -173,7 +173,7 @@ public class Tasks {
     private ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
         dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
-        dep.add("groovy-3.0.3-indy.jar", LIBS, "https://repo1.maven.org/maven2/org/codehaus/groovy/groovy/3.0.3/groovy-3.0.3-indy.jar");
+        dep.add("groovy-3.0.7-indy.jar", LIBS, "https://repo1.maven.org/maven2/org/codehaus/groovy/groovy/3.0.7/groovy-3.0.7-indy.jar");
         dep.add("javax.servlet-api-4.0.1.jar", LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
         dep.add("log4j-1.2.17.jar", LIBS, "https://repo1.maven.org/maven2/log4j/log4j/1.2.17/log4j-1.2.17.jar");
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
