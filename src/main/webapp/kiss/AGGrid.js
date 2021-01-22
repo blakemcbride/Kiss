@@ -488,7 +488,7 @@ class AGGrid {
     /**
      * Create a new grid context.
      */
-    static newGridContext = function () {
+    static newGridContext() {
         AGGrid.gridContext.push([]);
     }
 
@@ -497,7 +497,7 @@ class AGGrid {
      *
      * @param grid
      */
-    static addGrid = function (grid) {
+    static addGrid(grid) {
         const cc = AGGrid.gridContext[AGGrid.gridContext.length - 1];
         cc.push(grid);
     }
@@ -505,7 +505,7 @@ class AGGrid {
     /**
      * Destroy all grids in last context and remove the context
      */
-    static popGridContext = function () {
+    static popGridContext() {
         const c = AGGrid.gridContext.pop();
         if (c)
             for (let i = 0; i < c.length; i++)
@@ -515,7 +515,7 @@ class AGGrid {
     /**
      * destroys all popup and screen grids that have been created
      */
-    static popAllGridContexts = function () {
+    static popAllGridContexts() {
         while (AGGrid.gridContext.length)
             AGGrid.popGridContext();
     }
