@@ -52,6 +52,26 @@ public class TimeUtils {
         return hour + ":" + NumberFormat.Format(min, "Z", 2, 0) + ' ' + side;
     }
 
+    /**
+     * Return the hour portion of a time HHMM
+     *
+     * @param time HHMM
+     * @return HH
+     */
+    public static int hour(int time) {
+        return time / 100;
+    }
+
+    /**
+     * Return the minute portion of a time HHMM
+     *
+     * @param time HHMM
+     * @return  MM
+     */
+    public static int minutes(int time) {
+        return time - (time / 100) * 100;
+    }
+
     public static void main(String [] argv) {
         int tm = TimeUtils.now();
         System.out.println(tm);
