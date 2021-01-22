@@ -13,6 +13,12 @@ class AGGrid {
     static SINGLE_SELECTION = 'single';
     static MULTI_SELECTION = 'multiple';
 
+    static gridContext = [];        //  An array of arrays.  The outer array represents a stack of contexts.
+                                    //  The inner array is an array of grids that'll need to be disposed.
+                                    //  Basically, each context (except the first) represents a popup.
+                                    //  The first represents the current screen.
+                                    //  Each inner array contains an array of grids in that context.
+
     /**
      * Create a new AGGrid instance.
      * <br><br>
@@ -94,6 +100,10 @@ class AGGrid {
             new agGrid.Grid(eGridDiv, this.gridOptions);
             this.gridInstantiated = true;
         }
+        if (!AGGrid.gridContext.length)
+            console.debug("Missing grid context.  Be sure to call AGGrid.newGridContext()");
+        else
+            AGGrid.addGrid(this);  // must have a context first!
         return this;
     }
 
@@ -473,6 +483,41 @@ class AGGrid {
     multiSelect() {
         this.rowSelection = AGGrid.MULTI_SELECTION;
         return this;
+    }
+
+    /**
+     * Create a new grid context.
+     */
+    static newGridContext = function () {
+        AGGrid.gridContext.push([]);
+    }
+
+    /**
+     * Add a grid to the current context.
+     *
+     * @param grid
+     */
+    static addGrid = function (grid) {
+        const cc = AGGrid.gridContext[AGGrid.gridContext.length - 1];
+        cc.push(grid);
+    }
+
+    /**
+     * Destroy all grids in last context and remove the context
+     */
+    static popGridContext = function () {
+        const c = AGGrid.gridContext.pop();
+        if (c)
+            for (let i = 0; i < c.length; i++)
+                c[i].destroy();
+    }
+
+    /**
+     * destroys all popup and screen grids that have been created
+     */
+    static popAllGridContexts = function () {
+        while (AGGrid.gridContext.length)
+            AGGrid.popGridContext();
     }
 
 }
