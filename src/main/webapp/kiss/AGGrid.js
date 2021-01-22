@@ -101,9 +101,8 @@ class AGGrid {
             this.gridInstantiated = true;
         }
         if (!AGGrid.gridContext.length)
-            console.debug("Missing grid context.  Be sure to call AGGrid.newGridContext()");
-        else
-            AGGrid.addGrid(this);  // must have a context first!
+            AGGrid.newGridContext();
+        AGGrid.addGrid(this);
         return this;
     }
 

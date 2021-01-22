@@ -106,13 +106,6 @@ class Utils {
     static someControlValueChangedFun = null;
     static globalEnterFunction = null;
 
-
-    static gridContext = [];             //  An array of arrays.  The outer array represents a stack of contexts
-                                         //  The inner array is an array of grids that'll need to be disposed
-                                         //  Basically, each context (except the first) represents a popup
-                                         //  The first represents the current screen
-                                         //  Each inner array contains an array of grids on that context
-
     static enterFunction = null;         //  If defined, execute function when enter key hit
     static enterFunctionStack = [];      //  Save stack for enter key to handle popups
 
@@ -979,7 +972,8 @@ class Utils {
             id: id,
             globalEnterHandler: Utils.globalEnterHandler(null)
         });
-        Utils.newGridContext();
+        AGGrid.newGridContext();
+        Utils.newEnterContext();
         if (!w.hasClass('popup-background')) {
             let width = w.css('width');
             let height = w.css('height');
@@ -1048,7 +1042,8 @@ class Utils {
      */
     static popup_close() {
         const context = Utils.popup_context.pop();
-        Utils.popGridContext();
+        AGGrid.popGridContext();
+        Utils.popEnterContext();
         $('#' + context.id).hide();
         Utils.globalEnterHandler(context.globalEnterHandler);
         Utils.popup_zindex -= 2;
@@ -1244,9 +1239,10 @@ class Utils {
     static cleanup() {
         Utils.clearSomeControlValueChanged(false);
         Kiss.RadioButtons.resetGroups();
-        Utils.popAllGridContexts();
-        Utils.newGridContext();   //  for the new screen we are loading
-        Utils.enterFunction = null;
+        AGGrid.popAllGridContexts();
+        AGGrid.newGridContext();   //  for the new screen we are loading
+        Utils.clearAllEnterContexts();
+        Utils.newEnterContext();
         Utils.globalEnterHandler(null);
         Utils.popup_context = [];
         const ctl = $(':focus');   // remove any focus
@@ -1255,43 +1251,27 @@ class Utils {
     }
 
     /**
-     * Create a new grid context.
+     * Create a new enter key context.
      */
-    static newGridContext() {
-        Utils.gridContext.push([]);
+    static newEnterContext() {
         Utils.enterFunctionStack.push(Utils.enterFunction);
         Utils.enterFunction = null;
     };
 
     /**
-     * Add a grid to the current context.
-     *
-     * @param grid
-     */
-    static addGrid(grid) {
-        const cc = Utils.gridContext[Utils.gridContext.length - 1];
-        cc.push(grid);
-    };
-
-    /**
      * Destroy all grids in last context and remove the context
      */
-    static popGridContext() {
-        const c = Utils.gridContext.pop();
-        if (c) {
-            for (let i = 0; i < c.length; i++)
-                c[i].destroy();
+    static popEnterContext() {
+        if (Utils.enterFunctionStack.length)
             Utils.enterFunction = Utils.enterFunctionStack.pop();
-        }
+        else
+            Utils.enterFunction = null;
     };
 
     /**
-     * destroys all popup and screen grids that have been created
+     * Clear all enter key contexts that have been created
      */
-    static popAllGridContexts() {
-        while (Utils.gridContext.length)
-            Utils.popGridContext();
-        // Not necessary but just in case
+    static clearAllEnterContexts() {
         Utils.enterFunction = null;
         Utils.enterFunctionStack = [];
     };
