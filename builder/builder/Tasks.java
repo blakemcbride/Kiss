@@ -29,6 +29,8 @@ public class Tasks {
     final String tomcatTarFile = "apache-tomcat-9.0.34.tar.gz";
     final String BUILDDIR = "build.work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
+    final String postgresqlJar = "postgresql-42.2.12.jar";
+    final String groovyJar = "groovy-3.0.7-indy.jar";
 
     void all() {
         war();
@@ -59,6 +61,24 @@ public class Tasks {
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         createJar(explodedDir + "/WEB-INF/classes", BUILDDIR + "/Kiss.jar");
         //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
+    }
+
+    /**
+     * Create an executable JAR that includes Kiss, Groovy, and the PostgreSQL driver.
+     */
+    void KissGP() {
+        final String name = "KissGP";
+        final String workDir = BUILDDIR + "/" + name;
+        final String jarName = workDir + ".jar";
+        jar();
+        rmTree(workDir);
+        rm(jarName);
+        unJar(workDir, BUILDDIR + "/Kiss.jar");
+        unJar(workDir, "libs/" + postgresqlJar);
+        rm(workDir + "/META-INF/MANIFEST.MF");
+        unJar(workDir, "libs/" + groovyJar);
+        createJar(workDir, jarName);
+        rmTree(workDir);
     }
 
     void war() {
@@ -173,14 +193,14 @@ public class Tasks {
     private ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
         dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
-        dep.add("groovy-3.0.7-indy.jar", LIBS, "https://repo1.maven.org/maven2/org/codehaus/groovy/groovy/3.0.7/groovy-3.0.7-indy.jar");
+        dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/codehaus/groovy/groovy/3.0.7/groovy-3.0.7-indy.jar");
         dep.add("javax.servlet-api-4.0.1.jar", LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
         dep.add("log4j-1.2.17.jar", LIBS, "https://repo1.maven.org/maven2/log4j/log4j/1.2.17/log4j-1.2.17.jar");
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
         dep.add("mssql-jdbc-8.2.0.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/8.2.0.jre8/mssql-jdbc-8.2.0.jre8.jar");
         dep.add("mysql-connector-java-8.0.19.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.19/mysql-connector-java-8.0.19.jar");
 	//  dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
-        dep.add("postgresql-42.2.12.jar", LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.12/postgresql-42.2.12.jar");
+        dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.2.12/postgresql-42.2.12.jar");
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
         dep.add("sqlite-jdbc-3.30.1.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.30.1/sqlite-jdbc-3.30.1.jar");
