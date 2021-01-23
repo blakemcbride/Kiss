@@ -39,6 +39,11 @@ public class Tasks {
         javadoc();
     }
 
+    /**
+     * This creates a command-line executable jar file that runs the org.kissweb.Main class.
+     * You can put your custom code in the org.kissweb.Main class and build the runnable jar.
+     * For a possible better solution, see the KissGP target.
+     */
     void kisscmd() {
         final String targetPath = BUILDDIR + "/cmdline";
         final String manifest = targetPath + "/META-INF/MANIFEST.MF";
@@ -65,6 +70,7 @@ public class Tasks {
 
     /**
      * Create an executable JAR that includes Kiss, Groovy, and the PostgreSQL driver.
+     * It runs an arbitrary groovy file in the context of Kiss and PostgreSQL.
      */
     void KissGP() {
         final String name = "KissGP";
