@@ -81,6 +81,7 @@ public class Tasks {
         rm(jarName);
         unJar(workDir, BUILDDIR + "/Kiss.jar");
         unJar(workDir, "libs/" + postgresqlJar);
+        unJar(workDir, "libs/json.jar");
         rm(workDir + "/META-INF/MANIFEST.MF");
         unJar(workDir, "libs/" + groovyJar);
         createJar(workDir, jarName);
