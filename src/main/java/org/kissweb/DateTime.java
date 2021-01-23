@@ -117,7 +117,7 @@ public class DateTime {
      * @return
      */
     public Date getDate() {
-        return Date.from(zdt.now().toInstant());
+        return Date.from(zdt.toInstant());
     }
 
     /**
@@ -184,6 +184,12 @@ public class DateTime {
         SimpleDateFormat df = new SimpleDateFormat(dateFormat);
         df.setTimeZone(TimeZone.getTimeZone(timeZone));
         return df.format(date);
+    }
+
+    public static void main(String [] args) {
+        DateTime dt = new DateTime(20201224, 1130);
+        Date d = dt.getDate();
+        int x = 1;
     }
 
 }
