@@ -71,6 +71,10 @@
 
         jqObj.keyup(keyUpHandler);
 
+        jqObj.on('change', function () {
+            Utils.someControlValueChanged();
+        });
+
         //--
 
         newElm.getIntValue = function () {
