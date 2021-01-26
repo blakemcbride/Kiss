@@ -301,7 +301,7 @@ public class BuildUtils {
      * @param dest
      */
     public static void copyTree(String source, String dest) {
-        copyTreeRegex(source, dest, null);
+        copyTreeRegex(source, dest, null, null);
     }
 
     /**
@@ -315,6 +315,22 @@ public class BuildUtils {
      * @param includeRegex regular expression for files to include or null
      */
     public static void copyTreeRegex(String source, String dest, String includeRegex) {
+        copyTreeRegex(source, dest, includeRegex, null);
+    }
+
+    /**
+     * Copy one directory tree to another
+     *
+     * The regular expression applies to file names and not directory names.
+     * If includeRegex is null, all files are included.
+     * If excludeRegex is null, no files are excluded.
+     *
+     * @param source
+     * @param dest
+     * @param includeRegex regular expression for files to include or null
+     * @param excludeRegex regular expression for files to exclude or null
+     */
+    public static void copyTreeRegex(String source, String dest, String includeRegex, String excludeRegex) {
         mkdir(dest);
         File sf = new File(source);
         File df = new File(dest);
@@ -323,31 +339,37 @@ public class BuildUtils {
         mkdir(dest);
         if (!df.exists())
             throw new RuntimeException("can't create directory " + dest);
-        Pattern pat;
+        Pattern incPat, exPat;
         if (includeRegex != null)
-            pat = Pattern.compile(includeRegex);
+            incPat = Pattern.compile(includeRegex);
         else
-            pat = null;
-        copyTree(new File(source), new File(dest), pat);
+            incPat = null;
+        if (excludeRegex != null)
+            exPat = Pattern.compile(excludeRegex);
+        else
+            exPat = null;
+        copyTree(new File(source), new File(dest), incPat, exPat);
     }
 
-    private static void copyTree(File src, File dest, Pattern pat) {
+    private static void copyTree(File src, File dest, Pattern incPat, Pattern exPat) {
         File[] files = src.listFiles();
         if (files != null)
             for (File f : files) {
                 File d = new File(dest, f.getName());
                 if (f.isFile()) {
-                    if ((pat == null || pat.matcher(f.getName()).matches())
+                    if ((incPat == null || incPat.matcher(f.getName()).matches())
                             && (!d.exists()  ||  d.lastModified() < f.lastModified())) {
                         try {
-                            (new File(d.getParent())).mkdirs();
-                            Files.copy(f.toPath(), d.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            if (exPat == null || !exPat.matcher(f.getName()).matches()) {
+                                (new File(d.getParent())).mkdirs();
+                                Files.copy(f.toPath(), d.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                            }
                         } catch (IOException e) {
                             throw new RuntimeException("error copying " + f.toString() + " to " + d.toString());
                         }
                     }
                 } else
-                    copyTree(f, d, pat);
+                    copyTree(f, d, incPat, exPat);
             }
     }
 
