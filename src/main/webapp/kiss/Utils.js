@@ -252,7 +252,8 @@ class Utils {
                 '  </div>' +
                 '</div>');
         }
-        this.makeDraggable($('#wait-msg-content'), $('#wait-msg-content'));
+        const content = $('#wait-msg-content');
+        this.makeDraggable(content, content);
         $('#wmsg-message').text(message);
         $('#wmsg-modal').show();
     }
@@ -961,7 +962,7 @@ class Utils {
      *
      * @see popup_close
      */
-    static popup_open(id, focus_ctl) {
+    static popup_open(id, focus_ctl=null) {
         const w = $('#' + id);
         let content;
         let both_parts;
