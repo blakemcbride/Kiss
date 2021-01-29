@@ -88,7 +88,7 @@ public class BuildUtils {
                             println(e.getMessage());
                         else
                             println(e.getCause().getMessage());
-                        println("error execiting task " + arg);
+                        println("error executing task " + arg);
                         return;
                     }
                     break;
