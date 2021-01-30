@@ -249,7 +249,7 @@
 
         jqObj.on('input', function (elm) {
             let txt = Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
-            if (txt.length > max) {
+            if (max && txt.length > max) {
                 txt = Utils.take(txt, max);
                 jqObj.html(Utils.textToHtml(txt));
             }
