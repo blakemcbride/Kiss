@@ -1324,6 +1324,8 @@ class Utils {
             .replace(/<\/div>/g, '')
             .replace(/<span[^>]*>/g, '')
             .replace(/<\/span>/g, '')
+            .replace(/<font[^>]*>/g, '')
+            .replace(/<\/font>/g, '')
             .replace(/<a>/g, '')
             .replace(/<[ap] +[^>]*>/g, '')
             .replace(/<\/[ap]>/g, '')

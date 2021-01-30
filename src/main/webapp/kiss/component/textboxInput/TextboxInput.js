@@ -7,6 +7,7 @@
 
 /*
   I need to use a div rather than a textarea because a textarea doesn't support HTML contents.  A div does.
+  (I think the problem had to do with newlines.)
  */
 
 'use strict';
@@ -93,9 +94,7 @@
         jqObj.keydown((event) => {
             if (!max || event.key && event.key.length > 1 && event.key !== 'Enter')
                 return;
-
-            const txt = Utils.htmlToText(jqObj.html());
-
+            const txt = Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
             if (txt && txt.length >= max) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -109,11 +108,25 @@
             Utils.someControlValueChanged();
         });
 
+        jqObj.focusout(() => {
+            if (upcase) {
+                let sval = resetContent ? '' : Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
+                sval = sval ? sval.replace(/ +/g, ' ') : '';
+                if (sval)
+                    jqObj.html(Utils.textToHtml(sval.toUpperCase()));
+            }
+        });
+
         //--
 
         newElm.getValue = function () {
-            let sval = resetContent ? '' : Utils.htmlToText(jqObj.html());
-            return sval ? sval.replace(/ +/g, ' ') : '';
+            let sval = resetContent ? '' : Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
+            sval = sval ? sval.replace(/ +/g, ' ') : '';
+            if (sval && upcase) {
+                sval = sval.toUpperCase();
+                jqObj.html(Utils.textToHtml(sval));
+            }
+            return sval
         };
 
         newElm.setValue = function (val) {
@@ -129,7 +142,7 @@
         newElm.clear = function () {
             newElm.setValue('');
             if (placeholder) {
-                let content = '<span style="color: gray;">' + placeholder + '</span>';
+                const content = '<span style="color: gray;">' + placeholder + '</span>';
                 jqObj.html(content);
                 resetContent = true;
             }
@@ -218,7 +231,7 @@
 
         newElm.isError = function (desc) {
             if (min) {
-                let val = newElm.getValue();
+                const val = newElm.getValue();
                 if (val.length < min) {
                     let msg;
                     if (min === 1)
@@ -235,13 +248,10 @@
         };
 
         jqObj.on('input', function (elm) {
-            if (upcase) {
-                const val = jqObj.text();
-                if (val) {
-                    const p = jqObj.caret();
-                    jqObj.text(val.toUpperCase());
-                    jqObj.caret(p);
-                }
+            let txt = Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
+            if (txt.length > max) {
+                txt = Utils.take(txt, max);
+                jqObj.html(Utils.textToHtml(txt));
             }
         });
 
@@ -251,7 +261,6 @@
                     jqObj.caret(0);
                 }, 1);
         });
-
     };
 
     const componentInfo = {
