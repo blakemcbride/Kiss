@@ -23,6 +23,7 @@ public class Groff {
     private String title;
     private boolean atTop = true;
     private boolean autoPageHeader = true;
+    private boolean deleteGroffFile = true;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -75,6 +76,13 @@ public class Groff {
         pw.println("'tl ''\\s(14" + title + "\\s0''");
         pw.println("'SP");
         pw.println("..");
+    }
+
+    /**
+     * Prevent the deletion of the intermediate Groff file for debugging purposes.
+     */
+    public void DontDeleteTroffFile() {
+        deleteGroffFile = false;
     }
 
     /**
@@ -133,7 +141,8 @@ public class Groff {
         }
         Process p = builder.start();
         p.waitFor();
-        (new File(mmfname)).delete();
+        if (deleteGroffFile)
+            (new File(mmfname)).delete();
         if (isWindows) {
             builder = new ProcessBuilder("cmd", "/c", "ps2pdf.bat", psfname, pdfname);
             p = builder.start();
