@@ -44,6 +44,7 @@ class AGGrid {
         this.highlightedRows = [];
         this.dragFunction = null;
         this.suppressRowClickSelection = false;
+        this.suppressHorizontalScroll = true;
     }
 
     /**
@@ -60,7 +61,7 @@ class AGGrid {
             rowData: this.data,
             rowSelection: this.rowSelection,
             rowDeselection: this.rowSelection === AGGrid.MULTI_SELECTION,
-            suppressHorizontalScroll: true,
+            suppressHorizontalScroll: this.suppressHorizontalScroll,
             suppressCellSelection: true,
             components: this.components,
             suppressRowClickSelection: this.suppressRowClickSelection,
@@ -73,13 +74,15 @@ class AGGrid {
                 resizable: true
             },
             onGridReady: function (params) {
-                params.api.sizeColumnsToFit();
+                if (this.suppressHorizontalScroll) {
+                    params.api.sizeColumnsToFit();
 
-                window.addEventListener('resize', function() {
-                    setTimeout(function() {
-                        params.api.sizeColumnsToFit();
-                    })
-                })
+                    window.addEventListener('resize', function() {
+                        setTimeout(function() {
+                            params.api.sizeColumnsToFit();
+                        });
+                    });
+                }
             }/* ,
             getRowNodeId: function (data) {
                 return data[self.keyColumn];
@@ -252,7 +255,8 @@ class AGGrid {
             this.data = this.data.concat(data);
         else {
             this.gridOptions.api.updateRowData({add: data});
-            this.resizeColumns();  // when vert scrollbar gets auto-added must resize columns
+            if (this.suppressHorizontalScroll)
+                this.resizeColumns();  // when vert scrollbar gets auto-added must resize columns
         }
         return this;
     }
