@@ -301,7 +301,18 @@ public class BuildUtils {
      * @param dest
      */
     public static void copyTree(String source, String dest) {
-        copyTreeRegex(source, dest, null, null);
+        copyTreeRegex(source, dest, null, null, false);
+    }
+
+    /**
+     * Copy one directory tree to another.
+     * Force copy regardless of file dates.
+     *
+     * @param source
+     * @param dest
+     */
+    public static void copyTreeForce(String source, String dest) {
+        copyTreeRegex(source, dest, null, null, true);
     }
 
     /**
@@ -331,6 +342,23 @@ public class BuildUtils {
      * @param excludeRegex regular expression for files to exclude or null
      */
     public static void copyTreeRegex(String source, String dest, String includeRegex, String excludeRegex) {
+        copyTreeRegex(source, dest, includeRegex, excludeRegex, false);
+    }
+
+    /**
+     * Copy one directory tree to another
+     *
+     * The regular expression applies to file names and not directory names.
+     * If includeRegex is null, all files are included.
+     * If excludeRegex is null, no files are excluded.
+     *
+     * @param source
+     * @param dest
+     * @param includeRegex regular expression for files to include or null
+     * @param excludeRegex regular expression for files to exclude or null
+     * @param force force copy regardless of date
+     */
+    public static void copyTreeRegex(String source, String dest, String includeRegex, String excludeRegex, boolean force) {
         mkdir(dest);
         File sf = new File(source);
         File df = new File(dest);
@@ -348,17 +376,17 @@ public class BuildUtils {
             exPat = Pattern.compile(excludeRegex);
         else
             exPat = null;
-        copyTree(new File(source), new File(dest), incPat, exPat);
+        copyTree(new File(source), new File(dest), incPat, exPat, force);
     }
 
-    private static void copyTree(File src, File dest, Pattern incPat, Pattern exPat) {
+    private static void copyTree(File src, File dest, Pattern incPat, Pattern exPat, boolean force) {
         File[] files = src.listFiles();
         if (files != null)
             for (File f : files) {
                 File d = new File(dest, f.getName());
                 if (f.isFile()) {
                     if ((incPat == null || incPat.matcher(f.getName()).matches())
-                            && (!d.exists()  ||  d.lastModified() < f.lastModified())) {
+                            && (force || !d.exists()  ||  d.lastModified() < f.lastModified())) {
                         try {
                             if (exPat == null || !exPat.matcher(f.getName()).matches()) {
                                 (new File(d.getParent())).mkdirs();
@@ -369,7 +397,7 @@ public class BuildUtils {
                         }
                     }
                 } else
-                    copyTree(f, d, incPat, exPat);
+                    copyTree(f, d, incPat, exPat, force);
             }
     }
 
