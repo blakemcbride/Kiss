@@ -150,6 +150,8 @@ class DateUtils {
      * @returns {string}
      */
     static intToStr4(dt) {
+        if (typeof dt === 'string')
+            dt = Number(dt);
         if (!dt)
             return '';
         const y = Math.floor(dt / 10000);
@@ -182,6 +184,8 @@ class DateUtils {
      * @returns {string}
      */
     static intToStr2(dt) {
+        if (typeof dt === 'string')
+            dt = Number(dt);
         if (!dt)
             return '';
         let y = Math.floor(dt / 10000);

@@ -32,7 +32,9 @@ class TimeUtils {
      * @returns {string}
      */
     static format(val, zero_fill) {
-        if (val === null || val === undefined || val === ''  ||  val < 0)
+        if (typeof val === 'string')
+            val = Number(val);
+        if (val === null || val === undefined || isNaN(val)  ||  val < 0)
             return '';
         if (typeof val === 'object')
             val = DateTimeUtils.dateToIntTime(val);
