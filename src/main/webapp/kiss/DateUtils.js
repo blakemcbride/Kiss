@@ -340,8 +340,19 @@ class DateUtils {
     }
 
     /**
+     * Return the number of days between two dates.
+     *
+     * @param {number} dt1 date formatted as YYYYMMDD
+     * @param {number} dt2 date formatted as YYYYMMDD
+     * @returns {number} returns the number of days dt1 - dt2
+     */
+    static daysDifference(dt1, dt2) {
+        return DateUtils.julian(dt1) - DateUtils.julian(dt2);
+    }
+
+    /**
      * Takes an integer date formatted as YYYYMMDD and returns the
-     * name of the day of the week as a sring such as
+     * name of the day of the week as a string such as
      * "Sunday", "Monday", etc.
      *
      * @param {number} dt integer date formatted as YYYYMMDD
@@ -356,7 +367,53 @@ class DateUtils {
             case 4:  return "Thursday";
             case 5:  return "Friday";
             case 6:  return "Saturday";
+            default: return '';
         }
+    }
+
+    /**
+     * Takes an integer date formatted as YYYYMMDD and returns the
+     * name of the month as a string such as
+     * "January", "February", etc.
+     *
+     * @param {number} dt integer date formatted as YYYYMMDD
+     * @returns {string} the name of the day of the week
+     */
+    static monthName(dt) {
+        const y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        const m = Math.floor(dt / 100);
+        switch (m) {
+            case 1: return 'January';
+            case 2: return 'February';
+            case 3: return 'march';
+            case 4: return 'April';
+            case 5: return 'May';
+            case 6: return 'June';
+            case 7: return 'July';
+            case 8: return 'August';
+            case 9: return 'September';
+            case 10: return 'October';
+            case 11: return 'November';
+            case 12: return 'December';
+            default: return '';
+        }
+    }
+
+    /**
+     * Formats a date into a string format as in:  Mon January 12, 2021
+     *
+     * @param dt {number} integer date formatted as YYYYMMDD
+     * @returns {string}
+     */
+    static longFormat(dt) {
+        const y = Math.floor(dt / 10000);
+        const t = dt - y * 10000;
+        const m = Math.floor(t / 100);
+        const d = Math.floor(t - m * 100);
+        const dayOfWeek = Utils.take(DateUtils.dayOfWeekName(dt), 3);
+        const monthName = DateUtils.monthName(dt);
+        return dayOfWeek + " " + monthName + " " + d + ", " + y;
     }
 
     /**
