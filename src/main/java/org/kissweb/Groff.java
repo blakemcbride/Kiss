@@ -24,6 +24,8 @@ public class Groff {
     private boolean atTop = true;
     private boolean autoPageHeader = true;
     private boolean deleteGroffFile = true;
+    private String footerLeft = "";
+    private String footerRight = "";
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -61,7 +63,7 @@ public class Groff {
 
     private void setDefaults1() {
         pw.println(".PH \"''''\"");
-        pw.println(".PF \"''Page \\\\\\\\nP''\"");
+        pw.println(".PF \"'" + footerLeft + "'Page \\\\\\\\nP'" + footerRight + "'\"");
         pw.println(".S 11");;
     }
 
@@ -162,5 +164,16 @@ public class Groff {
      */
     public String process() throws IOException, InterruptedException {
         return process(1f);
+    }
+
+    /**
+     * Ability to customize what shows on the bottom of each page.
+     *
+     * @param left   appears on the bottom left
+     * @param right  appears on the bottom right
+     */
+    public void setFooter(String left, String right) {
+        footerLeft = left == null ? "" : left;
+        footerRight = right == null ? "" : right;
     }
 }
