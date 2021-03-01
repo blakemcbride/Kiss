@@ -386,7 +386,7 @@ class DateUtils {
         switch (m) {
             case 1: return 'January';
             case 2: return 'February';
-            case 3: return 'march';
+            case 3: return 'March';
             case 4: return 'April';
             case 5: return 'May';
             case 6: return 'June';
@@ -407,6 +407,10 @@ class DateUtils {
      * @returns {string}
      */
     static longFormat(dt) {
+        if (typeof dt === 'string')
+            dt = Number(dt);
+        if (!dt)
+            return '';
         const y = Math.floor(dt / 10000);
         const t = dt - y * 10000;
         const m = Math.floor(t / 100);
