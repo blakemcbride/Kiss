@@ -37,14 +37,15 @@ public class GroovyService {
 
     /**
      * This is the method that allows Groovy to be used as a scripting language.
+     * This method can be used to execute a static or instance method.
      * On the Groovy side, all arguments are received in boxed form.  Groovy
      * must also return a boxed object.
-     *
+     * <p>
      * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
-     *
+     * <p>
      * if ignoreMissing is true and the file, class, or method are missing a NULL is returned.
      * If ignoreMissing is false and the file, class, or method are missing an exception is thrown.
-     *
+     * <p>
      * filePath can be an absolute path or a string containing a "~".  The "~" is replaced with the root of
      * the application.
      *
@@ -52,14 +53,15 @@ public class GroovyService {
      * @param filePath
      * @param className
      * @param methodName
-     * @param args boxed or unboxed arguments (variable number)
+     * @param inst          the instance the method is evoked against or null if static method
+     * @param args          boxed or unboxed arguments (variable number)
      * @return The boxed value returned by the Groovy method call
      * @throws Exception
      */
-    public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object ... args) throws Exception {
+    public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
         String rootPath = MainServlet.getApplicationPath();
         rootPath = StringUtils.drop(rootPath, -1);  //  drop the trailing slash
-        if (filePath == null  ||  filePath.isEmpty())
+        if (filePath == null || filePath.isEmpty())
             filePath = "~";
         filePath = filePath.replace("~", rootPath);
         final String fileName = filePath + "/" + className + ".groovy";
@@ -72,8 +74,8 @@ public class GroovyService {
                 return null;
             throw new Exception("Groovy file " + fileName + " not found.");
         }
-        Class<?> [] ca = new Class<?>[args.length];
-        for (int i=0 ; i < args.length ; i++)
+        Class<?>[] ca = new Class<?>[args.length];
+        for (int i = 0; i < args.length; i++)
             ca[i] = args[i].getClass();
         try {
             methp = ci.gclass.getMethod(methodName, ca);
@@ -86,10 +88,28 @@ public class GroovyService {
             throw new Exception("Method " + methodName + " not found in Groovy file " + fileName, e);
         }
         try {
-            return methp.invoke(null, args);
+            return methp.invoke(inst, args);
         } catch (Exception e) {
             throw new Exception("Error executing method " + methodName + " of Groovy file " + fileName, e);
         }
+    }
+
+    /**
+     * Execute a Groovy constructor.
+     *
+     * @param relativePath
+     * @param className
+     * @param args
+     * @return
+     * @throws Exception
+     */
+    public static Object constructor(String relativePath, String className, Object... args) throws Exception {
+        String rootPath = MainServlet.getApplicationPath();
+        final String fileName = rootPath + "/" + (relativePath != null && !relativePath.isEmpty() ? relativePath + "/" : "") + className + ".groovy";
+        final GroovyClassInfo ci = loadGroovyClass(fileName);
+        if (ci == null)
+            throw new Exception("Groovy file " + fileName + " not found.");
+        return ci.gclass.invokeConstructor(args);
     }
 
     ProcessServlet.ExecutionReturn internalGroovy(ProcessServlet ms, HttpServletResponse response, String _package, String _className, String _method) {
@@ -155,7 +175,6 @@ public class GroovyService {
                     System.err.println(e.getMessage());
                     return ProcessServlet.ExecutionReturn.Error;
                 }
-
 
                 try {
                     if (MainServlet.isDebug())
