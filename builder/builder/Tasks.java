@@ -71,6 +71,10 @@ public class Tasks {
     /**
      * Create an executable JAR that includes Kiss, Groovy, and the PostgreSQL driver.
      * It runs an arbitrary groovy file in the context of Kiss and PostgreSQL.
+     *
+     * All that is needed is KissGP.jar
+     *
+     * Usage:  java -jar KissGP.jar [groovy-file] [args]...
      */
     void KissGP() {
         final String name = "KissGP";
