@@ -9,16 +9,6 @@
  *
  */
 class AGGrid {
-
-    static SINGLE_SELECTION = 'single';
-    static MULTI_SELECTION = 'multiple';
-
-    static gridContext = [];        //  An array of arrays.  The outer array represents a stack of contexts.
-                                    //  The inner array is an array of grids that'll need to be disposed.
-                                    //  Basically, each context (except the first) represents a popup.
-                                    //  The first represents the current screen.
-                                    //  Each inner array contains an array of grids in that context.
-
     /**
      * Create a new AGGrid instance.
      * <br><br>
@@ -524,3 +514,13 @@ class AGGrid {
     }
 
 }
+
+// class variables
+AGGrid.SINGLE_SELECTION = 'single';
+AGGrid.MULTI_SELECTION = 'multiple';
+
+AGGrid.gridContext = [];        //  An array of arrays.  The outer array represents a stack of contexts.
+                                //  The inner array is an array of grids that'll need to be disposed.
+                                //  Basically, each context (except the first) represents a popup.
+                                //  The first represents the current screen.
+                                //  Each inner array contains an array of grids in that context.

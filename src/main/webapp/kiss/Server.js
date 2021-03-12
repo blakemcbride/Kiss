@@ -11,9 +11,6 @@
  * This class provides the facilities used to communicate with the back-end.
  */
 class Server {
-
-    static contextCreated = false;
-
     /**
      * Set the URL of the back-end.
      *
@@ -168,6 +165,11 @@ class Server {
     }
 
 }
+
+// class variable
+Server.contextCreated = false;
+
+
 
 
 
