@@ -36,6 +36,10 @@ a database, parsing a CSV file, interfacing with a third-party REST service,
 and more.  Basically, all of @emph{Kiss} is available except the @emph{Kiss}
 REST server.
 
+Although this system supports @emph{PostgreSQL} out-of-the-box, it
+also supports any of the other databases with a slightly more complex
+command line.
+
 @section Building The Utility
 
 The build system (@emph{bld}) has the ability to build a @emph{JAR}
@@ -79,4 +83,24 @@ java -jar KissGP.jar test1
 @end example
 
 @emph{test1.groovy} can be extended arbitrarily to perform any function needed.
+
+@section Databses Other Than PostgreSQL
+
+Although @emph{KissGP.jar} comes bundled with support for the
+@emph{PostgreSQL} database, @emph{KissGP.jar} can support databases
+other than @emph{PostgreSQL} by adding the driver for the database and
+using a slightly more complex command line as follows.
+
+To use @emph{KissGP.jar} with Microsoft SQL Server, for example, you'd
+have to include the database driver for it in addition to the
+@emph{KissGP.jar} file and the file with your program.  The command
+line would look as follows:
+
+@example
+java -cp mssql-jdbc-8.2.0.jre8.jar -jar KissGP.jar test1
+@end example
+
+The same is true of the other databases.  Please note that the drivers
+you'll need are already in the @emph{libs} directory.
+
 

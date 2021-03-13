@@ -58,7 +58,7 @@ ul.no-bullet {list-style: none}
 <li><a name="stoc-Developing" href="#toc-Developing">4 Developing</a></li>
 <li><a name="stoc-Front_002dend-API" href="#toc-Front_002dend-API">5 Front-end API</a></li>
 <li><a name="stoc-Back_002dend-API" href="#toc-Back_002dend-API">6 Back-end API</a></li>
-<li><a name="stoc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#toc-Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
+<li><a name="stoc-Command-Line-Utility" href="#toc-Command-Line-Utility">7 Command Line Utility</a></li>
 
 </ul>
 </div>
@@ -153,7 +153,12 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-JSON" href="#JSON">6.2 JSON</a></li>
   <li><a name="toc-Utilities-1" href="#Utilities-1">6.3 Utilities</a></li>
 </ul></li>
-<li><a name="toc-Method_002c-Macro_002c-Function-And-Variable-Index" href="#Method_002c-Macro_002c-Function-And-Variable-Index">Method, Macro, Function And Variable Index</a></li>
+<li><a name="toc-Command-Line-Utility" href="#Command-Line-Utility">7 Command Line Utility</a>
+<ul class="no-bullet">
+  <li><a name="toc-Building-The-Utility" href="#Building-The-Utility">7.1 Building The Utility</a></li>
+  <li><a name="toc-Using-The-System" href="#Using-The-System">7.2 Using The System</a></li>
+  <li><a name="toc-Databses-Other-Than-PostgreSQL" href="#Databses-Other-Than-PostgreSQL">7.3 Databses Other Than PostgreSQL</a></li>
+</ul></li>
 
 </ul>
 </div>
@@ -1887,8 +1892,90 @@ These utilities are located under the <code>src/main/java/org/kissweb</code> dir
 are documented in the JavaDocs.
 </p>
 
-<a name="Method_002c-Macro_002c-Function-And-Variable-Index"></a>
-<h2 class="unnumbered">Method, Macro, Function And Variable Index</h2>
+
+<a name="Command-Line-Utility"></a>
+<h2 class="chapter">7 Command Line Utility</h2>
+
+<p>In addition to utilizing <em>Kiss</em> as a web application development
+system, <em>Kiss</em> also provides a command line interface.  This interface
+allows you to build quick but powerful utilities to do things like updating
+a database, parsing a CSV file, interfacing with a third-party REST service,
+and more.  Basically, all of <em>Kiss</em> is available except the <em>Kiss</em>
+REST server.
+</p>
+<p>Although this system supports <em>PostgreSQL</em> out-of-the-box, it
+also supports any of the other databases with a slightly more complex
+command line.
+</p>
+<a name="Building-The-Utility"></a>
+<h3 class="section">7.1 Building The Utility</h3>
+
+<p>The build system (<em>bld</em>) has the ability to build a <em>JAR</em>
+file named <em>KissGP.jar</em>.  The <em>GP</em> stands for <em>Groovy</em>
+and <em>PostgreSQL</em>.  Basically, it is a <em>JAR</em> file capable of
+running <em>Groovy</em> scripts in the context of all of the <em>Kiss</em>
+utilities including access to a <em>PostgreSQL</em> database.
+</p>
+<p>(It should be noted that although <em>Groovy</em> scripts are text /
+source files, they nevertheless run at full compiled speed because
+they are compiled at runtime.)
+</p>
+<p>To build the <em>JAR</em> file, type the following:
+</p>
+<div class="example">
+<pre class="example">./bld KissGP
+</pre></div>
+
+<p>A file named <em>KissGP.jar</em> will be created in the <em>build.work</em>
+directory.  That, in addition to the <em>JDK</em>, is all that is needed to
+use the system.
+</p>
+<a name="Using-The-System"></a>
+<h3 class="section">7.2 Using The System</h3>
+
+<p>To use the <em>Kiss</em> command line interface you first create the
+<em>Groovy</em> program you would like to run.  It may use all of the
+<em>Groovy</em> and <em>Kiss</em> API.  For example, let&rsquo;s start with
+something simple.  Create the following file named
+<em>test1.groovy</em>:
+</p>
+<div class="example">
+<pre class="example">static void main(String [] args) {
+    println &quot;Hello world!&quot;
+}
+</pre></div>
+
+<p>You can then run the program as follows:
+</p>
+<div class="example">
+<pre class="example">java -jar KissGP.jar test1
+</pre></div>
+
+<p><em>test1.groovy</em> can be extended arbitrarily to perform any function needed.
+</p>
+<a name="Databses-Other-Than-PostgreSQL"></a>
+<h3 class="section">7.3 Databses Other Than PostgreSQL</h3>
+
+<p>Although <em>KissGP.jar</em> comes bundled with support for the
+<em>PostgreSQL</em> database, <em>KissGP.jar</em> can support databases
+other than <em>PostgreSQL</em> by adding the driver for the database and
+using a slightly more complex command line as follows.
+</p>
+<p>To use <em>KissGP.jar</em> with Microsoft SQL Server, for example, you&rsquo;d
+have to include the database driver for it in addition to the
+<em>KissGP.jar</em> file and the file with your program.  The command
+line would look as follows:
+</p>
+<div class="example">
+<pre class="example">java -cp mssql-jdbc-8.2.0.jre8.jar -jar KissGP.jar test1
+</pre></div>
+
+<p>The same is true of the other databases.  Please note that the drivers
+you&rsquo;ll need are already in the <em>libs</em> directory.
+</p>
+
+
+
 
 <hr>
 

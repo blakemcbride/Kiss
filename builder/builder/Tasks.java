@@ -75,6 +75,8 @@ public class Tasks {
      * All that is needed is KissGP.jar
      *
      * Usage:  java -jar KissGP.jar [groovy-file] [args]...
+     *
+     * Other databases can be used also.  See the manual.
      */
     void KissGP() {
         final String name = "KissGP";
