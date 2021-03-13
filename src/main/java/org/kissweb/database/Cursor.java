@@ -1,5 +1,5 @@
 /*
-*  Copyright (c) 2015 Blake McBride (blake@mcbride.name)
+*  Copyright (c) 2015 Blake McBride (blake@mcbridemail.com)
 *  All rights reserved.
 *
 *  Permission is hereby granted, free of charge, to any person obtaining

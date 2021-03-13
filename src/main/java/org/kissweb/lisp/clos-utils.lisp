@@ -3,8 +3,8 @@
 ;
 ;  Written by:
 ;        Blake McBride
-;        blake@mcbride.name
-;        http://blake.mcbride.name
+;        blake@mcbridemail.com
+;        https://blakemcbride.us
 ;
 ;  Version / Release 4/30/2018
 ;

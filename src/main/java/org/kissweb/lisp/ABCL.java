@@ -1,7 +1,3 @@
-/*
- *  Copyright 2006-2013 Arahant LLC
- *  All Rights Reserved.
-*/
 
 package org.kissweb.lisp;
 
@@ -17,7 +13,7 @@ import java.util.Set;
 /**
  * Utility functions to make it easy to interface between Java and Lisp.
  *
- * @author Blake McBride (blake@mcbride.name)
+ * @author Blake McBride
  */
 public class ABCL {
     private static Interpreter interpreter;

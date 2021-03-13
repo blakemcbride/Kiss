@@ -1,0 +1,82 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+@chapter Command Line Utility
+
+In addition to utilizing @emph{Kiss} as a web application development
+system, @emph{Kiss} also provides a command line interface.  This interface
+allows you to build quick but powerful utilities to do things like updating
+a database, parsing a CSV file, interfacing with a third-party REST service,
+and more.  Basically, all of @emph{Kiss} is available except the @emph{Kiss}
+REST server.
+
+@section Building The Utility
+
+The build system (@emph{bld}) has the ability to build a @emph{JAR}
+file named @emph{KissGP.jar}.  The @emph{GP} stands for @emph{Groovy}
+and @emph{PostgreSQL}.  Basically, it is a @emph{JAR} file capable of
+running @emph{Groovy} scripts in the context of all of the @emph{Kiss}
+utilities including access to a @emph{PostgreSQL} database.
+
+(It should be noted that although @emph{Groovy} scripts are text /
+source files, they nevertheless run at full compiled speed because
+they are compiled at runtime.)
+
+To build the @emph{JAR} file, type the following:
+
+@example
+./bld KissGP
+@end example
+
+A file named @emph{KissGP.jar} will be created in the @emph{build.work}
+directory.  That, in addition to the @emph{JDK}, is all that is needed to
+use the system.
+
+@section Using The System
+
+To use the @emph{Kiss} command line interface you first create the
+@emph{Groovy} program you would like to run.  It may use all of the
+@emph{Groovy} and @emph{Kiss} API.  For example, let's start with
+something simple.  Create the following file named
+@emph{test1.groovy}:
+
+@example
+static void main(String [] args) @{
+    println "Hello world!"
+@}
+@end example
+
+You can then run the program as follows:
+
+@example
+java -jar KissGP.jar test1
+@end example
+
+@emph{test1.groovy} can be extended arbitrarily to perform any function needed.
+

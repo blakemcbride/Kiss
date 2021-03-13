@@ -16,6 +16,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
 /**
+ * Provides the ability to act as a client to an external REST server.
+ * Supports text, XML, and JSON communications.
+ *
  * Author: Blake McBride
  * Date: 2/21/21
  */

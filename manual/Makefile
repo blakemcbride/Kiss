@@ -1,5 +1,7 @@
 
-TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex backendapi.tex frontendapi.tex
+TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex \
+          backendapi.tex frontendapi.tex commandline.tex
+
 
 %.dvi : %.tex
 	tex $<
