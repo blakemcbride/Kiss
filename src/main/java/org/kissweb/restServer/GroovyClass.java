@@ -3,7 +3,7 @@
  *  All Rights Reserved.
 */
 
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyCodeSource;

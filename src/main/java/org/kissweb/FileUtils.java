@@ -1,6 +1,6 @@
 package org.kissweb;
 
-import org.kissweb.rest.MainServlet;
+import org.kissweb.restServer.MainServlet;
 
 import java.io.File;
 import java.io.IOException;

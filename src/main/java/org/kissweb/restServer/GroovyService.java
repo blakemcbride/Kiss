@@ -1,4 +1,4 @@
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import org.kissweb.StringUtils;
 import org.kissweb.database.Connection;

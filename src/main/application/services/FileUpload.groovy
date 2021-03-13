@@ -2,7 +2,7 @@ package services
 
 import org.json.JSONObject
 import org.kissweb.database.Connection
-import org.kissweb.rest.ProcessServlet
+import org.kissweb.restServer.ProcessServlet
 
 /**
  * Author: Blake McBride

@@ -1,4 +1,4 @@
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.http.HttpServletRequest;

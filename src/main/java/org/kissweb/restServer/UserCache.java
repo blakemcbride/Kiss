@@ -1,4 +1,4 @@
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

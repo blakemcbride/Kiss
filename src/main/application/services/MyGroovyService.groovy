@@ -2,9 +2,9 @@ package services
 
 import org.json.JSONObject
 import org.kissweb.database.Connection
-import org.kissweb.rest.GroovyService
-import org.kissweb.rest.ProcessServlet
-import org.kissweb.rest.MainServlet
+import org.kissweb.restServer.GroovyService
+import org.kissweb.restServer.ProcessServlet
+import org.kissweb.restServer.MainServlet
 
 class MyGroovyService {
 

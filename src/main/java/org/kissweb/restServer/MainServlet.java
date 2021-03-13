@@ -1,4 +1,4 @@
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.log4j.Logger;
@@ -43,7 +43,7 @@ public class MainServlet extends HttpServlet {
         return underIDE;
     }
 
-    private QueueManager queueManager;
+    private org.kissweb.restServer.QueueManager queueManager;
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -57,7 +57,7 @@ public class MainServlet extends HttpServlet {
             }
         }
         if (queueManager == null)
-            queueManager = new QueueManager(maxWorkerThreads);
+            queueManager = new org.kissweb.restServer.QueueManager(maxWorkerThreads);
 
         PrintWriter out = response.getWriter();
         response.setStatus(202);
@@ -68,7 +68,7 @@ public class MainServlet extends HttpServlet {
 
     private void initializeSystem(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, PropertyVetoException, SQLException {
         setApplicationPath(request);
-        ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, response, null, "KissInit", "init");
+        org.kissweb.restServer.ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, response, null, "KissInit", "init");
         if (res == ProcessServlet.ExecutionReturn.Success) {
             hasDatabase = database != null  &&  !database.isEmpty();
             if (hasDatabase)

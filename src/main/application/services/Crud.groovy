@@ -7,7 +7,7 @@ import org.kissweb.FileUtils
 import org.kissweb.Groff
 import org.kissweb.database.Connection
 import org.kissweb.database.Record
-import org.kissweb.rest.ProcessServlet
+import org.kissweb.restServer.ProcessServlet
 
 /**
  * Author: Blake McBride

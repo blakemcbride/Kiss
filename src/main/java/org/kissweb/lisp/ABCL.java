@@ -6,7 +6,7 @@
 package org.kissweb.lisp;
 
 import org.armedbear.lisp.*;
-import org.kissweb.rest.MainServlet;
+import org.kissweb.restServer.MainServlet;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;

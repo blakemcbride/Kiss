@@ -1,6 +1,6 @@
 import org.kissweb.database.Connection
-import org.kissweb.rest.MainServlet
-import org.kissweb.rest.UserCache
+import org.kissweb.restServer.MainServlet
+import org.kissweb.restServer.UserCache
 
 class KissInit {
 

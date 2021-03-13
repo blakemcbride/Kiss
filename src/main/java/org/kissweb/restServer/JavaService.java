@@ -1,4 +1,4 @@
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import org.dvare.dynamic.compiler.DynamicCompiler;
 import org.kissweb.database.Connection;

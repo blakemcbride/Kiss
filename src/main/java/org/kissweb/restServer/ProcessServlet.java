@@ -1,4 +1,4 @@
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
@@ -36,7 +36,7 @@ public class ProcessServlet implements Runnable {
     private PrintWriter out;
     protected Connection DB;
 
-    ProcessServlet(QueueManager.Packet packet) {
+    ProcessServlet(org.kissweb.restServer.QueueManager.Packet packet) {
         request = (HttpServletRequest) packet.asyncContext.getRequest();
         response = (HttpServletResponse) packet.asyncContext.getResponse();
         asyncContext = packet.asyncContext;
@@ -263,7 +263,7 @@ public class ProcessServlet implements Runnable {
             return;
 
         if (res == ProcessServlet.ExecutionReturn.NotFound) {
-            res = (new JavaService()).tryJava(this, response, _className, _method, injson, outjson);
+            res = (new org.kissweb.restServer.JavaService()).tryJava(this, response, _className, _method, injson, outjson);
             if (res == ProcessServlet.ExecutionReturn.Error)
                 return;
         }

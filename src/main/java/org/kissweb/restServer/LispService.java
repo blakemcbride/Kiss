@@ -1,4 +1,4 @@
-package org.kissweb.rest;
+package org.kissweb.restServer;
 
 import org.kissweb.lisp.ABCL;
 import org.apache.log4j.Logger;
@@ -10,9 +10,9 @@ import java.io.File;
 import java.util.*;
 
 
-import static org.kissweb.rest.ProcessServlet.ExecutionReturn;
-import static org.kissweb.rest.ProcessServlet.MaxHold;
-import static org.kissweb.rest.ProcessServlet.CheckCacheDelay;
+import static org.kissweb.restServer.ProcessServlet.ExecutionReturn;
+import static org.kissweb.restServer.ProcessServlet.MaxHold;
+import static org.kissweb.restServer.ProcessServlet.CheckCacheDelay;
 
 
 /**
