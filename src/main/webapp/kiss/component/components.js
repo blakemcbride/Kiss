@@ -558,6 +558,7 @@ class components {
      *     <tr><td>    onclick(fun)     </td><td>     <code>fun</code> is executed when the user clicks on the text   </td></tr>
      *     <tr><td>    setColor(val)     </td><td>     sets the color of the text              </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
+     *     <tr><td>    setHTMLValue(val)     </td><td>     sets the HTML inside the control              </td></tr>
      *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
      * </table>
      */

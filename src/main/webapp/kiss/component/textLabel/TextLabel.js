@@ -64,6 +64,15 @@
             return this;
         };
 
+        newElm.setHTMLValue = function (val) {
+            if (val !== 0  &&  !val) {
+                jqObj.text('');
+                return this;
+            }
+            jqObj.html(val);
+            return this;
+        };
+
         newElm.clear = function () {
             jqObj.text('');
             return this;
