@@ -238,18 +238,20 @@ public class BuildUtils {
     /**
      * Copies all files that match a (Java!) regex from one directory to another excluding another (Java!) regex.
      *
+     * Normally only copies files that have a later date unless <code>force</code> is <code>true</code>
+     *
      * @param srcDir
      * @param targetDir
      * @param includeRegex or null if all
      * @param excludeRegex or null of no exclusions
+     * @param force if true ignore file dates
      */
-    public static void copyRegex(String srcDir, String targetDir, String includeRegex, String excludeRegex) {
+    public static void copyRegex(String srcDir, String targetDir, String includeRegex, String excludeRegex, boolean force) {
         File sf = new File(srcDir);
         File df = new File(targetDir);
         if (!sf.exists())
             throw new RuntimeException(srcDir + " does not exist");
         mkdir(targetDir);
-        boolean ret = true;
         File[] files = sf.listFiles();
         if (includeRegex == null)
             includeRegex = ".*";
@@ -259,10 +261,12 @@ public class BuildUtils {
             if (excludeRegex != null)
                 expat = Pattern.compile(excludeRegex);
             for (File file : files) {
+                if (!file.isFile())
+                    continue;
                 String fname = file.getName();
                 if (pat.matcher(fname).matches() && (excludeRegex == null || !expat.matcher(fname).matches())) {
                     File destFile = new File(df, file.getName());
-                    if (!destFile.exists() || file.lastModified() > destFile.lastModified())
+                    if (force || !destFile.exists() || file.lastModified() > destFile.lastModified())
                         try {
                             Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         } catch (IOException e) {

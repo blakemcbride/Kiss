@@ -102,7 +102,7 @@ public class Tasks {
         copyTree("libs", explodedDir + "/WEB-INF/lib");
         buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
-        copyRegex("src/main/java/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null);
+        copyRegex("src/main/java/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
     }
