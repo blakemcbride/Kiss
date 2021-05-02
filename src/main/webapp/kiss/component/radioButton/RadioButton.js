@@ -78,19 +78,25 @@ Kiss.RadioButtons.groups = {};
             }
         }
 
+        if (!id)
+            id = Utils.nextID();
+
         if (!Kiss.RadioButtons.groups[group]) {
             Kiss.RadioButtons.groups[group] = {};
             Kiss.RadioButtons.groups[group].required = false;
+            Kiss.RadioButtons.groups[group].ids = [];  //  the individual ids in the group
         }
         if (checked)
             Kiss.RadioButtons.groups[group].default_value = value;
         if (required)
             Kiss.RadioButtons.groups[group].required = true;
+        Kiss.RadioButtons.groups[group].ids.push(id);
 
         if (!align_vertical)
             div_style = 'display: inline-block;' + div_style;
 
-        const newElm = Utils.replaceHTML(id, elm, '<div class="{class}" style="{div_style}"><input type="radio" {attr} style="{button_style}" name="{name}" id="{id}"><label for="{id}" style="{label_style}">{content}</label></div>', {
+        const newElm = Utils.replaceHTML(id, elm, '<div id="{id}--div" class="{class}" style="{div_style}"><input type="radio" {attr} style="{button_style}" name="{name}" id="{id}"><label for="{id}" style="{label_style}">{content}</label></div>', {
+            id: id,
             attr: nAttrs,
             name: group,
             class: cls,
@@ -129,21 +135,21 @@ Kiss.RadioButtons.groups = {};
         //--
 
         newElm.hide = function () {
-            jqObj.hide();
+            $('#' + id + '--div').hide();
             return this;
         };
 
         newElm.show = function () {
-            jqObj.show();
+            $('#' + id + '--div').show();
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return $('#' + id + '--div').is(':hidden');
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return $('#' + id + '--div').is(':visible');
         };
 
     };
@@ -195,15 +201,21 @@ Kiss.RadioButtons.isReadOnly = function (group) {
 //--
 
 Kiss.RadioButtons.hide = function (group) {
-    $('input[type=radio][name=' + group + ']').attr('readonly', true);
+    const ids = Kiss.RadioButtons.groups[group].ids;
+    ids.forEach(id => {
+        $('#' + id + '--div').hide();
+    });
 };
 
 Kiss.RadioButtons.show = function (group) {
-    $('input[type=radio][name=' + group + ']').attr('readonly', false);
+    const ids = Kiss.RadioButtons.groups[group].ids;
+    ids.forEach(id => {
+        $('#' + id + '--div').show();
+    });
 };
 
 Kiss.RadioButtons.isHidden = function (group) {
-    return $('input[type=radio][name=' + group + ']').is(':hitten');
+    return $('input[type=radio][name=' + group + ']').is(':hidden');
 };
 
 Kiss.RadioButtons.isVisible = function (group) {
