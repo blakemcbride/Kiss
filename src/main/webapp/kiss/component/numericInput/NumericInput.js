@@ -119,6 +119,9 @@
             return this;
         };
 
+        if (show_zero)
+            newElm.setValue(0);
+
         newElm.clear = function () {
             newElm.setValue('');
             return this;
