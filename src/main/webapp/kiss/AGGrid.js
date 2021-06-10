@@ -14,7 +14,7 @@ class AGGrid {
      * <br><br>
      * The HTML portion of this should look like:
      * <br><br>
-     * <code>&lt;div id="grid" style="margin-top: 10px; width: 100%; height: calc(100vh - 240px);"&gt;&lt;/div&gt;</code>
+     * <code>&lt;div id="grid" style="margin-top: 10px; width: 100%; height: calc(100% - 90px);"&gt;&lt;/div&gt;</code>
      * <br><br>
      * CSS <code>calc</code> can be used to set the width or height so that the grid dynamically resizes when the browser window
      * gets resized.
@@ -35,6 +35,7 @@ class AGGrid {
         this.dragFunction = null;
         this.suppressRowClickSelection = false;
         this.suppressHorizontalScroll = true;
+        this.rowStyleFun = null;
     }
 
     /**
@@ -63,6 +64,7 @@ class AGGrid {
             defaultColDef: {
                 resizable: true
             },
+            getRowStyle: this.rowStyleFun,
             onGridReady: function (params) {
                 if (this.suppressHorizontalScroll) {
                     params.api.sizeColumnsToFit();
@@ -132,6 +134,18 @@ class AGGrid {
      */
     setDragFunction(fun) {
         this.dragFunction = fun;
+        return this;
+    }
+
+    /**
+     * This method allows you to set a function that determines
+     * the style of each individual row.
+     *
+     * @param fun {function}
+     * @returns {AGGrid}
+     */
+    rowStyleFunction(fun) {
+        this.rowStyleFun = fun;
         return this;
     }
 
@@ -524,3 +538,4 @@ AGGrid.gridContext = [];        //  An array of arrays.  The outer array represe
                                 //  Basically, each context (except the first) represents a popup.
                                 //  The first represents the current screen.
                                 //  Each inner array contains an array of grids in that context.
+
