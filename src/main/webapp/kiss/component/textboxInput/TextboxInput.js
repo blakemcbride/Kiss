@@ -225,7 +225,7 @@
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('change').change(fun);
+            jqObj.off('DOMSubtreeModified').on('DOMSubtreeModified', fun);
             return this;
         };
 
