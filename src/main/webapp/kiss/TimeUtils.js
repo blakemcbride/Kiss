@@ -29,9 +29,9 @@ class TimeUtils {
      *
      * @param  val integer HHMM or Date object
      * @param {boolean} zero_fill
-     * @returns {string}
+     * @returns {string} hh:mm XM
      */
-    static format(val, zero_fill) {
+    static format(val, zero_fill=false) {
         if (typeof val === 'string')
             val = Number(val);
         if (val === null || val === undefined || isNaN(val)  ||  val < 0)

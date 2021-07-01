@@ -41,12 +41,13 @@ class DateTimeUtils {
     }
 
     /**
+     * Format a date and time into a single string.
      *
      * @param {number} dt    YYYYMMDD
      * @param {number} time  HHMM
-     * @returns {string}
+     * @returns {string}  mm/dd/yyyy hh:mm
      */
-    static formatInt(dt, time) {
+    static formatDateTime(dt, time) {
         if (!dt && (time === undefined || time === null || time === ''))
             return '';
         const res = DateUtils.intToStr4(dt);
