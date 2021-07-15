@@ -110,6 +110,9 @@ class AGGrid {
      * Free all of the internal data structures associated with the grid.
      * <br><br>
      * This method must be called once a grid is no longer needed.
+     * <br><br>
+     * Please note that this function is normally handled by the framework.
+     * If your application code is calling it, you are most likely doing something wrong.
      */
     destroy() {
         if (this.gridInstantiated) {
