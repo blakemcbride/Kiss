@@ -217,15 +217,6 @@ class AGGrid {
     }
 
     /**
-     * Returns an array of the highlighted row indexes.
-     *
-     * @returns {array}
-     */
-    getHighlightedRowIndexes() {
-        return this.highlightedRows;
-    }
-
-    /**
      * Select the row specified in which the key column of that row is equal to <code>id</code>.
      *
      * @param id
