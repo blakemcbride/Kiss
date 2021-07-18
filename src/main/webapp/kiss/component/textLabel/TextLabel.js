@@ -89,13 +89,21 @@
             return this;
         };
 
-        newElm.hide = function () {
-            jqObj.hide();
+        newElm.hide = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            if (flg)
+                jqObj.hide();
+            else
+                jqObj.show();
             return this;
         };
 
-        newElm.show = function () {
-            jqObj.show();
+        newElm.show = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            if (flg)
+                jqObj.show();
+            else
+                jqObj.hide();
             return this;
         };
 

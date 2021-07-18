@@ -90,9 +90,9 @@
     $$('edit').onclick(edit);
     grid.setOnRowDoubleClicked(edit);
 
-    grid.setOnSelection(() => {
-        $$('edit').enable();
-        $$('delete').enable();
+    grid.setOnSelectionChanged((rows) => {
+        $$('edit').enable(rows);
+        $$('delete').enable(rows);
     });
 
     $$('delete').onclick(() => {

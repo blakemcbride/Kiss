@@ -69,22 +69,22 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     uncheck the box               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)   </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets focus on control            </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns <code>true</code> if checked and <code>false</code> if unchecked               </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    isDirty()     </td><td>    true if the user changed its state     </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>    true if the control is disabled     </td></tr>
-     *     <tr><td>    isHidden()     </td><td>    true if the control is hidden (not visible)    </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>    true if the control is read-only     </td></tr>
-     *     <tr><td>    isVisible()     </td><td>    true if the control is visible (not hidden)     </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    <code>true</code> if the user changed its state     </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    <code>true</code> if the control is disabled     </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    <code>true</code> if the control is hidden (not visible)    </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>    <code>true</code> if the control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    <code>true</code> if the control is visible (not hidden)     </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code> whenever the state of this control changes. <code>fun</code> is passed the value of the control.  </td></tr>
-     *     <tr><td>    processChanges(flg)     </td><td> if false, checkbox should not register changes (no data was changed) See Utils.someControlValueChanged() </td></tr>
-     *     <tr><td>    readOnly()     </td><td>    sets control to read-only         </td></tr>
-     *     <tr><td>    readWrite()     </td><td>    sets control to read-write        </td></tr>
+     *     <tr><td>    processChanges(flg)     </td><td> if <code>false</code>, checkbox should not register changes (no data was changed) See Utils.someControlValueChanged() </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>    sets control to read-only (or the reverse if the optional argument is <code>false</code>)         </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    sets control to read-write (or the reverse if the optional argument is <code>false</code>)        </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     if <code>val</code> is <code>true</code> check the box, uncheck if <code>false</code>               </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static check_box() {}
@@ -107,25 +107,25 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     clear the control value               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getDateValue()     </td><td>     returns the date as a <code>Date</code> instance             </td></tr>
      *     <tr><td>    getIntValue()     </td><td>     returns the date as an integer with the "YYYYMMDD" format             </td></tr>
      *     <tr><td>    getSQLValue()     </td><td>     returns the date as a string with the "YYYY-MM-DD" format             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    isDirty()     </td><td>    true if the user changed the value       </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>    true if the control is disabled       </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    <code>true</code> if the user changed the value       </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    <code>true</code> if the control is disabled       </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
-     *     <tr><td>    isHidden()     </td><td>   true if the control is hidden (not visible)    </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>   true if the control is read-only    </td></tr>
-     *     <tr><td>    isVisible()     </td><td>   true if the control is visible (not hidden)    </td></tr>
+     *     <tr><td>    isHidden()     </td><td>   <code>true</code> if the control is hidden (not visible)    </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>   <code>true</code> if the control is read-only    </td></tr>
+     *     <tr><td>    isVisible()     </td><td>   <code>true</code> if the control is visible (not hidden)    </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.  </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
-     *     <tr><td>    readOnly()     </td><td>    set control to read-only  </td></tr>
-     *     <tr><td>    readWrite()     </td><td>    set control to read-write     </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>    set control to read-only (or the reverse if the optional argument is <code>false</code>)  </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    set control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the control value.  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static date_input() {}
@@ -149,30 +149,30 @@ class components {
      *     <tr><td>    add(val, lbl, data)     </td><td>     add a new list item.  <code>val</code> is the value associated to the option, <code>lbl</code> is the text shown in the list, and <code>data</data> represents optional and arbitrary data associated to the option               </td></tr>
      *     <tr><td>    addItems(items, valField, lblField [, dataField]) </td><td>  used to add an array of items at one time. <code>items</code> is the array of items to add.  <code>valField</code> and <code>lblField</code> are the names of the fields in the array.  <code>dataField</code> is the name of a field whose data is stored along with the item.  If null, the whole item is stored. </td></tr>
      *     <tr><td>    clear()     </td><td>     remove the list contents except the <code>default-option</code>               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus on the control        </td></tr>
      *     <tr><td>    getAllLabels()     </td><td>     returns an array of all the labels             </td></tr>
      *     <tr><td>    getData(idx)     </td><td>     returns the data associated to an option.  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.              </td></tr>
      *     <tr><td>    getIntValue(idx)     </td><td>   returns the integer value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
      *     <tr><td>    getLabel(idx)     </td><td>     returns the label associated to an option. If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
      *     <tr><td>    getValue(idx)     </td><td>     returns the string value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.   </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    isDirty()     </td><td>     true if user changed value      </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>     true if control is disabled      </td></tr>
-     *     <tr><td>    isHidden()     </td><td>     true if control is hidden (not visible)      </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty([flg])     </td><td>     <code>true</code> if user changed value (or the reverse if the optional argument is <code>false</code>)      </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     <code>true</code> if control is disabled      </td></tr>
+     *     <tr><td>    isHidden()     </td><td>     <code>true</code> if control is hidden (not visible)      </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>     true if control is read-only     </td></tr>
-     *     <tr><td>    isVisible()     </td><td>     true if control is visible (not hidden)      </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     <code>true</code> if control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     <code>true</code> if control is visible (not hidden)      </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
-     *     <tr><td>    readOnly()     </td><td>    make control read-only      </td></tr>
-     *     <tr><td>    readWrite()     </td><td>    make control read-write      </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>    make control read-only (or the reverse if the optional argument is <code>false</code>)      </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    make control read-write (or the reverse if the optional argument is <code>false</code>)      </td></tr>
      *     <tr><td>    removeByIndex(idx)     </td><td>     remove the row indicated by <code>idx</code>             </td></tr>
      *     <tr><td>    selectedIndex()     </td><td>     returns the index of the selected item  (-1 if none)             </td></tr>
      *     <tr><td>    selectIndex(row)     </td><td>     selects the indicated row index            </td></tr>
      *     <tr><td>    setLabel(lbl, idx)     </td><td>     sets a row label to <code>lbl</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.             </td></tr>
      *     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    size()     </td><td>    returns the number of rows in the list (including <code>default-option</code>              </td></tr>
      * </table>
      */
@@ -195,11 +195,11 @@ class components {
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     erases the contents of the control               </td></tr>
      *     <tr><td>    click() </td><td> simulate a user click on the control </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getFormData() </td><td>  gets the upload file data for transmission to the back-end  </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    isDirty()     </td><td>  has the control contents been changed by user      </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
      *     <tr><td>    isDisabled()     </td><td> is the control disabled? </td></tr>
@@ -208,9 +208,9 @@ class components {
      *     <tr><td>    isVisible()     </td><td> is the control visible?   </td></tr>
      *     <tr><td>    numberOfUploadFiles() </td><td> the number of files the user selected is returned </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>  execute fun when control changes              </td></tr>
-     *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
-     *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td> set control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td> set control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    uploadFile(idx) </td><td> the JavaScript <code>File</code> object of file number <code>idx</code> </td></tr>
      *     <tr><td>    uploadFileExtension(idx) </td><td> the file name extension of file number <code>idx</code> </td></tr>
      *     <tr><td>    uploadFilename(idx) </td><td> the name of file number <code>idx</code> </td></tr>
@@ -240,32 +240,32 @@ class components {
      *     <tr><td>    addItems(items, valField, lblField [, dataField]) </td><td>  used to add an array of items at one time. <code>items</code> is the array of items to add.  <code>valField</code> and <code>lblField</code> are the names of the fields in the array.   <code>dataField</code> is the name of a field whose data is stored along with the item.  If null, the whole item is stored. </td></tr>
      *     <tr><td>    clear()     </td><td>     remove the list contents except the <code>default-option</code>               </td></tr>
      *     <tr><td>    clearSelection()     </td><td>     de-select all elements              </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus on control            </td></tr>
      *     <tr><td>    getAllLabels()     </td><td>     returns an array of all the labels             </td></tr>
      *     <tr><td>    getData(idx)     </td><td>     returns the data associated to an option.  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.              </td></tr>
      *     <tr><td>    getIntValue(idx)     </td><td>   returns the integer value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
      *     <tr><td>    getLabel(idx)     </td><td>     returns the label associated to an option. If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
      *     <tr><td>    getValue(idx)     </td><td>     returns the string value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.   </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    isDirty()     </td><td>    true if user has changed control value     </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>    true if control is disabled     </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    <code>true</code> if user has changed control value     </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    <code>true</code> if control is disabled     </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
-     *     <tr><td>    isHidden()     </td><td>    true if control is hidden (not visible)     </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>     true if control is read-only     </td></tr>
-     *     <tr><td>    isVisible()     </td><td>    true if control is visible (not hidden)     </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    <code>true</code> if control is hidden (not visible)     </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     <code>true</code> if control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    <code>true</code> if control is visible (not hidden)     </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
      *     <tr><td>    onClick(fun)     </td><td>     execute <code>fun</code>whenever the user clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
      *     <tr><td>    onDblClick(fun)     </td><td>     execute <code>fun</code>whenever the user double-clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
-     *     <tr><td>    readOnly()     </td><td>     sets control to read-only    </td></tr>
-     *     <tr><td>    readWrite()     </td><td>     sets control to read-write    </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>     sets control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>     sets control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    removeByIndex(idx)     </td><td>     remove the row indicated by <code>idx</code>             </td></tr>
      *     <tr><td>    setLabel(lbl, idx)     </td><td>     sets a row label to <code>lbl</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.             </td></tr>
      *     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  </td></tr>
      *     <tr><td>    selectedIndex()     </td><td>     returns the index of the selected item  (-1 if none)             </td></tr>
      *     <tr><td>    selectIndex(row)     </td><td>     selects the indicated row index            </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    size()     </td><td>    returns the number of rows in the list               </td></tr>
      * </table>
      */
@@ -289,25 +289,25 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     clear the control value               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getDateValue()     </td><td>     returns the date as a <code>Date</code> instance             </td></tr>
      *     <tr><td>    getIntValue()     </td><td>     returns the date as an integer with the "YYYYMMDD" format             </td></tr>
      *     <tr><td>    getSQLValue()     </td><td>     returns the date as a string with the "YYYY-MM-DD" format             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    isDirty()     </td><td>    true if the user changed the value       </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>    true if the control is disabled       </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    <code>true</code> if the user changed the value       </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    <code>true</code> if the control is disabled       </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
-     *     <tr><td>    isHidden()     </td><td>   true if the control is hidden (not visible)    </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>   true if the control is read-only    </td></tr>
-     *     <tr><td>    isVisible()     </td><td>   true if the control is visible (not hidden)    </td></tr>
+     *     <tr><td>    isHidden()     </td><td>   <code>true</code> if the control is hidden (not visible)    </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>   <code>true</code> if the control is read-only    </td></tr>
+     *     <tr><td>    isVisible()     </td><td>   <code>true</code> if the control is visible (not hidden)    </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.  </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
-     *     <tr><td>    readOnly()     </td><td>    set control to read-only  </td></tr>
-     *     <tr><td>    readWrite()     </td><td>    set control to read-write     </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>    set control to read-only (or the reverse if the optional argument is <code>false</code>)  </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    set control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the control value.  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static native_date_input() {}
@@ -336,11 +336,11 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     erases the contents of the control               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the numeric value of the control             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    isDirty()     </td><td>     did user change control content?   </td></tr>
      *     <tr><td>    isDisabled()     </td><td>     is control disabled?   </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
@@ -350,10 +350,10 @@ class components {
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control               </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when key up    </td></tr>
-     *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
-     *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td> set control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td> set control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the numeric value of the control              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static numeric_input() {}
@@ -382,20 +382,20 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    click()     </td><td>     simulate a button click               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus to control           </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the label on the push button             </td></tr>
-     *     <tr><td>    hide()     </td><td>     hides the control               </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>     true if control is disabled               </td></tr>
-     *     <tr><td>    isHidden()     </td><td>    true if control is hidden (not visible)           </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>    true if control is read-only              </td></tr>
-     *     <tr><td>    isVisible()     </td><td>    true if control is visible (not hidden)        </td></tr>
-     *     <tr><td>    readOnly()     </td><td>     sets control to read-only              </td></tr>
-     *     <tr><td>    readWrite()     </td><td>    sets control to read-write          </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     hides the control (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     <code>true</code> if control is disabled               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    <code>true</code> if control is hidden (not visible)           </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>    <code>true</code> if control is read-only              </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    <code>true</code> if control is visible (not hidden)        </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>     sets control to read-only (or the reverse if the optional argument is <code>false</code>)              </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    sets control to read-write (or the reverse if the optional argument is <code>false</code>)          </td></tr>
      *     <tr><td>    onclick(fun)     </td><td>     <code>fun</code> is executed when the user clicks on the button               </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the label on the push button              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static push_button() {}
@@ -432,23 +432,23 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>    sets the radio button group to none selected   </td></tr>
-     *     <tr><td>    disable()     </td><td>    set the control to disabled    </td></tr>
-     *     <tr><td>    enable()     </td><td>    set the control to enabled            </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>    set the control to disabled (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>    set the control to enabled (or the reverse if the optional argument is <code>false</code>)            </td></tr>
      *     <tr><td>    focus()     </td><td>    set focus on the current control           </td></tr>
      *     <tr><td>    getIntValue()     </td><td>     the integer value of the selected ratio button group               </td></tr>
      *     <tr><td>    getValue()     </td><td>     the string value of the selected ratio button group               </td></tr>
-     *     <tr><td>    hide()     </td><td>    hides the control             </td></tr>
-     *     <tr><td>    isDirty()     </td><td>     true if the user changed the value             </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>     true if the control is disabled            </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>    hides the control (or the reverse if the optional argument is <code>false</code>)             </td></tr>
+     *     <tr><td>    isDirty()     </td><td>     <code>true</code> if the user changed the value             </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     <code>true</code> if the control is disabled            </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
-     *     <tr><td>    isHidden(desc)     </td><td>     true if the control is hidden (not visible)   </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>     true if the control is read-only           </td></tr>
-     *     <tr><td>    isVisible()     </td><td>     true if the control is visible (not hidden)           </td></tr>
+     *     <tr><td>    isHidden(desc)     </td><td>     <code>true</code> if the control is hidden (not visible)   </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     <code>true</code> if the control is read-only           </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     <code>true</code> if the control is visible (not hidden)           </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code> whenever the state of this control changes.  <code>fun</code> is passed the value of the control group.  </td></tr>
-     *     <tr><td>    readOnly()     </td><td>    sets the control to read-only               </td></tr>
-     *     <tr><td>    readWrite()     </td><td>    sets the control to read-write        </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>    sets the control to read-only (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    sets the control to read-write (or the reverse if the optional argument is <code>false</code>)        </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     selects the button with the associated value               </td></tr>
-     *     <tr><td>    show()     </td><td>    sets the control to show (not hide)           </td></tr>
+     *     <tr><td>    show([flg])     </td><td>    sets the control to show (not hide) (or the reverse if the optional argument is <code>false</code>)           </td></tr>
      * </table>
      * </table>
      */
@@ -476,23 +476,23 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     erases the contents of the control               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the string associated with the control             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    isDirty()     </td><td>    true if user changed control contents             </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>    true if control is disabled            </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    <code>true</code> if user changed control contents             </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    <code>true</code> if control is disabled            </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
-     *     <tr><td>    isHidden()     </td><td>    true if user control is hidden (not visible)             </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>    true if control is read-only             </td></tr>
-     *     <tr><td>    isVisible()     </td><td>    true if control is visible (not hidden)          </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    <code>true</code> if user control is hidden (not visible)             </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>    <code>true</code> if control is read-only             </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    <code>true</code> if control is visible (not hidden)          </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>  execute fun when control changes              </td></tr>
      *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when key up    </td></tr>
-     *     <tr><td>    readOnly()     </td><td>     sets control to read-only       </td></tr>
-     *     <tr><td>    readWrite()     </td><td>     sets control to read-write     </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>     sets control to read-only (or the reverse if the optional argument is <code>false</code>)       </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>     sets control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static textbox_input() {}
@@ -517,11 +517,11 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     erases the contents of the control               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the string associated with the control             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    isDirty()     </td><td>  has the control contents been changed by user      </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
      *     <tr><td>    isDisabled()     </td><td> is the control disabled? </td></tr>
@@ -531,11 +531,11 @@ class components {
      *     <tr><td>    onChange(fun)     </td><td>  execute fun if control value changed, as it loses focus             </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when key up    </td></tr>
-     *     <tr><td>    readOnly()     </td><td> set control to read-only    </td></tr>
-     *     <tr><td>    readWrite()     </td><td> set control to read-write    </td></tr>
-     *     <tr><td>    setPassword(val)     </td><td>     if true, treat as a password control; if false, treat as text input - previous value is returned   </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td> set control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td> set control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    setPassword(val)     </td><td>     if <code>true</code>, treat as a password control; if <code>false</code>, treat as text input - previous value is returned   </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static text_input() {}
@@ -552,21 +552,21 @@ class components {
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     erases the contents of the control               </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the string associated with the control             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    isHidden()     </td><td> is the control hidden? </td></tr>
      *     <tr><td>    isVisible()     </td><td> is the control visible?   </td></tr>
      *     <tr><td>    onclick(fun)     </td><td>     <code>fun</code> is executed when the user clicks on the text   </td></tr>
      *     <tr><td>    setColor(val)     </td><td>     sets the color of the text              </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
      *     <tr><td>    setHTMLValue(val)     </td><td>     sets the HTML inside the control              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static text_label() {}
 
     /**
      * This HTML tag, "time-input", provides a control where the user can enter a time.  The time appear like "3:30 PM".  A 24 hour clock is also supported automatically (like 14:30).
-     * The values this control interacs with is a plain integer in the form HHMM in a 24 hour clock.  So, "1:30 PM" would be <code>1330</code>.
+     * The values this control interacts with is a plain integer in the form HHMM in a 24 hour clock.  So, "1:30 PM" would be <code>1330</code>.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
@@ -585,23 +585,23 @@ class components {
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    clear()     </td><td>     remove the value associated with the control               </td></tr>
-     *     <tr><td>    disable()     </td><td>     the control remains visible but inactive               </td></tr>
-     *     <tr><td>    enable()     </td><td>     the control is set to visible and enabled              </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
      *     <tr><td>    getValue()     </td><td>     returns the value associated with the control             </td></tr>
-     *     <tr><td>    hide()     </td><td>     the control is hidden               </td></tr>
-     *     <tr><td>    isDirty()     </td><td>     true if user changed control value     </td></tr>
-     *     <tr><td>    isDisabled()     </td><td>     true if control is disabled    </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>     <code>true</code> if user changed control value     </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     <code>true</code> if control is disabled    </td></tr>
      *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
-     *     <tr><td>    isHidden()     </td><td>     true if control is hidden (not visible)     </td></tr>
-     *     <tr><td>    isReadOnly()     </td><td>     true if control is read-only     </td></tr>
-     *     <tr><td>    isVisible()     </td><td>     true if control is visible (not hidden)    </td></tr>
+     *     <tr><td>    isHidden()     </td><td>     <code>true</code> if control is hidden (not visible)     </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     <code>true</code> if control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     <code>true</code> if control is visible (not hidden)    </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>  execute fun if control value changed, as it loses focus             </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
-     *     <tr><td>    readOnly()     </td><td>   sets control to read-only   </td></tr>
-     *     <tr><td>    readWrite()     </td><td>    sets control to read-write      </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>   sets control to read-only (or the reverse if the optional argument is <code>false</code>)   </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    sets control to read-write (or the reverse if the optional argument is <code>false</code>)      </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the value associated with the control              </td></tr>
-     *     <tr><td>    show()     </td><td>     the control is made visible               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
      */
     static time_input() {}

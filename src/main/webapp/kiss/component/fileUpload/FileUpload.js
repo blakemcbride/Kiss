@@ -85,13 +85,15 @@
             return jqObj.val(null);
         };
 
-        newElm.disable = function () {
-            jqObj.prop('disabled', true);
+        newElm.disable = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            jqObj.prop('disabled', flg);
             return this;
         };
 
-        newElm.enable = function () {
-            jqObj.prop('disabled', false);
+        newElm.enable = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            jqObj.prop('disabled', !flg);
             return this;
         };
 
@@ -101,13 +103,21 @@
 
         //--
 
-        newElm.hide = function () {
-            jqObj.hide();
+        newElm.hide = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            if (flg)
+                jqObj.hide();
+            else
+                jqObj.show();
             return this;
         };
 
-        newElm.show = function () {
-            jqObj.show();
+        newElm.show = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            if (flg)
+                jqObj.show();
+            else
+                jqObj.hide();
             return this;
         };
 

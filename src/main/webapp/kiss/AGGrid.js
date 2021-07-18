@@ -422,15 +422,17 @@ class AGGrid {
     }
 
     /**
-     * Execute <code>fn</code> anytime a row is selected or the selection changes.
+     * Execute <code>fn</code> anytime a row selection is changed.
+     *
+     * <code>fn</code> is passwd an array of the selected rows.
      *
      * @param fn {function}
      */
-    setOnSelection(fn) {
+    setOnSelectionChanged(fn) {
         const self = this;
-        this.gridOptions.onRowSelected = function () {
-            if (self.gridOptions.api.getSelectedRows().length  &&  fn)
-                fn();
+        this.gridOptions.onSelectionChanged = function () {
+            if (fn)
+                fn(self.gridOptions.api.getSelectedRows());
         };
         return this;
     }

@@ -118,13 +118,15 @@ Kiss.RadioButtons.groups = {};
            The functionality for individual radio buttons is as follows.
          */
 
-        newElm.disable = function () {
-            jqObj.prop('disabled', true);
+        newElm.disable = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            jqObj.prop('disabled', flg);
             return this;
         };
 
-        newElm.enable = function () {
-            jqObj.prop('disabled', false);
+        newElm.enable = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            jqObj.prop('disabled', !flg);
             return this;
         };
 
@@ -134,13 +136,21 @@ Kiss.RadioButtons.groups = {};
 
         //--
 
-        newElm.hide = function () {
-            $('#' + id + '--div').hide();
+        newElm.hide = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            if (flg)
+                $('#' + id + '--div').hide();
+            else
+                $('#' + id + '--div').show();
             return this;
         };
 
-        newElm.show = function () {
-            $('#' + id + '--div').show();
+        newElm.show = function (flg = true) {
+            flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            if (flg)
+                $('#' + id + '--div').show();
+            else
+                $('#' + id + '--div').hide();
             return this;
         };
 
