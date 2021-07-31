@@ -836,9 +836,9 @@ public class BuildUtils {
         String cmd, argsFile = null;
         if (ldep != null  &&  !ldep.isEmpty()  ||  fdep != null  &&  !fdep.isEmpty()) {
             argsFile = writeDependencyArgsToFile(ldep, fdep);
-            cmd = "javac @" + argsFile + " -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
+            cmd = "javac -g @" + argsFile + " -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
         } else
-            cmd = "javac -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
+            cmd = "javac -g -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
         runWait(true, cmd);
         rm(argsFile);
     }
