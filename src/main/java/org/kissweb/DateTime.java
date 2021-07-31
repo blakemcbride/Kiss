@@ -36,7 +36,10 @@ public class DateTime {
      * @param time HHMM
      */
     public DateTime(int dt, int time) {
-        zdt = ZonedDateTime.of(DateUtils.year(dt), DateUtils.month(dt), DateUtils.day(dt), TimeUtils.hour(time), TimeUtils.minutes(time), 0, 0, ZoneId.systemDefault());
+        if (dt == 0 && time == 0)
+            zdt = null;
+        else
+            zdt = ZonedDateTime.of(DateUtils.year(dt), DateUtils.month(dt), DateUtils.day(dt), TimeUtils.hour(time), TimeUtils.minutes(time), 0, 0, ZoneId.systemDefault());
     }
 
     /**
@@ -45,7 +48,10 @@ public class DateTime {
      * @param dt
      */
     public DateTime(Date dt) {
-        zdt = ZonedDateTime.ofInstant(dt.toInstant(), ZoneId.systemDefault());
+        if (dt == null)
+            zdt = null;
+        else
+            zdt = ZonedDateTime.ofInstant(dt.toInstant(), ZoneId.systemDefault());
     }
 
     /**
@@ -54,7 +60,10 @@ public class DateTime {
      * @param dt
      */
     public DateTime(GregorianCalendar dt) {
-        zdt = dt.toZonedDateTime();
+        if (dt == null)
+            zdt = null;
+        else
+            zdt = dt.toZonedDateTime();
     }
 
     /**
@@ -72,7 +81,7 @@ public class DateTime {
      * @return YYYY
      */
     public int getYear() {
-        return zdt.getYear();
+        return zdt == null ? 0 : zdt.getYear();
     }
 
     /**
@@ -81,7 +90,7 @@ public class DateTime {
      * @return 1-12
      */
     public int getMonth() {
-        return zdt.getMonthValue();
+        return zdt == null ? 0 : zdt.getMonthValue();
     }
 
     /**
@@ -90,7 +99,7 @@ public class DateTime {
      * @return (1-31)
      */
     public int getDay() {
-        return zdt.getDayOfMonth();
+        return zdt == null ? 0 : zdt.getDayOfMonth();
     }
 
     /**
@@ -99,7 +108,7 @@ public class DateTime {
      * @return (0-23)
      */
     public int getHour() {
-        return zdt.getHour();
+        return zdt == null ? 0 : zdt.getHour();
     }
 
     /**
@@ -108,7 +117,7 @@ public class DateTime {
      * @return (0-59)
      */
     public int getMinute() {
-        return zdt.getMinute();
+        return zdt == null ? 0 : zdt.getMinute();
     }
 
     /**
@@ -117,7 +126,7 @@ public class DateTime {
      * @return
      */
     public Date getDate() {
-        return Date.from(zdt.toInstant());
+        return zdt == null ? null : Date.from(zdt.toInstant());
     }
 
     /**
@@ -135,7 +144,7 @@ public class DateTime {
      * @return HHMM
      */
     public int getIntTime() {
-        return zdt.getHour() * 100 + zdt.getMinute();
+        return zdt == null ? 0 : zdt.getHour() * 100 + zdt.getMinute();
     }
 
     /**
@@ -161,12 +170,14 @@ public class DateTime {
     }
 
     /**
-     * Format a date passed in as a string mm/dd/yyyy hh:mm AM/PM
+     * Format a date passed into a string mm/dd/yyyy hh:mm AM/PM
      * 
      * @param date
      * @return
      */
     public static String format(Date date) {
+        if (date == null)
+            return "";
         SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mm a");
         return df.format(date);
     }
