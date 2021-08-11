@@ -113,7 +113,7 @@ public class Record implements AutoCloseable {
      * @see #setTime(String, long)
      */
     public Object setDateOnly(String name, java.util.Date val) {
-        cols.put(name.toLowerCase(), new java.sql.Date(val.getTime()));
+        cols.put(name.toLowerCase(), val == null ? null : new java.sql.Date(val.getTime()));
         return val;
     }
 
@@ -178,7 +178,7 @@ public class Record implements AutoCloseable {
      * @see #set(String, Object)
      */
     public Object setDateTime(String name, java.util.Date val) {
-        cols.put(name.toLowerCase(), new java.sql.Timestamp(val.getTime()));
+        cols.put(name.toLowerCase(), val == null ? null : new java.sql.Timestamp(val.getTime()));
         return val;
     }
 
