@@ -187,11 +187,11 @@ Kiss.RadioButtons.setValue = function (group, val) {
 };
 
 Kiss.RadioButtons.clear = function (group) {
-    let jqObj = $('input[type=radio][name=' + group + ']');
+    const jqObj = $('input[type=radio][name=' + group + ']');
     if (Kiss.RadioButtons.groups[group].default_value !== undefined)
         Kiss.RadioButtons.setValue(group, Kiss.RadioButtons.groups[group].default_value);
     else
-        jqObj.attr('checked', false);
+        jqObj.prop('checked', false);
 };
 
 //--
@@ -238,7 +238,7 @@ Kiss.RadioButtons.isError = function (group, desc) {
     if (!Kiss.RadioButtons.groups[group].required)
         return false;
 
-    let val = $('input[type=radio][name=' + group + ']:checked').val();
+    const val = $('input[type=radio][name=' + group + ']:checked').val();
     if (!val) {
         Utils.showMessage('Error', desc + ' selection is required.');
         return true;
