@@ -272,6 +272,49 @@ class Utils {
     }
 
     /**
+     * Test the validity of a domain name.
+     *
+     * @param d {string} the domain to be tested
+     * @returns {boolean}
+     */
+    static isValidDomain(d) {
+        if (!d || typeof d !== 'string' || d.length < 3)
+            return false;
+        if (d.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789.]/gi, ''))
+            return false;
+        if (d[0] === '.' ||  d[d.length-1] === '.')
+            return false;
+        if (d.indexOf('..') !== -1)
+            return false;
+        if (d.indexOf('.') === -1)
+            return false;
+        return true;
+    }
+
+    /**
+     * Test the validity of an email address.
+     *
+     * @param add {string} the email address to be tested
+     * @returns {boolean}
+     */
+    static isValidEmailAddress(add) {
+        if (!add || typeof add !== 'string' || add.length < 5)
+            return false;
+        if (add.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789.]/gi, '') !== '@')
+            return false;
+        const idx = add.indexOf("@");
+        const dom = add.substr(idx+1);
+        if (!isValidDomain(dom))
+            return false;
+        const user = add.substr(0, idx);
+        if (user.length < 1  ||  user[0] === '.' ||  user[user.length-1] === '.')
+            return false;
+        if (user.indexOf('..') !== -1)
+            return false;
+        return true;
+    }
+
+    /**
      * APL-like take for strings.
      *
      * @param {string} s
