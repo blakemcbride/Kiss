@@ -315,6 +315,112 @@ class Utils {
     }
 
     /**
+     * Determines if an email address with or without a name is valid.
+     * This accepts things like:
+     *
+     *    name@abc.com
+     *    <name@abc.com>
+     *    George Tall <name@abc.com>
+     *    "Tall, George" <name.abc.com>
+     *
+     * @param ad {string}
+     * @returns {boolean}
+     */
+    static isValidEmailAddressWithName(ad) {
+        if (!ad || typeof ad !== 'string' || ad.length < 5)
+            return false;
+        const idx1 = ad.indexOf("<");
+        if (idx1 === -1)
+            return Utils.isValidEmailAddress(ad);
+        const idx2 = ad.indexOf(">");
+        if (idx2 < idx1 + 2)
+            return false;
+        const email = ad.substring(idx1+1, idx2-1);
+        return Utils.isValidEmailAddress(email);
+    }
+
+    /**
+     * Returns the email portion of an email address with a name.
+     * For example, all of the following will return "abc.com":
+     *
+     *    name@abc.com
+     *    <name@abc.com>
+     *    George Tall <name@abc.com>
+     *    "Tall, George" <name.abc.com>
+     *
+     * @param ad {string}
+     * @returns {string}
+     */
+    static getEmailFromAddressWithName(ad) {
+        const idx1 = ad.indexOf("<");
+        if (idx1 === -1)
+            return ad;
+        const idx2 = ad.indexOf(">");
+        return ad.substring(idx1+1, idx2);
+    }
+
+    /**
+     * Returns the name portion of an email address with a name.
+     * For example:
+     *
+     *    name@abc.com -> ""
+     *    <name@abc.com> -> ""
+     *    George Tall <name@abc.com> -> "George Tall"
+     *    "Tall, George" <name.abc.com> -> "Tall, George"
+     *
+     * @param ad {string}
+     * @returns {string}
+     */
+    static getNameFromAddressWithName(ad) {
+        const idx1 = ad.indexOf("<");
+        if (idx1 === -1)
+            return "";
+        let name = ad.substring(0, idx1).trim();
+        if (!name)
+            return "";
+        if (name[0] === "'" && name[name.length-1] === "'" || name[0] === '"' && name[name.length-1] === '"')
+            name = name.substring(1, name.length-1);
+        return name;
+    }
+
+    /**
+     * Splits a string containing any number of full email addresses with possible names into an array
+     * where each element is a single address.
+     *
+     * @param s {string}
+     * @returns {object} an array with the separated email addresses
+     */
+    static splitEmailAddresses(s) {
+        if (!s || typeof s !== 'string' || s.length < 5)
+            return [];
+        const a = [];
+        let inQuote = false;
+        let quote;
+        let add = "";
+        for (let i=0 ; i < s.length ; i++) {
+            let c = s[i];
+            if (inQuote) {
+                if (c === quote)
+                    inQuote = false;
+                add += c;
+            } else {
+                if (c === '"' || c === "'") {
+                    inQuote = true;
+                    quote = c;
+                    add += c;
+                } else if (c === ",") {
+                    a.push(add);
+                    add = "";
+                } else
+                    add += c;
+            }
+        }
+        if (add)
+            a.push(add);
+        return a;
+    }
+
+    /**
      * APL-like take for strings.
      *
      * @param {string} s
