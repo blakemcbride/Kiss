@@ -221,6 +221,9 @@ class components {
     /**
      * This HTML tag, "list-box", adds functionality and a consistent and convenient API to the HTML provided <code>select</code> tag.
      * <br><br>
+     * Be sure to call the <code>clear()</code> method between uses otherwise the system won't detect the same file
+     * being accessed.
+     * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    default-option="label"     </td><td>     what is the default selection     </td></tr>
