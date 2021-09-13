@@ -157,18 +157,18 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            jqObj.attr('contenteditable', !flg);
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            jqObj.attr('contenteditable', flg);
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return jqObj.attr('contenteditable') === 'false';
         };
 
         //--
@@ -186,7 +186,7 @@
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('contenteditable');
+            return jqObj.attr('contenteditable') === 'false';
         };
 
         //--
