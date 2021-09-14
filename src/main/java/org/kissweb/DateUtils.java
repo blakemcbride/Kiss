@@ -558,6 +558,16 @@ public class DateUtils {
     }
 
     /**
+     * Returns the full name of the week day.
+     *
+     * @param dt
+     * @return
+     */
+    public static String dayOfWeekName(Date dt) {
+        return dayOfWeekName(toInt(dt));
+    }
+
+    /**
      * Returns the full name of the month of the year.
      *
      * @param dt YYYYMMDD
