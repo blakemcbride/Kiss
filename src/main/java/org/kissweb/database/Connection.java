@@ -34,9 +34,11 @@ package org.kissweb.database;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.kissweb.DateUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -633,5 +635,45 @@ public class Connection implements AutoCloseable {
      */
     public ConnectionType getDBType() {
         return ctype;
+    }
+
+    /**
+     * Utility method to convert a Java Date into an SQL Timestamp.
+     *
+     * @param dt
+     * @return
+     */
+    public static java.sql.Timestamp toTimestamp(Date dt) {
+        return dt == null ? null : new java.sql.Timestamp(dt.getTime());
+    }
+
+    /**
+     * Utility method to convert an integer date into an SQL Timestamp.
+     *
+     * @param dt YYYYMMDD
+     * @return
+     */
+    public static java.sql.Timestamp toTimestamp(int dt) {
+        return dt == 0 ? null : new java.sql.Timestamp(DateUtils.toDate(dt).getTime());
+    }
+
+    /**
+     * Utility method to convert a Java Date into an SQL Date.
+     *
+     * @param dt
+     * @return
+     */
+    public static java.sql.Date toDate(Date dt) {
+        return dt == null ? null : new java.sql.Date(dt.getTime());
+    }
+
+    /**
+     * Utility method to convert an integer date into an SQL Timestamp.
+     *
+     * @param dt YYYYMMDD
+     * @return
+     */
+    public static java.sql.Date toDate(int dt) {
+        return dt == 0 ? null : new java.sql.Date(DateUtils.toDate(dt).getTime());
     }
 }
