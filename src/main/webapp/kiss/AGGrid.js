@@ -51,7 +51,7 @@ class AGGrid {
             columnDefs: this.columns,
             rowData: this.data,
             rowSelection: this.rowSelection,
-            rowDeselection: this.rowSelection === AGGrid.MULTI_SELECTION,
+            suppressRowDeselection: this.rowSelection === AGGrid.MULTI_SELECTION,
             suppressHorizontalScroll: this.suppressHorizontalScroll,
             suppressCellSelection: true,
             components: this.components,
@@ -67,7 +67,7 @@ class AGGrid {
             getRowStyle: this.rowStyleFun,
             onGridReady: function (params) {
                 if (this.suppressHorizontalScroll) {
-                    params.api.sizeColumnsToFit();
+                    //                   params.api.sizeColumnsToFit();
 
                     window.addEventListener('resize', function() {
                         setTimeout(function() {
@@ -179,7 +179,7 @@ class AGGrid {
     deleteRow(id) {
         const node = this.gridOptions.api.getRowNode(id);
         if (node  &&  node.data)
-            this.gridOptions.api.updateRowData({remove: [node.data]});
+            this.gridOptions.api.applyTransaction({remove: [node.data]});
         return this;
     }
 
@@ -252,7 +252,7 @@ class AGGrid {
         if (!this.gridOptions)
             this.data = this.data.concat(data);
         else {
-            this.gridOptions.api.updateRowData({add: data});
+            this.gridOptions.api.applyTransaction({add: data});
             if (this.suppressHorizontalScroll)
                 this.resizeColumns();  // when vert scrollbar gets auto-added must resize columns
         }
@@ -271,7 +271,7 @@ class AGGrid {
         if (!this.gridOptions)
             this.data.push(data);
         else
-            this.gridOptions.api.updateRowData({add: [data]});
+            this.gridOptions.api.applyTransaction({add: [data]});
         return this;
     }
 
@@ -293,7 +293,7 @@ class AGGrid {
      * @returns {AGGrid}
      */
     updateSelectedRecord(row) {
-        this.gridOptions.api.updateRowData({update: [row]});
+        this.gridOptions.api.applyTransaction({update: [row]});
         return this;
     }
 
@@ -304,7 +304,7 @@ class AGGrid {
      */
     deleteSelectedRows() {
         const selectedData = this.gridOptions.api.getSelectedRows();
-        this.gridOptions.api.updateRowData({remove: selectedData});
+        this.gridOptions.api.applyTransaction({remove: selectedData});
         return this;
     }
 
@@ -390,7 +390,7 @@ class AGGrid {
      */
     deleteRowIndex(n) {
         const row = this.getRowAtIndex(n);
-        this.gridOptions.api.updateRowData({remove: [row]});
+        this.gridOptions.api.applyTransaction({remove: [row]});
         return this;
     }
 
