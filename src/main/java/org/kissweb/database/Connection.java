@@ -607,13 +607,17 @@ public class Connection implements AutoCloseable {
      * Modifies an SQL statement to limit the number of rows returned.
      * This is needed since different databases do it differently.
      *
+     * A max less than 1 means all records (no max).
+     *
      * This method assumes that the SQL statement is not ending in any closing character (like ";").
      *
      * @param max the limit of number of records to return
      * @param sql the SQL statement to be modified
      * @return the modified SQL statement
      */
-    public String limit(int max, String sql) {
+    String limit(int max, String sql) {
+        if (max < 1)  //  all
+            return sql;
         switch (ctype) {
             case PostgreSQL:
             case MySQL:
