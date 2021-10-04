@@ -27,7 +27,7 @@ A 6-part training series on KISS is at:
 
 ## Quick Start
 
-Presuming you have the Java JDK (tested with Java 8 & 11), GIT, and an
+Presuming you have the Java JDK (tested with Java 8, 11, and 17), GIT, and an
 Internet connection, you can run the following commands to download, install,
 configure, and run Kiss, tomcat, and the required JAR files:
 
