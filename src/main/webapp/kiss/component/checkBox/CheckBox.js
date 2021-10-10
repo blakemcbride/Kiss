@@ -11,9 +11,12 @@
 
     const processor = function (elm, attr, content) {
         let nStyle, originalValue;
-        if (attr.style)
-            nStyle = 'display: inline-flex; ' + attr.style;
-        else
+        if (attr.style) {
+            if ((new RegExp("^display:|[^-]display:")).test(attr.style))
+                nStyle = attr.style;
+            else
+                nStyle = 'display: inline-flex; ' + attr.style;
+        } else
             nStyle = 'margin-left: 8px; display: inline-flex;';
         let cls = '';
         let processChanges = true;
