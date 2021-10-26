@@ -11,6 +11,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -36,7 +37,7 @@ public class RestClient {
      * @throws IOException if error
      */
     public static JSONObject jsonCall(String method, String urlStr, JSONObject out, JSONObject headers, String debugFileName) throws IOException {
-        return jsonCall(method, urlStr, out.toString(), headers, debugFileName);
+        return jsonCall(method, urlStr, out == null ? null : out.toString(), headers, debugFileName);
     }
 
     /**
@@ -75,7 +76,7 @@ public class RestClient {
      */
     public static JSONObject jsonCall(String method, String urlStr, String outStr, JSONObject headers, String debugFileName) throws IOException {
         if (debugFileName != null)
-            Files.write(Paths.get("S-" + debugFileName), outStr.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
+            Files.write(Paths.get("S-" + debugFileName), outStr == null ? "".getBytes() : outStr.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
         String res = performService(method, urlStr, outStr, headers);
         if (debugFileName != null)
             Files.write(Paths.get("R-" + debugFileName), res.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
