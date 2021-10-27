@@ -32,6 +32,15 @@ public class Tasks {
     final String postgresqlJar = "postgresql-42.2.12.jar";
     final String groovyJar = "groovy-3.0.9-indy.jar";
 
+    /**
+     * Build the whole system
+     *
+     * 1. download needed jar files
+     * 2. build the system into a deployable war file
+     * 3. set up a local tomcat server
+     * 4. deploy the war file to the local tomcat
+     * 5. build JavaDocs
+     */
     void all() {
         war();
         setupTomcat();
@@ -56,10 +65,17 @@ public class Tasks {
         createJar(targetPath, jarFile);
     }
 
+    /**
+     * Download needed foreign libraries
+     */
     void libs() {
         downloadAll(foreignLibs);
     }
 
+    /**
+     * Create Kiss.jar.  This is a JAR file that can be used in other apps as a
+     * utility library.
+     */
     void jar() {
         libs();
         buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
@@ -94,7 +110,10 @@ public class Tasks {
         rmTree(workDir);
     }
 
-    void war() {
+    /**
+     * Build the system into explodedDir
+     */
+    void build() {
         libs();
         copyTree("src/main/webapp", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
@@ -103,6 +122,13 @@ public class Tasks {
         buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         copyRegex("src/main/java/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
+    }
+
+    /**
+     * Build the system and create the deployable WAR file.
+     */
+    void war() {
+        build();
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
     }
@@ -141,11 +167,19 @@ public class Tasks {
         }
     }
 
+    /**
+     * Build and run the system
+     *
+     * 1. download needed jar files
+     * 2. build the system into a deployable war file
+     * 3. set up a local tomcat server
+     * 4. deploy the war file to the local tomcat
+     * 5. build JavaDocs
+     * 6. run the local tomcat
+     */
     void develop() {
         Process proc;
-        war();
-        setupTomcat();
-        deployWar();
+        build();
         if (isWindows)
             runWait(true, "tomcat\\bin\\debug.cmd");
         else

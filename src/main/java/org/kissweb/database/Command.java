@@ -216,7 +216,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * This method is the same as <cod>fetchOne</cod> except that it returns a JSON object.
+     * This method is the same as <code>fetchOne</code> except that it returns a JSON object.
      *
      * @param sql
      * @param args

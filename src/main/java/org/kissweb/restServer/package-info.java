@@ -10,5 +10,5 @@
  *
  * All of the above act as microservices (i.e. can be changed on a running system) except the Java pre-compiled services.
  */
-package org.kissweb.database;
+package org.kissweb.restServer;
 

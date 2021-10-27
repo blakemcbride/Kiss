@@ -1,5 +1,7 @@
 <?xml version="1.0"?>
 <project name="Kiss" basedir="." default="all">
+
+  <!--  For docs on what each of these do see builder/builder/Tasks.java    -->
   
   <target name="builder">
     <javac classpath="builder/libs/commons-compress-1.20.jar" includeantruntime="false">
@@ -17,6 +19,15 @@
   </target>
 
   <target name="libs" depends="builder">
+    <exec executable="java">
+      <arg value="-cp"/>
+      <arg value="builder:builder/libs/*"/>
+      <arg value="builder.BuildUtils"/>
+      <arg value="${ant.project.invoked-targets}"/>
+    </exec>
+  </target>
+
+  <target name="build" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="builder:builder/libs/*"/>
