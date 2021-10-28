@@ -1,0 +1,54 @@
+Kiss IntelliJ - Community Edition
+
+Tried on version 2021.2.3
+
+The Community Version does not support Web applications.  However,
+that is not necessary for our purposes.  It's a little inconvenient to
+work with but not too bad.  Basically, we'll use the KISS build system
+for installing and running tomcat.  We'll then attach to the debug port
+available on tomcat.  From there, you'll be able to debug and develop
+as normal.
+
+One positive thing about using the Community version is that it is
+a lot easier to set up.
+
+
+IDE config:
+
+From command line:  ./bld all
+Open with IntelliJ
+Add Ant build (message in lower right-hand corner)
+Unmark top directory as source root
+Mark source roots
+	src/main/java
+	src/main/application
+	builder
+File / Invalidate Cache
+
+
+File / Project Structure
+	Libraries
+		(remove unused libraries)
+		Keep or add
+			commons-compress
+			libs (libs directory)
+	Modules
+		(remove unused libs)
+
+
+Ant / Kiss / All
+	Properties (icon) - de-select “Make build in background”
+
+
+------------------------
+
+Developing and debugging:
+
+From the command line:  ./bld develop
+
+From the IDE:  Run / Attach to Process / 9000
+
+From the browser:  http://localhost:8000
+
+From here you can develop and debug through the IDE as normal.
+

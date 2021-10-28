@@ -1,0 +1,38 @@
+Visual Studio Code (VSC) (also VSCode or VS Code)
+
+Portable, free, open-source IDE from Microsoft
+Works on Windows, Mac, and Linux
+
+Written in Electron - JS, CSS, HTML
+
+To run:  code .
+
+
+Stores files in ~/.vscode and ~/.config/Code
+
+Completely reset vscode:  rm -rf ~/.vscode ~/.config/Code
+
+-----------------------------------------------------------------------------------------------------------------
+
+JDK 11 is required for some of the extensions to VSCode.
+
+Install extensions:
+	Extension Pack for Java
+		Language Support for Java(™) by Red Hat
+		Visual Studio IntelliCode
+	Debugger for Java
+	Tomcat for Java
+	Java Decompiler
+	Groovy
+code-Groovy
+HTML CSS Support
+IntelliSense for CSS class names in HTML
+JavaScript and TypeScript Nightly
+
+Add tomcat server (bottom of file list)
+
+Build app (from command-line)
+
+Start back-end tomcat in debug mode (within vscode):
+	Right-click on build.work/exploded directory
+	Select “Debug on Tomcat Server”

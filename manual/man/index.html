@@ -100,11 +100,7 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.8 Setup And Configuration</a></li>
   <li><a name="toc-Building-The-System" href="#Building-The-System">2.9 Building The System</a>
   <ul class="no-bullet">
-    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.9.1 Using an IDE</a>
-    <ul class="no-bullet">
-      <li><a name="toc-IntelliJ-_0028Ultimate_0029" href="#IntelliJ-_0028Ultimate_0029">2.9.1.1 IntelliJ (Ultimate)</a></li>
-      <li><a name="toc-NetBeans" href="#NetBeans">2.9.1.2 NetBeans</a></li>
-    </ul></li>
+    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.9.1 Using an IDE</a></li>
   </ul></li>
   <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.10 What Do I Do With It Now?</a></li>
 </ul></li>
@@ -646,7 +642,7 @@ and the front-end server runs by executing a single command.
 <a href="https://adoptopenjdk.net">https://adoptopenjdk.net</a>
 </li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL,
 Oracle, SQLite)
-</li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, NetBeans, eclipse)
+</li><li> IDE (e.g.&nbsp;<a href="https://www.jetbrains.com/idea">IntelliJ</a>, VSCode, NetBeans, eclipse)
 </li><li> GIT source code control system
 </li></ol>
 
@@ -897,171 +893,15 @@ started by <em>bld</em> by simply running <em>./bld develop</em> After
 that, the IDE can be used to debug it by <em>attaching</em> to port
 9000.
 </p>
+<p><em>Kiss</em> also comes with an <em>ant</em> build that simply calls the
+native <em>bld</em> program.  This is useful as an intermediary between
+<em>bld</em> and the IDE since many IDE&rsquo;s support <em>ant</em>.
+</p>
 <p>Using your IDE to run the entire process is a bit tedious to initially
 setup but makes the entire process simpler from that point forward.
 Unfortunately, configuring your IDE is completely different for each
-IDE.  Instructions for setting up the Ultimate (commercial) version of
-IntelliJ and NetBeans are included as follows.  Other IDE&rsquo;s may be
-configured according to the instructions that are typically associated
-with the IDE.
-</p>
-<p>Also, bear this in mind, the build process used by <em>bld</em> and that
-of the IDE are not the same.  Use one or the other.
-</p>
-
-<a name="IntelliJ-_0028Ultimate_0029"></a>
-<h4 class="subsubsection">2.9.1.1 IntelliJ (Ultimate)</h4>
-
-<p>Although the Ultimate (commercial) version of IntelliJ costs money, it
-is probably the most powerful, reliable, and best supported IDE.
-<em>Kiss</em> works well with it.  On the other hand, like other IDE&rsquo;s,
-IntelliJ can be a bit tedious to configure properly.  The following
-steps can be used to configure IntelliJ.
-</p>
-<ol>
-<li> Download dependencies.  Even though IntelliJ will be used to build,
-debug, and maintain the system, the <em>Kiss</em> build system
-(<em>bld</em>) should initially be used to install the dependencies.
-And even before that, the build system itself must be built.  All this
-can be accomplished with the following commands:
-<ol type="a" start="1">
-<li> build-builder                [under Windows only]
-</li><li> ./bld libs                   [Windows without the ./]
-</li></ol>
-</li><li> Install tomcat.  You must install a copy of the <em>tomcat</em> server.
-You can do this by either installing it in a typical way from the
-Apache Tomcat site, or you can execute the following <em>bld</em>
-command to create a local tomcat installation for you:
-<ol type="a" start="1">
-<li> ./bld setupTomcat
-</li></ol>
-<p>If <em>bld</em> is used, it will setup tomcat in a directory named
-<em>tomcat</em> under the root of the <em>Kiss</em> installation.
-</p></li><li> Configure IDE for tomcat.  This can be done from within the IDE by:
-<ol type="a" start="1">
-<li> Go to File / Settings / Build, Execution, Deployment / Application Servers.
-</li><li> Click the + in the upper middle of the popup, and then select <em>Tomcat Server</em>
-</li><li> The home and base should both be set to the root of the tomcat directory.  This
-will be an absolute rather than a relative path.
-</li></ol>
-</li><li> Import the project.  From within the IDE:
-<ol type="a" start="1">
-<li> Select <em>Import Project</em>
-</li><li> Select the root directory of the <em>Kiss</em> system.
-</li><li> Select <em>Create project from existing sources</em>
-</li><li> Accept defaults but when you get to the <em>Source files</em> page, de-select the 
-<em>builder</em> directory.
-</li><li> On the libraries page, de-select <em>commons</em> and <em>SimpleWebServer</em>.
-</li><li> Accept the remaining defaults until the project is created.
-</li></ol>
-</li><li> Configure artifact.  The artifact is the end files that IntelliJ deploys to tomcat.  
-These are the files that typically end up in a WAR file used by tomcat.  Configuring
-this is done with the following IntelliJ steps:
-<ol type="a" start="1">
-<li> Right-click on the top node in the <em>Projects</em> pane and select
-<em>Open Module Settings</em>.
-</li><li> Select <em>Artifacts</em>
-</li><li> Click the + in the upper middle of the popup and then select <em>Web
-Application: Exploded</em> / <em>From Module</em> and then select the only module.
-</li><li> Check <em>Include in project build</em>
-</li><li> Expand <em>Kiss</em> under <em>Available Elements</em> and double-click on <em>libs</em>
-</li><li> Click <em>OK</em>
-</li></ol>
-</li><li> Add a run configuration.  From within the IDE:
-<ol type="a" start="1">
-<li> Select <em>Run</em> / <em>Edit configurations...</em>
-</li><li> Click the + in the upper left corner of the popup and select <em>Tomcat Server</em> / 
-<em>Local</em>.
-</li><li> Change Name to <em>Kiss</em>
-</li><li> Verify the <em>Application server</em> (use the tomcat we configured for this project).
-The other defaults should be correct.
-</li><li> Click the <em>Deployment</em> tab
-</li><li> Click the + on the right side of the popup and select <em>Artifact...</em>
-</li><li> Click on the <em>Startup/Connection</em> tab
-</li><li> Under the <em>Debug</em> configuration and then <em>again</em> under the
-<em>Run</em> configuration, add an environment variable named
-<em>KISS_ROOT</em> and set its value to the path of the root of your
-<em>Kiss</em> system.
-</li></ol>
-</li></ol>
-
-<p>After this configuration is performed, you can use the IDE&rsquo;s native
-build and debug processes for development.  However, <em>bld</em> should
-still be used to produce the production WAR file.
-</p>
-
-<a name="NetBeans"></a>
-<h4 class="subsubsection">2.9.1.2 NetBeans</h4>
-
-<p>NetBeans is currently under significant transition since it joined the Apache
-organization.  NetBeans 11.2 did not work correctly with tomcat, however,
-the nightly build as of February 28, 2020 did.  So, we expect that any version 
-<em>after</em> 11.2 should work.  This is how we configured the IDE.  In all cases,
-when not specified otherwise. leave the defaults.
-</p>
-<ol>
-<li> Download dependencies.  Even though NetBeans will be used to build,
-debug, and maintain the system, the <em>Kiss</em> build system
-(<em>bld</em>) should initially be used to install the dependencies.
-And even before that, the build system itself must be built.  All this
-can be accomplished with the following commands:
-<ol type="a" start="1">
-<li> ./build-builder
-</li><li> ./bld libs
-</li></ol>
-</li><li> Install tomcat.  You must install a copy of the <em>tomcat</em> server.
-You can do this by either installing it in a typical way from the
-Apache Tomcat site, or you can execute the following <em>bld</em>
-command to create a local tomcat installation for you:
-<ol type="a" start="1">
-<li> ./bld setupTomcat
-</li></ol>
-<p>If <em>bld</em> is used, it will setup tomcat in a directory named <em>tomcat</em> under
-the root of the <em>Kiss</em> installation.
-</p></li><li> Configure tomcat.  From within NetBeans, do the following:
-<ol type="a" start="1">
-<li> Select <em>Tools</em> and then <em>Servers</em>
-</li><li> Click <em>Add Server...</em>, and then select <em>Apache Tomcat or TomEE</em>
-</li><li> Select the server location.  <em>Catalina Base</em> should be blank.
-</li><li> Set both the <em>Username</em> and <em>Password</em> to <em>admin</em>, and then click 
-<em>Finish</em>
-</li></ol>
-</li><li> Import the Project through the IDE as follows:
-<ol type="a" start="1">
-<li> Select <em>File</em> and then <em>New Project</em>
-</li><li> Select <em>Java Web</em> under <em>Java with Ant</em>, and then select
-<em>Web Application with Existing Sources</em> on the right, and then
-click <em>Next</em>
-</li><li> Under <em>Location</em> select the root of the <em>Kiss</em> system.  The
-remaining defaults on that tab are fine.  Click <em>Next</em>.
-</li><li> On the <em>Server and Settings</em> tab, be sure to select the
-appropriate tomcat server.
-</li><li> The following should be set on the <em>Existing Sources and Libraries</em> page:
-<ol type="A" start="1">
-<li> Set the <em>Web Pages Folder</em> by selecting the <code>src/main/webapp</code>
-directory.
-</li><li> Set the <em>WEB-INF Content</em> by selecting the <code>src/main/java</code> directory.
-</li><li> Set the <em>Libraries Folder</em> by selecting the <code>libs</code> folder
-under the <em>Kiss</em> root.
-</li><li> Remove what is in the <em>Sources Package Folders</em> section and add the two paths
-<em>src/main/application</em> and <em>src/main/java</em>, and then click <em>Finish</em>.
-</li></ol>
-</li></ol>
-</li><li> Set the source folder names by:
-<ol type="a" start="1">
-<li> Right-click on the root of the project in the <em>Projects</em> pane and
-select <em>Properties</em>.
-</li><li> On the <em>Sources</em> page, you will see two labels in the
-<em>Source Package Folders</em> section that we need to change.  Change
-the <em>application</em> one to <em>Application</em> and the second to <em>Kiss Core</em>.
-</li><li> Click <em>OK</em>
-</li></ol>
-</li></ol>
-
-
-<p>After this configuration is performed, you can use the IDE&rsquo;s native
-build and debug processes for development.  However, <em>bld</em> should
-still be used to produce the production WAR file.
+IDE.  Instructions for setting up some of the IDEs is located under the
+<code>manual/IDE-Setup</code> directory.
 </p>
 
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
