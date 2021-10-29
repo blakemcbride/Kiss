@@ -145,6 +145,15 @@ public class Tasks {
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
         }
         if (isWindows) {
+            rm("tomcat\\conf\\tomcat-users.xml");
+            // The following is needed by NetBeans
+            writeToFile("tomcat\\conf\\tomcat-users.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<tomcat-users xmlns=\"http://tomcat.apache.org/xml\"\n" +
+                    "              xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                    "              xsi:schemaLocation=\"http://tomcat.apache.org/xml tomcat-users.xsd\"\n" +
+                    "              version=\"1.0\">\n" +
+                    "  <user username=\"admin\" password=\"admin\" roles=\"tomcat,manager-script\" />\n" +
+                    "</tomcat-users>\n");
             writeToFile("tomcat\\bin\\debug.cmd", "@echo off\n" +
                     "cd " + getcwd() + "\\tomcat\\bin\n" +
                     "set JAVA_HOME=" + getJavaPathOnWindows() + "\n" +
@@ -158,6 +167,15 @@ public class Tasks {
                     "set CATALINA_HOME=" + getTomcatPath() + "\n" +
                     "shutdown.bat\n");
         } else {
+            rm("tomcat/conf/tomcat-users.xml");
+            // The following is needed by NetBeans
+            writeToFile("tomcat/conf/tomcat-users.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<tomcat-users xmlns=\"http://tomcat.apache.org/xml\"\n" +
+                    "              xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                    "              xsi:schemaLocation=\"http://tomcat.apache.org/xml tomcat-users.xsd\"\n" +
+                    "              version=\"1.0\">\n" +
+                    "  <user username=\"admin\" password=\"admin\" roles=\"tomcat,manager-script\" />\n" +
+                    "</tomcat-users>\n");
             writeToFile("tomcat/bin/debug", "#\n" +
                     "cd " + getcwd() + "/tomcat/bin\n" +
                     "export JPDA_ADDRESS=9000\n" +

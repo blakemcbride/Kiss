@@ -11,10 +11,10 @@ steps can be used to configure IntelliJ.
 
 
 From command line:  ./bld all
-Open with IntelliJ
+Open (not "New Project") with IntelliJ
 Add Ant build (message in lower right-hand corner)
-Unmark top directory as source root
-Mark source roots
+Right-click on project root / Mark directory as / Unmark as Source Root
+Right-click on the following directories and mark as Sources Root
 	src/main/java
 	src/main/application
 	builder
@@ -30,7 +30,7 @@ Configure IDE for tomcat.
 
 File / Project Structure
 	Libraries
-		(remove unused libraries)
+		(remove unused libraries - all except the following)
 		Keep or add
 			commons-compress
 			libs (libs directory)
@@ -54,7 +54,7 @@ Run / Edit Configurations
 	Name: Kiss Tomcat
         Application Server:  Kiss Tomcat
 
-	URL:  http://localhost:8080/
+	URL:  http://localhost:8000
 	HTTP port: 8080
 	JMX port:  1099
 	Before Launch:
@@ -62,9 +62,17 @@ Run / Edit Configurations
 		Add: Run ant target 'build'
 	Deployment
 		Add artifact Kiss Exploded
-		Application context:  /
+		Application context:  (blank)
 	Startup/Connection
 		Debug
 			Port: 9000
 
+
+Start the front-end server that comes with Kiss from the command line:
+	./serve
+	
+
+You can now develop and debug.  Front-end and back-end changes with take affect on
+page reload.  Just be sure you have browser caching turned off on your browser
+development console.
 

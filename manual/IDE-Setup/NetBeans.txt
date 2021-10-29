@@ -1,51 +1,53 @@
 
 NetBeans
 
-NetBeans is the most intuitive and easy to use IDE.  Unfortunately, since it became
-an Apache project, it has been going through a huge number of changes.  As of version
-12.5, it wasn't able to debug Groovy code.  It is our hope that this can be rectified soon.
+NetBeans is the most intuitive and easy to use IDE.  Unfortunately,
+since it became an Apache project, it has been going through a huge
+number of changes.  As of version 12.5, it wasn't able to debug Groovy
+code.  Version 12.6-rc1 works!
 
-Some older comments:
+----------------------------------------------------------------------
 
-NetBeans 11.2 did not work correctly with tomcat, however, the nightly build as of February
-28, 2020 did. So, we expect that any version after 11.2 should work. This is how we
-configured the IDE. In all cases, when not specified otherwise, leave the defaults.
-1. Download dependencies. Even though NetBeans will be used to build, debug, and
-maintain the system, the Kiss build system (bld ) should initially be used to install the
-dependencies. And even before that, the build system itself must be built. All this can
-be accomplished with the following commands:
-    a. ./build-builder
-    b. ./bld libs
-2. Install tomcat. You must install a copy of the tomcat server. You can do this by either
-installing it in a typical way from the Apache Tomcat site, or you can execute the
-following bld command to create a local tomcat installation for you:
-    a. ./bld setupTomcat
-    If bld is used, it will setup tomcat in a directory named tomcat under the root of the
-    Kiss installation.
-3. Configure tomcat. From within NetBeans, do the following:
-    a. Select Tools and then Servers
-    b. Click Add Server..., and then select Apache Tomcat or TomEEChapter 2: System Setup
-    c. Select the server location. Catalina Base should be blank.
-    d. Set both the Username and Password to admin, and then click Finish
-4. Import the Project through the IDE as follows:
-    a. Select File and then New Project
-    b. Select Java Web under Java with Ant, and then select Web Application with Ex-isting Sources on the right, and then click Next
-    c. Under Location select the root of the Kiss system. The remaining defaults on that
-       tab are fine. Click Next.
-    d. On the Server and Settings tab, be sure to select the appropriate tomcat server.
-    e. The following should be set on the Existing Sources and Libraries page:
-        A. Set the Web Pages Folder by selecting the src/main/webapp directory.
-        B. Set the WEB-INF Content by selecting the src/main/java directory.
-        C. Set the Libraries Folder by selecting the libs folder under the Kiss root.
-        D. Remove what is in the Sources Package Folders section and add the two paths
-           src/main/application and src/main/java, and then click Finish.
-5. Set the source folder names by:
-    a. Right-click on the root of the project in the Projects pane and select Properties.
-    b. On the Sources page, you will see two labels in the Source Package Folders section
-       that we need to change. Change the application one to Application and the second
-       to Kiss Core.
-    c. Click OK
+12.6-rc1
 
-After this configuration is performed, you can use the IDE’s native build and debug
-processes for development. However, bld should still be used to produce the production
-WAR file.
+./bld all
+Go into NetBeans
+Tools / Plugins / Installed
+	Select and activate HTML5, Java SE, Tools, Groovy, Java Web and EE
+Tools / Servers
+	Add Server
+	Tomcat
+	Server Location:  .../tomcat
+	Catalina Base:  (blank)
+	Username: admin
+	Password: admin
+	
+File / New Project
+	Java with Ant / Java Web / Web Application with Existing Sources
+	Name and Location
+		Location:  (root of your app)
+		(Remaining defaults are fine) Next
+	Server Settings
+		Server:  choose the tomcat that comes with Kiss
+		Context Path:  /
+	Existing Sources and Libraries
+		Web Page Folder:  .../src/main/webapp
+		WEB-INF Content:  .../tomcat/conf
+		Libraries Folder:  .../libs
+	Source Package Folders:
+		src/main/application
+		src/main/java
+		builder
+
+Right-click project root / Properties / Sources
+	Source/Binary Format:  JDK 8
+	
+
+After this configuration is performed, you can use the IDE’s native
+build and debug processes for development. However, bld should still
+be used to produce the production WAR file.
+
+In order to enable the ability to put breakpoints in a Groovy file,
+you must first bring a Java file up in the editor.  This enables
+debugging ability for Java and Groovy.
+

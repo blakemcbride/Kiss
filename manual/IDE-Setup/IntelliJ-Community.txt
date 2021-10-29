@@ -51,4 +51,8 @@ From the IDE:  Run / Attach to Process / 9000
 From the browser:  http://localhost:8000
 
 From here you can develop and debug through the IDE as normal.
+Changes you make to the front-end or back-end will take affect
+immediatly.  No re-builds are necessary.
+
+Be sure to turn off network caching on your browser development console.
 
