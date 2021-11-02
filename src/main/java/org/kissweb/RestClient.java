@@ -172,8 +172,9 @@ public class RestClient {
             con.setUseCaches(false);
 
             con.setRequestMethod(method);
-            for (String header : headers.keySet())
-                con.setRequestProperty(header, headers.getString(header));
+            if (headers != null)
+                for (String header : headers.keySet())
+                    con.setRequestProperty(header, headers.getString(header));
             con.setDoInput(true);
             if (outStr != null && outStr.length() > 0) {
                 con.setDoOutput(true);
