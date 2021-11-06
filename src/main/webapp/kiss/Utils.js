@@ -304,7 +304,7 @@ class Utils {
             return false;
         const idx = add.indexOf("@");
         const dom = add.substr(idx+1);
-        if (!isValidDomain(dom))
+        if (!Utils.isValidDomain(dom))
             return false;
         const user = add.substr(0, idx);
         if (user.length < 1  ||  user[0] === '.' ||  user[user.length-1] === '.')
