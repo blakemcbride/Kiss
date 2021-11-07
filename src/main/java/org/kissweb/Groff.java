@@ -68,7 +68,7 @@ public class Groff {
     }
 
     private void setDefaults2() {
-        pw.println(".nf");
+        pw.println("'nf");
     }
 
     private void writePageHeader(String title) {
