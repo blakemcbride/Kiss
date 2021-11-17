@@ -489,6 +489,35 @@ class AGGrid {
     }
 
     /**
+     * Hide or show column colId.
+     *
+     * @param colId
+     * @param {boolean} val true=show, false=hide
+     * @returns {boolean} previous value
+     */
+    columnShow(colId, val) {
+        let hide;
+        const state = {
+            state: [
+                {
+                    colId: colId,
+                    hide: !val
+                }
+            ]
+        };
+        const priorState = this.gridOptions.columnApi.getColumnState();
+        for (let prop in priorState) {
+            let val = priorState[prop];
+            if (val.colId === colId) {
+                hide = val.hide;
+                break;
+            }
+        }
+        this.gridOptions.columnApi.applyColumnState(state);
+        return !hide;
+    }
+
+    /**
      * Create a new grid context.
      */
     static newGridContext() {
