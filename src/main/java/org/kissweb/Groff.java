@@ -26,6 +26,13 @@ public class Groff {
     private boolean deleteGroffFile = true;
     private String footerLeft = "";
     private String footerRight = "";
+    private int numberOfColumns;
+    private int currentColumn;
+    private int currentRow;
+    private String delim = "\f";
+    private final StringBuilder row = new StringBuilder();
+    private boolean inTitle;
+    private boolean inTable = false;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -61,10 +68,84 @@ public class Groff {
             pw.println(".rm TP");
     }
 
+    /**
+     * Mark the start of a table.
+     *
+     * <code>colFmt</code> is a string specifying the layout for each column as specified by tbl.
+     *
+     * @param colFmt
+     */
+    public void startTable(String colFmt) {
+        colFmt = colFmt.trim();
+        colFmt = colFmt.replaceAll("  ", " ");
+        if (!colFmt.endsWith("."))
+            colFmt += ".";
+        numberOfColumns = 1 + colFmt.replaceAll("[^ ]", "").length();
+        out(".TS H");
+        out("center tab(" + delim + ");");
+        out(colFmt);
+        inTitle = true;
+        inTable = true;
+    }
+
+    /**
+     * Output a column (title or body of table)
+     *
+     * @param col
+     */
+    public void column(String col) {
+        if (currentColumn == numberOfColumns) {
+            if (!inTitle && currentRow++ % 2 == 1)
+                pw.print("\\*Y");
+            pw.println(row);
+            currentColumn = 0;
+            row.setLength(0);
+        }
+        if (currentColumn++ != 0)
+            row.append(delim);
+        row.append(col);
+    }
+
+    /**
+     * Mark the end of the title
+     */
+    public void endTitle() {
+        pw.println(row);
+        row.setLength(0);
+        currentColumn = 0;
+        for (int i=0 ; i < numberOfColumns ; i++) {
+            if (i != 0)
+                pw.print(delim);
+            pw.print("\\_");
+        }
+        pw.println();
+        pw.println(".TH");
+        inTitle = false;
+    }
+
+    /**
+     * To be called at the end of the table
+     */
+    public void endTable() {
+        if (row.length() > 0)
+            pw.println(row);
+        pw.println(".TE");
+        inTable = false;
+    }
+
     private void setDefaults1() {
         pw.println(".PH \"''''\"");
         pw.println(".PF \"'" + footerLeft + "'Page \\\\\\\\nP'" + footerRight + "'\"");
-        pw.println(".S 11");;
+        pw.println(".S 11");
+
+        // Code to help make every other line gray
+        pw.println(".\\\" ----------------------------------------------------------------");
+        pw.println(".defcolor lightgray gray 0.95");
+        pw.println(".fcolor lightgray");
+        pw.println(".nr TW 0");
+        pw.println(".nr LW 0.2p");
+        pw.println(".ds Y \\Z'\\h'-\\\\n[LW]u'\\v'0.22v'\\D'P 0 -.9v 2u*\\\\n[LW]u+\\\\n[TW]u 0 0 .9v''");
+        pw.println(".\\\" ----------------------------------------------------------------");
     }
 
     private void setDefaults2() {
@@ -117,6 +198,8 @@ public class Groff {
      * @throws InterruptedException
      */
     public String process(float sideMargin) throws IOException, InterruptedException {
+        if (inTable)
+            endTable();
         ProcessBuilder builder;
         String psfname = null;
         out(null);

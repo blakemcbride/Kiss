@@ -55,19 +55,18 @@ class Crud {
 
         Groff rpt = new Groff("PhoneList-", "Phone List", false)
 
-        rpt.out(".TS H")
-        rpt.out("Lw(1i) Lw(1i) Lw(1i) .")
-        rpt.out("")
-        rpt.out("Last Name\tFirst Name\tPhone Number")
-        rpt.out("\\_\t\\_\t\\_")
-        rpt.out(".TH")
+        rpt.startTable("Lw(1i) Lw(1i) Lw(1i)")
+        rpt.column("Last Name")
+        rpt.column("First Name")
+        rpt.column("Phone Number")
+        rpt.endTitle()
 
         List<Record> recs = db.fetchAll("select * from phone order by last_name, first_name")
         for (Record rec : recs) {
-            rpt.out(rec.getString("last_name") + "\t" + rec.getString("first_name") + "\t" + rec.getString("phone_number"))
+            rpt.column(rec.getString("last_name"))
+            rpt.column(rec.getString("first_name"))
+            rpt.column(rec.getString("phone_number"))
         }
-
-        rpt.out(".TE")
 
         outjson.put("reportUrl", rpt.process())
     }
