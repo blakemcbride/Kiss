@@ -198,6 +198,7 @@ public class Tasks {
     void develop() {
         Process proc;
         build();
+        setupTomcat();
         if (isWindows)
             runWait(true, "tomcat\\bin\\debug.cmd");
         else
