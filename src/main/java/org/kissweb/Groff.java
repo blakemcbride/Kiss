@@ -161,6 +161,16 @@ public class Groff {
     }
 
     /**
+     * Output an integer date column.  Formats date as MM/DD/YY
+     *
+     * @param date integer date formatted as YYYYMMDD
+     */
+    public void dateColumn2(int date) {
+        String col = DateUtils.format2(date);
+        column(col);
+    }
+
+    /**
      * Output a Date date column.  Formats date as MM/DD/YYYY
      *
      * @param date
