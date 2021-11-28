@@ -30,8 +30,15 @@ public class FileUtils {
     public static File createReportFile(final String prefix, final String suffix)
     {
         File dir;
-        dir = new File(MainServlet.getRootPath(), TempDir);
-        dir.mkdir();
+
+        try {
+            // Needed when Kiss is not used as a server
+            Class.forName("javax.servlet.http.HttpServlet");
+            dir = new File(MainServlet.getRootPath(), TempDir);
+            dir.mkdir();
+        } catch (ClassNotFoundException e) {
+            dir = null;
+        }
         final File f;
         try {
             f = File.createTempFile(prefix, suffix, dir);
@@ -39,7 +46,8 @@ public class FileUtils {
         } catch (IOException e) {
             return null;
         }
-        deleteOldFiles(dir);
+        if (dir != null)
+            deleteOldFiles(dir);
         return f;
     }
 

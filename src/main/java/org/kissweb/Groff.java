@@ -1,6 +1,7 @@
 package org.kissweb;
 
 import java.io.*;
+import java.util.Date;
 
 /**
  * Class to interface with the groff typesetting system.  This is an easy way to generate nicely formatted reports.
@@ -107,6 +108,69 @@ public class Groff {
     }
 
     /**
+     * Output a numeric double column
+     *
+     * @param num the number to be output
+     * @param msk   Format mask - any combination of the following:<br>
+     *      *  <ul>
+     *      *     <li>B = blank if zero</li>
+     *      *     <li>C = add commas</li>
+     *      *     <li>L = left justify number</li>
+     *      *     <li>P = put perenthises around negative numbers</li>
+     *      *     <li>Z = zero fill</li>
+     *      *     <li>D = floating dollar sign</li>
+     *      *     <li>U = uppercase letters in conversion</li>
+     *      *     <li>R = add a percent sign to the end of the number</li>
+     *      *  </ul>
+     * @param dp number of decimal places (-1 means auto)
+     */
+    public void column(double num, String msk, int dp) {
+        String col = NumberFormat.Format(num, msk, 0, dp);
+        column(col);
+    }
+
+    /**
+     * Output a numeric integer column
+     *
+     * @param num the number to be output
+     * @param msk   Format mask - any combination of the following:<br>
+     *      *  <ul>
+     *      *     <li>B = blank if zero</li>
+     *      *     <li>C = add commas</li>
+     *      *     <li>L = left justify number</li>
+     *      *     <li>P = put perenthises around negative numbers</li>
+     *      *     <li>Z = zero fill</li>
+     *      *     <li>D = floating dollar sign</li>
+     *      *     <li>U = uppercase letters in conversion</li>
+     *      *     <li>R = add a percent sign to the end of the number</li>
+     *      *  </ul>
+     */
+    public void column(int num, String msk) {
+        String col = NumberFormat.Format((double) num, msk, 0, 0);
+        column(col);
+    }
+
+    /**
+     * Output an integer date column.  Formats date as MM/DD/YYYY
+     *
+     * @param date integer date formatted as YYYYMMDD
+     */
+    public void dateColumn(int date) {
+        String col = DateUtils.format4(date);
+        column(col);
+    }
+
+    /**
+     * Output a Date date column.  Formats date as MM/DD/YYYY
+     *
+     * @param date
+     */
+    public void dateColumn(Date date) {
+        String col = DateUtils.format4(DateUtils.toInt(date));
+        column(col);
+    }
+
+    /**
      * Mark the end of the title
      */
     public void endTitle() {
@@ -191,11 +255,13 @@ public class Groff {
 
     /**
      * Process the groff/tbl/mm input, produce the PDF output file, and return the path to the PDF file.
+     * The file name returned is suitable for a web server and not the absolute file path.
      *
      * @param sideMargin size of the margin on the left side of the page in inches
      * @return
      * @throws IOException
      * @throws InterruptedException
+     * @see #getRealFileName()
      */
     public String process(float sideMargin) throws IOException, InterruptedException {
         if (inTable)
@@ -258,5 +324,13 @@ public class Groff {
     public void setFooter(String left, String right) {
         footerLeft = left == null ? "" : left;
         footerRight = right == null ? "" : right;
+    }
+
+    /**
+     * The file name returned elsewhere is one convenient for web applications.
+     * This method returns the real file name - not relative to a web server.
+     */
+    public String getRealFileName() {
+        return pdfname;
     }
 }
