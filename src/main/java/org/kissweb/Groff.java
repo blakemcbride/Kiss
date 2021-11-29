@@ -78,7 +78,7 @@ public class Groff {
      */
     public void startTable(String colFmt) {
         colFmt = colFmt.trim();
-        colFmt = colFmt.replaceAll("  ", " ");
+        colFmt = colFmt.replaceAll(" {2}", " ");
         if (!colFmt.endsWith("."))
             colFmt += ".";
         numberOfColumns = 1 + colFmt.replaceAll("[^ ]", "").length();
@@ -89,12 +89,7 @@ public class Groff {
         inTable = true;
     }
 
-    /**
-     * Output a column (title or body of table)
-     *
-     * @param col
-     */
-    public void column(String col) {
+    private void flush() {
         if (currentColumn == numberOfColumns) {
             if (!inTitle && currentRow++ % 2 == 1)
                 pw.print("\\*Y");
@@ -102,9 +97,37 @@ public class Groff {
             currentColumn = 0;
             row.setLength(0);
         }
+    }
+
+    /**
+     * Output a column (title or body of table)
+     *
+     * @param col
+     */
+    public void column(String col) {
+        flush();
         if (currentColumn++ != 0)
             row.append(delim);
-        row.append(col);
+        if (col != null)
+            row.append(col);
+    }
+
+    /**
+     * Output a column that may wrap vertically.
+     *
+     * @param col
+     */
+    public void columnWrap(String col) {
+        flush();
+        if (currentColumn++ != 0)
+            row.append(delim);
+        if (col != null)
+            if (col.length() > 3) {
+                row.append("T{\n");
+                row.append(col);
+                row.append("\nT}");
+            } else
+                row.append(col);
     }
 
     /**
@@ -116,7 +139,7 @@ public class Groff {
      *      *     <li>B = blank if zero</li>
      *      *     <li>C = add commas</li>
      *      *     <li>L = left justify number</li>
-     *      *     <li>P = put perenthises around negative numbers</li>
+     *      *     <li>P = put parentheses around negative numbers</li>
      *      *     <li>Z = zero fill</li>
      *      *     <li>D = floating dollar sign</li>
      *      *     <li>U = uppercase letters in conversion</li>
@@ -138,7 +161,7 @@ public class Groff {
      *      *     <li>B = blank if zero</li>
      *      *     <li>C = add commas</li>
      *      *     <li>L = left justify number</li>
-     *      *     <li>P = put perenthises around negative numbers</li>
+     *      *     <li>P = put parentheses around negative numbers</li>
      *      *     <li>Z = zero fill</li>
      *      *     <li>D = floating dollar sign</li>
      *      *     <li>U = uppercase letters in conversion</li>
@@ -201,10 +224,16 @@ public class Groff {
      * To be called at the end of the table
      */
     public void endTable() {
-        if (row.length() > 0)
-            pw.println(row);
-        pw.println(".TE");
-        inTable = false;
+        if (inTable) {
+            if (row.length() > 0) {
+                if (!inTitle && currentRow++ % 2 == 1)
+                    pw.print("\\*Y");
+                pw.println(row);
+            }
+            pw.println(".TE");
+            inTable = false;
+        }
+        inTitle = false;
     }
 
     private void setDefaults1() {
@@ -223,7 +252,7 @@ public class Groff {
     }
 
     private void setDefaults2() {
-        pw.println("'nf");
+ //       pw.println("'nf");
     }
 
     private void writePageHeader(String title) {
