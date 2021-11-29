@@ -680,4 +680,14 @@ public class Connection implements AutoCloseable {
     public static java.sql.Date toDate(int dt) {
         return dt == 0 ? null : new java.sql.Date(DateUtils.toDate(dt).getTime());
     }
+
+    /**
+     * local method used to assure Dates are of the right type.
+     *
+     * @param dt
+     * @return
+     */
+    static Object fixObj(Object dt) {
+        return dt != null && dt.getClass() == java.util.Date.class ? new java.sql.Date(((java.util.Date) dt).getTime()) : dt;
+    }
 }

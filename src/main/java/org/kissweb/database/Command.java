@@ -101,8 +101,9 @@ public class Command implements AutoCloseable {
                 pcols.clear();
         } else
             pstat.clearParameters();
-        for (int i = 0; i < args.length; i++)
-            pstat.setObject(i + 1, args[i]);
+        if (args != null)
+            for (int i = 0; i < args.length; i++)
+                pstat.setObject(i + 1, Connection.fixObj(args[i]));
         if (lastSQL == null)
             lastSQL = sql;
         isSelect = false;
@@ -146,8 +147,9 @@ public class Command implements AutoCloseable {
                 pcols.clear();
         } else
             pstat.clearParameters();
-        for (int i = 0; i < args.length; i++)
-            pstat.setObject(i + 1, args[i]);
+        if (args != null)
+            for (int i = 0; i < args.length; i++)
+                pstat.setObject(i + 1, Connection.fixObj(args[i]));
         Cursor c = new Cursor(this);
         if (lastSQL == null)
             lastSQL = sql;

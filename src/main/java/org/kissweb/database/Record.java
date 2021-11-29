@@ -460,15 +460,13 @@ public class Record implements AutoCloseable {
                 cursor.ustmt.clearParameters();
             int i = 1;
             for (AbstractMap.SimpleEntry<String,Object> fld : cf)
-                cursor.ustmt.setObject(i++, fld.getValue());
+                cursor.ustmt.setObject(i++, Connection.fixObj(fld.getValue()));
             for (String pcol : cursor.cmd.getPriColumns(cursor))
-                cursor.ustmt.setObject(i++, ocols.get(pcol));
+                cursor.ustmt.setObject(i++, Connection.fixObj(ocols.get(pcol)));
             cursor.ustmt.execute();
             // now update our memory of the original values
             ocols.clear();
-            cols.forEach((key, val) -> {
-                ocols.put(key, val);
-            });
+            ocols.putAll(cols);
         }
     }
 
@@ -501,7 +499,7 @@ public class Record implements AutoCloseable {
             try (PreparedStatement ustmt = conn.conn.prepareStatement(sql.toString())) {
                 int i = 1;
                 for (String pcol : conn.getPrimaryColumns(table))
-                    ustmt.setObject(i++, cols.get(pcol));
+                    ustmt.setObject(i++, Connection.fixObj(cols.get(pcol)));
                 ustmt.execute();
             }
             return;
@@ -525,7 +523,7 @@ public class Record implements AutoCloseable {
             cursor.ustmt.clearParameters();
         int i = 1;
         for (String pcol : cursor.cmd.getPriColumns(cursor))
-            cursor.ustmt.setObject(i++, ocols.get(pcol));
+            cursor.ustmt.setObject(i++, Connection.fixObj(ocols.get(pcol)));
         cursor.ustmt.execute();
     }
 
@@ -571,7 +569,7 @@ public class Record implements AutoCloseable {
             pstmt.clearParameters();
         int i = 1;
         for (Object val : cols.values())
-            pstmt.setObject(i++, val);
+            pstmt.setObject(i++, Connection.fixObj(val));
 //        ResultSet rset = pstmt.executeQuery();
         pstmt.executeUpdate();
         Object nextId = null;
@@ -619,7 +617,7 @@ public class Record implements AutoCloseable {
             pstmt.clearParameters();
         int i = 1;
         for (Object val : cols.values())
-            pstmt.setObject(i++, val);
+            pstmt.setObject(i++, Connection.fixObj(val));
         return pstmt.execute();
     }
 
@@ -644,7 +642,7 @@ public class Record implements AutoCloseable {
      * @param rec the record to be copied from
      */
     public void copy(Record rec) {
-        rec.cols.forEach((key, value) -> cols.put(key, value));
+        cols.putAll(rec.cols);
     }
 
     /**
@@ -656,7 +654,7 @@ public class Record implements AutoCloseable {
         if (pstmt != null) {
             try {
                 pstmt.close();
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
             pstmt = null;
         }
