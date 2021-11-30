@@ -37,6 +37,7 @@ import org.json.JSONObject;
 import org.kissweb.DateUtils;
 
 import java.sql.*;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -682,12 +683,33 @@ public class Connection implements AutoCloseable {
     }
 
     /**
-     * local method used to assure Dates are of the right type.
+     * local method used to assure Dates of any type are of the SQL type.
      *
      * @param dt
      * @return
      */
     static Object fixObj(Object dt) {
-        return dt != null && dt.getClass() == java.util.Date.class ? new java.sql.Date(((java.util.Date) dt).getTime()) : dt;
+        if (dt != null) {
+            Class<?> cls = dt.getClass();
+            if (cls == java.util.Date.class)
+                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+            else if (cls == java.util.Calendar.class)
+                dt = new java.sql.Date(((java.util.Calendar) dt).getTime().getTime());
+            else if (cls == java.time.LocalDateTime.class) {
+                java.time.LocalDateTime ldt = (java.time.LocalDateTime) dt;
+                dt = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+            } else if (cls == java.time.ZonedDateTime.class) {
+                java.time.ZonedDateTime zdt = (java.time.ZonedDateTime) dt;
+                dt = Date.from(zdt.toInstant());
+                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+            } else if (cls == java.time.LocalDate.class) {
+                java.time.LocalDate ld = (java.time.LocalDate) dt;
+                java.time.ZonedDateTime zonedDateTime = ld.atStartOfDay(ZoneId.systemDefault());
+                dt = Date.from(zonedDateTime.toInstant());
+                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+            }
+        }
+        return dt;
     }
 }
