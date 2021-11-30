@@ -693,7 +693,7 @@ public class Connection implements AutoCloseable {
             Class<?> cls = dt.getClass();
             if (cls == java.util.Date.class)
                 dt = new java.sql.Date(((java.util.Date) dt).getTime());
-            else if (cls == java.util.Calendar.class)
+            else if (dt instanceof java.util.Calendar)
                 dt = new java.sql.Date(((java.util.Calendar) dt).getTime().getTime());
             else if (cls == java.time.LocalDateTime.class) {
                 java.time.LocalDateTime ldt = (java.time.LocalDateTime) dt;
