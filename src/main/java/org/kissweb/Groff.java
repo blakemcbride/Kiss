@@ -34,6 +34,7 @@ public class Groff {
     private final StringBuilder row = new StringBuilder();
     private boolean inTitle;
     private boolean inTable = false;
+    private String runDate;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -87,6 +88,15 @@ public class Groff {
         out(colFmt);
         inTitle = true;
         inTable = true;
+    }
+
+    /**
+     * Manually set the run date string.  An empty string (but not null) will cause no run date to be printed.
+     *
+     * @param rt
+     */
+    public void setRuntime(String rt) {
+        runDate = rt;
     }
 
     private void flush() {
@@ -258,7 +268,10 @@ public class Groff {
     private void writePageHeader(String title) {
         pw.println(".de TP");
         pw.println("'SP .5i");
-        pw.println("'tl '''Run date: " + DateTime.currentDateTimeFormatted());
+        if (runDate == null)
+            pw.println("'tl '''Run date: " + DateTime.currentDateTimeFormatted());
+        else if (!runDate.isEmpty())
+            pw.println("'tl '''" + runDate);
         pw.println("'tl ''\\s(14" + title + "\\s0''");
         pw.println("'SP");
         pw.println("..");
