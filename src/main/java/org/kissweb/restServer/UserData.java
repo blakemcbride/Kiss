@@ -52,7 +52,10 @@ public class UserData {
     }
 
     public void putUserData(String key, Object value) {
-        data.put(key, value);
+        if (value == null)
+            data.remove(key);
+        else
+            data.put(key, value);
     }
 
     public Object getUserData(String key) {
