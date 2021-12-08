@@ -22,7 +22,7 @@ class Login {
         if (rec == null)
             return null    //  invalid user
         UserData ud = UserCache.newUser(user, password, (Integer) rec.getInt("user_id"))
-//        ud.addUserData("abc", 5)    add any user specific data
+//        ud.putUserData("abc", 5)    add any user specific data
         return ud
     }
 
