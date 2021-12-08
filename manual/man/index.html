@@ -125,10 +125,12 @@ ul.no-bullet {list-style: none}
       <li><a name="toc-BLD" href="#BLD">4.1.1.2 BLD</a></li>
     </ul></li>
     <li><a name="toc-Application-Code" href="#Application-Code">4.1.2 Application Code</a></li>
-    <li><a name="toc-Programming-Languages" href="#Programming-Languages">4.1.3 Programming Languages</a></li>
+    <li><a name="toc-Cached-User-Data" href="#Cached-User-Data">4.1.3 Cached User Data</a></li>
+    <li><a name="toc-Programming-Languages" href="#Programming-Languages">4.1.4 Programming Languages</a></li>
   </ul></li>
   <li><a name="toc-Front_002dend-Development-1" href="#Front_002dend-Development-1">4.2 Front-end Development</a></li>
   <li><a name="toc-Reports-And-Exports" href="#Reports-And-Exports">4.3 Reports And Exports</a></li>
+  <li><a name="toc-Authentication" href="#Authentication">4.4 Authentication</a></li>
 </ul></li>
 <li><a name="toc-Front_002dend-API" href="#Front_002dend-API">5 Front-end API</a>
 <ul class="no-bullet">
@@ -1203,8 +1205,24 @@ be defined and used within web service classes.
 </p>
 <p>Of course during this process, <code>Kiss</code> handles many possible error conditions.
 </p>
+<a name="cached_005fuser_005fdata"></a><a name="Cached-User-Data"></a>
+<h4 class="subsection">4.1.3 Cached User Data</h4>
+
+<p>During the login process, user-specific data may be cached.  This
+often occurs in the <code>login</code> Groovy method of the <code>Login</code>
+application-specific class.
+</p>
+<p>Every web service has access to this data via the following method:
+</p>
+<div class="example">
+<pre class="example">        servlet.getUserData().getUserData(&quot;dataName&quot;)
+        servlet.getUserData().putUserData(&quot;dataName&quot;, &quot;datValue&quot;)
+</pre></div>
+
+<p>See <a href="#authentication">Authentication</a>
+</p>
 <a name="Programming-Languages"></a>
-<h4 class="subsection">4.1.3 Programming Languages</h4>
+<h4 class="subsection">4.1.4 Programming Languages</h4>
 
 <p>At this point, <em>Kiss</em> supports the development of back-end REST
 services in the Java, Groovy, or Common Lisp languages.  Groovy was
@@ -1307,6 +1325,21 @@ tables, and overall formatting of your reports. See
 front-end by just providing the URL to the file.  At that point, the
 front-end <code>Utils.showReport</code> takes the URL returned by the back-end
 and downloads the file.
+</p>
+<a name="authentication"></a><a name="Authentication"></a>
+<h3 class="section">4.4 Authentication</h3>
+
+<p><em>Kiss</em> has built-in authentication.  However, each application has its
+own method of storing and validating users.  Additionally, each application
+may have its own user-specific data it may want to retain between web service
+calls. <em>Kiss</em> has a generic and easy way of handling these needs.
+</p>
+<p>Application-specific user login and data is handled by the Groovy file
+located in the <code>application</code> directory named <code>Login.groovy</code>.
+That file must have two methods; <code>login</code> and <code>checkLogin</code>.  
+See that file for more details.
+</p>
+<p>See <a href="#cached_005fuser_005fdata">Cached User Data</a>
 </p>
 
 

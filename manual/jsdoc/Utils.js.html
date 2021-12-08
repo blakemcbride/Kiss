@@ -1497,22 +1497,22 @@ class Utils {
         if (!html)
             return '';
         return html
-            .replace(/&lt;br>/g, '\n')
+            .replace(/&lt;br *[^>]*>/g, '\n')
+            .replace(/&lt;div *[^>]*>/g, '\n')
+            .replace(/&lt;\/div>/g, '')
+            .replace(/&lt;span *[^>]*>/g, '')
+            .replace(/&lt;\/span>/g, '')
+            .replace(/&lt;font *[^>]*>/g, '')
+            .replace(/&lt;\/font>/g, '')
+            .replace(/&lt;[ap] *[^>]*>/g, '')
+            .replace(/&lt;\/[ap]>/g, '')
+            // these need to be last
             .replace(/&amp;sp;/g, ' ')
             .replace(/&amp;nbsp;/g, ' ')
             .replace(/&amp;amp;/g, '&amp;')
             .replace(/&amp;lt;/g, '&lt;')
             .replace(/&amp;gt;/g, '>')
             .replace(/&amp;quot;/g, '"')
-            .replace(/&lt;div[^>]*>/g, '\n')
-            .replace(/&lt;\/div>/g, '')
-            .replace(/&lt;span[^>]*>/g, '')
-            .replace(/&lt;\/span>/g, '')
-            .replace(/&lt;font[^>]*>/g, '')
-            .replace(/&lt;\/font>/g, '')
-            .replace(/&lt;a>/g, '')
-            .replace(/&lt;[ap] +[^>]*>/g, '')
-            .replace(/&lt;\/[ap]>/g, '')
             ;
     }
 

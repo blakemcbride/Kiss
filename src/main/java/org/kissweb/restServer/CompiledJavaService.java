@@ -20,7 +20,7 @@ public class CompiledJavaService {
             return ProcessServlet.ExecutionReturn.NotFound;   // not done yet
 
 
-        Class cls = null;
+        Class<?> cls = null;
         String dynamicClassPath = MainServlet.getDynamicClassPath();
         if (!ms.isEmpty(dynamicClassPath)) {
             if (dynamicClassPath.charAt(dynamicClassPath.length() - 1) != '/')
@@ -39,7 +39,7 @@ public class CompiledJavaService {
                 // ignore
             }
         if (cls != null) {
-            Class[] ca = {
+            Class<?>[] ca = {
                     JSONObject.class,
                     JSONObject.class,
                     Connection.class,
@@ -48,9 +48,7 @@ public class CompiledJavaService {
 
             Method methp;
             try {
-                @SuppressWarnings("unchecked")
-                Method tmethp = cls.getMethod(_method, ca);
-                methp = tmethp;  // had to use tmethp to be able to use @SuppressWarnings
+                methp = cls.getMethod(_method, ca);  // had to use tmethp to be able to use @SuppressWarnings
             } catch (Exception e) {
                 ms.errorReturn(response, "Java method " + _method + " not found in class " + this.getClass().getName(), e);
                 return ProcessServlet.ExecutionReturn.Error;

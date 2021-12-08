@@ -3,55 +3,35 @@ package org.kissweb.restServer;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.Hashtable;
 
 /**
+ * This class manages all the users currently logged into the system.
+ *
  * Author: Blake McBride
  * Date: 3/23/18
  */
 public class UserCache {
 
-    private static final HashMap<String, UserData> uuidTable = new HashMap<>();
+    private static final Hashtable<String, UserData> uuidTable = new Hashtable<>();
     private static LocalDateTime lastPurge = LocalDateTime.now();
     private static int inactiveUserMaxSeconds;
 
-    static class UserData {
-        String username;
-        String password;
-        int user_id;
-        String uuid;
-        LocalDateTime lastAccessDate;
-
-        UserData(String user, String pw) {
-            username = user;
-            password = pw;
-            uuid = UUID.randomUUID().toString();
-            lastAccessDate = LocalDateTime.now();
-        }
-    }
-
-    static UserData newUser(String user, String pw) {
-        UserData ud = new UserData(user, pw);
-        synchronized (uuidTable) {
-            uuidTable.put(ud.uuid, ud);
-        }
+    static public UserData newUser(String user, String pw, Object userId) {
+        UserData ud = new UserData(user, pw, userId);
+        uuidTable.put(ud.getUuid(), ud);
         return ud;
     }
 
     static UserData findUser(String uuid) {
         UserData ud;
-        synchronized (uuidTable) {
-            purgeOld();
-            ud = uuidTable.get(uuid);
-         }
+        purgeOld();
+        ud = uuidTable.get(uuid);
         return ud;
     }
 
     static void removeUser(String uuid) {
-        synchronized (uuidTable) {
-            uuidTable.remove(uuid);
-        }
+        uuidTable.remove(uuid);
     }
 
     private static void purgeOld() {
@@ -65,8 +45,8 @@ public class UserCache {
             maxSeconds = 3600;  // no more than 60 minutes
         old = old.minusSeconds(maxSeconds);
         for (UserData ud : uuidTable.values())
-            if (ud.lastAccessDate.isBefore(old))
-                purge.add(ud.uuid);
+            if (ud.getLastAccessDate().isBefore(old))
+                purge.add(ud.getUuid());
         for (String s : purge)
             uuidTable.remove(s);
         lastPurge = LocalDateTime.now();

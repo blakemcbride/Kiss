@@ -114,6 +114,17 @@ public class MainServlet extends HttpServlet {
         applicationPath = path;
     }
 
+    /**
+     * This is a very important method.  It tells the difference between running in some sort of development
+     * environment or a production environment.  If running in a production environment, you want to get the
+     * source files that came with the distribution.  However, if you're in a development environment, you want to get
+     * the development source files so that you can develop while the system is running.
+     *
+     * This method sets the <code>rootPath</code> and <code>applicationPath</code>.  <code>rootPath</code> is the root
+     * of the application.  <code>applicationPath</code> is the root of the application files.
+     *
+     * @param request
+     */
     private static void setApplicationPath(HttpServletRequest request) {
         rootPath = request.getServletContext().getRealPath("/");
         System.out.println("* * * Context path = " + rootPath);

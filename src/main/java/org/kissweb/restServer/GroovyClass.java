@@ -27,7 +27,7 @@ public class GroovyClass {
 
 	private static GroovyClassLoader groovyLoader;
 	
-	private final Class groovyClass;
+	private final Class<?> groovyClass;
 
 	/**
 	 * Load a groovy source file.  If the file was previously loaded the old version will be
@@ -50,6 +50,9 @@ public class GroovyClass {
 		else
 			path = "";
 
+		if (!sourceFile.endsWith(".groovy"))
+			sourceFile += ".groovy";
+
 		if (groovyLoader == null)
 			groovyLoader = new GroovyClassLoader(GroovyClass.class.getClassLoader());
 		groovyClass = groovyLoader.parseClass(new GroovyCodeSource(new File(path + sourceFile)), false);
@@ -64,20 +67,16 @@ public class GroovyClass {
 		groovyLoader = null;
 	}
 
-	Method getMethod(String methodName, Class... argTypes) throws Exception {
-		@SuppressWarnings("unchecked")
-		Method methp = groovyClass.getMethod(methodName, argTypes);
-		return methp;
+	Method getMethod(String methodName, Class<?> ... argTypes) throws Exception {
+		return groovyClass.getMethod(methodName, argTypes);
 	}
 
 	private Method getMethod(String methodName, Object... args) throws Exception {
-		Class[] argTypes = new Class[args.length];
+		Class<?>[] argTypes = new Class[args.length];
 		for (int i = 0; i < args.length; i++)
 			argTypes[i] = args[i].getClass();  //   Object.class;
 
-		@SuppressWarnings("unchecked")
-		Method methp = groovyClass.getMethod(methodName, argTypes);
-		return methp;
+		return groovyClass.getMethod(methodName, argTypes);
 	}
 		
 	public static Object invoke(boolean calculatePath, String sourceFile, String methodName, Object instance, Object ... args) throws Exception {
@@ -96,21 +95,19 @@ public class GroovyClass {
 		return methp.invoke(instance, args);
 	}
 		
-	@SuppressWarnings("unchecked")
-	public Constructor getConstructor(Class ... argTypes) throws Exception {
+	public Constructor<?> getConstructor(Class<?> ... argTypes) throws Exception {
 		return groovyClass.getConstructor(argTypes);
 	}
 		
-	@SuppressWarnings("unchecked")
-	private Constructor getConstructor(Object... args) throws Exception {
-		Class[] argTypes = new Class[args.length];
+	private Constructor<?> getConstructor(Object... args) throws Exception {
+		Class<?>[] argTypes = new Class[args.length];
 		for (int i = 0; i < args.length; i++)
 			argTypes[i] = args[i].getClass();  //   Object.class;
 		return groovyClass.getConstructor(argTypes);
 	}
 		
 	Object invokeConstructor(Object... args) throws Exception {
-		Constructor c = getConstructor(args);
+		Constructor<?> c = getConstructor(args);
 		return c.newInstance(args);
 	}
 

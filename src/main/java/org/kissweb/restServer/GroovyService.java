@@ -121,7 +121,6 @@ public class GroovyService {
             };
 
             try {
-                @SuppressWarnings("unchecked")
                 Method methp = ci.gclass.getMethod(_method, ca);
                 if (methp == null) {
                     if (ms != null)

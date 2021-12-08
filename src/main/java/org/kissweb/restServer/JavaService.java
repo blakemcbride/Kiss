@@ -28,12 +28,12 @@ class JavaService {
 
     private static class JavaClassInfo {
         static long cacheLastChecked = 0;   // last time cache unload checked
-        Class jclass;
+        Class<?> jclass;
         long lastModified;
         long lastAccess;
         int executing;
 
-        JavaClassInfo(Class jc, long lm) {
+        JavaClassInfo(Class<?> jc, long lm) {
             jclass = jc;
             lastModified = lm;
             lastAccess = (new Date()).getTime() / 1000L;
@@ -41,7 +41,6 @@ class JavaService {
         }
     }
 
-    @SuppressWarnings("unchecked")
     ProcessServlet.ExecutionReturn tryJava(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         JavaClassInfo ci;
         String fileName = MainServlet.getApplicationPath() + _className.replace(".", "/") + ".java";
@@ -114,7 +113,7 @@ class JavaService {
     }
 
     private synchronized static JavaClassInfo loadJavaClass(String className, String fileName) throws Exception {
-        Class jclass;
+        Class<?> jclass;
         JavaClassInfo ci;
         if (javaClassCache.containsKey(fileName)) {
             ci = javaClassCache.get(fileName);

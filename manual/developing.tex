@@ -169,6 +169,21 @@ be defined and used within web service classes.
 
 Of course during this process, @code{Kiss} handles many possible error conditions.
 
+@anchor{cached_user_data}@subsection Cached User Data
+
+During the login process, user-specific data may be cached.  This
+often occurs in the @code{login} Groovy method of the @code{Login}
+application-specific class.
+
+Every web service has access to this data via the following method:
+
+@example
+        servlet.getUserData().getUserData("dataName")
+        servlet.getUserData().putUserData("dataName", "datValue")
+@end example
+
+@xref{authentication,,Authentication}
+
 @subsection Programming Languages
 
 At this point, @emph{Kiss} supports the development of back-end REST
@@ -272,3 +287,17 @@ When files are produced by the back-end, they are sent to the
 front-end by just providing the URL to the file.  At that point, the
 front-end @code{Utils.showReport} takes the URL returned by the back-end
 and downloads the file.
+
+@anchor{authentication}@section Authentication
+
+@emph{Kiss} has built-in authentication.  However, each application has its
+own method of storing and validating users.  Additionally, each application
+may have its own user-specific data it may want to retain between web service
+calls. @emph{Kiss} has a generic and easy way of handling these needs.
+
+Application-specific user login and data is handled by the Groovy file
+located in the @code{application} directory named @code{Login.groovy}.
+That file must have two methods; @code{login} and @code{checkLogin}.  
+See that file for more details.
+
+@xref{cached_user_data,,Cached User Data}

@@ -143,18 +143,22 @@ public class Groff {
     /**
      * Output a numeric double column
      *
+     * <code>msk</code> is a <code>String</code> consisting of the following characters:
+     *
+     * <ul>
+     *     <li>B = blank if zero</li>
+     *     <li>C = add commas</li>
+     *     <li>L = left justify number</li>
+     *     <li>P = put parentheses around negative numbers</li>
+     *     <li>Z = zero fill</li>
+     *     <li>D = floating dollar sign</li>
+     *     <li>U = uppercase letters in conversion</li>
+     *    <li>R = add a percent sign to the end of the number</li>
+     * </ul>
+     *
      * @param num the number to be output
-     * @param msk   Format mask - any combination of the following:<br>
-     *      *  <ul>
-     *      *     <li>B = blank if zero</li>
-     *      *     <li>C = add commas</li>
-     *      *     <li>L = left justify number</li>
-     *      *     <li>P = put parentheses around negative numbers</li>
-     *      *     <li>Z = zero fill</li>
-     *      *     <li>D = floating dollar sign</li>
-     *      *     <li>U = uppercase letters in conversion</li>
-     *      *     <li>R = add a percent sign to the end of the number</li>
-     *      *  </ul>
+     * @param msk   Format mask
+
      * @param dp number of decimal places (-1 means auto)
      */
     public void column(double num, String msk, int dp) {
@@ -165,18 +169,21 @@ public class Groff {
     /**
      * Output a numeric integer column
      *
+     * <code>msk</code> is a <code>String</code> consisting of the following characters:
+     *
+     * <ul>
+     *     <li>B = blank if zero</li>
+     *     <li>C = add commas</li>
+     *     <li>L = left justify number</li>
+     *     <li>P = put parentheses around negative numbers</li>
+     *     <li>Z = zero fill</li>
+     *     <li>D = floating dollar sign</li>
+     *     <li>U = uppercase letters in conversion</li>
+     *    <li>R = add a percent sign to the end of the number</li>
+     * </ul>
+     *
      * @param num the number to be output
-     * @param msk   Format mask - any combination of the following:<br>
-     *      *  <ul>
-     *      *     <li>B = blank if zero</li>
-     *      *     <li>C = add commas</li>
-     *      *     <li>L = left justify number</li>
-     *      *     <li>P = put parentheses around negative numbers</li>
-     *      *     <li>Z = zero fill</li>
-     *      *     <li>D = floating dollar sign</li>
-     *      *     <li>U = uppercase letters in conversion</li>
-     *      *     <li>R = add a percent sign to the end of the number</li>
-     *      *  </ul>
+     * @param msk   Format mask
      */
     public void column(int num, String msk) {
         String col = NumberFormat.Format((double) num, msk, 0, 0);

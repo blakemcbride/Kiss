@@ -30,10 +30,11 @@ public class ProcessServlet implements Runnable {
     static final int CheckCacheDelay = 60;  // how often to check to unload microservices in seconds
     private ServletContext servletContext;
 
-    private HttpServletRequest request;
-    private HttpServletResponse response;
-    private AsyncContext asyncContext;
-    private PrintWriter out;
+    private final HttpServletRequest request;
+    private final HttpServletResponse response;
+    private final AsyncContext asyncContext;
+    private final PrintWriter out;
+    private UserData ud;
     protected Connection DB;
 
     ProcessServlet(org.kissweb.restServer.QueueManager.Packet packet) {
@@ -48,7 +49,7 @@ public class ProcessServlet implements Runnable {
         try {
             run2();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 
@@ -92,7 +93,7 @@ public class ProcessServlet implements Runnable {
             Part filePart = null;
             try {
                 filePart = request.getPart("_file-" + i);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
             if (filePart == null)
                 break;
@@ -248,7 +249,8 @@ public class ProcessServlet implements Runnable {
                 try {
                     if (MainServlet.isDebug())
                         System.err.println("Validating uuid " + injson.getString("_uuid"));
-                    checkLogin(injson.getString("_uuid"));
+                    ud = UserCache.findUser(injson.getString("_uuid"));
+                    checkLogin(ud);
                 } catch (Exception e) {
                     if (MainServlet.isDebug())
                         System.err.println("Login failure.");
@@ -257,7 +259,9 @@ public class ProcessServlet implements Runnable {
                 }
                 if (MainServlet.isDebug())
                     System.err.println("Login success");
-            }
+            } else
+                ud = UserCache.findUser(injson.getString("_uuid"));
+
         res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
         if (res == ProcessServlet.ExecutionReturn.Error)
             return;
@@ -290,12 +294,11 @@ public class ProcessServlet implements Runnable {
         }
     }
 
-    private void successReturn(HttpServletResponse response, JSONObject outjson) throws IOException {
+    private void successReturn(HttpServletResponse response, JSONObject outjson) {
         try {
             if (DB != null)
                 DB.commit();
-        } catch (SQLException e) {
-
+        } catch (SQLException ignored) {
         }
         response.setContentType("application/json");
         response.setStatus(200);
@@ -311,7 +314,7 @@ public class ProcessServlet implements Runnable {
         if (DB != null) {
             try {
                 DB.rollback();
-            } catch (SQLException e1) {
+            } catch (SQLException ignored) {
             }
         }
         closeSession();
@@ -343,6 +346,10 @@ public class ProcessServlet implements Runnable {
         return (str == null || str.equals(""));
     }
 
+    public UserData getUserData() {
+        return ud;
+    }
+
     private void log_error(final String str, final Throwable e) {
         String time = DateUtils.todayDate() + " ";
         logger.error(time + str, e);
@@ -355,33 +362,29 @@ public class ProcessServlet implements Runnable {
     }
 
     private String login(String user, String password) throws Exception {
-        UserCache.UserData ud;
+        UserData ud;
         if (MainServlet.hasDatabase()) {
-            Record rec = DB.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", user, password);
-            if (rec == null)
+            ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password);
+            if (ud == null)
                 throw new Exception("Invalid login.");
-            ud = UserCache.newUser(user, password);
-            ud.user_id = rec.getInt("user_id");
         } else
-            ud = UserCache.newUser(user, password);
-        return ud.uuid;
+            ud = UserCache.newUser(user, password, null);
+        return ud.getUuid();
     }
 
-    private int checkLogin(String uuid) throws Exception {
-        UserCache.UserData ud = UserCache.findUser(uuid);
+    private void checkLogin(UserData ud) throws Exception {
         if (ud == null)
             throw new Exception("Login timed out; please re-login.");
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime timeout = ud.lastAccessDate.plusSeconds(120);  // cache user data for 120 seconds
+        LocalDateTime timeout = ud.getLastAccessDate().plusSeconds(120);  // cache user data for 120 seconds
         if (MainServlet.hasDatabase() && now.isAfter(timeout)) {
-            Record rec = DB.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", ud.username, ud.password);
-            if (rec == null) {
-                UserCache.removeUser(uuid);
+            Boolean good = (Boolean) GroovyClass.invoke(true, "Login", "checkLogin", null, DB, ud);
+            if (!good) {
+                UserCache.removeUser(ud.getUuid());
                 throw new Exception("Invalid login.");
             }
         }
-        ud.lastAccessDate = LocalDateTime.now();
-        return ud.user_id;
+        ud.setLastAccessDate(LocalDateTime.now());
     }
 
     private void newDatabaseConnection() throws SQLException {
