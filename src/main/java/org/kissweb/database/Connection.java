@@ -62,9 +62,9 @@ public class Connection implements AutoCloseable {
 
     public enum ConnectionType {PostgreSQL, MicrosoftServer, MySQL, Oracle, SQLite}
 
-    private ConcurrentHashMap<String, String> primaryColName = new ConcurrentHashMap<>();  // table name, auto-inc primary key column name
-    private ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();  // table name, primary key column names
-    private HashMap<String, Boolean> TableExistanceCache = new HashMap<>();
+    private final ConcurrentHashMap<String, String> primaryColName = new ConcurrentHashMap<>();  // table name, auto-inc primary key column name
+    private final ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();  // table name, primary key column names
+    private final HashMap<String, Boolean> TableExistanceCache = new HashMap<>();
     private boolean externalConnection = false;
 
     java.sql.Connection conn;
@@ -103,7 +103,7 @@ public class Connection implements AutoCloseable {
                     ctype = ConnectionType.SQLite;
                     break;
             }
-        } catch (SQLException e) {
+        } catch (SQLException ignored) {
         }
     }
 
@@ -692,22 +692,22 @@ public class Connection implements AutoCloseable {
         if (dt != null) {
             Class<?> cls = dt.getClass();
             if (cls == java.util.Date.class)
-                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
             else if (dt instanceof java.util.Calendar)
-                dt = new java.sql.Date(((java.util.Calendar) dt).getTime().getTime());
+                dt = new java.sql.Timestamp(((java.util.Calendar) dt).getTime().getTime());
             else if (cls == java.time.LocalDateTime.class) {
                 java.time.LocalDateTime ldt = (java.time.LocalDateTime) dt;
                 dt = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
             } else if (cls == java.time.ZonedDateTime.class) {
                 java.time.ZonedDateTime zdt = (java.time.ZonedDateTime) dt;
                 dt = Date.from(zdt.toInstant());
-                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
             } else if (cls == java.time.LocalDate.class) {
                 java.time.LocalDate ld = (java.time.LocalDate) dt;
                 java.time.ZonedDateTime zonedDateTime = ld.atStartOfDay(ZoneId.systemDefault());
                 dt = Date.from(zonedDateTime.toInstant());
-                dt = new java.sql.Date(((java.util.Date) dt).getTime());
+                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
             }
         }
         return dt;
