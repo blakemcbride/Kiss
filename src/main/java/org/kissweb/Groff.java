@@ -2,6 +2,7 @@ package org.kissweb;
 
 import java.io.*;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Class to interface with the groff typesetting system.  This is an easy way to generate nicely formatted reports.
@@ -21,7 +22,7 @@ public class Groff {
     private final String pdfname;
     private final String mmfname;
     private final boolean landscape;
-    private String title;
+    private final String title;
     private boolean atTop = true;
     private boolean autoPageHeader = true;
     private boolean deleteGroffFile = true;
@@ -82,7 +83,7 @@ public class Groff {
         colFmt = colFmt.replaceAll(" {2}", " ");
         if (!colFmt.endsWith("."))
             colFmt += ".";
-        numberOfColumns = 1 + colFmt.replaceAll("[^ ]", "").length();
+        numberOfColumns = 1 + colFmt.trim().replaceAll(" {2}", " ").replaceAll("[^ ]", "").length();
         out(".TS H");
         out("center tab(" + delim + ");");
         out(colFmt);
@@ -100,7 +101,7 @@ public class Groff {
     }
 
     private void flush() {
-        if (currentColumn == numberOfColumns) {
+        if (currentColumn >= numberOfColumns) {
             if (!inTitle && currentRow++ % 2 == 1)
                 pw.print("\\*Y");
             pw.println(row);
@@ -120,6 +121,19 @@ public class Groff {
             row.append(delim);
         if (col != null)
             row.append(col);
+    }
+
+    /**
+     * Normally not needed.  Done automatically.  However, is needed to end a row prematurely.
+     */
+    public void endRow() {
+        if (currentColumn == 0)
+            return;
+        while (currentColumn < numberOfColumns) {
+            row.append(delim);
+            currentColumn++;
+        }
+        flush();
     }
 
     /**
@@ -330,34 +344,40 @@ public class Groff {
         out(null);
         pw.flush();
         pw.close();
-        if (isMac) 
+        if (isMac) {
             if (landscape)
-                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO="+sideMargin+"i -rW=" + (11-2*sideMargin) + "i " +  mmfname + " |pstopdf -i -o " + pdfname);
+                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO=" + sideMargin + "i -rW=" + (11 - 2 * sideMargin) + "i " + mmfname + " |pstopdf -i -o " + pdfname);
             else
-                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO="+sideMargin+"i -rW=" + (8.5-2*sideMargin) + "i " +  mmfname + " |pstopdf -i -o " + pdfname);
-        else if (isWindows) {
+                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO=" + sideMargin + "i -rW=" + (8.5 - 2 * sideMargin) + "i " + mmfname + " |pstopdf -i -o " + pdfname);
+            builder.redirectError(new File("/dev/null"));
+        } else if (isWindows) {
             psfname = pdfname.replaceAll("\\.pdf$", ".ps");
             if (landscape)
                 builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=8.5i", "-P-l", "-rO=" + sideMargin + "i", "-rW=" + (11 - 2 * sideMargin) + "i", mmfname);
             else
                 builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=11i", "-rO=" + sideMargin + "i", "-rW=" + (8.5 - 2 * sideMargin) + "i", mmfname);
-            builder.redirectOutput(new File(psfname));
+            builder.redirectError(new File("NUL:"));
         } else {
             if (landscape)
                 builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=8.5i", "-P-l", "-rO="+sideMargin+"i", "-rW=" + (11-2*sideMargin) + "i", mmfname);
             else
                 builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=11i", "-rO="+sideMargin+"i", "-rW=" + (8.5-2*sideMargin) + "i", mmfname);
-            builder.redirectOutput(new File(pdfname));
+            builder.redirectError(new File("/dev/null"));
         }
+        builder.redirectOutput(new File(pdfname));
         Process p = builder.start();
-        p.waitFor();
+        boolean r = p.waitFor(1L, TimeUnit.MINUTES);
         if (deleteGroffFile)
             (new File(mmfname)).delete();
+        if (!r)
+            throw new InterruptedException();
         if (isWindows) {
             builder = new ProcessBuilder("cmd", "/c", "ps2pdf.bat", psfname, pdfname);
             p = builder.start();
-            p.waitFor();
+            r = p.waitFor(1L, TimeUnit.MINUTES);
             (new File(psfname)).delete();
+            if (!r)
+                throw new InterruptedException();
         }
         return FileUtils.getHTTPPath(pdfname);
     }
