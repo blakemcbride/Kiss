@@ -301,7 +301,7 @@ public class Groff {
     /**
      * Prevent the deletion of the intermediate Groff file for debugging purposes.
      */
-    public void DontDeleteTroffFile() {
+    public void dontDeleteGroffFile() {
         deleteGroffFile = false;
     }
 
@@ -411,5 +411,15 @@ public class Groff {
      */
     public String getRealFileName() {
         return pdfname;
+    }
+
+    /**
+     * For debugging.  Returns the intermediate groff file.  This only makes sense if <code>dontDeleteGroffFile()</code>
+     * is called.
+     *
+     * @return The intermediate troff/groff source file.
+     */
+    public String getGroffFileName() {
+        return mmfname;
     }
 }
