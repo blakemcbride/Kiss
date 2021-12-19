@@ -52,7 +52,7 @@ class Server {
         injson._method = meth;
         injson._class = cls;
 
-        const doCall = async function (cls, meth, injson, pass) {
+        const doCall = async function (cls, meth, injson, pass, resolve, reject) {
             let response;
             try {
                 response = await fetch(Server.url + '/' + path, {
@@ -63,27 +63,31 @@ class Server {
                     }
                 });
             } catch (err) {
-                return await processError(cls, meth, injson, pass, err);
+                if (pass < 3)
+                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
+                await Utils.showMessage('Error', msg);
+                resolve({_Success: false, _ErrorMessage: msg});
+                return;
             }
             try {
-                let res =  await response.json();
+                const res = await response.json();
                 if (!res._Success)
                     await Utils.showMessage('Error', res._ErrorMessage);
-                return res;
+                resolve(res);
             } catch (err) {
-                return await processError(cls, meth, injson, pass, err);
+                if (pass < 3)
+                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
+                await Utils.showMessage('Error', msg);
+                resolve({_Success: false, _ErrorMessage: msg});
             }
         };
 
-        const processError = async function(cls, meth, injson, pass, err) {
-            if (pass < 3)
-                return await doCall(cls, meth, injson, pass + 1);
-            const msg = 'Error communicating with the server.';
-            await Utils.showMessage('Error', msg);
-            return {_Success: false, _ErrorMessage: msg};
-        };
+        return new Promise(function (resolve, reject) {
+            doCall(cls, meth, injson, 1, resolve, reject);
+        });
 
-        return await doCall(cls, meth, injson, 1);
     }
 
     /**
