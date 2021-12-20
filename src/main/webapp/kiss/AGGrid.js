@@ -444,7 +444,13 @@ class AGGrid {
      * @returns {AGGrid}
      */
     setOnRowDoubleClicked(fn) {
-        this.gridOptions.onRowDoubleClicked = fn;
+        if (fn)
+            this.gridOptions.onRowDoubleClicked = () => {
+                if (!Kiss.suspendDepth)
+                    fn();
+            };
+        else
+            this.gridOptions.onRowDoubleClicked = fn;
         return this;
     }
 

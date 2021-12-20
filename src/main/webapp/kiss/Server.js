@@ -54,6 +54,8 @@ class Server {
 
         const doCall = async function (cls, meth, injson, pass, resolve, reject) {
             let response;
+            if (pass === 1)
+                Kiss.suspendDepth++;
             try {
                 response = await fetch(Server.url + '/' + path, {
                     method: 'POST',
@@ -67,6 +69,7 @@ class Server {
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 const msg = 'Error communicating with the server.';
                 await Utils.showMessage('Error', msg);
+                Kiss.suspendDepth--;
                 resolve({_Success: false, _ErrorMessage: msg});
                 return;
             }
@@ -74,12 +77,14 @@ class Server {
                 const res = await response.json();
                 if (!res._Success)
                     await Utils.showMessage('Error', res._ErrorMessage);
+                Kiss.suspendDepth--;
                 resolve(res);
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 const msg = 'Error communicating with the server.';
                 await Utils.showMessage('Error', msg);
+                Kiss.suspendDepth--;
                 resolve({_Success: false, _ErrorMessage: msg});
             }
         };
@@ -110,6 +115,7 @@ class Server {
                 for (let key in injson)
                     fd.append(key, injson[key]);
             Utils.waitMessage("File upload in progress.");
+            Kiss.suspendDepth++;
             $.ajax({
                 url: Server.url + '/rest',
                 type: 'POST',
@@ -124,12 +130,14 @@ class Server {
                         await Utils.showMessage("Information", "Upload successful.");
                     else
                         await Utils.showMessage("Error", res._ErrorMessage);
+                    Kiss.suspendDepth--;
                     resolve(res);
                 },
                 error: async function (hdr, status, error) {
                     const msg = 'Error communicating with the server.';
                     Utils.waitMessageEnd();
                     await Utils.showMessage("Error", msg);
+                    Kiss.suspendDepth--;
                     resolve({_Success: false, _ErrorMessage: msg});
                 }
             });

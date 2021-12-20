@@ -57,11 +57,15 @@
             jqObj.off('click').off('keyup').off('keydown');
             if (fun)
                 jqObj.on('click', function (e) {
-                    if (!waitForKeyUp)
+                    if (Kiss.suspendDepth < 0)  // should never happen but just in case
+                        Kiss.suspendDepth = 0;
+                    if (!waitForKeyUp && !Kiss.suspendDepth)
                         fun();
                 }).on('keyup', function (e) {
+                    if (Kiss.suspendDepth < 0)  // should never happen but just in case
+                        Kiss.suspendDepth = 0;
                     e.stopPropagation();
-                    if (waitForKeyUp && e.key === 'Enter') {
+                    if (waitForKeyUp && e.key === 'Enter' && !Kiss.suspendDepth) {
                         fun();
                         waitForKeyUp = false;
                     }
