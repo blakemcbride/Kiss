@@ -96,8 +96,10 @@ class Server {
         injson._method = meth;
         injson._class = cls;
 
-        const doCall = async function (cls, meth, injson, pass) {
+        const doCall = async function (cls, meth, injson, pass, resolve, reject) {
             let response;
+            if (pass === 1)
+                Kiss.suspendDepth++;
             try {
                 response = await fetch(Server.url + '/' + path, {
                     method: 'POST',
@@ -107,27 +109,34 @@ class Server {
                     }
                 });
             } catch (err) {
-                return await processError(cls, meth, injson, pass, err);
+                if (pass &lt; 3)
+                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
+                await Utils.showMessage('Error', msg);
+                Kiss.suspendDepth--;
+                resolve({_Success: false, _ErrorMessage: msg});
+                return;
             }
             try {
-                let res =  await response.json();
+                const res = await response.json();
                 if (!res._Success)
                     await Utils.showMessage('Error', res._ErrorMessage);
-                return res;
+                Kiss.suspendDepth--;
+                resolve(res);
             } catch (err) {
-                return await processError(cls, meth, injson, pass, err);
+                if (pass &lt; 3)
+                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
+                await Utils.showMessage('Error', msg);
+                Kiss.suspendDepth--;
+                resolve({_Success: false, _ErrorMessage: msg});
             }
         };
 
-        const processError = async function(cls, meth, injson, pass, err) {
-            if (pass &lt; 3)
-                return await doCall(cls, meth, injson, pass + 1);
-            const msg = 'Error communicating with the server.';
-            await Utils.showMessage('Error', msg);
-            return {_Success: false, _ErrorMessage: msg};
-        };
+        return new Promise(function (resolve, reject) {
+            doCall(cls, meth, injson, 1, resolve, reject);
+        });
 
-        return await doCall(cls, meth, injson, 1);
     }
 
     /**
@@ -150,6 +159,7 @@ class Server {
                 for (let key in injson)
                     fd.append(key, injson[key]);
             Utils.waitMessage("File upload in progress.");
+            Kiss.suspendDepth++;
             $.ajax({
                 url: Server.url + '/rest',
                 type: 'POST',
@@ -164,12 +174,14 @@ class Server {
                         await Utils.showMessage("Information", "Upload successful.");
                     else
                         await Utils.showMessage("Error", res._ErrorMessage);
+                    Kiss.suspendDepth--;
                     resolve(res);
                 },
                 error: async function (hdr, status, error) {
                     const msg = 'Error communicating with the server.';
                     Utils.waitMessageEnd();
                     await Utils.showMessage("Error", msg);
+                    Kiss.suspendDepth--;
                     resolve({_Success: false, _ErrorMessage: msg});
                 }
             });
