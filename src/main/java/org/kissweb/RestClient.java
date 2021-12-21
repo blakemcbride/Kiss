@@ -13,10 +13,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
-import java.net.URL;
+import java.net.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -87,6 +84,18 @@ public class RestClient {
     }
 
     /**
+     * Call a REST service sending nothing and returning a JSON object.
+     *
+     * @param method
+     * @param urlStr
+     * @return
+     * @throws IOException
+     */
+    public JSONObject jsonCall(String method, String urlStr) throws IOException {
+        return jsonCall(method, urlStr, (String) null, null);
+    }
+
+    /**
      * Call a REST service sending a String but returning an XML document.
      *
      * @param method POST / GET / etc.
@@ -109,7 +118,21 @@ public class RestClient {
     }
 
     /**
-     * Call a REST service sending a string but returning a JSON object.
+     * Call a REST service sending nothing and returning an XML document.
+     *
+     * @param method
+     * @param urlStr
+     * @return
+     * @throws IOException
+     * @throws ParserConfigurationException
+     * @throws SAXException
+     */
+    public Document xmlCall(String method, String urlStr) throws IOException, ParserConfigurationException, SAXException {
+        return xmlCall(method, urlStr, null, null);
+    }
+
+    /**
+     * Call a REST service sending a string and returning a JSON object.
      *
      * 'headers' is a JSON object.  Each element is a header / value combination.  These are sent as the header of
      *  the REST call.
