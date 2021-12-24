@@ -43,7 +43,7 @@ public class GroovyClass {
 	 * @param sourceFile
 	 * @throws Exception 
 	 */
-	GroovyClass(boolean calculatePath, String sourceFile) throws Exception {
+	public GroovyClass(boolean calculatePath, String sourceFile) throws Exception {
 		String path;
 		if (calculatePath)
 			path = MainServlet.getApplicationPath();
@@ -67,7 +67,7 @@ public class GroovyClass {
 		groovyLoader = null;
 	}
 
-	Method getMethod(String methodName, Class<?> ... argTypes) throws Exception {
+	public Method getMethod(String methodName, Class<?>... argTypes) throws Exception {
 		return groovyClass.getMethod(methodName, argTypes);
 	}
 

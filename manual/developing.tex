@@ -213,6 +213,25 @@ anticipated that support for many of these other languages (such as
 Scala, Clojure, JRuby, Jython, and Kotlin) will likely follow,
 especially if there are requests.
 
+@subsection Cron
+
+@emph{Kiss} has the ability to run any number of commands at specified
+intervals.  For example, you could run a process every hour and
+another process every Tuesday at 3 PM, etc.  This facility echos 
+the standard Unix or Linux @code{cron} facility.
+
+The file that determines what gets run and when is @*
+@code{src/main/application/CronTasks/crontab}.  All tasks must be in
+the @code{Groovy} language and exist in the
+@code{src/main/application/CronTasks} directory.
+
+All contents of the @code{src/main/application/CronTasks} can be changed
+on a running system.  The change will get noticed and take effect.
+There is no need to restart the system.
+
+Look at the files in the @code{src/main/application/CronTasks}
+directory for samples and further documentation.
+
 @anchor{Front-end Development}@section Front-end Development
 
 A separate server is used so that development files will be served

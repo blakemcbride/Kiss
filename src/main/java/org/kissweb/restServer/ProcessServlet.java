@@ -4,8 +4,8 @@ import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import org.kissweb.DateUtils;
 import org.kissweb.FileUtils;
+import org.kissweb.KissWarning;
 import org.kissweb.database.Connection;
-import org.kissweb.database.Record;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
@@ -48,7 +48,7 @@ public class ProcessServlet implements Runnable {
     public void run() {
         try {
             run2();
-        } catch (IOException e) {
+        } catch (Throwable e) {
             logger.error(e);
         }
     }
@@ -193,8 +193,7 @@ public class ProcessServlet implements Runnable {
         if (_className != null) {
             //  is file upload
             _method = request.getParameter("_method");
-            if (MainServlet.isDebug())
-                System.err.println("Enter back-end seeking UPLOAD service " + _className + "." + _method + "()");
+            logger.info("Enter back-end seeking UPLOAD service " + _className + "." + _method + "()");
             injson = new JSONObject();
             Enumeration<String> names = request.getParameterNames();
             while (names.hasMoreElements()) {
@@ -212,53 +211,43 @@ public class ProcessServlet implements Runnable {
             }
             _className = injson.getString("_class");
             _method = injson.getString("_method");
-            if (MainServlet.isDebug())
-                System.err.println("Enter back-end seeking REST service " + _className + "." + _method + "()");
+            logger.info("Enter back-end seeking REST service " + _className + "." + _method + "()");
         }
 
         if (_method == null  ||  _method.isEmpty()) {
-            System.err.println("Missing _method");
             errorReturn(response, "missing _method", null);
             return;
         }
 
         if (_className.isEmpty())
             if (_method.equals("LoginRequired")) {
-                if (MainServlet.isDebug())
-                    System.err.println("Login is " + (MainServlet.hasDatabase() ? "" : "not ") + "required");
+                logger.info("Login is " + (MainServlet.hasDatabase() ? "" : "not ") + "required");
                 outjson.put("LoginRequired", MainServlet.hasDatabase());
                 successReturn(response, outjson);
                 return;
             } else if (_method.equals("Login")) {
-                if (MainServlet.isDebug())
-                    System.err.println("Attempting user login for " + injson.getString("username"));
+                logger.info("Attempting user login for " + injson.getString("username"));
                 try {
                     String uuid = login(injson.getString("username"), injson.getString("password"));
                     outjson.put("uuid", uuid);
                     successReturn(response, outjson);
-                    if (MainServlet.isDebug())
-                        System.err.println("Login successful");
+                    logger.info("Login successful");
                     return;
                 } catch (Exception e) {
                     errorReturn(response, "Login failure.", e);
-                    if (MainServlet.isDebug())
-                        System.err.println("Login failure.");
                     return;
                 }
             } else if (MainServlet.hasDatabase()) {
                 try {
-                    if (MainServlet.isDebug())
-                        System.err.println("Validating uuid " + injson.getString("_uuid"));
+                    logger.info("Validating uuid " + injson.getString("_uuid"));
                     ud = UserCache.findUser(injson.getString("_uuid"));
                     checkLogin(ud);
                 } catch (Exception e) {
-                    if (MainServlet.isDebug())
-                        System.err.println("Login failure.");
+                    logger.info("Login failure.");
                     errorReturn(response, "Login failure.", e);
                     return;
                 }
-                if (MainServlet.isDebug())
-                    System.err.println("Login success");
+                logger.info("Login success");
             } else
                 ud = UserCache.findUser(injson.getString("_uuid"));
 
@@ -284,12 +273,9 @@ public class ProcessServlet implements Runnable {
         }
 
         if (res == ProcessServlet.ExecutionReturn.NotFound) {
-            if (MainServlet.isDebug())
-                System.err.println("No back-end code found for " + _className);
             errorReturn(response, "No back-end code found for " + _className, null);
         } else {
-            if (MainServlet.isDebug())
-                System.err.println("REST service " + _className + "." + _method + "() executed successfully");
+            logger.info("REST service " + _className + "." + _method + "() executed successfully");
             successReturn(response, outjson);
         }
     }
@@ -323,6 +309,7 @@ public class ProcessServlet implements Runnable {
         JSONObject outjson = new JSONObject();
         outjson.put("_Success", false);
         String finalMsg = msg;
+        /*
         if (e != null) {
             String m = e.getMessage();
             if (m != null)
@@ -334,6 +321,7 @@ public class ProcessServlet implements Runnable {
                     finalMsg = msg + " " + m;
             }
         }
+         */
         outjson.put("_ErrorMessage", finalMsg);
         log_error(finalMsg, e);
         out.print(outjson);
@@ -352,13 +340,18 @@ public class ProcessServlet implements Runnable {
 
     private void log_error(final String str, final Throwable e) {
         String time = DateUtils.todayDate() + " ";
-        logger.error(time + str, e);
+        if (e instanceof KissWarning)
+            logger.error(time + str);
+        else
+            logger.error(time + str, e);
+        /*
         if (e != null) {
             e.printStackTrace();
             final StringWriter sw = new StringWriter();
             e.printStackTrace(new PrintWriter(sw));
             logger.error(sw.toString());
         }
+         */
     }
 
     private String login(String user, String password) throws Exception {
@@ -366,7 +359,7 @@ public class ProcessServlet implements Runnable {
         if (MainServlet.hasDatabase()) {
             ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password);
             if (ud == null)
-                throw new Exception("Invalid login.");
+                throw new KissWarning("Invalid login.");
         } else
             ud = UserCache.newUser(user, password, null);
         return ud.getUuid();
@@ -381,7 +374,7 @@ public class ProcessServlet implements Runnable {
             Boolean good = (Boolean) GroovyClass.invoke(true, "Login", "checkLogin", null, DB, ud);
             if (!good) {
                 UserCache.removeUser(ud.getUuid());
-                throw new Exception("Invalid login.");
+                throw new KissWarning("Invalid login.");
             }
         }
         ud.setLastAccessDate(LocalDateTime.now());
@@ -390,11 +383,9 @@ public class ProcessServlet implements Runnable {
     private void newDatabaseConnection() throws SQLException {
         if (!MainServlet.hasDatabase())
             return;
-        if (MainServlet.isDebug())
-            System.err.println("Previous open database connections = " + MainServlet.getCpds().getNumBusyConnections());
+        logger.info("Previous open database connections = " + MainServlet.getCpds().getNumBusyConnections());
         DB = new Connection(MainServlet.getCpds().getConnection());
-        if (MainServlet.isDebug())
-            System.err.println("New database connection obtained");
+        logger.info("New database connection obtained");
     }
 
     private void closeSession() {
@@ -413,7 +404,7 @@ public class ProcessServlet implements Runnable {
             if (sconn != null)
                 sconn.close();
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
     }
 

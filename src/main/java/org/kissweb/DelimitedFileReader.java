@@ -143,12 +143,7 @@ public class DelimitedFileReader implements AutoCloseable {
      * @return
      */
     public double getDouble(int i) {
-        try {
-            return Double.parseDouble(getString(i));
-        } catch (NumberFormatException e) {
-            System.out.println(lineValues);
-            throw e;
-        }
+        return Double.parseDouble(getString(i));
     }
 
     /**

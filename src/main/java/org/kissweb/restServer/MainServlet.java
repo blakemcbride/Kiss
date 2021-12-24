@@ -1,7 +1,9 @@
 package org.kissweb.restServer;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.kissweb.Cron;
 import org.kissweb.database.Connection;
 
 import javax.servlet.annotation.MultipartConfig;
@@ -34,10 +36,10 @@ public class MainServlet extends HttpServlet {
     private static String rootPath;                  // the root of the entire application
     private static boolean underIDE = false;
     private static ComboPooledDataSource cpds;
-    private static boolean debug = false;          // set by KissInit.groovy
-    private static boolean hasDatabase;            // determined by KissInit.groovy
-    private static boolean systemInitialized = false;
+    private static boolean debug = false;            // set by KissInit.groovy
+    private static boolean hasDatabase;              // determined by KissInit.groovy
     private static int maxWorkerThreads;
+    private static Cron cron;
 
     public static boolean isUnderIDE() {
         return underIDE;
@@ -47,15 +49,6 @@ public class MainServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (!systemInitialized) {
-            try {
-                initializeSystem(request, response);
-                if (!systemInitialized)
-                    return;
-            } catch (Exception e) {
-                return;
-            }
-        }
         if (queueManager == null)
             queueManager = new org.kissweb.restServer.QueueManager(maxWorkerThreads);
 
@@ -66,21 +59,9 @@ public class MainServlet extends HttpServlet {
         queueManager.add(request, response, out);
     }
 
-    private void initializeSystem(HttpServletRequest request, HttpServletResponse response) throws ClassNotFoundException, PropertyVetoException, SQLException {
-        setApplicationPath(request);
-        org.kissweb.restServer.ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, response, null, "KissInit", "init");
-        if (res == ProcessServlet.ExecutionReturn.Success) {
-            hasDatabase = database != null  &&  !database.isEmpty();
-            if (hasDatabase)
-                makeDatabaseConnection();
-            else
-                System.out.println("* * * No database configured; bypassing login requirements");
-            systemInitialized = true;
-        }
-    }
-
     /**
-     * Return the root of the application back-end source code
+     * Return the root of the application back-end source code.
+     * This takes into account where the source code is.
      */
     public static String getApplicationPath() {
         return applicationPath;
@@ -123,11 +104,13 @@ public class MainServlet extends HttpServlet {
      * This method sets the <code>rootPath</code> and <code>applicationPath</code>.  <code>rootPath</code> is the root
      * of the application.  <code>applicationPath</code> is the root of the application files.
      *
-     * @param request
+     * @param _rootPath
      */
-    private static void setApplicationPath(HttpServletRequest request) {
-        rootPath = request.getServletContext().getRealPath("/");
-        System.out.println("* * * Context path = " + rootPath);
+    static void setApplicationPathInternal(String _rootPath) {
+        Level level = logger.getLevel();
+        logger.setLevel(Level.ALL);
+        rootPath = _rootPath;
+        logger.info("* * * Context path = " + rootPath);
         applicationPath = System.getenv("KISS_ROOT");
         if (applicationPath == null || applicationPath.isEmpty()) {
             if ((new File(rootPath + "../../../src/main/application/" + "KissInit.groovy")).exists()) {
@@ -153,17 +136,51 @@ public class MainServlet extends HttpServlet {
         } catch (IOException e) {
             // ignore
         }
-        System.out.println(underIDE ? "* * * Is running with source" : "* * * Is not running with source");
-        System.out.println("* * * Application path set to " + applicationPath);
+        logger.info(underIDE ? "* * * Is running with source" : "* * * Is not running with source");
+        logger.info("* * * Application path set to " + applicationPath);
+        logger.setLevel(level);
     }
 
-    private void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
+    static void initializeSystem(String path) {
+        Level level = logger.getLevel();
+        logger.setLevel(Level.ALL);
+        setApplicationPathInternal(path);
+        org.kissweb.restServer.ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, null, null, "KissInit", "init");
+        if (res == ProcessServlet.ExecutionReturn.Success) {
+            hasDatabase = database != null  &&  !database.isEmpty();
+            if (hasDatabase) {
+                try {
+                    makeDatabaseConnection();
+                } catch (PropertyVetoException | SQLException | ClassNotFoundException e) {
+                    logger.error(e);
+                    System.exit(-1);
+                }
+            }
+            else
+                logger.info("* * * No database configured; bypassing login requirements");
+        }
+        try {
+            cron = new Cron(hasDatabase ? new Connection(cpds.getConnection()) : null);
+        } catch (IOException | SQLException e) {
+            logger.error(e);
+            System.exit(-1);
+        }
+        logger.setLevel(level);
+    }
+
+    static void stopCron() {
+        cron.cancel();
+    }
+
+    static void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
+        Level level = logger.getLevel();
+        logger.setLevel(Level.ALL);
         if (!hasDatabase) {
-            System.out.println("* * * No database configured; bypassing login requirements");
+            logger.info("* * * No database configured; bypassing login requirements");
             return;
         }
         if (cpds == null) {
-            System.out.println("* * * Attempting to connect to database " + host + ":" + database + ":" + user);
+            logger.info("* * * Attempting to connect to database " + host + ":" + database + ":" + user);
             if (connectionType == Connection.ConnectionType.SQLite  &&  database != null  &&  !database.isEmpty() &&  database.charAt(0) != '/')
                 database = applicationPath + database;
             String cstr = Connection.makeConnectionString(connectionType, host, database, user, password);
@@ -171,12 +188,11 @@ public class MainServlet extends HttpServlet {
             try {
                 con = new Connection(connectionType, cstr);
             } catch (Exception e) {
-                System.out.println("* * * Database connection failed (see application/KissInit.groovy)");
-                System.out.println("* * * " + e.getMessage());
+                logger.error("* * * Database connection failed (see application/KissInit.groovy) " + e.getMessage());
                 throw e;
             }
             con.close();
-            System.out.println("* * * Database connection succeeded");
+            logger.info("* * * Database connection succeeded");
 
             cpds = new ComboPooledDataSource();
 
@@ -186,6 +202,7 @@ public class MainServlet extends HttpServlet {
 
             cpds.setMaxStatements(180);
         }
+        logger.setLevel(level);
     }
 
     static String getDynamicClassPath() {
@@ -222,14 +239,6 @@ public class MainServlet extends HttpServlet {
 
     public static void setPassword(String passwordp) {
         password = passwordp;
-    }
-
-    static boolean isDebug() {
-        return debug;
-    }
-
-    public static void setDebug(boolean debugp) {
-        debug = debugp;
     }
 
     public static String getDatabase() {

@@ -1,5 +1,8 @@
 package org.kissweb.restServer;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
@@ -9,14 +12,20 @@ import javax.servlet.ServletContextListener;
  */
 public class StartupListener implements ServletContextListener {
 
+    private static final Logger logger = Logger.getLogger(StartupListener.class);
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        System.out.println("* * * CONTEXT INITIALIZED * * *");
+        logger.setLevel(Level.ALL);
+        logger.info("* * * START CONTEXT INITIALIZED * * *");
+        MainServlet.initializeSystem(sce.getServletContext().getRealPath("/"));
+        logger.info("* * * END CONTEXT INITIALIZED * * *");
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        System.out.println("* * * CONTEXT DESTROYED * * *");
+        logger.info("* * * CONTEXT DESTROYED * * *");
+        MainServlet.stopCron();
         System.exit(0);
     }
 }

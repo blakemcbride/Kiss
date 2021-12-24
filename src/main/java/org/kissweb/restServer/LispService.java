@@ -49,17 +49,15 @@ class LispService {
         LispObject args;
         String fileName = MainServlet.getApplicationPath() + lispFileName;
 
-        if (MainServlet.isDebug())
-            System.err.println("Attempting to load " + fileName);
+        logger.info("Attempting to load " + fileName);
         if (!(new File(fileName)).exists()) {
-            System.err.println(fileName + " not found");
+            logger.error(fileName + " not found");
             return ExecutionReturn.NotFound;
         }
 
         try {
             if (once) {
-                if (MainServlet.isDebug())
-                    System.err.println("Performing one-time Lisp initialization");
+                logger.info("Performing one-time Lisp initialization");
                 ABCL.init();
                 once = false;
             } else if (MainServlet.isUnderIDE())
@@ -77,16 +75,13 @@ class LispService {
 
         LispPackageInfo res;
         if (!(new File(fileName)).exists()) {
-            if (MainServlet.isDebug())
-                logger.error("File " + fileName + " not found");
+            logger.info("File " + fileName + " not found");
             return ExecutionReturn.NotFound;
         }
         try {
-            if (MainServlet.isDebug())
-                System.err.println("Loading Lisp file");
+            logger.info("Loading Lisp file");
             res = loadLispFile(_className, lispFileName, true);
         } catch (Exception e) {
-            System.err.println("Loading failed: " + e.getMessage());
             ms.errorReturn(response, "Error loading Lisp " + lispFileName, e);
             res = null;
         }
@@ -97,18 +92,15 @@ class LispService {
 
         try {
             res.executing++;
-            if (MainServlet.isDebug())
-                System.err.println("Executing lisp function " + _method);
+            logger.info("Executing lisp function " + _method);
             ABCL.executeLisp(_className, _method, lispIn, lispOut, lispHSU, lispThis);
         } catch (Exception e) {
             ms.errorReturn(response, "Error executing Lisp " + lispFileName + " " + _method + "()", e);
-            System.err.println("Executing failed: " + e.getMessage());
             return ExecutionReturn.Error;
         } finally {
             res.executing--;
         }
-        if (MainServlet.isDebug())
-            System.err.println("Execution completed successfully");
+        logger.info("Execution completed successfully");
         return ExecutionReturn.Success;
     }
 

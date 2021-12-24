@@ -44,25 +44,21 @@ class JavaService {
     ProcessServlet.ExecutionReturn tryJava(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
         JavaClassInfo ci;
         String fileName = MainServlet.getApplicationPath() + _className.replace(".", "/") + ".java";
-        if (MainServlet.isDebug())
-            System.err.println("Attempting to load " + fileName);
+        logger.info("Attempting to load " + fileName);
         try {
             ci = loadJavaClass(_className, fileName);
         } catch (ClassNotFoundException e) {
             ms.errorReturn(response, "Class not found: " + e.getMessage(), e);
-            System.err.println("Not found");
             return ProcessServlet.ExecutionReturn.Error;
         } catch (Throwable e) {
             ms.errorReturn(response, e.getMessage(), e);
-            System.err.println("Not found");
             return ProcessServlet.ExecutionReturn.Error;
         }
         if (ci != null && ci.jclass != null) {
             Object instance;
             Method meth;
 
-            if (MainServlet.isDebug())
-                System.err.println("Found");
+            logger.info("Found");
             try {
                 instance = ci.jclass.newInstance();
             } catch (Exception e) {
@@ -70,30 +66,23 @@ class JavaService {
                 return ProcessServlet.ExecutionReturn.Error;
             }
             try {
-                if (MainServlet.isDebug())
-                    System.err.println("Seeking method " + _method);
+                logger.info("Seeking method " + _method);
                 meth = ci.jclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, ProcessServlet.class);
             } catch (NoSuchMethodException e) {
                 ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), e);
-                System.err.println("Method failed");
-                System.err.println(e.getMessage());
                 return ProcessServlet.ExecutionReturn.Error;
             }
             try {
-                if (MainServlet.isDebug())
-                    System.err.println("Evoking method " + _method);
+                logger.info("Evoking method " + _method);
                 meth.invoke(instance, injson, outjson, ms.DB, ms);
             } catch (Exception e) {
                 ms.errorReturn(response, fileName + " " + _method + "()", e);
-                System.err.println("Method failed");
-                System.err.println(e.getMessage());
                 return ProcessServlet.ExecutionReturn.Error;
             }
-            if (MainServlet.isDebug())
-                System.err.println("Method completed successfully");
+            logger.info("Method completed successfully");
             return ProcessServlet.ExecutionReturn.Success;
         }
-        System.err.println("Not found or not loaded");
+        logger.error("Not found or not loaded");
         return ProcessServlet.ExecutionReturn.NotFound;
     }
 
@@ -136,8 +125,7 @@ class JavaService {
         }
         cleanJavaCache();
         if (!(new File(fileName)).exists()) {
-            if (MainServlet.isDebug())
-                logger.error("File " + fileName + " not found");
+            logger.info("File " + fileName + " not found");
             return null;
         }
         try {
