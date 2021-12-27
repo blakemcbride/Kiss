@@ -159,13 +159,73 @@ public class MainServlet extends HttpServlet {
             else
                 logger.info("* * * No database configured; bypassing login requirements");
         }
+
         try {
-            cron = new Cron(hasDatabase ? new Connection(cpds.getConnection()) : null);
-        } catch (IOException | SQLException e) {
+            cron = new Cron(MainServlet::getConnection,
+                    MainServlet::success,
+                    MainServlet::failure);
+        } catch (IOException e) {
             logger.error(e);
-            System.exit(-1);
         }
+
         logger.setLevel(level);
+    }
+
+    private static Connection getConnection() {
+        if (!hasDatabase)
+            return null;
+        Connection db = null;
+        try {
+            db = new Connection(MainServlet.getCpds().getConnection());
+            db.beginTransaction();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        return db;
+    }
+
+    private static void success(Object p) {
+        Connection db = (Connection) p;
+        try {
+            db.commit();
+            java.sql.Connection sconn = null;
+            try {
+                sconn = db.getSQLConnection();
+                db.close();
+            } catch (SQLException e) {
+                logger.error(e);
+            }
+            try {
+                if (sconn != null)
+                    sconn.close();
+            } catch (SQLException e) {
+                logger.error(e);
+            }
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+    }
+
+    private static void failure(Object p) {
+        Connection db = (Connection) p;
+        try {
+            db.rollback();
+            java.sql.Connection sconn = null;
+            try {
+                sconn = db.getSQLConnection();
+                db.close();
+            } catch (SQLException e) {
+                logger.error(e);
+            }
+            try {
+                if (sconn != null)
+                    sconn.close();
+            } catch (SQLException e) {
+                logger.error(e);
+            }
+        } catch (SQLException e) {
+            logger.error(e);
+        }
     }
 
     static void stopCron() {

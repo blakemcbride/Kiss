@@ -2,7 +2,6 @@ package org.kissweb;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.kissweb.database.Connection;
 import org.kissweb.restServer.GroovyClass;
 import org.kissweb.restServer.MainServlet;
 
@@ -11,8 +10,9 @@ import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.sql.SQLException;
 import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * System to auto-run Groovy files on a defined period as Unix cron does.
@@ -29,14 +29,24 @@ public class Cron {
 
     private final Timer timer;
 
-    public Cron(Connection db) throws IOException {
+    /**
+     *
+     * @param getParameter method that returns the parameter passed to the Groovy cron job
+     * @param success method that performs the cleanup action after a successful run of the cron job
+     * @param failure method that performs the cleanup action after a failed run of the cron job
+     * @throws IOException
+     */
+    public Cron(Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) throws IOException {
         logger.setLevel(Level.ALL);
-        CronFile cronFile = new CronFile(MainServlet.getApplicationPath() + "CronTasks/crontab", db);
+        CronFile cronFile = new CronFile(MainServlet.getApplicationPath() + "CronTasks/crontab", getParameter, success, failure);
         TheTimerTask ttt = new TheTimerTask(cronFile);
         timer = new Timer();
         timer.scheduleAtFixedRate(ttt, 0L, 60000L);
     }
 
+    /**
+     * Stop further execution of all cron jobs.
+     */
     public void cancel() {
         timer.cancel();
     }
@@ -64,11 +74,14 @@ public class Cron {
         private FileTime lastModifiedTime;
         private final String cronFileName;
         private List<CronLine> lines;
-        private final Connection db;
+        private final Supplier<Object> getParameter;
+        private final Consumer<Object> success, failure;
 
-        CronFile(String cronFileName, Connection db) {
+        CronFile(String cronFileName, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) {
             this.cronFileName = cronFileName;
-            this.db = db;
+            this.getParameter = getParameter;
+            this.success = success;
+            this.failure = failure;
         }
 
         void process() throws IOException {
@@ -95,7 +108,7 @@ public class Cron {
                 line = br.readLine();
                 if (line == null)
                     break;
-                CronLine cl = CronLine.newCronLine(line, db);
+                CronLine cl = CronLine.newCronLine(line, getParameter, success, failure);
                 if (cl != null)
                     lines.add(cl);
             }
@@ -114,9 +127,10 @@ public class Cron {
         private String daysOfWeek;
         private String command;
         private Class<?>[] argTypes;
-        private Connection db;
+        private Supplier<Object> getParameter;
+        private Consumer<Object> success, failure;
 
-        static CronLine newCronLine(String line, Connection db) {
+        static CronLine newCronLine(String line, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) {
             if (line == null)
                 return null;
             line = line.trim();
@@ -126,9 +140,11 @@ public class Cron {
                 return null;  // comment
             CronLine cl = new CronLine();
 
-            cl.db = db;
+            cl.getParameter = getParameter;
+            cl.success = success;
+            cl.failure = failure;
             cl.argTypes = new Class[1];
-            cl.argTypes[0] = Connection.class;  //   Object.class;
+            cl.argTypes[0] = Object.class;  //   Object.class;
 
             cl.line = line;
             cl.len = line.length();
@@ -167,20 +183,15 @@ public class Cron {
 
         private void runLine(String sfname) {
             logger.info("Running " + sfname);
+            Object parameter = null;
             try {
-                db.beginTransaction();
-
+                parameter = getParameter.get();
                 GroovyClass groovyClass = new GroovyClass(false, sfname);
                 Method methp = groovyClass.getMethod("main", argTypes);
-                methp.invoke(null, db);
-
-                db.commit();
+                methp.invoke(null, parameter);
+                success.accept(parameter);
             } catch (Exception e) {
-                try {
-                    db.rollback();
-                } catch (SQLException ex) {
-                    logger.error(ex);
-                }
+                failure.accept(parameter);
                 logger.error(e);
             }
         }
