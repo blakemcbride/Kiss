@@ -30,22 +30,24 @@ public class Cron {
     private final Timer timer;
 
     /**
+     * Start the cron process.
      *
+     * @param crontabFileName the path to the crontab file
      * @param getParameter method that returns the parameter passed to the Groovy cron job
      * @param success method that performs the cleanup action after a successful run of the cron job
      * @param failure method that performs the cleanup action after a failed run of the cron job
      * @throws IOException
      */
-    public Cron(Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) throws IOException {
+    public Cron(String crontabFileName, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) throws IOException {
         logger.setLevel(Level.ALL);
-        CronFile cronFile = new CronFile(MainServlet.getApplicationPath() + "CronTasks/crontab", getParameter, success, failure);
+        CronFile cronFile = new CronFile(crontabFileName, getParameter, success, failure);
         TheTimerTask ttt = new TheTimerTask(cronFile);
         timer = new Timer();
         timer.scheduleAtFixedRate(ttt, 0L, 60000L);
     }
 
     /**
-     * Stop further execution of all cron jobs.
+     * Stop further evocation of all cron jobs.
      */
     public void cancel() {
         timer.cancel();
@@ -86,7 +88,7 @@ public class Cron {
 
         void process() throws IOException {
             Calendar now = Calendar.getInstance();
-            String path = MainServlet.getApplicationPath() + "CronTasks/";
+            String path = new File(cronFileName).getParent() + "/";
             update();
             for (CronLine cl : lines)
                 cl.process(now, path);

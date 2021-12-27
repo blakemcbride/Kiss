@@ -161,7 +161,8 @@ public class MainServlet extends HttpServlet {
         }
 
         try {
-            cron = new Cron(MainServlet::getConnection,
+            cron = new Cron(MainServlet.getApplicationPath() + "CronTasks/crontab",
+                    MainServlet::getConnection,
                     MainServlet::success,
                     MainServlet::failure);
         } catch (IOException e) {
