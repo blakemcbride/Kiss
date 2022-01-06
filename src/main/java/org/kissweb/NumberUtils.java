@@ -113,6 +113,27 @@ public class NumberUtils {
     }
 
     /**
+     * Is string a valid number?
+     *
+     * @param s
+     * @return
+     */
+    public static boolean isValidNumber(String s) {
+        if (s == null)
+            return false;
+        s = s.trim();
+        if (s.isEmpty())
+            return false;
+        if (!s.replaceAll("[,.0-9]", "").isEmpty())  // bad character check
+            return false;
+        if (s.replaceAll("[,.]", "").isEmpty()) // has some digits
+            return false;
+        if (s.replaceAll("[^.]", "").length() > 1) // 0 or 1 decimal place
+            return false;
+        return true;
+    }
+
+    /**
      * Parse a String into an int.
      *
      * @param s
@@ -123,6 +144,13 @@ public class NumberUtils {
     }
 
     public static void main(String [] args) {
+
+        System.out.println(isValidNumber("38") ? "true" : "false");
+        System.out.println(isValidNumber("38.17") ? "true" : "false");
+        System.out.println(isValidNumber("38.5.") ? "true" : "false");
+        System.out.println(isValidNumber("385,345.78") ? "true" : "false");
+        System.out.println(isValidNumber("38x") ? "true" : "false");
+
         int v;
         double d;
         v = parseInt("45");
@@ -131,6 +159,7 @@ public class NumberUtils {
         v = parseInt(null);
         v = parseInt("45.99");
         v = parseInt("48 xx");
+        v = parseInt("483,345");
 
         d = parseDouble("45");
         d = parseDouble("");
@@ -138,6 +167,7 @@ public class NumberUtils {
         d = parseDouble(null);
         d = parseDouble("45.99");
         d = parseDouble("48 xx");
+        d = parseDouble("488,678.98");
 
         int x = 1;
     }
