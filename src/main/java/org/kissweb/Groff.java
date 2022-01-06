@@ -84,7 +84,6 @@ public class Groff {
         if (!colFmt.endsWith("."))
             colFmt += ".";
         numberOfColumns = 1 + colFmt.trim().replaceAll(" {2}", " ").replaceAll("[^ ]", "").length();
-        pw.println(".fi");
         out(".TS H");
         out("center tab(" + delim + ");");
         out(colFmt);
@@ -285,7 +284,7 @@ public class Groff {
     }
 
     private void setDefaults2() {
-        pw.println("'nf");
+        pw.println("'fi");
     }
 
     private void writePageHeader(String title) {
