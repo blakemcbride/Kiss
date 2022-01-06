@@ -1113,7 +1113,8 @@ class Utils {
             id: id,
             globalEnterHandler: Utils.globalEnterHandler(null)
         });
-        AGGrid.newGridContext();
+        if (window.AGGrid)
+            AGGrid.newGridContext();
         Utils.newEnterContext();
         if (!w.hasClass('popup-background')) {
             let width = w.css('width');
@@ -1183,7 +1184,8 @@ class Utils {
      */
     static popup_close() {
         const context = Utils.popup_context.pop();
-        AGGrid.popGridContext();
+        if (window.AGGrid)
+            AGGrid.popGridContext();
         Utils.popEnterContext();
         $('#' + context.id).hide();
         Utils.globalEnterHandler(context.globalEnterHandler);
@@ -1383,8 +1385,10 @@ class Utils {
     static cleanup() {
         Utils.clearSomeControlValueChanged(false);
         Kiss.RadioButtons.resetGroups();
-        AGGrid.popAllGridContexts();
-        AGGrid.newGridContext();   //  for the new screen we are loading
+        if (window.AGGrid) {
+            AGGrid.popAllGridContexts();
+            AGGrid.newGridContext();   //  for the new screen we are loading
+        }
         Utils.clearAllEnterContexts();
         Utils.newEnterContext();
         Utils.globalEnterHandler(null);
