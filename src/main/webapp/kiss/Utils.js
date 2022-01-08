@@ -15,6 +15,8 @@ let Kiss = {};
 
 Kiss.suspendDepth = 0;  // when > 0 suspend buttons
 
+Kiss.screenStack = [];
+
 
 /**
  * This is how components are accessed.
@@ -979,6 +981,8 @@ class Utils {
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
      * Also, the loaded code is processed for custom tags / components.
      *
+     * See pushPage() and popPage().  Those keep track of a stack of screens.
+     *
      * @param {string} page path to the page to be loaded.
      * @param {string} tag optional ID of div to fill (if empty "body" tag is used)
      * @param {string} initialFocus optional, ID of control to set initial focus on
@@ -1000,6 +1004,26 @@ class Utils {
                     $$(initialFocus).focus();
             });
         });
+    }
+
+    /**
+     * Load a new screen but also remember what is loaded so that it can be returned to.
+     *
+     * @param path
+     * @param tag
+     */
+    static pushPage(path, tag) {
+        Kiss.screenStack.push({path: path, tag: tag});
+        Utils.loadPage(path, tag);
+    }
+
+    /**
+     * Re-load the prior screen.
+     */
+    static popPage() {
+        Kiss.screenStack.pop();
+        const x = Kiss.screenStack.pop();
+        Utils.pushPage(x.path, x.tag);
     }
 
     /**
