@@ -423,6 +423,16 @@ public class DateUtils {
     }
 
     /**
+     * Format date as "Wed, Jan 3, 2018"
+     *
+     * @param dt
+     * @return
+     */
+    public static String formatLongWithWeekDay(int dt) {
+        return StringUtils.take(dayOfWeekName(dt), 3) + ", " + format("MMM d, yyyy", dt);
+   }
+
+    /**
      * Return the number of days between two dates.
      * (dat1 - dat2)
      *
