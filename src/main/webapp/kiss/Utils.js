@@ -95,7 +95,12 @@ function $$(id) {
         return rbObj;
     }
     const e = $((id.charAt(0) === '#' ? '' : '#') + id);
-    return e.length ? e[0].kiss : null;
+    if (e.length)
+        return e[0].kiss;
+    else {
+        console.log("$$: field " + id + " does not exist.")
+        return null;
+    }
 }
 
 /**
