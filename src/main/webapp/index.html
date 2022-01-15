@@ -51,8 +51,8 @@
     <script>
 
         function getScript(url, callback) {
-            let head = document.getElementsByTagName("head")[0];
-            let script = document.createElement("script");
+            const head = document.getElementsByTagName("head")[0];
+            const script = document.createElement("script");
             script.src = url;
 
             // Handle Script loading
@@ -78,10 +78,10 @@
         function startup() {
 
             // cache control
-            let softwareVersion = "20201108";   // version of the entire system
-            let controlCache = true;            // normally true but use false during debugging
+            const softwareVersion = "20201108";   // version of the entire system
+            const controlCache = true;            // normally true but use false during debugging
 
-            let afterLoad = function () {
+            const afterLoad = function () {
                 Utils.softwareVersion = softwareVersion;
                 Utils.controlCache = controlCache;
                 loadScript("index.js", function () {
@@ -91,7 +91,7 @@
 
             let numLoaded = 0;
 
-            let loadScript = function (script, fun) {
+            const loadScript = function (script, fun) {
                 if (fun)
                     getScript(script + (controlCache ? '?ver=' + softwareVersion : ''), fun);
                 else {
@@ -103,7 +103,7 @@
                 }
             };
 
-            let loadUtils = function () {
+            const loadUtils = function () {
                 loadScript("kiss/Utils.js");
                 loadScript("kiss/DateUtils.js");
                 loadScript("kiss/DateTimeUtils.js");
@@ -116,7 +116,7 @@
 
             $.ajaxSetup({ cache: controlCache });  // utilize browser cache to the fullest when version hasn't changed
 
-            let getURLParameter = function (sParam) {
+            const getURLParameter = function (sParam) {
                 let sPageURL = window.location.search.substring(1);
                 let sURLVariables = sPageURL.split('&');
                 for (let i = 0; i < sURLVariables.length; i++)  {
@@ -127,7 +127,7 @@
             };
 
             if (controlCache) {
-                let now = getURLParameter("now");
+                const now = getURLParameter("now");
                 if (now) {
                     let diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
                     if (diff > 30) {

@@ -11,11 +11,11 @@
         if ($$('password').isError('Password'))
             return;
 
-        let data = {
+        const data = {
             username: $$('username').getValue().toLowerCase(),
             password: $$('password').getValue()
         };
-        let res = await Server.call('', 'Login', data);
+        const res = await Server.call('', 'Login', data);
         if (res._Success) {
             Server.setUUID(res.uuid);
             // prevent accidental browser back button
