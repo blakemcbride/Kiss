@@ -1000,8 +1000,13 @@ class Utils {
                 $('body').html(text);
             Utils.rescan();  // does all the tag replacement
             getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function () {
-                if (initialFocus)
-                    $$(initialFocus).focus();
+                if (initialFocus) {
+                    const ctl = $$(initialFocus);
+                    if (ctl)
+                        ctl.focus();
+                    else
+                        console.log("loadPage: can't set focus to unknown field " + initialFocus);
+                }
             });
         });
     }
@@ -1172,9 +1177,13 @@ class Utils {
 
         this.makeDraggable(header, content);
 
-        if (focus_ctl)
-            $('#' + focus_ctl).focus();
-        else {
+        if (focus_ctl) {
+            const fctl = $('#' + focus_ctl);
+            if (fctl.length)
+                fctl.focus();
+            else
+                console.log("popup_open:  can't set focus to non-existent field " + focus_ctl);
+        } else {
             const ctl = $(':focus');
             if (ctl)
                 ctl.blur();
