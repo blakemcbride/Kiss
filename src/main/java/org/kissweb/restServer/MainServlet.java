@@ -155,10 +155,12 @@ public class MainServlet extends HttpServlet {
                     logger.error(e);
                     System.exit(-1);
                 }
+                logger.info("* * * Database " + database + " opened successfully");
             }
             else
                 logger.info("* * * No database configured; bypassing login requirements");
-        }
+        } else
+            logger.error("* * * Error executing KissInit.groovy");
 
         try {
             cron = new Cron(MainServlet.getApplicationPath() + "CronTasks/crontab",
