@@ -1147,7 +1147,7 @@ class Utils {
             id: id,
             globalEnterHandler: Utils.globalEnterHandler(null)
         });
-        if (window.AGGrid)
+        if (typeof AGGrid !== 'undefined')
             AGGrid.newGridContext();
         Utils.newEnterContext();
         if (!w.hasClass('popup-background')) {
@@ -1222,7 +1222,7 @@ class Utils {
      */
     static popup_close() {
         const context = Utils.popup_context.pop();
-        if (window.AGGrid)
+        if (typeof AGGrid !== 'undefined')
             AGGrid.popGridContext();
         Utils.popEnterContext();
         $('#' + context.id).hide();
@@ -1423,7 +1423,7 @@ class Utils {
     static cleanup() {
         Utils.clearSomeControlValueChanged(false);
         Kiss.RadioButtons.resetGroups();
-        if (window.AGGrid) {
+        if (typeof AGGrid !== 'undefined') {
             AGGrid.popAllGridContexts();
             AGGrid.newGridContext();   //  for the new screen we are loading
         }
