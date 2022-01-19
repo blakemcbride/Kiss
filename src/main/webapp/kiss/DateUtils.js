@@ -429,5 +429,49 @@ class DateUtils {
         return DateUtils.dateToInt(new Date());
     }
 
+    /**
+     * Return the year portion of a date.
+     *
+     * @param dt {number|Date} integer date formatted as YYYYMMDD or a Date object
+     * @returns {number}
+     */
+    static year(dt) {
+        if (typeof dt === 'object')
+            return dt.getFullYear();
+        return dt ? Math.floor(dt / 10000) : 0;
+    }
+
+    /**
+     * Return the month portion of a date.
+     *
+     * @param dt {number|Date} integer date formatted as YYYYMMDD or a Date object
+     * @returns {number}
+     */
+    static month(dt) {
+        if (!dt)
+            return 0;
+        if (typeof dt === 'object')
+            return dt.getMonth() + 1;
+        const y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        return Math.floor(dt / 100);
+    }
+
+    /**
+     * Return the day portion of a date.
+     *
+     * @param dt {number|Date} integer date formatted as YYYYMMDD or a Date object
+     * @returns {number}
+     */
+    static day(dt) {
+        if (!dt)
+            return 0;
+        if (typeof dt === 'object')
+            return dt.getDate();
+        const y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        const m = Math.floor(dt / 100);
+        return Math.floor(dt - m * 100);
+    }
 }
 

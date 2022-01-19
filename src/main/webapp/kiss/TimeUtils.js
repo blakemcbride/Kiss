@@ -9,7 +9,8 @@
 /**
  * Time utilities.
  *
- * Utilities to deal with times stored as an number in the form HHMM since midnight.
+ * Utilities to deal (mostly) with times stored as a number in the form HHMM since midnight.
+ * Also, some handling of Date objects.
  *
  */
 class TimeUtils {
@@ -25,9 +26,22 @@ class TimeUtils {
     }
 
     /**
+     * Format time with timezone.
+     *
+     * @param dt {Date}
+     * @returns {string} hh:mm XM XST
+     */
+    static formatLong(dt) {
+        if (typeof dt !== 'object')
+            return '';
+        const idt = TimeUtils.dateToTime(dt);
+        return TimeUtils.format(idt) + ' ' + dt.toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
+    }
+
+    /**
      * Format time.
      *
-     * @param  val integer HHMM or Date object
+     * @param  {Date|number} val integer HHMM or Date object
      * @param {boolean} zero_fill
      * @returns {string} hh:mm XM
      */
@@ -149,7 +163,7 @@ class TimeUtils {
      * strToInt().  The reason is that this function calls that function.  You would be calling it twice.
      * Just call strToInt() and compare it to null.
      *
-     * @param time numeric or string time
+     * @param time {number|string} numeric or string time
      * @returns {boolean}
      */
     static isValid(time) {
@@ -227,6 +241,19 @@ class TimeUtils {
         const hours = Math.floor(m / 60);
         const minutes = m - hours * 60;
         return hours * 100 + minutes;
+    }
+
+    /**
+     * Convert a Date object into a numeric time HHMM
+     * dropping the date portion.
+     *
+     * @param dt {Date}
+     * @returns {number} HHMM
+     */
+    static dateToTime(dt) {
+        if (typeof dt !== 'object')
+            return 0;
+        return dt.getHours() * 100 + dt.getMinutes();
     }
 
 }
