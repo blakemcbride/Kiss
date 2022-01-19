@@ -1,0 +1,3 @@
+#
+#  View tomcat log while developing.
+tail -f tomcat/logs/catalina.out
