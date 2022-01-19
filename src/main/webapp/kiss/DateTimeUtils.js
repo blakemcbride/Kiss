@@ -131,6 +131,26 @@ class DateTimeUtils {
         const minutes = dt.getMinutes();
         return hours * 100 + minutes;
     }
+
+    /**
+     * Returns the local long timezone text.
+     * For example "American/Chicago"
+     *
+     * @returns {string}
+     */
+    static getLocalTimezoneLongText() {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
+    /**
+     * Returns the local short timezone text.
+     * For example "CST"
+     *
+     * @returns {string}
+     */
+    static getLocalTimezoneShortText() {
+        return new Date().toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
+    }
 }
 
 

@@ -156,6 +156,11 @@ public class DateTime {
         return zdt;
     }
 
+    /**
+     * Return the date formatted as mm/dd/yyyy hh:mm AM/PM
+     *
+     * @return
+     */
     public String format() {
         return DateTime.format(getDate());
     }
@@ -170,6 +175,15 @@ public class DateTime {
     }
 
     /**
+     * Return the current date and time as a string mm/dd/yyyy hh:mm AM/PM cST
+     *
+     * @return
+     */
+    public static String currentDateTimeFormattedTZ() {
+        return DateTime.formatTZ(new Date());
+    }
+
+    /**
      * Format a date passed into a string mm/dd/yyyy hh:mm AM/PM
      * 
      * @param date
@@ -179,6 +193,19 @@ public class DateTime {
         if (date == null)
             return "";
         SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mm a");
+        return df.format(date);
+    }
+
+    /**
+     * Format a date passed into a string mm/dd/yyyy hh:mm AM/PM xST
+     *
+     * @param date
+     * @return
+     */
+    public static String formatTZ(Date date) {
+        if (date == null)
+            return "";
+        SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mm a zzz");
         return df.format(date);
     }
 
