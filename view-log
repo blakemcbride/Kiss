@@ -1,3 +1,12 @@
-#
+#!/bin/bash
+
 #  View tomcat log while developing.
+
+if [ ! -f tomcat/logs/catalina.out ]; then
+	echo Waiting for system startup
+	while [ ! -f tomcat/logs/catalina.out ]; do
+		sleep .1s
+	done
+fi
+
 tail -f tomcat/logs/catalina.out
