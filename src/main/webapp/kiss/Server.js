@@ -46,6 +46,7 @@ class Server {
     static async call(cls, meth, injson=null) {
 
         const path = "rest";  // path to servlet
+        const msg = 'Error communicating with the server.';
         if (!injson)
             injson = {};
         injson._uuid = Server.uuid;
@@ -67,7 +68,6 @@ class Server {
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                const msg = 'Error communicating with the server.';
                 await Utils.showMessage('Error', msg);
                 Kiss.suspendDepth--;
                 resolve({_Success: false, _ErrorMessage: msg});
@@ -82,7 +82,6 @@ class Server {
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                const msg = 'Error communicating with the server.';
                 await Utils.showMessage('Error', msg);
                 Kiss.suspendDepth--;
                 resolve({_Success: false, _ErrorMessage: msg});

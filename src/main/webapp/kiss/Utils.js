@@ -1209,7 +1209,7 @@ class Utils {
      * Dynamically change the width of a popup.
      *
      * @param {string} id popup id
-     * @param {string} height  like "200px"
+     * @param {string} width  like "200px"
      */
     static popup_set_width(id, width) {
         $('#' + id + '--width').css('width', width);
@@ -1222,6 +1222,10 @@ class Utils {
      */
     static popup_close() {
         const context = Utils.popup_context.pop();
+        if (!context) {
+            console.log('popup_close called without an active popup');
+            return;
+        }
         if (typeof AGGrid !== 'undefined')
             AGGrid.popGridContext();
         Utils.popEnterContext();
