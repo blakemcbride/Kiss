@@ -151,6 +151,21 @@ class DateTimeUtils {
     static getLocalTimezoneShortText() {
         return new Date().toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
     }
+
+    /**
+     * Combine a date and time into the number of milliseconds since 1970 UTC.
+     * This is very valuable when trying to transit a DateTime to a backend without losing timezone info.
+     *
+     * @param date {number|Date} YYYYMMDD (time portion of a Date is not used)
+     * @param time {number|null|undefined} HHMM
+     * @returns {number}
+     *
+     * @see DateUtils.millsToInt(), TimeUtils.millsToInt()
+     */
+    static toMilliseconds(date, time) {
+        const dt = new Date(DateUtils.year(date), DateUtils.month(date)-1, DateUtils.day(date), TimeUtils.hours(time), TimeUtils.minutes(time));
+        return dt.valueOf();
+    }
 }
 
 

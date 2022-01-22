@@ -114,6 +114,22 @@ class DateUtils {
     }
 
     /**
+     * Convert a number of milliseconds since 1970 UTC to an integer date YYYYMMDD.
+     * This takes into account the local timezone.
+     *
+     * @param m {number} number of milliseconds since 1970 UTC
+     * @returns {number} YYYYMMDD
+     *
+     * @see DateTimeUtils.toMilliseconds(), TimeUtils.millsToInt()
+     */
+    static millsToInt(m) {
+        if (!m)
+            return 0;
+        const dt = new Date(m);
+        return DateUtils.dateToInt(dt);
+    }
+
+    /**
      * Is dt a valid date?
      *
      * @param dt number, string, or date

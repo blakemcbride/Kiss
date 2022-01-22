@@ -1,34 +1,34 @@
 /*
-*  Copyright (c) 2015 Blake McBride (blake@mcbridemail.com)
-*  All rights reserved.
-*
-*  Permission is hereby granted, free of charge, to any person obtaining
-*  a copy of this software and associated documentation files (the
-*  "Software"), to deal in the Software without restriction, including
-*  without limitation the rights to use, copy, modify, merge, publish,
-*  distribute, sublicense, and/or sell copies of the Software, and to
-*  permit persons to whom the Software is furnished to do so, subject to
-*  the following conditions:
-*
-*  1. Redistributions of source code must retain the above copyright
-*  notice, this list of conditions, and the following disclaimer.
-*
-*  2. Redistributions in binary form must reproduce the above copyright
-*  notice, this list of conditions and the following disclaimer in the
-*  documentation and/or other materials provided with the distribution.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-*  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-*  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-*  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-*  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-*  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ *  Copyright (c) 2015 Blake McBride (blake@mcbridemail.com)
+ *  All rights reserved.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining
+ *  a copy of this software and associated documentation files (the
+ *  "Software"), to deal in the Software without restriction, including
+ *  without limitation the rights to use, copy, modify, merge, publish,
+ *  distribute, sublicense, and/or sell copies of the Software, and to
+ *  permit persons to whom the Software is furnished to do so, subject to
+ *  the following conditions:
+ *
+ *  1. Redistributions of source code must retain the above copyright
+ *  notice, this list of conditions, and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *  notice, this list of conditions and the following disclaimer in the
+ *  documentation and/or other materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 package org.kissweb.database;
 
@@ -94,9 +94,9 @@ public class Record implements AutoCloseable {
      * @see #setDateOnly(String, java.util.Date)
      * @see #setDateTime(String, java.util.Date)
      */
-    public Object set(String name, Object val) {
+    public Record set(String name, Object val) {
         cols.put(name.toLowerCase(), val);
-        return val;
+        return this;
     }
 
     /**
@@ -112,9 +112,9 @@ public class Record implements AutoCloseable {
      * @see #setDateOnly(String, int)
      * @see #setTime(String, long)
      */
-    public Object setDateOnly(String name, java.util.Date val) {
+    public Record setDateOnly(String name, java.util.Date val) {
         cols.put(name.toLowerCase(), val == null ? null : new java.sql.Date(val.getTime()));
-        return val;
+        return this;
     }
 
     /**
@@ -130,17 +130,17 @@ public class Record implements AutoCloseable {
      * @see #set(String, Object)
      * @see #setDateTime(String, java.util.Date)
      */
-    public int setDateOnly(String name, int dat) {
+    public Record setDateOnly(String name, int dat) {
         if (dat == 0) {
             cols.put(name.toLowerCase(), null);
-            return 0;
+            return this;
         }
         int y = dat / 10000;
         int m = (dat % 10000) / 100;
         int d = dat % 100;
         java.util.Date val = new GregorianCalendar(y, m-1, d).getTime();
         cols.put(name.toLowerCase(), new java.sql.Date(val.getTime()));
-        return dat;
+        return this;
     }
 
     /**
@@ -155,14 +155,14 @@ public class Record implements AutoCloseable {
      * @see #set(String, Object)
      * @see #setDateTime(String, java.util.Date)
      */
-    public long setTime(String name, long dat) {
+    public Record setTime(String name, long dat) {
         if (dat == 0) {
             cols.put(name.toLowerCase(), null);
-            return 0;
+            return this;
         }
         java.util.Date val = new java.util.Date(dat);
         cols.put(name.toLowerCase(), new java.sql.Time(val.getTime()));
-        return dat;
+        return this;
     }
 
     /**
@@ -177,9 +177,26 @@ public class Record implements AutoCloseable {
      * @see #setTime(String, long)
      * @see #set(String, Object)
      */
-    public Object setDateTime(String name, java.util.Date val) {
+    public Record setDateTime(String name, java.util.Date val) {
         cols.put(name.toLowerCase(), val == null ? null : new java.sql.Timestamp(val.getTime()));
-        return val;
+        return this;
+    }
+
+    /**
+     * Set the date and time value of a column in the record.
+     *
+     * @param name the column name
+     * @param val number ov milliseconds since 1970 UTC
+     * @return
+     *
+     * @see Cursor#set(String, Object)
+     * @see #setDateOnly(String, java.util.Date)
+     * @see #setTime(String, long)
+     * @see #set(String, Object)
+     */
+    public Record setDateTime(String name, long val) {
+        cols.put(name.toLowerCase(), val == 0L ? null : new java.sql.Timestamp(val));
+        return this;
     }
 
     /**

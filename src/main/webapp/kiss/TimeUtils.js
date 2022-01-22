@@ -184,11 +184,11 @@ class TimeUtils {
      * Returns the hours portion of a time in an integer representation formatted HHMM
      *
      * @param time {number} HHMM
-     * @returns {null|number}
+     * @returns {number}
      */
     static hours(time) {
         if (typeof time !== 'number')
-            return null;
+            return 0;
         return Math.floor(time / 100);
     }
 
@@ -196,12 +196,28 @@ class TimeUtils {
      * Returns the minutes portion of a time in an integer representation formatted HHMM
      *
      * @param time {number} HHMM
-     * @returns {null|number}
+     * @returns {number}
      */
     static minutes(time) {
         if (typeof time !== 'number')
-            return null;
+            return 0;
         return time - Math.floor(time / 100) * 100;
+    }
+
+    /**
+     * Convert a number of milliseconds since 1970 UTC to an integer time HHMM.
+     * This takes into account the local timezone.
+     *
+     * @param m {number} number of milliseconds since 1970 UTC
+     * @returns {number} HHMM
+     *
+     * @see DateTimeUtils.toMilliseconds(), DateUtils.millsToInt()
+     */
+    static millsToInt(m) {
+        if (!m)
+            return 0;
+        const dt = new Date(m);
+        return TimeUtils.dateToTime(dt);
     }
 
     /**
