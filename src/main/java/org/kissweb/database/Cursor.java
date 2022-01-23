@@ -507,12 +507,33 @@ public class Cursor implements AutoCloseable {
      *
      * @see #getDateOnly(String)
      * @see #getTime(String)
+     * @see #getDateTimeMS(String)
      */
     public java.util.Date getDateTime(String cname) throws SQLException {
         Timestamp ts = (Timestamp) get(cname);
         if (ts == null)
             return null;
         return new java.util.Date(ts.getTime());
+    }
+
+    /**
+     * Return the date/time value as the number of milliseconds since 1970 UTC.
+     *
+     * A <code>0</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see #getDateOnly(String)
+     * @see #getTime(String)
+     * @see #getDateTime(String)
+     */
+    public long getDateTimeMS(String cname) throws SQLException {
+        Timestamp ts = (Timestamp) get(cname);
+        if (ts == null)
+            return 0L;
+        return ts.getTime();
     }
 
     /**
