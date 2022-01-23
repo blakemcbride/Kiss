@@ -15,7 +15,7 @@ import org.kissweb.restServer.ProcessServlet
  */
 class Crud {
 
-    void getRecords(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void getRecords(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         List<Record> recs = db.fetchAll("select * from phone order by last_name, first_name")
         JSONArray rows = new JSONArray();
         for (Record rec : recs) {
@@ -29,7 +29,7 @@ class Crud {
         outjson.put("rows", rows)
     }
 
-    void addRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void addRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         Record rec = db.newRecord("phone")
         rec.set("first_name", injson.getString("firstName"))
         rec.set("last_name", injson.getString("lastName"))
@@ -37,7 +37,7 @@ class Crud {
         rec.addRecord()
     }
 
-    void updateRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void updateRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         Record rec = db.fetchOne("select * from phone where rec_id=?", injson.getInt("id"))
         rec.set("first_name", injson.getString("firstName"))
         rec.set("last_name", injson.getString("lastName"))
@@ -45,11 +45,11 @@ class Crud {
         rec.update();
     }
 
-    void deleteRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void deleteRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         db.execute("delete from phone where rec_id=?", injson.getInt("id"))
     }
 
-    void runReport(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void runReport(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
 
         // This will only work if you have Groff installed on your computer
 
@@ -71,7 +71,7 @@ class Crud {
         outjson.put("reportUrl", rpt.process())
     }
 
-    void runExport(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void runExport(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         File f = FileUtils.createReportFile("PhoneList-", ".csv")
         DelimitedFileWriter dfw = new DelimitedFileWriter(f.getAbsolutePath())
 

@@ -8,7 +8,7 @@ import org.kissweb.restServer.MainServlet
 
 class MyGroovyService {
 
-    void addNumbers(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void addNumbers(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         int num1 = injson.getInt("num1")
         int num2 = injson.getInt("num2")
         /*
@@ -20,7 +20,7 @@ class MyGroovyService {
         outjson.put("num3", (int) r)
     }
 
-    void hasDatabase(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    static void hasDatabase(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         outjson.put("hasDatabase", MainServlet.hasDatabase())
     }
 
