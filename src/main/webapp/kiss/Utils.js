@@ -167,7 +167,7 @@ class Utils {
             }).on('keydown', function (e) {
                 e.stopPropagation();
                 if (e.key === 'Enter')
-                    waitForKeyUp = true;
+                     waitForKeyUp = true;
             });
         });
     }
@@ -479,15 +479,6 @@ class Utils {
         return s.substring(0, s.length + n);
     }
 
-    static toNumber(str) {
-        if (typeof str === 'number')
-            return str;
-        if (typeof str !== 'string'  ||  !str)
-            return 0;
-        str = str.replaceAll(/[,$%]/g, '');
-        const r = Number(str);
-        return isNaN(r) ? 0 : r;
-    }
     /**
      *  Numeric formatter.  Takes a number and converts it to a nicely formatted String in a specified number base.
      *
@@ -986,7 +977,7 @@ class Utils {
 
         // Get the HTML
         xhr.open( 'GET', url );
-        //       xhr.responseType = 'document';
+ //       xhr.responseType = 'document';
         xhr.responseType = 'text';
         xhr.send();
     };
@@ -1276,6 +1267,24 @@ class Utils {
         for (let i=0 ; i < file_list.length ; i++)
             data.append('file-'+i, file_list[i]);
         return data;
+    }
+
+    /**
+     * Turn undefined, null, NaN, "", a number, or a string into a number.
+     * Anything (except a valid string or number) becomes a zero.
+     *
+     * @param v
+     * @returns {number}
+     */
+    static toNumber(v) {
+        if (!v  ||  (typeof v !== 'string'  &&  typeof v !== 'number'))
+            return 0;
+        if (typeof v === 'number')
+            return v;
+        v = v.replace('$', '');
+        v = v.replace('%', '');
+        v = v.replace(/,/g, '');
+        return Utils.toNumber(Number(v));
     }
 
     /**
