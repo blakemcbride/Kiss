@@ -558,6 +558,18 @@ class AGGrid {
             AGGrid.popGridContext();
     }
 
+    /**
+     * Format for date times formatted as mm/dd/yyyy hh:mm AM/PM
+     *
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.dateTime
+     *
+     * @param params
+     * @returns {string}
+     */
+    static dateTime(params) {
+        return DateTimeUtils.formatDate(params.value);
+    }
+
 }
 
 // class variables

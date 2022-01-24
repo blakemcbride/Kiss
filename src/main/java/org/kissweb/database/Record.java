@@ -732,7 +732,12 @@ public class Record implements AutoCloseable {
      */
     public JSONObject toJSON() {
         JSONObject obj = new JSONObject();
-        cols.forEach(obj::put);
+        cols.forEach((id, val) -> {
+            if (val instanceof java.util.Date)
+                obj.put(id, (java.util.Date) val);
+            else
+                obj.put(id, val);
+        });
         return obj;
     }
 

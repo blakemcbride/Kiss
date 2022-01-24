@@ -92,9 +92,11 @@
         newElm.setValue = function (val) {
             if (!val)
                 jqObj.val('');
-            else if (typeof val === 'number')
+            else if (typeof val === 'number') {
+                if (val > 30000000)
+                    val = DateUtils.millsToInt(val);
                 jqObj.val(DateUtils.intToSQL(val));
-            else if (typeof val === 'string') {
+            } else if (typeof val === 'string') {
                 if (/^\d+$/.test(val))
                     jqObj.val(DateUtils.intToSQL(Number(val)));
                 else

@@ -151,6 +151,7 @@ class components {
      *     <tr><td>    clear()     </td><td>     remove the list contents except the <code>default-option</code>               </td></tr>
      *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
+     *     <tr><td>    fill(selectedItem, items, valField, labelField [, dataField]) </td><td>   clear and fill a dropdown selecting the specified item </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus on the control        </td></tr>
      *     <tr><td>    getAllLabels()     </td><td>     returns an array of all the labels             </td></tr>
      *     <tr><td>    getData(idx)     </td><td>     returns the data associated to an option.  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.              </td></tr>

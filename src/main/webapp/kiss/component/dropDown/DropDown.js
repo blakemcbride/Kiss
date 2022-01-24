@@ -93,6 +93,16 @@
             return this;
         };
 
+        newElm.fill = function (selectedItem, items, valField, labelField, dataField) {
+            newElm.clear();
+            if (!selectedItem)
+                newElm.add('', '(choose)');
+            newElm.addItems(items, valField, labelField, dataField);
+            if (selectedItem)
+                newElm.setValue(selectedItem);
+            return this;
+        }
+
         newElm.size = function () {
             return jqObj.children('option').length;
         };

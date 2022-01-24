@@ -82,7 +82,7 @@ class JavaService {
             logger.info("Method completed successfully");
             return ProcessServlet.ExecutionReturn.Success;
         }
-        logger.error("Not found or not loaded");
+        logger.error("Not found or not loaded - " + fileName);
         return ProcessServlet.ExecutionReturn.NotFound;
     }
 

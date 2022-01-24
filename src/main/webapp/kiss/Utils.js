@@ -167,7 +167,7 @@ class Utils {
             }).on('keydown', function (e) {
                 e.stopPropagation();
                 if (e.key === 'Enter')
-                     waitForKeyUp = true;
+                    waitForKeyUp = true;
             });
         });
     }
@@ -479,6 +479,15 @@ class Utils {
         return s.substring(0, s.length + n);
     }
 
+    static toNumber(str) {
+        if (typeof str === 'number')
+            return str;
+        if (typeof str !== 'string'  ||  !str)
+            return 0;
+        str = str.replaceAll(/[,$%]/g, '');
+        const r = Number(str);
+        return isNaN(r) ? 0 : r;
+    }
     /**
      *  Numeric formatter.  Takes a number and converts it to a nicely formatted String in a specified number base.
      *
@@ -977,7 +986,7 @@ class Utils {
 
         // Get the HTML
         xhr.open( 'GET', url );
- //       xhr.responseType = 'document';
+        //       xhr.responseType = 'document';
         xhr.responseType = 'text';
         xhr.send();
     };
@@ -1209,7 +1218,7 @@ class Utils {
      * Dynamically change the width of a popup.
      *
      * @param {string} id popup id
-     * @param {string} width  like "200px"
+     * @param {string} height  like "200px"
      */
     static popup_set_width(id, width) {
         $('#' + id + '--width').css('width', width);
@@ -1222,10 +1231,6 @@ class Utils {
      */
     static popup_close() {
         const context = Utils.popup_context.pop();
-        if (!context) {
-            console.log('popup_close called without an active popup');
-            return;
-        }
         if (typeof AGGrid !== 'undefined')
             AGGrid.popGridContext();
         Utils.popEnterContext();
@@ -1540,6 +1545,17 @@ class Utils {
         }
         node.append(html);
         return node;
+    }
+
+    /**
+     * Return number of milliseconds since 1970 UTC from a date and time control.
+     *
+     * @param {string} dateField the ID of the date field
+     * @param {string} timeField the ID of the time field
+     * @returns {number}
+     */
+    static getMilliseconds(dateField, timeField) {
+        return DateTimeUtils.toMilliseconds($$(dateField).getIntValue(), $$(timeField).getValue());
     }
 
 }

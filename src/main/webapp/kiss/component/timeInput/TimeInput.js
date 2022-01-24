@@ -99,6 +99,8 @@
             }
             if (typeof val !== 'number')
                 val = Utils.toNumber(val);
+            if (val > 2400)
+                val = TimeUtils.millsToInt(val);
             jqObj.val(TimeUtils.format(val, zero_fill));
             originalValue = newElm.getValue();
             return this;

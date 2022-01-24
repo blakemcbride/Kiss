@@ -76,22 +76,24 @@ class DateTimeUtils {
     }
 
     /**
-     * Format a Date to a string representation looking like mm/dd/yyyy hh:mm
+     * Format a Date or number of milliseconds since 1970 UTC to a string representation looking like mm/dd/yyyy hh:mm
      *
-     * @param {Date} dt
+     * @param {Date|number} dt
      * @returns {string}
      */
     static formatDate(dt) {
         if (!dt)
             return '';
+        if (typeof dt === 'number')
+            dt = new Date(dt);
         let hours = dt.getHours();
         let sf;
-        if (hours > 12)
-            hours -= 12;
         if (hours >= 12)
             sf = ' PM';
         else
             sf = ' AM';
+        if (hours > 12)
+            hours -= 12;
         if (!hours)
             hours = 12;
         let min = dt.getMinutes();

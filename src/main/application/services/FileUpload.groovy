@@ -10,7 +10,7 @@ import org.kissweb.restServer.ProcessServlet
  */
 class FileUpload {
 
-    static void upload(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+    void upload(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         int numberOfFiles = servlet.getUploadFileCount()
         String fileName = servlet.getUploadFileName(0)  // name of first file
         BufferedInputStream is = servlet.getUploadBufferedInputStream(0)  // get the first one

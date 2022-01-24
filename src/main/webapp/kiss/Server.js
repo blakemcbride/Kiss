@@ -46,7 +46,6 @@ class Server {
     static async call(cls, meth, injson=null) {
 
         const path = "rest";  // path to servlet
-        const msg = 'Error communicating with the server.';
         if (!injson)
             injson = {};
         injson._uuid = Server.uuid;
@@ -56,7 +55,7 @@ class Server {
         const doCall = async function (cls, meth, injson, pass, resolve, reject) {
             let response;
             if (pass === 1)
-                Kiss.suspendDepth++;
+                Server.incCount();
             try {
                 response = await fetch(Server.url + '/' + path, {
                     method: 'POST',
@@ -68,8 +67,9 @@ class Server {
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
                 await Utils.showMessage('Error', msg);
-                Kiss.suspendDepth--;
+                Server.decCount();
                 resolve({_Success: false, _ErrorMessage: msg});
                 return;
             }
@@ -77,13 +77,14 @@ class Server {
                 const res = await response.json();
                 if (!res._Success)
                     await Utils.showMessage('Error', res._ErrorMessage);
-                Kiss.suspendDepth--;
+                Server.decCount();
                 resolve(res);
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
                 await Utils.showMessage('Error', msg);
-                Kiss.suspendDepth--;
+                Server.decCount();
                 resolve({_Success: false, _ErrorMessage: msg});
             }
         };
@@ -92,6 +93,16 @@ class Server {
             doCall(cls, meth, injson, 1, resolve, reject);
         });
 
+    }
+
+    static incCount() {
+        if (++Kiss.suspendDepth === 1)
+            document.body.style.cursor = 'wait';
+    }
+
+    static decCount() {
+        if (--Kiss.suspendDepth === 0)
+            document.body.style.cursor = 'default';
     }
 
     /**
@@ -114,7 +125,7 @@ class Server {
                 for (let key in injson)
                     fd.append(key, injson[key]);
             Utils.waitMessage("File upload in progress.");
-            Kiss.suspendDepth++;
+            Server.incCount();
             $.ajax({
                 url: Server.url + '/rest',
                 type: 'POST',
@@ -129,14 +140,14 @@ class Server {
                         await Utils.showMessage("Information", "Upload successful.");
                     else
                         await Utils.showMessage("Error", res._ErrorMessage);
-                    Kiss.suspendDepth--;
+                    Server.decCount();
                     resolve(res);
                 },
                 error: async function (hdr, status, error) {
                     const msg = 'Error communicating with the server.';
                     Utils.waitMessageEnd();
                     await Utils.showMessage("Error", msg);
-                    Kiss.suspendDepth--;
+                    Server.decCount();
                     resolve({_Success: false, _ErrorMessage: msg});
                 }
             });
@@ -179,8 +190,4 @@ class Server {
 
 // class variable
 Server.contextCreated = false;
-
-
-
-
 

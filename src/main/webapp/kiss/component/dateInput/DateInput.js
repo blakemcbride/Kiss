@@ -113,6 +113,8 @@
                 jqObj.val('');
                 originalValue = 0;
             } else if (typeof val === 'number') {
+                if (val > 30000000)
+                    val = DateUtils.millsToInt(val);
                 jqObj.val(DateUtils.intToStr4(val).trim())
                 originalValue = val;
             } else if (typeof val === 'string') {

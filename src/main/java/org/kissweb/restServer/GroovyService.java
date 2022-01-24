@@ -166,6 +166,7 @@ public class GroovyService {
                     logger.info("Searching for method " + _method);
                     meth = ci.gclass.getMethod(_method, JSONObject.class, JSONObject.class, Connection.class, ProcessServlet.class);
                 } catch (Exception e) {
+                    ms.errorReturn(response, "Error running " + fileName + " " + _method + "()", null);
                     return ProcessServlet.ExecutionReturn.Error;
                 }
 
@@ -182,7 +183,7 @@ public class GroovyService {
                 ci.executing--;
             }
         }
-        logger.error("Error loading or not found");
+        logger.error("Error loading or not found - " + fileName);
         return ProcessServlet.ExecutionReturn.NotFound;
     }
 
