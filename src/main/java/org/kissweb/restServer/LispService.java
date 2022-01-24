@@ -51,7 +51,6 @@ class LispService {
 
         logger.info("Attempting to load " + fileName);
         if (!(new File(fileName)).exists()) {
-            logger.error(fileName + " not found");
             return ExecutionReturn.NotFound;
         }
 

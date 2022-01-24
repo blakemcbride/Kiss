@@ -183,7 +183,6 @@ public class GroovyService {
                 ci.executing--;
             }
         }
-        logger.error("Error loading or not found - " + fileName);
         return ProcessServlet.ExecutionReturn.NotFound;
     }
 
