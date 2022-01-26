@@ -1,7 +1,9 @@
 package org.kissweb;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -33,9 +35,10 @@ public class Groff {
     private int currentRow;
     private String delim = "\f";
     private final StringBuilder row = new StringBuilder();
-    private boolean inTitle;
+    private boolean inTitle = false;
     private boolean inTable = false;
     private String runDate;
+    private final List<String> pageTitleLines = new ArrayList<>();
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -84,11 +87,14 @@ public class Groff {
         if (!colFmt.endsWith("."))
             colFmt += ".";
         numberOfColumns = 1 + colFmt.trim().replaceAll(" {2}", " ").replaceAll("[^ ]", "").length();
+        out(".fi");
         out(".TS H");
         out("center tab(" + delim + ");");
         out(colFmt);
         inTitle = true;
         inTable = true;
+        currentColumn = currentRow = 0;
+        row.setLength(0);
     }
 
     /**
@@ -260,18 +266,39 @@ public class Groff {
                 if (!inTitle && currentRow++ % 2 == 1)
                     pw.print("\\*Y");
                 pw.println(row);
+                row.setLength(0);
             }
             pw.println(".TE");
             pw.println(".nf");
             inTable = false;
+            currentColumn = currentRow = 0;
         }
         inTitle = false;
     }
 
-    private void setDefaults1() {
+    /**
+     * Output a line in bold text.
+     *
+     * @param txt
+     */
+    public void outBold(String txt) {
+        out(".B \"" + txt + "\"");
+    }
+
+    /**
+     * Add an additional line to the page title.
+     *
+     * @param line
+     */
+    public void addPageTitleLine(String line) {
+        pageTitleLines.add(line);
+    }
+
+    private void setDefaults() {
         pw.println(".PH \"''''\"");
         pw.println(".PF \"'" + footerLeft + "'Page \\\\\\\\nP'" + footerRight + "'\"");
         pw.println(".S 11");
+        pw.println("'nf");
 
         // Code to help make every other line gray
         pw.println(".\\\" ----------------------------------------------------------------");
@@ -283,18 +310,17 @@ public class Groff {
         pw.println(".\\\" ----------------------------------------------------------------");
     }
 
-    private void setDefaults2() {
-        pw.println("'fi");
-    }
-
     private void writePageHeader(String title) {
         pw.println(".de TP");
         pw.println("'SP .5i");
         if (runDate == null)
             pw.println("'tl '''" + DateTime.currentDateTimeFormattedTZ() + "'");
         else if (!runDate.isEmpty())
-            pw.println("'tl '''" + runDate);
-        pw.println("'tl ''\\s(14" + title + "\\s0''");
+            pw.println("'tl '''" + runDate + "'");
+        pw.println("'ce " + (1 + pageTitleLines.size()));
+        pw.println(title);
+        for (String line : pageTitleLines)
+            pw.println(line);
         pw.println("'SP");
         pw.println("..");
     }
@@ -312,17 +338,14 @@ public class Groff {
      * @param str
      */
     public void out(String str) {
-        boolean needDefaults2 = atTop;
         if (atTop) {
-            setDefaults1();
+            setDefaults();
             atTop = false;
         }
         if (autoPageHeader) {
             writePageHeader(title);
             autoPageHeader = false;
         }
-        if (needDefaults2)
-            setDefaults2();
         if (str != null)
             pw.println(str);
     }
