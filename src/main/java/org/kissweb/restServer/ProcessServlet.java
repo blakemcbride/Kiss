@@ -219,7 +219,7 @@ public class ProcessServlet implements Runnable {
             return;
         }
 
-        if (_className.isEmpty())
+        if (_className.isEmpty()) {
             if (_method.equals("LoginRequired")) {
                 logger.info("Login is " + (MainServlet.hasDatabase() ? "" : "not ") + "required");
                 outjson.put("LoginRequired", MainServlet.hasDatabase());
@@ -234,22 +234,27 @@ public class ProcessServlet implements Runnable {
                     logger.info("Login successful");
                     return;
                 } catch (Exception e) {
-                    errorReturn(response, "Login failure.", e);
+                    logger.info("Login failure");
+                    loginFailure(response);
                     return;
                 }
-            } else if (MainServlet.hasDatabase()) {
-                try {
-                    logger.info("Validating uuid " + injson.getString("_uuid"));
-                    ud = UserCache.findUser(injson.getString("_uuid"));
-                    checkLogin(ud);
-                } catch (Exception e) {
-                    logger.info("Login failure.");
-                    errorReturn(response, "Login failure.", e);
-                    return;
-                }
-                logger.info("Login success");
-            } else
+            }
+        } else if (MainServlet.hasDatabase()) {
+            try {
+                logger.info("Validating uuid " + injson.getString("_uuid"));
                 ud = UserCache.findUser(injson.getString("_uuid"));
+                checkLogin(ud);
+            } catch (Exception e) {
+                logger.info("Login failure.");
+                loginFailure(response);
+                return;
+            }
+            logger.info("Login success");
+        } else {
+            ud = UserCache.findUser(injson.getString("_uuid"));
+            if (ud == null)
+                loginFailure(response);
+        }
 
         res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
         if (res == ProcessServlet.ExecutionReturn.Error)
@@ -289,6 +294,7 @@ public class ProcessServlet implements Runnable {
         response.setContentType("application/json");
         response.setStatus(200);
         outjson.put("_Success", true);
+        outjson.put("_ErrorCode", 0);  // success
         out.print(outjson);
         out.flush();
         out.close();     // this causes the second response
@@ -323,7 +329,28 @@ public class ProcessServlet implements Runnable {
         }
          */
         outjson.put("_ErrorMessage", finalMsg);
+        outjson.put("_ErrorCode", 1);  // general error
         log_error(finalMsg, e);
+        out.print(outjson);
+        out.flush();
+        out.close();  //  this causes the second response
+        asyncContext.complete();
+    }
+
+    void loginFailure(HttpServletResponse response) {
+        if (DB != null) {
+            try {
+                DB.rollback();
+            } catch (SQLException ignored) {
+            }
+        }
+        closeSession();
+        response.setContentType("application/json");
+        response.setStatus(200);
+        JSONObject outjson = new JSONObject();
+        outjson.put("_Success", false);
+        outjson.put("_ErrorMessage", "Login failure.");
+        outjson.put("_ErrorCode", 2);  // login failure
         out.print(outjson);
         out.flush();
         out.close();  //  this causes the second response

@@ -29,10 +29,7 @@
 
 
     $$('logout').onclick(function () {
-        Utils.cleanup();  //  clean up any context information
         Server.logout();
-        window.onbeforeunload = null;
-        history.go(0);
     });
 
 })();

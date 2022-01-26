@@ -29,7 +29,12 @@ class Server {
      *  Removes the user association between the back-end and front-end.
      */
     static logout() {
+        Kiss.suspendDepth = 0;
+        document.body.style.cursor = 'default';
+        Utils.cleanup();  //  clean up any context information
         Server.uuid = '';
+        window.onbeforeunload = null;  //  allow logout
+        location.reload();
     }
 
     /**
@@ -68,23 +73,27 @@ class Server {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 const msg = 'Error communicating with the server.';
-                await Utils.showMessage('Error', msg);
                 Server.decCount();
+                await Utils.showMessage('Error', msg);
                 resolve({_Success: false, _ErrorMessage: msg});
                 return;
             }
             try {
                 const res = await response.json();
-                if (!res._Success)
-                    await Utils.showMessage('Error', res._ErrorMessage);
                 Server.decCount();
-                resolve(res);
+                if (!res._Success)
+                    if (res._ErrorCode === 2) {
+                        await Utils.showMessage('Error', res._ErrorMessage);
+                        Server.logout();
+                    } else
+                        await Utils.showMessage('Error', res._ErrorMessage);
+                 resolve(res);
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 const msg = 'Error communicating with the server.';
-                await Utils.showMessage('Error', msg);
                 Server.decCount();
+                await Utils.showMessage('Error', msg);
                 resolve({_Success: false, _ErrorMessage: msg});
             }
         };
@@ -136,18 +145,21 @@ class Server {
                 cache: false,
                 success: async function (res, status, hdr) {
                     Utils.waitMessageEnd();
+                    Server.decCount();
                     if (res._Success)
                         await Utils.showMessage("Information", "Upload successful.");
-                    else
+                    else if (res._ErrorCode === 2) {
                         await Utils.showMessage("Error", res._ErrorMessage);
-                    Server.decCount();
+                        Server.logout();
+                    } else
+                        await Utils.showMessage("Error", res._ErrorMessage);
                     resolve(res);
                 },
                 error: async function (hdr, status, error) {
                     const msg = 'Error communicating with the server.';
                     Utils.waitMessageEnd();
-                    await Utils.showMessage("Error", msg);
                     Server.decCount();
+                    await Utils.showMessage("Error", msg);
                     resolve({_Success: false, _ErrorMessage: msg});
                 }
             });
@@ -173,6 +185,8 @@ class Server {
             Promise.all(pa).then(function (ret) {
                 for (let i = 0; i < ret.length; i++)
                     if (!ret[i]._Success) {
+                        if (ret[i]._ErrorCode === 2)
+                            Server.logout();
                         resolve(true);  //  error
                         return;
                     }
