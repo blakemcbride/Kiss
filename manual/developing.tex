@@ -30,7 +30,7 @@
 @chapter Developing
 
 This section details the development process with @emph{Kiss}.  The
-details provided will be for intelliJ but can be adapted to other
+details provided will be for IntelliJ but can be adapted to other
 IDE's.  The use of an IDE is tremendously beneficial because of the
 graphical debugging and intelligent code completion capabilities.
 
@@ -45,6 +45,47 @@ immediately.
 Of course, in a production environment, only a single server would be
 utilized and front-end and back-end changes take effect immediately
 there too.
+
+@section Overview
+
+The following details the normal steps to boot up a development environment.
+Once this environment is set up, it may remain active for the whole day.
+There is rarely any reason to re-build or re-boot the development environment.
+
+Note that all of the command-prompt commands are executed from the
+root of your application.
+
+@enumerate
+@item
+In a command-prompt, type:  @code{./view-log}
+
+This is where back-end messages appear.
+@item
+In a second command-prompt, type:  @code{./bld develop}
+
+This builds the system and runs the back-end and front-end servers.
+@item
+In the IDE, attach to the Java process at port 9000.
+
+This will allow you to debug the back-end.
+@item
+From your browser, go to @uref{http://localhost:8000}
+
+This is where you view and interact with your application.
+@item
+Open the @emph{Developer tools} from within the browser.
+
+This is where you debug the front-end.
+@item
+Be sure to disable caching on the browser. (Otherwise, changes you make to 
+the front-end will not immediately appear in the browser.)
+@end enumerate
+
+At this point, development, testing, and debugging can occur unabated.
+There should be no need to rebuild or bring anything down.
+
+Front-end changes will appear as soon as you re-load the page on your browser.
+Back-end changes with take effect immediately.
 
 @section Back-end Development
 
