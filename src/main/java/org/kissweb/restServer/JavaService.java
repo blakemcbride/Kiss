@@ -76,7 +76,7 @@ class JavaService {
                 logger.info("Evoking method " + _method);
                 meth.invoke(instance, injson, outjson, ms.DB, ms);
             } catch (Exception e) {
-                ms.errorReturn(response, fileName + " " + _method + "()", e);
+                ms.errorReturn(response, fileName + " " + _method + "()", e.getCause());
                 return ProcessServlet.ExecutionReturn.Error;
             }
             logger.info("Method completed successfully");

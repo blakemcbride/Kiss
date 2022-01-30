@@ -94,7 +94,7 @@ class LispService {
             logger.info("Executing lisp function " + _method);
             ABCL.executeLisp(_className, _method, lispIn, lispOut, lispHSU, lispThis);
         } catch (Exception e) {
-            ms.errorReturn(response, "Error executing Lisp " + lispFileName + " " + _method + "()", e);
+            ms.errorReturn(response, "Error executing Lisp " + lispFileName + " " + _method + "()", e.getCause());
             return ExecutionReturn.Error;
         } finally {
             res.executing--;

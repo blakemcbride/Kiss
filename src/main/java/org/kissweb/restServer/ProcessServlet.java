@@ -2,9 +2,9 @@ package org.kissweb.restServer;
 
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
-import org.kissweb.DateUtils;
 import org.kissweb.FileUtils;
-import org.kissweb.KissWarning;
+import org.kissweb.FrontendException;
+import org.kissweb.LogException;
 import org.kissweb.database.Connection;
 
 import javax.servlet.AsyncContext;
@@ -314,23 +314,9 @@ public class ProcessServlet implements Runnable {
         response.setStatus(200);
         JSONObject outjson = new JSONObject();
         outjson.put("_Success", false);
-        String finalMsg = msg;
-        /*
-        if (e != null) {
-            String m = e.getMessage();
-            if (m != null)
-                finalMsg = msg + " " + m;
-            Throwable cause = e.getCause();
-            if (cause != null) {
-                m = cause.getMessage();
-                if (m != null)
-                    finalMsg = msg + " " + m;
-            }
-        }
-         */
-        outjson.put("_ErrorMessage", finalMsg);
+        outjson.put("_ErrorMessage", e != null ? e.getMessage() : msg);
         outjson.put("_ErrorCode", 1);  // general error
-        log_error(finalMsg, e);
+        log_error(msg, e);
         out.print(outjson);
         out.flush();
         out.close();  //  this causes the second response
@@ -366,19 +352,12 @@ public class ProcessServlet implements Runnable {
     }
 
     private void log_error(final String str, final Throwable e) {
-        String time = DateUtils.todayDate() + " ";
-        if (e instanceof KissWarning)
-            logger.error(time + str);
+        if (e instanceof FrontendException)
+            return;  //  no log
+        if (e instanceof LogException)
+            logger.warn(str + " " + e.getMessage());
         else
-            logger.error(time + str, e);
-        /*
-        if (e != null) {
-            e.printStackTrace();
-            final StringWriter sw = new StringWriter();
-            e.printStackTrace(new PrintWriter(sw));
-            logger.error(sw.toString());
-        }
-         */
+            logger.error(str, e);
     }
 
     private String login(String user, String password) throws Exception {
@@ -386,7 +365,7 @@ public class ProcessServlet implements Runnable {
         if (MainServlet.hasDatabase()) {
             ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password);
             if (ud == null)
-                throw new KissWarning("Invalid login.");
+                throw new LogException("Invalid login.");
         } else
             ud = UserCache.newUser(user, password, null);
         return ud.getUuid();
@@ -401,7 +380,7 @@ public class ProcessServlet implements Runnable {
             Boolean good = (Boolean) GroovyClass.invoke(true, "Login", "checkLogin", null, DB, ud);
             if (!good) {
                 UserCache.removeUser(ud.getUuid());
-                throw new KissWarning("Invalid login.");
+                throw new LogException("Invalid login.");
             }
         }
         ud.setLastAccessDate(LocalDateTime.now());
