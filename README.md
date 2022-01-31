@@ -6,6 +6,7 @@ developing web-based business applications.  Please see the main web
 site for a more detailed description at
 [https://kissweb.org](https://kissweb.org)
 
+This project is in full release status and not a beta.  It is being used in production.  
 
 Home for the code is at:  [https://github.com/blakemcbride/Kiss](https://github.com/blakemcbride/Kiss)
 
