@@ -26,6 +26,9 @@ A 6-part training series on KISS is at:
 * [Part 5 - Data Persistence](https://youtu.be/pS7DezhYpGo)
 * [Part 6 - Deployment](https://youtu.be/fGEzv7uuJCk)
 
+An article about KISS is available at [The KISS Web Development Framework](https://www.linuxjournal.com/content/kiss-web-development-framework)
+Another article about KISS is available at [Developing REST Microservices Simply](https://medium.com/codex/developing-rest-microservices-simply-ed934f846ff3)
+
 ## Quick Start
 
 Presuming you have the Java JDK (tested with Java 8, 11, and 17), GIT, and an
