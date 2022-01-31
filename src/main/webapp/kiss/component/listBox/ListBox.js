@@ -14,6 +14,7 @@
         let required = false;
         let size = null;
         let multiple = false;
+        let keyIsNumber = false;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -105,6 +106,8 @@
         };
 
         newElm.add = function (val, label, data) {
+            if (typeof val === "number")
+                keyIsNumber = true;
             jqObj.append($('<option></option>').attr('value', val).text(label));
             if (data)
                 dataStore[val] = data;
@@ -118,12 +121,24 @@
             for (let i=0 ; i < len ; i++) {
                 let item = items[i];
                 let lbl = typeof labelField === 'function' ? labelField(item) : item[labelField];
+                if (typeof item[valField] === 'number')
+                    keyIsNumber = true;
                 jqObj.append($('<option></option>').attr('value', item[valField]).text(lbl));
                 dataStore[item[valField]] = dataField ? item[dataField] : item;
             }
             originalValue = jqObj.val();
             return this;
         };
+
+        newElm.fill = function (selectedItem, items, valField, labelField, dataField) {
+            newElm.clear();
+            if (!selectedItem)
+                newElm.add('', '(choose)');
+            newElm.addItems(items, valField, labelField, dataField);
+            if (selectedItem)
+                newElm.setValue(selectedItem);
+            return this;
+        }
 
         newElm.size = function () {
             return jqObj.children('option').length;
@@ -133,13 +148,9 @@
 
         newElm.getValue = function (row) {
             if (row !== 0 && !row)
-                return jqObj.val();
-            return jqObj.find('option')[row].value;
-        };
-
-        newElm.getIntValue = function (row) {
-            const val = newElm.getValue(row);
-            return val ? Number(val) : 0;
+                return keyIsNumber ? Number(jqObj.val()) : jqObj.val();
+            const v = jqObj.find('option')[row].value;
+            return keyIsNumber ? Number(v) : v;
         };
 
         newElm.setValue = function (val, row) {

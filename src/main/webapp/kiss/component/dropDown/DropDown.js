@@ -19,6 +19,7 @@
         let nAttrs = '';
         let id;
         let default_option;
+        let keyIsNumber = false;
         for (let prop of Object.keys(attr)) {
             switch (prop) {
 
@@ -73,6 +74,8 @@
         };
 
         newElm.add = function (val, label, data) {
+            if (typeof val === "number")
+                keyIsNumber = true;
             jqObj.append($('<option></option>').attr('value', val).text(label));
             if (data)
                 dataStore[val] = data;
@@ -86,6 +89,8 @@
             for (let i=0 ; i < len ; i++) {
                 let item = items[i];
                 let lbl = typeof labelField === 'function' ? labelField(item) : item[labelField];
+                if (typeof item[valField] === 'number')
+                    keyIsNumber = true;
                 jqObj.append($('<option></option>').attr('value', item[valField]).text(lbl));
                 dataStore[item[valField]] = dataField ? item[dataField] : item;
             }
@@ -109,13 +114,9 @@
 
         newElm.getValue = function (row) {
             if (row !== 0 && !row)
-                return jqObj.val();
-            return jqObj.find('option')[row].value;
-        };
-
-        newElm.getIntValue = function (row) {
-            const val = newElm.getValue(row);
-            return val ? Number(val) : 0;
+                return keyIsNumber ? Number(jqObj.val()) : jqObj.val();
+            const v = jqObj.find('option')[row].value;
+            return keyIsNumber ? Number(v) : v;
         };
 
         newElm.setValue = function (val, row) {
