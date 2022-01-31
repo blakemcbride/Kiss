@@ -570,6 +570,18 @@ class AGGrid {
         return DateTimeUtils.formatDate(params.value);
     }
 
+    /**
+     * Format for dollars including commas and dollar signs
+     *
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.money
+     *
+     * @param params
+     * @returns {string}
+     */
+    static money(params) {
+        return Utils.format(params.value, "CD", 0, 2);
+    }
+
 }
 
 // class variables
