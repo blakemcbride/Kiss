@@ -7,6 +7,7 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -155,10 +156,11 @@ public final class Crypto {
      */
     public static byte [] encryptWithRandomSalt(String password, byte [] valueToEnc) throws Exception {
         final String salt = createSalt();
+        final byte [] ba = encrypt(salt, password, valueToEnc);
         final byte [] salta = salt.getBytes();
-        final byte [] val = Arrays.copyOf(salta, salta.length + valueToEnc.length);
-        System.arraycopy(valueToEnc, 0, val, salta.length, valueToEnc.length);
-        return encrypt(salt, password, val);
+        final byte [] na = Arrays.copyOf(salta, salta.length + ba.length);
+        System.arraycopy(ba, 0, na, salta.length, ba.length);
+        return na;
     }
 
     /**
@@ -257,6 +259,16 @@ public final class Crypto {
      */
     public static byte [] decrypt(String salt, byte [] encryptedValue) throws Exception {
         return decrypt(salt, defaultPassword, encryptedValue);
+    }
+
+    public static byte [] decryptWithRandomSalt(String password, byte [] encryptedValue) throws Exception {
+        final String salt = new String(Arrays.copyOfRange(encryptedValue, 0, 11));
+        encryptedValue = Arrays.copyOfRange(encryptedValue, 11, encryptedValue.length);
+        return decrypt(salt, password, encryptedValue);
+    }
+
+    public static byte [] decryptWithRandomSalt(byte [] encryptedValue) throws Exception {
+        return decryptWithRandomSalt(defaultPassword, encryptedValue);
     }
 
     /**
@@ -370,5 +382,19 @@ public final class Crypto {
         System.out.println(encrypted2 + " (" + encrypted2.length() + ")");
         System.out.println(decrypted1 + " (" + decrypted1.length() + ")");
         System.out.println(decrypted2 + " (" + decrypted2.length() + ")");
+
+        /*
+         * Same thing with byte array.
+         */
+        System.out.println();
+        byte [] e1 = encryptWithRandomSalt(password, unencrypted.getBytes());
+        byte [] e2 = encryptWithRandomSalt(password, unencrypted.getBytes());
+        byte [] d1 = decryptWithRandomSalt(password, e1);
+        byte [] d2 = decryptWithRandomSalt(password, e2);
+        System.out.println("\n" + unencrypted + " (" + unencrypted.length() + ")");
+        System.out.println("e1" + " (" + e1.length + ")");
+        System.out.println("e2" + " (" + e2.length + ")");
+        System.out.println(new String(d1) + " (" + d1.length + ")");
+        System.out.println(new String(d2) + " (" + d2.length + ")");
     }
 }
