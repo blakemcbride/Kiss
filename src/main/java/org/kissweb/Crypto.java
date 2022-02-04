@@ -329,7 +329,7 @@ public final class Crypto {
      */
     private static String base64Encode(byte [] ba) {
         final String c = base64Encoder.encode(ba);
-        return c.substring(0, c.length()-1);
+        return c.substring(0, c.length()-1).replaceAll("\n", "");
     }
 
     /**
