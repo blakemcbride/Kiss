@@ -1,8 +1,5 @@
 package org.kissweb;
 
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
-
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
@@ -11,6 +8,7 @@ import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.Base64;
 
 /**
  * Author: Blake McBride
@@ -23,8 +21,8 @@ public final class Crypto {
     private static final String ALGORITHM = "AES";
     private static String defaultPassword;
     private static final Cipher cipher;
-    private static final BASE64Decoder base64Decoder = new BASE64Decoder();
-    private final static BASE64Encoder base64Encoder = new BASE64Encoder();
+    private static final Base64.Decoder base64Decoder = Base64.getDecoder();
+    private final static Base64.Encoder base64Encoder = Base64.getEncoder();
     private final static Random random = new Random();
 
     static {
@@ -339,7 +337,7 @@ public final class Crypto {
      * @return
      */
     private static String base64Encode(byte [] ba) {
-        final String c = base64Encoder.encode(ba);
+        final String c = base64Encoder.encodeToString(ba);
         return c.substring(0, c.length()-1).replaceAll("\n", "");
     }
 
@@ -351,7 +349,7 @@ public final class Crypto {
      * @throws IOException
      */
     private static byte [] base64Decode(String s) throws IOException {
-        return base64Decoder.decodeBuffer(s + "=");
+        return base64Decoder.decode(s + "=");
     }
 
     /**
