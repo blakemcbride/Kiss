@@ -7,7 +7,6 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -392,8 +391,8 @@ public final class Crypto {
         byte [] d1 = decryptWithRandomSalt(password, e1);
         byte [] d2 = decryptWithRandomSalt(password, e2);
         System.out.println("\n" + unencrypted + " (" + unencrypted.length() + ")");
-        System.out.println("e1" + " (" + e1.length + ")");
-        System.out.println("e2" + " (" + e2.length + ")");
+        System.out.println(base64Encode(e1) + " (" + e1.length + ")");
+        System.out.println(base64Encode(e2) + " (" + e2.length + ")");
         System.out.println(new String(d1) + " (" + d1.length + ")");
         System.out.println(new String(d2) + " (" + d2.length + ")");
     }
