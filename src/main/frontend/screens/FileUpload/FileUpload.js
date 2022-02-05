@@ -11,8 +11,8 @@
             return;
         }
         const fd = $$('the-file').getFormData();
-        let data = {
-            var1: 22,    // just some random data we want to sent to the back-end
+        const data = {
+            var1: 22,    // just some random data we want to send to the back-end
             var2: 33
         }
         const r = await Server.fileUploadSend('services/FileUpload', 'upload', fd, data);

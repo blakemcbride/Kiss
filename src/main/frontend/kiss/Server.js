@@ -130,6 +130,7 @@ class Server {
         return new Promise(function (resolve, reject) {
             fd.append('_class', cls);
             fd.append('_method', meth);
+            fd.append("_uuid", Server.uuid);
             if (injson)
                 for (let key in injson)
                     fd.append(key, injson[key]);
