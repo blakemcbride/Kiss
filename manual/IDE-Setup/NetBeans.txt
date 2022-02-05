@@ -31,12 +31,12 @@ File / New Project
 		Server:  choose the tomcat that comes with Kiss
 		Context Path:  /
 	Existing Sources and Libraries
-		Web Page Folder:  .../src/main/webapp
+		Web Page Folder:  .../src/main/frontend
 		WEB-INF Content:  .../tomcat/conf
 		Libraries Folder:  .../libs
 	Source Package Folders:
-		src/main/application
-		src/main/java
+		src/main/backend
+		src/main/core
 		builder
 
 Right-click project root / Properties / Sources

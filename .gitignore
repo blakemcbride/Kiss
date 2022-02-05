@@ -137,6 +137,6 @@ atlassian-ide-plugin.xml
 /nbproject/private/
 /dist/
 
-src/main/webapp/lib
+src/main/frontend/lib
 
 /build/

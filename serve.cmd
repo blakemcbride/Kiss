@@ -1,3 +1,3 @@
 @echo off
-java -jar SimpleWebServer.jar -d src/main/webapp
+java -jar SimpleWebServer.jar -d src/main/frontend
 

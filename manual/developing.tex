@@ -103,7 +103,7 @@ source in most configurations.  However, this may be explicitly
 set via a system environment variable (@code{KISS_ROOT}).  The
 value of this environment variable should be the absolute path of the
 root of the application source code.  The directory it indicates
-should have a sub-directory named @code{src/main/application}.
+should have a sub-directory named @code{src/main/backend}.
 
 
 
@@ -133,7 +133,7 @@ form, back-end code can be debugged (including break-points) as if
 they were compiled before the system was booted.
 
 Once the back-end server is up, application files changed under the
-@code{src/main/application} directory will take effect immediately.
+@code{src/main/backend} directory will take effect immediately.
 
 @subsubsection BLD
 
@@ -165,7 +165,7 @@ All communications between the front-end and back-end occur over REST
 services you define.  Each REST service exists in its own
 file or class.  Web methods are methods within those classes.
 
-As architected, directories under @code{src/main/application}
+As architected, directories under @code{src/main/backend}
 represent the application's REST services.  Each class / file under that
 directory represents a web service.  The name of the class is the name
 of the web service.
@@ -179,7 +179,7 @@ This represents the data that came from the front-end.
 @item JSONObject outjson
 This represents the data being returned to the front-end.  It is pre-initialized with an empty @code{JSONObject}.
 @item Connection db
-This is a pre-opened connection to the defined database (defined in @code{application/KissInit.groovy})
+This is a pre-opened connection to the defined database (defined in @code{backend/KissInit.groovy})
 @item MainServlet servlet
 This is a rarely used servlet context argument.
 @end table
@@ -246,7 +246,7 @@ requires some Lisp code to make the connection clear.  Due to this
 connection code having to run, the Lisp interface is very slow on the
 first call.  It is, however, reasonably fast on all subsequent calls.
 The code that interfaces Java to Lisp is under the
-@code{src/main/java/org/kissweb/lisp} directory.
+@code{src/main/core/org/kissweb/lisp} directory.
 
 Do to the easy and natural connection between Java and many other JVM
 languages, interfaces to those languages is very easy.  It is
@@ -262,15 +262,15 @@ another process every Tuesday at 3 PM, etc.  This facility echos
 the standard Unix or Linux @code{cron} facility.
 
 The file that determines what gets run and when is @*
-@code{src/main/application/CronTasks/crontab}.  All tasks must be in
+@code{src/main/backend/CronTasks/crontab}.  All tasks must be in
 the @code{Groovy} language and exist in the
-@code{src/main/application/CronTasks} directory.
+@code{src/main/backend/CronTasks} directory.
 
-All contents of the @code{src/main/application/CronTasks} can be changed
+All contents of the @code{src/main/backend/CronTasks} can be changed
 on a running system.  The change will get noticed and take effect.
 There is no need to restart the system.
 
-Look at the files in the @code{src/main/application/CronTasks}
+Look at the files in the @code{src/main/backend/CronTasks}
 directory for samples and further documentation.
 
 @anchor{Front-end Development}@section Front-end Development
@@ -289,7 +289,7 @@ need to be followed.
 @enumerate
 @item
 The front-end needs to know where the back-end is located.  This is
-controlled in the file @code{src/main/webapp/index.js}.  That file
+controlled in the file @code{src/main/frontend/index.js}.  That file
 contains a line that looks as follows:
 @example
     Server.setURL('http://localhost:8080');
@@ -323,7 +323,7 @@ turned off by going into the page debugger (F12), then
 is open)}
 
 You can now develop the front-end portion of your application by
-editing files under the @code{src/main/webapp} directory.
+editing files under the @code{src/main/frontend} directory.
 
 @section Reports And Exports
 
@@ -356,7 +356,7 @@ may have its own user-specific data it may want to retain between web service
 calls. @emph{Kiss} has a generic and easy way of handling these needs.
 
 Application-specific user login and data is handled by the Groovy file
-located in the @code{application} directory named @code{Login.groovy}.
+located in the @code{backend} directory named @code{Login.groovy}.
 That file must have two methods; @code{login} and @code{checkLogin}.  
 See that file for more details.
 

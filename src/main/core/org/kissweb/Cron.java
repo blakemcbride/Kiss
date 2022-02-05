@@ -16,9 +16,9 @@ import java.util.function.Supplier;
 
 /**
  * System to auto-run Groovy files on a defined period as Unix cron does.
- * The file that controls what gets run and when is in application/CronTasks/crontab
- * The groovy files it runs are located in the application/CronTasks directory.
- * See the file application/crontab
+ * The file that controls what gets run and when is in backend/CronTasks/crontab
+ * The groovy files it runs are located in the backend/CronTasks directory.
+ * See the file backend/crontab
  *
  * Author: Blake McBride
  * Date: 12/22/21

@@ -29,7 +29,7 @@ public class ABCL {
 		invertCase();
 
 		if (MainServlet.isUnderIDE())
-            UtilsSource = "../java/org/kissweb/lisp/";
+            UtilsSource = "../core/org/kissweb/lisp/";
 		else
             UtilsSource = "../classes/org/kissweb/lisp/";
 

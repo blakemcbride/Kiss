@@ -4,7 +4,7 @@
 # To see docs run on Linux or Mac:  man 5 crontab
 #
 # In particular, each line in this file specifies when particular Groovy files get run.
-# Each Groovy file must exist in this directory (application/CronTasks).
+# Each Groovy file must exist in this directory (backend/CronTasks).
 #
 # Format of this file.
 #

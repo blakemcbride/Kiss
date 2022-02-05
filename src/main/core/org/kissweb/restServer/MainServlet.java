@@ -113,23 +113,23 @@ public class MainServlet extends HttpServlet {
         logger.info("* * * Context path = " + rootPath);
         applicationPath = System.getenv("KISS_ROOT");
         if (applicationPath == null || applicationPath.isEmpty()) {
-            if ((new File(rootPath + "../../../src/main/application/" + "KissInit.groovy")).exists()) {
-                applicationPath = rootPath + "../../../src/main/application/";
+            if ((new File(rootPath + "../../../src/main/backend/" + "KissInit.groovy")).exists()) {
+                applicationPath = rootPath + "../../../src/main/backend/";
                 underIDE = true;
-            } else if ((new File(rootPath + "../../src/main/application/" + "KissInit.groovy")).exists()) {
-                applicationPath = rootPath + "../../src/main/application/";
+            } else if ((new File(rootPath + "../../src/main/backend/" + "KissInit.groovy")).exists()) {
+                applicationPath = rootPath + "../../src/main/backend/";
                 underIDE = true;
-            } else if ((new File(rootPath + "../../../../src/main/application/" + "KissInit.groovy")).exists()) {
-                applicationPath = rootPath + "../../../../src/main/application/";
+            } else if ((new File(rootPath + "../../../../src/main/backend/" + "KissInit.groovy")).exists()) {
+                applicationPath = rootPath + "../../../../src/main/backend/";
                 underIDE = true;
             } else {
-                applicationPath = rootPath + (rootPath.endsWith("/") ? "" : "/") + "WEB-INF/application/";
+                applicationPath = rootPath + (rootPath.endsWith("/") ? "" : "/") + "WEB-INF/backend/";
                 underIDE = false;
             }
         } else {
             underIDE = true;
             applicationPath = applicationPath.replaceAll("\\\\", "/");
-            applicationPath = applicationPath + (applicationPath.endsWith("/") ? "" : "/") + "src/main/application/";
+            applicationPath = applicationPath + (applicationPath.endsWith("/") ? "" : "/") + "src/main/backend/";
         }
         try {
             applicationPath = (new File(applicationPath)).getCanonicalPath() + "/";
@@ -251,7 +251,7 @@ public class MainServlet extends HttpServlet {
             try {
                 con = new Connection(connectionType, cstr);
             } catch (Exception e) {
-                logger.error("* * * Database connection failed (see application/KissInit.groovy) " + e.getMessage());
+                logger.error("* * * Database connection failed (see backend/KissInit.groovy) " + e.getMessage());
                 throw e;
             }
             con.close();

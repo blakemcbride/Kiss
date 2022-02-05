@@ -95,10 +95,10 @@ At this point, you can do all development without any build
 procedures.  You can add or change anything on the front-end or
 back-end while the system is running.
 
-All application back-end code is located under the @code{src/main/application}
+All application back-end code is located under the @code{src/main/backend}
 directory.
 
-All application front-end code is located under the @code{src/main/webapp}
+All application front-end code is located under the @code{src/main/frontend}
 directory.
 
 If you change anything in either place, the system will notice the change 
@@ -275,7 +275,7 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 @anchor{Setup And Configuration}@section Setup And Configuration
 
 The system is configured by the contents of a single file
-@code{src/main/application/KissInit.groovy} A reboot of the web server
+@code{src/main/backend/KissInit.groovy} A reboot of the web server
 is required if any of the parameters in this file are changed.
 
 Given that @emph{Kiss} is for business applications, it authenticates its
@@ -416,7 +416,7 @@ This task creates the javadoc files that end up in @code{build.work/javadoc}
 @item kisscmd
 This task creates a command-line JAR that can be used in a non-web, command-line application.
 This is useful when creating applications that perform various utility functions.  This
-JAR cannot be used in any web environment.  See @code{src/main/java/org/kissweb/Main.java}
+JAR cannot be used in any web environment.  See @code{src/main/core/org/kissweb/Main.java}
 @end table
 
 @xref{Important} and @xref{Quick-Start Checklist}.

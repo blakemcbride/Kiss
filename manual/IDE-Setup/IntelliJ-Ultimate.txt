@@ -15,8 +15,8 @@ Open (not "New Project") with IntelliJ
 Add Ant build (message in lower right-hand corner)
 Right-click on project root / Mark directory as / Unmark as Source Root
 Right-click on the following directories and mark as Sources Root
-	src/main/java
-	src/main/application
+	src/main/core
+	src/main/backend
 	builder
 File / Invalidate Cache
 

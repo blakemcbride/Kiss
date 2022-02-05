@@ -38,9 +38,9 @@ of concern when building an application as follows.
 @section Back-end Application Files
 
 @table @code
-@item src/main/application/KissInit.groovy
+@item src/main/backend/KissInit.groovy
 This file is used to configure the system. @xref{Setup And Configuration}
-@item src/main/application
+@item src/main/backend
 All other files under this directory represent the application
 back-end.  All the files are used and distributed in source form.  The
 Kiss system compiles them at runtime but does not save the compiled form.
@@ -51,10 +51,10 @@ immediately on a running system.
 
 @section Front-end Application Files
 
-Files under the @code{src/main/webapp} directory represent the
+Files under the @code{src/main/frontend} directory represent the
 front-end of the application.
 
-All files under the @code{src/main/webapp/kiss} directory are part of
+All files under the @code{src/main/frontend/kiss} directory are part of
 the @emph{Kiss} system and would normally not need to be touched.
 
 @code{index.html} and @code{index.js} are also part of the @emph{Kiss}
@@ -75,7 +75,7 @@ SQLite.
 As shipped, @emph{Kiss} comes configured with an embedded SQLite
 server and database.  While this is fine for a demo or small
 application, a real database should be configured for real use.
-The included database is located in the @code{application} directory 
+The included database is located in the @code{backend} directory
 and is named @code{DB.sqlite}
 
 Although @emph{Kiss} has no preferred database, PostgreSQL is strongly
@@ -100,7 +100,7 @@ is loaded.
 @section Controlling Browser Cache
 
 The user's browser cache can be controlled from the file
-@code{src/main/webapp/index.html} In that file you will see two lines
+@code{src/main/frontend/index.html} In that file you will see two lines
 that look as follows:
 
 @example
@@ -153,8 +153,8 @@ the application path to change to @code{[HOST]/ABC}
 
 In order to start getting a feel for how @code{Kiss} applications
 function, in terms of the back-end, look at files in the
-@code{src/main/application/services} directory.  With @code{Kiss} you can
+@code{src/main/backend/services} directory.  With @code{Kiss} you can
 develop applications in several different languages.  The @code{services}
 example shows the same code in all of the supported languages.
 
-In terms of the front-end, see the example files under @code{src/main/webapp/page1}
+In terms of the front-end, see the example files under @code{src/main/frontend/page1}

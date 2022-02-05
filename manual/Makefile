@@ -24,7 +24,7 @@ Kiss.pdf : $(TEXFILES)
 man/index.html :  $(TEXFILES)
 	makeinfo --html Kiss.tex
 
-jsdoc/index.html: ../src/main/webapp/kiss/*.js ../src/main/webapp/kiss/component/components.js
+jsdoc/index.html: ../src/main/frontend/kiss/*.js ../src/main/frontend/kiss/component/components.js
 	rm -rf jsdoc
 	jsdoc -t /usr/local/lib/node_modules/docdash -c conf.json -d jsdoc $^
 

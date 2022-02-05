@@ -558,10 +558,10 @@ is running.
 procedures.  You can add or change anything on the front-end or
 back-end while the system is running.
 </p>
-<p>All application back-end code is located under the <code>src/main/application</code>
+<p>All application back-end code is located under the <code>src/main/backend</code>
 directory.
 </p>
-<p>All application front-end code is located under the <code>src/main/webapp</code>
+<p>All application front-end code is located under the <code>src/main/frontend</code>
 directory.
 </p>
 <p>If you change anything in either place, the system will notice the change 
@@ -733,7 +733,7 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 <h3 class="section">2.8 Setup And Configuration</h3>
 
 <p>The system is configured by the contents of a single file
-<code>src/main/application/KissInit.groovy</code> A reboot of the web server
+<code>src/main/backend/KissInit.groovy</code> A reboot of the web server
 is required if any of the parameters in this file are changed.
 </p>
 <p>Given that <em>Kiss</em> is for business applications, it authenticates its
@@ -872,7 +872,7 @@ doesn&rsquo;t start up the tomcat server.
 <dt><code>kisscmd</code></dt>
 <dd><p>This task creates a command-line JAR that can be used in a non-web, command-line application.
 This is useful when creating applications that perform various utility functions.  This
-JAR cannot be used in any web environment.  See <code>src/main/java/org/kissweb/Main.java</code>
+JAR cannot be used in any web environment.  See <code>src/main/core/org/kissweb/Main.java</code>
 </p></dd>
 </dl>
 
@@ -935,10 +935,10 @@ of concern when building an application as follows.
 <h3 class="section">3.1 Back-end Application Files</h3>
 
 <dl compact="compact">
-<dt><code>src/main/application/KissInit.groovy</code></dt>
+<dt><code>src/main/backend/KissInit.groovy</code></dt>
 <dd><p>This file is used to configure the system. See <a href="#Setup-And-Configuration">Setup And Configuration</a>
 </p></dd>
-<dt><code>src/main/application</code></dt>
+<dt><code>src/main/backend</code></dt>
 <dd><p>All other files under this directory represent the application
 back-end.  All the files are used and distributed in source form.  The
 Kiss system compiles them at runtime but does not save the compiled form.
@@ -951,10 +951,10 @@ immediately on a running system.
 <a name="Front_002dend-Application-Files"></a>
 <h3 class="section">3.2 Front-end Application Files</h3>
 
-<p>Files under the <code>src/main/webapp</code> directory represent the
+<p>Files under the <code>src/main/frontend</code> directory represent the
 front-end of the application.
 </p>
-<p>All files under the <code>src/main/webapp/kiss</code> directory are part of
+<p>All files under the <code>src/main/frontend/kiss</code> directory are part of
 the <em>Kiss</em> system and would normally not need to be touched.
 </p>
 <p><code>index.html</code> and <code>index.js</code> are also part of the <em>Kiss</em>
@@ -976,7 +976,7 @@ SQLite.
 <p>As shipped, <em>Kiss</em> comes configured with an embedded SQLite
 server and database.  While this is fine for a demo or small
 application, a real database should be configured for real use.
-The included database is located in the <code>application</code> directory 
+The included database is located in the <code>backend</code> directory
 and is named <code>DB.sqlite</code>
 </p>
 <p>Although <em>Kiss</em> has no preferred database, PostgreSQL is strongly
@@ -1003,7 +1003,7 @@ is loaded.
 <h3 class="section">3.5 Controlling Browser Cache</h3>
 
 <p>The user&rsquo;s browser cache can be controlled from the file
-<code>src/main/webapp/index.html</code> In that file you will see two lines
+<code>src/main/frontend/index.html</code> In that file you will see two lines
 that look as follows:
 </p>
 <div class="example">
@@ -1058,11 +1058,11 @@ the application path to change to <code>[HOST]/ABC</code>
 
 <p>In order to start getting a feel for how <code>Kiss</code> applications
 function, in terms of the back-end, look at files in the
-<code>src/main/application/services</code> directory.  With <code>Kiss</code> you can
+<code>src/main/backend/services</code> directory.  With <code>Kiss</code> you can
 develop applications in several different languages.  The <code>services</code>
 example shows the same code in all of the supported languages.
 </p>
-<p>In terms of the front-end, see the example files under <code>src/main/webapp/page1</code>
+<p>In terms of the front-end, see the example files under <code>src/main/frontend/page1</code>
 </p>
 
 
@@ -1139,7 +1139,7 @@ source in most configurations.  However, this may be explicitly
 set via a system environment variable (<code>KISS_ROOT</code>).  The
 value of this environment variable should be the absolute path of the
 root of the application source code.  The directory it indicates
-should have a sub-directory named <code>src/main/application</code>.
+should have a sub-directory named <code>src/main/backend</code>.
 </p>
 
 
@@ -1169,7 +1169,7 @@ form, back-end code can be debugged (including break-points) as if
 they were compiled before the system was booted.
 </p>
 <p>Once the back-end server is up, application files changed under the
-<code>src/main/application</code> directory will take effect immediately.
+<code>src/main/backend</code> directory will take effect immediately.
 </p>
 <a name="BLD"></a>
 <h4 class="subsubsection">4.2.1.2 BLD</h4>
@@ -1202,7 +1202,7 @@ the front-end server is started too.
 services you define.  Each REST service exists in its own
 file or class.  Web methods are methods within those classes.
 </p>
-<p>As architected, directories under <code>src/main/application</code>
+<p>As architected, directories under <code>src/main/backend</code>
 represent the application&rsquo;s REST services.  Each class / file under that
 directory represents a web service.  The name of the class is the name
 of the web service.
@@ -1218,7 +1218,7 @@ for that web service.  Each web method is passed four arguments as follows:
 <dd><p>This represents the data being returned to the front-end.  It is pre-initialized with an empty <code>JSONObject</code>.
 </p></dd>
 <dt><code>Connection db</code></dt>
-<dd><p>This is a pre-opened connection to the defined database (defined in <code>application/KissInit.groovy</code>)
+<dd><p>This is a pre-opened connection to the defined database (defined in <code>backend/KissInit.groovy</code>)
 </p></dd>
 <dt><code>MainServlet servlet</code></dt>
 <dd><p>This is a rarely used servlet context argument.
@@ -1281,7 +1281,7 @@ requires some Lisp code to make the connection clear.  Due to this
 connection code having to run, the Lisp interface is very slow on the
 first call.  It is, however, reasonably fast on all subsequent calls.
 The code that interfaces Java to Lisp is under the
-<code>src/main/java/org/kissweb/lisp</code> directory.
+<code>src/main/core/org/kissweb/lisp</code> directory.
 </p>
 <p>Do to the easy and natural connection between Java and many other JVM
 languages, interfaces to those languages is very easy.  It is
@@ -1298,15 +1298,15 @@ another process every Tuesday at 3 PM, etc.  This facility echos
 the standard Unix or Linux <code>cron</code> facility.
 </p>
 <p>The file that determines what gets run and when is <br>
-<code>src/main/application/CronTasks/crontab</code>.  All tasks must be in
+<code>src/main/backend/CronTasks/crontab</code>.  All tasks must be in
 the <code>Groovy</code> language and exist in the
-<code>src/main/application/CronTasks</code> directory.
+<code>src/main/backend/CronTasks</code> directory.
 </p>
-<p>All contents of the <code>src/main/application/CronTasks</code> can be changed
+<p>All contents of the <code>src/main/backend/CronTasks</code> can be changed
 on a running system.  The change will get noticed and take effect.
 There is no need to restart the system.
 </p>
-<p>Look at the files in the <code>src/main/application/CronTasks</code>
+<p>Look at the files in the <code>src/main/backend/CronTasks</code>
 directory for samples and further documentation.
 </p>
 <a name="Front_002dend-Development"></a><a name="Front_002dend-Development-1"></a>
@@ -1325,7 +1325,7 @@ need to be followed.
 </p>
 <ol>
 <li> The front-end needs to know where the back-end is located.  This is
-controlled in the file <code>src/main/webapp/index.js</code>.  That file
+controlled in the file <code>src/main/frontend/index.js</code>.  That file
 contains a line that looks as follows:
 <div class="example">
 <pre class="example">    Server.setURL('http://localhost:8080');
@@ -1358,7 +1358,7 @@ turned off by going into the page debugger (F12), then
 is open)</code>
 </p>
 <p>You can now develop the front-end portion of your application by
-editing files under the <code>src/main/webapp</code> directory.
+editing files under the <code>src/main/frontend</code> directory.
 </p>
 <a name="Reports-And-Exports"></a>
 <h3 class="section">4.4 Reports And Exports</h3>
@@ -1393,7 +1393,7 @@ may have its own user-specific data it may want to retain between web service
 calls. <em>Kiss</em> has a generic and easy way of handling these needs.
 </p>
 <p>Application-specific user login and data is handled by the Groovy file
-located in the <code>application</code> directory named <code>Login.groovy</code>.
+located in the <code>backend</code> directory named <code>Login.groovy</code>.
 That file must have two methods; <code>login</code> and <code>checkLogin</code>.  
 See that file for more details.
 </p>
@@ -1484,7 +1484,7 @@ two principal user methods that make this work.
 component or one you define yourself (there is no difference).  This
 loads the JavaScript file that defines the new tag.  All of the
 components that come with the <em>Kiss</em> system are under the
-<code>src/main/webapp/kiss/component</code> directory.  You can see those
+<code>src/main/frontend/kiss/component</code> directory.  You can see those
 files for examples of how custom tags are defined.
 </p>
 <p>New application pages are loaded with the <code>Utils.loadPage</code>
@@ -1640,7 +1640,7 @@ function used to send the files is <code>fileUploadSend</code> in the
 <h3 class="section">5.5 Utilities</h3>
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
-These utilities are located under the <code>src/main/webapp/kiss</code> directory and have names such as
+These utilities are located under the <code>src/main/frontend/kiss</code> directory and have names such as
 <code>DateTimeUtils.js</code>, <code>DateUtils</code>, <code>TimeUtils</code>, <code>Utils</code>, etc.  These utilities
 are documented in the front-end API documentation.
 </p>
@@ -1830,7 +1830,7 @@ with the return data.  Useful JSON utilities include the following:
 <h3 class="section">6.3 Utilities</h3>
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
-These utilities are located under the <code>src/main/java/org/kissweb</code> directory and have names such as
+These utilities are located under the <code>src/main/core/org/kissweb</code> directory and have names such as
 <code>DateTime.java</code>, <code>NumberFormat</code>, etc.  These utilities
 are documented in the JavaDocs.
 </p>

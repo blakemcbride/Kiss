@@ -59,7 +59,7 @@ public class Tasks {
         final String jarFile = BUILDDIR + "/kisscmd.jar";
         libs();
         unJarAllLibs(targetPath, localLibs, foreignLibs);
-        buildJava("src/main/java", targetPath, localLibs, foreignLibs);
+        buildJava("src/main/core", targetPath, localLibs, foreignLibs);
         rmTree(targetPath + "/META-INF");
         createManifest(manifest, "org.kissweb.Main");
         createJar(targetPath, jarFile);
@@ -78,7 +78,7 @@ public class Tasks {
      */
     void jar() {
         libs();
-        buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
+        buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         createJar(explodedDir + "/WEB-INF/classes", BUILDDIR + "/Kiss.jar");
         //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
@@ -115,16 +115,16 @@ public class Tasks {
      */
     void build() {
         libs();
-        copyTree("src/main/webapp", explodedDir);
+        copyTree("src/main/frontend", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
-        copyTree("src/main/application", explodedDir + "/WEB-INF/application");
+        copyTree("src/main/backend", explodedDir + "/WEB-INF/backend");
         copyTree("libs", explodedDir + "/WEB-INF/lib");
-        buildJava("src/main/java", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
+        buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
-        copyRegex("src/main/java/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
-        copy("src/main/java/log4j.properties", explodedDir + "/WEB-INF/classes");
-        copy("src/main/java/log4j.xml", explodedDir + "/WEB-INF/classes");
-        copy("src/main/java/log4j.dtd", explodedDir + "/WEB-INF/classes");
+        copyRegex("src/main/core/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
+        copy("src/main/core/log4j.properties", explodedDir + "/WEB-INF/classes");
+        copy("src/main/core/log4j.xml", explodedDir + "/WEB-INF/classes");
+        copy("src/main/core/log4j.dtd", explodedDir + "/WEB-INF/classes");
     }
 
     /**
@@ -208,7 +208,7 @@ public class Tasks {
             runWait(true, "tomcat\\bin\\debug.cmd");
         else
             runWait(true, "tomcat/bin/debug");
-        proc = runBackground("java -jar SimpleWebServer.jar -d src/main/webapp");
+        proc = runBackground("java -jar SimpleWebServer.jar -d src/main/frontend");
         println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out");
         println("You can browse to http://localhost:8000   (do not use port 8080)");
         println("The app can also be debugged at port 9000");
@@ -224,7 +224,7 @@ public class Tasks {
 
     void javadoc() {
         libs();
-        buildJavadoc("src/main/java", "libs", BUILDDIR + "/javadoc");
+        buildJavadoc("src/main/core", "libs", BUILDDIR + "/javadoc");
     }
 
     void clean() {
@@ -236,7 +236,7 @@ public class Tasks {
 
     void realclean() {
         clean();
-        rmTree("src/main/webapp/lib");
+        rmTree("src/main/frontend/lib");
         delete(foreignLibs);
         rmTree("tomcat");
         rm(tomcatTarFile);
@@ -282,10 +282,10 @@ public class Tasks {
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
         dep.add("sqlite-jdbc-3.30.1.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.30.1/sqlite-jdbc-3.30.1.jar");
         dep.add("dynamic-loader-3.0.jar", LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
-        dep.add("jquery-3.4.1.min.js", "src/main/webapp/lib", "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js");
-        dep.add("ag-grid-community.noStyle.min.js", "src/main/webapp/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/ag-grid-community.noStyle.min.js");
-        dep.add("ag-grid.min.css", "src/main/webapp/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-grid.min.css");
-        dep.add("ag-theme-balham.min.css", "src/main/webapp/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-theme-balham.min.css");
+        dep.add("jquery-3.4.1.min.js", "src/main/frontend/lib", "https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js");
+        dep.add("ag-grid-community.noStyle.min.js", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/ag-grid-community.noStyle.min.js");
+        dep.add("ag-grid.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-grid.min.css");
+        dep.add("ag-theme-balham.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-theme-balham.min.css");
         return dep;
     }
 

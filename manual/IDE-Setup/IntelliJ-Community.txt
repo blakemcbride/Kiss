@@ -20,8 +20,8 @@ Open with IntelliJ
 Add Ant build (message in lower right-hand corner)
 Unmark top directory as source root
 Mark source roots
-	src/main/java
-	src/main/application
+	src/main/core
+	src/main/backend
 	builder
 File / Invalidate Cache
 
