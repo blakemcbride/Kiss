@@ -85,7 +85,7 @@
         newElm.getValue = function () {
             const val = TimeUtils.strToInt(newElm.jqObj.val());
             if (val === null)
-                return val;
+                return 0;
             const hours = Math.floor(val / 100);
             const minutes = val % 100;
             return hours > 23  ||  minutes > 59 ? null : val;

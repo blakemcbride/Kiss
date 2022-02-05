@@ -165,8 +165,12 @@ class DateTimeUtils {
      * @see DateUtils.millsToInt(), TimeUtils.millsToInt()
      */
     static toMilliseconds(date, time) {
-        const dt = new Date(DateUtils.year(date), DateUtils.month(date)-1, DateUtils.day(date), TimeUtils.hours(time), TimeUtils.minutes(time));
-        return dt.valueOf();
+        let month = DateUtils.month(date)-1;
+        if (month < 0)
+            month = 0;
+        const dt = new Date(DateUtils.year(date), month, DateUtils.day(date), TimeUtils.hours(time), TimeUtils.minutes(time));
+        const n = dt.valueOf();
+        return n < 0 ? 0 : n;
     }
 }
 
