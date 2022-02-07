@@ -153,6 +153,16 @@
             return keyIsNumber ? Number(v) : v;
         };
 
+        /*
+            This function has been deprecated and replaced with getValue() above.
+            It is left here for backward compatability.
+        */
+        newElm.getIntValue = function (row) {
+            console.log("ListBox.js getIntValue called");
+            const val = newElm.getValue(row);
+            return val ? Number(val) : 0;
+        };
+
         newElm.setValue = function (val, row) {
             if (row !== 0 && !row) {
                 jqObj.val(val);
