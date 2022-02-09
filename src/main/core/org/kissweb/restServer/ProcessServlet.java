@@ -220,6 +220,7 @@ public class ProcessServlet implements Runnable {
         }
 
         if (_className.isEmpty()) {
+            // Core method
             if (_method.equals("LoginRequired")) {
                 logger.info("Login is " + (MainServlet.hasDatabase() ? "" : "not ") + "required");
                 outjson.put("LoginRequired", MainServlet.hasDatabase());
@@ -239,21 +240,28 @@ public class ProcessServlet implements Runnable {
                     return;
                 }
             }
-        } else if (MainServlet.hasDatabase()) {
-            try {
-                logger.info("Validating uuid " + injson.getString("_uuid"));
-                ud = UserCache.findUser(injson.getString("_uuid"));
-                checkLogin(ud);
-            } catch (Exception e) {
-                logger.info("Login failure.");
-                loginFailure(response);
-                return;
-            }
-            logger.info("Login success");
         } else {
-            ud = UserCache.findUser(injson.getString("_uuid"));
-            if (ud == null)
-                loginFailure(response);
+            // User defined method
+            if (MainServlet.hasDatabase()) {
+                if (MainServlet.shouldAllowWithoutAuthentication(_className, _method)) {
+                    logger.info("Method " + _className + "." + _method + "() allowed without authentication");
+                } else {
+                    try {
+                        logger.info("Validating uuid " + injson.getString("_uuid"));
+                        ud = UserCache.findUser(injson.getString("_uuid"));
+                        checkLogin(ud);
+                    } catch (Exception e) {
+                        logger.info("Login failure.");
+                        loginFailure(response);
+                        return;
+                    }
+                    logger.info("Login success");
+                }
+            } else {
+                ud = UserCache.findUser(injson.getString("_uuid"));
+                if (ud == null  &&  !MainServlet.shouldAllowWithoutAuthentication(_className, _method))
+                    loginFailure(response);
+            }
         }
 
         res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);

@@ -335,6 +335,25 @@ may be added to this database.
 The default username is @emph{kiss}, and the default password is
 @emph{password}
 
+@section Bypassing Authentication
+
+On rare occasions, it is necessary to bypass authentication.  In other
+words, be able to execute a web service without being logged in.  One
+example of this is registering a new user.  If the user isn't already a
+valid user, they can't execute services in order to register.
+
+@emph{Kiss} has a way of dealing with this scenario.  This is done in
+the same configuration file where all of the configuration options are
+located.  In the file @code{src/main/backend/KissInit.groovy}.  In
+that file, you are able to specify specific web methods that may be
+called without authentication.  That file has an example.
+
+It should be noted that it is recommended that something like a
+@emph{captcha} be used to at least be confident you are
+communicating with a human.  Additionally, it should be noted that the
+danger of providing unauthenticated services is somewhat mitigated by
+the combination of @emph{HTTPS} and @emph{CORS}.
+
 @section Building The System
 
 Although the system may be built with the included build system

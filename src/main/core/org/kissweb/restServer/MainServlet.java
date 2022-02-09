@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -40,6 +42,7 @@ public class MainServlet extends HttpServlet {
     private static boolean hasDatabase;              // determined by KissInit.groovy
     private static int maxWorkerThreads;
     private static Cron cron;
+    private static final Set<String> allowedWithoutAuthentication = new HashSet<>();
 
     public static boolean isUnderIDE() {
         return underIDE;
@@ -323,4 +326,14 @@ public class MainServlet extends HttpServlet {
     static ComboPooledDataSource getCpds() {
         return cpds;
     }
+
+    public static void allowWithoutAuthentication(String className, String methodName) {
+        className = className.replaceAll("\\.", "/");
+        allowedWithoutAuthentication.add(className + ":" + methodName);
+    }
+
+    public static boolean shouldAllowWithoutAuthentication(String className, String methodName) {
+        return allowedWithoutAuthentication.contains(className + ":" + methodName);
+    }
+
 }

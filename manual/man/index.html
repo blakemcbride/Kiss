@@ -98,11 +98,12 @@ ul.no-bullet {list-style: none}
   <li><a name="toc-Download-Kiss-1" href="#Download-Kiss-1">2.6 Download Kiss</a></li>
   <li><a name="toc-Documentation" href="#Documentation">2.7 Documentation</a></li>
   <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.8 Setup And Configuration</a></li>
-  <li><a name="toc-Building-The-System" href="#Building-The-System">2.9 Building The System</a>
+  <li><a name="toc-Bypassing-Authentication" href="#Bypassing-Authentication">2.9 Bypassing Authentication</a></li>
+  <li><a name="toc-Building-The-System" href="#Building-The-System">2.10 Building The System</a>
   <ul class="no-bullet">
-    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.9.1 Using an IDE</a></li>
+    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.10.1 Using an IDE</a></li>
   </ul></li>
-  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.10 What Do I Do With It Now?</a></li>
+  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.11 What Do I Do With It Now?</a></li>
 </ul></li>
 <li><a name="toc-Orientation" href="#Orientation">3 Orientation</a>
 <ul class="no-bullet">
@@ -783,8 +784,28 @@ may be added to this database.
 <p>The default username is <em>kiss</em>, and the default password is
 <em>password</em>
 </p>
+<a name="Bypassing-Authentication"></a>
+<h3 class="section">2.9 Bypassing Authentication</h3>
+
+<p>On rare occasions, it is necessary to bypass authentication.  In other
+words, be able to execute a web service without being logged in.  One
+example of this is registering a new user.  If the user isn&rsquo;t already a
+valid user, they can&rsquo;t execute services in order to register.
+</p>
+<p><em>Kiss</em> has a way of dealing with this scenario.  This is done in
+the same configuration file where all of the configuration options are
+located.  In the file <code>src/main/backend/KissInit.groovy</code>.  In
+that file, you are able to specify specific web methods that may be
+called without authentication.  That file has an example.
+</p>
+<p>It should be noted that it is recommended that something like a
+<em>captcha</em> be used to at least be confident you are
+communicating with a human.  Additionally, it should be noted that the
+danger of providing unauthenticated services is somewhat mitigated by
+the combination of <em>HTTPS</em> and <em>CORS</em>.
+</p>
 <a name="Building-The-System"></a>
-<h3 class="section">2.9 Building The System</h3>
+<h3 class="section">2.10 Building The System</h3>
 
 <p>Although the system may be built with the included build system
 (called <em>bld</em>) <em>or</em> your favorite IDE, the <em>bld</em>
@@ -879,7 +900,7 @@ JAR cannot be used in any web environment.  See <code>src/main/core/org/kissweb/
 <p>See <a href="#Important">Important</a> and See <a href="#Quick_002dStart-Checklist">Quick-Start Checklist</a>.
 </p>
 <a name="Using-an-IDE"></a>
-<h4 class="subsection">2.9.1 Using an IDE</h4>
+<h4 class="subsection">2.10.1 Using an IDE</h4>
 
 <p>Most IDE&rsquo;s can be used to develop and debug the application.  There are two
 way to do this as follows:
@@ -909,7 +930,7 @@ IDE.  Instructions for setting up some of the IDEs is located under the
 </p>
 
 <a name="What-Do-I-Do-With-It-Now_003f"></a>
-<h3 class="section">2.10 What Do I Do With It Now?</h3>
+<h3 class="section">2.11 What Do I Do With It Now?</h3>
 
 <p>What you have at this point is the beginnings of your new application.
 <em>Kiss</em> is provided as a running and deployable system.  It is

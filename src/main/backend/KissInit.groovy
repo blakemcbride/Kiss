@@ -14,5 +14,8 @@ class KissInit {
 
         UserCache.setInactiveUserMaxSeconds 900   // seconds user is allowed to be idle before auto-logoff
 
+        // Example of how to specify a method that is allowed without authentication
+    //    MainServlet.allowWithoutAuthentication("services.MyGroovyService", "addNumbers")
+
     }
 }
