@@ -16,7 +16,7 @@ class MyGroovyService {
              Keep in mind that this is a compiled and cached script so it runs as fast as regular compiled Java.
              It gets auto-recompiled and loaded whenever it changes.
          */
-        Integer r = GroovyService.run(false, "~/scripts", "MyScript", "myMethod", null, num1, num2)
+        Integer r = (Integer) GroovyService.run(false, "~/scripts", "MyScript", "myMethod", null, num1, num2)
         outjson.put("num3", (int) r)
     }
 
