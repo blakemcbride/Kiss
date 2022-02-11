@@ -123,9 +123,11 @@ div.vert-input label:after { content: ":"; }
 }
 
 .popup-background {
-    position: absolute;
+    position: fixed;
     left: 0;
     top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
     overflow: auto; /* Enable scroll if needed */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
