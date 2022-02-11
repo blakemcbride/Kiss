@@ -24,10 +24,10 @@ Install extensions:
 	Tomcat for Java
 	Java Decompiler
 	Groovy
-code-Groovy
-HTML CSS Support
-IntelliSense for CSS class names in HTML
-JavaScript and TypeScript Nightly
+	code-Groovy
+	HTML CSS Support
+	IntelliSense for CSS class names in HTML
+	JavaScript and TypeScript Nightly
 
 Add tomcat server (bottom of file list)
 
