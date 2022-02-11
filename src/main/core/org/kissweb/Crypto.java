@@ -271,7 +271,7 @@ public final class Crypto {
     /**
      * Set the default password.  This remains until it is changed.
      *
-     * The password can be any size > 0 but only a max of the first 32 bytes will be used.
+     * The password can be any size &gt; 0 but only a max of the first 32 bytes will be used.
      *
      * @param password the password
      */
