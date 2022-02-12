@@ -1,3 +1,4 @@
+import org.json.JSONObject
 import org.kissweb.database.Connection
 import org.kissweb.database.Record
 import org.kissweb.restServer.UserCache
@@ -15,14 +16,16 @@ class Login {
      * @param db
      * @param user
      * @param password
+     * @param outjson  extra data sent back to the front-end
      * @return
      */
-    public static UserData login(Connection db, String user, String password) {
+    public static UserData login(Connection db, String user, String password, JSONObject outjson) {
         Record rec = db.fetchOne("select * from users where user_name = ? and user_password = ? and user_active = 'Y'", user, password)
         if (rec == null)
             return null    //  invalid user
         UserData ud = UserCache.newUser(user, password, (Integer) rec.getInt("user_id"))
-//        ud.putUserData("abc", 5)    add any user specific data
+//        ud.putUserData("abc", 5)    add any user specific data to save on the back-end
+//        outjson.put("user_type", "xxx")    data sent back to the front-end
         return ud
     }
 

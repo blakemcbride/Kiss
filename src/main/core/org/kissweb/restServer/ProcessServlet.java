@@ -229,7 +229,7 @@ public class ProcessServlet implements Runnable {
             } else if (_method.equals("Login")) {
                 logger.info("Attempting user login for " + injson.getString("username"));
                 try {
-                    String uuid = login(injson.getString("username"), injson.getString("password"));
+                    String uuid = login(injson.getString("username"), injson.getString("password"), outjson);
                     outjson.put("uuid", uuid);
                     successReturn(response, outjson);
                     logger.info("Login successful");
@@ -239,6 +239,9 @@ public class ProcessServlet implements Runnable {
                     loginFailure(response, e);
                     return;
                 }
+            } else {
+                logger.error("Incorrect internal method call.");
+                errorReturn(response, "Incorrect internal method call.", null);
             }
         } else {
             // User defined method
@@ -375,10 +378,10 @@ public class ProcessServlet implements Runnable {
             logger.error(str, e);
     }
 
-    private String login(String user, String password) throws Exception {
+    private String login(String user, String password, JSONObject outjson) throws Exception {
         UserData ud;
         if (MainServlet.hasDatabase()) {
-            ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password);
+            ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password, outjson);
             if (ud == null)
                 throw new LogException("Invalid login.");
         } else
