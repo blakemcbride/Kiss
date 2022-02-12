@@ -236,7 +236,7 @@ public class ProcessServlet implements Runnable {
                     return;
                 } catch (Exception e) {
                     logger.info("Login failure");
-                    loginFailure(response);
+                    loginFailure(response, e);
                     return;
                 }
             }
@@ -252,7 +252,7 @@ public class ProcessServlet implements Runnable {
                         checkLogin(ud);
                     } catch (Exception e) {
                         logger.info("Login failure.");
-                        loginFailure(response);
+                        loginFailure(response, e);
                         return;
                     }
                     logger.info("Login success");
@@ -260,7 +260,7 @@ public class ProcessServlet implements Runnable {
             } else {
                 ud = UserCache.findUser(injson.getString("_uuid"));
                 if (ud == null  &&  !MainServlet.shouldAllowWithoutAuthentication(_className, _method))
-                    loginFailure(response);
+                    loginFailure(response, null);
             }
         }
 
@@ -331,7 +331,14 @@ public class ProcessServlet implements Runnable {
         asyncContext.complete();
     }
 
-    void loginFailure(HttpServletResponse response) {
+    private void loginFailure(HttpServletResponse response, Throwable e) {
+        String msg;
+        if (e != null)
+            e = e.getCause();
+        if (e instanceof FrontendException)
+            msg = e.getMessage();
+        else
+            msg = "Login failure.";
         if (DB != null) {
             try {
                 DB.rollback();
@@ -343,7 +350,7 @@ public class ProcessServlet implements Runnable {
         response.setStatus(200);
         JSONObject outjson = new JSONObject();
         outjson.put("_Success", false);
-        outjson.put("_ErrorMessage", "Login failure.");
+        outjson.put("_ErrorMessage", msg);
         outjson.put("_ErrorCode", 2);  // login failure
         out.print(outjson);
         out.flush();
