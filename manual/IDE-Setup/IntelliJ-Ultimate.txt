@@ -1,6 +1,6 @@
 Kiss IntelliJ - Ultimate Edition
 
-Tried on version 2021.2.2
+Tried on version 2021.3.2
 
 
 Although the Ultimate (commercial) version of IntelliJ costs money, it
@@ -10,69 +10,58 @@ IntelliJ can be a bit tedious to configure properly.  The following
 steps can be used to configure IntelliJ.
 
 
-From command line:  ./bld all
+From command line:  
+	./bld all	[Linux, Mac]
+	  -or-
+	bld all		[Windows]
 Open (not "New Project") with IntelliJ
 Add Ant build (message in lower right-hand corner)
-Right-click on project root / Mark directory as / Unmark as Source Root
-Right-click on the following directories and mark as Sources Root
-	src/main/core
-	src/main/backend
-	builder
-File / Invalidate Cache
+
+Right-click on "Kiss" at the top of the Project pane and select
+"Open Module Settings".
+
+Project
+	Edit as needed
+	Compiler output is unused
+Modules
+	Remove all modules except "Kiss"
+	Sources
+		Mark as source
+			src/main/backend
+			src/main/core
+		Mark as excluded
+			build.work
+			tomcat
+	Dependencies
+		Java
+		<Module source>
+		libs
+Libraries
+	libs
+		(all jar files in the libs directory)
+Facets - none
+Artifacts - none
+Global Libraries - none
 
 
-Configure IDE for tomcat.
-    File / Settings / Build, Execution, Deployment / Application Servers
-    Click the + in the upper middle of the popup, and then select Tomcat Server
-    The home and base should both be set to the root of the tomcat directory that
-    is part of Kiss. This will be an absolute rather than a relative path.
-    Name it "Kiss Tomcat"
+Run the front-end and back-end servers by typing the following at the
+command-line:
 
-File / Project Structure
-	Libraries
-		(remove unused libraries - all except the following)
-		Keep or add
-			commons-compress
-			libs (libs directory)
-	Modules
-		(remove unused libs)
+./bld develop		[Linux, Mac]
+     or
+bld develop 		[Windows]
 
-	Artifacts
-		+
-		Web Application: Exploded
-		Name: Kiss Exploded
-		Output directory:  .../build.work/exploded
-		Output Layout:  leave alone
+Attach IntelliJ to the back-end server started with the above command:
 
-Ant / Kiss / All
-	Properties (icon) - de-select “Make build in background”
+	Run / Attach to Process
+	(select port 9000)
 
+Back-end code is debugged through IntelliJ.  Front-end debugging
+occurs through the browser developer console.  Be sure browser
+network caching is disabled.
 
-Run / Edit Configurations
-	+
-        Add Tomcat Server / Local
-	Name: Kiss Tomcat
-        Application Server:  Kiss Tomcat
-
-	URL:  http://localhost:8000
-	HTTP port: 8080
-	JMX port:  1099
-	Before Launch:
-		Remove build
-		Add: Run ant target 'build'
-	Deployment
-		Add artifact Kiss Exploded
-		Application context:  (blank)
-	Startup/Connection
-		Debug
-			Port: 9000
-
-
-Start the front-end server that comes with Kiss from the command line:
-	./serve
-	
-
-You can now develop and debug.  Front-end and back-end changes with take affect on
-page reload.  Just be sure you have browser caching turned off on your browser
-development console.
+You can now develop and debug.  Front-end changes will take affect on
+page reload.  Back-end changes take effect immediatly.  Just be sure
+you have browser caching turned off on your browser development
+console.
 
