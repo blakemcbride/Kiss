@@ -9,4 +9,4 @@ if [ ! -f tomcat/logs/catalina.out ]; then
 	done
 fi
 
-tail -f tomcat/logs/catalina.out
+tail -F tomcat/logs/catalina.out
