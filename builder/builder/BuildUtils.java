@@ -180,8 +180,10 @@ public class BuildUtils {
     private static void mkdir(File d) {
         if (d.exists()  &&  d.isDirectory())
             return;
+        if (d.exists()  &&  !d.isDirectory())
+            throw new RuntimeException("mkdir: error creating directory " + d.getAbsolutePath() + "; file with that name exists");
         if (!d.mkdirs())
-            throw new RuntimeException("error creating directory " + d.getAbsolutePath());
+            throw new RuntimeException("mkdir: error creating directory " + d.getAbsolutePath());
     }
 
     /**
@@ -191,13 +193,15 @@ public class BuildUtils {
      * @param to a file name with a path
      */
     public static void move(String from, String to) {
+        if (!new File(from).exists())
+            throw new RuntimeException("move: file \"" + from + "\" does not exist");
         try {
             File parent = new File(to).getParentFile();
             if (parent != null)
                 parent.mkdirs();
             Files.move(Paths.get(from), Paths.get(to), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
-            throw new RuntimeException("error moving " + from + " to " + to);
+            throw new RuntimeException("Error moving " + from + " to " + to);
         }
     }
 
@@ -222,7 +226,9 @@ public class BuildUtils {
         File sfile = new File(source);
         File dfile = new File(dest);
         if (!sfile.exists())
-            throw new RuntimeException("error copying: " + source + " does not exist");
+            throw new RuntimeException("copy: " + source + " does not exist");
+        if (sfile.isDirectory())
+            throw new RuntimeException("copy: " + source + " is a directory");
         if (dfile.exists()  &&  dfile.isDirectory())
             dfile = new File(dfile, sfile.getName());
         if (!dfile.exists() || sfile.lastModified() > dfile.lastModified())
@@ -250,7 +256,9 @@ public class BuildUtils {
         File sf = new File(srcDir);
         File df = new File(targetDir);
         if (!sf.exists())
-            throw new RuntimeException(srcDir + " does not exist");
+            throw new RuntimeException("copyRegex: " + srcDir + " does not exist");
+        if (!sf.isDirectory())
+            throw new RuntimeException("copyRegex: " + srcDir + " is not a directory");
         mkdir(targetDir);
         File[] files = sf.listFiles();
         if (includeRegex == null)
@@ -367,10 +375,12 @@ public class BuildUtils {
         File sf = new File(source);
         File df = new File(dest);
         if (!sf.exists())
-            throw new RuntimeException(source + " does not exist");
+            throw new RuntimeException("copyTreeRegex: " + source + " does not exist");
         mkdir(dest);
         if (!df.exists())
-            throw new RuntimeException("can't create directory " + dest);
+            throw new RuntimeException("copyTreeRegex: can't create directory " + dest);
+        if (!df.isDirectory())
+            throw new RuntimeException("copyTreeRegex: can't create directory " + dest + "; file exists with that name");
         Pattern incPat, exPat;
         if (includeRegex != null)
             incPat = Pattern.compile(includeRegex);
@@ -417,7 +427,7 @@ public class BuildUtils {
         if (!f.exists())
             return;
         if (!f.delete())
-            throw new RuntimeException("error deleting " + file);
+            throw new RuntimeException("rm: error deleting " + file);
     }
 
     /**
@@ -432,7 +442,7 @@ public class BuildUtils {
         if (!f.exists())
             return;
         if (!f.delete())
-            throw new RuntimeException("error deleting " + file);
+            throw new RuntimeException("rmdir: error deleting " + file);
     }
 
     /**
@@ -471,7 +481,7 @@ public class BuildUtils {
             try {
                 Files.write(Paths.get(fname), txt.getBytes(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             } catch (IOException e) {
-                throw new RuntimeException("error creating/writing " + fname);
+                throw new RuntimeException("writeToFile:  error creating/writing " + fname);
             }
         }
     }
@@ -504,11 +514,13 @@ public class BuildUtils {
     }
 
     private static ArrayList<File> allSourceFiles(String dirStr, String ext) {
-        return allSourceFiles(new ArrayList<>(), new File(dirStr), ext);
+        return dirStr == null ? new ArrayList<>() : allSourceFiles(new ArrayList<>(), new File(dirStr), ext);
     }
 
-    private static ArrayList<File> allSourceFiles(final ArrayList<File> lst, final File file, final String ext) {
-        final File [] fl = file.listFiles();
+    private static ArrayList<File> allSourceFiles(final ArrayList<File> lst, final File dir, final String ext) {
+        if (dir == null || !dir.exists()  ||  !dir.isDirectory())
+            return lst;
+        final File [] fl = dir.listFiles();
         if (fl != null)
             for (File f : fl)
                 if (f.isDirectory())
@@ -574,15 +586,17 @@ public class BuildUtils {
             f = File.createTempFile("DocFiles-", ".inp");
             boolean colon = false;
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
-                bw.write("-cp ");
-                for (File f2 : libs) {
-                    if (colon)
-                        bw.write(isWindows ? ';' : ':');
-                    else
-                        colon = true;
-                    bw.write(f2.getPath());
+                if (!libs.isEmpty()) {
+                    bw.write("-cp ");
+                    for (File f2 : libs) {
+                        if (colon)
+                            bw.write(isWindows ? ';' : ':');
+                        else
+                            colon = true;
+                        bw.write(f2.getPath());
+                    }
+                    bw.newLine();
                 }
-                bw.newLine();
                 for (File f2 : lst) {
                     bw.write(f2.getPath());
                     bw.newLine();
@@ -647,6 +661,11 @@ public class BuildUtils {
     }
 
     public static void buildJava(String srcPath, String destDir, LocalDependencies localLibs, ForeignDependencies foreignLibs) {
+        File sf = new File(srcPath);
+        if (!sf.exists())
+            throw new RuntimeException("buildJava: directory \"" + srcPath + "\" does not exist");
+        if (!sf.isDirectory())
+            throw new RuntimeException("buildJava: \"" + srcPath + "\" is not a directory");
         mkdir(destDir);
         ArrayList<File> allFiles = allSourceFiles(srcPath, ".java");
         ArrayList<File> ood = outOfDateSourceFiles(allFiles, srcPath, destDir, ".java", ".class");
@@ -657,7 +676,17 @@ public class BuildUtils {
         }
     }
 
+    /**
+     * Build JavaDocs
+     *
+     * @param srcPath
+     * @param libPath
+     * @param destDir
+     */
     public static void buildJavadoc(String srcPath, String libPath, String destDir) {
+        if (!new File(srcPath).exists())
+            throw new RuntimeException("buildJavadoc: directory \"" + srcPath + "\" does not exist");
+        mkdir(destDir);
         ArrayList<File> allFiles = allSourceFiles(srcPath, ".java");
         long latestSourceDate = getLatestDate(allFiles);
         File indexFile = new File(destDir + "/index.html");
@@ -683,16 +712,22 @@ public class BuildUtils {
      * Wait till it is done.
      *
      * @param showOutput true if output should be shown
-     * @param cmd
+     * @param startDir starting directory or null
+     * @param cmd the command to execute
      */
     public static void runWait(boolean showOutput, String startDir, String cmd) {
         println(cmd);
+        File sdir = null;
+        if (startDir != null) {
+            sdir = new File(startDir);
+            if (!sdir.exists())
+                mkdir(sdir);
+            else if (sdir.isFile())
+                throw new RuntimeException("runWait: " + startDir + " is a file");
+        }
         try {
             Process proc;
             String[] mscmd = new String[3];
-            File sdir = null;
-            if (startDir != null)
-                sdir = new File(startDir);
             if (isWindows) {
                 mscmd[0] = "cmd.exe";
                 mscmd[1] = "/C";
@@ -833,6 +868,9 @@ public class BuildUtils {
     }
 
     public static void javac(LocalDependencies ldep, ForeignDependencies fdep, String sourcePath, String destPath, String filelist) {
+        if (!new File(sourcePath).exists())
+            throw new RuntimeException("javac: \"" + sourcePath + "\" does not exist");
+        mkdir(destPath);
         String cmd, argsFile = null;
         if (ldep != null  &&  !ldep.isEmpty()  ||  fdep != null  &&  !fdep.isEmpty()) {
             argsFile = writeDependencyArgsToFile(ldep, fdep);
@@ -861,6 +899,8 @@ public class BuildUtils {
      * @param nPathsElementsToDelete number of leading path elements in tar file to eliminate
      */
     public static void gunzip(String fname, String dir, int nPathsElementsToDelete) {
+        if (!new File(fname).exists())
+            throw new RuntimeException("gunzip: file \"" + fname + "\" does not exist.");
         try {
             File tarfile = new File(fname.substring(0, fname.length() - 3));
             unGzip(fname, tarfile);
@@ -993,10 +1033,6 @@ public class BuildUtils {
             CACHE_DIR += "/";
         }
         return CACHE_DIR;
-    }
-
-    public static void removeFromCache(String fname) {
-        rm(cacheDir() + fname);
     }
 
 }
