@@ -1,3 +1,29 @@
-*.bat eol=crlf
-*.cmd eol=crlf
+*          text=auto
+
+*.bat 		text eol=crlf
+*.cmd 		text eol=crlf
+*.java          text diff=java
+*.groovy        text diff=java
+*.css           text diff=css
+*.html          text diff=html
+*.js            text
+*.xml           text
+*.lisp		text
+*.tex		text diff=tex
+*.md       	text diff=markdown
+*.txt      	text
+*.sql      	text
+
+
+*.class         binary
+*.jar           binary
+*.war           binary
+*.png      	binary
+*.jpg      	binary
+*.zip		binary
+*.gz		binary
+
+.gitattributes	export-ignore
+.gitignore	export-ignore
+.gitkeep	export-ignore
 

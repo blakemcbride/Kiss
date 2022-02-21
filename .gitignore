@@ -88,6 +88,8 @@ atlassian-ide-plugin.xml
 .\#*
 *.bak
 
+.vscode
+
 # Textmate
 # --------
 .textmate
