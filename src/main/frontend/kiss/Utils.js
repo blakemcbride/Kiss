@@ -1546,6 +1546,26 @@ class Utils {
         return DateTimeUtils.toMilliseconds($$(dateField).getIntValue(), $$(timeField).getValue());
     }
 
+    /**
+     * Get current location.
+     *
+     * @returns {Promise<GeolocationCoordinates>} or null
+     */
+    static getLocation() {
+        return new Promise(function(resolve, reject) {
+            const getPos = function (p) {
+                resolve(p.coords);
+            }
+            const handleError = function(error) {
+                resolve(null);
+            }
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(getPos, handleError);
+            } else
+                resolve(null);
+        });
+    }
+
 }
 
 // Class variables
