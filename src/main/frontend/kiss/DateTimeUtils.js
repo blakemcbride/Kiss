@@ -76,6 +76,25 @@ class DateTimeUtils {
     }
 
     /**
+     * Convert in integer date and integer time into a Date object.
+     *
+     * @param dt YYYYMMDD
+     * @param tm  HHMM
+     * @returns {Date}
+     */
+    static createDate(dt, tm) {
+        if (!dt)
+            return null;
+        const y = Math.floor(dt / 10000);
+        dt -= y * 10000;
+        const m = Math.floor(dt / 100);
+        const d = Math.floor(dt - m * 100);
+        const h = Math.floor(tm / 100);
+        const min = tm - Math.floor(tm / 100) * 100;
+        return new Date(y, m - 1, d, h, min);
+    }
+
+    /**
      * Format a Date or number of milliseconds since 1970 UTC to a string representation looking like mm/dd/yyyy hh:mm
      *
      * @param {Date|number} dt
