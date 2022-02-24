@@ -88,11 +88,13 @@
 
         newElm.getValue = function () {
             let sval = jqObj.val();
-            return sval ? sval.replace(/\s+/g, ' ') : '';
+            return sval ? sval.replace(/\s+/g, ' ').trim() : '';
         };
 
         newElm.setValue = function (val) {
-            if (val !== 0  &&  !val) {
+            if (val)
+                val = val.trim();
+            if (!val) {
                 jqObj.val(originalValue = '');
                 return this;
             }
@@ -203,6 +205,7 @@
         newElm.isError = function (desc) {
             if (min) {
                 let val = newElm.getValue();
+                val = val ? val.replace(/\s+/g, ' ').trim() : '';
                 if (val.length < min) {
                     let msg;
                     if (min === 1)

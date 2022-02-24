@@ -121,7 +121,7 @@
 
         newElm.getValue = function () {
             let sval = resetContent ? '' : Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
-            sval = sval ? sval.replace(/ +/g, ' ') : '';
+            sval = sval ? sval.replace(/ +/g, ' ').trim() : '';
             if (sval && upcase) {
                 sval = sval.toUpperCase();
                 jqObj.html(Utils.textToHtml(sval));
@@ -130,11 +130,13 @@
         };
 
         newElm.setValue = function (val) {
-            removePlaceholder();
-            if (val !== 0  &&  !val) {
+             if (val)
+                val = val.trim();
+            if (!val) {
                 jqObj.text(originalValue='');
                 return this;
             }
+            removePlaceholder();
             jqObj.html(Utils.textToHtml(originalValue=val));
             return this;
         };
@@ -243,7 +245,8 @@
 
         newElm.isError = function (desc) {
             if (min) {
-                const val = newElm.getValue();
+                let val = newElm.getValue();
+                val = val ? val.replace(/\s+/g, ' ').trim() : '';
                 if (val.length < min) {
                     let msg;
                     if (min === 1)
