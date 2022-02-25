@@ -582,6 +582,18 @@ class AGGrid {
         return Utils.format(params.value, "CD", 0, 2);
     }
 
+    /**
+     * Format for blank if zero
+     *
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.blankIfZero
+     *
+     * @param params
+     * @returns {string}
+     */
+    static blankIfZero(params) {
+        return params.value ? params.value : '';
+    }
+
 }
 
 // class variables
