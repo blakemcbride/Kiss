@@ -153,7 +153,7 @@ class AGGrid {
     }
 
     /**
-     * Erase all of the rows in the grid.
+     * Erase all the rows in the grid.
      *
      * @returns {AGGrid}
      */
@@ -318,7 +318,7 @@ class AGGrid {
     }
 
     /**
-     * Returns all of the rows.
+     * Returns all the rows.
      *
      * @returns {array}
      */
@@ -423,7 +423,7 @@ class AGGrid {
 
     /**
      * Execute <code>fn</code> anytime a row selection is changed.
-     *
+     * <br><br>
      * <code>fn</code> is passwd an array of the selected rows.
      *
      * @param fn {function}
@@ -551,7 +551,7 @@ class AGGrid {
     }
 
     /**
-     * destroys all popup and screen grids that have been created
+     * Destroys all popup and screen grids that have been created
      */
     static popAllGridContexts() {
         while (AGGrid.gridContext.length)
@@ -560,7 +560,7 @@ class AGGrid {
 
     /**
      * Format for date times formatted as mm/dd/yyyy hh:mm AM/PM
-     *
+     * <br><br>
      * Usage:  in columnDefs:  valueFormatter:  AGGrid.dateTime
      *
      * @param params
@@ -572,7 +572,7 @@ class AGGrid {
 
     /**
      * Format for dollars including commas and dollar signs
-     *
+     * <br><br>
      * Usage:  in columnDefs:  valueFormatter:  AGGrid.money
      *
      * @param params
@@ -584,7 +584,7 @@ class AGGrid {
 
     /**
      * Format for blank if zero
-     *
+     * <br><br>
      * Usage:  in columnDefs:  valueFormatter:  AGGrid.blankIfZero
      *
      * @param params
