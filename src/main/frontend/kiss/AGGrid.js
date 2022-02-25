@@ -571,6 +571,18 @@ class AGGrid {
     }
 
     /**
+     * Format for date times formatted as mm/dd/yyyy
+     * <br><br>
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.date
+     *
+     * @param params
+     * @returns {string}
+     */
+    static date(params) {
+        return DateUtils.intToStr4(params.value);
+    }
+
+    /**
      * Format for dollars including commas and dollar signs
      * <br><br>
      * Usage:  in columnDefs:  valueFormatter:  AGGrid.money
