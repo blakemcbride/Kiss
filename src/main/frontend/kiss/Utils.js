@@ -1566,6 +1566,48 @@ class Utils {
         });
     }
 
+    /**
+     * Toggle full screen mode.  This is mainly good for tablets and phones.
+     * It doesn't make sense for desktops or laptops.
+     * <br><br>
+     * You can tell if it is a tablet or phone via:
+     * <code>if (screen.width * screen.height < 1000000)  ...</code>
+     * <br><br>
+     * This function only works when it is attached to a button on the screen.
+     * This is a restriction placed on us by the browsers to assure the user
+     * is making the choice.
+     * <br><br>
+     * Note also that this does not work on an iPad.  Apple doesn't allow it.
+     * They also make sure Chrome on an iPad doesn't work.  Presumably this
+     * is to assure that browser apps don't compete against their app store.
+     * <br><br>
+     * This does work on Android devices.
+     */
+    static toggleFullscreen() {
+        if (!Utils.isFullScreen) {
+            const element = document.documentElement;
+            // Check which implementation is available
+            const requestMethod = element.requestFullScreen ||
+                element.webkitRequestFullscreen ||
+                element.mozRequestFullScreen ||
+                element.msRequestFullscreen;
+
+            if (requestMethod)
+                requestMethod.apply(element);
+            Utils.isFullScreen = true;
+        } else {
+            if (document.exitFullscreen)
+                document.exitFullscreen();
+            else if (document.webkitExitFullscreen) /* Safari */
+                document.webkitExitFullscreen();
+            else if (document.mozExitFullscreen)
+                document.mozExitFullscreen();
+            else if (document.msExitFullscreen)  /* IE11 */
+                document.msExitFullscreen();
+            Utils.isFullScreen = false;
+        }
+    }
+
 }
 
 // Class variables
@@ -1575,6 +1617,7 @@ Utils.popup_context = [];
 Utils.someControlValueChangedFlag = false;
 Utils.someControlValueChangedFun = null;
 Utils.globalEnterFunction = null;
+Utils.isFullScreen = false;
 
 Utils.enterFunction = null;         //  If defined, execute function when enter key hit
 Utils.enterFunctionStack = [];      //  Save stack for enter key to handle popups
