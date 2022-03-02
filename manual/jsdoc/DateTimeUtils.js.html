@@ -145,6 +145,8 @@ class DateTimeUtils {
      * @returns {string}
      */
     static formatDate(dt) {
+        if (typeof dt === 'string')
+            dt = dt.trim();
         if (!dt)
             return '';
         if (typeof dt === 'number')
