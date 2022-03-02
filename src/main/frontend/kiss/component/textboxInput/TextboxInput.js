@@ -84,6 +84,18 @@
             return;
         const jqObj = newElm.jqObj;
 
+        function setColor(disabled) {
+            if (disabled) {
+                jqObj.css('background-color', '#DDDDDD');
+                jqObj.css('color', 'rgb(84, 84, 84)');
+            } else {
+                jqObj.css('background-color', 'white');
+                jqObj.css('color', 'black');
+            }
+        }
+
+        setColor(disabled);
+
         function removePlaceholder() {
             if (resetContent) {
                 jqObj.text('');
@@ -178,12 +190,14 @@
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             jqObj.attr('contenteditable', !flg);
+            setColor(flg);
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             jqObj.attr('contenteditable', flg);
+            setColor(!flg);
             return this;
         };
 
