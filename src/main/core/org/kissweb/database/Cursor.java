@@ -116,7 +116,6 @@ public class Cursor implements AutoCloseable {
      * instance representing the next row.  If there are no more records, <code>null</code>
      * is returned and the cursor is closed.
      *
-     *
      * @return
      * @throws SQLException
      *

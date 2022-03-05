@@ -43,10 +43,10 @@ public class GroovyService {
      * <p>
      * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
      * <p>
-     * if ignoreMissing is true and the file, class, or method are missing a NULL is returned.
-     * If ignoreMissing is false and the file, class, or method are missing an exception is thrown.
+     * If <code>ignoreMissing</code> is <code>true</code> and the file, class, or method are missing a <code>NULL</code> is returned.
+     * If <code>ignoreMissing</code> is <code>false</code> and the file, class, or method are missing an exception is thrown.
      * <p>
-     * filePath can be an absolute path or a string containing a "~".  The "~" is replaced with the root of
+     * <code>filePath</code> can be an absolute path or a string containing a "~".  The "~" is replaced with the root of
      * the application.
      *
      * @param ignoreMissing

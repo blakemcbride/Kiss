@@ -32,16 +32,17 @@ public class GoogleDistance {
     /**
      * Performs the actual query through Google.
      * You must set the API_KEY before creating this object.
+     * <br><br>
+     * Each address may be a normal address such as:  "735 Spring Street, Atlanta, GA 33456"<br>
+     * Or, they may be latitude longitude such as:  "38.234567 -85.003456"
      *
-     * @param fromAddress
-     * @param toAddress
-     * @return the JSON object returned by Google.
-     * @throws IOException
+     * @param add1
+     * @param add2
      */
-    public GoogleDistance(String fromAddress, String toAddress) {
+    public GoogleDistance(String add1, String add2) {
         final URLBuilder url = new URLBuilder(URL);
-        url.addParameter("origins", fromAddress);
-        url.addParameter("destinations", toAddress);
+        url.addParameter("origins", add1);
+        url.addParameter("destinations", add2);
         url.addParameter("units", "imperial");
         url.addParameter("key", API_KEY);
         final String surl = url.build();
@@ -55,7 +56,7 @@ public class GoogleDistance {
 
     /**
      * Returns the distance in miles between two addresses.
-     *
+     * <br><br>
      * Returns -1 on error.
      */
     public int miles() {
@@ -73,7 +74,7 @@ public class GoogleDistance {
     }
 
     /**
-     * Return the estimated travel time in minutes.
+     * Return the estimated travel time in minutes.<br>
      * -1 is returned on error.
      */
     public int minutes() {

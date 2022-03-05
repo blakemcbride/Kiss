@@ -8,9 +8,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Author: Blake McBride
+ * Author: Blake McBride<br>
  * Date: 11/8/19
- *
+ * <br><br>
  * This class provides a variety of features on top of the functionality provided by org.json.
  * In addition to being able to parse a string into a json object, the json object can also be obtained
  * from a file.  Once the json object is obtained, embedded elements may be indexed similar to XPath thus
@@ -22,7 +22,7 @@ public class JsonPath {
     /**
      * This takes a JSON string or a file name (containing JSON) and
      * returns a JSON object.
-     *
+     * <br><br>
      * If in a string, the string must start with "{" or space character
      *
      * @param str the json string or file name containing a json string
@@ -308,7 +308,7 @@ public class JsonPath {
 
     /**
      * Traverse an object returning the Character referenced by <code>path</code>.
-     *
+     * <br><br>
      * If the field contains mor than one character, the first is returned.
      *
      * @param delimiter the delimiter used in <code>path</code> to delimit the each path sub-part
@@ -338,7 +338,7 @@ public class JsonPath {
     /**
      * Traverse an object returning the Character referenced by <code>path</code>.
      * The delimiter used in <code>path</code> is a period.
-     *
+     * <br><br>
      * If the field contains mor than one character, the first is returned.
      *
      * @param jobj the initial json object
@@ -351,7 +351,7 @@ public class JsonPath {
 
     /**
      * Traverse an object returning the Integer date referenced by <code>path</code>.
-     *
+     * <br><br>
      * The Integer date returned is of the form YYYYMMDD.  So, 6/8/2018 would be
      * returned as 20180608.  A null is returned if the data cannot be obtained.
      *
@@ -385,7 +385,7 @@ public class JsonPath {
     /**
      * Traverse an object returning the Integer date referenced by <code>path</code>.
      * The delimiter used in <code>path</code> is a period.
-     *
+     * <br><br>
      * The Integer date returned is of the form YYYYMMDD.  So, 6/8/2018 would be
      * returned as 20180608.  A null is returned if the data cannot be obtained.
      *

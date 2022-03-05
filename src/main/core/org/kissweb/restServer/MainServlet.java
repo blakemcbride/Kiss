@@ -103,7 +103,7 @@ public class MainServlet extends HttpServlet {
      * environment or a production environment.  If running in a production environment, you want to get the
      * source files that came with the distribution.  However, if you're in a development environment, you want to get
      * the development source files so that you can develop while the system is running.
-     *
+     * <br><br>
      * This method sets the <code>rootPath</code> and <code>applicationPath</code>.  <code>rootPath</code> is the root
      * of the application.  <code>applicationPath</code> is the root of the application files.
      *

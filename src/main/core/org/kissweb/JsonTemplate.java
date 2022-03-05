@@ -13,16 +13,16 @@ import java.util.regex.Pattern;
 import static org.kissweb.StringUtils.drop;
 
 /**
- * Author: Blake McBride
+ * Author: Blake McBride<br>
  * Date: 11/9/19
- *
+ * <br><br>
  * This class replaces occurrences of ${NAME} with values obtained from a supplied map.
  */
 public class JsonTemplate {
 
     /**
      * Fill all occurrences of variables in the form ${VAR} with the values given in the map.
-     *
+     * <br><br>
      * If <code>jstr</code> is a file name, the json will be taken from the file.
      *
      * @param jstr the json string or file name
@@ -51,7 +51,7 @@ public class JsonTemplate {
 
     /**
      * Fill all occurrences of variables in the form ${VAR} with the values given in the map.
-     *
+     * <br><br>
      * If <code>jstr</code> is a file name, the json will be taken from the file.
      *
      * @param jobj the json object

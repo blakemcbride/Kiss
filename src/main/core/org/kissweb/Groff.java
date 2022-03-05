@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Class to interface with the groff typesetting system.  This is an easy way to generate nicely formatted reports.
  * Of course, the underlying system must have groff/tbl/mm installed.
- *
+ * <br><br>
  * See: https://www.gnu.org/software/groff
  *
  * @author Blake McBride
@@ -76,7 +76,7 @@ public class Groff {
 
     /**
      * Mark the start of a table.
-     *
+     * <br><br>
      * <code>colFmt</code> is a string specifying the layout for each column as specified by tbl.
      *
      * @param colFmt
@@ -162,7 +162,7 @@ public class Groff {
 
     /**
      * Output a numeric double column
-     *
+     * <br><br>
      * <code>msk</code> is a <code>String</code> consisting of the following characters:
      *
      * <ul>
@@ -188,7 +188,7 @@ public class Groff {
 
     /**
      * Output a numeric integer column
-     *
+     * <br><br>
      * <code>msk</code> is a <code>String</code> consisting of the following characters:
      *
      * <ul>
@@ -408,7 +408,7 @@ public class Groff {
 
     /**
      * Process the groff/tbl/mm input, produce the PDF output file, and return the path to the PDF file.
-     * Defaults to a 1 inch side margin.
+     * Defaults to a 1-inch side margin.
      *
      * @return
      * @throws IOException

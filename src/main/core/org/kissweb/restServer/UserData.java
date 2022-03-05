@@ -6,8 +6,8 @@ import java.util.UUID;
 
 /**
  * Instances of this class keep information about a particular user.
- *
- * Author: Blake McBride
+ * <br><br>
+ * Author: Blake McBride<br>
  * Date: 12/8/21
  */
 public class UserData {

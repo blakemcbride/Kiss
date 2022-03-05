@@ -23,8 +23,8 @@ import java.security.cert.CertificateException;
 /**
  * Provides the ability to act as a client to an external REST server.
  * Supports text, XML, and JSON communications.
- *
- * Author: Blake McBride
+ * <br><br>
+ * Author: Blake McBride<br>
  * Date: 2/21/21
  */
 public class RestClient {
@@ -133,7 +133,7 @@ public class RestClient {
 
     /**
      * Call a REST service sending a string and returning a JSON object.
-     *
+     * <br><br>
      * 'headers' is a JSON object.  Each element is a header / value combination.  These are sent as the header of
      *  the REST call.
      *
@@ -158,7 +158,7 @@ public class RestClient {
 
     /**
      * Performs the web service call.  Sends and returns raw strings.
-     *
+     * <br><br>
      * 'headers' is a JSON object.  Each element is a header / value combination.  These are sent as the header of
      * the REST call.
      *

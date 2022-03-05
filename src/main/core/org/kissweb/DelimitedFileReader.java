@@ -41,9 +41,9 @@ import java.util.logging.Logger;
 /**
  * Read and parse a CSV file.
  * This class implements the AutoCloseable interface.
- *
+ * <br><br>
  * This code attempts to conform to RFC 4180.
- *
+ * <br><br>
  * Fields can be accessed sequentially, by index, or by field name.
  * Field names are obtained at the first record of the CSV file.
  *
@@ -112,7 +112,7 @@ public class DelimitedFileReader implements AutoCloseable {
 
     /**
      * Close the CSV file.
-     *
+     * <br><br>
      * Note that this method will be called automatically if the try-with-resource Java facility is utilized.
      */
     @Override
@@ -137,7 +137,6 @@ public class DelimitedFileReader implements AutoCloseable {
 
     /**
      * Gets the double value of field number i.
-     *
      *
      * @param i field number, index origin 0
      * @return

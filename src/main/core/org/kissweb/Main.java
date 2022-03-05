@@ -45,18 +45,18 @@ import java.util.Objects;
 /**
  * Author: Blake McBride
  * Date: 4/10/20
- *
+ * <br><br>
  * This class is only used for command-line execution of Kiss.  So, if
  * Kiss is run from the command-line, this is the class that gets executed.
  * This class is not used in any of the web environments (including develop).
- *
+ * <br><br>
  * The command-line jar file is built with:
- *     ./bld kisscmd
- *
+ *     <code>./bld kisscmd</code>
+ * <br><br>
  * This creates the file: build.work/kisscmd.jar
- *
+ * <br><br>
  * To execute do:
- *     java -jar kisscmd.jar
+ *     <code>java -jar kisscmd.jar</code>
  */
 public class Main {
 

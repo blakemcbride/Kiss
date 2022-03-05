@@ -6,8 +6,8 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * A class used to process URL escape sequences.
- *
- * Author: Blake McBride
+ * <br><br>
+ * Author: Blake McBride<br>
  * Date: 12/20/21
  */
 public class URLBuilder {

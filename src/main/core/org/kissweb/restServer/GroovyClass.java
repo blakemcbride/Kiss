@@ -15,9 +15,9 @@ import java.lang.reflect.Method;
 /**
  *
  * @author Blake McBride
- * 
+ *  <br><br>
  * This class deals with dynamically loading groovy source files.
- * 
+ * <br><br>
  * If you load the same .groovy file with the same GroovyClassLoader groovy
  * just uses the original file and doesn't actually re-load the source.
  * If you create a new GroovyClassLoader then groovy re-loads the groovy
@@ -32,10 +32,10 @@ public class GroovyClass {
 	/**
 	 * Load a groovy source file.  If the file was previously loaded the old version will be
 	 * used to avoid a duplicate load.  If a reload is desired, call reset() first.
-	 * 
+	 * <br><br>
 	 * If calculatePath is true, the path to sourceFile is calculated relative to the running system.
 	 * If it is false, sourceFile is used as-is.
-	 * 
+	 * <br><br>
 	 * A notable exception thrown by this method is FileNotFoundException.  That occurs if the source
 	 * file is not found.  Other exceptions indicate a problem with the file.
 	 * 

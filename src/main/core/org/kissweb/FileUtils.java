@@ -22,7 +22,6 @@ public class FileUtils {
      * center.  The file is deleted when it is more than a day old.  This provides plenty of time for the user
      * to download a report or data file.
      *
-     *
      * @param prefix at least 3 characters long
      * @param suffix
      * @return

@@ -19,8 +19,8 @@ import java.util.function.Supplier;
  * The file that controls what gets run and when is in backend/CronTasks/crontab
  * The groovy files it runs are located in the backend/CronTasks directory.
  * See the file backend/crontab
- *
- * Author: Blake McBride
+ * <br><br>
+ * Author: Blake McBride<br>
  * Date: 12/22/21
  */
 public class Cron {

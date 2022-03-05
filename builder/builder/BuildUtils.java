@@ -684,6 +684,7 @@ public class BuildUtils {
      * @param destDir
      */
     public static void buildJavadoc(String srcPath, String libPath, String destDir) {
+        final boolean showOutput = false;
         if (!new File(srcPath).exists())
             throw new RuntimeException("buildJavadoc: directory \"" + srcPath + "\" does not exist");
         mkdir(destDir);
@@ -694,7 +695,7 @@ public class BuildUtils {
             mkdir(destDir);
             String srcFiles = writeDocArgsToFile(allSourceFiles(libPath, ".jar"), allFiles);
             // for some reason, Windows hangs if we don't show the output
-            runWait(isWindows, "javadoc -d " + destDir + " @" + srcFiles);
+            runWait(showOutput || isWindows, "javadoc -d " + destDir + " @" + srcFiles);
             rm(srcFiles);
         }
     }

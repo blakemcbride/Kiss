@@ -11,9 +11,9 @@ import java.util.Random;
 import java.util.Base64;
 
 /**
- * Author: Blake McBride
+ * Author: Blake McBride<br>
  * Date: 2/1/22
- *
+ * <br><br>
  * This class provides the ability to encrypt/decrypt strings and byte arrays with very strong (AES) encryption.
  */
 public final class Crypto {
@@ -36,7 +36,7 @@ public final class Crypto {
 
     /**
      * Encrypt a string utilizing the passed in salt and password.
-     *
+     * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
@@ -103,7 +103,7 @@ public final class Crypto {
 
     /**
      * Encrypt a byte array utilizing the passed in salt and password.
-     *
+     * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
@@ -121,7 +121,6 @@ public final class Crypto {
 
     /**
      * Encrypt a byte array utilizing a salt and the default password.
-     *
      *
      * @param salt the salt or null
      * @param valueToEnc
@@ -173,7 +172,7 @@ public final class Crypto {
 
     /**
      * Decrypt a string utilizing the passed in salt and password.
-     *
+     * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
@@ -230,7 +229,7 @@ public final class Crypto {
 
     /**
      * Decrypt a byte array utilizing the passed in salt and password.
-     *
+     * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
@@ -270,7 +269,7 @@ public final class Crypto {
 
     /**
      * Set the default password.  This remains until it is changed.
-     *
+     * <br><br>
      * The password can be any size greater than 0 but only a max of the first 32 bytes will be used.
      *
      * @param password the password
@@ -281,7 +280,7 @@ public final class Crypto {
 
     /**
      * Take a salt and password of any size and convert produce an encryption key.
-     *
+     * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *

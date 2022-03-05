@@ -8,13 +8,13 @@ import java.util.function.Supplier;
 
 /**
  * Command Line IO.
- *
+ * <br><br>
  * In the old days, programs worked by asking one question at a time.  Although this is very primitive in today's
  * terms, it did work.  You could build any application with no GUI and just this interface.  The advantage is
  * that it is very fast to put together a program that works sufficiently well.  This may make sense for internal
  * use situations.
- *
- * Author: Blake McBride
+ * <br><br>
+ * Author: Blake McBride<br>
  * Date: 1/4/22
  */
 public class CL {
@@ -87,7 +87,6 @@ public class CL {
     }
 
     /**
-     *
      * Prompt user for a numeric input.
      *
      * @param prompt

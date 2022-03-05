@@ -7,8 +7,8 @@ import java.util.Hashtable;
 
 /**
  * This class manages all the users currently logged into the system.
- *
- * Author: Blake McBride
+ * <br><br>
+ * Author: Blake McBride<br>
  * Date: 3/23/18
  */
 public class UserCache {
