@@ -16,7 +16,7 @@ public class GoogleDistance {
 
     private final static String URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
     private static String API_KEY;  // from Google
-    private final JSONObject result;
+    private JSONObject result = null;
     private JSONObject elm0 = null;
 
     /**
@@ -38,7 +38,7 @@ public class GoogleDistance {
      * @return the JSON object returned by Google.
      * @throws IOException
      */
-    public GoogleDistance(String fromAddress, String toAddress) throws IOException {
+    public GoogleDistance(String fromAddress, String toAddress) {
         final URLBuilder url = new URLBuilder(URL);
         url.addParameter("origins", fromAddress);
         url.addParameter("destinations", toAddress);
@@ -47,7 +47,10 @@ public class GoogleDistance {
         final String surl = url.build();
 
         RestClient rc = new RestClient();
-        result = rc.jsonCall("GET", surl);
+        try {
+            result = rc.jsonCall("GET", surl);
+        } catch (IOException ignore) {
+        }
     }
 
     /**
@@ -96,6 +99,16 @@ public class GoogleDistance {
         if (elements.length() != 1)
             return null;
         return elements.getJSONObject(0);
+    }
+
+    /**
+     * Example use of this class.
+     */
+    private void example() {
+        GoogleDistance.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        GoogleDistance gm = new GoogleDistance("995 Meridian Blvd, Franklin, TN 37067", "7270 Gary Ave, Miami Beach, FL");
+        int miles = gm.miles();
+        int minutes = gm.minutes();
     }
 
 }
