@@ -1036,4 +1036,8 @@ public class BuildUtils {
         return CACHE_DIR;
     }
 
+    public static void removeFromCache(String fname) {
+        rm(cacheDir() + fname);
+    }
+
 }
