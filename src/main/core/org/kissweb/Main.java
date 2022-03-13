@@ -38,7 +38,6 @@ import org.kissweb.database.Connection.ConnectionType;
 import org.kissweb.database.Cursor;
 import org.kissweb.database.Record;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -60,7 +59,7 @@ import java.util.Objects;
  */
 public class Main {
 
-    public static void main(String [] argv) throws SQLException, ClassNotFoundException {
+    public static void main(String [] argv) throws Exception {
         Connection db = new Connection(ConnectionType.PostgreSQL, "localhost", "waytogo", "postgres", "postgres");
         Command cmd = db.newCommand();
         Cursor c = cmd.query("select * from hr_employee_event order by employee_id, event_date, summary, detail");

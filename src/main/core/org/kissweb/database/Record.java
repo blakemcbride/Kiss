@@ -456,6 +456,7 @@ public class Record implements AutoCloseable {
      * executing it against the database.  It does not affect any cursors.
      *
      * @throws SQLException
+     * @see Connection#commit()
      */
     public void update() throws SQLException {
         if (cursor == null  ||  !cursor.cmd.isSelect)
@@ -513,6 +514,7 @@ public class Record implements AutoCloseable {
      * executing it against the database.  It does not affect any cursors.
      *
      * @throws SQLException
+     * @see Connection#commit()
      */
     public void delete() throws SQLException {
         /*
@@ -573,6 +575,7 @@ public class Record implements AutoCloseable {
      * @throws SQLException
      *
      * @see #addRecord()
+     * @see Connection#commit()
      */
     public Object addRecordAutoInc() throws SQLException {
         if (pstmt == null) {
@@ -628,6 +631,7 @@ public class Record implements AutoCloseable {
      * @throws SQLException
      *
      * @see #addRecordAutoInc()
+     * @see Connection#commit()
      */
     public boolean addRecord() throws SQLException {
         if (pstmt == null) {
@@ -717,7 +721,7 @@ public class Record implements AutoCloseable {
     }
 
     /**
-     * Returns a map of all of the columns in the record.
+     * Returns a map of all the columns in the record.
      *
      * @return
      */

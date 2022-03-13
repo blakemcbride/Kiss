@@ -37,6 +37,7 @@ package org.kissweb.database;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.*;
 import java.sql.*;
 import java.util.*;
 
@@ -56,19 +57,37 @@ import java.util.*;
  * @author Blake McBride
  */
 public class Cursor implements AutoCloseable {
+    private static final int BATCH_SIZE = 100;  // number of records retrieved from the database server at a time
     Command cmd;
     String tname;
     PreparedStatement ustmt;
-    private ResultSet rset;
     private final ResultSetMetaData mdata;
     StringBuilder prevsql;
     private Record lastRec;
+    private File cacheFile;
+    private ObjectInputStream cacheStream;
+    private ColumnInfo [] columnInfo;
+    private LinkedList<Record> memoryCache;
 
-    Cursor(Command cmd) throws SQLException {
+    /**
+     * Read in the entire result set and cache locally.  This can be done via a temporary disk file or in-memory.
+     * In-memory cache is used if <code>useMemoryCache</code>
+     * is <code>true</code> or if <code>max</code> is greater than zero and less than <code>BATCH_SIZE</code>.
+     * The returned <code>Cursor</code> cursors through this locally cached result set.
+     *
+     * @param useMemoryCache
+     * @param max
+     * @param cmd
+     * @throws SQLException
+     * @throws IOException
+     */
+    Cursor(boolean useMemoryCache, int max, Command cmd) throws SQLException, IOException {
         this.cmd = cmd;
-        rset = cmd.pstat.executeQuery();
+        cmd.pstat.setFetchSize(BATCH_SIZE);
+        ResultSet rset = cmd.pstat.executeQuery();
         mdata = rset.getMetaData();
         cmd.isSelect = true;
+        cacheAllRecords(useMemoryCache, max, rset);
     }
 
     /**
@@ -77,13 +96,6 @@ public class Cursor implements AutoCloseable {
      * @return
      */
     public String getTableName() {
-        if (tname == null) {
-            try {
-                tname = mdata.getTableName(1).toLowerCase();
-            } catch (SQLException e) {
-                return null;
-            }
-        }
         return tname;
     }
 
@@ -107,7 +119,7 @@ public class Cursor implements AutoCloseable {
      * @see #getRecord()
      * @see #next()
      */
-    public boolean isNext() throws SQLException {
+    public boolean isNext() throws Exception {
         return null != next();
     }
 
@@ -122,21 +134,276 @@ public class Cursor implements AutoCloseable {
      *  @see #getRecord()
      * @see #isNext()
      */
-    public Record next() throws SQLException {
-        if (rset.next()) {
-            HashMap<String,Object> ocols = new HashMap<>();
-            LinkedHashMap<String,Object> cols = new LinkedHashMap<>();
-            int ncols = mdata.getColumnCount();
-            for (int i=1 ; i <= ncols ; i++) {
-                Object val = rset.getObject(i);
-                String name = mdata.getColumnName(i).toLowerCase();
-                cols.put(name, val);
-                ocols.put(name, val);
-            }
-            return lastRec = new Record(cmd.conn, this, ocols, cols);
+    public Record next() throws Exception {
+        return lastRec = nextCachedRecord();
+    }
+
+    private static class ColumnInfo {
+        String name;
+        int type;
+        int size;
+
+        ColumnInfo(ResultSetMetaData mdata, int i) throws SQLException {
+            name = mdata.getColumnName(i).toLowerCase();
+            type = mdata.getColumnType(i);
+            size = mdata.getPrecision(i);
         }
-        close();
-        return lastRec = null;
+    }
+
+    private static final int RECORD_BEGINNING = 9990;
+    private static final int END_OF_RECORD    = 9991;
+    private static final int END_OF_CACHE     = 9992;
+    private static final int NULL_FIELD       = 9993;
+    private static final int FIELD_HAS_VALUE  = 9994;
+
+    /**
+     * Read all records in, cache locally, close result set and statement.
+     * <br><br>
+     * This can be done via a temporary disk file or in-memory.
+     * In-memory cache is used if <code>useMemoryCache</code>
+     * is <code>true</code> or if <code>max</code> is greater than zero and less than <code>BATCH_SIZE</code>.
+     *
+     * <br><br>
+     * <pre>
+     * Format is:<br>
+     *     Entry type: (int)
+     *         1=record beginning
+     *         3=end of cache (all records)
+     *         4=null field
+     *         5=field not null
+     *     Field type - Types class (int) or 9999=end of record
+     *     Field length: if not null and only for string or binary fields (short or int)
+     *     Field value: if not null
+     * </pre>
+     */
+    private void cacheAllRecords(boolean useMemoryCache, int maxRecords, ResultSet rset) throws IOException, SQLException {
+        try {
+            tname = mdata.getTableName(1).toLowerCase();
+        } catch (SQLException e) {
+            tname = null;
+        }
+        if (useMemoryCache || maxRecords > 0  &&  maxRecords <= BATCH_SIZE) {
+            cacheFile = null;
+            cacheStream = null;
+            memoryCache = new LinkedList<>();
+
+            while (rset.next()) {
+                HashMap<String,Object> ocols = new HashMap<>();
+                LinkedHashMap<String,Object> cols = new LinkedHashMap<>();
+                int ncols = mdata.getColumnCount();
+                for (int i=1 ; i <= ncols ; i++) {
+                    Object val = rset.getObject(i);
+                    String name = mdata.getColumnName(i).toLowerCase();
+                    cols.put(name, val);
+                    ocols.put(name, val);
+                }
+                memoryCache.addLast(new Record(cmd.conn, this, ocols, cols));
+            }
+        } else {
+            memoryCache = null;
+            cacheFile = File.createTempFile("cache-", ".dat");
+            int ncols = -1;
+            columnInfo = null;  //  initialized just to keep the IDE happy
+            try (FileOutputStream fos = new FileOutputStream(cacheFile);
+                 BufferedOutputStream bos = new BufferedOutputStream(fos);
+                 ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+                while (rset.next()) {
+                    int len;
+                    if (ncols == -1) {
+                        ncols = mdata.getColumnCount();
+                        columnInfo = new ColumnInfo[ncols];
+                        for (int i = 0; i < ncols; i++)
+                            columnInfo[i] = new ColumnInfo(mdata, i+1);
+                    }
+                    oos.writeInt(RECORD_BEGINNING);
+                    for (int i = 0; i < ncols; i++) {
+                        Object val = rset.getObject(i+1);
+                        ColumnInfo ci = columnInfo[i];
+                        oos.writeInt(ci.type);
+                        if (val == null) {
+                            oos.writeInt(NULL_FIELD);
+                            continue;
+                        } else
+                            oos.writeInt(FIELD_HAS_VALUE);
+                        switch (ci.type) {
+                            case Types.SMALLINT:
+                                short s = (short)(int)(Integer) val;
+                                oos.writeShort(s);
+                                break;
+                            case Types.INTEGER:
+                                oos.writeInt((Integer) val);
+                                break;
+                            case Types.BIGINT:
+                                oos.writeLong((Long) val);
+                                break;
+                            case Types.REAL:
+                            case Types.FLOAT:
+                                oos.writeFloat((Float) val);
+                                break;
+                            case Types.DOUBLE:
+                                oos.writeDouble((Double) val);
+                                break;
+                            case Types.CHAR:
+                            case Types.VARCHAR:
+                                short slen = (short) ((String) val).length();
+                                oos.writeShort(slen);
+                                if (slen > 0)
+                                    oos.writeUTF((String) val);
+                                break;
+                            case Types.LONGVARCHAR:
+                                len = ((String) val).length();
+                                oos.writeInt(len);
+                                if (len > 0)
+                                    oos.writeUTF((String) val);
+                                break;
+                            case Types.TIMESTAMP:
+                            case Types.TIMESTAMP_WITH_TIMEZONE:
+                            case Types.DATE:
+                            case Types.TIME:
+                            case Types.TIME_WITH_TIMEZONE:
+                            case Types.NCHAR:
+                            case Types.NVARCHAR:
+                            case Types.LONGNVARCHAR:
+                                oos.writeObject(val);
+                                break;
+                            case Types.BINARY:
+                            case Types.VARBINARY:
+                            case Types.LONGVARBINARY:
+                            case Types.BLOB:
+                                Byte [] bytes1 = (Byte[]) val;
+                                len = bytes1.length;
+                                oos.writeInt(len);
+                                if (len > 0) {
+                                    byte [] bytes2 = new byte[len];
+                                    for (int j=0 ; j < len ; j++)
+                                        bytes2[j] = bytes1[j];
+                                    oos.write(bytes2);
+                                }
+                                break;
+                            default:
+                                throw new SQLException("Unhandled data type " + ci.type);
+                        }
+                    }
+                    oos.writeInt(END_OF_RECORD);
+                }
+                oos.writeInt(END_OF_CACHE);
+            }
+            FileInputStream fis = new FileInputStream(cacheFile);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            cacheStream = new ObjectInputStream(bis);
+        }
+        rset.close();
+    }
+
+    private Record closeCache() {
+        try {
+            if (cacheStream != null)
+                cacheStream.close();
+        } catch (Exception ignore) {
+
+        } finally {
+            if (cacheFile != null)
+                cacheFile.delete();
+            cacheStream = null;
+            cacheFile = null;
+            columnInfo = null;
+            memoryCache = null;
+        }
+        return null;
+    }
+
+    private Record nextCachedRecord() throws Exception {
+        if (memoryCache != null) {
+            if (memoryCache.isEmpty())
+                return null;
+            return memoryCache.removeFirst();
+        }
+        if (cacheFile == null || cacheStream == null)
+            return closeCache();
+        int recType = cacheStream.readInt();
+        if (recType == END_OF_CACHE)
+            return closeCache();
+        if (recType != RECORD_BEGINNING)
+            throw new Exception("Cursor: JDBC Cache: expected RECORD_BEGINNING");
+        final LinkedHashMap<String,Object> cols = new LinkedHashMap<>();
+        final HashMap<String,Object> ocols = new HashMap<>();
+        int i = 0;
+        while (true) {
+            Object obj;
+            int len;
+            int fieldType = cacheStream.readInt();
+            if (fieldType == END_OF_RECORD)
+                break;
+            ColumnInfo ci = columnInfo[i++];
+            int nullField = cacheStream.readInt();
+            if (nullField == NULL_FIELD) {
+                cols.put(ci.name, null);
+                ocols.put(ci.name, null);
+                continue;
+            }
+            switch (fieldType) {
+                case Types.SMALLINT:
+                    cols.put(ci.name, obj=cacheStream.readShort());
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.INTEGER:
+                    cols.put(ci.name, obj=cacheStream.readInt());
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.BIGINT:
+                    cols.put(ci.name, obj=cacheStream.readLong());
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.REAL:
+                case Types.FLOAT:
+                    cols.put(ci.name, obj=cacheStream.readFloat());
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.DOUBLE:
+                    cols.put(ci.name, obj=cacheStream.readDouble());
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.CHAR:
+                case Types.VARCHAR:
+                    short slen = cacheStream.readShort();
+                    cols.put(ci.name, obj=slen > 0 ? cacheStream.readUTF() : "");
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.LONGVARCHAR:
+                    len = cacheStream.readShort();
+                    cols.put(ci.name, obj=len > 0 ? cacheStream.readUTF() : "");
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.TIMESTAMP:
+                case Types.TIMESTAMP_WITH_TIMEZONE:
+                case Types.DATE:
+                case Types.TIME:
+                case Types.TIME_WITH_TIMEZONE:
+                case Types.NCHAR:
+                case Types.NVARCHAR:
+                case Types.LONGNVARCHAR:
+                    cols.put(ci.name, obj=cacheStream.readObject());
+                    ocols.put(ci.name, obj);
+                    break;
+                case Types.BINARY:
+                case Types.VARBINARY:
+                case Types.LONGVARBINARY:
+                case Types.BLOB:
+                    len = cacheStream.readInt();
+                    if (len > 0) {
+                        byte[] bytes = new byte[len];
+                        cacheStream.read(bytes);
+                        Byte [] bytes2 = new Byte[bytes.length];
+                        Arrays.setAll(bytes2, n -> bytes[n]);
+                        cols.put(ci.name, bytes2);
+                        ocols.put(ci.name, bytes2);
+                    }
+                    break;
+                default:
+                    throw new SQLException("Unhandled data type " + fieldType);
+            }
+        }
+        return new Record(cmd.conn, this, ocols, cols);
     }
 
     /**
@@ -147,9 +414,8 @@ public class Cursor implements AutoCloseable {
      * @return the Record or null if none
      * @throws SQLException
      */
-    public Record fetchOne() throws SQLException {
+    public Record fetchOne() throws Exception {
         lastRec = next();
-        partialClose();
         return lastRec;
     }
 
@@ -162,7 +428,7 @@ public class Cursor implements AutoCloseable {
      *
      * @see #fetchOne()
      */
-    public JSONObject fetchOneJSON() throws SQLException {
+    public JSONObject fetchOneJSON() throws Exception {
         Record rec = fetchOne();
         return rec != null ? rec.toJSON() : null;
     }
@@ -175,7 +441,7 @@ public class Cursor implements AutoCloseable {
      * @return the JSON object passed in
      * @throws SQLException
      */
-    public JSONObject fetchOneJSON(JSONObject obj) throws SQLException {
+    public JSONObject fetchOneJSON(JSONObject obj) throws Exception {
         Record rec = fetchOne();
         if (rec != null)
             rec.addToJSON(obj);
@@ -191,7 +457,7 @@ public class Cursor implements AutoCloseable {
      * @return
      * @throws SQLException
      */
-    public List<Record> fetchAll() throws SQLException {
+    public List<Record> fetchAll() throws Exception {
         List<Record> r = new ArrayList<>();
         Record rec;
         while (null != (rec=next()))
@@ -210,21 +476,8 @@ public class Cursor implements AutoCloseable {
      *
      * @see #fetchAll()
      */
-    public JSONArray fetchAllJSON() throws SQLException {
+    public JSONArray fetchAllJSON() throws Exception {
         return Record.toJSONArray(fetchAll());
-    }
-
-
-    /**
-     * After this, you can edit and delete records.  You just can't read any more.
-     *
-     * @throws SQLException
-     */
-    void partialClose() throws SQLException {
-        if (rset != null) {
-            rset.close();
-            rset = null;
-        }
     }
 
     /**
@@ -235,7 +488,7 @@ public class Cursor implements AutoCloseable {
      */
     @Override
     public void close() throws SQLException {
-        partialClose();
+        closeCache();
         if (ustmt != null) {
             ustmt.close();
             ustmt = null;

@@ -35,6 +35,7 @@ package org.kissweb.database;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -61,7 +62,6 @@ public class Command implements AutoCloseable {
     boolean isSelect;
     private String lastSQL;
     private List<String> pcols;
-
 
     Command(Connection c) throws SQLException {
         conn = c;
@@ -134,26 +134,8 @@ public class Command implements AutoCloseable {
      * @see #fetchOne(String, Object...)
      * @see #query(int, String, Object...)
      */
-    public Cursor query(String sql, Object ... args) throws SQLException {
-        // The following two lines allows args to be a variable argument array or a passed in ArrayList of arguments
-        if (args != null  &&  args.length == 1  &&  args[0] instanceof ArrayList)
-            args = ((ArrayList) args[0]).toArray();
-        if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
-            if (pstat != null)
-                pstat.close();
-            pstat = conn.conn.prepareStatement(sql);
-            lastSQL = null;
-            if (pcols != null)
-                pcols.clear();
-        } else
-            pstat.clearParameters();
-        if (args != null)
-            for (int i = 0; i < args.length; i++)
-                pstat.setObject(i + 1, Connection.fixObj(args[i]));
-        Cursor c = new Cursor(this);
-        if (lastSQL == null)
-            lastSQL = sql;
-        return c;
+    public Cursor query(String sql, Object ... args) throws SQLException, IOException {
+        return query(false, 0, sql, args);
     }
 
     /**
@@ -182,8 +164,44 @@ public class Command implements AutoCloseable {
      * @see #fetchOne(String, Object...)
      * @see #query(String, Object...)
      */
-    public Cursor query(int max, String sql, Object ... args) throws SQLException {
-        return query(conn.limit(max, sql), args);
+    public Cursor query(int max, String sql, Object ... args) throws SQLException, IOException {
+        return query(false, max, sql, args);
+    }
+
+    /**
+     * Buffers the result set.  This can be done via a temporary disk file or in-memory.  In-memory cache is used if <code>useMemoryCache</code>
+     * is <code>true</code> or if <code>max</code> is greater than zero and less than <code>BATCH_SIZE</code>.
+     *
+     * @param useMemoryCache
+     * @param max
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     * @throws IOException
+     */
+    Cursor query(boolean useMemoryCache, int max, String sql, Object ... args) throws SQLException, IOException {
+        if (max > 0)
+            sql = conn.limit(max, sql);
+        // The following two lines allows args to be a variable argument array or a passed in ArrayList of arguments
+        if (args != null  &&  args.length == 1  &&  args[0] instanceof ArrayList)
+            args = ((ArrayList) args[0]).toArray();
+        if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
+            if (pstat != null)
+                pstat.close();
+            pstat = conn.conn.prepareStatement(sql);
+            lastSQL = null;
+            if (pcols != null)
+                pcols.clear();
+        } else
+            pstat.clearParameters();
+        if (args != null)
+            for (int i = 0; i < args.length; i++)
+                pstat.setObject(i + 1, Connection.fixObj(args[i]));
+        Cursor c = new Cursor(useMemoryCache, max, this);
+        if (lastSQL == null)
+            lastSQL = sql;
+        return c;
     }
 
     /**
@@ -211,8 +229,8 @@ public class Command implements AutoCloseable {
      * @see #fetchAll(String, Object...)
      * @see #execute(String, Object...)
      */
-    public Record fetchOne(String sql, Object ... args) throws SQLException {
-        try (Cursor c = query(conn.limit(1, sql), args)) {
+    public Record fetchOne(String sql, Object ... args) throws Exception {
+        try (Cursor c = query(true, 1, sql, args)) {
             return c.fetchOne();
         }
     }
@@ -227,8 +245,8 @@ public class Command implements AutoCloseable {
      *
      * @see #fetchOne(String, Object...)
      */
-    public JSONObject fetchOneJSON(String sql, Object ... args) throws SQLException {
-        try (Cursor c = query(conn.limit(1, sql), args)) {
+    public JSONObject fetchOneJSON(String sql, Object ... args) throws Exception {
+        try (Cursor c = query(true, 1, sql, args)) {
             Record r = c.fetchOne();
             return r != null ? r.toJSON() : null;
         }
@@ -245,8 +263,8 @@ public class Command implements AutoCloseable {
      *
      * @see #fetchOne(String, Object...)
      */
-    public JSONObject fetchOneJSON(JSONObject obj, String sql, Object ... args) throws SQLException {
-        try (Cursor c = query(conn.limit(1, sql), args)) {
+    public JSONObject fetchOneJSON(JSONObject obj, String sql, Object ... args) throws Exception {
+        try (Cursor c = query(true, 1, sql, args)) {
             Record r = c.fetchOne();
             return r != null ? r.addToJSON(obj) : obj;
         }
@@ -277,8 +295,8 @@ public class Command implements AutoCloseable {
      * @see #fetchOne(String, Object...)
      * @see #execute(String, Object...)
      */
-    public List<Record> fetchAll(String sql, Object ... args) throws SQLException {
-        return query(sql, args).fetchAll();
+    public List<Record> fetchAll(String sql, Object ... args) throws Exception {
+        return query(true, 0, sql, args).fetchAll();
     }
 
     /**
@@ -292,8 +310,8 @@ public class Command implements AutoCloseable {
      *
      * @see #fetchAll(String, Object...)
      */
-    public JSONArray fetchAllJSON(String sql, Object ... args) throws SQLException {
-        return Record.toJSONArray(query(sql, args).fetchAll());
+    public JSONArray fetchAllJSON(String sql, Object ... args) throws Exception {
+        return Record.toJSONArray(query(true, 0, sql, args).fetchAll());
     }
 
     /**
@@ -322,8 +340,8 @@ public class Command implements AutoCloseable {
      * @see #fetchOne(String, Object...)
      * @see #execute(String, Object...)
      */
-    public List<Record> fetchAll(int max, String sql, Object ... args) throws SQLException {
-        return query(conn.limit(max, sql), args).fetchAll();
+    public List<Record> fetchAll(int max, String sql, Object ... args) throws Exception {
+        return query(true, max, sql, args).fetchAll();
     }
 
     /**
@@ -337,8 +355,8 @@ public class Command implements AutoCloseable {
      * 
      * @see #fetchAll(int, String, Object...)
      */
-    public JSONArray fetchAllJSON(int max, String sql, Object ... args) throws SQLException {
-        return Record.toJSONArray(query(conn.limit(max, sql), args).fetchAll());
+    public JSONArray fetchAllJSON(int max, String sql, Object ... args) throws Exception {
+        return Record.toJSONArray(query(true, max, sql, args).fetchAll());
     }
 
     List<String> getPriColumns(Cursor c) {

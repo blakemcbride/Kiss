@@ -501,7 +501,6 @@
 ;(map-java-class-method closeHSU ArahantSession "closeHSU")
 
 ;(map-java-instance-method setCurrentPersonToArahant HibernateSessionUtil "setCurrentPersonToArahant")
-;(map-java-instance-method beginTransaction HibernateSessionUtil "beginTransaction")
 ;(map-java-instance-method commitTransaction HibernateSessionUtil "commitTransaction")
 ;(map-java-instance-method rollbackTransaction HibernateSessionUtil "rollbackTransaction")
 ;(map-java-instance-method-with-wrapper createCriteria HibernateSessionUtil "createCriteria" HibernateCriteriaUtil "java.lang.String")

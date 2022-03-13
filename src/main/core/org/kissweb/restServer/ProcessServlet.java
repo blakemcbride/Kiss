@@ -300,38 +300,43 @@ public class ProcessServlet implements Runnable {
         try {
             if (DB != null)
                 DB.commit();
+            response.setContentType("application/json");
+            response.setStatus(200);
+            outjson.put("_Success", true);
+            outjson.put("_ErrorCode", 0);  // success
+            out.print(outjson);
+            out.flush();
+            out.close();     // this causes the second response
         } catch (SQLException ignored) {
+        } finally {
+            asyncContext.complete();
+            closeSession();
         }
-        response.setContentType("application/json");
-        response.setStatus(200);
-        outjson.put("_Success", true);
-        outjson.put("_ErrorCode", 0);  // success
-        out.print(outjson);
-        out.flush();
-        out.close();     // this causes the second response
-        closeSession();
-        asyncContext.complete();
     }
 
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
-        if (DB != null) {
-            try {
-                DB.rollback();
-            } catch (SQLException ignored) {
+        try {
+            if (DB != null) {
+                try {
+                    DB.rollback();
+                } catch (SQLException ignored) {
+                }
             }
+            response.setContentType("application/json");
+            response.setStatus(200);
+            JSONObject outjson = new JSONObject();
+            outjson.put("_Success", false);
+            outjson.put("_ErrorMessage", e != null ? e.getMessage() : msg);
+            outjson.put("_ErrorCode", 1);  // general error
+            log_error(msg, e);
+            out.print(outjson);
+            out.flush();
+            out.close();  //  this causes the second response
+        } catch (Exception ignored) {
+        } finally {
+            asyncContext.complete();
+            closeSession();
         }
-        closeSession();
-        response.setContentType("application/json");
-        response.setStatus(200);
-        JSONObject outjson = new JSONObject();
-        outjson.put("_Success", false);
-        outjson.put("_ErrorMessage", e != null ? e.getMessage() : msg);
-        outjson.put("_ErrorCode", 1);  // general error
-        log_error(msg, e);
-        out.print(outjson);
-        out.flush();
-        out.close();  //  this causes the second response
-        asyncContext.complete();
     }
 
     private void loginFailure(HttpServletResponse response, Throwable e) {
@@ -374,8 +379,9 @@ public class ProcessServlet implements Runnable {
             return;  //  no log
         if (e instanceof LogException)
             logger.warn(str + " " + e.getMessage());
-        else
+        else {
             logger.error(str, e);
+        }
     }
 
     private String login(String user, String password, JSONObject outjson) throws Exception {
@@ -408,7 +414,9 @@ public class ProcessServlet implements Runnable {
         if (!MainServlet.hasDatabase())
             return;
         logger.info("Previous open database connections = " + MainServlet.getCpds().getNumBusyConnections());
-        DB = new Connection(MainServlet.getCpds().getConnection());
+        final java.sql.Connection conn = MainServlet.getCpds().getConnection();
+        conn.setAutoCommit(false);  //  all SQL operations require a commit but Kiss does a commit at the end of each service
+        DB = new Connection(conn);
         logger.info("New database connection obtained");
     }
 

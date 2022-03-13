@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *  This class represents a connection to an SQL database.
  * <br><br>
  *  Typically, one connection would be used for each thread in an application.  Operations on a connection
- *  is separate or isolated from all of the other connections.
+ *  are separate or isolated from all the other connections.
  *
  * @author Blake McBride
  *
@@ -170,6 +170,9 @@ public class Connection implements AutoCloseable {
 
     /**
      * Form a new connection to an SQL database.  This method is only used in special situations.
+     * <br><br>
+     * Auto commits are turned off thus always requiring commit() to complete a transaction.
+     * However, KISS explicitly calls commit at the end of each web service (if it succeeds, and a rollback otherwise).
      *
      * @param type
      * @param connectionString
@@ -183,7 +186,7 @@ public class Connection implements AutoCloseable {
         Class.forName(driver);
         ctype = type;
         conn = DriverManager.getConnection(connectionString);
-////    conn.setAutoCommit(false);  // so we can use cursors and not retrieve the entire result set at once
+        conn.setAutoCommit(false);  // commits are always necessary and we can batch our reads
         dmd = conn.getMetaData();
     }
 
@@ -239,44 +242,32 @@ public class Connection implements AutoCloseable {
     }
 
     /**
-     * Begin a transaction.  All following operations are part of the transaction up untill a commit() or rollback().
-     * @throws SQLException
-     *
-     * @see #commit
-     * @see #rollback
-     */
-    public void beginTransaction() throws SQLException {
-        conn.setAutoCommit(false);
-    }
-
-    /**
-     * Commit all the operations to the database since the last beginTransaction().  Also ends the transaction.
+     * Commit all the operations to the database since the last commit().
+     * <br><br>
+     * Updates to a database do not take effect until they are committed.  This method performs the commit.
+     * When a commit occurs, all database changes done since the last commit are effectively written to the database.
+     * If a commit does not occur, the updates will not occur.
+     * <br><br>
+     * Note that the KISS system does a commit at the end of each web service if the service completes.  However, if the
+     * service fails (throws an exception) KISS does a rollback instead.
      *
      * @throws SQLException
      *
-     * @see #beginTransaction
      * @see #rollback
      */
     public void commit() throws SQLException {
-        boolean autoCommit = conn.getAutoCommit();
-        conn.setAutoCommit(false);
         conn.commit();
-        conn.setAutoCommit(autoCommit);
     }
 
     /**
-     * Rollback, erase, or forget all the operations since the last beginTransaction.  Also ends the transaction.
+     * Rollback, erase, or forget all the operations since the last commit.
      *
      * @throws SQLException
      *
-     * @see #beginTransaction
      * @see #commit
      */
     public void rollback() throws SQLException {
-        boolean autoCommit = conn.getAutoCommit();
-        conn.setAutoCommit(false);
         conn.rollback();
-        conn.setAutoCommit(autoCommit);
     }
 
     /**
@@ -344,7 +335,7 @@ public class Connection implements AutoCloseable {
      *
      * @see Command#fetchOne(String, Object...)
      */
-    public Record fetchOne(String sql, Object... args) throws SQLException {
+    public Record fetchOne(String sql, Object... args) throws Exception {
         try (Command cmd = newCommand()) {
             return cmd.fetchOne(sql, args);
         }
@@ -360,7 +351,7 @@ public class Connection implements AutoCloseable {
      *
      * @see #fetchOne(String, Object...)
      */
-    public JSONObject fetchOneJSON(String sql, Object... args) throws SQLException {
+    public JSONObject fetchOneJSON(String sql, Object... args) throws Exception {
         Record r = fetchOne(sql, args);
         return r != null ? r.toJSON() : null;
     }
@@ -376,7 +367,7 @@ public class Connection implements AutoCloseable {
      *
      * @see #fetchOne(String, Object...)
      */
-    public JSONObject fetchOneJSON(JSONObject obj, String sql, Object... args) throws SQLException {
+    public JSONObject fetchOneJSON(JSONObject obj, String sql, Object... args) throws Exception {
         Record r = fetchOne(sql, args);
         return r != null ? r.addToJSON(obj) : obj;
     }
@@ -408,7 +399,7 @@ public class Connection implements AutoCloseable {
      * @see Command#fetchAll(String, Object...)
      * @see #fetchAll(int, String, Object...)
      */
-    public List<Record> fetchAll(String sql, Object... args) throws SQLException {
+    public List<Record> fetchAll(String sql, Object... args) throws Exception {
         try (Command cmd = newCommand()) {
             return cmd.fetchAll(sql, args);
         }
@@ -424,7 +415,7 @@ public class Connection implements AutoCloseable {
      *
      * @see #fetchAll(String, Object...)
      */
-    public JSONArray fetchAllJSON(String sql, Object... args) throws SQLException {
+    public JSONArray fetchAllJSON(String sql, Object... args) throws Exception {
         return Record.toJSONArray(fetchAll(sql, args));
     }
 
@@ -456,7 +447,7 @@ public class Connection implements AutoCloseable {
      * @see Command#fetchAll(String, Object...)
      * @see #fetchAll(String, Object...)
      */
-    public List<Record> fetchAll(int max, String sql, Object... args) throws SQLException {
+    public List<Record> fetchAll(int max, String sql, Object... args) throws Exception {
         try (Command cmd = newCommand()) {
             return cmd.fetchAll(max, sql, args);
         }
@@ -473,7 +464,7 @@ public class Connection implements AutoCloseable {
      *
      * @see #fetchAll(int, String, Object...)
      */
-    public JSONArray fetchAllJSON(int max, String sql, Object... args) throws SQLException {
+    public JSONArray fetchAllJSON(int max, String sql, Object... args) throws Exception {
         return Record.toJSONArray(fetchAll(max, sql, args));
     }
     /**
@@ -571,7 +562,7 @@ public class Connection implements AutoCloseable {
                     Record rec = cursor.getRecord();
                     res = rec.getLong("count(*)") != 0;
                 }
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 return false;
             }
         }
@@ -687,7 +678,7 @@ public class Connection implements AutoCloseable {
     }
 
     /**
-     * local method used to assure Dates of any type are of the SQL type.
+     * Local method used to assure Dates of any type are of the SQL type.
      *
      * @param dt
      * @return
