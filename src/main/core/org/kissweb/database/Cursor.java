@@ -647,8 +647,7 @@ public class Cursor implements AutoCloseable {
      * @see Record#getShort(String)
      */
     public Short getShort(String cname) throws SQLException {
-        Integer r = (Integer) get(cname);
-        return r == null ? null : (Short)(short)(int) r;
+        return (Short) get(cname);
     }
 
     /**

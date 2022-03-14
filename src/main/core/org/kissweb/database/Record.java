@@ -232,8 +232,7 @@ public class Record implements AutoCloseable {
      * @see Cursor#getShort(String)
      */
     public Short getShort(String cname) throws SQLException {
-        Integer r = (Integer) get(cname);
-        return r == null ? null : (Short)(short)(int) r;
+        return (Short) get(cname);
     }
 
     /**
