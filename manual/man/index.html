@@ -1,6 +1,6 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<!-- Created by GNU Texinfo 6.5, http://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Kiss Manual</title>
@@ -10,31 +10,25 @@
 <meta name="resource-type" content="document">
 <meta name="distribution" content="global">
 <meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
 <link href="#SEC_Contents" rel="contents" title="Table of Contents">
 <style type="text/css">
 <!--
+a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
 a.summary-letter {text-decoration: none}
 blockquote.indentedblock {margin-right: 0em}
-blockquote.smallindentedblock {margin-right: 0em; font-size: smaller}
-blockquote.smallquotation {font-size: smaller}
 div.display {margin-left: 3.2em}
 div.example {margin-left: 3.2em}
-div.lisp {margin-left: 3.2em}
-div.smalldisplay {margin-left: 3.2em}
-div.smallexample {margin-left: 3.2em}
-div.smalllisp {margin-left: 3.2em}
 kbd {font-style: oblique}
 pre.display {font-family: inherit}
 pre.format {font-family: inherit}
 pre.menu-comment {font-family: serif}
 pre.menu-preformatted {font-family: serif}
-pre.smalldisplay {font-family: inherit; font-size: smaller}
-pre.smallexample {font-size: smaller}
-pre.smallformat {font-family: inherit; font-size: smaller}
-pre.smalllisp {font-size: smaller}
 span.nolinebreak {white-space: nowrap}
 span.roman {font-family: initial; font-weight: normal}
 span.sansserif {font-family: sans-serif; font-weight: normal}
+span:hover a.copiable-anchor {visibility: visible}
 ul.no-bullet {list-style: none}
 -->
 </style>
@@ -47,128 +41,11 @@ ul.no-bullet {list-style: none}
 
 
 
-<a name="SEC_Overview"></a>
-<h2 class="shortcontents-heading">Short Table of Contents</h2>
-
-<div class="shortcontents">
-<ul class="no-bullet">
-<li><a name="stoc-Introduction" href="#toc-Introduction">1 Introduction</a></li>
-<li><a name="stoc-System-Setup" href="#toc-System-Setup">2 System Setup</a></li>
-<li><a name="stoc-Orientation" href="#toc-Orientation">3 Orientation</a></li>
-<li><a name="stoc-Developing" href="#toc-Developing">4 Developing</a></li>
-<li><a name="stoc-Front_002dend-API" href="#toc-Front_002dend-API">5 Front-end API</a></li>
-<li><a name="stoc-Back_002dend-API" href="#toc-Back_002dend-API">6 Back-end API</a></li>
-<li><a name="stoc-Command-Line-Utility" href="#toc-Command-Line-Utility">7 Command Line Utility</a></li>
-
-</ul>
-</div>
-
-<a name="SEC_Contents"></a>
-<h2 class="contents-heading">Table of Contents</h2>
-
-<div class="contents">
-<ul class="no-bullet">
-<li><a name="toc-Introduction" href="#Introduction">1 Introduction</a>
-<ul class="no-bullet">
-  <li><a name="toc-Kiss-Highlights" href="#Kiss-Highlights">1.1 <em>Kiss</em> Highlights</a>
-  <ul class="no-bullet">
-    <li><a name="toc-Back_002dend-Highlights" href="#Back_002dend-Highlights">1.1.1 Back-end Highlights</a></li>
-    <li><a name="toc-Front_002dend-Highlights" href="#Front_002dend-Highlights">1.1.2 Front-end Highlights</a></li>
-    <li><a name="toc-Back_002dend-Web-Service-Example" href="#Back_002dend-Web-Service-Example">1.1.3 Back-end Web Service Example</a></li>
-    <li><a name="toc-Front_002dend-Web-Service-Usage-Example" href="#Front_002dend-Web-Service-Usage-Example">1.1.4 Front-end Web Service Usage Example</a></li>
-  </ul></li>
-  <li><a name="toc-HTML-component-usage" href="#HTML-component-usage">1.2 HTML component usage</a></li>
-  <li><a name="toc-System-Maturity-And-Future" href="#System-Maturity-And-Future">1.3 System Maturity And Future</a></li>
-  <li><a name="toc-Getting-All-Source-Code" href="#Getting-All-Source-Code">1.4 Getting All Source Code</a></li>
-  <li><a name="toc-Oracle-Database-Support" href="#Oracle-Database-Support">1.5 Oracle Database Support</a></li>
-  <li><a name="toc-Contact-And-Links" href="#Contact-And-Links">1.6 Contact And Links</a></li>
-  <li><a name="toc-License" href="#License">1.7 License</a></li>
-  <li><a name="toc-Acknowledgments" href="#Acknowledgments">1.8 Acknowledgments</a></li>
-</ul></li>
-<li><a name="toc-System-Setup" href="#System-Setup">2 System Setup</a>
-<ul class="no-bullet">
-  <li><a name="toc-Important-1" href="#Important-1">2.1 Important</a></li>
-  <li><a name="toc-Super_002dQuick_002dStart" href="#Super_002dQuick_002dStart">2.2 Super-Quick-Start</a></li>
-  <li><a name="toc-Quick_002dStart-Checklist-1" href="#Quick_002dStart-Checklist-1">2.3 Quick-Start Checklist</a></li>
-  <li><a name="toc-Runtime-Environments" href="#Runtime-Environments">2.4 Runtime Environments</a></li>
-  <li><a name="toc-Pre_002drequisites-1" href="#Pre_002drequisites-1">2.5 Pre-requisites</a>
-  <ul class="no-bullet">
-    <li><a name="toc-Groff-and-PDF" href="#Groff-and-PDF">2.5.1 Groff and PDF</a></li>
-  </ul></li>
-  <li><a name="toc-Download-Kiss-1" href="#Download-Kiss-1">2.6 Download Kiss</a></li>
-  <li><a name="toc-Documentation" href="#Documentation">2.7 Documentation</a></li>
-  <li><a name="toc-Setup-And-Configuration-1" href="#Setup-And-Configuration-1">2.8 Setup And Configuration</a></li>
-  <li><a name="toc-Bypassing-Authentication" href="#Bypassing-Authentication">2.9 Bypassing Authentication</a></li>
-  <li><a name="toc-Building-The-System" href="#Building-The-System">2.10 Building The System</a>
-  <ul class="no-bullet">
-    <li><a name="toc-Using-an-IDE" href="#Using-an-IDE">2.10.1 Using an IDE</a></li>
-  </ul></li>
-  <li><a name="toc-What-Do-I-Do-With-It-Now_003f" href="#What-Do-I-Do-With-It-Now_003f">2.11 What Do I Do With It Now?</a></li>
-</ul></li>
-<li><a name="toc-Orientation" href="#Orientation">3 Orientation</a>
-<ul class="no-bullet">
-  <li><a name="toc-Back_002dend-Application-Files" href="#Back_002dend-Application-Files">3.1 Back-end Application Files</a></li>
-  <li><a name="toc-Front_002dend-Application-Files" href="#Front_002dend-Application-Files">3.2 Front-end Application Files</a></li>
-  <li><a name="toc-Database" href="#Database">3.3 Database</a></li>
-  <li><a name="toc-Single-Page-Application" href="#Single-Page-Application">3.4 Single Page Application</a></li>
-  <li><a name="toc-Controlling-Browser-Cache" href="#Controlling-Browser-Cache">3.5 Controlling Browser Cache</a></li>
-  <li><a name="toc-Creating-JavaDocs" href="#Creating-JavaDocs">3.6 Creating JavaDocs</a></li>
-  <li><a name="toc-Deploying-A-Kiss-Application" href="#Deploying-A-Kiss-Application">3.7 Deploying A Kiss Application</a></li>
-  <li><a name="toc-Learning-The-System" href="#Learning-The-System">3.8 Learning The System</a></li>
-</ul></li>
-<li><a name="toc-Developing" href="#Developing">4 Developing</a>
-<ul class="no-bullet">
-  <li><a name="toc-Overview" href="#Overview">4.1 Overview</a></li>
-  <li><a name="toc-Back_002dend-Development" href="#Back_002dend-Development">4.2 Back-end Development</a>
-  <ul class="no-bullet">
-    <li><a name="toc-REST-Server" href="#REST-Server">4.2.1 REST Server</a>
-    <ul class="no-bullet">
-      <li><a name="toc-IDE" href="#IDE">4.2.1.1 IDE</a></li>
-      <li><a name="toc-BLD" href="#BLD">4.2.1.2 BLD</a></li>
-    </ul></li>
-    <li><a name="toc-Application-Code" href="#Application-Code">4.2.2 Application Code</a></li>
-    <li><a name="toc-Cached-User-Data" href="#Cached-User-Data">4.2.3 Cached User Data</a></li>
-    <li><a name="toc-Programming-Languages" href="#Programming-Languages">4.2.4 Programming Languages</a></li>
-    <li><a name="toc-Cron" href="#Cron">4.2.5 Cron</a></li>
-  </ul></li>
-  <li><a name="toc-Front_002dend-Development-1" href="#Front_002dend-Development-1">4.3 Front-end Development</a></li>
-  <li><a name="toc-Reports-And-Exports" href="#Reports-And-Exports">4.4 Reports And Exports</a></li>
-  <li><a name="toc-Authentication" href="#Authentication">4.5 Authentication</a></li>
-</ul></li>
-<li><a name="toc-Front_002dend-API" href="#Front_002dend-API">5 Front-end API</a>
-<ul class="no-bullet">
-  <li><a name="toc-Calling-REST-Services" href="#Calling-REST-Services">5.1 Calling REST Services</a></li>
-  <li><a name="toc-Kiss-Components" href="#Kiss-Components">5.2 Kiss Components</a>
-  <ul class="no-bullet">
-    <li><a name="toc-Tagless-Components" href="#Tagless-Components">5.2.1 Tagless Components</a></li>
-  </ul></li>
-  <li><a name="toc-Modal-Popup-Windows" href="#Modal-Popup-Windows">5.3 Modal Popup Windows</a></li>
-  <li><a name="toc-File-Uploads" href="#File-Uploads">5.4 File Uploads</a></li>
-  <li><a name="toc-Utilities" href="#Utilities">5.5 Utilities</a></li>
-  <li><a name="toc-Controlling-Browser-Cache-1" href="#Controlling-Browser-Cache-1">5.6 Controlling Browser Cache</a></li>
-  <li><a name="toc-Additional-Resources" href="#Additional-Resources">5.7 Additional Resources</a></li>
-</ul></li>
-<li><a name="toc-Back_002dend-API" href="#Back_002dend-API">6 Back-end API</a>
-<ul class="no-bullet">
-  <li><a name="toc-Database-API" href="#Database-API">6.1 Database API</a></li>
-  <li><a name="toc-JSON" href="#JSON">6.2 JSON</a></li>
-  <li><a name="toc-Utilities-1" href="#Utilities-1">6.3 Utilities</a></li>
-</ul></li>
-<li><a name="toc-Command-Line-Utility" href="#Command-Line-Utility">7 Command Line Utility</a>
-<ul class="no-bullet">
-  <li><a name="toc-Building-The-Utility" href="#Building-The-Utility">7.1 Building The Utility</a></li>
-  <li><a name="toc-Using-The-System" href="#Using-The-System">7.2 Using The System</a></li>
-  <li><a name="toc-Databses-Other-Than-PostgreSQL" href="#Databses-Other-Than-PostgreSQL">7.3 Databses Other Than PostgreSQL</a></li>
-</ul></li>
-
-</ul>
-</div>
 
 
 
 
-
-<a name="Introduction"></a>
+<div class="chapter" id="Introduction">
 <h2 class="chapter">1 Introduction</h2>
 
 <p>The <em>KISS Framework</em> is an application development framework for
@@ -252,12 +129,27 @@ system.  The second advantage is that by pushing as much processing to
 the front-end as possible (rendering the display on the front-end),
 the system can better scale.
 </p>
-<a name="Kiss-Highlights"></a>
+<ul class="section-toc">
+<li><a href="#Kiss-Highlights" accesskey="1"><em>Kiss</em> Highlights</a></li>
+<li><a href="#HTML-component-usage" accesskey="2">HTML component usage</a></li>
+<li><a href="#System-Maturity-And-Future" accesskey="3">System Maturity And Future</a></li>
+<li><a href="#Getting-All-Source-Code" accesskey="4">Getting All Source Code</a></li>
+<li><a href="#Contact-And-Links" accesskey="5">Contact And Links</a></li>
+<li><a href="#License" accesskey="6">License</a></li>
+<li><a href="#Acknowledgments" accesskey="7">Acknowledgments</a></li>
+</ul>
+<div class="section" id="Kiss-Highlights">
 <h3 class="section">1.1 <em>Kiss</em> Highlights</h3>
 
 <p>Some highlights of the <em>Kiss</em> system include:
 </p>
-<a name="Back_002dend-Highlights"></a>
+<ul class="section-toc">
+<li><a href="#Back_002dend-Highlights" accesskey="1">Back-end Highlights</a></li>
+<li><a href="#Front_002dend-Highlights" accesskey="2">Front-end Highlights</a></li>
+<li><a href="#Back_002dend-Web-Service-Example" accesskey="3">Back-end Web Service Example</a></li>
+<li><a href="#Front_002dend-Web-Service-Usage-Example" accesskey="4">Front-end Web Service Usage Example</a></li>
+</ul>
+<div class="subsection" id="Back_002dend-Highlights">
 <h4 class="subsection">1.1.1 Back-end Highlights</h4>
 
 <ol>
@@ -282,7 +174,8 @@ provide support for heavy loads and high throughput.
 supports PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 </li></ol>
 
-<a name="Front_002dend-Highlights"></a>
+</div>
+<div class="subsection" id="Front_002dend-Highlights">
 <h4 class="subsection">1.1.2 Front-end Highlights</h4>
 
 <ol>
@@ -300,7 +193,8 @@ systems take up.
 </li><li> Consistent and simple API.
 </li></ol>
 
-<a name="Back_002dend-Web-Service-Example"></a>
+</div>
+<div class="subsection" id="Back_002dend-Web-Service-Example">
 <h4 class="subsection">1.1.3 Back-end Web Service Example</h4>
 
 
@@ -328,7 +222,8 @@ no configuration files or other code that needs to be changed.
 }
 </pre></div>
 
-<a name="Front_002dend-Web-Service-Usage-Example"></a>
+</div>
+<div class="subsection" id="Front_002dend-Web-Service-Usage-Example">
 <h4 class="subsection">1.1.4 Front-end Web Service Usage Example</h4>
 
 <p>The following front-end example utilizes the web service defined in the
@@ -346,7 +241,9 @@ if (res._Success) {
 }
 </pre></div>
     
-<a name="HTML-component-usage"></a>
+</div>
+</div>
+<div class="section" id="HTML-component-usage">
 <h3 class="section">1.2 HTML component usage</h3>
    
 <p>To use a component add to HTML:
@@ -369,7 +266,8 @@ Non-custom attributes do what you&rsquo;s expect them to do.
 <p>The system also supports tag-less components.  This provides an easy
 way to package arbitrary blocks of code (that can have screens too).
 </p>
-<a name="System-Maturity-And-Future"></a>
+</div>
+<div class="section" id="System-Maturity-And-Future">
 <h3 class="section">1.3 System Maturity And Future</h3>
 
 <p>Largely, the Kiss system, in the form of running applications, has
@@ -384,7 +282,8 @@ Moving forward, as time permits, the priorities are as follows:
 </li><li> Support more back-end languages (such as Python, JavaScript, Ruby, etc.)
 </li></ol>
 
-<a name="Getting-All-Source-Code"></a>
+</div>
+<div class="section" id="Getting-All-Source-Code">
 <h3 class="section">1.4 Getting All Source Code</h3>
 
 <p>Source code for all of <em>Kiss</em> and its dependencies is freely
@@ -395,31 +294,20 @@ distribution).  The following lists the paths to the internal
 dependencies (those included with <em>Kiss</em>):
 </p>
 <dl compact="compact">
-<dt><code>abcl.jar</code></dt>
+<dt><span><code>abcl.jar</code></span></dt>
 <dd><p><a href="https://common-lisp.net/project/armedbear">https://common-lisp.net/project/armedbear</a>
 </p></dd>
-<dt><code>json.jar</code></dt>
+<dt><span><code>json.jar</code></span></dt>
 <dd><p><a href="https://github.com/blakemcbride/JSON-java">https://github.com/blakemcbride/JSON-java</a>
 </p></dd>
-<dt><code>SimpleWebServer.jar (only used during development)</code></dt>
+<dt><span><code>SimpleWebServer.jar (only used during development)</code></span></dt>
 <dd><p><a href="https://github.com/blakemcbride/SimpleWebServer">https://github.com/blakemcbride/SimpleWebServer</a>
 </p></dd>
 </dl>
 
-<a name="Oracle-Database-Support"></a>
-<h3 class="section">1.5 Oracle Database Support</h3>
-
-<p>Although <em>Kiss</em> supports the Oracle DBMS out-of-the-box, the
-<em>Kiss</em> build system does not automatically load the Oracle JDBC
-JAR files.  This is because Oracle JDBC is not downloadable without a
-login, password, and accepting their license &ndash; all of which must be
-done manually.
-</p>
-<p>Once the Oracle JDBC libraries are manually installed, <em>Kiss</em>
-will support the Oracle database as-is.
-</p>
-<a name="Contact-And-Links"></a>
-<h3 class="section">1.6 Contact And Links</h3>
+</div>
+<div class="section" id="Contact-And-Links">
+<h3 class="section">1.5 Contact And Links</h3>
 
 <p>The <em>Kiss</em> main web site is at <a href="http://kissweb.org">http://kissweb.org</a>
 </p>
@@ -431,8 +319,9 @@ will support the Oracle database as-is.
 </p>
 <p>Commercial support is available.  Contact us via email at <a href="mailto:kissweb.org@gmail.com">kissweb.org@gmail.com</a>
 </p>
-<a name="License"></a>
-<h3 class="section">1.7 License</h3>
+</div>
+<div class="section" id="License">
+<h3 class="section">1.6 License</h3>
 
 <p>Copyright (c) 2018 Blake McBride (blake@mcbridemail.com)
 </p>
@@ -463,8 +352,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </p>
-<a name="Acknowledgments"></a>
-<h3 class="section">1.8 Acknowledgments</h3>
+</div>
+<div class="section" id="Acknowledgments">
+<h3 class="section">1.7 Acknowledgments</h3>
 
 <p>The Kiss design, code, documentation, and web site were written by
 Blake McBride.  The author gratefully acknowledges and appreciates,
@@ -490,10 +380,25 @@ among others, the following:
 
 
 
-<a name="System-Setup"></a>
+</div>
+</div>
+<div class="chapter" id="System-Setup">
 <h2 class="chapter">2 System Setup</h2>
 
-<a name="Important"></a><a name="Important-1"></a>
+<span id="Important"></span><ul class="section-toc">
+<li><a href="#Important-1" accesskey="1">Important</a></li>
+<li><a href="#Super_002dQuick_002dStart" accesskey="2">Super-Quick-Start</a></li>
+<li><a href="#Quick_002dStart-Checklist-1" accesskey="3">Quick-Start Checklist</a></li>
+<li><a href="#Runtime-Environments" accesskey="4">Runtime Environments</a></li>
+<li><a href="#Pre_002drequisites-1" accesskey="5">Pre-requisites</a></li>
+<li><a href="#Download-Kiss-1" accesskey="6">Download Kiss</a></li>
+<li><a href="#Documentation" accesskey="7">Documentation</a></li>
+<li><a href="#Setup-And-Configuration-1" accesskey="8">Setup And Configuration</a></li>
+<li><a href="#Bypassing-Authentication" accesskey="9">Bypassing Authentication</a></li>
+<li><a href="#Building-The-System">Building The System</a></li>
+<li><a href="#What-Do-I-Do-With-It-Now_003f">What Do I Do With It Now?</a></li>
+</ul>
+<div class="section" id="Important-1">
 <h3 class="section">2.1 Important</h3>
 
 <p>The <em>Kiss</em> system comes with its own build system, so it doesn&rsquo;t
@@ -523,7 +428,8 @@ required under Linux and Mac but not under Windows.  When running on
 Windows, use &ldquo;bld&rdquo; rather than &ldquo;./bld&rdquo; and the same for all the
 other commands shown.
 </p>
-<a name="Super_002dQuick_002dStart"></a>
+</div>
+<div class="section" id="Super_002dQuick_002dStart">
 <h3 class="section">2.2 Super-Quick-Start</h3>
 
 <p>This is the simplest and shortest path to a running system.  It assumes:
@@ -569,7 +475,8 @@ directory.
 and deliver it with the next request.
 </p>
 
-<a name="Quick_002dStart-Checklist"></a><a name="Quick_002dStart-Checklist-1"></a>
+<span id="Quick_002dStart-Checklist"></span></div>
+<div class="section" id="Quick_002dStart-Checklist-1">
 <h3 class="section">2.3 Quick-Start Checklist</h3>
 
 <p>This is a more detailed and expanded description of the same
@@ -593,7 +500,8 @@ process entirely through it.
 <p>Once the development server is running under <em>bld</em>, you can stop it 
 by hitting any key.
 </p>
-<a name="Runtime-Environments"></a>
+</div>
+<div class="section" id="Runtime-Environments">
 <h3 class="section">2.4 Runtime Environments</h3>
 
 <p>As shipped, there are two different environments that <em>Kiss</em> may
@@ -635,7 +543,8 @@ during the development process.  See <a href="#Front_002dend-Development">Front-
 front-end is done through the browser debugger.  There is no setup,
 and the front-end server runs by executing a single command.
 </p>
-<a name="Pre_002drequisites"></a><a name="Pre_002drequisites-1"></a>
+<span id="Pre_002drequisites"></span></div>
+<div class="section" id="Pre_002drequisites-1">
 <h3 class="section">2.5 Pre-requisites</h3>
 
 <p>You should download and install the following pre-requisites.
@@ -666,7 +575,10 @@ configuration.
 </p>
 <p>Install the above according to their instructions.
 </p>
-<a name="Groff-and-PDF"></a>
+<ul class="section-toc">
+<li><a href="#Groff-and-PDF" accesskey="1">Groff and PDF</a></li>
+</ul>
+<div class="subsection" id="Groff-and-PDF">
 <h4 class="subsection">2.5.1 Groff and PDF</h4>
 
 <p>The <em>Kiss</em> reporting facilities are dependent on the full
@@ -683,7 +595,9 @@ reporting facilities to work under Windows.  They may be obtained from:
 <p><a href="https://www.ghostscript.com">https://www.ghostscript.com</a>
 </p>
 
-<a name="Download-Kiss"></a><a name="Download-Kiss-1"></a>
+<span id="Download-Kiss"></span></div>
+</div>
+<div class="section" id="Download-Kiss-1">
 <h3 class="section">2.6 Download Kiss</h3>
 
 <p>Kiss is located at <a href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
@@ -692,7 +606,8 @@ reporting facilities to work under Windows.  They may be obtained from:
 </p>
 <p><code>git clone https://github.com/blakemcbride/Kiss.git</code>
 </p>
-<a name="Documentation"></a>
+</div>
+<div class="section" id="Documentation">
 <h3 class="section">2.7 Documentation</h3>
 
 <p>The <em>Kiss</em> documentation consists of three parts; this manual,
@@ -730,7 +645,8 @@ file:///my/home/path/kiss/build.work/javadoc/index.html
 file:///my/home/path/kiss/manual/jsdoc/index.html
 </pre></div>
 
-<a name="Setup-And-Configuration"></a><a name="Setup-And-Configuration-1"></a>
+<span id="Setup-And-Configuration"></span></div>
+<div class="section" id="Setup-And-Configuration-1">
 <h3 class="section">2.8 Setup And Configuration</h3>
 
 <p>The system is configured by the contents of a single file
@@ -784,7 +700,8 @@ may be added to this database.
 <p>The default username is <em>kiss</em>, and the default password is
 <em>password</em>
 </p>
-<a name="Bypassing-Authentication"></a>
+</div>
+<div class="section" id="Bypassing-Authentication">
 <h3 class="section">2.9 Bypassing Authentication</h3>
 
 <p>On rare occasions, it is necessary to bypass authentication.  In other
@@ -804,7 +721,8 @@ communicating with a human.  Additionally, it should be noted that the
 danger of providing unauthenticated services is somewhat mitigated by
 the combination of <em>HTTPS</em> and <em>CORS</em>.
 </p>
-<a name="Building-The-System"></a>
+</div>
+<div class="section" id="Building-The-System">
 <h3 class="section">2.10 Building The System</h3>
 
 <p>Although the system may be built with the included build system
@@ -854,11 +772,11 @@ are unneeded.
 <p>The main tasks that will be of interest to you are as follows:
 </p>
 <dl compact="compact">
-<dt><code>libs</code></dt>
+<dt><span><code>libs</code></span></dt>
 <dd><p>This task is only required if you intend to use your IDE to build the
 remainder of the system.  It installs the required dependencies.
 </p></dd>
-<dt><code>develop</code></dt>
+<dt><span><code>develop</code></span></dt>
 <dd><p>This will cause the entire system to build (not repeating unnecessary
 steps) and start up a tomcat instance to run the system in a
 development mode.  The system will be available from your local
@@ -866,7 +784,7 @@ browser at <code>http://localhost:8000</code>.  You may debug the
 application by attaching to the running <em>tomcat</em> server at port
 9000.
 </p></dd>
-<dt><code>war</code></dt>
+<dt><span><code>war</code></span></dt>
 <dd><p>This will cause the system to generate the single file needed by a
 production system.  It will end up in <em>build.work/Kiss.war</em>
 </p></dd>
@@ -875,22 +793,22 @@ production system.  It will end up in <em>build.work/Kiss.war</em>
 <p>Other tasks which may be useful are as follows:
 </p>
 <dl compact="compact">
-<dt><code>clean</code></dt>
+<dt><span><code>clean</code></span></dt>
 <dd><p>This task removes all files built but retains files that were downloaded from
 repositories (although <em>bld</em> caches those files anyway.)
 </p></dd>
-<dt><code>realclean</code></dt>
+<dt><span><code>realclean</code></span></dt>
 <dd><p>This removes all built and downloaded files so the system should be everything
 you need to build it without any extraneous files
 </p></dd>
-<dt><code>all</code></dt>
+<dt><span><code>all</code></span></dt>
 <dd><p>This performs all of the steps necessary to setup and build the system but
 doesn&rsquo;t start up the tomcat server.
 </p></dd>
-<dt><code>javadoc</code></dt>
+<dt><span><code>javadoc</code></span></dt>
 <dd><p>This task creates the javadoc files that end up in <code>build.work/javadoc</code>
 </p></dd>
-<dt><code>kisscmd</code></dt>
+<dt><span><code>kisscmd</code></span></dt>
 <dd><p>This task creates a command-line JAR that can be used in a non-web, command-line application.
 This is useful when creating applications that perform various utility functions.  This
 JAR cannot be used in any web environment.  See <code>src/main/core/org/kissweb/Main.java</code>
@@ -899,7 +817,10 @@ JAR cannot be used in any web environment.  See <code>src/main/core/org/kissweb/
 
 <p>See <a href="#Important">Important</a> and See <a href="#Quick_002dStart-Checklist">Quick-Start Checklist</a>.
 </p>
-<a name="Using-an-IDE"></a>
+<ul class="section-toc">
+<li><a href="#Using-an-IDE" accesskey="1">Using an IDE</a></li>
+</ul>
+<div class="subsection" id="Using-an-IDE">
 <h4 class="subsection">2.10.1 Using an IDE</h4>
 
 <p>Most IDE&rsquo;s can be used to develop and debug the application.  There are two
@@ -929,7 +850,9 @@ IDE.  Instructions for setting up some of the IDEs is located under the
 <code>manual/IDE-Setup</code> directory.
 </p>
 
-<a name="What-Do-I-Do-With-It-Now_003f"></a>
+</div>
+</div>
+<div class="section" id="What-Do-I-Do-With-It-Now_003f">
 <h3 class="section">2.11 What Do I Do With It Now?</h3>
 
 <p>What you have at this point is the beginnings of your new application.
@@ -943,7 +866,9 @@ front-end API reference located in the <em>manual/jsdoc</em> directory.
 </p>
 
 
-<a name="Orientation"></a>
+</div>
+</div>
+<div class="chapter" id="Orientation">
 <h2 class="chapter">3 Orientation</h2>
 
 
@@ -952,14 +877,24 @@ debugging, however, only a few areas in the system would normally be
 of concern when building an application as follows.
 </p>
 
-<a name="Back_002dend-Application-Files"></a>
+<ul class="section-toc">
+<li><a href="#Back_002dend-Application-Files" accesskey="1">Back-end Application Files</a></li>
+<li><a href="#Front_002dend-Application-Files" accesskey="2">Front-end Application Files</a></li>
+<li><a href="#Database" accesskey="3">Database</a></li>
+<li><a href="#Single-Page-Application" accesskey="4">Single Page Application</a></li>
+<li><a href="#Controlling-Browser-Cache" accesskey="5">Controlling Browser Cache</a></li>
+<li><a href="#Creating-JavaDocs" accesskey="6">Creating JavaDocs</a></li>
+<li><a href="#Deploying-A-Kiss-Application" accesskey="7">Deploying A Kiss Application</a></li>
+<li><a href="#Learning-The-System" accesskey="8">Learning The System</a></li>
+</ul>
+<div class="section" id="Back_002dend-Application-Files">
 <h3 class="section">3.1 Back-end Application Files</h3>
 
 <dl compact="compact">
-<dt><code>src/main/backend/KissInit.groovy</code></dt>
+<dt><span><code>src/main/backend/KissInit.groovy</code></span></dt>
 <dd><p>This file is used to configure the system. See <a href="#Setup-And-Configuration">Setup And Configuration</a>
 </p></dd>
-<dt><code>src/main/backend</code></dt>
+<dt><span><code>src/main/backend</code></span></dt>
 <dd><p>All other files under this directory represent the application
 back-end.  All the files are used and distributed in source form.  The
 Kiss system compiles them at runtime but does not save the compiled form.
@@ -969,7 +904,8 @@ immediately on a running system.
 </dl>
 
 
-<a name="Front_002dend-Application-Files"></a>
+</div>
+<div class="section" id="Front_002dend-Application-Files">
 <h3 class="section">3.2 Front-end Application Files</h3>
 
 <p>Files under the <code>src/main/frontend</code> directory represent the
@@ -988,7 +924,8 @@ and would be modified to suit your needs.
 would be the application specific screens you create.  The included
 <code>page1</code> directory is only an example page.
 </p>
-<a name="Database"></a>
+</div>
+<div class="section" id="Database">
 <h3 class="section">3.3 Database</h3>
 
 <p><em>Kiss</em> supports Microsoft SQL Server, Oracle, PostgreSQL, MySQL, and
@@ -1007,7 +944,8 @@ portable on all major platforms.
 <p>See <a href="#Setup-And-Configuration">Setup And Configuration</a>
 </p>
 
-<a name="Single-Page-Application"></a>
+</div>
+<div class="section" id="Single-Page-Application">
 <h3 class="section">3.4 Single Page Application</h3>
 
 <p><em>Kiss</em> applications are single page applications in the sense
@@ -1020,7 +958,8 @@ hundreds of pages may exist.  <em>Kiss</em> lazy-loads pages as they are
 used, and except for browser cache, eliminates them once another page
 is loaded.
 </p>
-<a name="Controlling-Browser-Cache"></a>
+</div>
+<div class="section" id="Controlling-Browser-Cache">
 <h3 class="section">3.5 Controlling Browser Cache</h3>
 
 <p>The user&rsquo;s browser cache can be controlled from the file
@@ -1040,7 +979,8 @@ they download the new version, normal browser cache activity will
 occur.
 </p>
 
-<a name="javadoc"></a><a name="Creating-JavaDocs"></a>
+<span id="javadoc"></span></div>
+<div class="section" id="Creating-JavaDocs">
 <h3 class="section">3.6 Creating JavaDocs</h3>
 
 <p>JavaDocs for the <em>Kiss</em> system will need to be created.  It is
@@ -1055,7 +995,8 @@ bld javadoc                [Windows]
 <p>The JavaDoc files end up in the <code>build.work/javadoc</code> directory.
 </p>
 
-<a name="Deploying-A-Kiss-Application"></a>
+</div>
+<div class="section" id="Deploying-A-Kiss-Application">
 <h3 class="section">3.7 Deploying A Kiss Application</h3>
 
 <p>The only file needed to deply the application is <code>Kiss.war</code> It
@@ -1074,7 +1015,8 @@ file, unpack it, and run it.  The application will be available at
 <p>Renaming <code>Kiss.war</code> to <code>ABC.war</code>, for example, will cause
 the application path to change to <code>[HOST]/ABC</code>
 </p>
-<a name="Learning-The-System"></a>
+</div>
+<div class="section" id="Learning-The-System">
 <h3 class="section">3.8 Learning The System</h3>
 
 <p>In order to start getting a feel for how <code>Kiss</code> applications
@@ -1087,7 +1029,9 @@ example shows the same code in all of the supported languages.
 </p>
 
 
-<a name="Developing"></a>
+</div>
+</div>
+<div class="chapter" id="Developing">
 <h2 class="chapter">4 Developing</h2>
 
 <p>This section details the development process with <em>Kiss</em>.  The
@@ -1107,7 +1051,14 @@ immediately.
 utilized and front-end and back-end changes take effect immediately
 there too.
 </p>
-<a name="Overview"></a>
+<ul class="section-toc">
+<li><a href="#Overview" accesskey="1">Overview</a></li>
+<li><a href="#Back_002dend-Development" accesskey="2">Back-end Development</a></li>
+<li><a href="#Front_002dend-Development-1" accesskey="3">Front-end Development</a></li>
+<li><a href="#Reports-And-Exports" accesskey="4">Reports And Exports</a></li>
+<li><a href="#Authentication" accesskey="5">Authentication</a></li>
+</ul>
+<div class="section" id="Overview">
 <h3 class="section">4.1 Overview</h3>
 
 <p>The following details the normal steps to boot up a development environment.
@@ -1143,7 +1094,8 @@ There should be no need to rebuild or bring anything down.
 <p>Front-end changes will appear as soon as you re-load the page on your browser.
 Back-end changes with take effect immediately.
 </p>
-<a name="Back_002dend-Development"></a>
+</div>
+<div class="section" id="Back_002dend-Development">
 <h3 class="section">4.2 Back-end Development</h3>
 
 <p>The back-end works differently in development and production
@@ -1164,13 +1116,24 @@ should have a sub-directory named <code>src/main/backend</code>.
 </p>
 
 
-<a name="REST-Server"></a>
+<ul class="section-toc">
+<li><a href="#REST-Server" accesskey="1">REST Server</a></li>
+<li><a href="#Application-Code" accesskey="2">Application Code</a></li>
+<li><a href="#Cached-User-Data" accesskey="3">Cached User Data</a></li>
+<li><a href="#Programming-Languages" accesskey="4">Programming Languages</a></li>
+<li><a href="#Cron" accesskey="5">Cron</a></li>
+</ul>
+<div class="subsection" id="REST-Server">
 <h4 class="subsection">4.2.1 REST Server</h4>
 
 <p>There are two different methods of running the back-end REST server as
 follows.
 </p>
-<a name="IDE"></a>
+<ul class="section-toc">
+<li><a href="#IDE" accesskey="1">IDE</a></li>
+<li><a href="#BLD" accesskey="2">BLD</a></li>
+</ul>
+<div class="subsubsection" id="IDE">
 <h4 class="subsubsection">4.2.1.1 IDE</h4>
 
 <p>Running of the IDE back-end requires the following:
@@ -1192,7 +1155,8 @@ they were compiled before the system was booted.
 <p>Once the back-end server is up, application files changed under the
 <code>src/main/backend</code> directory will take effect immediately.
 </p>
-<a name="BLD"></a>
+</div>
+<div class="subsubsection" id="BLD">
 <h4 class="subsubsection">4.2.1.2 BLD</h4>
 
 <p>Utilizing the included <em>Kiss build system (bld)</em> the many steps required 
@@ -1216,7 +1180,9 @@ breakpoints, etc.)
 <p>Remember, however, that you won&rsquo;t be able to use or debug the application until
 the front-end server is started too.
 </p>
-<a name="Application-Code"></a>
+</div>
+</div>
+<div class="subsection" id="Application-Code">
 <h4 class="subsection">4.2.2 Application Code</h4>
 
 <p>All communications between the front-end and back-end occur over REST
@@ -1232,16 +1198,16 @@ of the web service.
 for that web service.  Each web method is passed four arguments as follows:
 </p>
 <dl compact="compact">
-<dt><code>JSONObject injson</code></dt>
+<dt><span><code>JSONObject injson</code></span></dt>
 <dd><p>This represents the data that came from the front-end.
 </p></dd>
-<dt><code>JSONObject outjson</code></dt>
+<dt><span><code>JSONObject outjson</code></span></dt>
 <dd><p>This represents the data being returned to the front-end.  It is pre-initialized with an empty <code>JSONObject</code>.
 </p></dd>
-<dt><code>Connection db</code></dt>
+<dt><span><code>Connection db</code></span></dt>
 <dd><p>This is a pre-opened connection to the defined database (defined in <code>backend/KissInit.groovy</code>)
 </p></dd>
-<dt><code>MainServlet servlet</code></dt>
+<dt><span><code>MainServlet servlet</code></span></dt>
 <dd><p>This is a rarely used servlet context argument.
 </p></dd>
 </dl>
@@ -1264,7 +1230,8 @@ be defined and used within web service classes.
 </p>
 <p>Of course during this process, <code>Kiss</code> handles many possible error conditions.
 </p>
-<a name="cached_005fuser_005fdata"></a><a name="Cached-User-Data"></a>
+<span id="cached_005fuser_005fdata"></span></div>
+<div class="subsection" id="Cached-User-Data">
 <h4 class="subsection">4.2.3 Cached User Data</h4>
 
 <p>During the login process, user-specific data may be cached.  This
@@ -1280,7 +1247,8 @@ application-specific class.
 
 <p>See <a href="#authentication">Authentication</a>
 </p>
-<a name="Programming-Languages"></a>
+</div>
+<div class="subsection" id="Programming-Languages">
 <h4 class="subsection">4.2.4 Programming Languages</h4>
 
 <p>At this point, <em>Kiss</em> supports the development of back-end REST
@@ -1310,7 +1278,8 @@ anticipated that support for many of these other languages (such as
 Scala, Clojure, JRuby, Jython, and Kotlin) will likely follow,
 especially if there are requests.
 </p>
-<a name="Cron"></a>
+</div>
+<div class="subsection" id="Cron">
 <h4 class="subsection">4.2.5 Cron</h4>
 
 <p><em>Kiss</em> has the ability to run any number of commands at specified
@@ -1330,7 +1299,9 @@ There is no need to restart the system.
 <p>Look at the files in the <code>src/main/backend/CronTasks</code>
 directory for samples and further documentation.
 </p>
-<a name="Front_002dend-Development"></a><a name="Front_002dend-Development-1"></a>
+<span id="Front_002dend-Development"></span></div>
+</div>
+<div class="section" id="Front_002dend-Development-1">
 <h3 class="section">4.3 Front-end Development</h3>
 
 <p>A separate server is used so that development files will be served
@@ -1381,7 +1352,8 @@ is open)</code>
 <p>You can now develop the front-end portion of your application by
 editing files under the <code>src/main/frontend</code> directory.
 </p>
-<a name="Reports-And-Exports"></a>
+</div>
+<div class="section" id="Reports-And-Exports">
 <h3 class="section">4.4 Reports And Exports</h3>
 
 <p>Creating reports and exports requires both front-end and back-end components.
@@ -1405,7 +1377,8 @@ front-end by just providing the URL to the file.  At that point, the
 front-end <code>Utils.showReport</code> takes the URL returned by the back-end
 and downloads the file.
 </p>
-<a name="authentication"></a><a name="Authentication"></a>
+<span id="authentication"></span></div>
+<div class="section" id="Authentication">
 <h3 class="section">4.5 Authentication</h3>
 
 <p><em>Kiss</em> has built-in authentication.  However, each application has its
@@ -1422,7 +1395,9 @@ See that file for more details.
 </p>
 
 
-<a name="Front_002dend-API"></a>
+</div>
+</div>
+<div class="chapter" id="Front_002dend-API">
 <h2 class="chapter">5 Front-end API</h2>
 
 <p>The front-end API are all the facilities that run on the browser.
@@ -1460,7 +1435,16 @@ the need for the other to change.  In other words, they are minimally dependent 
 </p>
 
 
-<a name="Calling-REST-Services"></a>
+<ul class="section-toc">
+<li><a href="#Calling-REST-Services" accesskey="1">Calling REST Services</a></li>
+<li><a href="#Kiss-Components" accesskey="2">Kiss Components</a></li>
+<li><a href="#Modal-Popup-Windows" accesskey="3">Modal Popup Windows</a></li>
+<li><a href="#File-Uploads" accesskey="4">File Uploads</a></li>
+<li><a href="#Utilities" accesskey="5">Utilities</a></li>
+<li><a href="#Controlling-Browser-Cache-1" accesskey="6">Controlling Browser Cache</a></li>
+<li><a href="#Additional-Resources" accesskey="7">Additional Resources</a></li>
+</ul>
+<div class="section" id="Calling-REST-Services">
 <h3 class="section">5.1 Calling REST Services</h3>
 
 <p>On the front-end, the class <code>Server</code> is what deals with the REST
@@ -1488,7 +1472,8 @@ login token so that future communications cannot occur.
 <p>The <code>Server</code> class also includes a method (<code>fileUploadSend</code>)
 that makes it easy to upload files.
 </p>
-<a name="Kiss-Components"></a>
+</div>
+<div class="section" id="Kiss-Components">
 <h3 class="section">5.2 Kiss Components</h3>
 
 
@@ -1520,7 +1505,10 @@ tag is replaced with.  Ultimately, it must boil down to straight HTML,
 CSS, and JavaScript code.
 </p>
 
-<a name="Tagless-Components"></a>
+<ul class="section-toc">
+<li><a href="#Tagless-Components" accesskey="1">Tagless Components</a></li>
+</ul>
+<div class="subsection" id="Tagless-Components">
 <h4 class="subsection">5.2.1 Tagless Components</h4>
 
 <p>Let&rsquo;s say you have a pop-up window that allows a user to search for employees, or product, or whatever.
@@ -1539,7 +1527,9 @@ is needed, one would execute <code>Kiss.MyComponent.run(in_data, on_exit)</code>
 Arguments passed to <code>on_exit</code> are determined by the component.
 </p>
 
-<a name="Modal-Popup-Windows"></a>
+</div>
+</div>
+<div class="section" id="Modal-Popup-Windows">
 <h3 class="section">5.3 Modal Popup Windows</h3>
 
 <p><em>Kiss</em> supports dragable, modal popup windows. <em>HTML</em> is
@@ -1555,10 +1545,10 @@ the second represents the body of the popup window.
 <p>The top-level <code>popup</code> tag&rsquo;s attribute section must contain the following:
 </p>
 <dl compact="compact">
-<dt><code>id=&quot;my-popup&quot;</code></dt>
+<dt><span><code>id=&quot;my-popup&quot;</code></span></dt>
 <dd><p>an ID is needed to reference the popup
 </p></dd>
-<dt><code>width=&quot;600px&quot; height=&quot;300px&quot;</code></dt>
+<dt><span><code>width=&quot;600px&quot; height=&quot;300px&quot;</code></span></dt>
 <dd><p>Set the height and width of the popup
 </p></dd>
 </dl>
@@ -1581,10 +1571,10 @@ the second represents the body of the popup window.
 <p>There are only two JavaScript functions used to control the popup.
 </p>
 <dl compact="compact">
-<dt><code>Utils.popup_open(id [, focus-id])</code></dt>
+<dt><span><code>Utils.popup_open(id [, focus-id])</code></span></dt>
 <dd><p>open the popup indicated by the <code>id</code>, and if <code>focus-id</code> is present, set initial focus to that control
 </p></dd>
-<dt><code>Utils.popup_close()</code></dt>
+<dt><span><code>Utils.popup_close()</code></span></dt>
 <dd><p>close the most recent popup
 </p></dd>
 </dl>
@@ -1592,7 +1582,8 @@ the second represents the body of the popup window.
 <p>Your defined responses to the buttons on the popup determines your dealing with the
 data on the popup and when to close it.
 </p>
-<a name="File-Uploads"></a>
+</div>
+<div class="section" id="File-Uploads">
 <h3 class="section">5.4 File Uploads</h3>
 
 <p><em>Kiss</em> includes facilities that make it easy to upload a file or
@@ -1657,7 +1648,8 @@ function used to send the files is <code>fileUploadSend</code> in the
 
 
 
-<a name="Utilities"></a>
+</div>
+<div class="section" id="Utilities">
 <h3 class="section">5.5 Utilities</h3>
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
@@ -1665,7 +1657,8 @@ These utilities are located under the <code>src/main/frontend/kiss</code> direct
 <code>DateTimeUtils.js</code>, <code>DateUtils</code>, <code>TimeUtils</code>, <code>Utils</code>, etc.  These utilities
 are documented in the front-end API documentation.
 </p>
-<a name="Controlling-Browser-Cache-1"></a>
+</div>
+<div class="section" id="Controlling-Browser-Cache-1">
 <h3 class="section">5.6 Controlling Browser Cache</h3>
 
 <p>Browser&rsquo;s have a mind of their own in term of deciding when to use
@@ -1689,7 +1682,8 @@ to re-load all files whenever <code>softwareVersion</code> changes.  After the c
 the browser cache will work as normal to maximally cache the files until the next
 <code>softwareVersion</code> change.
 </p>
-<a name="Additional-Resources"></a>
+</div>
+<div class="section" id="Additional-Resources">
 <h3 class="section">5.7 Additional Resources</h3>
 
 <p>Although not a part of the <em>Kiss</em> system, there are some very
@@ -1712,7 +1706,9 @@ working with service workers very easy.
 
 
 
-<a name="Back_002dend-API"></a>
+</div>
+</div>
+<div class="chapter" id="Back_002dend-API">
 <h2 class="chapter">6 Back-end API</h2>
 
 <p>In addition to the full API provided by the Java system, and any additional
@@ -1729,7 +1725,12 @@ API&rsquo;s may be broadly grouped as follows:
 <p>An overview of these API&rsquo;s is contained in this chapter.  Detailed
 documentation is contained in the JavaDocs.  See <a href="#javadoc">Creating JavaDocs</a>.
 </p>
-<a name="Database-API"></a>
+<ul class="section-toc">
+<li><a href="#Database-API" accesskey="1">Database API</a></li>
+<li><a href="#JSON" accesskey="2">JSON</a></li>
+<li><a href="#Utilities-1" accesskey="3">Utilities</a></li>
+</ul>
+<div class="section" id="Database-API">
 <h3 class="section">6.1 Database API</h3>
 
 <p><em>Kiss</em> comes with a powerful library for accessing SQL databases.
@@ -1756,17 +1757,17 @@ This section provides an overview.
 <p>The <em>Kiss</em> database routines revolve around four main classes as follows:
 </p>
 <dl compact="compact">
-<dt><code>Connection</code></dt>
+<dt><span><code>Connection</code></span></dt>
 <dd><p>This represents a connection to an SQL database.
 </p></dd>
-<dt><code>Command</code></dt>
+<dt><span><code>Command</code></span></dt>
 <dd><p>This represents a single action or command against the database.
 </p></dd>
-<dt><code>Cursor</code></dt>
+<dt><span><code>Cursor</code></span></dt>
 <dd><p>If the action is a <code>select</code>, the <code>Cursor</code> represents a
 pointer into the result set.
 </p></dd>
-<dt><code>Record</code></dt>
+<dt><span><code>Record</code></span></dt>
 <dd><p>This class represents a single row within a table or result set.
 </p></dd>
 </dl>
@@ -1794,7 +1795,8 @@ generates these statements for you.
 </p>
 <p>In addition to the above, these utilities provide full support for transactions and parameters.
 </p>
-<a name="JSON"></a>
+</div>
+<div class="section" id="JSON">
 <h3 class="section">6.2 JSON</h3>
 
 <p>The first two arguments to all REST methods is <code>injson</code> and
@@ -1847,7 +1849,8 @@ with the return data.  Useful JSON utilities include the following:
 </li></ul>
 
 
-<a name="Utilities-1"></a>
+</div>
+<div class="section" id="Utilities-1">
 <h3 class="section">6.3 Utilities</h3>
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
@@ -1857,7 +1860,9 @@ are documented in the JavaDocs.
 </p>
 
 
-<a name="Command-Line-Utility"></a>
+</div>
+</div>
+<div class="chapter" id="Command-Line-Utility">
 <h2 class="chapter">7 Command Line Utility</h2>
 
 <p>In addition to utilizing <em>Kiss</em> as a web application development
@@ -1871,7 +1876,12 @@ REST server.
 also supports any of the other databases with a slightly more complex
 command line.
 </p>
-<a name="Building-The-Utility"></a>
+<ul class="section-toc">
+<li><a href="#Building-The-Utility" accesskey="1">Building The Utility</a></li>
+<li><a href="#Using-The-System" accesskey="2">Using The System</a></li>
+<li><a href="#Databses-Other-Than-PostgreSQL" accesskey="3">Databses Other Than PostgreSQL</a></li>
+</ul>
+<div class="section" id="Building-The-Utility">
 <h3 class="section">7.1 Building The Utility</h3>
 
 <p>The build system (<em>bld</em>) has the ability to build a <em>JAR</em>
@@ -1894,7 +1904,8 @@ they are compiled at runtime.)
 directory.  That, in addition to the <em>JDK</em>, is all that is needed to
 use the system.
 </p>
-<a name="Using-The-System"></a>
+</div>
+<div class="section" id="Using-The-System">
 <h3 class="section">7.2 Using The System</h3>
 
 <p>To use the <em>Kiss</em> command line interface you first create the
@@ -1917,7 +1928,8 @@ something simple.  Create the following file named
 
 <p><em>test1.groovy</em> can be extended arbitrarily to perform any function needed.
 </p>
-<a name="Databses-Other-Than-PostgreSQL"></a>
+</div>
+<div class="section" id="Databses-Other-Than-PostgreSQL">
 <h3 class="section">7.3 Databses Other Than PostgreSQL</h3>
 
 <p>Although <em>KissGP.jar</em> comes bundled with support for the
@@ -1941,7 +1953,8 @@ you&rsquo;ll need are already in the <em>libs</em> directory.
 
 
 
-<hr>
+<hr></div>
+</div>
 
 
 
