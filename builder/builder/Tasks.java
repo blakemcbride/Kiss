@@ -272,7 +272,9 @@ public class Tasks {
         dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
         dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/codehaus/groovy/groovy/3.0.9/groovy-3.0.9-indy.jar");
         dep.add("javax.servlet-api-4.0.1.jar", LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
-        dep.add("log4j-1.2.17.jar", LIBS, "https://repo1.maven.org/maven2/log4j/log4j/1.2.17/log4j-1.2.17.jar");
+        dep.add("log4j-core-2.17.2.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.2/log4j-core-2.17.2.jar");
+        dep.add("log4j-api-2.17.2.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.17.2/log4j-api-2.17.2.jar");
+        dep.add("log4j-1.2-api-2.17.2.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.17.2/log4j-1.2-api-2.17.2.jar");
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
         dep.add("mssql-jdbc-8.2.0.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/8.2.0.jre8/mssql-jdbc-8.2.0.jre8.jar");
         dep.add("mysql-connector-java-8.0.19.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.19/mysql-connector-java-8.0.19.jar");
