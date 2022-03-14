@@ -122,9 +122,7 @@ public class Tasks {
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         copyRegex("src/main/core/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
-        copy("src/main/core/log4j.properties", explodedDir + "/WEB-INF/classes");
-        copy("src/main/core/log4j.xml", explodedDir + "/WEB-INF/classes");
-        copy("src/main/core/log4j.dtd", explodedDir + "/WEB-INF/classes");
+        copy("src/main/core/log4j2.xml", explodedDir + "/WEB-INF/classes");
     }
 
     /**
