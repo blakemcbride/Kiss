@@ -131,10 +131,6 @@ class JavaService {
             String code = new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
 
             DynamicCompiler dc = new DynamicCompiler();
-            if (isJava11()) {
-                dc.addOption("--add-exports", "java.sql/java.sql=ALL-UNNAMED");
-                dc.addOption("--add-exports", "java.base/java.util=ALL-UNNAMED");
-            }
             String cname = className.replaceAll("/", ".");
             dc.addSource(cname, code);
             Map<String, Class<?>> compiled = dc.build();
