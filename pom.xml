@@ -1,0 +1,27 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"   
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0   
+http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+
+  <!--  This file is only used to describe dependencies to github  -->
+  
+  <modelVersion>4.0.0</modelVersion>  
+  
+  <groupId>org.kissweb</groupId>  
+  <artifactId>KISS</artifactId>  
+  <version>1.0</version>  
+  <packaging>jar</packaging>  
+  
+  <name>Kiss Web Development Framework</name>  
+  <url>https://kissweb.org</url>  
+  
+  <dependencies>  
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.3.3</version>
+    </dependency>
+  </dependencies>  
+  
+</project>
+
