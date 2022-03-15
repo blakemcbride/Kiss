@@ -67,7 +67,7 @@ public class Cursor implements AutoCloseable {
     private File cacheFile;
     private ObjectInputStream cacheStream;
     private ColumnInfo [] columnInfo;
-    private LinkedList<Record> memoryCache;
+    private ArrayList<Record> memoryCache;
 
     /**
      * Read in the entire result set and cache locally.  This can be done via a temporary disk file or in-memory.
@@ -185,7 +185,7 @@ public class Cursor implements AutoCloseable {
         if (useMemoryCache || maxRecords > 0  &&  maxRecords <= BATCH_SIZE) {
             cacheFile = null;
             cacheStream = null;
-            memoryCache = new LinkedList<>();
+            memoryCache = new ArrayList<>();
 
             while (rset.next()) {
                 HashMap<String,Object> ocols = new HashMap<>();
@@ -197,7 +197,7 @@ public class Cursor implements AutoCloseable {
                     cols.put(name, val);
                     ocols.put(name, val);
                 }
-                memoryCache.addLast(new Record(cmd.conn, this, ocols, cols));
+                memoryCache.add(new Record(cmd.conn, this, ocols, cols));
             }
         } else {
             memoryCache = null;
@@ -316,7 +316,7 @@ public class Cursor implements AutoCloseable {
         if (memoryCache != null) {
             if (memoryCache.isEmpty())
                 return null;
-            return memoryCache.removeFirst();
+            return memoryCache.remove(0);
         }
         if (cacheFile == null || cacheStream == null)
             return closeCache();
@@ -458,11 +458,17 @@ public class Cursor implements AutoCloseable {
      * @throws SQLException
      */
     public List<Record> fetchAll() throws Exception {
-        List<Record> r = new ArrayList<>();
+        if (memoryCache != null) {
+            final List<Record> recs = memoryCache;
+            closeCache();
+            lastRec = null;
+            return recs;
+        }
+        final List<Record> r = new ArrayList<>();
         Record rec;
         while (null != (rec=next()))
             r.add(rec);
-        close();
+        closeCache();
         lastRec = null;
         return r;
     }
