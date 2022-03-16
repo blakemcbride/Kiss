@@ -1,34 +1,34 @@
 /*
-*  Copyright (c) 2015 Blake McBride (blake@mcbridemail.com)
-*  All rights reserved.
-*
-*  Permission is hereby granted, free of charge, to any person obtaining
-*  a copy of this software and associated documentation files (the
-*  "Software"), to deal in the Software without restriction, including
-*  without limitation the rights to use, copy, modify, merge, publish,
-*  distribute, sublicense, and/or sell copies of the Software, and to
-*  permit persons to whom the Software is furnished to do so, subject to
-*  the following conditions:
-*
-*  1. Redistributions of source code must retain the above copyright
-*  notice, this list of conditions, and the following disclaimer.
-*
-*  2. Redistributions in binary form must reproduce the above copyright
-*  notice, this list of conditions and the following disclaimer in the
-*  documentation and/or other materials provided with the distribution.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-*  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-*  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-*  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-*  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-*  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-*  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-*  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-*  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
+ *  Copyright (c) 2015 Blake McBride (blake@mcbridemail.com)
+ *  All rights reserved.
+ *
+ *  Permission is hereby granted, free of charge, to any person obtaining
+ *  a copy of this software and associated documentation files (the
+ *  "Software"), to deal in the Software without restriction, including
+ *  without limitation the rights to use, copy, modify, merge, publish,
+ *  distribute, sublicense, and/or sell copies of the Software, and to
+ *  permit persons to whom the Software is furnished to do so, subject to
+ *  the following conditions:
+ *
+ *  1. Redistributions of source code must retain the above copyright
+ *  notice, this list of conditions, and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *  notice, this list of conditions and the following disclaimer in the
+ *  documentation and/or other materials provided with the distribution.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ *  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 package org.kissweb.database;
 
@@ -101,9 +101,13 @@ public class Command implements AutoCloseable {
                 pcols.clear();
         } else
             pstat.clearParameters();
-        if (args != null)
-            for (int i = 0; i < args.length; i++)
-                pstat.setObject(i + 1, Connection.fixObj(args[i]));
+        try {
+            if (args != null)
+                for (int i = 0; i < args.length; i++)
+                    pstat.setObject(i + 1, Connection.fixObj(args[i]));
+        } catch (Exception e) {
+            throw new SQLException("Too many SQL parameters specified", e);
+        }
         if (lastSQL == null)
             lastSQL = sql;
         isSelect = false;
@@ -195,9 +199,13 @@ public class Command implements AutoCloseable {
                 pcols.clear();
         } else
             pstat.clearParameters();
-        if (args != null)
-            for (int i = 0; i < args.length; i++)
-                pstat.setObject(i + 1, Connection.fixObj(args[i]));
+        try {
+            if (args != null)
+                for (int i = 0; i < args.length; i++)
+                    pstat.setObject(i + 1, Connection.fixObj(args[i]));
+        } catch (Exception e) {
+            throw new SQLException("Too many SQL parameters specified", e);
+        }
         Cursor c = new Cursor(useMemoryCache, max, this);
         if (lastSQL == null)
             lastSQL = sql;
@@ -302,7 +310,7 @@ public class Command implements AutoCloseable {
     /**
      * This method is the same as <code>fetchAll</code> except that it return the list of records as a JSON array
      * of JSON objects where each object represents a column.
-     * 
+     *
      * @param sql
      * @param args
      * @return
@@ -346,13 +354,13 @@ public class Command implements AutoCloseable {
 
     /**
      * This method is the same as <code>fetchAll</code> except that it returns a JSON array of the records.
-     * 
+     *
      * @param max
      * @param sql
      * @param args
      * @return
      * @throws SQLException
-     * 
+     *
      * @see #fetchAll(int, String, Object...)
      */
     public JSONArray fetchAllJSON(int max, String sql, Object ... args) throws Exception {
