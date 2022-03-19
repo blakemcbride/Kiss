@@ -21,7 +21,7 @@ class MyGroovyService {
             outjson.put("num3", num1 + num2)
 
 
-        /*  We could perform all of the processing here.  Or, we can call a Groovy script as follows.   */
+        /*  We could perform all of the processing here (as above).  Or, we can call a Groovy script as follows.   */
         /*
         Integer r = (Integer) GroovyService.run(false, "~/scripts", "MyScript", "myMethod", null, num1, num2)
         outjson.put("num3", (int) r)

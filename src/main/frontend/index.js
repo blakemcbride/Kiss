@@ -7,11 +7,9 @@ Utils.afterComponentsLoaded(function () {
     const href = window.location.href;
     let url = href.substr(0, href.lastIndexOf('/'));
     url = url.replace('8000', '8080');
-
     Server.setURL(url);
 
     const screenPixels = screen.height * screen.width;
-
     if (screenPixels < 600000)
         Utils.loadPage("mobile/login");
     /*
