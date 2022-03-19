@@ -10,8 +10,16 @@ Utils.afterComponentsLoaded(function () {
 
     Server.setURL(url);
 
-    Utils.loadPage('login');
+    const screenPixels = screen.height * screen.width;
 
+    if (screenPixels < 600000)
+        Utils.loadPage("mobile/login");
+    /*
+    else if (screenPixels < 1000000)
+        Utils.loadPage("tablet/login");
+    */
+    else
+        Utils.loadPage('login');
 });
 
 

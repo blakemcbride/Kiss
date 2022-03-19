@@ -12,7 +12,14 @@
 		<async-supported>true</async-supported>
 		<init-param>
 			<param-name>cors.allowed.origins</param-name>
+			<!-- The following line is good for most situations including development and production.
+			     However, it doesn't support testing on a remote (non-localhost or mobile) device.
+			     This could be a problem when testing a mobile layout.  -->
 			<param-value>http://localhost:8000</param-value>
+			<!--  Or, the following can be used (not both).  It totally bypasses CORS and allows any origin.
+			      This is fine for development purposes and for testing remote (non-localhost or mobile) devices.
+			      This setting should not be used in a production environment!  -->
+<!--			<param-value>*</param-value>     -->
 		</init-param>
 		<init-param>
 			<param-name>cors.allowed.methods</param-name>
@@ -26,10 +33,12 @@
 			<param-name>cors.exposed.headers</param-name>
 			<param-value>Access-Control-Allow-Origin,Content-Length,Content-Type,Date,Server,Access-Control-Allow-Credentials</param-value>
 		</init-param>
+		<!--
 		<init-param>
 			<param-name>cors.support.credentials</param-name>
 			<param-value>true</param-value>
 		</init-param>
+		-->
 		<init-param>
 			<param-name>cors.preflight.maxage</param-name>
 			<param-value>10</param-value>

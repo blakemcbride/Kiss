@@ -1122,6 +1122,7 @@ should have a sub-directory named <code>src/main/backend</code>.
 <li><a href="#Cached-User-Data" accesskey="3">Cached User Data</a></li>
 <li><a href="#Programming-Languages" accesskey="4">Programming Languages</a></li>
 <li><a href="#Cron" accesskey="5">Cron</a></li>
+<li><a href="#CORS" accesskey="6">CORS</a></li>
 </ul>
 <div class="subsection" id="REST-Server">
 <h4 class="subsection">4.2.1 REST Server</h4>
@@ -1299,6 +1300,31 @@ There is no need to restart the system.
 <p>Look at the files in the <code>src/main/backend/CronTasks</code>
 directory for samples and further documentation.
 </p>
+</div>
+<div class="subsection" id="CORS">
+<h4 class="subsection">4.2.6 CORS</h4>
+
+<p>Typically, for security reasons, web servers prevent web services from
+an application that didn&rsquo;t come from the same application.  This is
+known as Cross-Origin Resource Sharing or CORS.  <em>Kiss</em> fully
+supports this standard.  However, there are times when you do not want 
+this protection during the development process.
+</p>
+<p>As shipped, <em>Kiss</em> fully supports CORS except for
+<code>localhost:8000</code>.  This is needed for the development process and
+would not cause a security problem in a production environment.
+</p>
+<p>The problem occurs when you are running your development environment
+on a laptop or desktop but want to test on a mobile device.  In this
+case, you would be running the server and the application on two
+different devices (since we use two servers in the development
+process).  In order to allow this (for development purposes only), you
+would need to change the setting in
+<code>src/main/frontend/WEB-INF/web.xml</code> See comments in that file for
+instructions.  Note that if this file is changed, the <em>Kiss</em>
+system will have to be rebuilt.  Do not leave the setting open in a
+production environment!
+</p>
 <span id="Front_002dend-Development"></span></div>
 </div>
 <div class="section" id="Front_002dend-Development-1">
@@ -1352,6 +1378,26 @@ is open)</code>
 <p>You can now develop the front-end portion of your application by
 editing files under the <code>src/main/frontend</code> directory.
 </p>
+<ul class="section-toc">
+<li><a href="#Mobile-Interface" accesskey="1">Mobile Interface</a></li>
+</ul>
+<div class="subsection" id="Mobile-Interface">
+<h4 class="subsection">4.3.1 Mobile Interface</h4>
+
+<p>It is often necessary to support mobile devices.  Although many
+applications support mobile applications through pages that use
+responsive design, it is often the case that the pages are so
+different between various platforms that the use of whole new pages is
+simpler and more effective &ndash; especially for complex screens.
+</p>
+<p>Although <em>Kiss</em> has always supported responsive design,
+<em>Kiss</em> also supports the ability to have different pages for
+different platforms.  If you look at <code>src/main/frontend/index.js</code>
+you will see how <code>Kiss</code> handles this.  Basically <code>Kiss</code>
+detects the platform and loads different pages based on the platform.
+</p>
+
+</div>
 </div>
 <div class="section" id="Reports-And-Exports">
 <h3 class="section">4.4 Reports And Exports</h3>
