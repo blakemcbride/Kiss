@@ -16,7 +16,7 @@
 			     However, it doesn't support testing on a remote (non-localhost or mobile) device.
 			     This could be a problem when testing a mobile layout.  -->
 			<param-value>http://localhost:8000</param-value>
-			<!--  Or, the following can be used (not both).  It totally bypasses CORS and allows any origin.
+			<!--  Or, the following line can be used (not both).  It totally bypasses CORS and allows any origin.
 			      This is fine for development purposes and for testing remote (non-localhost or mobile) devices.
 			      This setting should not be used in a production environment!  -->
 <!--			<param-value>*</param-value>     -->
