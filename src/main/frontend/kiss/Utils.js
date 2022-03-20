@@ -13,11 +13,6 @@ Component.ComponentList = [];
 
 let Kiss = {};
 
-Kiss.suspendDepth = 0;  // when > 0 suspend buttons
-
-Kiss.screenStack = [];
-
-
 /**
  * This is how components are accessed.
  *
@@ -506,7 +501,7 @@ class Utils {
      *    result in r:   "(12,345.35)"
      * </p>
      *
-     * @see format
+     * @see Utils.format
      */
     static formatb(num, base, msk, wth, dp) {
         let si, i, r, n;
@@ -1002,7 +997,7 @@ class Utils {
      * @param tag
      */
     static pushPage(path, tag) {
-        Kiss.screenStack.push({path: path, tag: tag});
+        Utils.screenStack.push({path: path, tag: tag});
         Utils.loadPage(path, tag);
     }
 
@@ -1010,8 +1005,8 @@ class Utils {
      * Re-load the prior screen.
      */
     static popPage() {
-        Kiss.screenStack.pop();
-        const x = Kiss.screenStack.pop();
+        Utils.screenStack.pop();
+        const x = Utils.screenStack.pop();
         Utils.pushPage(x.path, x.tag);
     }
 
@@ -1113,7 +1108,7 @@ class Utils {
      * @param {string} id the id of the popup to evoke
      * @param {string} focus_ctl optional control to set initial focus
      *
-     * @see popup_close
+     * @see Utils.popup_close
      */
     static popup_open(id, focus_ctl=null) {
         const w = $('#' + id);
@@ -1197,7 +1192,7 @@ class Utils {
     /**
      * Close the most recent modal popup.
      *
-     * @see popup_open
+     * @see Utils.popup_open
      */
     static popup_close() {
         const context = Utils.popup_context.pop();
@@ -1218,7 +1213,7 @@ class Utils {
      * @returns {number}
      *
      * @see Server.fileUploadSend
-     * @see getFileUploadFormData
+     * @see Utils.getFileUploadFormData
      */
     static getFileUploadCount(id) {
         const ctl = $('#'+id);
@@ -1237,7 +1232,7 @@ class Utils {
      * @returns {FormData}
      *
      * @see Server.fileUploadSend
-     * @see getFileUploadCount
+     * @see Utils.getFileUploadCount
      */
     static getFileUploadFormData(id) {
         const ctl = $('#'+id);
@@ -1608,6 +1603,46 @@ class Utils {
         }
     }
 
+    /**
+     * Save an application global data item associated with a key.
+     *
+     * @param {string} key
+     * @param {*} val
+     *
+     * @see Utils.getData
+     * @see Utils.eraseData
+     */
+    static saveData(key, val) {
+        Utils.globalData[key] = val;
+    };
+
+    /**
+     * Retrieve the application global data associated with a key.
+     *
+     * @param {string} key
+     * @returns {*}
+     *
+     * @see Utils.saveData
+     * @see Utils.eraseData
+     */
+    static getData(key) {
+        return Utils.globalData[key];
+    };
+
+    /**
+     * Erase an application global data item returning its prior value.
+     *
+     * @param {string} key
+     * @returns {*} the value before it was erased
+     *
+     * @see Utils.saveData
+     * @see Utils.getData
+     */
+    static eraseData(key) {
+        const r = Utils.globalData[key];
+        delete Utils.globalData[key];
+        return r;
+    };
 }
 
 // Class variables
@@ -1621,6 +1656,12 @@ Utils.isFullScreen = false;
 
 Utils.enterFunction = null;         //  If defined, execute function when enter key hit
 Utils.enterFunctionStack = [];      //  Save stack for enter key to handle popups
+
+Utils.screenStack = [];
+
+Utils.suspendDepth = 0;  // when > 0 suspend buttons
+
+Utils.globalData = {};
 
 $(document).on('keypress', function(e) {
     if (Utils.enterFunction  &&  e.key === 'Enter')

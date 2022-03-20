@@ -120,7 +120,8 @@ class DateUtils {
      * @param m {number} number of milliseconds since 1970 UTC
      * @returns {number} YYYYMMDD
      *
-     * @see DateTimeUtils.toMilliseconds(), TimeUtils.millsToInt()
+     * @see DateTimeUtils.toMilliseconds()
+     * @see TimeUtils.millsToInt()
      */
     static millsToInt(m) {
         if (!m)

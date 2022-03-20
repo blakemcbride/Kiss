@@ -29,7 +29,7 @@ class Server {
      *  Removes the user association between the back-end and front-end.
      */
     static logout() {
-        Kiss.suspendDepth = 0;
+        Utils.suspendDepth = 0;
         document.body.style.cursor = 'default';
         Utils.cleanup();  //  clean up any context information
         Server.uuid = '';
@@ -105,12 +105,12 @@ class Server {
     }
 
     static incCount() {
-        if (++Kiss.suspendDepth === 1)
+        if (++Utils.suspendDepth === 1)
             document.body.style.cursor = 'wait';
     }
 
     static decCount() {
-        if (--Kiss.suspendDepth === 0)
+        if (--Utils.suspendDepth === 0)
             document.body.style.cursor = 'default';
     }
 

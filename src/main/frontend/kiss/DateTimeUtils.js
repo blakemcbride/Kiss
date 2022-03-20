@@ -183,7 +183,8 @@ class DateTimeUtils {
      * @param time {number|null|undefined} HHMM
      * @returns {number}
      *
-     * @see DateUtils.millsToInt(), TimeUtils.millsToInt()
+     * @see DateUtils.millsToInt()
+     * @see TimeUtils.millsToInt()
      */
     static toMilliseconds(date, time) {
         let month = DateUtils.month(date)-1;

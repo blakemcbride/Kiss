@@ -211,7 +211,8 @@ class TimeUtils {
      * @param m {number} number of milliseconds since 1970 UTC
      * @returns {number} HHMM
      *
-     * @see DateTimeUtils.toMilliseconds(), DateUtils.millsToInt()
+     * @see DateTimeUtils.toMilliseconds()
+     * @see DateUtils.millsToInt()
      */
     static millsToInt(m) {
         if (!m)
