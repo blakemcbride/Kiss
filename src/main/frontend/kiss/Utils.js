@@ -960,16 +960,24 @@ class Utils {
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
      * Also, the loaded code is processed for custom tags / components.
      *
-     * See pushPage() and popPage().  Those keep track of a stack of screens.
-     *
      * @param {string} page path to the page to be loaded.
      * @param {string} tag optional ID of div to fill (if empty "body" tag is used)
      * @param {string} initialFocus optional, ID of control to set initial focus on
+     * @param {object} argv arguments for the page being loaded
+     * @param {object} retv return value array from child screen
+     *
+     * @see Utils.pushPage
+     * @see Utils.popPage
      */
-    static loadPage(page, tag, initialFocus) {
+    static loadPage(page, tag, initialFocus, argv, retv) {
         Utils.cleanup();
         if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
             Kiss.RadioButtons.resetGroups();
+        Utils.lastScreenLoaded.page = page;
+        Utils.lastScreenLoaded.tag  = tag;
+        Utils.lastScreenLoaded.initialFocus = initialFocus;
+        Utils.lastScreenLoaded.argv  = argv;
+        Utils.lastScreenLoaded.retv = retv;
         const pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
 //        $.get(pg, function (text) {
         this.getHTML(pg, function (text) {
@@ -993,21 +1001,78 @@ class Utils {
     /**
      * Load a new screen but also remember what is loaded so that it can be returned to.
      *
-     * @param path
-     * @param tag
+     * @param {string} path
+     * @param {string} tag
+     * @param {string} initialFocus
+     * @param {object} argv values being passed to the new screen
+     *
+     * @see Utils.popPage
+     * @see Utils.getPageArgv
+     * @see Utils.getPageRetv
      */
-    static pushPage(path, tag) {
-        Utils.screenStack.push({path: path, tag: tag});
-        Utils.loadPage(path, tag);
+    static pushPage(path, tag, initialFocus, argv) {
+        //  push the previous screen with args
+        Utils.screenStack.push({path: Utils.lastScreenLoaded.page, tag: Utils.lastScreenLoaded.tag, initialFocus: Utils.initialFocus, argv: Utils.lastScreenLoaded.argv});
+        Utils.loadPage(path, tag, initialFocus, argv);
     }
 
     /**
      * Re-load the prior screen.
+     *
+     * @param {object} retv values being returned from the prior screen
+     *
+     * @see Utils.pushPage
+     * @see Utils.getPageArgv
+     * @see Utils.getPageRetv
      */
-    static popPage() {
-        Utils.screenStack.pop();
-        const x = Utils.screenStack.pop();
-        Utils.pushPage(x.path, x.tag);
+    static popPage(retv) {
+        if (!Utils.screenStack.length) {
+            console.log("Utils.popPage:  no screen to pop");
+            return;
+        }
+        const frame = Utils.screenStack.pop();
+        Utils.loadPage(frame.path, frame.tag, frame.initialFocus, frame.argv, retv);
+    }
+
+    /**
+     * Convert an object into an array.  This is especially useful for the <code>arguments</code> variable.
+     *
+     * @param obj
+     * @returns {array}
+     */
+    static convertToArray(obj) {
+        const a = [];
+        for (let i=0 ; i < obj.length ; i++)
+            a.push(obj[i]);
+        return a;
+    }
+
+    /**
+     * Returns an object representing the values passed to the current screen by a parent screen.
+     * <br><br>
+     * This value remains constant through subsequent <code>pushPage</code> and <code>popPage</code> calls.
+     *
+     * @returns {object}
+     *
+     * @see Utils.pushPage
+     * @see Utils.popPage
+     * @see Utils.getPageRetv
+     */
+    static getPageArgv() {
+        return Utils.lastScreenLoaded.argv;
+    }
+
+    /**
+     * Returns an object representing the return value from the child screen.
+     *
+     * @returns {object}
+     *
+     * @see Utils.pushPage
+     * @see Utils.popPage
+     * @see Utils.getPageArgv
+     */
+    static getPageRetv() {
+        return Utils.lastScreenLoaded.retv;
     }
 
     /**
@@ -1658,6 +1723,7 @@ Utils.enterFunction = null;         //  If defined, execute function when enter 
 Utils.enterFunctionStack = [];      //  Save stack for enter key to handle popups
 
 Utils.screenStack = [];
+Utils.lastScreenLoaded = {};  //  current stackframe
 
 Utils.suspendDepth = 0;  // when > 0 suspend buttons
 
