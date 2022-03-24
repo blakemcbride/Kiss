@@ -1042,9 +1042,13 @@ class Utils {
                         else
                             console.log("loadPage: can't set focus to unknown field " + initialFocus);
                     }
+                    resolve();
+                }, function () {
+                    reject();
                 });
             }, function(err) {
                 console.log("loadPage: error loading " + pg);
+                reject();
             });
         });
     }
