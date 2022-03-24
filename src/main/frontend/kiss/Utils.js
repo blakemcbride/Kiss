@@ -786,8 +786,7 @@ class Utils {
     static useTaglessComponent(path) {
         let npath;
         const loadScript = function (arg) {
-            getScript(npath + '.js' + arg, function (data, textStatus, jqxhr) {
-            });
+            getScript(npath + '.js' + arg);
         };
 
         const loadComponent = function (arg) {
@@ -858,7 +857,7 @@ class Utils {
         let npath;
         Component.ComponentsBeingLoaded++;
         const loadScript = function (arg) {
-            getScript(npath + '.js' + arg, function () {
+            getScript(npath + '.js' + arg).then(function () {
                 if (!--Component.ComponentsBeingLoaded && Component.AfterAllComponentsLoaded) {
                     Utils.rescan();  // does all the tag replacement
                     Component.AfterAllComponentsLoaded();
@@ -934,26 +933,31 @@ class Utils {
         return newElm.kiss;
     }
 
-    static async getHTML( url, callback ) {
-        let response;
-        try {
-            response = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-type': 'text/plain'
-                }
-            });
-        } catch (err) {
-            console.log(err.message);
-            console.log(err.stack);
-        }
-        try {
-            let r = await response.text();
-            callback(r);
-        } catch (err) {
-            console.log(err.message);
-            console.log(err.stack);
-        }
+    static getHTML(url) {
+        return new Promise(async function (resolve, reject) {
+            let response;
+            try {
+                response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-type': 'text/plain'
+                    }
+                });
+            } catch (err) {
+                console.log(err.message);
+                console.log(err.stack);
+                reject(err);
+                return;
+            }
+            try {
+                let r = await response.text();
+                resolve(r);
+            } catch (err) {
+                console.log(err.message);
+                console.log(err.stack);
+                reject(err);
+            }
+        });
     };
 
     /**
@@ -971,29 +975,32 @@ class Utils {
      */
     static loadPage(page, tag, initialFocus, argv, retv) {
         Utils.cleanup();
-        if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
-            Kiss.RadioButtons.resetGroups();
-        Utils.lastScreenLoaded.page = page;
-        Utils.lastScreenLoaded.tag  = tag;
-        Utils.lastScreenLoaded.initialFocus = initialFocus;
-        Utils.lastScreenLoaded.argv  = argv;
-        Utils.lastScreenLoaded.retv = retv;
-        const pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
-//        $.get(pg, function (text) {
-        this.getHTML(pg, function (text) {
-            if (tag)
-                $('#' + tag).html(text);
-            else
-                $('body').html(text);
-            Utils.rescan();  // does all the tag replacement
-            getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), function () {
-                if (initialFocus) {
-                    const ctl = $$(initialFocus);
-                    if (ctl)
-                        ctl.focus();
-                    else
-                        console.log("loadPage: can't set focus to unknown field " + initialFocus);
-                }
+        return new Promise(function (resolve, reject) {
+            if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
+                Kiss.RadioButtons.resetGroups();
+            Utils.lastScreenLoaded.page = page;
+            Utils.lastScreenLoaded.tag  = tag;
+            Utils.lastScreenLoaded.initialFocus = initialFocus;
+            Utils.lastScreenLoaded.argv  = argv;
+            Utils.lastScreenLoaded.retv = retv;
+            const pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
+            Utils.getHTML(pg).then(function (text) {
+                if (tag)
+                    $('#' + tag).html(text);
+                else
+                    $('body').html(text);
+                Utils.rescan();  // does all the tag replacement
+                getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '')).then(function () {
+                    if (initialFocus) {
+                        const ctl = $$(initialFocus);
+                        if (ctl)
+                            ctl.focus();
+                        else
+                            console.log("loadPage: can't set focus to unknown field " + initialFocus);
+                    }
+                });
+            }, function(err) {
+                console.log("loadPage: error loading " + pg);
             });
         });
     }

@@ -43,29 +43,35 @@
 
     <script>
 
-        function getScript(url, callback) {
-            const head = document.getElementsByTagName("head")[0];
-            const script = document.createElement("script");
-            script.src = url;
+        function getScript(url) {
+            return new Promise(function (resolve, reject) {
+                const head = document.getElementsByTagName("head")[0];
+                const script = document.createElement("script");
+                script.src = url;
 
-            // Handle Script loading
-            {
-                let done = false;
+                // Handle Script loading
+                {
+                    let done = false;
 
-                // Attach handlers for all browsers
-                script.onload = script.onreadystatechange = function () {
-                    if (!done && (!this.readyState ||  this.readyState === "loaded" || this.readyState === "complete")) {
-                        done = true;
-                        if (callback)
-                            callback();
-
-                        // Handle memory leak in IE
-                        script.onload = script.onreadystatechange = null;
-                    }
-                };
-            }
-
-            head.appendChild(script);
+                    // Attach handlers for all browsers
+                    script.onload = script.onreadystatechange = function () {
+                        if (!done && (!this.readyState ||  this.readyState === "loaded" || this.readyState === "complete")) {
+                            done = true;
+                            // Handle memory leak in IE
+                            script.onload = script.onreadystatechange = null;
+                            resolve();
+                        } else {
+                            console.log("getScript:  error loading " + url);
+                            reject();
+                        }
+                    };
+                    script.onerror = function () {
+                        console.log("getScript: error loading " + url);
+                        reject();
+                    };
+                }
+                head.appendChild(script);
+            });
         }
 
         function startup() {
@@ -86,10 +92,10 @@
 
             const loadScript = function (script, fun) {
                 if (fun)
-                    getScript(script + (controlCache ? '?ver=' + softwareVersion : ''), fun);
+                    getScript(script + (controlCache ? '?ver=' + softwareVersion : '')).then(fun);
                 else {
                     numLoaded++;
-                    getScript(script + (controlCache ? '?ver=' + softwareVersion : ''), function () {
+                    getScript(script + (controlCache ? '?ver=' + softwareVersion : '')).then(function () {
                         if (!--numLoaded)
                             afterLoad();
                     });
