@@ -220,8 +220,8 @@
 
 <div class="description usertext">
     Evoke a back-end REST service.
-
-This function is typically called with an await and returns the result of the call.
+<br><br>
+This function is typically called with an <code>await</code> or a <code>then</code> in order to process the result.
 </div>
 
 
@@ -389,7 +389,7 @@ This function is typically called with an await and returns the result of the ca
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line183">line 183</a>
+        <a href="Server.js.html">Server.js</a>, <a href="Server.js.html#line186">line 186</a>
     </li></ul></dd>
     
 
@@ -431,14 +431,18 @@ This function is typically called with an await and returns the result of the ca
 <div class="description usertext">
     Used to call a number of simultaneous web services and wait till they're all done
 before processing any of their results.
-
+<br><br>
 This function takes a variable number of arguments.
-
+<br><br>
 The first argument is an array of the Promises from each web service call.
-
+<br><br>
 Each remaining argument is a function that gets the result from the positionally corresponding
 promise in the first argument.  If any are null there is no function executed for that returned promise.
 Each function that gets executed gets passed the return value of the associated web service.
+<br><br>
+You can wait for this function to complete asynchronously by calling it with an await.
+<br><br>
+The return value is <code>false</code> if all the web services complete and <code>true</code> if there is an error.
 </div>
 
 

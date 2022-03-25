@@ -39,8 +39,8 @@ class Server {
 
     /**
      * Evoke a back-end REST service.
-     *
-     * This function is typically called with an await and returns the result of the call.
+     * <br><br>
+     * This function is typically called with an <code>await</code> or a <code>then</code> in order to process the result.
      *
      * @param {string} cls the web service to be called
      * @param {string} meth  the web method
@@ -170,15 +170,18 @@ class Server {
     /**
      * Used to call a number of simultaneous web services and wait till they're all done
      * before processing any of their results.
-     *
+     * <br><br>
      * This function takes a variable number of arguments.
-     *
+     * <br><br>
      * The first argument is an array of the Promises from each web service call.
-     *
+     * <br><br>
      * Each remaining argument is a function that gets the result from the positionally corresponding
      * promise in the first argument.  If any are null there is no function executed for that returned promise.
      * Each function that gets executed gets passed the return value of the associated web service.
-     *
+     * <br><br>
+     * You can wait for this function to complete asynchronously by calling it with an await.
+     * <br><br>
+     * The return value is <code>false</code> if all the web services complete and <code>true</code> if there is an error.
      */
     static callAll(pa /*, ... each subsequent arg is a function to handle the result of the next promise in pa */) {
         const args = arguments;
