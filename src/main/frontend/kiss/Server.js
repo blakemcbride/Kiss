@@ -117,10 +117,12 @@ class Server {
     /**
      * Send the file upload to the server.
      * This method displays a wait message and a final status message.
+     * <br><br>
+     * <code>fd</code> can either be form data or it can be the ID of the file upload control.
      *
      * @param {string} cls
      * @param {string} meth
-     * @param {FormData} fd
+     * @param {FormData|string} fd
      * @param {object} injson
      *
      * @see Utils.getFileUploadCount
@@ -128,6 +130,8 @@ class Server {
      */
     static fileUploadSend(cls, meth, fd, injson=null) {
         return new Promise(function (resolve, reject) {
+            if (typeof fd === 'string')
+                fd = $$(fd).getFormData();
             fd.append('_class', cls);
             fd.append('_method', meth);
             fd.append("_uuid", Server.uuid);
