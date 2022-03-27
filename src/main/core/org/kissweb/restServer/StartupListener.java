@@ -20,9 +20,9 @@ public class StartupListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         logger.setLevel(Level.ALL);
-        logger.info("* * * START CONTEXT INITIALIZED * * *");
+        logger.info("* * * INITIALIZING APPLICATION * * *");
         MainServlet.initializeSystem(sce.getServletContext().getRealPath("/"));
-        logger.info("* * * END CONTEXT INITIALIZED * * *");
+        logger.info("* * * APPLICATION STARTED * * *");
     }
 
     /**
@@ -30,7 +30,7 @@ public class StartupListener implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        logger.info("* * * CONTEXT DESTROYED * * *");
+        logger.info("* * * APPLICATION STOPPED * * *");
         MainServlet.stopCron();
         System.exit(0);
     }
