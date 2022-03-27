@@ -653,7 +653,17 @@ public class Cursor implements AutoCloseable {
      * @see Record#getShort(String)
      */
     public Short getShort(String cname) throws SQLException {
-        return (Short) get(cname);
+        // some databases return an Integer even though the field is a smallint
+        Object obj = get(cname);
+        if (obj == null)
+            return null;
+        if (obj.getClass() == Short.class)
+            return (Short) obj;
+        else if (obj.getClass() == Integer.class) {
+            int i = (Integer) obj;
+            return (short) i;
+        }
+        throw new SQLException("column " + cname + " is not a short or integer");
     }
 
     /**

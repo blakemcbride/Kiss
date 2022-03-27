@@ -232,7 +232,17 @@ public class Record implements AutoCloseable {
      * @see Cursor#getShort(String)
      */
     public Short getShort(String cname) throws SQLException {
-        return (Short) get(cname);
+        // some databases return an Integer even though the field is a smallint
+        Object obj = get(cname);
+        if (obj == null)
+            return null;
+        if (obj.getClass() == Short.class)
+            return (Short) obj;
+        else if (obj.getClass() == Integer.class) {
+            int i = (Integer) obj;
+            return (short) i;
+        }
+        throw new SQLException("column " + cname + " is not a short or integer");
     }
 
     /**
@@ -458,7 +468,7 @@ public class Record implements AutoCloseable {
      * @see Connection#commit()
      */
     public void update() throws SQLException {
-        if (cursor == null  ||  !cursor.cmd.isSelect)
+        if (cursor != null  &&  !cursor.cmd.isSelect)
             throw new RuntimeException("Can't update record; not in select");
         if (table == null)
             throw new RuntimeException("Can't update record; no table name");
@@ -477,7 +487,24 @@ public class Record implements AutoCloseable {
                     needComma = true;
                 sql.append(fld.getKey()).append("=?");
             }
-            if (cursor.ustmt == null  ||  !sql.equals(cursor.prevsql)) {
+            PreparedStatement pstmt;
+            if (cursor == null) {
+                // Update a new record
+                sql.append(" where ");
+                boolean needAnd = false;
+                List<String> pc = conn.getPrimaryColumns(table);
+                if (pc == null)
+                    throw new RuntimeException("Can't update table " + table + ": no primary key");
+                for (String pcol : pc) {
+                    if (needAnd)
+                        sql.append(" and ");
+                    else
+                        needAnd = true;
+                    sql.append(pcol).append("=?");
+                }
+                pstmt = conn.conn.prepareStatement(sql.toString());
+            } else if (cursor.ustmt == null  ||  !sql.equals(cursor.prevsql)) {
+                //  Update a record read in + new statement
                 cursor.prevsql = new StringBuilder(sql);
                 sql.append(" where ");
                 boolean needAnd = false;
@@ -494,17 +521,28 @@ public class Record implements AutoCloseable {
                 if (cursor.ustmt != null)
                     cursor.ustmt.close();
                 cursor.ustmt = cursor.cmd.conn.conn.prepareStatement(sql.toString());
-            } else
+                pstmt = cursor.ustmt;
+            } else {
+                // Update a record read in - re-use same prepared statement
                 cursor.ustmt.clearParameters();
+                pstmt = cursor.ustmt;
+            }
             int i = 1;
             for (AbstractMap.SimpleEntry<String,Object> fld : cf)
-                cursor.ustmt.setObject(i++, Connection.fixObj(fld.getValue()));
-            for (String pcol : cursor.cmd.getPriColumns(cursor))
-                cursor.ustmt.setObject(i++, Connection.fixObj(ocols.get(pcol)));
-            cursor.ustmt.execute();
+                pstmt.setObject(i++, Connection.fixObj(fld.getValue()));
+            List<String> pcols;
+            if (cursor == null)
+                pcols = conn.getPrimaryColumns(table);
+            else
+                pcols = cursor.cmd.getPriColumns(cursor);
+            for (String pcol : pcols)
+                pstmt.setObject(i++, Connection.fixObj(ocols.get(pcol)));
+            pstmt.execute();
             // now update our memory of the original values
             ocols.clear();
             ocols.putAll(cols);
+            if (cursor == null)
+                pstmt.close();
         }
     }
 
@@ -612,13 +650,23 @@ public class Record implements AutoCloseable {
             pstmt.setObject(i++, Connection.fixObj(val));
 //        ResultSet rset = pstmt.executeQuery();
         pstmt.executeUpdate();
-        Object nextId = null;
+        Object nextId;
         try (ResultSet rset = pstmt.getGeneratedKeys()) {
             if (rset.next())
                 nextId = rset.getObject(1);
             else
                 throw new SQLException("Failure to get next serial");
         }
+
+        //  update the column value
+        List<String> pcols = conn.getPrimaryColumns(table);
+        cols.put(pcols.get(0), nextId);
+
+        if (ocols == null)
+            ocols = new HashMap<>();
+        else
+            ocols.clear();
+        ocols.putAll(cols);
         return nextId;
     }
 
@@ -659,7 +707,14 @@ public class Record implements AutoCloseable {
         int i = 1;
         for (Object val : cols.values())
             pstmt.setObject(i++, Connection.fixObj(val));
-        return pstmt.execute();
+        boolean ret = pstmt.execute();
+        if (ocols == null)
+            ocols = new HashMap<>();
+        else
+            ocols.clear();
+        for (String key : cols.keySet())
+            ocols.put(key, cols.get(key));
+        return ret;
     }
 
     /**
