@@ -14,6 +14,9 @@ public class StartupListener implements ServletContextListener {
 
     private static final Logger logger = Logger.getLogger(StartupListener.class);
 
+    /**
+     * This is the first method that gets called.  It is where the whole process starts.
+     */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         logger.setLevel(Level.ALL);
@@ -22,6 +25,9 @@ public class StartupListener implements ServletContextListener {
         logger.info("* * * END CONTEXT INITIALIZED * * *");
     }
 
+    /**
+     * This method gets called when the server is shut down.  It is the last method to be run.
+     */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         logger.info("* * * CONTEXT DESTROYED * * *");

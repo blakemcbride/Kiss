@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import org.kissweb.Cron;
 import org.kissweb.database.Connection;
 
+import javax.servlet.ServletContextEvent;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Set;
 
 
@@ -38,17 +40,20 @@ public class MainServlet extends HttpServlet {
     private static String rootPath;                  // the root of the entire application
     private static boolean underIDE = false;
     private static ComboPooledDataSource cpds;
-    private static boolean debug = false;            // set by KissInit.groovy
     private static boolean hasDatabase;              // determined by KissInit.groovy
     private static int maxWorkerThreads;
     private static Cron cron;
     private static final Set<String> allowedWithoutAuthentication = new HashSet<>();
+    private static final Hashtable<String,Object> environment = new Hashtable<>();  // general application-specific values
 
+    private QueueManager queueManager;
+
+    /**
+     * Returns <code>true</code> if in development mode.  Returns <code>false</code> if in production.
+     */
     public static boolean isUnderIDE() {
         return underIDE;
     }
-
-    private org.kissweb.restServer.QueueManager queueManager;
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -113,7 +118,7 @@ public class MainServlet extends HttpServlet {
         Level level = logger.getLevel();
         logger.setLevel(Level.ALL);
         rootPath = _rootPath;
-        logger.info("* * * Context path = " + rootPath);
+        logger.info("* * * Root path = " + rootPath);
         applicationPath = System.getenv("KISS_ROOT");
         if (applicationPath == null || applicationPath.isEmpty()) {
             if ((new File(rootPath + "../../../src/main/backend/" + "KissInit.groovy")).exists()) {
@@ -144,6 +149,11 @@ public class MainServlet extends HttpServlet {
         logger.setLevel(level);
     }
 
+    /**
+     * Initialize the system.
+     *
+     * @see StartupListener#contextInitialized(ServletContextEvent)
+     */
     static void initializeSystem(String path) {
         Level level = logger.getLevel();
         logger.setLevel(Level.ALL);
@@ -315,7 +325,7 @@ public class MainServlet extends HttpServlet {
     }
 
     public static void setMaxWorkerThreads(int maxThreads) {
-        MainServlet.maxWorkerThreads = maxThreads;
+        maxWorkerThreads = maxThreads;
     }
 
     public static boolean hasDatabase() {
@@ -326,13 +336,45 @@ public class MainServlet extends HttpServlet {
         return cpds;
     }
 
+    /**
+     * Be default, all web service methods are authenticated.
+     * This method is used to declare specific rest service methods that should not be authenticated.
+     * This allows specific web service methods to be executed prior to logging in.
+     *
+     * @param className
+     * @param methodName
+     */
     public static void allowWithoutAuthentication(String className, String methodName) {
         className = className.replaceAll("\\.", "/");
         allowedWithoutAuthentication.add(className + ":" + methodName);
     }
 
-    public static boolean shouldAllowWithoutAuthentication(String className, String methodName) {
+    static boolean shouldAllowWithoutAuthentication(String className, String methodName) {
         return allowedWithoutAuthentication.contains(className + ":" + methodName);
+    }
+
+    /**
+     * Add an application-specific key / value pair.
+     *
+     * @param key
+     * @param value
+     *
+     * @see #getEnvironment(String)
+     */
+    public static void putEnvironment(String key, Object value) {
+        environment.put(key, value);
+    }
+
+    /**
+     * Retrieve an application-specific value previously set with <code>putEnvironment</code>
+     *
+     * @param key
+     * @return
+     *
+     * @see #putEnvironment(String, Object)
+     */
+    public static Object getEnvironment(String key) {
+        return environment.get(key);
     }
 
 }
