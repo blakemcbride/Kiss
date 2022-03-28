@@ -298,6 +298,15 @@ public class ProcessServlet implements Runnable {
         }
     }
 
+    /**
+     * Return a binary array to the front-end.
+     * This is often used to send images back to the front-end.
+     * If this method is used, normal JSON is not returned.
+     * The front-end counter-part to this method is <code>Server.binaryCall()</code>
+     *
+     * @param filename the name of the binary array being sent (typically a file)
+     * @param data the binary array to be sent
+     */
     public void binaryReturn(String filename, byte [] data) {
         didBinaryReturn = true;
         try {

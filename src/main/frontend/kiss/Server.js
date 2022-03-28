@@ -104,6 +104,16 @@ class Server {
 
     }
 
+    /**
+     * Perform a binary call.  JSON is sent but a binary array (rather than JSON) is expected back.
+     * This is often used to retrieve images.
+     * The back-end service should call <code>servlet.binaryReturn()</code>
+     *
+     * @param cls
+     * @param meth
+     * @param injson
+     * @returns {Promise<unknown>}
+     */
     static async binaryCall(cls, meth, injson=null) {
 
         const path = "rest";  // path to servlet
