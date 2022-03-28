@@ -36,5 +36,6 @@ Utils.afterComponentsLoaded(function () {
     Utils.useComponent('TimeInput');
     Utils.useComponent('FileUpload');
     Utils.useComponent('NativeDateInput');
+    Utils.useComponent('Picture');
 })();
 

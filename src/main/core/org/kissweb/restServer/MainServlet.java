@@ -7,6 +7,7 @@ import org.kissweb.Cron;
 import org.kissweb.database.Connection;
 
 import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -15,7 +16,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -59,8 +59,7 @@ public class MainServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (queueManager == null)
             queueManager = new org.kissweb.restServer.QueueManager(maxWorkerThreads);
-
-        PrintWriter out = response.getWriter();
+        ServletOutputStream out = response.getOutputStream();
         response.setStatus(202);
         out.flush();  //  this causes the first response
 

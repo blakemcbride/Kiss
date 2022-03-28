@@ -1,9 +1,9 @@
 package org.kissweb.restServer;
 
 import javax.servlet.AsyncContext;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -20,15 +20,15 @@ class QueueManager {
         pool = Executors.newFixedThreadPool(maxThreads);
     }
 
-    void add(HttpServletRequest request, HttpServletResponse response, PrintWriter out) {
+    void add(HttpServletRequest request, HttpServletResponse response, ServletOutputStream out) {
         pool.execute(new ProcessServlet(new Packet(request, response, out)));
     }
 
     static class Packet {
         AsyncContext asyncContext;
-        PrintWriter out;
+        ServletOutputStream out;
 
-        Packet(HttpServletRequest request, HttpServletResponse response, PrintWriter out) {
+        Packet(HttpServletRequest request, HttpServletResponse response, ServletOutputStream out) {
             this.out = out;
             asyncContext = request.startAsync(request, response);
         }

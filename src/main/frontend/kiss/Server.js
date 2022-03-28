@@ -87,7 +87,7 @@ class Server {
                         Server.logout();
                     } else
                         await Utils.showMessage('Error', res._ErrorMessage);
-                 resolve(res);
+                resolve(res);
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
@@ -95,6 +95,70 @@ class Server {
                 Server.decCount();
                 await Utils.showMessage('Error', msg);
                 resolve({_Success: false, _ErrorMessage: msg});
+            }
+        };
+
+        return new Promise(function (resolve, reject) {
+            doCall(cls, meth, injson, 1, resolve, reject);
+        });
+
+    }
+
+    static async binaryCall(cls, meth, injson=null) {
+
+        const path = "rest";  // path to servlet
+        if (!injson)
+            injson = {};
+        injson._uuid = Server.uuid;
+        injson._method = meth;
+        injson._class = cls;
+
+        const doCall = async function (cls, meth, injson, pass, resolve, reject) {
+            let response;
+            if (pass === 1)
+                Server.incCount();
+            try {
+                response = await fetch(Server.url + '/' + path, {
+                    method: 'POST',
+                    body: JSON.stringify(injson),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+            } catch (err) {
+                if (pass < 3)
+                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
+                Server.decCount();
+                await Utils.showMessage('Error', msg);
+                resolve({_Success: false, _ErrorMessage: msg});
+                return;
+            }
+            try {
+                const res = await response.arrayBuffer();
+                Server.decCount();
+                const msg = 'Error communicating with the server.';
+                if (!res) {
+                    await Utils.showMessage('Error', msg);
+                    resolve({_Success: false, _ErrorMessage: msg});
+                }
+                let str = String.fromCharCode.apply(null, new Uint8Array(res));
+                const idx = str.indexOf(";");
+                const fname = str.substring(0, idx);
+                str = str.substring(idx+1);
+                const ret = {
+                    _Success: true,
+                    filename: fname,
+                    data: btoa(str)
+                };
+                resolve(ret);
+            } catch (err) {
+                if (pass < 3)
+                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
+                const msg = 'Error communicating with the server.';
+                Server.decCount();
+                await Utils.showMessage('Error', msg);
+                resolve(null);
             }
         };
 

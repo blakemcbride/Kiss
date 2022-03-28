@@ -9,6 +9,7 @@ import org.kissweb.database.Connection;
 
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
@@ -33,9 +34,10 @@ public class ProcessServlet implements Runnable {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final AsyncContext asyncContext;
-    private final PrintWriter out;
+    private final ServletOutputStream out;
     private UserData ud;
     protected Connection DB;
+    private boolean didBinaryReturn = false;
 
     ProcessServlet(org.kissweb.restServer.QueueManager.Packet packet) {
         request = (HttpServletRequest) packet.asyncContext.getRequest();
@@ -296,7 +298,27 @@ public class ProcessServlet implements Runnable {
         }
     }
 
+    public void binaryReturn(String filename, byte [] data) {
+        didBinaryReturn = true;
+        try {
+            if (DB != null)
+                DB.commit();
+            response.setContentType("application/octet-stream");
+            response.setStatus(200);
+            out.print(filename + ";");
+            out.write(data);
+            out.close();
+        } catch (Throwable ignored) {
+            int x = 1;
+        } finally {
+            asyncContext.complete();
+            closeSession();
+        }
+    }
+
     private void successReturn(HttpServletResponse response, JSONObject outjson) {
+        if (didBinaryReturn)
+            return;
         try {
             if (DB != null)
                 DB.commit();
@@ -304,10 +326,10 @@ public class ProcessServlet implements Runnable {
             response.setStatus(200);
             outjson.put("_Success", true);
             outjson.put("_ErrorCode", 0);  // success
-            out.print(outjson);
+            out.print(outjson.toString());
             out.flush();
             out.close();     // this causes the second response
-        } catch (SQLException ignored) {
+        } catch (SQLException | IOException ignored) {
         } finally {
             asyncContext.complete();
             closeSession();
@@ -315,6 +337,8 @@ public class ProcessServlet implements Runnable {
     }
 
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
+        if (didBinaryReturn)
+            return;
         try {
             if (DB != null) {
                 try {
@@ -329,7 +353,7 @@ public class ProcessServlet implements Runnable {
             outjson.put("_ErrorMessage", e != null ? e.getMessage() : msg);
             outjson.put("_ErrorCode", 1);  // general error
             log_error(msg, e);
-            out.print(outjson);
+            out.print(outjson.toString());
             out.flush();
             out.close();  //  this causes the second response
         } catch (Exception ignored) {
@@ -360,9 +384,12 @@ public class ProcessServlet implements Runnable {
         outjson.put("_Success", false);
         outjson.put("_ErrorMessage", msg);
         outjson.put("_ErrorCode", 2);  // login failure
-        out.print(outjson);
-        out.flush();
-        out.close();  //  this causes the second response
+        try {
+            out.print(outjson.toString());
+            out.flush();
+            out.close();  //  this causes the second response
+        } catch (IOException ignore) {
+        }
         asyncContext.complete();
     }
 

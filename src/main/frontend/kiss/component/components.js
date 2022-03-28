@@ -361,6 +361,22 @@ class components {
     static numeric_input() {}
 
     /**
+     * This HTML tag, "picture", adds the ability to display an image.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    clear()     </td><td>     erases the image               </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the image is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>     is image hidden?   </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     is image visible?   </td></tr>
+     *     <tr><td>    onclick(fun)     </td><td>     <code>fun</code> is executed when the user clicks on the image               </td></tr>
+     *     <tr><td>    setValue(filename, image)     </td><td>     sets the image to be displayed           </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the image is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     * </table>
+     */
+    static picture() {}
+
+    /**
      * This HTML tag, "popup", adds the ability to define a popup window.  Within it, the tags "popup-title" and "popup-body"
      * should be used to define the respective parts of the popup window.
      * <br><br>
