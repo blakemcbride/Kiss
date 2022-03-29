@@ -464,7 +464,7 @@ This control is custom and doesn't use the native browser date input offering th
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line179">line 179</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line181">line 181</a>
     </li></ul></dd>
     
 
@@ -527,6 +527,7 @@ This control is custom and doesn't use the native browser date input offering th
     <tr><td>    fill(selectedItem, items, valField, labelField [, dataField]) </td><td>   clear and fill a dropdown selecting the specified item </td></tr>
     <tr><td>    focus()     </td><td>    sets focus on the control        </td></tr>
     <tr><td>    getAllLabels()     </td><td>     returns an array of all the labels             </td></tr>
+    <tr><td>    getAllData()     </td><td>     returns an array of all the data associated with the control             </td></tr>
     <tr><td>    getData(idx)     </td><td>     returns the data associated to an option.  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.              </td></tr>
     <tr><td>    getLabel(idx)     </td><td>     returns the label associated to an option. If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
     <tr><td>    getValue(idx)     </td><td>     returns the string value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.   </td></tr>
@@ -547,6 +548,7 @@ This control is custom and doesn't use the native browser date input offering th
     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  </td></tr>
     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
     <tr><td>    size()     </td><td>    returns the number of rows in the list (including <code>default-option</code>              </td></tr>
+    <tr><td>    triggerGlobalChange(flg)     </td><td>    Default <code>true</code>.  If <code>false</code> then control changes will not trigger a global control change.  See <code>Utils.someControlValueChanged()</code>   </td></tr>
 </table>
 </div>
 
@@ -594,7 +596,7 @@ This control is custom and doesn't use the native browser date input offering th
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line219">line 219</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line221">line 221</a>
     </li></ul></dd>
     
 
@@ -716,7 +718,7 @@ This control is custom and doesn't use the native browser date input offering th
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line274">line 274</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line278">line 278</a>
     </li></ul></dd>
     
 
@@ -784,6 +786,7 @@ being accessed.
     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
     <tr><td>    focus()     </td><td>    sets focus on control            </td></tr>
     <tr><td>    getAllLabels()     </td><td>     returns an array of all the labels             </td></tr>
+    <tr><td>    getAllData()     </td><td>     returns an array of all the data associated with the control             </td></tr>
     <tr><td>    getData(idx)     </td><td>     returns the data associated to an option.  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.              </td></tr>
     <tr><td>    getLabel(idx)     </td><td>     returns the label associated to an option. If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
     <tr><td>    getValue(idx)     </td><td>     returns the string value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.   </td></tr>
@@ -806,6 +809,7 @@ being accessed.
     <tr><td>    selectIndex(row)     </td><td>     selects the indicated row index            </td></tr>
     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
     <tr><td>    size()     </td><td>    returns the number of rows in the list               </td></tr>
+    <tr><td>    triggerGlobalChange(flg)     </td><td>    Default <code>true</code>.  If <code>false</code> then control changes will not trigger a global control change.  See <code>Utils.someControlValueChanged()</code>   </td></tr>
 </table>
 </div>
 
@@ -853,7 +857,7 @@ being accessed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line315">line 315</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line319">line 319</a>
     </li></ul></dd>
     
 
@@ -976,7 +980,7 @@ Also see the date-input tag.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line361">line 361</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line365">line 365</a>
     </li></ul></dd>
     
 
@@ -1104,7 +1108,7 @@ only accept numbers, can verify decimal places, and formats the number when the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line377">line 377</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line381">line 381</a>
     </li></ul></dd>
     
 
@@ -1202,7 +1206,7 @@ only accept numbers, can verify decimal places, and formats the number when the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line389">line 389</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line393">line 393</a>
     </li></ul></dd>
     
 
@@ -1296,7 +1300,7 @@ should be used to define the respective parts of the popup window.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line419">line 419</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line423">line 423</a>
     </li></ul></dd>
     
 
@@ -1408,7 +1412,7 @@ should be used to define the respective parts of the popup window.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line473">line 473</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line477">line 477</a>
     </li></ul></dd>
     
 
@@ -1544,7 +1548,7 @@ same group name.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line559">line 559</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line563">line 563</a>
     </li></ul></dd>
     
 
@@ -1669,7 +1673,7 @@ same group name.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line583">line 583</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line587">line 587</a>
     </li></ul></dd>
     
 
@@ -1775,7 +1779,7 @@ used or the 'span' tag otherwise.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line516">line 516</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line520">line 520</a>
     </li></ul></dd>
     
 
@@ -1900,7 +1904,7 @@ Static HTML content can be used inside this control.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line625">line 625</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line629">line 629</a>
     </li></ul></dd>
     
 

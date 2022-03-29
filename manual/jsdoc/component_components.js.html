@@ -198,6 +198,7 @@ class components {
      *     &lt;tr>&lt;td>    fill(selectedItem, items, valField, labelField [, dataField]) &lt;/td>&lt;td>   clear and fill a dropdown selecting the specified item &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>    sets focus on the control        &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getAllLabels()     &lt;/td>&lt;td>     returns an array of all the labels             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getAllData()     &lt;/td>&lt;td>     returns an array of all the data associated with the control             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getData(idx)     &lt;/td>&lt;td>     returns the data associated to an option.  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getLabel(idx)     &lt;/td>&lt;td>     returns the label associated to an option. If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getValue(idx)     &lt;/td>&lt;td>     returns the string value associated to an option (returns an array if &lt;code>multiple&lt;/code> attribute included).  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.   &lt;/td>&lt;/tr>
@@ -218,6 +219,7 @@ class components {
      *     &lt;tr>&lt;td>    setValue(val, idx)     &lt;/td>&lt;td>     sets a row value to &lt;code>val&lt;/code>.  If &lt;code>idx&lt;/code> is undefined, the selected row is affected otherwise the row indexed by &lt;code>idx&lt;/code> is updated.  &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    show([flg])     &lt;/td>&lt;td>     the control is made visible (or the reverse if the optional argument is &lt;code>false&lt;/code>)               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    size()     &lt;/td>&lt;td>    returns the number of rows in the list (including &lt;code>default-option&lt;/code>              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    triggerGlobalChange(flg)     &lt;/td>&lt;td>    Default &lt;code>true&lt;/code>.  If &lt;code>false&lt;/code> then control changes will not trigger a global control change.  See &lt;code>Utils.someControlValueChanged()&lt;/code>   &lt;/td>&lt;/tr>
      * &lt;/table>
      */
     static drop_down() {}
@@ -291,6 +293,7 @@ class components {
      *     &lt;tr>&lt;td>    enable([flg])     &lt;/td>&lt;td>     the control is set to visible and enabled (or the reverse if the optional argument is &lt;code>false&lt;/code>)              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    focus()     &lt;/td>&lt;td>    sets focus on control            &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getAllLabels()     &lt;/td>&lt;td>     returns an array of all the labels             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    getAllData()     &lt;/td>&lt;td>     returns an array of all the data associated with the control             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getData(idx)     &lt;/td>&lt;td>     returns the data associated to an option.  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getLabel(idx)     &lt;/td>&lt;td>     returns the label associated to an option. If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    getValue(idx)     &lt;/td>&lt;td>     returns the string value associated to an option (returns an array if &lt;code>multiple&lt;/code> attribute included).  If &lt;code>idx&lt;/code> is undefined, the selected row is used otherwise the row indexed by &lt;code>idx&lt;/code> is used.   &lt;/td>&lt;/tr>
@@ -313,6 +316,7 @@ class components {
      *     &lt;tr>&lt;td>    selectIndex(row)     &lt;/td>&lt;td>     selects the indicated row index            &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    show([flg])     &lt;/td>&lt;td>     the control is made visible (or the reverse if the optional argument is &lt;code>false&lt;/code>)               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    size()     &lt;/td>&lt;td>    returns the number of rows in the list               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    triggerGlobalChange(flg)     &lt;/td>&lt;td>    Default &lt;code>true&lt;/code>.  If &lt;code>false&lt;/code> then control changes will not trigger a global control change.  See &lt;code>Utils.someControlValueChanged()&lt;/code>   &lt;/td>&lt;/tr>
      * &lt;/table>
      */
     static list_box() {}

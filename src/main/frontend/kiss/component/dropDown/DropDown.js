@@ -20,6 +20,8 @@
         let id;
         let default_option;
         let keyIsNumber = false;
+        let triggerGlobalChange = true;
+
         for (let prop of Object.keys(attr)) {
             switch (prop) {
 
@@ -59,7 +61,8 @@
         let dataStore = {};
 
         jqObj.on('change', function () {
-            Utils.someControlValueChanged();
+            if (triggerGlobalChange)
+                Utils.someControlValueChanged();
         });
 
         //--
@@ -171,6 +174,10 @@
             return dataStore[newElm.getValue(row)];
         };
 
+        newElm.getAllData = function () {
+            return dataStore;
+        };
+
         newElm.isDirty = function () {
             return originalValue !== jqObj.val();
         };
@@ -235,12 +242,17 @@
 
         newElm.onChange = function (func) {
             jqObj.off('change').on('change', function () {
-                Utils.someControlValueChanged();
+                if (triggerGlobalChange)
+                    Utils.someControlValueChanged();
                 // func gets passed the selected value, label
                 func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
             });
             return this;
         };
+
+        newElm.triggerGlobalChange = function (flg) {
+            triggerGlobalChange = flg;
+        }
 
         newElm.focus = function () {
             jqObj.focus();

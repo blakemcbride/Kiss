@@ -154,6 +154,7 @@ class components {
      *     <tr><td>    fill(selectedItem, items, valField, labelField [, dataField]) </td><td>   clear and fill a dropdown selecting the specified item </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus on the control        </td></tr>
      *     <tr><td>    getAllLabels()     </td><td>     returns an array of all the labels             </td></tr>
+     *     <tr><td>    getAllData()     </td><td>     returns an array of all the data associated with the control             </td></tr>
      *     <tr><td>    getData(idx)     </td><td>     returns the data associated to an option.  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.              </td></tr>
      *     <tr><td>    getLabel(idx)     </td><td>     returns the label associated to an option. If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
      *     <tr><td>    getValue(idx)     </td><td>     returns the string value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.   </td></tr>
@@ -174,6 +175,7 @@ class components {
      *     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    size()     </td><td>    returns the number of rows in the list (including <code>default-option</code>              </td></tr>
+     *     <tr><td>    triggerGlobalChange(flg)     </td><td>    Default <code>true</code>.  If <code>false</code> then control changes will not trigger a global control change.  See <code>Utils.someControlValueChanged()</code>   </td></tr>
      * </table>
      */
     static drop_down() {}
@@ -247,6 +249,7 @@ class components {
      *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
      *     <tr><td>    focus()     </td><td>    sets focus on control            </td></tr>
      *     <tr><td>    getAllLabels()     </td><td>     returns an array of all the labels             </td></tr>
+     *     <tr><td>    getAllData()     </td><td>     returns an array of all the data associated with the control             </td></tr>
      *     <tr><td>    getData(idx)     </td><td>     returns the data associated to an option.  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.              </td></tr>
      *     <tr><td>    getLabel(idx)     </td><td>     returns the label associated to an option. If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.             </td></tr>
      *     <tr><td>    getValue(idx)     </td><td>     returns the string value associated to an option (returns an array if <code>multiple</code> attribute included).  If <code>idx</code> is undefined, the selected row is used otherwise the row indexed by <code>idx</code> is used.   </td></tr>
@@ -269,6 +272,7 @@ class components {
      *     <tr><td>    selectIndex(row)     </td><td>     selects the indicated row index            </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    size()     </td><td>    returns the number of rows in the list               </td></tr>
+     *     <tr><td>    triggerGlobalChange(flg)     </td><td>    Default <code>true</code>.  If <code>false</code> then control changes will not trigger a global control change.  See <code>Utils.someControlValueChanged()</code>   </td></tr>
      * </table>
      */
     static list_box() {}
