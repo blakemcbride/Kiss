@@ -471,6 +471,51 @@ IDE.  Instructions for setting up some of the IDEs is located under the
 @code{manual/IDE-Setup} directory.
 
 
+@section System Upgrades
+
+The @emph{Kiss} framework is continually enhanced.  @emph{Kiss}
+includes a mechanism to upgrade your application.  However, this
+automated upgrade process currently only works on Unix-like operating
+systems such as macOS and Linux.  On Windows, a manual process will
+need to be employed.
+
+The process of upgrading your application is as follows:
+
+@enumerate
+@item
+Go to the directory containing a clone of the @emph{Kiss} framework (not your application).
+@item
+Update your clone via: @code{git pull}
+@item
+While remaining in the @emph{Kiss} clone directory (and not your application directory),
+run the following command:  @code{./upgrade-application <path-to-your-application>}
+@end enumerate
+
+@strong{Caveat}
+
+While this upgrade process upgrades the majority of the system, there
+are a few files that are not auto-updated to be sure not to clobber
+possible application-specific code that may have been added.
+Therefore, the following files will need to be manually verified.
+
+@itemize @bullet
+@item
+@code{builder/builder/Tasks.java}
+
+This file is left untouched by the upgrade process.  You may have
+custom tasks or modified existing tasks.  Be sure to check
+@code{buildForeignDependencies()}.
+@item
+@code{libs}
+
+The upgrade process installs new or updated JAR files that are part of
+the @emph{Kiss} system.  However, you may have added
+application-specific JAR files.  After the upgrade, be sure to manually delete any
+outdated JAR files that come with @emph{Kiss} that have been upgraded
+by this process.
+@end itemize
+
+
 @section What Do I Do With It Now?
 
 What you have at this point is the beginnings of your new application.

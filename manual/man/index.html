@@ -396,6 +396,7 @@ among others, the following:
 <li><a href="#Setup-And-Configuration-1" accesskey="8">Setup And Configuration</a></li>
 <li><a href="#Bypassing-Authentication" accesskey="9">Bypassing Authentication</a></li>
 <li><a href="#Building-The-System">Building The System</a></li>
+<li><a href="#System-Upgrades">System Upgrades</a></li>
 <li><a href="#What-Do-I-Do-With-It-Now_003f">What Do I Do With It Now?</a></li>
 </ul>
 <div class="section" id="Important-1">
@@ -852,8 +853,50 @@ IDE.  Instructions for setting up some of the IDEs is located under the
 
 </div>
 </div>
+<div class="section" id="System-Upgrades">
+<h3 class="section">2.11 System Upgrades</h3>
+
+<p>The <em>Kiss</em> framework is continually enhanced.  <em>Kiss</em>
+includes a mechanism to upgrade your application.  However, this
+automated upgrade process currently only works on Unix-like operating
+systems such as macOS and Linux.  On Windows, a manual process will
+need to be employed.
+</p>
+<p>The process of upgrading your application is as follows:
+</p>
+<ol>
+<li> Go to the directory containing a clone of the <em>Kiss</em> framework (not your application).
+</li><li> Update your clone via: <code>git pull</code>
+</li><li> While remaining in the <em>Kiss</em> clone directory (and not your application directory),
+run the following command:  <code>./upgrade-application &lt;path-to-your-application&gt;</code>
+</li></ol>
+
+<p><strong>Caveat</strong>
+</p>
+<p>While this upgrade process upgrades the majority of the system, there
+are a few files that are not auto-updated to be sure not to clobber
+possible application-specific code that may have been added.
+Therefore, the following files will need to be manually verified.
+</p>
+<ul>
+<li> <code>builder/builder/Tasks.java</code>
+
+<p>This file is left untouched by the upgrade process.  You may have
+custom tasks or modified existing tasks.  Be sure to check
+<code>buildForeignDependencies()</code>.
+</p></li><li> <code>libs</code>
+
+<p>The upgrade process installs new or updated JAR files that are part of
+the <em>Kiss</em> system.  However, you may have added
+application-specific JAR files.  After the upgrade, be sure to manually delete any
+outdated JAR files that come with <em>Kiss</em> that have been upgraded
+by this process.
+</p></li></ul>
+
+
+</div>
 <div class="section" id="What-Do-I-Do-With-It-Now_003f">
-<h3 class="section">2.11 What Do I Do With It Now?</h3>
+<h3 class="section">2.12 What Do I Do With It Now?</h3>
 
 <p>What you have at this point is the beginnings of your new application.
 <em>Kiss</em> is provided as a running and deployable system.  It is
@@ -1071,7 +1114,9 @@ root of your application.
 <ol>
 <li> In a command-prompt, type:  <code>./view-log</code>
 
-<p>This is where back-end messages appear.
+<p>This is where back-end messages appear. (Note that this command currently only works on Unix-like 
+operating systems such as macOS and Linux.  It is only displaying a log file which can easily
+be done on Windows without continual update.)
 </p></li><li> In a second command-prompt, type:  <code>./bld develop</code>
 
 <p>This builds the system and runs the back-end and front-end servers.

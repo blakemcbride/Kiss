@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# Upgrade a Kiss-based application with the latest version of Kiss.
+
+if [ $# -ne 1 ]; then
+	echo
+	echo '* * * This is to be run from the Kiss clone and not the application directory. * * *'
+	echo
+	echo Usage: $0 path-to-kiss-based-application
+	echo
+	exit
+fi
+if [ ! -d $1 ]; then
+	echo Directory $1 does not exist.
+	exit
+fi
+./bld clean
+pushd $1
+./bld clean
+popd
+rsync -av --delete builder/builder/BuildUtils.java $1/builder/builder
+rsync -av --delete builder/libs/ $1/builder/libs
+rsync -av libs/ $1/libs
+rsync -av --delete src/main/core/org/kissweb/ $1/src/main/core/org/kissweb
+rsync -av --delete src/main/frontend/kiss/ $1/src/main/frontend/kiss
+rsync -av bld $1
+rsync -av bld.cmd $1
+rsync -av build-builder.cmd $1
+rsync -av SimpleWebServer.jar $1
+rsync -av view-log $1
+
+
