@@ -305,7 +305,8 @@
                 if (triggerGlobalChange)
                     Utils.someControlValueChanged();
                 // func gets passed the selected value, label
-                func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
+                if (func)
+                    func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
             });
             return this;
         };
