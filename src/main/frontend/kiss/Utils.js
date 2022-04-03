@@ -1350,7 +1350,8 @@ class Utils {
         if (window.location.href.search("localhost:8000") !== -1 ||
             window.location.href.search("localhost:8001") !== -1 ||
             window.location.href.search("localhost:8002") !== -1 ||
-            window.location.href.search("localhost:63342") !== -1) // if debugging with a local server
+            window.location.href.search("localhost:63342") !== -1 ||
+            window.location.href.search("localhost:63340") !== -1) // if debugging with a local server
             path = "http://localhost:8080" + url;
         else {
             const server = Server.url;

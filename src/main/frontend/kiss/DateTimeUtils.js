@@ -15,11 +15,15 @@ class DateTimeUtils {
 
     /**
      * Format a Date in a full format.  For example:  Wed Jan 4, 2022 12:31 PM CST
+     * <br><br>
+     * <code>dt</code> can be a <code>Date</code> object or the number of milliseconds since 1970.
      *
-     * @param dt {Date}
+     * @param dt {Date|number}
      * @returns {string}
      */
     static formatDateLong(dt) {
+        if (typeof dt === 'number')
+            dt = new Date(dt);
         if (typeof dt !== 'object')
             return '';
         const idt = DateUtils.dateToInt(dt);
