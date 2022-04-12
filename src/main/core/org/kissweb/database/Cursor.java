@@ -270,15 +270,11 @@ public class Cursor implements AutoCloseable {
                             case Types.VARBINARY:
                             case Types.LONGVARBINARY:
                             case Types.BLOB:
-                                Byte [] bytes1 = (Byte[]) val;
-                                len = bytes1.length;
+                                byte [] bytes = (byte[]) val;
+                                len = bytes.length;
                                 oos.writeInt(len);
-                                if (len > 0) {
-                                    byte [] bytes2 = new byte[len];
-                                    for (int j=0 ; j < len ; j++)
-                                        bytes2[j] = bytes1[j];
-                                    oos.write(bytes2);
-                                }
+                                if (len > 0)
+                                    oos.write(bytes);
                                 break;
                             default:
                                 throw new SQLException("Unhandled data type " + ci.type);
@@ -392,7 +388,9 @@ public class Cursor implements AutoCloseable {
                     len = cacheStream.readInt();
                     if (len > 0) {
                         byte[] bytes = new byte[len];
-                        cacheStream.read(bytes);
+                        int total_read = 0;
+                        while (total_read < len)
+                            total_read += cacheStream.read(bytes, total_read, len-total_read);
                         Byte [] bytes2 = new Byte[bytes.length];
                         Arrays.setAll(bytes2, n -> bytes[n]);
                         cols.put(ci.name, bytes2);
