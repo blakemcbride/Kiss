@@ -318,7 +318,6 @@ public class ProcessServlet implements Runnable {
             out.write(data);
             out.close();
         } catch (Throwable ignored) {
-            int x = 1;
         } finally {
             asyncContext.complete();
             closeSession();

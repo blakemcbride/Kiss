@@ -113,6 +113,8 @@ class Server {
      * @param meth
      * @param injson
      * @returns {Promise<unknown>}
+     *
+     * @see Utils.toBase64
      */
     static async binaryCall(cls, meth, injson=null) {
 
@@ -152,14 +154,20 @@ class Server {
                     await Utils.showMessage('Error', msg);
                     resolve({_Success: false, _ErrorMessage: msg});
                 }
-                let str = String.fromCharCode.apply(null, new Uint8Array(res));
-                const idx = str.indexOf(";");
-                const fname = str.substring(0, idx);
-                str = str.substring(idx+1);
+                //               let str = String.fromCharCode.apply(null, new Uint8Array(res));    sometimes causes stack overflow
+                const bytes = new Uint8Array(res);
+                let fname = '';
+                let i = 0;
+                let c = ' ';
+                while (c !== ';') {
+                    c = String.fromCharCode(bytes[i++]);
+                    if (c !== ';')
+                        fname += c;
+                }
                 const ret = {
                     _Success: true,
                     filename: fname,
-                    data: btoa(str)
+                    data: bytes.slice(i, bytes.length)
                 };
                 resolve(ret);
             } catch (err) {
