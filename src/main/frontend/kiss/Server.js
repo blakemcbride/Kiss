@@ -168,7 +168,7 @@ class Server {
                 const msg = 'Error communicating with the server.';
                 Server.decCount();
                 await Utils.showMessage('Error', msg);
-                resolve(null);
+                resolve({_Success: false, _ErrorMessage: msg});
             }
         };
 
