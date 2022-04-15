@@ -37,7 +37,7 @@ public class ProcessServlet implements Runnable {
     private final ServletOutputStream out;
     private UserData ud;
     protected Connection DB;
-    private boolean didBinaryReturn = false;
+    private byte [] binaryData;
 
     ProcessServlet(org.kissweb.restServer.QueueManager.Packet packet) {
         request = (HttpServletRequest) packet.asyncContext.getRequest();
@@ -299,42 +299,30 @@ public class ProcessServlet implements Runnable {
     }
 
     /**
-     * Return a binary array to the front-end.
-     * This is often used to send images back to the front-end.
-     * If this method is used, normal JSON is not returned.
-     * The front-end counter-part to this method is <code>Server.binaryCall()</code>
+     * Return binary data to the front-end.
      *
-     * @param filename the name of the binary array being sent (typically a file)
-     * @param data the binary array to be sent
+     * @param data
      */
-    public void binaryReturn(String filename, byte [] data) {
-        didBinaryReturn = true;
-        try {
-            if (DB != null)
-                DB.commit();
-            response.setContentType("application/octet-stream");
-            response.setStatus(200);
-            out.print(filename + ";");
-            out.write(data);
-            out.close();
-        } catch (Throwable ignored) {
-        } finally {
-            asyncContext.complete();
-            closeSession();
-        }
+    public void returnBinary(byte [] data) {
+        binaryData = data;
     }
 
     private void successReturn(HttpServletResponse response, JSONObject outjson) {
-        if (didBinaryReturn)
-            return;
         try {
             if (DB != null)
                 DB.commit();
-            response.setContentType("application/json");
-            response.setStatus(200);
             outjson.put("_Success", true);
             outjson.put("_ErrorCode", 0);  // success
-            out.print(outjson.toString());
+            response.setStatus(200);
+            if (binaryData == null) {
+                response.setContentType("application/json");
+                out.print(outjson.toString());
+            } else {
+                response.setContentType("application/octet-stream");
+                out.print(outjson.toString() + "\003");
+                out.write(binaryData);
+                binaryData = null;
+            }
             out.flush();
             out.close();     // this causes the second response
         } catch (SQLException | IOException ignored) {
@@ -345,8 +333,6 @@ public class ProcessServlet implements Runnable {
     }
 
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
-        if (didBinaryReturn)
-            return;
         try {
             if (DB != null) {
                 try {

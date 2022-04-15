@@ -105,9 +105,11 @@ class Server {
     }
 
     /**
-     * Perform a binary call.  JSON is sent but a binary array (rather than JSON) is expected back.
-     * This is often used to retrieve images.
-     * The back-end service should call <code>servlet.binaryReturn()</code>
+     * Perform a binary call.  JSON is sent and JSON is returned.
+     * However, a new element will be in the returned json called '_data'.
+     * _data will contain the binary data.
+     * This method is often used to retrieve images.
+     * The back-end service should call <code>servlet.returnBinary()</code>
      *
      * @param cls
      * @param meth
@@ -156,19 +158,17 @@ class Server {
                 }
                 //               let str = String.fromCharCode.apply(null, new Uint8Array(res));    sometimes causes stack overflow
                 const bytes = new Uint8Array(res);
-                let fname = '';
+                let json = '';
                 let i = 0;
                 let c = ' ';
-                while (c !== ';') {
+                while (c !== '\x03') {
                     c = String.fromCharCode(bytes[i++]);
-                    if (c !== ';')
-                        fname += c;
+                    if (c !== '\x03')
+                        json += c;
                 }
-                const ret = {
-                    _Success: true,
-                    filename: fname,
-                    data: bytes.slice(i, bytes.length)
-                };
+                const ret = JSON.parse(json);
+                ret._Success = true;
+                ret._data = bytes.slice(i, bytes.length);
                 resolve(ret);
             } catch (err) {
                 if (pass < 3)
