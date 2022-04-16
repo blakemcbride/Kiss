@@ -38,6 +38,7 @@ public class ProcessServlet implements Runnable {
     private UserData ud;
     protected Connection DB;
     private byte [] binaryData;
+    private boolean isBinaryReturn = false;
 
     ProcessServlet(org.kissweb.restServer.QueueManager.Packet packet) {
         request = (HttpServletRequest) packet.asyncContext.getRequest();
@@ -304,6 +305,7 @@ public class ProcessServlet implements Runnable {
      * @param data
      */
     public void returnBinary(byte [] data) {
+        isBinaryReturn = true;
         binaryData = data;
     }
 
@@ -314,14 +316,17 @@ public class ProcessServlet implements Runnable {
             outjson.put("_Success", true);
             outjson.put("_ErrorCode", 0);  // success
             response.setStatus(200);
-            if (binaryData == null) {
+            if (!isBinaryReturn) {
                 response.setContentType("application/json");
                 out.print(outjson.toString());
             } else {
                 response.setContentType("application/octet-stream");
                 out.print(outjson.toString() + "\003");
-                out.write(binaryData);
-                binaryData = null;
+                if (binaryData != null) {
+                    out.write(binaryData);
+                    binaryData = null;
+                    isBinaryReturn = false;
+                }
             }
             out.flush();
             out.close();     // this causes the second response
