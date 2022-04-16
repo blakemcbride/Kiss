@@ -72,10 +72,10 @@ class Server {
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                const msg = 'Error communicating with the server.';
+                console.log("Server communication error (1): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', msg);
-                resolve({_Success: false, _ErrorMessage: msg});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 return;
             }
             try {
@@ -91,10 +91,10 @@ class Server {
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                const msg = 'Error communicating with the server.';
+                console.log("Server communication error (2): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', msg);
-                resolve({_Success: false, _ErrorMessage: msg});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
             }
         };
 
@@ -142,19 +142,18 @@ class Server {
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                const msg = 'Error communicating with the server.';
+                console.log("Server communication error (3): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', msg);
-                resolve({_Success: false, _ErrorMessage: msg});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 return;
             }
             try {
                 const res = await response.arrayBuffer();
                 Server.decCount();
-                const msg = 'Error communicating with the server.';
                 if (!res) {
-                    await Utils.showMessage('Error', msg);
-                    resolve({_Success: false, _ErrorMessage: msg});
+                    await Utils.showMessage('Error', Server.errorMessage);
+                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 }
                 //               let str = String.fromCharCode.apply(null, new Uint8Array(res));    sometimes causes stack overflow
                 const bytes = new Uint8Array(res);
@@ -173,10 +172,9 @@ class Server {
             } catch (err) {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                const msg = 'Error communicating with the server.';
                 Server.decCount();
-                await Utils.showMessage('Error', msg);
-                resolve({_Success: false, _ErrorMessage: msg});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
             }
         };
 
@@ -243,11 +241,10 @@ class Server {
                     resolve(res);
                 },
                 error: async function (hdr, status, error) {
-                    const msg = 'Error communicating with the server.';
                     Utils.waitMessageEnd();
                     Server.decCount();
-                    await Utils.showMessage("Error", msg);
-                    resolve({_Success: false, _ErrorMessage: msg});
+                    await Utils.showMessage("Error", Server.errorMessage);
+                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 }
             });
         });
@@ -294,4 +291,6 @@ class Server {
 
 // class variable
 Server.contextCreated = false;
+Server.errorMessage = 'Error communicating with the server.';
+
 
