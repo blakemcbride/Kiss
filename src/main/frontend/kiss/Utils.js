@@ -1554,7 +1554,8 @@ class Utils {
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#039;")
             .replace(/\n/g, '<br>')
-            .replace(/ /g, '&nbsp;');
+//            .replace(/ /g, '&nbsp;')  kills text wrapping
+            ;
     }
 
     /**
