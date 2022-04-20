@@ -369,7 +369,7 @@ public class ProcessServlet implements Runnable {
         if (e instanceof FrontendException)
             msg = e.getMessage();
         else
-            msg = "Login failure.";
+            msg = "You have been logged out due to inactivity. Please log in again.";
         if (DB != null) {
             try {
                 DB.rollback();
