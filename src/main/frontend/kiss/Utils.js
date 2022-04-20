@@ -1222,7 +1222,9 @@ class Utils {
             content.css('width', width);
             body.css('height', height);
         } else {
+            w.css('z-index', Utils.popup_zindex++);
             content = w.children();
+            content.css('z-index', Utils.popup_zindex++);
             both_parts = content.children();
             header = both_parts.first();
             body = header.next();
@@ -1244,6 +1246,7 @@ class Utils {
                 ctl.blur();
         }
     }
+
 
     /**
      * Dynamically change the height of a popup.
