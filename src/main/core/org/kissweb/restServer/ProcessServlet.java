@@ -365,11 +365,9 @@ public class ProcessServlet implements Runnable {
     private void loginFailure(HttpServletResponse response, Throwable e) {
         String msg;
         if (e != null)
-            e = e.getCause();
-        if (e instanceof FrontendException)
             msg = e.getMessage();
         else
-            msg = "You have been logged out due to inactivity. Please log in again.";
+            msg = "Login failure.";
         if (DB != null) {
             try {
                 DB.rollback();
@@ -423,7 +421,7 @@ public class ProcessServlet implements Runnable {
 
     private void checkLogin(UserData ud) throws Exception {
         if (ud == null)
-            throw new Exception("Login timed out; please re-login.");
+            throw new FrontendException("You have been logged out due to inactivity. Please log in again.");
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime timeout = ud.getLastAccessDate().plusSeconds(120);  // cache user data for 120 seconds
         if (MainServlet.hasDatabase() && now.isAfter(timeout)) {
