@@ -132,6 +132,12 @@ class Utils {
                     '  </div>' +
                     '</div>');
                 modal = $('#msg-modal');  // the append changes this
+
+                // Adjust width for mobile
+                const content = $('#msg-modal-content-tab');
+                const smaller = screen.width < screen.height ? screen.width : screen.height;
+                if (smaller < content.width() + 20)
+                    content.width(smaller-20);
             }
 
             $('#msg-header').text(title);
@@ -198,6 +204,12 @@ class Utils {
                     '    </div>' +
                     '  </div>' +
                     '</div>');
+
+                // Adjust width for mobile
+                const content = $('#yesno-popup-content');
+                const smaller = screen.width < screen.height ? screen.width : screen.height;
+                if (smaller < content.width() + 20)
+                    content.width(smaller-20);
             }
             Utils.makeDraggable($('#yesno-popup-header'), $('#yesno-popup-content'));
 
@@ -244,6 +256,12 @@ class Utils {
                 '    </div>' +
                 '  </div>' +
                 '</div>');
+
+            // Adjust width for mobile
+            const content = $('#wait-msg-content');
+            const smaller = screen.width < screen.height ? screen.width : screen.height;
+            if (smaller < content.width() + 20)
+                content.width(smaller-20);
         }
         const content = $('#wait-msg-content');
         this.makeDraggable(content, content);
@@ -1246,7 +1264,6 @@ class Utils {
                 ctl.blur();
         }
     }
-
 
     /**
      * Dynamically change the height of a popup.
