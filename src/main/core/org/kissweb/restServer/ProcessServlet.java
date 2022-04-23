@@ -398,6 +398,22 @@ public class ProcessServlet implements Runnable {
         return ud;
     }
 
+    /**
+     * Returns the IP address of the client.
+     *
+     * @return
+     */
+    public String getRemoteAddr() {
+        String remoteAddr = "";
+
+        if (request != null) {
+            remoteAddr = request.getHeader("X-FORWARDED-FOR");
+            if (remoteAddr == null || "".equals(remoteAddr))
+                remoteAddr = request.getRemoteAddr();
+        }
+        return remoteAddr;
+    }
+
     private void log_error(final String str, final Throwable e) {
         if (e instanceof FrontendException)
             return;  //  no log
@@ -411,7 +427,7 @@ public class ProcessServlet implements Runnable {
     private String login(String user, String password, JSONObject outjson) throws Exception {
         UserData ud;
         if (MainServlet.hasDatabase()) {
-            ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password, outjson);
+            ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password, outjson, this);
             if (ud == null)
                 throw new LogException("Invalid login.");
         } else
@@ -425,7 +441,7 @@ public class ProcessServlet implements Runnable {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime timeout = ud.getLastAccessDate().plusSeconds(120);  // cache user data for 120 seconds
         if (MainServlet.hasDatabase() && now.isAfter(timeout)) {
-            Boolean good = (Boolean) GroovyClass.invoke(true, "Login", "checkLogin", null, DB, ud);
+            Boolean good = (Boolean) GroovyClass.invoke(true, "Login", "checkLogin", null, DB, ud, this);
             if (!good) {
                 UserCache.removeUser(ud.getUuid());
                 throw new LogException("Invalid login.");
