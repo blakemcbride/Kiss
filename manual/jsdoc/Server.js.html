@@ -204,13 +204,19 @@ class Server {
                 let json = '';
                 let i = 0;
                 let c = ' ';
-                while (c !== '\x03') {
+                const m = bytes.length;
+                while (c !== '\x03' &amp;&amp; i &lt; m) {
                     c = String.fromCharCode(bytes[i++]);
                     if (c !== '\x03')
                         json += c;
                 }
                 const ret = JSON.parse(json);
-                ret._Success = true;
+                if (!ret._Success)
+                    if (ret._ErrorCode === 2) {
+                        await Utils.showMessage('Error', ret._ErrorMessage);
+                        Server.logout();
+                    } else
+                        await Utils.showMessage('Error', ret._ErrorMessage);
                 ret._data = bytes.slice(i, bytes.length);
                 resolve(ret);
             } catch (err) {
