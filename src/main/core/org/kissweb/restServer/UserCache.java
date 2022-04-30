@@ -24,10 +24,10 @@ public class UserCache {
     }
 
     static UserData findUser(String uuid) {
-        UserData ud;
+        if (uuid == null  ||  uuid.isEmpty())
+            return null;
         purgeOld();
-        ud = uuidTable.get(uuid);
-        return ud;
+        return uuidTable.get(uuid);
     }
 
     static void removeUser(String uuid) {

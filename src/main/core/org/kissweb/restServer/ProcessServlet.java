@@ -250,6 +250,7 @@ public class ProcessServlet implements Runnable {
             // User defined method
             if (MainServlet.hasDatabase()) {
                 if (MainServlet.shouldAllowWithoutAuthentication(_className, _method)) {
+                    ud = UserCache.findUser(injson.getString("_uuid"));  // in case they are logged in
                     logger.info("Method " + _className + "." + _method + "() allowed without authentication");
                 } else {
                     try {
