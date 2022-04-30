@@ -528,15 +528,21 @@ public class Record implements AutoCloseable {
                 pstmt = cursor.ustmt;
             }
             int i = 1;
-            for (AbstractMap.SimpleEntry<String,Object> fld : cf)
-                pstmt.setObject(i++, Connection.fixObj(fld.getValue()));
+            for (AbstractMap.SimpleEntry<String,Object> fld : cf) {
+                Object val = fld.getValue();
+                Array a = makeSQLArray(conn, val);
+                if (a == null)
+                    pstmt.setObject(i++, Connection.fixDate(val));
+                else
+                    pstmt.setArray(i++, a);
+            }
             List<String> pcols;
             if (cursor == null)
                 pcols = conn.getPrimaryColumns(table);
             else
                 pcols = cursor.cmd.getPriColumns(cursor);
             for (String pcol : pcols)
-                pstmt.setObject(i++, Connection.fixObj(ocols.get(pcol)));
+                pstmt.setObject(i++, Connection.fixDate(ocols.get(pcol)));
             pstmt.execute();
             // now update our memory of the original values
             ocols.clear();
@@ -576,7 +582,7 @@ public class Record implements AutoCloseable {
             try (PreparedStatement ustmt = conn.conn.prepareStatement(sql.toString())) {
                 int i = 1;
                 for (String pcol : conn.getPrimaryColumns(table))
-                    ustmt.setObject(i++, Connection.fixObj(cols.get(pcol)));
+                    ustmt.setObject(i++, Connection.fixDate(cols.get(pcol)));
                 ustmt.execute();
             }
             return;
@@ -600,7 +606,7 @@ public class Record implements AutoCloseable {
             cursor.ustmt.clearParameters();
         int i = 1;
         for (String pcol : cursor.cmd.getPriColumns(cursor))
-            cursor.ustmt.setObject(i++, Connection.fixObj(ocols.get(pcol)));
+            cursor.ustmt.setObject(i++, Connection.fixDate(ocols.get(pcol)));
         cursor.ustmt.execute();
     }
 
@@ -646,8 +652,13 @@ public class Record implements AutoCloseable {
         } else
             pstmt.clearParameters();
         int i = 1;
-        for (Object val : cols.values())
-            pstmt.setObject(i++, Connection.fixObj(val));
+        for (Object val : cols.values()) {
+            Array a = makeSQLArray(conn, val);
+            if (a == null)
+                pstmt.setObject(i++, Connection.fixDate(val));
+            else
+                pstmt.setArray(i++, a);
+        }
 //        ResultSet rset = pstmt.executeQuery();
         pstmt.executeUpdate();
         Object nextId;
@@ -705,8 +716,13 @@ public class Record implements AutoCloseable {
         } else
             pstmt.clearParameters();
         int i = 1;
-        for (Object val : cols.values())
-            pstmt.setObject(i++, Connection.fixObj(val));
+        for (Object val : cols.values()) {
+            Array a = makeSQLArray(conn, val);
+            if (a == null)
+                pstmt.setObject(i++, Connection.fixDate(val));
+            else
+                pstmt.setArray(i++, a);
+        }
         boolean ret = pstmt.execute();
         if (ocols == null)
             ocols = new HashMap<>();
@@ -715,6 +731,100 @@ public class Record implements AutoCloseable {
         for (String key : cols.keySet())
             ocols.put(key, cols.get(key));
         return ret;
+    }
+
+    /**
+     * If the object passed in is a collection, make it suitable for setArray.
+     * Otherwise, return null if it is not a collection type.
+     * <br><br>
+     * At least in PostgreSQL, your query should look like:<br>
+     *     <code>where col = ANY(?)</code>
+     *  rather than:<br>
+     *     <code>where col in (?)</code>
+     *
+     * @param a
+     * @return
+     * @throws SQLException
+     * @see ArrayListInteger
+     * @see ArrayListLong
+     * @see ArrayListShort
+     * @see ArrayListString
+     */
+    @SuppressWarnings("unchecked")
+    static Array makeSQLArray(Connection conn, Object a) throws SQLException {
+        if (a instanceof int[]) {
+            int [] a1 = (int[]) a;
+            Integer [] a2 = new Integer[a1.length];
+            for (int j=0 ; j < a1.length ; j++)
+                a2[j] = a1[j];
+            return conn.conn.createArrayOf("integer", a2);
+        } else if (a instanceof Integer[]) {
+            return conn.conn.createArrayOf("integer", (Object[]) a);
+        } else if (a instanceof long[]) {
+            long [] a1 = (long[]) a;
+            Long [] a2 = new Long[a1.length];
+            for (int j=0 ; j < a1.length ; j++)
+                a2[j] = a1[j];
+            return conn.conn.createArrayOf("bigint", a2);
+        } else if (a instanceof Long[]) {
+            return conn.conn.createArrayOf("bigint", (Object[]) a);
+        } else if (a instanceof float[]) {
+            float [] a1 = (float[]) a;
+            Float [] a2 = new Float[a1.length];
+            for (int j=0 ; j < a1.length ; j++)
+                a2[j] = a1[j];
+            return conn.conn.createArrayOf("real", a2);
+        } else if (a instanceof Float[]) {
+            return conn.conn.createArrayOf("real", (Object[]) a);
+        } else if (a instanceof double[]) {
+            double [] a1 = (double[]) a;
+            Double [] a2 = new Double[a1.length];
+            for (int j=0 ; j < a1.length ; j++)
+                a2[j] = a1[j];
+            return conn.conn.createArrayOf("double precision", a2);
+        } else if (a instanceof Double[]) {
+            return conn.conn.createArrayOf("double precision", (Object[]) a);
+        } else if (a instanceof short[]) {
+            short [] a1 = (short[]) a;
+            Short [] a2 = new Short[a1.length];
+            for (int j=0 ; j < a1.length ; j++)
+                a2[j] = a1[j];
+            return conn.conn.createArrayOf("smallint", a2);
+        } else if (a instanceof Short[]) {
+            return conn.conn.createArrayOf("smallint", (Object[]) a);
+        } else if (a instanceof String[]) {
+            return conn.conn.createArrayOf("varchar", (Object[]) a);
+        } else if (a instanceof ArrayListInteger) {
+            ArrayList<Integer> lst = (ArrayList<Integer>) a;
+            int sz = lst.size();
+            Integer [] a2 = new Integer[sz];
+            for (int j=0 ; j < sz ; j++)
+                a2[j] = lst.get(j);
+            return conn.conn.createArrayOf("integer", a2);
+        } else if (a instanceof ArrayListLong) {
+            ArrayList<Long> lst = (ArrayList<Long>) a;
+            int sz = lst.size();
+            Long [] a2 = new Long[sz];
+            for (int j=0 ; j < sz ; j++)
+                a2[j] = lst.get(j);
+            return conn.conn.createArrayOf("bigint", a2);
+        } else if (a instanceof ArrayListShort) {
+            ArrayList<Short> lst = (ArrayList<Short>) a;
+            int sz = lst.size();
+            Short [] a2 = new Short[sz];
+            for (int j=0 ; j < sz ; j++)
+                a2[j] = lst.get(j);
+            return conn.conn.createArrayOf("smallint", a2);
+        } else if (a instanceof ArrayListString) {
+            ArrayList<String> lst = (ArrayList<String>) a;
+            int sz = lst.size();
+            String [] a2 = new String[sz];
+            for (int j=0 ; j < sz ; j++)
+                a2[j] = lst.get(j);
+            return conn.conn.createArrayOf("varchar", a2);
+        } else if (a instanceof Collection)
+            throw new SQLException("Use one of ArrayListString, ArrayListInteger, etc.");
+        return null;
     }
 
     /**

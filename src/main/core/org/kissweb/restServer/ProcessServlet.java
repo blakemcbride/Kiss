@@ -363,10 +363,16 @@ public class ProcessServlet implements Runnable {
     }
 
     private void loginFailure(HttpServletResponse response, Throwable e) {
-        String msg;
-        if (e != null)
+        String msg = null;
+        if (e != null) {
             msg = e.getMessage();
-        else
+            if (msg == null) {
+                Throwable t = e.getCause();
+                if (t != null)
+                    msg = t.getMessage();
+            }
+        }
+        if (msg == null)
             msg = "Login failure.";
         if (DB != null) {
             try {

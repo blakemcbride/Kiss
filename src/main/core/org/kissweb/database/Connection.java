@@ -679,11 +679,12 @@ public class Connection implements AutoCloseable {
 
     /**
      * Local method used to assure Dates of any type are of the SQL type.
+     * If the object is not a date type, it is simply returned.
      *
      * @param dt
      * @return
      */
-    static Object fixObj(Object dt) {
+    static Object fixDate(Object dt) {
         if (dt != null) {
             Class<?> cls = dt.getClass();
             if (cls == java.util.Date.class)

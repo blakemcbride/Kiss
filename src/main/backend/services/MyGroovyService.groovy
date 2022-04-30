@@ -1,7 +1,9 @@
 package services
 
 import org.json.JSONObject
+import org.kissweb.database.ArrayListInteger
 import org.kissweb.database.Connection
+import org.kissweb.database.Record
 import org.kissweb.restServer.GroovyService
 import org.kissweb.restServer.ProcessServlet
 import org.kissweb.restServer.MainServlet
@@ -26,6 +28,18 @@ class MyGroovyService {
         Integer r = (Integer) GroovyService.run(false, "~/scripts", "MyScript", "myMethod", null, num1, num2)
         outjson.put("num3", (int) r)
          */
+
+        Connection db2 = new Connection(Connection.ConnectionType.PostgreSQL, "localhost", "smallishevents", "postgres", "postgres")
+        ArrayListInteger ali = new ArrayListInteger();
+        ali.add(70);
+        ali.add(6);
+        List<Record> recs = db2.fetchAll("select * from se_user where user_id = any(?)", ali)
+        println "---------------------------"
+        for (Record rec : recs) {
+            print rec.getInt("user_id")
+            println " " + rec.getString("fname")
+        }
+        println "---------------------------"
     }
 
     void hasDatabase(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
