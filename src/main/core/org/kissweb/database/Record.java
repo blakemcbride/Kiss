@@ -738,9 +738,12 @@ public class Record implements AutoCloseable {
      * Otherwise, return null if it is not a collection type.
      * <br><br>
      * At least in PostgreSQL, your query should look like:<br>
-     *     <code>where col = ANY(?)</code>
+     *     <code>where col = ANY(?)</code><br>
      *  rather than:<br>
-     *     <code>where col in (?)</code>
+     *     <code>where col in (?)</code><br>
+     *  Also, if using
+     *      <code>where col &lt;&gt; ANY(?)</code><br>
+     *  the list must have at least one element.
      *
      * @param a
      * @return

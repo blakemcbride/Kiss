@@ -91,7 +91,7 @@ public class Command implements AutoCloseable {
      */
     public boolean execute(String sql, Object ... args) throws SQLException {
         // The following two lines allows args to be a variable argument array or a passed in ArrayList of arguments
-        if (args != null  &&  args.length == 1  &&  args[0] instanceof ArrayList  &&  !(args[0] instanceof ArrayListType))
+        if (args != null && args.length == 1 && args[0] instanceof ArrayList && !(args[0] instanceof ArrayListType))
             args = ((ArrayList) args[0]).toArray();
         if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
             if (pstat != null)
@@ -102,19 +102,19 @@ public class Command implements AutoCloseable {
                 pcols.clear();
         } else
             pstat.clearParameters();
-        try {
-            if (args != null)
-                for (int i = 0; i < args.length; ) {
-                    Object val = args[i];
-                    Array a = Record.makeSQLArray(conn, val);
+        if (args != null)
+            for (int i = 0; i < args.length; ) {
+                Object val = args[i];
+                Array a = Record.makeSQLArray(conn, val);
+                try {
                     if (a == null)
                         pstat.setObject(++i, Connection.fixDate(val));
                     else
                         pstat.setArray(++i, a);
+                } catch (Exception e) {
+                    throw new SQLException("Too many SQL parameters specified", e);
                 }
-        } catch (Exception e) {
-            throw new SQLException("Too many SQL parameters specified", e);
-        }
+            }
         if (lastSQL == null)
             lastSQL = sql;
         isSelect = false;
@@ -196,7 +196,7 @@ public class Command implements AutoCloseable {
             sql = conn.limit(max, sql);
         // The following two lines allows args to be a variable argument array or a passed in ArrayList of arguments
 
-        if (args != null  &&  args.length == 1  &&  args[0] instanceof ArrayList  &&  !(args[0] instanceof ArrayListType))
+        if (args != null && args.length == 1 && args[0] instanceof ArrayList && !(args[0] instanceof ArrayListType))
             args = ((ArrayList) args[0]).toArray();
         if (lastSQL == null || lastSQL != sql && !lastSQL.equals(sql)) {
             if (pstat != null)
@@ -207,19 +207,19 @@ public class Command implements AutoCloseable {
                 pcols.clear();
         } else
             pstat.clearParameters();
-        try {
-            if (args != null)
-                for (int i = 0; i < args.length; ) {
-                    Object val = args[i];
-                    Array a = Record.makeSQLArray(conn, val);
+        if (args != null)
+            for (int i = 0; i < args.length; ) {
+                Object val = args[i];
+                Array a = Record.makeSQLArray(conn, val);
+                try {
                     if (a == null)
                         pstat.setObject(++i, Connection.fixDate(val));
                     else
                         pstat.setArray(++i, a);
+                } catch (Exception e) {
+                    throw new SQLException("Too many SQL parameters specified", e);
                 }
-        } catch (Exception e) {
-            throw new SQLException("Too many SQL parameters specified", e);
-        }
+            }
         Cursor c = new Cursor(useMemoryCache, max, this);
         if (lastSQL == null)
             lastSQL = sql;
