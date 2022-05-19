@@ -76,6 +76,16 @@
             });
         }
 
+        function getURLParameter(sParam) {
+            const urlArgs = window.location.search.substring(1);
+            const argArray = urlArgs.split('&');
+            for (let i = 0; i < argArray.length; i++)  {
+                let param = argArray[i].split('=');
+                if (param[0] === sParam)
+                    return param[1];
+            }
+        }
+
         function startup() {
 
             // cache control
@@ -114,32 +124,22 @@
                 loadScript("kiss/AGGrid.js");
             };
 
-
             $.ajaxSetup({ cache: controlCache });  // utilize browser cache to the fullest when version hasn't changed
-
-            const getURLParameter = function (sParam) {
-                let sPageURL = window.location.search.substring(1);
-                let sURLVariables = sPageURL.split('&');
-                for (let i = 0; i < sURLVariables.length; i++)  {
-                    let sParameterName = sURLVariables[i].split('=');
-                    if (sParameterName[0] === sParam)
-                        return sParameterName[1];
-                }
-            };
 
             if (controlCache) {
                 const now = getURLParameter("now");
+                const urlArgs = window.location.search.substring(1);
                 if (now) {
-                    let diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
+                    const diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
                     if (diff > 30) {
                         window.onbeforeunload = null;
-                        window.location.href = 'index.html?now=' + (new Date()).getTime();
+                        window.location.href = 'index.html?now=' + (new Date()).getTime() + (urlArgs ? '&' + urlArgs : '');
                     } else {
                         loadUtils();
                     }
                 } else {
                     window.onbeforeunload = null;
-                    window.location.href = 'index.html?now=' + (new Date()).getTime();
+                    window.location.href = 'index.html?now=' + (new Date()).getTime() + (urlArgs ? '&' + urlArgs : '');
                 }
             } else
                 loadUtils();
