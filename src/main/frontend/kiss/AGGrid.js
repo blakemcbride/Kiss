@@ -603,7 +603,7 @@ class AGGrid {
      * @returns {string}
      */
     static blankIfZero(params) {
-        return params.value ? params.value : '';
+        return params.value && params.value !== '0' ? params.value : '';
     }
 
 }

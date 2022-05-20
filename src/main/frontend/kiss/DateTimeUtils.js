@@ -105,9 +105,11 @@ class DateTimeUtils {
      * @returns {string}
      */
     static formatDate(dt) {
-        if (typeof dt === 'string')
+        if (typeof dt === 'string') {
             dt = dt.trim();
-        if (!dt)
+            if (!dt || dt === '0')
+                return '';
+        } else if (!dt)
             return '';
         if (typeof dt === 'number')
             dt = new Date(dt);
