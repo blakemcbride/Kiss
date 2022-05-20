@@ -22,6 +22,10 @@ class DateTimeUtils {
      * @returns {string}
      */
     static formatDateLong(dt) {
+        if (!dt)
+            return '';
+        if (typeof dt === 'string')
+            dt = Number(dt);
         if (typeof dt === 'number')
             dt = new Date(dt);
         if (typeof dt !== 'object')
@@ -111,6 +115,8 @@ class DateTimeUtils {
                 return '';
         } else if (!dt)
             return '';
+        if (typeof dt === 'string')
+            dt = Number(dt);
         if (typeof dt === 'number')
             dt = new Date(dt);
         let hours = dt.getHours();
