@@ -45,7 +45,7 @@
         }
 
         nattrs += ' hidden';
-        nstyle = 'height: ' + height + '; width: ' + width + '; -' + nstyle;
+        nstyle = 'height: ' + height + '; width: ' + width + '; ' + nstyle;
 
         content = content.replace(/<popup-title/, '<div').replace(/<\/popup-title>/, '</div>');
         content = content.replace(/<popup-body/, '<div').replace(/<\/popup-body>/, '</div>');
