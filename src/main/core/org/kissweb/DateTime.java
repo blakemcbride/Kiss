@@ -1,6 +1,7 @@
 package org.kissweb;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -27,6 +28,15 @@ public class DateTime {
      */
     public DateTime(ZonedDateTime dt) {
         zdt = dt;
+    }
+
+    /**
+     * Create a DateTime object from the number of milliseconds since 1970 (Epoch).
+     *
+     * @param millisecs
+     */
+    public DateTime(long millisecs) {
+        zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millisecs), ZoneId.systemDefault());
     }
 
     /**
@@ -222,6 +232,15 @@ public class DateTime {
         SimpleDateFormat df = new SimpleDateFormat(dateFormat);
         df.setTimeZone(TimeZone.getTimeZone(timeZone));
         return df.format(date);
+    }
+
+    /**
+     * Returns number of milliseconds since 1970.
+     *
+     * @return
+     */
+    public long getMilliseconds() {
+        return zdt.toInstant().toEpochMilli();
     }
 
     public static void main(String [] args) {

@@ -81,7 +81,8 @@ public class DateUtils {
      * @param m
      * @param d
      * @return
-     */    public static int toInt(int y, int m, int d) {
+     */
+    public static int toInt(int y, int m, int d) {
         if (m == 0)
             return 0;
         y = guessYear(y);
