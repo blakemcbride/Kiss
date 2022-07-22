@@ -606,6 +606,30 @@ class AGGrid {
         return params.value && params.value !== '0' ? params.value : '';
     }
 
+    /**
+     * Format number with commas, parens around negative numbers, 0 decimal
+     * <br><br>
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.numericCP0
+     *
+     * @param params
+     * @returns {string}
+     */
+    static numericCP0(params) {
+        return Utils.format(params.value, "CP", 0, 0);
+    }
+
+    /**
+     * Format number with percent, parens around negative numbers, blank if zero, 0 decimal
+     * <br><br>
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.numericPR0
+     *
+     * @param params
+     * @returns {string}
+     */
+    static numericPRB0(params) {
+        return Utils.format(params.value, "PRB", 0, 0);
+    }
+
 }
 
 // class variables
