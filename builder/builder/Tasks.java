@@ -30,7 +30,7 @@ public class Tasks {
     final String BUILDDIR = "build.work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
     final String postgresqlJar = "postgresql-42.3.3.jar";
-    final String groovyJar = "groovy-3.0.9-indy.jar";
+    final String groovyJar = "groovy-4.0.4.jar";
 
     /**
      * Build the whole system
@@ -268,7 +268,7 @@ public class Tasks {
     private ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
         dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
-        dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/codehaus/groovy/groovy/3.0.9/groovy-3.0.9-indy.jar");
+        dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/4.0.4/groovy-4.0.4.jar");
         dep.add("javax.servlet-api-4.0.1.jar", LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
         dep.add("log4j-core-2.17.2.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.17.2/log4j-core-2.17.2.jar");
         dep.add("log4j-api-2.17.2.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.17.2/log4j-api-2.17.2.jar");
