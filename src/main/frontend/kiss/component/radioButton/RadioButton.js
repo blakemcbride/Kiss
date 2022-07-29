@@ -179,18 +179,18 @@ Kiss.RadioButtons.groups = {};
  */
 
 Kiss.RadioButtons.getValue = function (group) {
-    return $('input[type=radio][name=' + group + ']:checked').val();
+    return $('input[type=radio][name="' + group + '"]:checked').val();
 };
 
 Kiss.RadioButtons.setValue = function (group, val) {
     if (!val)
         Kiss.RadioButtons.clear(group);
     else
-        $('input[type=radio][name=' + group + '][value='+val+']').prop('checked', true);
+        $('input[type=radio][name="' + group + '"][value="'+val+'"]').prop('checked', true);
 };
 
 Kiss.RadioButtons.clear = function (group) {
-    const jqObj = $('input[type=radio][name=' + group + ']');
+    const jqObj = $('input[type=radio][name="' + group + '"]');
     if (Kiss.RadioButtons.groups[group].default_value !== undefined)
         Kiss.RadioButtons.setValue(group, Kiss.RadioButtons.groups[group].default_value);
     else
@@ -200,15 +200,15 @@ Kiss.RadioButtons.clear = function (group) {
 //--
 
 Kiss.RadioButtons.readOnly = function (group) {
-    $('input[type=radio][name=' + group + ']').attr('readonly', true);
+    $('input[type=radio][name="' + group + '"]').attr('readonly', true);
 };
 
 Kiss.RadioButtons.readWrite = function (group) {
-    $('input[type=radio][name=' + group + ']').attr('readonly', false);
+    $('input[type=radio][name="' + group + '"]').attr('readonly', false);
 };
 
 Kiss.RadioButtons.isReadOnly = function (group) {
-    return !!$('input[type=radio][name=' + group + ']').attr('readonly');
+    return !!$('input[type=radio][name="' + group + '"]').attr('readonly');
 };
 
 //--
@@ -228,11 +228,11 @@ Kiss.RadioButtons.show = function (group) {
 };
 
 Kiss.RadioButtons.isHidden = function (group) {
-    return $('input[type=radio][name=' + group + ']').is(':hidden');
+    return $('input[type=radio][name="' + group + '"]').is(':hidden');
 };
 
 Kiss.RadioButtons.isVisible = function (group) {
-    return $('input[type=radio][name=' + group + ']').is(':visible');
+    return $('input[type=radio][name="' + group + '"]').is(':visible');
 };
 
 //--
@@ -241,7 +241,7 @@ Kiss.RadioButtons.isError = function (group, desc) {
     if (!Kiss.RadioButtons.groups[group].required)
         return false;
 
-    const val = $('input[type=radio][name=' + group + ']:checked').val();
+    const val = $('input[type=radio][name="' + group + '"]:checked').val();
     if (!val) {
         Utils.showMessage('Error', desc + ' selection is required.');
         return true;
@@ -250,10 +250,10 @@ Kiss.RadioButtons.isError = function (group, desc) {
 };
 
 Kiss.RadioButtons.onChange = function (group, fun) {
-    const ctl = $('input[type=radio][name=' + group + ']');
+    const ctl = $('input[type=radio][name="' + group + '"]');
     return ctl.off('change').change(() => {
         if (fun)
-            fun($('input[type=radio][name=' + group + ']:checked').val());
+            fun($('input[type=radio][name="' + group + '"]:checked').val());
         Utils.someControlValueChanged();
     });
 };
@@ -264,18 +264,18 @@ Kiss.RadioButtons.resetGroups = function () {
 };
 
 Kiss.RadioButtons.enable = function (group) {
-    $('input[type=radio][name=' + group + ']').attr('disabled', false);
+    $('input[type=radio][name="' + group + '"]').attr('disabled', false);
 };
 
 Kiss.RadioButtons.disable = function (group) {
-    $('input[type=radio][name=' + group + ']').attr('disabled', true);
+    $('input[type=radio][name="' + group + '"]').attr('disabled', true);
 };
 
 Kiss.RadioButtons.isDisabled = function (group) {
-    return !!$('input[type=radio][name=' + group + ']').attr('disabled');
+    return !!$('input[type=radio][name="' + group + '"]').attr('disabled');
 };
 
 Kiss.RadioButtons.focus = function (group) {
-    $('input[type=radio][name=' + group + ']').focus();
+    $('input[type=radio][name="' + group + '"]').focus();
 };
 
