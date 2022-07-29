@@ -734,10 +734,23 @@ public class Cursor implements AutoCloseable {
      * @see #getDateTime(String)
      */
     public java.util.Date getDateOnly(String cname) throws SQLException {
-        java.sql.Date dt = (java.sql.Date) get(cname);
-        if (dt == null)
+        Object obj = get(cname);
+        if (obj == null)
             return null;
-        return new java.util.Date(dt.getTime());
+        if (obj instanceof java.sql.Date) {
+            java.sql.Date dt = (java.sql.Date) obj;
+            return new java.util.Date(dt.getTime());
+        } else {
+            // assume Timestamp
+            java.sql.Timestamp ts = (java.sql.Timestamp) obj;
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(ts);
+            cal.set(Calendar.HOUR, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+            return cal.getTime();
+        }
     }
 
     /**
@@ -753,11 +766,20 @@ public class Cursor implements AutoCloseable {
      * @see #getDateTime(String)
      */
     public int getDateAsInt(String cname) throws SQLException {
-        java.sql.Date dt = (java.sql.Date) get(cname);
-        if (dt == null)
+        Calendar cal;
+        Object obj = get(cname);
+        if (obj == null)
             return 0;
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(dt);
+        if (obj instanceof java.sql.Date) {
+            java.sql.Date dt = (java.sql.Date) obj;
+            cal = Calendar.getInstance();
+            cal.setTime(dt);
+        } else {
+            // assume Timestamp
+            java.sql.Timestamp ts = (java.sql.Timestamp) obj;
+            cal = Calendar.getInstance();
+            cal.setTime(ts);
+        }
         return cal.get(Calendar.DAY_OF_MONTH) + ((cal.get(Calendar.MONTH) + 1) * 100) + ((cal.get(Calendar.YEAR)) * 10000);
     }
 
