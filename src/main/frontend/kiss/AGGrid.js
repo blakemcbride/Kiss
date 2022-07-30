@@ -583,51 +583,20 @@ class AGGrid {
     }
 
     /**
-     * Format for dollars including commas and dollar signs
+     * Format a numeric field
      * <br><br>
-     * Usage:  in columnDefs:  valueFormatter:  AGGrid.money
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.numericFormat, mask:  'xxx', decimalPlaces: N
      *
      * @param params
      * @returns {string}
-     */
-    static money(params) {
-        return Utils.format(params.value, "CD", 0, 2);
-    }
-
-    /**
-     * Format for blank if zero
-     * <br><br>
-     * Usage:  in columnDefs:  valueFormatter:  AGGrid.blankIfZero
      *
-     * @param params
-     * @returns {string}
+     * @see Utils.format()
      */
-    static blankIfZero(params) {
-        return params.value && params.value !== '0' ? params.value : '';
-    }
-
-    /**
-     * Format number with commas, parens around negative numbers, 0 decimal
-     * <br><br>
-     * Usage:  in columnDefs:  valueFormatter:  AGGrid.numericCP0
-     *
-     * @param params
-     * @returns {string}
-     */
-    static numericCP0(params) {
-        return Utils.format(params.value, "CP", 0, 0);
-    }
-
-    /**
-     * Format number with percent, parens around negative numbers, blank if zero, 0 decimal
-     * <br><br>
-     * Usage:  in columnDefs:  valueFormatter:  AGGrid.numericPR0
-     *
-     * @param params
-     * @returns {string}
-     */
-    static numericPRB0(params) {
-        return Utils.format(params.value, "PRB", 0, 0);
+    static  numericFormat(params) {
+        const val = params.value ? Number(params.value) : 0;
+        const msk = params.colDef.mask ? params.colDef.mask : '';
+        const dp  = params.colDef.decimalPlaces ? params.colDef.decimalPlaces : 0;
+        return Utils.format(val, msk, 0, dp);
     }
 
 }
