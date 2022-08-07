@@ -646,23 +646,24 @@ public class Record implements AutoCloseable {
         if (pstmt == null) {
             StringBuilder sql = new StringBuilder("insert into " + table + " (");
             boolean needComma = false;
-            for (String fld : cols.keySet()) {
-                if (needComma)
-                    sql.append(", ");
-                else
-                    needComma = true;
-                sql.append(fld);
-            }
+            for (String fld : cols.keySet())
+                if (cols.get(fld) != null) {
+                    if (needComma)
+                        sql.append(", ");
+                    else
+                        needComma = true;
+                    sql.append(fld);
+                }
             sql.append(") values (");
             needComma = false;
-
-            for (int i = 0; i < cols.size(); i++)
-                if (needComma)
-                    sql.append(", ?");
-                else {
-                    needComma = true;
-                    sql.append("?");
-                }
+            for (Object v : cols.values())
+                if (v != null)
+                    if (needComma)
+                        sql.append(", ?");
+                    else {
+                        needComma = true;
+                        sql.append("?");
+                    }
             sql.append(")");
 //            if (conn.ctype == Connection.ConnectionType.PostgreSQL)
 //                sql.append(" returning " + colname);
@@ -675,11 +676,13 @@ public class Record implements AutoCloseable {
             pstmt.clearParameters();
         int i = 1;
         for (Object val : cols.values()) {
-            Array a = makeSQLArray(conn, val);
-            if (a == null)
-                pstmt.setObject(i++, Connection.fixDate(val));
-            else
-                pstmt.setArray(i++, a);
+            if (val != null) {
+                Array a = makeSQLArray(conn, val);
+                if (a == null)
+                    pstmt.setObject(i++, Connection.fixDate(val));
+                else
+                    pstmt.setArray(i++, a);
+            }
         }
 //        ResultSet rset = pstmt.executeQuery();
         pstmt.executeUpdate();
@@ -717,33 +720,37 @@ public class Record implements AutoCloseable {
         if (pstmt == null) {
             StringBuilder sql = new StringBuilder("insert into " + table + " (");
             boolean needComma = false;
-            for (String fld : cols.keySet()) {
-                if (needComma)
-                    sql.append(", ");
-                else
-                    needComma = true;
-                sql.append(fld);
-            }
+            for (String fld : cols.keySet())
+                if (cols.get(fld) != null) {
+                    if (needComma)
+                        sql.append(", ");
+                    else
+                        needComma = true;
+                    sql.append(fld);
+                }
             sql.append(") values (");
             needComma = false;
-            for (int i = 0; i < cols.size(); i++)
-                if (needComma)
-                    sql.append(", ?");
-                else {
-                    needComma = true;
-                    sql.append("?");
-                }
+            for (Object v : cols.values())
+                if (v != null)
+                    if (needComma)
+                        sql.append(", ?");
+                    else {
+                        needComma = true;
+                        sql.append("?");
+                    }
             sql.append(")");
             pstmt = conn.conn.prepareStatement(sql.toString());
         } else
             pstmt.clearParameters();
         int i = 1;
         for (Object val : cols.values()) {
-            Array a = makeSQLArray(conn, val);
-            if (a == null)
-                pstmt.setObject(i++, Connection.fixDate(val));
-            else
-                pstmt.setArray(i++, a);
+            if (val != null) {
+                Array a = makeSQLArray(conn, val);
+                if (a == null)
+                    pstmt.setObject(i++, Connection.fixDate(val));
+                else
+                    pstmt.setArray(i++, a);
+            }
         }
         boolean ret = pstmt.execute();
         if (ocols == null)
