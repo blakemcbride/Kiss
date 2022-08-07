@@ -29,7 +29,7 @@ public class Tasks {
     final String tomcatTarFile = "apache-tomcat-9.0.34.tar.gz";
     final String BUILDDIR = "build.work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
-    final String postgresqlJar = "postgresql-42.3.3.jar";
+    final String postgresqlJar = "postgresql-42.4.1.jar";
     final String groovyJar = "groovy-4.0.4.jar";
 
     /**
@@ -277,7 +277,7 @@ public class Tasks {
         dep.add("mssql-jdbc-10.2.0.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/10.2.0.jre8/mssql-jdbc-10.2.0.jre8.jar");
         dep.add("mysql-connector-java-8.0.28.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.28/mysql-connector-java-8.0.28.jar");
         dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
-        dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.3.3/postgresql-42.3.3.jar");
+        dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.4.1/postgresql-42.4.1.jar");
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
         dep.add("sqlite-jdbc-3.36.0.3.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.36.0.3/sqlite-jdbc-3.36.0.3.jar");
