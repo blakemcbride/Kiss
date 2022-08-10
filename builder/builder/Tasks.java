@@ -26,7 +26,7 @@ public class Tasks {
     final String LIBS = "libs";
     final ForeignDependencies foreignLibs = buildForeignDependencies();
     final LocalDependencies localLibs = buildLocalDependencies();
-    final String tomcatTarFile = "apache-tomcat-9.0.34.tar.gz";
+    final String tomcatTarFile = "apache-tomcat-9.0.65.tar.gz";
     final String BUILDDIR = "build.work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
     final String postgresqlJar = "postgresql-42.4.1.jar";
@@ -140,7 +140,7 @@ public class Tasks {
 
     void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.34/bin/apache-tomcat-9.0.34.tar.gz");
+            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz");
             gunzip(tomcatTarFile, "tomcat", 1);
             rmTree("tomcat/webapps/ROOT");
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
