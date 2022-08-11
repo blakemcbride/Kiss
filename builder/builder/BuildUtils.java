@@ -1039,5 +1039,39 @@ public class BuildUtils {
     public static void removeFromCache(String fname) {
         rm(cacheDir() + fname);
     }
+    
+    /**
+     * Works like Unix "tail -F" command.  It never exits.
+     * Useful for continuous display of a log file that may rotate.
+     * 
+     * @param fileName
+     * @throws Exception 
+     */
+    public static void tail(String fileName) throws Exception {
+        long lastKnownPosition = 0;
+        final File file = new File(fileName);
+        final byte [] buf = new byte[4096];
+        final int sleepLength = 250;
+        boolean dontNeedSleep;
 
+        while (true) {
+            long fileLength = file.length();
+            if (fileLength < lastKnownPosition)
+                lastKnownPosition = 0;
+            if (dontNeedSleep = fileLength > lastKnownPosition) {
+                RandomAccessFile fp = new RandomAccessFile(file, "r");
+                fp.seek(lastKnownPosition);
+                long nbytes = fileLength - lastKnownPosition;
+                if (dontNeedSleep = nbytes > buf.length)
+                    nbytes = buf.length;
+                if (fp.read(buf, 0, (int) nbytes) != nbytes)
+                    throw new Exception("read error");
+                System.out.write(buf, 0, (int)nbytes);
+                lastKnownPosition += nbytes;
+                fp.close();
+            } 
+            if (!dontNeedSleep)
+                Thread.sleep(sleepLength);
+        }
+    }
 }
