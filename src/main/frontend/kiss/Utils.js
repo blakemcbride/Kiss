@@ -1,3 +1,5 @@
+/* global getScript, AGGrid, Server, DateTimeUtils */
+
 /**
  * Created by Blake McBride on 1/20/16.
  */
@@ -93,7 +95,7 @@ function $$(id) {
     if (e.length)
         return e[0].kiss;
     else {
-        console.log("$$: field " + id + " does not exist.")
+        console.log("$$: field " + id + " does not exist.");
         return null;
     }
 }
@@ -1279,7 +1281,7 @@ class Utils {
      * Dynamically change the width of a popup.
      *
      * @param {string} id popup id
-     * @param {string} height  like "200px"
+     * @param {string} width  like "200px"
      */
     static popup_set_width(id, width) {
         $('#' + id + '--width').css('width', width);
@@ -1648,10 +1650,10 @@ class Utils {
         return new Promise(function(resolve, reject) {
             const getPos = function (p) {
                 resolve(p.coords);
-            }
+            };
             const handleError = function(error) {
                 resolve(null);
-            }
+            };
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(getPos, handleError);
             } else
@@ -1708,7 +1710,7 @@ class Utils {
      * @param {*} val
      *
      * @see Utils.getData
-     * @see Utils.eraseData
+     * @see Utils.getAndEraseData
      */
     static saveData(key, val) {
         Utils.globalData[key] = val;
@@ -1721,7 +1723,7 @@ class Utils {
      * @returns {*}
      *
      * @see Utils.saveData
-     * @see Utils.eraseData
+     * @see Utils.getAndEraseData
      */
     static getData(key) {
         return Utils.globalData[key];
@@ -1736,7 +1738,7 @@ class Utils {
      * @see Utils.saveData
      * @see Utils.getData
      */
-    static eraseData(key) {
+    static getAndEraseData(key) {
         const r = Utils.globalData[key];
         delete Utils.globalData[key];
         return r;
@@ -1921,5 +1923,5 @@ $(document).on('keypress', function(e) {
                 focus(target);
         }
         return this;
-    }
+    };
 })(jQuery);
