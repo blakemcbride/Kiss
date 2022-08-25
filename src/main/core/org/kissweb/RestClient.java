@@ -19,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.*;
 import java.security.cert.CertificateException;
+import java.util.Base64;
 
 /**
  * Provides the ability to act as a client to an external REST server.
@@ -227,7 +228,22 @@ public class RestClient {
         responseString = res.toString();
         return responseCode;
     }
-
+    
+    /**
+     * The following builds a JSON header that implements HTTP basic authentication.
+     * Additional items may be added to the returned header object.
+     * 
+     * @param user
+     * @param pw
+     * @return a new JSON header object containing the basic authentication
+    */
+    public static JSONObject basicAuthenticationHeader(String user, String pw) {
+        final JSONObject header = new JSONObject();
+        final String valueToEncode = user + ":" + pw;
+        header.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes()));
+        return header;     
+    }
+    
     /**
      * The HTTP response code
      *
