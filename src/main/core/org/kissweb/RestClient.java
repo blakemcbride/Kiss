@@ -20,6 +20,7 @@ import java.nio.file.StandardOpenOption;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Base64;
+import org.json.JSONException;
 
 /**
  * Provides the ability to act as a client to an external REST server.
@@ -152,7 +153,11 @@ public class RestClient {
         if (ires == HttpURLConnection.HTTP_OK) {
             if (debugFileName != null)
                 Files.write(Paths.get("R-" + debugFileName), responseString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
-            return new JSONObject(responseString);
+            try {
+                return new JSONObject(responseString);
+            } catch (JSONException e) {
+                return null;
+            }
         }
         return null;
     }
