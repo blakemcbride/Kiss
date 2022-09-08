@@ -2,7 +2,14 @@
 input[type=text] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
 input[type=password] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
 input[type=number] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
-input[type=date] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+input[type=date] { 
+    height: 20px; 
+    border-radius: 5px; 
+    padding-left: 3px; 
+    padding-right: 3px; 
+    padding-top: 0;
+    padding-bottom: 0;
+}
 textarea { border-radius: 5px; padding-left: 3px; padding-right: 3px; }
 
 
