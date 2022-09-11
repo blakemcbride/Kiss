@@ -53,6 +53,8 @@ class Server {
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
+        else
+            injson = { ...injson };  // shallow copy
         injson._uuid = Server.uuid;
         injson._method = meth;
         injson._class = cls;
@@ -123,6 +125,8 @@ class Server {
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
+        else
+            injson = { ...injson };  // shallow copy
         injson._uuid = Server.uuid;
         injson._method = meth;
         injson._class = cls;
