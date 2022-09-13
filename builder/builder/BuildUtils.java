@@ -639,14 +639,13 @@ public class BuildUtils {
     }
 
     private static class StreamGobbler extends Thread {
-        private InputStream is;
-        private String type;
+        private final InputStream is;
 
-        StreamGobbler(InputStream is, String type) {
+        StreamGobbler(InputStream is) {
             this.is = is;
-            this.type = type;
         }
 
+        @Override
         public void run() {
             try {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
@@ -737,8 +736,47 @@ public class BuildUtils {
             } else
                 proc = Runtime.getRuntime().exec(cmd, null, sdir);
             if (showOutput) {
-                (new StreamGobbler(proc.getErrorStream(), "ERROR")).start();
-                (new StreamGobbler(proc.getInputStream(), "OUTPUT")).start();
+                (new StreamGobbler(proc.getErrorStream())).start();
+                (new StreamGobbler(proc.getInputStream())).start();
+            }
+            if (proc.waitFor() != 0)
+                throw new RuntimeException("error executing " + cmd);
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("error executing " + cmd);
+        }
+    }
+
+    /**
+     * Run a command in the underlying OS shell in the foreground.
+     * Wait till it is done.
+     * This command support all of the shell processing such as &gt; and &lt; etc.
+     *
+     * @param startDir starting directory or null
+     * @param cmd the command to execute
+     */
+    public static void runShell(String startDir, String cmd) {
+        println(cmd);
+        File sdir = null;
+        if (startDir != null) {
+            sdir = new File(startDir);
+            if (!sdir.exists())
+                mkdir(sdir);
+            else if (sdir.isFile())
+                throw new RuntimeException("runWait: " + startDir + " is a file");
+        }
+        try {
+            Process proc;
+            String[] mscmd = new String[3];
+            if (isWindows) {
+                mscmd[0] = "cmd.exe";
+                mscmd[1] = "/C";
+                mscmd[2] = cmd;
+                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
+            } else {
+                mscmd[0] = "bash";
+                mscmd[1] = "-c";
+                mscmd[2] = cmd;
+                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
             }
             if (proc.waitFor() != 0)
                 throw new RuntimeException("error executing " + cmd);
@@ -749,6 +787,10 @@ public class BuildUtils {
 
     public static void runWait(boolean showOutput, String cmd) {
         runWait(showOutput, null, cmd);
+    }    
+    
+    public static void runShell(String cmd) {
+        runShell(null, cmd);
     }
 
     /**
