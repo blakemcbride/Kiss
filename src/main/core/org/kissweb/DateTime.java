@@ -235,6 +235,18 @@ public class DateTime {
     }
 
     /**
+     * Returns a string representing the current date and/or time with a specified format.
+     *
+     * @param dateFormat
+     * @return
+     */
+    public static String currentDateTimeFormatted(String dateFormat) {
+        Date date = new Date();
+        SimpleDateFormat df = new SimpleDateFormat(dateFormat);
+        return df.format(date);
+    }
+
+    /**
      * Returns number of milliseconds since 1970.
      *
      * @return
