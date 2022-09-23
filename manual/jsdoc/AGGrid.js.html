@@ -640,6 +640,8 @@ class AGGrid {
      */
     static  numericFormat(params) {
         let val = params.value;
+        if (!val)
+            val = 0;
         val = typeof val !== 'string' ? val : Number(val.replaceAll('$', '').replaceAll(',', ''));
         const msk = params.colDef.mask ? params.colDef.mask : '';
         const dp  = params.colDef.decimalPlaces ? params.colDef.decimalPlaces : 0;
