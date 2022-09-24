@@ -172,11 +172,11 @@ public class RestClient {
      * @param urlStr the URL endpoint
      * @param outStr what is sent to the service
      * @param headers representing all of the headers
-     * @return the string returned from the call
+     * @return the HTTP return code
      * @throws IOException if the communication fail, an exception is thrown
      */
     public int performService(String method, String urlStr, String outStr, JSONObject headers) throws IOException {
-        HttpsURLConnection con = null;
+        HttpURLConnection con = null;
         StringBuilder res = new StringBuilder();
 
         responseString = null;
@@ -186,14 +186,14 @@ public class RestClient {
             // Proxy server support
             if (proxyServerURL != null && !proxyServerURL.isEmpty()) {
                 Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyServerURL, proxyServerPort));
-                con = (HttpsURLConnection) url.openConnection(proxy);
+                con = (HttpURLConnection) url.openConnection(proxy);
             } else
-                con = (HttpsURLConnection) url.openConnection();
+                con = (HttpURLConnection) url.openConnection();
 
             //  SSL support
             if (context != null) {
                 SSLSocketFactory sockFact = context.getSocketFactory();
-                con.setSSLSocketFactory(sockFact);
+                ((HttpsURLConnection) con).setSSLSocketFactory(sockFact);
             }
 
             con.setConnectTimeout(30000);
@@ -215,7 +215,7 @@ public class RestClient {
             responseCode = con.getResponseCode();
             InputStream inputStream;
 
-            if (responseCode == HttpURLConnection.HTTP_OK)
+            if (responseCode >= 200  &&  responseCode < 300)
                 inputStream = con.getInputStream();
             else
                 inputStream = con.getErrorStream();
@@ -233,22 +233,22 @@ public class RestClient {
         responseString = res.toString();
         return responseCode;
     }
-    
+
     /**
      * The following builds a JSON header that implements HTTP basic authentication.
      * Additional items may be added to the returned header object.
-     * 
+     *
      * @param user
      * @param pw
      * @return a new JSON header object containing the basic authentication
-    */
+     */
     public static JSONObject basicAuthenticationHeader(String user, String pw) {
         final JSONObject header = new JSONObject();
         final String valueToEncode = user + ":" + pw;
         header.put("Authorization", "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes()));
-        return header;     
+        return header;
     }
-    
+
     /**
      * The HTTP response code
      *
