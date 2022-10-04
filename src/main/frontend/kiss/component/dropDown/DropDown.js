@@ -109,7 +109,7 @@
             if (selectedItem)
                 newElm.setValue(selectedItem);
             return this;
-        }
+        };
 
         newElm.size = function () {
             return jqObj.children('option').length;
@@ -253,7 +253,7 @@
 
         newElm.triggerGlobalChange = function (flg) {
             triggerGlobalChange = flg;
-        }
+        };
 
         newElm.focus = function () {
             jqObj.focus();
