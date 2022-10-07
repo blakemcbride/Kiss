@@ -31,6 +31,7 @@ public class Tasks {
     final String explodedDir = BUILDDIR + "/" + "exploded";
     final String postgresqlJar = "postgresql-42.4.1.jar";
     final String groovyJar = "groovy-4.0.4.jar";
+    final String debugPort = "9000";
 
     /**
      * Build the whole system
@@ -159,7 +160,7 @@ public class Tasks {
                     "cd " + getcwd() + "\\tomcat\\bin\n" +
                     "set JAVA_HOME=" + getJavaPathOnWindows() + "\n" +
                     "set CATALINA_HOME=" + getTomcatPath() + "\n" +
-                    "set JPDA_ADDRESS=9000\n" +
+                    "set JPDA_ADDRESS=" + debugPort + "\n" +
                     "set JPDA_TRANSPORT=dt_socket\n" +
                     "catalina.bat jpda start\n");
             writeToFile("tomcat\\bin\\stopdebug.cmd", "@echo off\n" +
@@ -179,7 +180,7 @@ public class Tasks {
                     "</tomcat-users>\n");
             writeToFile("tomcat/bin/debug", "#\n" +
                     "cd " + getcwd() + "/tomcat/bin\n" +
-                    "export JPDA_ADDRESS=9000\n" +
+                    "export JPDA_ADDRESS=" + debugPort + "\n" +
                     "export JPDA_TRANSPORT=dt_socket\n" +
                     "./catalina.sh jpda start\n");
             makeExecutable("tomcat/bin/debug");
@@ -209,7 +210,7 @@ public class Tasks {
         proc = runBackground("java -jar SimpleWebServer.jar -d src/main/frontend");
         println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out");
         println("You can browse to http://localhost:8000   (do not use port 8080)");
-        println("The app can also be debugged at port 9000");
+        println("The app can also be debugged at port " + debugPort);
         println("hit any key to stop tomcat");
         readChar();
         println("shutting down tomcat");
