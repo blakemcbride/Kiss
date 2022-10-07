@@ -254,6 +254,17 @@ public class DateTime {
     public long getMilliseconds() {
         return zdt.toInstant().toEpochMilli();
     }
+    
+    /**
+     * Add days to a DateTime object.
+     * 
+     * @param days the number of days to add - can be negative
+     * @return 
+     */
+    public DateTime addDays(int days) {
+        zdt = zdt.plusDays(days);
+        return this;
+    } 
 
     public static void main(String [] args) {
         DateTime dt = new DateTime(20201224, 1130);

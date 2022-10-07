@@ -145,7 +145,7 @@ public class DateUtils {
     /**
      * convert from an <code>int</code> date to a <code>Date</code> date.
      *
-     * @param dat
+     * @param dat a date formatted as YYYYMMDD
      * @return
      */
     public static Date toDate(int dat) {
@@ -172,7 +172,8 @@ public class DateUtils {
      *
      * @param dt
      * @return
-     */    public static Date toDate(LocalDate dt) {
+     */    
+    public static Date toDate(LocalDate dt) {
         return dt == null ? null : Date.from(dt.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
@@ -245,7 +246,7 @@ public class DateUtils {
     /**
      * convert from an <code>int</code> date to a <code>LocalDate</code> date.
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @return
      */
     public static LocalDate toLocalDate(int dt) {
@@ -268,7 +269,7 @@ public class DateUtils {
     /**
      * Convert from a <code>Calendar</code> date to a <code>LocalDate</code>
      *
-     * @param dt
+     * @param dt a Calendar object
      * @return
      *
      */
@@ -309,8 +310,8 @@ public class DateUtils {
     /**
      * Add N days to a date.
      *
-     * @param dt
-     * @param n
+     * @param dt a date formatted as YYYYMMDD
+     * @param n the number of days to add, may be negative
      * @return
      *
      * @see #addMonths(int, int)
@@ -327,7 +328,7 @@ public class DateUtils {
     /**
      * Add N months to a date.
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @param n
      * @return
      *
@@ -345,7 +346,7 @@ public class DateUtils {
     /**
      * Add N years to a date.
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @param n
      * @return
      *
@@ -363,7 +364,7 @@ public class DateUtils {
      * Formats a date to a string according to a format specification.
      *
      * @param fmt format specification
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @return
      *
      * @see java.text.SimpleDateFormat
@@ -383,7 +384,7 @@ public class DateUtils {
     /**
      * Format a date with a two digit year as "m/d/yy"
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @return
      */
     public static String format2(int dt) {
@@ -393,7 +394,7 @@ public class DateUtils {
     /**
      * Format a date with a four digit year as "m/d/yyyy"
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @return
      */
     public static String format4(int dt) {
@@ -403,7 +404,7 @@ public class DateUtils {
     /**
      * Format a date as "YYYY-MM-DD"
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @return
      */
     public static String formatSQL(int dt) {
@@ -413,7 +414,7 @@ public class DateUtils {
     /**
      * Format date as "Jan 3, 2018"
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @return
      *
      * @see #format2(int)
@@ -426,7 +427,7 @@ public class DateUtils {
     /**
      * Format date as "Wed, Jan 3, 2018"
      *
-     * @param dt
+     * @param dt a date formatted as YYYYMMDD
      * @return
      */
     public static String formatLongWithWeekDay(int dt) {
