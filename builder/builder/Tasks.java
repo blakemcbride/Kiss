@@ -2,11 +2,17 @@
  * Author: Blake McBride
  * Date: 2/16/20
  *
- * I've found that I spend more time messing with build programs (such as Maven, Gradle, and others) than
- * the underlying application I am trying to build.  They all do the normal things very, very easily.
- * But when you try to go off their beaten path it gets real difficult real fast.  Being sick and
- * tired of this, and having easily built a shell script to build what I want, I needed a more portable
- * solution.  The files in this directory are that solution.
+ * I've found that I sometimes spend more time messing with build programs (such 
+ * as Maven, Gradle, and others) than the underlying application I am trying to 
+ * build.  They all do the normal things very, very easily.  But when you try to
+ * go off their beaten path it gets real difficult real fast.  Being sick and
+ * tired of this, and having easily built a shell script to build what I want, I
+ * needed a more portable solution.  The files in this directory are that solution.
+ *
+ * It should be noted, however, that unlike a shell script, this build system 
+ * does not execute commands that are already done.  In other words, only the 
+ * minimum steps necessary to rebuild a system are actually executed.  So, this 
+ * build system runs as fast as the others.
  *
  * There are two classes as follows:
  *
