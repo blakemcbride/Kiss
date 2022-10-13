@@ -12,13 +12,19 @@ Stores files in ~/.vscode and ~/.config/Code
 
 Completely reset vscode:  rm -rf ~/.vscode ~/.config/Code
 
+The file "pom.xml" is only used to describe dependencies to GitHub.
+Kiss is not a Maven project.  Unfortunately, most IDE's see the pom.xml
+file and assume a Maven project.  For this reason, the pom.xml usually
+needs to be deleted before engaging an IDE.
+
+
 -----------------------------------------------------------------------------------------------------------------
 
 JDK 11 is required for some of the extensions to VSCode.
 
 Install extensions:
 	Extension Pack for Java
-		Language Support for Java(™) by Red Hat
+		Language Support for Java(ï¿½) by Red Hat
 		Visual Studio IntelliCode
 	Debugger for Java
 	Tomcat for Java
@@ -35,4 +41,4 @@ Build app (from command-line)
 
 Start back-end tomcat in debug mode (within vscode):
 	Right-click on build.work/exploded directory
-	Select “Debug on Tomcat Server”
+	Select "Debug on Tomcat Server"

@@ -1,15 +1,20 @@
 
 NetBeans
 
-NetBeans is the most intuitive and easy to use IDE.  Unfortunately,
-since it became an Apache project, it has been going through a huge
-number of changes.  As of version 12.5, it wasn't able to debug Groovy
-code.  Version 12.6-rc1 works!
+NetBeans is the most intuitive and easy to use IDE.  As of version 15,
+while it does work, it is incapable of debugging code that is changed
+while the system is running (a key aspect of Kiss).
+
+The file "pom.xml" is only used to describe dependencies to GitHub.
+Kiss is not a Maven project.  Unfortunately, most IDE's see the pom.xml
+file and assume a Maven project.  For this reason, the pom.xml usually
+needs to be deleted before engaging an IDE.
 
 ----------------------------------------------------------------------
 
 12.6-rc1
 
+rm pom.xml
 ./bld all
 Go into NetBeans
 Tools / Plugins / Installed

@@ -12,10 +12,16 @@ as normal.
 One positive thing about using the Community version is that it is
 a lot easier to set up.
 
+The file "pom.xml" is only used to describe dependencies to GitHub.
+Kiss is not a Maven project.  Unfortunately, most IDE's see the pom.xml
+file and assume a Maven project.  For this reason, the pom.xml usually
+needs to be deleted before engaging an IDE.
+
 
 IDE config:
 
-From command line:  ./bld all
+rm pom.xml
+From command line:  ./bld libs
 Open with IntelliJ
 Add Ant build (message in lower right-hand corner)
 Unmark top directory as source root
@@ -51,8 +57,8 @@ From the IDE:  Run / Attach to Process / 9000
 From the browser:  http://localhost:8000
 
 From here you can develop and debug through the IDE as normal.
-Changes you make to the front-end or back-end will take affect
-immediatly.  No re-builds are necessary.
+Changes you make to the front-end or back-end will take effect
+immediately.  No re-builds are necessary.
 
 Be sure to turn off network caching on your browser development console.
 

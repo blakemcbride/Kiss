@@ -9,8 +9,14 @@ Kiss works well with it.  On the other hand, like other IDE's,
 IntelliJ can be a bit tedious to configure properly.  The following
 steps can be used to configure IntelliJ.
 
+The file "pom.xml" is only used to describe dependencies to GitHub.
+Kiss is not a Maven project.  Unfortunately, most IDE's see the pom.xml
+file and assume a Maven project.  For this reason, the pom.xml usually
+needs to be deleted before engaging an IDE.
 
-From command line:  
+
+From command line:
+    rm pom.xml
 	./bld all	[Linux, Mac]
 	  -or-
 	bld all		[Windows]
@@ -60,8 +66,8 @@ Back-end code is debugged through IntelliJ.  Front-end debugging
 occurs through the browser developer console.  Be sure browser
 network caching is disabled.
 
-You can now develop and debug.  Front-end changes will take affect on
-page reload.  Back-end changes take effect immediatly.  Just be sure
+You can now develop and debug.  Front-end changes will take effect on
+page reload.  Back-end changes take effect immediately.  Just be sure
 you have browser caching turned off on your browser development
 console.
 
