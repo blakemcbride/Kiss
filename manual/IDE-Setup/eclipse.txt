@@ -1,0 +1,7 @@
+
+eclipse IDE
+
+Historically, I have found eclipse to be maximally complex, convoluted, 
+difficult to use, and unreliable.  While trying to use it, I had a number of 
+problems.  I tried getting answers on the eclipse mailing list but did not get a
+solution.  I have therefor, at least for now, dropped my efforts with eclipse.

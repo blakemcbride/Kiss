@@ -12,6 +12,11 @@ as normal.
 One positive thing about using the Community version is that it is
 a lot easier to set up.
 
+Unfortunately, it has been found that not only is JetBrains' Community Edition
+less functional than their Ultimate version, it appears to have bugs that do not
+appear in their Ultimate version.  This is not due to a lack of updates on
+their Community version either since those bugs appear in no Ultimate version.
+
 The file "pom.xml" is only used to describe dependencies to GitHub.
 Kiss is not a Maven project.  Unfortunately, most IDE's see the pom.xml
 file and assume a Maven project.  For this reason, the pom.xml usually
