@@ -1,13 +1,15 @@
 Kiss IntelliJ - Ultimate Edition
 
-Tried on version 2021.3.2
-
+Tried on version 2022.2.3
 
 Although the Ultimate (commercial) version of IntelliJ costs money, it
 is probably the most powerful, reliable, and best supported IDE.
 Kiss works well with it.  On the other hand, like other IDE's,
 IntelliJ can be a bit tedious to configure properly.  The following
 steps can be used to configure IntelliJ.
+
+Both IntelliJ Community and Ultimate version support Kiss code re-loads well.
+It is the only IDE that does.
 
 The file "pom.xml" is only used to describe dependencies to GitHub.
 Kiss is not a Maven project.  Unfortunately, most IDE's see the pom.xml

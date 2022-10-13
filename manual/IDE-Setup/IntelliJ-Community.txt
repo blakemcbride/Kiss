@@ -1,6 +1,6 @@
 Kiss IntelliJ - Community Edition
 
-Tried on version 2021.2.3
+Tried on version 2022.2.3
 
 The Community Version does not support Web applications.  However,
 that is not necessary for our purposes.  It's a little inconvenient to
@@ -8,6 +8,9 @@ work with but not too bad.  Basically, we'll use the KISS build system
 for installing and running tomcat.  We'll then attach to the debug port
 available on tomcat.  From there, you'll be able to debug and develop
 as normal.
+
+Both IntelliJ Community and Ultimate version support Kiss code re-loads well.
+It is the only IDE that does.
 
 One positive thing about using the Community version is that it is
 a lot easier to set up.

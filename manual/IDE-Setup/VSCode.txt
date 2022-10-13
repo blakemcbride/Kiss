@@ -1,12 +1,15 @@
 Visual Studio Code (VSC) (also VSCode or VS Code)
 
+I was unable to get VSCode's debugger to understand that I was re-loading
+code.  Therefore, VSCode is not a good IDE for developing Kiss apps
+(unless you can figure it out).
+
 Portable, free, open-source IDE from Microsoft
 Works on Windows, Mac, and Linux
 
 Written in Electron - JS, CSS, HTML
 
 To run:  code .
-
 
 Stores files in ~/.vscode and ~/.config/Code
 
@@ -26,19 +29,25 @@ Install extensions:
 	Extension Pack for Java
 		Language Support for Java(�) by Red Hat
 		Visual Studio IntelliCode
-	Debugger for Java
-	Tomcat for Java
+                Debugger for Java
 	Java Decompiler
 	Groovy
-	code-Groovy
+	code-groovy
 	HTML CSS Support
 	IntelliSense for CSS class names in HTML
 	JavaScript and TypeScript Nightly
 
-Add tomcat server (bottom of file list)
+Add a run configuration for VSCode that looks like this:
+        {
+            "type": "java",
+            "request": "attach",
+            "name": "Attach by Process ID",
+            "processId": "${command:PickJavaProcess}",
+            "hostName": "localhost",
+            "port": 9000
+        }
 
-Build app (from command-line)
+Start system from command-line:
+    ./bld develop
 
-Start back-end tomcat in debug mode (within vscode):
-	Right-click on build.work/exploded directory
-	Select "Debug on Tomcat Server"
+Run "Attach to Process ID" that we just added.
