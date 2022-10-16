@@ -10,18 +10,18 @@ Items:
 3.  IDE free
 
 
-			1	2	3
-IntelliJ Ultimate	Y	Y	N
-IntelliJ Community	Y	N	Y
-NetBeans		N	Y	Y
-eclipse			Y	N	Y
-VSCode			?	Y	Y
+                        1       2       3
+IntelliJ Ultimate       Y       Y       N
+IntelliJ Community      Y       N       Y
+NetBeans                N       Y       Y
+eclipse                 Y       N       Y
+VSCode                  ?       Y       Y
 
 
 IntelliJ ultimate is clearly the best choice.  However, especially
 when used in a commercial environment, IntelliJ can be very expensive.
 
-NetBeans Will be the best choice once they fix their debugger.
+NetBeans will be the best choice once they fix their debugger.
 
 
 
