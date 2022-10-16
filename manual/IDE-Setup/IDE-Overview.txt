@@ -21,7 +21,8 @@ VSCode                  ?       Y       Y
 IntelliJ ultimate is clearly the best choice.  However, especially
 when used in a commercial environment, IntelliJ can be very expensive.
 
-NetBeans will be the best choice once they fix their debugger.
+NetBeans will be the best choice if they fix their debugger.
 
+eclipse will be the best IDE if the fix their JavaScript support.
 
 
