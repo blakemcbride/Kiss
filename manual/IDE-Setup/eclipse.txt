@@ -3,53 +3,64 @@ eclipse IDE
 
 Version: 2022-09 (4.25.0)
 
+If you wish to reset eclipse system remove ~/.eclipse
 
-./bld develop
-File / Import
-	General
-		Project from folder
+From command-line:
+	rm pom.xml
+	./bld libs
+From eclipse:
+	Help / Eclipse Marketplace
+		Find ind install "Groovy Development Tools"
+	File / Import
+		General
+			Project from folder
 	
-Right-click project / Properties
-	Builders
-		Uncheck all
-	Java Build Path
-		Source
-			remove all
-			Add Folder
-				src/main/backend
-				src/main/core
-		Libraries
-			Remove Maven Dependencies
-			Add JARs
-				lib/*
-	Java Compiler
-		Uncheck "Use compliance from ..."
-		Compiler compliance level: 17
-	Project Natures
-		Remove Maven Nature
-		Add Groovy Nature
-		Add JavaScript
-	Groovy Compiler
-		4.0
-		
-Run / Debug Configurations
-	Double-click Remote JavaApplication
-		Name: Kiss
-		Project: Kiss
-		Connection Type: Standard (Socket Attach)
-		Host:  localhost
-		Port:  9000
-		
-To debug:
-	Debug dropdown
-	Select configuration
+	Right-click project / Properties
+		Builders
+			Uncheck all
+		Java Build Path
+			Source
+				remove all
+				Add Folder
+					src/main/backend
+					src/main/core
+			Libraries
+				Remove Maven Dependencies
+				Add JARs
+					lib/*
+		Java Compiler
+			Uncheck "Use compliance from ..."
+			Compiler compliance level: 17
+		Project Natures
+			Remove Maven Nature
+			Add Groovy Nature
+			Add JavaScript
+		Groovy Compiler
+			4.0
 
-To support Ant builds:
-	Window / Show View / Ant / Ant
-	Drag build.xml into the Ant window
+	Run / Debug Configurations
+		Double-click Remote JavaApplication
+			Name: Kiss
+			Project: Kiss
+			Connection Type: Standard (Socket Attach)
+			Host:  localhost
+			Port:  9000
+
+	To support Ant builds:
+		Window / Show View / Ant / Ant
+		Drag build.xml into the Ant window
+
+
+To debug:
+	From the command line:
+		./bld develop
+	From eclipse:
+		Debug dropdown
+		Select Kiss configuration
+
 	
 			
 Interestingly, eclipse flags many JavaScript errors that do not exist.
-Therefore, eclipse's JavaScript support is very poor.
+Therefore, eclipse's JavaScript support is unusably poor.
 
 
