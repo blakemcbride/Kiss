@@ -18,7 +18,7 @@ eclipse                 Y       N       Y
 VSCode                  ?       Y       Y
 
 
-IntelliJ ultimate is clearly the best choice.  However, especially
+IntelliJ Ultimate is clearly the best choice.  However, especially
 when used in a commercial environment, IntelliJ can be very expensive.
 
 NetBeans will be the best choice if they fix their debugger.
