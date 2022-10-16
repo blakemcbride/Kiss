@@ -23,6 +23,6 @@ when used in a commercial environment, IntelliJ can be very expensive.
 
 NetBeans will be the best choice if they fix their debugger.
 
-eclipse will be the best IDE if the fix their JavaScript support.
+eclipse will be the best choice if they fix their JavaScript support.
 
 
