@@ -9,8 +9,12 @@ for installing and running tomcat.  We'll then attach to the debug port
 available on tomcat.  From there, you'll be able to debug and develop
 as normal.
 
-Both IntelliJ Community and Ultimate version support Kiss code re-loads well.
-It is the only IDE that does.
+Both IntelliJ Community and Ultimate version support Kiss code
+re-loads well.  It is the only IDE that does.
+
+There is, however, a big problem with their Community version with
+respect to JavaScript.  Their community version does not support
+JavaScript!
 
 One positive thing about using the Community version is that it is
 a lot easier to set up.

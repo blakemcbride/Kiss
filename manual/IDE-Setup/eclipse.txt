@@ -1,7 +1,55 @@
 
 eclipse IDE
 
-Historically, I have found eclipse to be maximally complex, convoluted, 
-difficult to use, and unreliable.  While trying to use it, I had a number of 
-problems.  I tried getting answers on the eclipse mailing list but did not get a
-solution.  I have therefor, at least for now, dropped my efforts with eclipse.
+Version: 2022-09 (4.25.0)
+
+
+./bld develop
+File / Import
+	General
+		Project from folder
+	
+Right-click project / Properties
+	Builders
+		Uncheck all
+	Java Build Path
+		Source
+			remove all
+			Add Folder
+				src/main/backend
+				src/main/core
+		Libraries
+			Remove Maven Dependencies
+			Add JARs
+				lib/*
+	Java Compiler
+		Uncheck "Use compliance from ..."
+		Compiler compliance level: 17
+	Project Natures
+		Remove Maven Nature
+		Add Groovy Nature
+		Add JavaScript
+	Groovy Compiler
+		4.0
+		
+Run / Debug Configurations
+	Double-click Remote JavaApplication
+		Name: Kiss
+		Project: Kiss
+		Connection Type: Standard (Socket Attach)
+		Host:  localhost
+		Port:  9000
+		
+To debug:
+	Debug dropdown
+	Select configuration
+
+To support Ant builds:
+	Window / Show View / Ant / Ant
+	Drag build.xml into the Ant window
+	
+			
+Interestingly, eclipse flags many JavaScript errors that do not exist.
+Therefore, eclipse's JavaScript support is very poor.
+
+
