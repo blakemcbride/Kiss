@@ -1200,13 +1200,29 @@ class Utils {
 
     /**
      * Open a modal popup window identified by id <code>id</code>.
+     * <br><br>
+     * If <code>replace</code> is used and there isn't a prior popup, it just acts like a plain open.
+     * So, if the popup is being used as a wizard, all the opens should set this to <code>true</code>.
      *
      * @param {string} id the id of the popup to evoke
-     * @param {string} focus_ctl optional control to set initial focus
+     * @param {string} focus_ctl optional, control to set initial focus
+     * @param {boolean} replace optional, if true, replace prior popup with this popup at the same coordinates
      *
      * @see Utils.popup_close
      */
-    static popup_open(id, focus_ctl=null) {
+    static popup_open(id, focus_ctl=null, replace = false) {
+
+        let prior_offset = null;
+
+        if (replace && Utils.popup_context.length) {
+            const prior_context = Utils.popup_context[Utils.popup_context.length - 1];
+            const prior_id = prior_context.id;
+            const prior_w = $('#' + prior_id);
+            const prior_content = prior_w.children();
+            prior_offset = $(prior_content).offset();
+            Utils.popup_close();
+        }
+
         const w = $('#' + id);
         let content;
         let both_parts;
@@ -1251,6 +1267,8 @@ class Utils {
         }
 
         w.show();
+        if (prior_offset)
+            $(content).offset(prior_offset);
 
         this.makeDraggable(header, content);
 
