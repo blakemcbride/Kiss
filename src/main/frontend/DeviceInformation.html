@@ -2,9 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Device Information</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <title>Device Information</title>
     <script>
         function updateInfo() {
 
@@ -22,15 +21,15 @@
             let fullVersion  = 'Unknown';
             let nameOffset,verOffset,ix;
             let OSName = "Unknown";
-            if (nAgt.indexOf("Windows NT 11")!== -1) OSName="Windows 11";
-            if (nAgt.indexOf("Windows NT 10")!== -1) OSName="Windows 10";
+            if (nAgt.indexOf("Windows NT 11")  !== -1) OSName="Windows 11";
+            if (nAgt.indexOf("Windows NT 10")  !== -1) OSName="Windows 10";
             if (nAgt.indexOf("Windows NT 6.3") !== -1) OSName="Windows 8.1";
             if (nAgt.indexOf("Windows NT 6.2") !== -1) OSName="Windows 8";
             if (nAgt.indexOf("Windows NT 6.1") !== -1) OSName="Windows 7";
             if (nAgt.indexOf("Windows NT 6.0") !== -1) OSName="Windows Vista";
             if (nAgt.indexOf("Windows NT 5.1") !== -1) OSName="Windows XP";
             if (nAgt.indexOf("Windows NT 5.0") !== -1) OSName="Windows 2000";
-            if (nAgt.indexOf("Mac")            !== -1) OSName="Mac/iOS";
+            if (nAgt.indexOf("Mac")            !== -1) OSName="macOS/iOS";
             if (nAgt.indexOf("X11")            !== -1) OSName="UNIX";
             if (nAgt.indexOf("Linux")          !== -1) OSName="Linux";
 
@@ -79,14 +78,11 @@
             if ((ix=fullVersion.indexOf(" "))!==-1)
                 fullVersion=fullVersion.substring(0,ix);
 
-            document.body.innerHTML = "";
-            document.write(`Device Type = ${deviceType}<br>OS = ${OSName}<br>Browser = ${browserName}<br>Browser version  = ${fullVersion}<br>Display size = ${screen.width}x${screen.height}<br>Window size = ${window.innerWidth}x${window.innerHeight}<br>${nAgt}`
-            );
+            document.body.innerHTML = `Device Type = ${deviceType}<br>OS = ${OSName}<br>Browser = ${browserName}<br>Browser version  = ${fullVersion}<br>Display size = ${screen.width}x${screen.height}<br>Window size = ${window.innerWidth}x${window.innerHeight}<br>${nAgt}`;
             window.onresize = updateInfo;
         }
     </script>
 </head>
-<body onload="updateInfo()" style="font-size: xx-large;">
-
+<body onload="updateInfo()" style="font-size: medium;">
 </body>
 </html>
