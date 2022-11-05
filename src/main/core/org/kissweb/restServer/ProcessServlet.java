@@ -401,8 +401,23 @@ public class ProcessServlet implements Runnable {
         return (str == null || str.equals(""));
     }
 
+    /**
+     * Get all user data.
+     *
+     * @return
+     */
     public UserData getUserData() {
         return ud;
+    }
+
+    /**
+     * Get a specific user data element.
+     *
+     * @param key
+     * @return
+     */
+    public Object getUserData(String key) {
+        return ud.getUserData(key);
     }
 
     /**
