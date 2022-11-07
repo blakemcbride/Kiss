@@ -1629,8 +1629,8 @@ class Utils {
 
     /**
      * Append html (as text) to the list of children of a node.
-     *<br><br>
-     * <code>tag</code> can be the id of the control or its jQuery node.
+     * <br><br>
+     * @code{tag} can be the id of the control or its jQuery node.
      * This function returns the jQuery node that can be used
      * for additional calls to this function (so it'll be faster).
      *
@@ -1639,12 +1639,40 @@ class Utils {
      * @returns {object} the jQuery node
      */
     static appendChild(tag, html) {
-        const node = typeof tag === 'string' ? $('#' + tag) : tag;
-        if (!node.length) {
-            console.log('tag ' + tag +' not found.');
-            return;
-        }
+        let node;
+        if (typeof tag === 'string') {
+            node = $('#' + tag);
+            if (!node || !node.length) {
+                console.log('tag ' + tag +' not found.');
+                return;
+            }
+        } else
+            node = tag;
         node.append(html);
+        return node;
+    }
+
+    /**
+     * Erase all the child nodes.
+     * <br><br>
+     * @code{tag} can be the id of the control or its jQuery node.
+     * This function returns the jQuery node that can be used
+     * for additional calls to this function.
+     *
+     * @param tag {object|string} see above
+     * @returns {object} the jQuery node
+     */
+    static eraseChildren(tag) {
+        let node;
+        if (typeof tag === 'string') {
+            node = $('#' + tag);
+            if (!node || !node.length) {
+                console.log('tag ' + tag +' not found.');
+                return;
+            }
+        } else
+            node = tag;
+        node.empty();
         return node;
     }
 
