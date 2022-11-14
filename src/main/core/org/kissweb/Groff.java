@@ -263,9 +263,16 @@ public class Groff {
     public void endTable() {
         if (inTable) {
             if (row.length() > 0) {
-                if (!inTitle && currentRow++ % 2 == 1)
-                    pw.print("\\*Y");
-                pw.println(row);
+                if (row.toString().startsWith("T{\n")) {
+                    pw.print("T{\n");
+                    if (!inTitle && currentRow++ % 2 == 1)
+                        pw.print("\\*Y");
+                    pw.println(row.delete(0, 3));
+                } else {
+                    if (!inTitle && currentRow++ % 2 == 1)
+                        pw.print("\\*Y");
+                    pw.println(row);
+                }
                 row.setLength(0);
             }
             pw.println(".TE");
