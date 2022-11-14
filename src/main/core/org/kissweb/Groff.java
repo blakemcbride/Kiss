@@ -90,6 +90,7 @@ public class Groff {
             colFmt += ".";
         numberOfColumns = 1 + colFmt.trim().replaceAll(" {2}", " ").replaceAll("[^ ]", "").length();
         out(".fi");
+        out(".ad l");
         out(".TS H");
         out("center tab(" + delim + ");");
         out(colFmt);
