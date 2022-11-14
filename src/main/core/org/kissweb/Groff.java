@@ -39,6 +39,7 @@ public class Groff {
     private boolean inTable = false;
     private String runDate;
     private final List<String> pageTitleLines = new ArrayList<>();
+    private boolean grayEveryOtherLineFlg = true;
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
@@ -82,6 +83,7 @@ public class Groff {
      * @param colFmt
      */
     public void startTable(String colFmt) {
+        grayEveryOtherLineFlg = true;  //  default
         colFmt = colFmt.trim();
         colFmt = colFmt.replaceAll(" {2}", " ");
         if (!colFmt.endsWith("."))
@@ -108,7 +110,7 @@ public class Groff {
 
     private void flush() {
         if (currentColumn >= numberOfColumns) {
-            if (!inTitle && currentRow++ % 2 == 1)
+            if (grayEveryOtherLineFlg && !inTitle && currentRow++ % 2 == 1)
                 pw.print("\\*Y");
             pw.println(row);
             currentColumn = 0;
@@ -148,6 +150,10 @@ public class Groff {
      * @param col
      */
     public void columnWrap(String col) {
+        /*  Automatic graying of every other row in a table is incompatible with wrapped columns.
+            Therefore, it is turned off when wrapped columns are used.
+         */
+        grayEveryOtherLineFlg = false;
         flush();
         if (currentColumn++ != 0)
             row.append(delim);
@@ -265,11 +271,11 @@ public class Groff {
             if (row.length() > 0) {
                 if (row.toString().startsWith("T{\n")) {
                     pw.print("T{\n");
-                    if (!inTitle && currentRow++ % 2 == 1)
+                    if (grayEveryOtherLineFlg && !inTitle && currentRow++ % 2 == 1)
                         pw.print("\\*Y");
                     pw.println(row.delete(0, 3));
                 } else {
-                    if (!inTitle && currentRow++ % 2 == 1)
+                    if (grayEveryOtherLineFlg && !inTitle && currentRow++ % 2 == 1)
                         pw.print("\\*Y");
                     pw.println(row);
                 }
