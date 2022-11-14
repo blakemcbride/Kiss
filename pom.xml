@@ -6,7 +6,9 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <!--  This file is only used to describe dependencies to GitHub.  
         Kiss is not a Maven project and is not built with Maven!
         Kiss is built with its own build system called 'bld'. 
-	See the documentation.    -->
+        In fact, you may need to delete this file so that your IDE
+        doesn't think this is a Maven project.
+        See the documentation.    -->
   
   <modelVersion>4.0.0</modelVersion>  
   
