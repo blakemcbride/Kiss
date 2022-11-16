@@ -23,6 +23,7 @@
         let enterFunction = null;
         let nattrs = '';
         let id;
+        let placeholder = true;
         for (let prop in attr) {
             switch (prop) {
 
@@ -36,6 +37,9 @@
                     break;
                 case 'required':
                     required = true;
+                    break;
+                case 'no-placeholder':
+                    placeholder = false;
                     break;
 
                 // pre-existing attributes
@@ -57,7 +61,7 @@
         const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content ? content.trim() : 'mm/dd/yyyy'
+            placeholder: content ? content.trim() : (placeholder ? 'mm/dd/yyyy' : '')
         });
         if (!newElm)
             return;

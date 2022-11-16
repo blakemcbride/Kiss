@@ -97,6 +97,7 @@ class components {
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    max="20181231"     </td><td>     the maximum date allowed               </td></tr>
      *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed               </td></tr>
+     *     <tr><td>    no-placeholder     </td><td>     do not display mm/dd/yyyy when field is empty  </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      * </table>
      * <br>
