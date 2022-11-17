@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 
 /**
@@ -142,5 +143,25 @@ public class FileUtils {
      */
     public static String readFile(String fileName) throws IOException {
         return new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Copy file
+     *
+     * @param source file
+     * @param dest  file or directory
+     * @throws IOException
+     */
+    public static void copy(String source, String dest) throws IOException {
+        File sfile = new File(source);
+        File dfile = new File(dest);
+        if (!sfile.exists())
+            throw new IOException("copy: " + source + " does not exist");
+        if (sfile.isDirectory())
+            throw new IOException("copy: " + source + " is a directory");
+        if (dfile.exists() && dfile.isDirectory())
+            dfile = new File(dfile, sfile.getName());
+        dfile.getParentFile().mkdirs();
+        Files.copy(sfile.toPath(), dfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 }
