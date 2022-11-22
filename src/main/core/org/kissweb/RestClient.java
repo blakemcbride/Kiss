@@ -1,5 +1,6 @@
 package org.kissweb;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -77,11 +78,25 @@ public class RestClient {
      * @param method POST / GET / etc.
      * @param urlStr URL endpoint
      * @param out what is sent to the service
-     * @param headers representing all of the headers
+     * @param headers representing all the headers
      * @return what is returned from the service
      * @throws IOException if error
      */
     public JSONObject jsonCall(String method, String urlStr, JSONObject out, JSONObject headers) throws IOException {
+        return jsonCall(method, urlStr, out == null ? null : out.toString(), headers);
+    }
+
+    /**
+     * Call a REST service sending a JSON array and returning a JSON object.
+     *
+     * @param method POST / GET / etc.
+     * @param urlStr URL endpoint
+     * @param out what is sent to the service
+     * @param headers representing all the headers
+     * @return what is returned from the service
+     * @throws IOException if error
+     */
+    public JSONObject jsonCall(String method, String urlStr, JSONArray out, JSONObject headers) throws IOException {
         return jsonCall(method, urlStr, out == null ? null : out.toString(), headers);
     }
 
