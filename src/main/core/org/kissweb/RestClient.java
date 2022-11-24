@@ -126,7 +126,7 @@ public class RestClient {
      */
     public Document xmlCall(String method, String urlStr, String outStr, JSONObject headers) throws IOException, ParserConfigurationException, SAXException {
         int ires = performService(method, urlStr, outStr, headers);
-        if (ires == HttpURLConnection.HTTP_OK) {
+        if (ires >= 200  &&  ires < 300) {
             if (debugFileName != null)
                 Files.write(Paths.get(debugFileName), responseString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
             return parseXML(responseString);
@@ -165,7 +165,7 @@ public class RestClient {
         if (debugFileName != null)
             Files.write(Paths.get("S-" + debugFileName), outStr == null ? "".getBytes() : outStr.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
         int ires = performService(method, urlStr, outStr, headers);
-        if (ires == HttpURLConnection.HTTP_OK) {
+        if (ires >= 200  &&  ires < 300) {
             if (debugFileName != null)
                 Files.write(Paths.get("R-" + debugFileName), responseString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
             try {
