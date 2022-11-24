@@ -91,7 +91,7 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.4.1</version>
+      <version>42.5.1</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
