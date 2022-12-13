@@ -988,10 +988,12 @@ class Utils {
      * @param {string} tag optional ID of div to fill (if empty "body" tag is used)
      * @param {string} initialFocus optional, ID of control to set initial focus on
      * @param {object} argv arguments for the page being loaded
-     * @param {object} retv return value array from child screen
+     * @param {object} retv return value array from child screen (mainly used internally)
      *
      * @see Utils.pushPage
      * @see Utils.popPage
+     * @see Utils.getPageArgv
+     * @see Utils.getPageRetv
      */
     static loadPage(page, tag, initialFocus, argv, retv) {
         Utils.cleanup();
@@ -1040,6 +1042,7 @@ class Utils {
      * @see Utils.popPage
      * @see Utils.getPageArgv
      * @see Utils.getPageRetv
+     * @see Utils.loadPage
      */
     static pushPage(path, tag, initialFocus, argv) {
         //  push the previous screen with args
