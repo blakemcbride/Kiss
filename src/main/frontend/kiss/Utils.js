@@ -1600,6 +1600,7 @@ class Utils {
 
     /**
      * Convert an HTML string into a text string.
+     * Also convert Unicode to ASCII when possible.
      *
      * @param html
      * @returns {string}
@@ -1609,6 +1610,21 @@ class Utils {
             return '';
         return html
             .replace(/<br *[^>]*>/g, '\n')
+
+            // iPhone uses Unicode!  Convert to ASCII.
+            .replace(/\u2018/g, "'")
+            .replace(/\u2019/g, "'")
+            .replace(/\u201B/g, "'")
+            .replace(/\u201C/g, '"')
+            .replace(/\u201F/g, '"')
+            .replace(/\u201D/g, '"')
+            .replace(/\u275D/g, '"')
+            .replace(/\u275E/g, '"')
+            .replace(/\u301D/g, '"')
+            .replace(/\u301E/g, '"')
+            .replace(/\u275B/g, "'")
+            .replace(/\u275C/g, "'")
+
             .replace(/<div *[^>]*>/g, '\n')
             .replace(/<\/div>/g, '')
             .replace(/<span *[^>]*>/g, '')
