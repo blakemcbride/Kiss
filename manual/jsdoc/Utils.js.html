@@ -1027,9 +1027,12 @@ class Utils {
     /**
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
      * Also, the loaded code is processed for custom tags / components.
+     * &lt;br>&lt;br>
+     * &lt;code>.html&lt;/code> and &lt;code>.js&lt;/code> are appended to &lt;code>page&lt;/code> to determine what to load.
+     * The HTML file is loaded first and then the JS file.
      *
-     * @param {string} page path to the page to be loaded.
-     * @param {string} tag optional ID of div to fill (if empty "body" tag is used)
+     * @param {string} page path to the page to be loaded
+     * @param {string} tag optional ID of div to fill (if empty, "body" tag is used)
      * @param {string} initialFocus optional, ID of control to set initial focus on
      * @param {object} argv arguments for the page being loaded
      * @param {object} retv return value array from child screen (mainly used internally)
@@ -1078,9 +1081,9 @@ class Utils {
     /**
      * Load a new screen but also remember what is loaded so that it can be returned to.
      *
-     * @param {string} path
-     * @param {string} tag
-     * @param {string} initialFocus
+     * @param {string} page path to the page to be loaded
+     * @param {string} tag optional ID of div to fill (if empty, "body" tag is used)
+     * @param {string} initialFocus optional, ID of control to set initial focus on
      * @param {object} argv values being passed to the new screen
      *
      * @see Utils.popPage
@@ -1088,16 +1091,22 @@ class Utils {
      * @see Utils.getPageRetv
      * @see Utils.loadPage
      */
-    static pushPage(path, tag, initialFocus, argv) {
+    static pushPage(page, tag, initialFocus, argv) {
         //  push the previous screen with args
-        Utils.screenStack.push({path: Utils.lastScreenLoaded.page, tag: Utils.lastScreenLoaded.tag, initialFocus: Utils.initialFocus, argv: Utils.lastScreenLoaded.argv});
-        Utils.loadPage(path, tag, initialFocus, argv);
+        const stackFrame = {
+            path: Utils.lastScreenLoaded.page,
+            tag: Utils.lastScreenLoaded.tag,
+            initialFocus: Utils.initialFocus,
+            argv: Utils.lastScreenLoaded.argv
+        };
+        Utils.screenStack.push(stackFrame);
+        Utils.loadPage(page, tag, initialFocus, argv);
     }
 
     /**
      * Re-load the prior screen.
      *
-     * @param {object} retv values being returned from the prior screen
+     * @param {object} retv values being returned to the prior screen
      *
      * @see Utils.pushPage
      * @see Utils.getPageArgv
@@ -1108,8 +1117,8 @@ class Utils {
             console.log("Utils.popPage:  no screen to pop");
             return;
         }
-        const frame = Utils.screenStack.pop();
-        Utils.loadPage(frame.path, frame.tag, frame.initialFocus, frame.argv, retv);
+        const stackFrame = Utils.screenStack.pop();
+        Utils.loadPage(stackFrame.path, stackFrame.tag, stackFrame.initialFocus, stackFrame.argv, retv);
     }
 
     /**
