@@ -1,0 +1,6 @@
+#
+
+# This script is used to package up a front-end-only system
+
+cd src/main/frontend
+tar cvzf ../../../frontend.tar.gz *
