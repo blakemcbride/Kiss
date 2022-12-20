@@ -2,5 +2,8 @@
 
 # This script is used to package up a front-end-only system
 
+FILE=frontend.tar.gz
+
+rm -f $FILE
 cd src/main/frontend
-tar cvzf ../../../frontend.tar.gz *
+tar cvzf ../../../$FILE *
