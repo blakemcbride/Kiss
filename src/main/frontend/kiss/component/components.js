@@ -470,6 +470,7 @@ class components {
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code> whenever the state of this control changes.  <code>fun</code> is passed the value of the control group.  </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>    sets the control to read-only (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>    sets the control to read-write (or the reverse if the optional argument is <code>false</code>)        </td></tr>
+     *     <tr><td>    setLabel(val)     </td><td>     selects the label for the control               </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     selects the button with the associated value               </td></tr>
      *     <tr><td>    show([flg])     </td><td>    sets the control to show (not hide) (or the reverse if the optional argument is <code>false</code>)           </td></tr>
      * </table>

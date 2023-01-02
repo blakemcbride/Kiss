@@ -113,6 +113,11 @@ Kiss.RadioButtons.groups = {};
             Utils.someControlValueChanged();
         });
 
+        newElm.setLabel = function(lbl) {
+            jqObj.next().text(lbl);
+            return this;
+        }
+
         /*
            RadioButtons have the ability to control a single radio button or a group of radio buttons.
            The functionality for individual radio buttons is as follows.
