@@ -999,10 +999,8 @@ class Utils {
      * @see Utils.getPageRetv
      */
     static loadPage(page, tag, initialFocus, argv, retv) {
-        Utils.cleanup();
         return new Promise(function (resolve, reject) {
-            if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
-                Kiss.RadioButtons.resetGroups();
+            Utils.cleanup();
             Utils.lastScreenLoaded.page = page;
             Utils.lastScreenLoaded.tag  = tag;
             Utils.lastScreenLoaded.initialFocus = initialFocus;
@@ -1063,17 +1061,21 @@ class Utils {
      * Re-load the prior screen.
      *
      * @param {object} retv values being returned to the prior screen
+     * @param {number} howmany how many screens to go back (default 1)
      *
      * @see Utils.pushPage
      * @see Utils.getPageArgv
      * @see Utils.getPageRetv
      */
-    static popPage(retv) {
-        if (!Utils.screenStack.length) {
-            console.log("Utils.popPage:  no screen to pop");
-            return;
+    static popPage(retv, howmany=1) {
+        let stackFrame;
+        while (howmany--) {
+            if (!Utils.screenStack.length) {
+                console.log("Utils.popPage:  no screen to pop");
+                return;
+            }
+            stackFrame = Utils.screenStack.pop();
         }
-        const stackFrame = Utils.screenStack.pop();
         Utils.loadPage(stackFrame.path, stackFrame.tag, stackFrame.initialFocus, stackFrame.argv, retv);
     }
 
@@ -1543,7 +1545,8 @@ class Utils {
      */
     static cleanup() {
         Utils.clearSomeControlValueChanged(false);
-        Kiss.RadioButtons.resetGroups();
+        if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
+            Kiss.RadioButtons.resetGroups();
         if (typeof AGGrid !== 'undefined') {
             AGGrid.popAllGridContexts();
             AGGrid.newGridContext();   //  for the new screen we are loading
