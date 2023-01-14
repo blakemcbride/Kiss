@@ -1057,6 +1057,7 @@ class Utils {
                 else
                     $('body').html(text);
                 Utils.rescan();  // does all the tag replacement
+                window.scrollTo(0, 0);
                 getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '')).then(function () {
                     if (initialFocus) {
                         const ctl = $$(initialFocus);
