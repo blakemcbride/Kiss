@@ -100,7 +100,7 @@
                 if (/^\d+$/.test(val))
                     jqObj.val(DateUtils.intToSQL(Number(val)));
                 else
-                    jqObj.val(val);
+                    jqObj.val(DateUtils.intToSQL(DateUtils.strToInt(val)));
             } else if (typeof val === 'object')  // Date
                 jqObj.val(DateUtils.intToSQL(DateUtils.dateToInt(val)));
             originalValue = newElm.getIntValue();

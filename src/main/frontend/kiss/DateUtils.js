@@ -20,7 +20,11 @@
 class DateUtils {
 
     /**
-     * Converts a string date "mM/dD/yyYY" or 'mmddyyyy' to an integer of the form YYYYMMDD.
+     * Converts a string in any of the following formats to an int YYYYMMDD:
+     *     "mM/dD/yyYY"
+     *     "mmddyyyy"
+     *     "yyyymmdd"
+     *     "YYYY-MM-DD" or "YYYY/MM/DD"
      * Bad dates return 0
      *
      * @param {string} dateString
@@ -35,20 +39,34 @@ class DateUtils {
         let month;
         let year;
 
-        if (!/^\d{1,2}\/\d{1,2}\/\d{2,4}$/.test(dateString)) {
-            if (/^\d{8}$/.test(dateString)) {
-                // assume MMDDYYYY
-                month = parseInt(dateString.substr(0, 2), 10);
-                day = parseInt(dateString.substr(2, 2), 10);
-                year = parseInt(dateString.substr(4, 4), 10)
-            } else
-                return 0;
-        } else {
+        if (/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(dateString)) {  //  mM/dD/yyYY
+            let sp = dateString.indexOf(" ");
+            if (sp > 5)
+                dateString = dateString.substring(0, sp);
             const parts = dateString.split("/");
             day = parseInt(parts[1], 10);
             month = parseInt(parts[0], 10);
             year = parseInt(parts[2], 10);
-        }
+        } else if (/^\d{4}[-/]\d{2}[-/]\d{2}/.test(dateString)) {  // YYYY-MM-DD or YYYY/MM/DD
+            year = parseInt(dateString.substring(0, 4), 10);
+            month = parseInt(dateString.substring(5, 7), 10);
+            day = parseInt(dateString.substring(8, 10), 10);
+        } else if (/^\d{8}$/.test(dateString)) {  // NNNNNNNN
+            // assume MMDDYYYY
+            month = parseInt(dateString.substring(0, 2), 10);
+            day = parseInt(dateString.substring(2, 4), 10);
+            year = parseInt(dateString.substring(4, 8), 10);
+            if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900 || year > 2100) {
+                // assume YYYYMMDD
+                year = parseInt(dateString.substring(0, 4), 10);
+                month = parseInt(dateString.substring(4, 6), 10);
+                day = parseInt(dateString.substring(6, 8), 10);
+            }
+            if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900 || year > 2100)
+                return 0;
+        } else
+            return 0;
+
         if (year < 100) {
             let currentYear = new Date().getFullYear();
             let y19 = 1900 + year;
