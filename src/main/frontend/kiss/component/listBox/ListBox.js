@@ -319,24 +319,32 @@
 
         newElm.onClick = function (fun) {
             jqObj.off('click').click(function () {
-                if (jqObj.val()) {
-                    timeout = setTimeout(function () {
-                        if (timeout)
-                            fun(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
-                    }, 300);
-                }
+                timeout = setTimeout(function () {
+                    if (fun) {
+                        const val = jqObj.val();
+                        if (val)
+                            fun(val, jqObj.find('option:selected').text(), dataStore[val]);
+                        else
+                            fun(null, null, null);
+                    }
+                }, 300);
             });
             return this;
         };
 
+        // double-click is not recognised on mobile devices
         newElm.onDblClick = function (fun) {
             jqObj.off('dblclick').dblclick(function () {
-                if (jqObj.val()) {
-                    if (timeout) {
-                        clearTimeout(timeout);
-                        timeout = null;
-                    }
-                    fun(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
+                if (timeout) {
+                    clearTimeout(timeout);
+                    timeout = null;
+                }
+                if (fun) {
+                    const val = jqObj.val();
+                    if (val)
+                        fun(val, jqObj.find('option:selected').text(), dataStore[val]);
+                    else
+                        fun(null, null, null);
                 }
             });
             return this;

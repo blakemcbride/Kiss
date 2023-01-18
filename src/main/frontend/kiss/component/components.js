@@ -263,7 +263,7 @@ class components {
      *     <tr><td>    isVisible()     </td><td>    <code>true</code> if control is visible (not hidden)     </td></tr>
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
      *     <tr><td>    onClick(fun)     </td><td>     execute <code>fun</code>whenever the user clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
-     *     <tr><td>    onDblClick(fun)     </td><td>     execute <code>fun</code>whenever the user double-clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data)</code>              </td></tr>
+     *     <tr><td>    onDblClick(fun)     </td><td>     execute <code>fun</code>whenever the user double-clicks on an item. <code>fun</code> is called as follows <code>fun(val, lbl, data) (Note that double-click does not function on mobile devices.)</code>              </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>     sets control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>     sets control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    removeByIndex(idx)     </td><td>     remove the row indicated by <code>idx</code>             </td></tr>
