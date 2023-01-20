@@ -549,6 +549,28 @@ public class DateUtils {
     }
 
     /**
+     * Returns the day of week number as follows:<br>
+     * 0 = Sunday<br>
+     * 1 = Monday<br>
+     * 2 = Tuesday<br>
+     * 3 = Wednesday<br>
+     * 4 = Thursday<br>
+     * 5 = Friday<br>
+     * 6 = Saturday<br>
+     * <br>
+     * -1 = Invalid date
+     *
+     * @param dt YYYYMMDD
+     * @return
+     */
+    public static int dayOfWeek(int dt) {
+        if (dt <= 0)
+            return -1;
+        return (int)(julian(dt) % 7L);
+    }
+
+
+    /**
      * Returns the full name of the week day.
      *
      * @param dt YYYYMMDD
