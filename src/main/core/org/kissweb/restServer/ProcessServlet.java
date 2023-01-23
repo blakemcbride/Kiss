@@ -210,6 +210,29 @@ public class ProcessServlet implements Runnable {
         return f.getAbsolutePath();
     }
 
+    /**
+     * Reads upload file "n", saves it to the file name passed in, and returns the file name passed in
+     *
+     * @param n file number
+     * @param fileName the name of the file to save the upload to
+     * @return the fileName passed in
+     * @throws IOException
+     *
+     * @see #getUploadFileName(int)
+     * @see #getUploadBufferedInputStream(int)
+     */
+    public String saveUploadFile(int n, String fileName) throws IOException {
+        try (
+                BufferedInputStream bis = getUploadBufferedInputStream(n);
+                BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(fileName));
+        ) {
+            int c;
+            while (-1 != (c = bis.read()))
+                bos.write(c);
+        }
+        return fileName;
+    }
+
     private void run2() throws IOException {
         servletContext = request.getServletContext();
         String _className;
