@@ -134,6 +134,23 @@ public class ProcessServlet implements Runnable {
     }
 
     /**
+     * Returns the file extension of a given file upload.
+     *
+     * @param i
+     * @return
+     */
+    public String getUploadFileType(int i) {
+        try {
+            final Part filePart = request.getPart("_file-" + i);
+            final String fn = getFileName(filePart);
+            final int idx = fn.lastIndexOf('.');
+            return idx == -1 ? "" : fn.substring(idx + 1);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
      * In file upload scenarios, this method returns a BufferedInputStream
      * associated with file number i.  When done, the stream must be
      * closed by the application.
@@ -152,6 +169,22 @@ public class ProcessServlet implements Runnable {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * In a file upload scenario, this method returns a byte array of the data that was uploaded.
+     *
+     * @param i starting from 0
+     * @return
+     * @throws IOException
+     */
+    public byte [] getUploadBytes(int i) throws IOException {
+        BufferedInputStream bis = getUploadBufferedInputStream(i);
+        if (bis == null)
+            return null;
+        byte [] ba = FileUtils.readAllBytes(bis);
+        bis.close();
+        return ba;
     }
 
     /**

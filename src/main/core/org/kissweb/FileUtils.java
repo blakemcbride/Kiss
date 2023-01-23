@@ -2,6 +2,8 @@ package org.kissweb;
 
 import org.kissweb.restServer.MainServlet;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -143,6 +145,24 @@ public class FileUtils {
      */
     public static String readFile(String fileName) throws IOException {
         return new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Read all bytes from a <code>BufferedInputStream</code> and return a byte array with the data.
+     * This is useful when processing an uploaded file.
+     *
+     * @param bis
+     * @return
+     * @throws IOException
+     */
+    public static byte [] readAllBytes(BufferedInputStream bis) throws IOException {
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final byte[] buffer = new byte[1024];
+        int len;
+        while ((len = bis.read(buffer)) != -1)
+            baos.write(buffer, 0, len);
+        baos.flush();
+        return baos.toByteArray();
     }
 
     /**
