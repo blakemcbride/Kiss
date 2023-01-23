@@ -222,6 +222,18 @@ public class Record implements AutoCloseable {
     }
 
     /**
+     * Tests if a given column exists.
+     * Returns <code>true</code> of the column exists, and <code>false</code> if it does not.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     */
+    public boolean columnExists(String cname) throws SQLException {
+        return cols.containsKey(cname.toLowerCase());
+    }
+
+    /**
      * Return the <code>Short</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
