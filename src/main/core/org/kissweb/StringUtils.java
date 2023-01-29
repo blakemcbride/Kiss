@@ -265,8 +265,18 @@ public class StringUtils {
 	 * @param s
 	 * @return
 	 */
-	public Character stringToCharacter(String s) {
+	public static Character stringToCharacter(String s) {
 		return s == null || s.isEmpty() ? null : s.charAt(0);
+	}
+
+	/**
+	 * Convert <code>Character</code> to <code>String</code> correctly handling nulls.
+	 *
+	 * @param c
+	 * @return
+	 */
+	public static String characterToString(Character c) {
+		return c == null ? null : c.toString();
 	}
 
 }
