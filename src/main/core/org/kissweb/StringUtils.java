@@ -259,4 +259,14 @@ public class StringUtils {
 		return str == null || str.isEmpty();
 	}
 
+	/**
+	 * Convert <code>String</code> to <code>Character</code> correctly handling nulls and zero length strings.
+	 *
+	 * @param s
+	 * @return
+	 */
+	public Character stringToCharacter(String s) {
+		return s == null || s.isEmpty() ? null : s.charAt(0);
+	}
+
 }
