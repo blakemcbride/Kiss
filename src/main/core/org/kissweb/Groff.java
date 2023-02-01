@@ -17,14 +17,14 @@ import java.util.concurrent.TimeUnit;
  */
 public class Groff {
 
-    private static Boolean isMac;
-    private static Boolean isWindows;
+    private static final Boolean isMac;
+    private static final Boolean isWindows;
 
-    private final PrintWriter pw;
-    private final String pdfname;
-    private final String mmfname;
-    private final boolean landscape;
-    private final String title;
+    private PrintWriter pw;
+    private String pdfname;
+    private String mmfname;
+    private boolean landscape;
+    private String title;
     private boolean atTop = true;
     private boolean autoPageHeader = true;
     private boolean deleteGroffFile = true;
@@ -40,29 +40,68 @@ public class Groff {
     private String runDate;
     private final List<String> pageTitleLines = new ArrayList<>();
     private boolean grayEveryOtherLineFlg = true;
+    private String mmString;
+
+    static {
+        String os = System.getProperty("os.name").toLowerCase();
+        isMac = os.startsWith("mac ");
+        isWindows = os.startsWith("windows");
+    }
+
+    private Groff() {}
 
     /**
      * Initialize a new report.  The files it uses are put in temporary files
      * that are auto-cleaned and in a place that can be served to the front-end.
      * On the front-end side, see JavaScript Utils.showReport()
      *
-     * @param fnamePrefix file name prefix
+     * @param fnamePrefix final PDF file name prefix
      * @param title     report title
-     * @param landscape true if landscape format
+     * @param landscape true if landscape format, portrait otherwise
      * @throws IOException
      */
     public Groff(String fnamePrefix, String title, boolean landscape) throws IOException {
-        if (isMac == null) {
-            String os = System.getProperty("os.name").toLowerCase();
-            isMac = os.startsWith("mac ");
-            isWindows = os.startsWith("windows");
-        }
-        File fyle = FileUtils.createReportFile(fnamePrefix, ".pdf");
         this.landscape = landscape;
-        this.pdfname = fyle.getAbsolutePath();
+        this.pdfname = FileUtils.createReportFile(fnamePrefix, ".pdf").getAbsolutePath();
         mmfname = pdfname.replaceAll("\\.pdf$", ".mm");
         pw = new PrintWriter(new BufferedWriter(new FileWriter(mmfname)));
         this.title = title;
+    }
+
+    /**
+     * Initialize a new MM template.  When utilizing a template rather than generating a report,
+     * there are only two methods used besides this one:  <code>setVariable</code> and <code>process</code>.
+     *
+     * @param fnamePrefix final PDF file name prefix
+     * @param mmTemplateFileName path to the MM template
+     * @param landscape true if landscape format, portrait otherwise
+     * @return
+     * @throws IOException
+     * @see #setVariable(String, String)
+     * @see #process()
+     */
+    public static Groff newTemplate(String fnamePrefix, String mmTemplateFileName, boolean landscape) throws IOException {
+        Groff groff = new Groff();
+        groff.landscape = landscape;
+        groff.pdfname = FileUtils.createReportFile(fnamePrefix, ".pdf").getAbsolutePath();
+        groff.mmfname = FileUtils.createReportFile(fnamePrefix, ".mm").getAbsolutePath();
+        groff.mmString = FileUtils.readFile(mmTemplateFileName);
+        groff.deleteGroffFile = true;
+        return groff;
+    }
+
+    /**
+     * Used to assign values to template variables.  Note, this method is only used when processing
+     * an MM template.
+     *
+     * @param name name of the variable
+     * @param value value to assign to it
+     * @see #newTemplate(String, String, boolean)
+     */
+    public void setVariable(String name, String value) {
+        if (mmString == null)
+            throw new RuntimeException("Cannot set variable " + name + " because mmString is null");
+        mmString = mmString.replaceAll(name, value);
     }
 
     /**
@@ -373,15 +412,22 @@ public class Groff {
      * @throws IOException
      * @throws InterruptedException
      * @see #getRealFileName()
+     * @see #process()
      */
     public String process(float sideMargin) throws IOException, InterruptedException {
-        if (inTable)
-            endTable();
         ProcessBuilder builder;
         String psfname = null;
-        out(null);
-        pw.flush();
-        pw.close();
+        if (mmString != null) {
+            // Process a template
+            FileUtils.write(mmfname, mmString);
+        } else {
+            // Generate a report
+            if (inTable)
+                endTable();
+            out(null);
+            pw.flush();
+            pw.close();
+        }
         if (isMac) {
             if (landscape)
                 builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO=" + sideMargin + "i -rW=" + (11 - 2 * sideMargin) + "i " + mmfname + " |pstopdf -i -o " + pdfname);
@@ -427,6 +473,7 @@ public class Groff {
      * @return
      * @throws IOException
      * @throws InterruptedException
+     * @see #process(float)
      */
     public String process() throws IOException, InterruptedException {
         return process(1f);
