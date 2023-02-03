@@ -101,7 +101,7 @@ public class Groff {
     public void setVariable(String name, String value) {
         if (mmString == null)
             throw new RuntimeException("Cannot set variable " + name + " because mmString is null");
-        mmString = mmString.replaceAll(name, value);
+        mmString = mmString.replace(name, value);
     }
 
     /**
