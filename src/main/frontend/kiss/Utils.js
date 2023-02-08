@@ -1877,9 +1877,35 @@ class Utils {
 
             base64 += encodings[a] + encodings[b] + encodings[c] + '=';
         }
-
         return base64;
     }
+
+    /**
+     * Formats a social security number into a standard format.
+     * If it is an invalid SSN, whatever is passed in is returned.
+     *
+     * @param s {string|null}
+     * @returns {string|null}
+     */
+    static formatSsn(s) {
+        if (!s)
+            return null;
+        const n = s.replace(/\D/g, '');
+        if (n.length !== 9)
+            return s;
+        return n.substring(0, 3) + '-' + n.substring(3, 5) + '-' + n.substring(5, 9);
+    }
+
+    /**
+     * Return <code>true</code> if the passed in string is a valid SSN.
+     *
+     * @param s {string|null}
+     * @returns {boolean}
+     */
+    static isValidSsn(s) {
+        return s && s.replace(/\D/g, '').length === 9;
+    }
+
 }
 
 // Class variables
