@@ -872,18 +872,34 @@ public class Record implements AutoCloseable {
     }
 
     /**
-     * Copy all columns from rec to 'this' that have the same column names and types
+     * Copy all columns from <code>fromRec</code> to <code>this</code> that have the same column names and types
      *
-     * @param rec the record to be copied from
+     * @param fromRec the record to be copied from
      */
-    public void copyCorresponding(Record rec) {
-        rec.cols.forEach((key, src) -> {
-            if (cols.containsKey(key)) {
-                Object dest = cols.get(key);
-                if (dest == null || src == null || dest.getClass() == src.getClass())
-                    cols.replace(key, src);
-            }
-        });
+    public void copyCorresponding(Record fromRec) throws SQLException {
+        final Record toRec = this;
+        final String fromTable = fromRec.table;
+        if (fromTable == null)
+            throw new SQLException("Missing from table name");
+        final String toTable = table;
+        if (toTable == null)
+            throw new SQLException("Missing to table name");
+        final HashMap<String, ColumnInfo> fromCols = conn.getColumnInfo(fromTable);
+        if (fromCols == null)
+            throw new SQLException("Error acquiring from table column information");
+        final HashMap<String, ColumnInfo> toCols = conn.getColumnInfo(toTable);
+        if (toCols == null)
+            throw new SQLException("Error acquiring to table column information");
+        for (Map.Entry<String, Object> e : fromRec.cols.entrySet()) {
+            String fromFieldName = e.getKey();
+            ColumnInfo toColInfo = toCols.get(fromFieldName);
+            if (toColInfo == null)
+                continue;
+            ColumnInfo fromCol = fromCols.get(fromFieldName);
+            if (fromCol.getDataType() != toColInfo.getDataType())
+                continue;
+            toRec.cols.put(fromFieldName, e.getValue());
+        }
     }
 
     /**

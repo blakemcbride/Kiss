@@ -1,6 +1,5 @@
 package org.kissweb.database;
 
-import java.util.ArrayList;
 
 /**
  *

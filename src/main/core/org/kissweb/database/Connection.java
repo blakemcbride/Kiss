@@ -70,6 +70,7 @@ public class Connection implements AutoCloseable {
     java.sql.Connection conn;
     DatabaseMetaData dmd;
     private ConnectionType ctype;
+    private final HashMap<String,HashMap<String,ColumnInfo>> columnInfo = new HashMap<>();
 
     /**
      * Create a Connection out of a pre-opened JDBC connection.
@@ -708,4 +709,26 @@ public class Connection implements AutoCloseable {
         }
         return dt;
     }
+
+    HashMap<String, ColumnInfo> getColumnInfo(String table) throws SQLException {
+        if (table == null || table.isEmpty())
+            return null;
+        HashMap<String, ColumnInfo> colInfo = columnInfo.get(table);
+        if (colInfo != null)
+            return colInfo;
+        DatabaseMetaData meta = conn.getMetaData();
+        ResultSet res = meta.getColumns(null, null, table, null);
+        colInfo = new HashMap<>();
+        while (res.next()) {
+            String colName = res.getString("COLUMN_NAME");
+            colInfo.put(colName, new ColumnInfo(colName,
+                    res.getInt("DATA_TYPE"),
+                    res.getInt("COLUMN_SIZE"),
+                    res.getInt("NULLABLE")));
+        }
+        res.close();
+        columnInfo.put(table, colInfo);
+        return colInfo;
+    }
+
 }
