@@ -50,7 +50,7 @@ public final class Crypto {
         final Key key = generateKey(salt, password);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         final byte[] encValue = cipher.doFinal(valueToEnc.getBytes());
-        return base64Encode(encValue);
+        return base64Encode2(encValue);
     }
 
     /**
@@ -185,7 +185,7 @@ public final class Crypto {
     public static String decrypt(String salt, String password, String encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
         cipher.init(Cipher.DECRYPT_MODE, key);
-        final byte[] decordedValue = base64Decode(encryptedValue);
+        final byte[] decordedValue = base64Decode2(encryptedValue);
         final byte[] decValue = cipher.doFinal(decordedValue);
         return new String(decValue);
     }
@@ -330,14 +330,36 @@ public final class Crypto {
     }
 
     /**
+     * Base64 encode
+     *
+     * @param ba
+     * @return
+     */
+    public static String base64Encode(byte [] ba) {
+        final String c = base64Encoder.encodeToString(ba);
+        return c.replaceAll("\n", "");
+    }
+
+    /**
      * Base64 encode without the trailing =
      *
      * @param ba
      * @return
      */
-    private static String base64Encode(byte [] ba) {
+    private static String base64Encode2(byte [] ba) {
         final String c = base64Encoder.encodeToString(ba);
         return c.substring(0, c.length()-1).replaceAll("\n", "");
+    }
+
+    /**
+     * Base 64 decode
+     *
+     * @param s
+     * @return
+     * @throws IOException
+     */
+    public static byte [] base64Decode(String s) throws IOException {
+        return base64Decoder.decode(s);
     }
 
     /**
@@ -347,7 +369,7 @@ public final class Crypto {
      * @return
      * @throws IOException
      */
-    private static byte [] base64Decode(String s) throws IOException {
+    private static byte [] base64Decode2(String s) throws IOException {
         return base64Decoder.decode(s + "=");
     }
 
@@ -358,7 +380,7 @@ public final class Crypto {
     private static String createSalt() {
         final long rl = random.nextLong();
         final byte [] ba = longtoBytes(rl);
-        return base64Encode(ba);
+        return base64Encode2(ba);
     }
 
     public static void main(String [] args) throws Exception {
@@ -388,8 +410,8 @@ public final class Crypto {
         byte [] d1 = decryptWithRandomSalt(password, e1);
         byte [] d2 = decryptWithRandomSalt(password, e2);
         System.out.println("\n" + unencrypted + " (" + unencrypted.length() + ")");
-        System.out.println(base64Encode(e1) + " (" + e1.length + ")");
-        System.out.println(base64Encode(e2) + " (" + e2.length + ")");
+        System.out.println(base64Encode2(e1) + " (" + e1.length + ")");
+        System.out.println(base64Encode2(e2) + " (" + e2.length + ")");
         System.out.println(new String(d1) + " (" + d1.length + ")");
         System.out.println(new String(d2) + " (" + d2.length + ")");
     }
