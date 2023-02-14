@@ -144,7 +144,18 @@ public class FileUtils {
      * @throws IOException
      */
     public static String readFile(String fileName) throws IOException {
-        return new String(Files.readAllBytes(Paths.get(fileName)), StandardCharsets.UTF_8);
+        return new String(readFileBytes(fileName), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Read the entire contents of a file into a byte array.
+     *
+     * @param fileName
+     * @return
+     * @throws IOException
+     */
+    public static byte [] readFileBytes(String fileName) throws IOException {
+        return Files.readAllBytes(Paths.get(fileName));
     }
 
     /**
