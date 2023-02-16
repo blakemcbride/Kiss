@@ -351,6 +351,32 @@ class AGGrid {
     }
 
     /**
+     * Returns the first row in the grid.  If there are no rows, a <code>null</code> is returned.
+     * Row selection is ignored.
+     *
+     * @returns {*|null}
+     */
+    getFirstRow() {
+        const rows = this.getAllRows();
+        if (!rows.length)
+            return null;
+        return rows[0];
+    }
+
+    /**
+     * Returns the last row in the grid.  If there are no rows, a <code>null</code> is returned.
+     * Row selection is ignored.
+     *
+     * @returns {*|null}
+     */
+    getLastRow() {
+        const rows = this.getAllRows();
+        if (!rows.length)
+            return null;
+        return rows[rows.length-1];
+    }
+
+    /**
      * Return the index of the selected row.  <code>null</code> is returned if no row is selected.
      * If multiple rows are selected, the index of the forst selected row is returned.
      *
