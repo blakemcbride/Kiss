@@ -374,7 +374,7 @@ public class Connection implements AutoCloseable {
     }
 
     /**
-     * Fetch all of the records and close it.
+     * Fetch all the records and close it.
      * The records can be updated or deleted if there was a single-table select and
      * the primary key was selected.
      * <br><br>
@@ -399,6 +399,7 @@ public class Connection implements AutoCloseable {
      *
      * @see Command#fetchAll(String, Object...)
      * @see #fetchAll(int, String, Object...)
+     * @see #fetchAll(int, int, String, Object...)
      */
     public List<Record> fetchAll(String sql, Object... args) throws Exception {
         try (Command cmd = newCommand()) {
@@ -446,6 +447,7 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      *
      * @see Command#fetchAll(String, Object...)
+     * @see #fetchAll(int, int, String, Object...)
      * @see #fetchAll(String, Object...)
      */
     public List<Record> fetchAll(int max, String sql, Object... args) throws Exception {
@@ -468,6 +470,59 @@ public class Connection implements AutoCloseable {
     public JSONArray fetchAllJSON(int max, String sql, Object... args) throws Exception {
         return Record.toJSONArray(fetchAll(max, sql, args));
     }
+
+    /**
+     * Group the result set into groups of records the size of <code>max</code> records in each group.
+     * Retrieve the group indicated by <code>page</code> (starting at zero) and then close it.
+     * The records can be updated or deleted if there was a single-table select and
+     * the primary key was selected.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
+     * This is a convenience method and mainly useful in isolated situations where there aren't other SQL operations
+     * within the same connection occurring.  Remember, each REST service has its own connection.
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>Array</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
+     * If no records are found, an empty list is returned.
+     * <br><br>
+     * @param page starts at zero
+     * @param max
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     *
+     * @see Command#fetchAll(int, int, String, Object...)
+     * @see #fetchAll(int, String, Object...)
+     */
+    public List<Record> fetchAll(int page, int max, String sql, Object... args) throws Exception {
+        try (Command cmd = newCommand()) {
+            return cmd.fetchAll(page, max, sql, args);
+        }
+    }
+
+    /**
+     * Same as <code>fetchAll</code> except returns a JSON array.
+     *
+     * @param page starts at zero
+     * @param max
+     * @param sql
+     * @param args
+     * @return
+     * @throws SQLException
+     *
+     * @see #fetchAll(int, int, String, Object...)
+     */
+    public JSONArray fetchAllJSON(int page, int max, String sql, Object... args) throws Exception {
+        return Record.toJSONArray(fetchAll(page, max, sql, args));
+    }
+
     /**
      * Return the name of the column that is the table's primary key.  Throws an exception of
      * the table has a composite primary key.
@@ -623,7 +678,33 @@ public class Connection implements AutoCloseable {
             case MicrosoftServer:
                 return "select top " + max + sql.trim().substring(6);
             case Oracle:
-                return "select * from (" + sql + ") qv2279 where rownum <= " + max;
+                return sql + " offset 0 rows fetch next " + max + " rows only";
+            default:
+                return sql;
+        }
+    }
+
+    /**
+     * Read a single page worth of records.  Useful for screens that page.
+     *
+     * @param pageNumber starting at zero
+     * @param maxRecords number of records in each page
+     * @param sql
+     * @return
+     */
+    String page(int pageNumber, int maxRecords, String sql) {
+        if (pageNumber == 0)
+            return limit(maxRecords, sql);
+        if (maxRecords < 1)  //  all
+            return sql;
+        switch (ctype) {
+            case PostgreSQL:
+            case MySQL:
+            case SQLite:
+                return sql + " limit " + maxRecords + " offset " + (pageNumber * maxRecords);
+            case MicrosoftServer:
+            case Oracle:
+                return sql + " offset " + (pageNumber * maxRecords) + " rows fetch next " + maxRecords + " rows only";
             default:
                 return sql;
         }
