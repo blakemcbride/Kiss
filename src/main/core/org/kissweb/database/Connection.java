@@ -500,6 +500,7 @@ public class Connection implements AutoCloseable {
      *
      * @see Command#fetchAll(int, int, String, Object...)
      * @see #fetchAll(int, String, Object...)
+     * @see #fetchCount(String, Object...)
      */
     public List<Record> fetchAll(int page, int max, String sql, Object... args) throws Exception {
         try (Command cmd = newCommand()) {
@@ -521,6 +522,32 @@ public class Connection implements AutoCloseable {
      */
     public JSONArray fetchAllJSON(int page, int max, String sql, Object... args) throws Exception {
         return Record.toJSONArray(fetchAll(page, max, sql, args));
+    }
+
+    /**
+     * This method returns the total number of records that would be returned with a given select
+     * in an efficient manner.  It is very useful when using the paging facility.
+     * <br><br>
+     * On the other hand, this method executes a costly SQL query so should be used only when necessary.
+     * This would mainly be in conjunction with paging.
+     * 
+     * @param sql
+     * @return
+     * @throws Exception
+     * @see #fetchAll(int, int, String, Object...) 
+     */
+    public long fetchCount(String sql, Object ... args) throws Exception {
+        try (Command cmd = newCommand()) {
+            sql = "select count(*) from (" + sql + ") as tmp123";
+            /*
+            String lsql = sql.toLowerCase();
+            int b = lsql.indexOf(" from ");
+            int e = lsql.lastIndexOf(" order by ");
+            sql = "select count(*)" + sql.substring(b, e);
+             */
+            Record rec = cmd.fetchOne(sql, args);
+            return rec.getLong("count");
+        }
     }
 
     /**
