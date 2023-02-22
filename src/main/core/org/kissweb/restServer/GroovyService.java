@@ -75,8 +75,16 @@ public class GroovyService {
             throw new Exception("Groovy file " + fileName + " not found.");
         }
         Class<?>[] ca = new Class<?>[args.length];
-        for (int i = 0; i < args.length; i++)
-            ca[i] = args[i].getClass();
+        for (int i=0 ; i < args.length ; i++) {
+            if (args[i] == null)
+                ca[i] = Object.class;
+            else if (args[i] instanceof Class) {
+                // The user is passing a class indicating the class of a null argument
+                ca[i] = (Class) args[i];
+                args[i] = null;
+            } else
+                ca[i] = args[i].getClass();
+        }
         try {
             methp = ci.gclass.getMethod(methodName, ca);
             if (methp == null) {
