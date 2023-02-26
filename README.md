@@ -1,4 +1,4 @@
-# KISS Web Application Framework
+# KISS Web Application Full Stack Framework
 
 
 The KISS Framework is an application development framework for
