@@ -114,6 +114,7 @@ class Utils {
      */
     static showMessage(title, message) {
         const self = this;
+        Utils.waitMessageEnd();
         return new Promise(function (resolve, reject) {
             let modal = $('#msg-modal');
             if (!modal.length) {
