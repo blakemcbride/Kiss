@@ -72,10 +72,100 @@ public class TimeUtils {
         return time - (time / 100) * 100;
     }
 
+    /**
+     * Parse a string into an int representing a time in the form HHMM.
+     * Intelligently parses the strings, for example:
+     * <br><br>
+     * "330" -> 330<br>
+     * "0330" -> 330<br>
+     * "3:30" -> 330<br>
+     * "3.30" -> 330<br>
+     * "230 pm" -> 1430<br>
+     * "14:30" -> 1430<br>
+     *
+     * @param time
+     * @return
+     */
+    public static int parse(String time) {
+        if (time == null ||  time.isEmpty())
+            return -1;
+        char c;
+        int hour;
+        int minutes = 0;
+        time = time.trim();
+        final int len = time.length();
+        final StringBuilder sb = new StringBuilder();
+        int i = 0;  // index into string
+        for ( ; i < len ; i++) {
+            c = time.charAt(i);
+            if (!Character.isDigit(c))
+                break;
+            sb.append(c);
+        }
+        if (i == 0 || i > 4)
+            return -1;
+        if (i == 3) {
+            // one digit hour (HMM)
+            sb.setLength(i=1);
+        } else if (i == 4) {
+            // two digits hour (HHMM)
+            sb.setLength(i=2);
+        }
+        hour = Integer.parseInt(sb.toString());
+        if (i >= len)
+            return hour * 100;
+
+        sb.setLength(0);
+        c = time.charAt(i++);  // digit or [:-.] or [aApP] or space
+        if (c == ':' || c == '.' || c == '-' || c == ' ') {
+            if (i >= len)
+                return -1;
+            c = time.charAt(i++); // 1st digit of minutes or [aApP]
+        }
+        if (Character.isDigit(c)) {
+            sb.append(c);
+            if (i >= len){
+                minutes = Integer.parseInt(sb.toString());
+                return hour * 100 + minutes;
+            }
+            c = time.charAt(i++);
+            if (Character.isDigit(c))
+                sb.append(c);
+            minutes = Integer.parseInt(sb.toString());
+            if (i >= len){
+                minutes = Integer.parseInt(sb.toString());
+                return hour * 100 + minutes;
+            }
+            c = time.charAt(i++);
+        }
+        if (c == ' ')
+            c = time.charAt(i++);
+        if (c == 'P' || c == 'p')
+            hour += 12;
+        return hour * 100 + minutes;
+    }
+
+    private static void p(String s) {
+        System.out.println("\"" + s + "\"  " + parse(s));
+    }
+
     public static void main(String [] argv) {
         int tm = TimeUtils.now();
         System.out.println(tm);
         System.out.println(TimeUtils.formatMilitary(tm));
         System.out.println(TimeUtils.formatAMPM(tm));
+
+        System.out.println();
+        p("330");
+        p("330p");
+        p("3:30");
+        p("3:30 AM");
+        p("3:30 PM");
+        p("3:30PM");
+        p("2134");
+        p("1234");
+        p("805");
+        p("8a");
+        p("8p");
     }
 }
