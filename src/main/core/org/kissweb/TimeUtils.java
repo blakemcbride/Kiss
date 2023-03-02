@@ -124,7 +124,7 @@ public class TimeUtils {
         }
         if (Character.isDigit(c)) {
             sb.append(c);
-            if (i >= len){
+            if (i >= len) {
                 minutes = Integer.parseInt(sb.toString());
                 return hour * 100 + minutes;
             }
@@ -132,14 +132,14 @@ public class TimeUtils {
             if (Character.isDigit(c))
                 sb.append(c);
             minutes = Integer.parseInt(sb.toString());
-            if (i >= len){
+            if (i >= len) {
                 minutes = Integer.parseInt(sb.toString());
                 return hour * 100 + minutes;
             }
             c = time.charAt(i++);
         }
         if (c == ' ')
-            c = time.charAt(i++);
+            c = time.charAt(i);
         if (c == 'P' || c == 'p')
             hour += 12;
         return hour * 100 + minutes;
