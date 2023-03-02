@@ -11,6 +11,12 @@
  * This class provides the facilities used to communicate with the back-end.
  */
 class Server {
+
+    // class variables
+    static #errorMessage = 'Error communicating with the server.';
+    static #timeLastCall;
+    static #maxInactiveSeconds = 0;  // max number of seconds between calls or zero for no max (or auto logout)
+
     /**
      * Set the URL of the back-end.
      *
@@ -49,7 +55,7 @@ class Server {
      * @returns data returned from the back-end
      */
     static async call(cls, meth, injson=null) {
-
+        Server.#checkTime();
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
@@ -76,8 +82,8 @@ class Server {
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (1): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
+                await Utils.showMessage('Error', Server.#errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
                 return;
             }
             try {
@@ -95,8 +101,8 @@ class Server {
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (2): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
+                await Utils.showMessage('Error', Server.#errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
             }
         };
 
@@ -121,7 +127,7 @@ class Server {
      * @see Utils.toBase64
      */
     static async binaryCall(cls, meth, injson=null) {
-
+        Server.#checkTime();
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
@@ -148,16 +154,16 @@ class Server {
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (3): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
+                await Utils.showMessage('Error', Server.#errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
                 return;
             }
             try {
                 const res = await response.arrayBuffer();
                 Server.decCount();
                 if (!res) {
-                    await Utils.showMessage('Error', Server.errorMessage);
-                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
+                    await Utils.showMessage('Error', Server.#errorMessage);
+                    resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
                 }
                 //               let str = String.fromCharCode.apply(null, new Uint8Array(res));    sometimes causes stack overflow
                 const bytes = new Uint8Array(res);
@@ -183,8 +189,8 @@ class Server {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
+                await Utils.showMessage('Error', Server.#errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
             }
         };
 
@@ -219,6 +225,7 @@ class Server {
      * @see Utils.getFileUploadFormData
      */
     static fileUploadSend(cls, meth, fd, injson=null) {
+        Server.#checkTime();
         return new Promise(function (resolve, reject) {
             if (typeof fd === 'string')
                 fd = $$(fd).getFormData();
@@ -253,8 +260,8 @@ class Server {
                 error: async function (hdr, status, error) {
                     Utils.waitMessageEnd();
                     Server.decCount();
-                    await Utils.showMessage("Error", Server.errorMessage);
-                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
+                    await Utils.showMessage("Error", Server.#errorMessage);
+                    resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
                 }
             });
         });
@@ -277,6 +284,7 @@ class Server {
      * The return value is <code>false</code> if all the web services complete and <code>true</code> if there is an error.
      */
     static callAll(pa /*, ... each subsequent arg is a function to handle the result of the next promise in pa */) {
+        Server.#checkTime();
         const args = arguments;
         return new Promise(function (resolve, reject) {
             Promise.all(pa).then(function (ret) {
@@ -297,10 +305,52 @@ class Server {
         });
     }
 
+    /**
+     * Set the maximum number of seconds between calls or zero for no max.
+     * If the maximum number of seconds is exceeded, the user will be logged out
+     * on their next attempt to make a service call.
+     *
+     * @param seconds
+     */
+    static setMaxInactivitySeconds(seconds) {
+        Server.#maxInactiveSeconds = seconds;
+        Server.#timeLastCall = (new Date()).getTime() / 1000; // seconds since 1970
+    }
+
+    /**
+     * Set the maximum number of minutes between calls or zero for no max.
+     * If the maximum number of minutes is exceeded, the user will be logged out
+     * on their next attempt to make a service call.
+     *
+     * @param minutes
+     */
+    static setMaxInactivityMinutes(minutes) {
+        Server.setMaxInactivitySeconds(minutes * 60);
+    }
+
+    /**
+     * Set the maximum number of hours between calls or zero for no max.
+     * If the maximum number of hours is exceeded, the user will be logged out
+     * on their next attempt to make a service call.
+     *
+     * @param hours
+     */
+    static setMaxInactivityHours(hours) {
+        Server.setMaxInactivitySeconds(hours * 60 * 60);
+    }
+
+    static async #checkTime() {
+        if (!Server.#maxInactiveSeconds)
+            return;
+        const now = (new Date()).getTime() / 1000;
+        if (now - Server.#timeLastCall > Server.#maxInactiveSeconds) {
+            await Utils.showMessage("Warning", "Auto logout due to inactivity.  Please re-login.");
+            Server.logout();
+        } else
+            Server.#timeLastCall = now;
+    }
 }
 
-// class variable
-Server.contextCreated = false;
-Server.errorMessage = 'Error communicating with the server.';
+
 
 
