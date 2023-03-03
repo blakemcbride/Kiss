@@ -98,7 +98,7 @@
                 return this;
             }
             if (typeof val !== 'number')
-                val = Utils.toNumber(val);
+                val = TimeUtils.strToInt(val);
             if (val > 2400)
                 val = TimeUtils.millsToInt(val);
             jqObj.val(TimeUtils.format(val, zero_fill));

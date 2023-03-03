@@ -611,6 +611,18 @@ class AGGrid {
     }
 
     /**
+     * Format times as HH:MM AM/PM
+     * <br><br>
+     * Usage:  in columnDefs:  valueFormatter:  AGGrid.time
+     *
+     * @param params
+     * @returns {string}
+     */
+    static time(params) {
+        return TimeUtils.format(params.value);
+    }
+
+    /**
      * Format a numeric field
      * <br><br>
      * Usage:  in columnDefs:  valueFormatter:  AGGrid.numericFormat, mask:  'xxx', decimalPlaces: N
