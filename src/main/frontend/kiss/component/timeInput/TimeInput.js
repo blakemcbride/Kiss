@@ -97,8 +97,10 @@
                 originalValue = newElm.getValue();
                 return this;
             }
-            if (typeof val !== 'number')
+            if (typeof val === 'string')
                 val = TimeUtils.strToInt(val);
+            else if (typeof val === 'object')
+                val = TimeUtils.dateToTime(val);
             if (val > 2400)
                 val = TimeUtils.millsToInt(val);
             jqObj.val(TimeUtils.format(val, zero_fill));
