@@ -103,9 +103,10 @@ class DateTimeUtils {
     }
 
     /**
-     * Format a Date or number of milliseconds since 1970 UTC to a string representation looking like mm/dd/yyyy hh:mm
+     * Format a Date or number of milliseconds since 1970 UTC to a string representation
+     * looking like mm/dd/yyyy hh:mm AM/PM
      *
-     * @param {Date|number} dt
+     * @param {Date|string|number} dt
      * @returns {string}
      */
     static formatDate(dt) {
@@ -142,7 +143,7 @@ class DateTimeUtils {
      *
      * @param {number} dt    YYYYMMDD
      * @param {number} time  HHMM
-     * @returns {string}  mm/dd/yyyy hh:mm
+     * @returns {string}  mm/dd/yyyy hh:mm AM/PM
      */
     static formatDateTime(dt, time) {
         if (!dt && (time === undefined || time === null || time === ''))
@@ -156,7 +157,8 @@ class DateTimeUtils {
     }
 
     /**
-     * Convert a Date object into in integer time
+     * Convert a Date object into in integer time.
+     * Ignores / removes the date component.
      *
      * @param {Date} dt
      * @returns {number} HHMM
@@ -185,6 +187,36 @@ class DateTimeUtils {
      */
     static getLocalTimezoneShortText() {
         return new Date().toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
+    }
+
+    /**
+     * Add hours to a date.
+     *
+     * @param dt {Date|number|string}
+     * @param hours {number}
+     * @returns {Date}
+     */
+    static addHours(dt, hours) {
+        if (typeof dt === 'string')
+            dt = Number(dt);
+        if (typeof dt === 'number')
+            dt = new Date(dt);
+        return new Date(dt.getTime() + hours * 60 * 60 * 1000);
+    }
+
+    /**
+     * Add minutes to a date.
+     *
+     * @param dt {Date|number|string}
+     * @param minutes {number}
+     * @returns {Date}
+     */
+    static addMinutes(dt, minutes) {
+        if (typeof dt === 'string')
+            dt = Number(dt);
+        if (typeof dt === 'number')
+            dt = new Date(dt);
+        return new Date(dt.getTime() + minutes * 60 * 1000);
     }
 
     /**
