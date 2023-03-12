@@ -191,7 +191,9 @@ public class MainServlet extends HttpServlet {
             return null;
         Connection db = null;
         try {
-            db = new Connection(MainServlet.getCpds().getConnection());
+            java.sql.Connection c = MainServlet.getCpds().getConnection();
+            c.setAutoCommit(false);
+            db = new Connection(c);
         } catch (SQLException e) {
             logger.error(e);
         }

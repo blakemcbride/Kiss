@@ -3,6 +3,9 @@
 # The format is the same as the Unix crontab file.
 # To see docs run on Linux or Mac:  man 5 crontab
 #
+# This crontab file, as well as any of the Groovy files the cron system runs
+# can be changed on a running system.  There is no need to rebuild the system.
+#
 # In particular, each line in this file specifies when particular Groovy files get run.
 # Each Groovy file must exist in this directory (backend/CronTasks).
 #

@@ -19,10 +19,12 @@ class EveryMinute {
     static void main(Object obj) {
         Connection db = (Connection) obj
         println("EveryMinute is running at " + DateTime.currentDateTimeFormatted())
-        List<Record> recs = db.fetchAll("select * from phone order by last_name, first_name")
+        /*
+        List<Record> recs = db.fetchAll("select * from mytable order by whatever")
         recs.forEach(rec -> {
             println(rec.getString("first_name"))
         })
+         */
     }
 
 }
