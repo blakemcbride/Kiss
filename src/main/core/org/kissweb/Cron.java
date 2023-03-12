@@ -39,7 +39,7 @@ public class Cron {
      * @throws IOException
      */
     public Cron(String crontabFileName, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) throws IOException {
-        logger.setLevel(Level.ALL);
+        //logger.setLevel(Level.INFO);
         CronFile cronFile = new CronFile(crontabFileName, getParameter, success, failure);
         TheTimerTask ttt = new TheTimerTask(cronFile);
         timer = new Timer();
