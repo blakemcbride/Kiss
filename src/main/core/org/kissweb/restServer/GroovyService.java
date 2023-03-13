@@ -16,7 +16,7 @@ import java.util.*;
  */
 public class GroovyService {
 
-    private static final transient Logger logger = Logger.getLogger(GroovyService.class);
+    private static final Logger logger = Logger.getLogger(GroovyService.class);
 
     private static final HashMap<String, GroovyClassInfo> groovyClassCache = new HashMap<>();
 
@@ -36,8 +36,10 @@ public class GroovyService {
     }
 
     /**
-     * This method is used to obtain a method from a groovy class.  The Groovy file is treated as a microservice.
-     * This means you will always get the most current definition of the method.  Once the method is obtained, it may be evoked any number of times.
+     * This method is used to obtain a class or instance method from a groovy class.
+     * The Groovy file is treated as a microservice.
+     * This means you will always get the most current definition of the method.
+     * Once the method is obtained, it may be evoked any number of times.
      * <br><br>
      * This method is mainly used in cases where a method will be evoked multiple times.  If it is only going to be evoked once,
      * then the <code>run</code> method (the one that doesn't take the method object) should be used instead.
@@ -124,13 +126,15 @@ public class GroovyService {
      * This method is used to run a method on a groovy class.  The method would normally be returned from the
      * <code>getMethod</code> method.
      * <br><br>
-     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * The calling method may use boxed or unboxed arguments, but a boxed type will always be returned.
+     * <br><br>
+     * All arguments to the method being executed are received in boxed form.  It
      * must also return a boxed object.
      *
      * @param methp the method to evoke
      * @param inst instance or null if a class method
-     * @param args
-     * @return
+     * @param args boxed or unboxed
+     * @return boxed
      * @throws Exception
      *
      * @see #getMethod(String, String, String, Object...)
@@ -149,11 +153,12 @@ public class GroovyService {
 
     /**
      * This method allows calls to Groovy microservices.
-     * This method can be used to execute a static or instance methods.
-     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * It can be used to execute a static or instance methods.
+     * <br><br>
+     * The calling method may use boxed or unboxed arguments, but a boxed type will always be returned.
+     * <br><br>
+     * All arguments to the method being executed are received in boxed form.  It
      * must also return a boxed object.
-     * <p>
-     * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
      * <p>
      * If <code>ignoreMissing</code> is <code>true</code> and the file, class, or method are missing a <code>NULL</code> is returned.
      * If <code>ignoreMissing</code> is <code>false</code> and the file, class, or method are missing an exception is thrown.
@@ -164,8 +169,8 @@ public class GroovyService {
      * @param filePath relative to the "backend" directory unless it is an absolute path
      * @param className
      * @param methodName
-     * @param inst          the instance the method is evoked against or null if static method
-     * @param args          boxed or unboxed arguments (variable number)
+     * @param inst  the instance the method is evoked against or null if static method
+     * @param args boxed or unboxed arguments (variable number)
      * @return The boxed value returned by the Groovy method call
      * @throws Exception
      * @see #run(String, String, String, Object, Object...)
@@ -176,20 +181,21 @@ public class GroovyService {
     }
 
     /**
-     * This is the method that allows Groovy to be used as a scripting language.
-     * This method can be used to execute a static or instance method.
-     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * This method is used to execute a microservice.
+     * It can be used to execute a static or instance method.
+     * <br><br>
+     * The calling method may use boxed or unboxed arguments, but a boxed type will always be returned.
+     * <br><br>
+     * All arguments to the method being executed are received in boxed form.  It
      * must also return a boxed object.
-     * <p>
-     * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
-     * <p>
+     * <br><br>
      * <code>filePath</code> is relative to the <code>backend</code> directory unless it is an absolute path.
      *
      * @param filePath relative to the "backend" directory unless it is an absolute path
      * @param className
      * @param methodName
-     * @param inst          the instance the method is evoked against or null if static method
-     * @param args          boxed or unboxed arguments (variable number)
+     * @param inst the instance the method is evoked against or null if static method
+     * @param args boxed or unboxed arguments (variable number)
      * @return The boxed value returned by the Groovy method call
      * @throws Exception
      * @see #run(boolean, String, String, String, Object, Object...)
@@ -213,6 +219,10 @@ public class GroovyService {
         final GroovyClassInfo ci = loadGroovyClass(fileName);
         if (ci == null)
             throw new Exception("Groovy file " + new File(fileName).getAbsolutePath() + " not found.");
+        if (args == null) {
+            args = new Object[1];
+            args[0] = null;
+        }
         return ci.gclass.invokeConstructor(args);
     }
 
