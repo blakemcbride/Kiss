@@ -52,7 +52,7 @@ public class ProcessServlet implements Runnable {
         try {
             run2();
         } catch (Throwable e) {
-            logger.error(e);
+            logger.error("", e);
         }
     }
 
@@ -554,7 +554,7 @@ public class ProcessServlet implements Runnable {
             if (sconn != null)
                 sconn.close();
         } catch (SQLException e) {
-            logger.error(e);
+            logger.error("", e);
         }
     }
 

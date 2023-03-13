@@ -164,7 +164,7 @@ public class MainServlet extends HttpServlet {
                 try {
                     makeDatabaseConnection();
                 } catch (PropertyVetoException | SQLException | ClassNotFoundException e) {
-                    logger.error(e);
+                    logger.error("", e);
                     System.exit(-1);
                 }
                 logger.info("* * * Database " + database + " opened successfully");
@@ -195,7 +195,7 @@ public class MainServlet extends HttpServlet {
             c.setAutoCommit(false);
             db = new Connection(c);
         } catch (SQLException e) {
-            logger.error(e);
+            logger.error("", e);
         }
         return db;
     }
@@ -209,16 +209,16 @@ public class MainServlet extends HttpServlet {
                 sconn = db.getSQLConnection();
                 db.close();
             } catch (SQLException e) {
-                logger.error(e);
+                logger.error("", e);
             }
             try {
                 if (sconn != null)
                     sconn.close();
             } catch (SQLException e) {
-                logger.error(e);
+                logger.error("", e);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            logger.error("", e);
         }
     }
 
@@ -231,16 +231,16 @@ public class MainServlet extends HttpServlet {
                 sconn = db.getSQLConnection();
                 db.close();
             } catch (SQLException e) {
-                logger.error(e);
+                logger.error("", e);
             }
             try {
                 if (sconn != null)
                     sconn.close();
             } catch (SQLException e) {
-                logger.error(e);
+                logger.error("", e);
             }
         } catch (SQLException e) {
-            logger.error(e);
+            logger.error("", e);
         }
     }
 

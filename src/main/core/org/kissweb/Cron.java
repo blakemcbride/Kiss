@@ -67,7 +67,7 @@ public class Cron {
             try {
                 cronFile.process();
             } catch (IOException e) {
-                logger.error(e);
+                logger.error("cron", e);
             }
         }
     }
@@ -194,7 +194,7 @@ public class Cron {
                 success.accept(parameter);
             } catch (Exception e) {
                 failure.accept(parameter);
-                logger.error(e);
+                logger.error("cron", e);
             }
         }
 
