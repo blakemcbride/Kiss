@@ -1818,8 +1818,9 @@ documentation is contained in the JavaDocs.  See <a href="#javadoc">Creating Jav
 </p>
 <ul class="section-toc">
 <li><a href="#Database-API" accesskey="1">Database API</a></li>
-<li><a href="#JSON" accesskey="2">JSON</a></li>
-<li><a href="#Utilities-1" accesskey="3">Utilities</a></li>
+<li><a href="#Microservices" accesskey="2">Microservices</a></li>
+<li><a href="#JSON" accesskey="3">JSON</a></li>
+<li><a href="#Utilities-1" accesskey="4">Utilities</a></li>
 </ul>
 <div class="section" id="Database-API">
 <h3 class="section">6.1 Database API</h3>
@@ -1887,8 +1888,188 @@ generates these statements for you.
 <p>In addition to the above, these utilities provide full support for transactions and parameters.
 </p>
 </div>
+<div class="section" id="Microservices">
+<h3 class="section">6.2 Microservices</h3>
+
+<p>Microservices are classes that may be added, changed, or deleted while
+the system is running.  In spite of this, however, all microservices
+are fully compiled and run at full speed.  This has two major advantages.
+</p>
+<p>First, in a development environment, all development may be done without 
+the need to bring the development server down, rebuild, re-deploy, and reboot
+the development server.  This means development time is significantly reduced.
+Additionally, IDE debuggers function in an environment such as this so
+the debugging process may proceed normally.
+</p>
+<p>Second, in a production environment, the system may be upgraded
+without disrupting existing users on the system.  Of course users
+actively using the exact features you have just changed could be
+affected (if their front-end and back-ends do not agree).
+A simple re-try would put everything back in sync.
+</p>
+<p>Kiss microservices are on a class basis.  What that means is that a
+microservice is always a single and whole class.  You cannot have more
+than one class in a microservice.  Microservices can call
+core components of the system just as regular methods can.  However,
+if one wishes to have one microservice call another microservice,
+the calling mechanism is a little more clunky.  However, using this
+clunkier mechanism retains all of the dynamic features of the system.
+</p>
+<p>Defining microservices in Kiss involves defining a normal class just
+as you would write a class in any circumstance.  No special
+configuration, wiring, declarations, or additional steps are required.
+Microservice additions, changes, and deletions take affect as soon as
+you save the source file.  All microservices are compiled at runtime
+by the system automatically.  So there is no compilation step that
+you need to perform.
+</p>
+<p>The only caveat to the above is that remote microservices (described
+below) expect a certain method signature (standard arguments).  This
+is only to assure that the front-end and back-end can communicate as
+expected.  Local microservices do not have this requirement.
+</p>
+<ul class="section-toc">
+<li><a href="#Microservice-Language" accesskey="1">Microservice Language</a></li>
+<li><a href="#Types-Of-Microservices" accesskey="2">Types Of Microservices</a></li>
+<li><a href="#Remote-Microservices" accesskey="3">Remote Microservices</a></li>
+<li><a href="#Defining-Remote-Services" accesskey="4">Defining Remote Services</a></li>
+<li><a href="#Local-Microservices" accesskey="5">Local Microservices</a></li>
+</ul>
+<div class="subsection" id="Microservice-Language">
+<h4 class="subsection">6.2.1 Microservice Language</h4>
+
+<p>In Kiss, microservices can be written in Java, Groovy, or Common Lisp.
+However, Groovy microservices have been used exclusively in all
+current environments that we are aware of.  Therefore, Groovy
+microservices are best tested.
+</p>
+<p>The reasons Groovy was used are as follows:
+</p>
+<ol>
+<li> Groovy was the easiest and most natural to implement.
+</li><li> Groovy runs as fast as Java and has full and natural access to all 
+Java facilities.
+</li><li> The actual loading of Groovy services is the fastest of the three languages.
+</li><li> Groovy is largely a super-set of Java so if you know Java, you basically
+know Groovy.  Learning of additional Groovy facilities can occur over
+time.
+</li><li> Groovy offers a small number of conveniences over Java.
+</li></ol>
+
+<p>Having said all this, however, all three languages are fully supported
+and there are no known bugs in any of the languages supported.
+</p>
+</div>
+<div class="subsection" id="Types-Of-Microservices">
+<h4 class="subsection">6.2.2 Types Of Microservices</h4>
+
+<p>There are two types of microservices as follows:
+</p>
+<ol>
+<li> Remote (REST) Services
+</li><li> Local Services
+</li></ol>
+
+<p>Remote services are generally called by a (likely JavaScript)
+front-end or a remote client typically over <em>HTTP</em> or
+<em>HTTPS</em>.  Local services are services that are called locally,
+from within the system as, for example, one microservice calling a
+method in a different microservice.
+</p>
+</div>
+<div class="subsection" id="Remote-Microservices">
+<h4 class="subsection">6.2.3 Remote Microservices</h4>
+
+<p>In <em>Kiss</em>, remote microservices appear to the outside world as
+typical <em>REST</em> services.  They may be called by a
+<em>JavaScript</em> front-end, web service client, or any other facility
+that can talk to <em>REST</em> services.
+</p>
+<p><em>Kiss</em> <em>REST</em> services are asynchronous <em>HTTP</em> or
+<em>HTTPS</em> services.  Internally they are processed utilizing a
+thread pool to assure optimal CPU utilization.  The number of threads
+in the thread pool is controlled by a configuration parameter given in
+the <code>KissInit.groovy</code> file.
+</p>
+<p><em>Kiss</em> comes with <em>JavaScript</em> code so that <code>Kiss</code>
+<code>REST</code> services can be easily accessed from a typical front-end.
+This code resides in a single file and can and has been used by
+alternative front-ends such as <em>Angular</em> and <code>React</code>.
+</p>
+<p>There is no need to handle authentication.  <em>Kiss</em> handles that
+automatically.  So, when your web method is called, you know who
+they are and that they have been authenticated.
+</p>
+</div>
+<div class="subsection" id="Defining-Remote-Services">
+<h4 class="subsection">6.2.4 Defining Remote Services</h4>
+
+<p>Remote REST microservices typically reside under the
+<code>backend/services</code> directory.  You can organize them any way you
+like.  A microservice is equivalent to a class.  The class name is the
+microservice name.  The methods in that class that have a certain
+signature (particular set of arguments) are the web methods.
+</p>
+<p>A REST web microservice has the following signature:
+</p>
+<div class="example">
+<pre class="example">void myMethod(JSONObject injson, 
+              JSONObject outjson, 
+              Connection db, 
+              ProcessServlet servlet) {
+...
+}
+</pre></div>
+
+<dl compact="compact">
+<dt><span>&lsquo;<samp>injson</samp>&rsquo;</span></dt>
+<dd><p>This is a <code>JSON</code> object that contains all of the arguments passed
+in from the front-end.
+</p></dd>
+<dt><span>&lsquo;<samp>outjson</samp>&rsquo;</span></dt>
+<dd><p>This is a <code>JSON</code> object which will contain all of the results
+sent back to the front-end.  Whatever is put in this object gets sent back to the front-end.
+</p></dd>
+<dt><span>&lsquo;<samp>db</samp>&rsquo;</span></dt>
+<dd><p>This is a database connection that can be used to access the SQL database.  The
+connection is unique and independent of all other services.
+</p></dd>
+<dt><span>&lsquo;<samp>servlet</samp>&rsquo;</span></dt>
+<dd><p>This object provides access to various system facilities uniquely related
+to this call.
+</p></dd>
+</dl>
+
+<p>See <a href="#json">JSON</a> and the <code>JavaDoc</code> for additional information.
+</p>
+
+</div>
+<div class="subsection" id="Local-Microservices">
+<h4 class="subsection">6.2.5 Local Microservices</h4>
+
+<p>Local microservices are simply regular classes.  They typically reside
+in the <code>backend/services</code> directory organized anyway you like.
+Although methods within a particular microservice/class can call each
+other in the normal way, there is an extra step required for one
+microservice to call method in a different microservice.  One of the
+reasons for this is so the system can be certain the latest version of
+the service is loaded and that it is fully compiled before you attempt
+to use it.
+</p>
+<p>In Groovy, a method in one class/microservice can call a method
+in a different class/microservice via the following methods.
+</p>
+<ul>
+<li> GroovyService.run
+</li><li> GroovyService.getMethod
+</li></ul>
+
+<p>See the <em>Javadoc</em>.
+</p>
+<span id="json"></span></div>
+</div>
 <div class="section" id="JSON">
-<h3 class="section">6.2 JSON</h3>
+<h3 class="section">6.3 JSON</h3>
 
 <p>The first two arguments to all REST methods is <code>injson</code> and
 <code>outjson</code>.  <code>injson</code> is a <code>JSONObject</code> that contains
@@ -1942,7 +2123,7 @@ with the return data.  Useful JSON utilities include the following:
 
 </div>
 <div class="section" id="Utilities-1">
-<h3 class="section">6.3 Utilities</h3>
+<h3 class="section">6.4 Utilities</h3>
 
 <p><em>Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code>src/main/core/org/kissweb</code> directory and have names such as
