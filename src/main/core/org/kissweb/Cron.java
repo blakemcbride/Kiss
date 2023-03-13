@@ -3,7 +3,6 @@ package org.kissweb;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.kissweb.restServer.GroovyClass;
-import org.kissweb.restServer.MainServlet;
 
 import java.io.*;
 import java.lang.reflect.Method;
@@ -67,7 +66,7 @@ public class Cron {
             try {
                 cronFile.process();
             } catch (IOException e) {
-                logger.error("cron", e);
+                logger.error("cron error", e);
             }
         }
     }
@@ -194,7 +193,7 @@ public class Cron {
                 success.accept(parameter);
             } catch (Exception e) {
                 failure.accept(parameter);
-                logger.error("cron", e);
+                logger.error("cron error", e);
             }
         }
 
