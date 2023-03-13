@@ -36,34 +36,31 @@ public class GroovyService {
     }
 
     /**
-     * This is the method that allows Groovy to be used as a scripting language.
-     * This method can be used to execute a static or instance method.
-     * On the Groovy side, all arguments are received in boxed form.  Groovy
-     * must also return a boxed object.
-     * <p>
-     * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
-     * <p>
-     * If <code>ignoreMissing</code> is <code>true</code> and the file, class, or method are missing a <code>NULL</code> is returned.
-     * If <code>ignoreMissing</code> is <code>false</code> and the file, class, or method are missing an exception is thrown.
-     * <p>
-     * <code>filePath</code> can be an absolute path or a string containing a "~".  The "~" is replaced with the root of
-     * the application.
+     * This method is used to obtain a method from a groovy class.  The Groovy file is treated as a microservice.
+     * This means you will always get the most current definition of the method.  Once the method is obtained, it may be evoked any number of times.
+     * <br><br>
+     * This method is mainly used in cases where a method will be evoked multiple times.  If it is only going to be evoked once,
+     * then the <code>run</code> method (the one that doesn't take the method object) should be used instead.
      *
-     * @param ignoreMissing
-     * @param filePath
+     * @param ignoreMissing if <code>true</code> ignore missing classes or methods and return null
+     * @param filePath relative to the "backend" directory unless it is an absolute path
      * @param className
      * @param methodName
-     * @param inst          the instance the method is evoked against or null if static method
-     * @param args          boxed or unboxed arguments (variable number)
-     * @return The boxed value returned by the Groovy method call
+     * @param args  the actual arguments or the argument types (classes)
+     * @return
      * @throws Exception
+     *
+     * @see #run(Method, Object, Object...)
+     * @see #run(String, String, String, Object, Object...)
+     * @see #getMethod(String, String, String, Object...)
      */
-    public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
+    public static Method getMethod(boolean ignoreMissing, String filePath, String className, String methodName, Object... args) throws Exception {
         String rootPath = MainServlet.getApplicationPath();
         rootPath = StringUtils.drop(rootPath, -1);  //  drop the trailing slash
         if (filePath == null || filePath.isEmpty())
-            filePath = "~";
-        filePath = filePath.replace("~", rootPath);
+            filePath = rootPath;
+        else if (!filePath.startsWith("/"))
+            filePath = rootPath + "/" + filePath;
         final String fileName = filePath + "/" + className + ".groovy";
         if (ignoreMissing && !(new File(fileName)).exists())
             return null;
@@ -72,7 +69,7 @@ public class GroovyService {
         if (ci == null) {
             if (ignoreMissing)
                 return null;
-            throw new Exception("Groovy file " + fileName + " not found.");
+            throw new Exception("Groovy file " + new File(fileName).getAbsolutePath() + " not found.");
         }
         Class<?>[] ca = new Class<?>[args.length];
         for (int i=0 ; i < args.length ; i++) {
@@ -95,11 +92,110 @@ public class GroovyService {
         } catch (Exception e) {
             throw new Exception("Method " + methodName + " not found in Groovy file " + fileName, e);
         }
+        return methp;
+    }
+
+    /**
+     * This method is used to obtain a method from a groovy class.  The Groovy file is treated as a microservice.
+     * This means you will always get the most current definition of the method.  Once the method is obtained, it may be evoked any number of times.
+     * <br><br>
+     * This method is mainly used in cases where a method will be evoked multiple times.  If it is only going to be evoked once,
+     * then the <code>run</code> method (the one that doesn't take the method object) should be used instead.
+     * <br><br>
+     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * must also return a boxed object.
+     *
+     * @param filePath relative to the "backend" directory unless it is an absolute path
+     * @param className
+     * @param methodName
+     * @param args  the actual arguments or the argument types (classes)
+     * @return
+     * @throws Exception
+     *
+     * @see #run(Method, Object, Object...)
+     * @see #run(String, String, String, Object, Object...)
+     * @see #getMethod(boolean, String, String, String, Object...)
+     */
+    public static Method getMethod(String filePath, String className, String methodName, Object... args) throws Exception {
+        return getMethod(false, filePath, className, methodName, args);
+    }
+
+    /**
+     * This method is used to run a method on a groovy class.  The method would normally be returned from the
+     * <code>getMethod</code> method.
+     * <br><br>
+     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * must also return a boxed object.
+     *
+     * @param methp the method to evoke
+     * @param inst instance or null if a class method
+     * @param args
+     * @return
+     * @throws Exception
+     *
+     * @see #getMethod(String, String, String, Object...)
+     */
+    public static Object run(Method methp, Object inst, Object... args) throws Exception {
         try {
+            if (args == null) {
+                args = new Object[1];
+                args[0] = null;
+            }
             return methp.invoke(inst, args);
         } catch (Exception e) {
-            throw new Exception("Error executing method " + methodName + " of Groovy file " + fileName, e);
+            throw new Exception("Error executing method " + methp.getName() + " of class " + methp.getClass().getName(), e);
         }
+    }
+
+    /**
+     * This method allows calls to Groovy microservices.
+     * This method can be used to execute a static or instance methods.
+     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * must also return a boxed object.
+     * <p>
+     * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
+     * <p>
+     * If <code>ignoreMissing</code> is <code>true</code> and the file, class, or method are missing a <code>NULL</code> is returned.
+     * If <code>ignoreMissing</code> is <code>false</code> and the file, class, or method are missing an exception is thrown.
+     * <p>
+     * <code>filePath</code> is relative to the <code>backend</code> directory unless it is an absolute path.
+     *
+     * @param ignoreMissing
+     * @param filePath relative to the "backend" directory unless it is an absolute path
+     * @param className
+     * @param methodName
+     * @param inst          the instance the method is evoked against or null if static method
+     * @param args          boxed or unboxed arguments (variable number)
+     * @return The boxed value returned by the Groovy method call
+     * @throws Exception
+     * @see #run(String, String, String, Object, Object...)
+     */
+    public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
+        Method meth = getMethod(ignoreMissing, filePath, className, methodName, inst, args);
+        return run(meth, inst, args);
+    }
+
+    /**
+     * This is the method that allows Groovy to be used as a scripting language.
+     * This method can be used to execute a static or instance method.
+     * On the Groovy side, all arguments are received in boxed form.  Groovy
+     * must also return a boxed object.
+     * <p>
+     * On the Java side, boxed or unboxed arguments may be used but a boxed type is always returned.
+     * <p>
+     * <code>filePath</code> is relative to the <code>backend</code> directory unless it is an absolute path.
+     *
+     * @param filePath relative to the "backend" directory unless it is an absolute path
+     * @param className
+     * @param methodName
+     * @param inst          the instance the method is evoked against or null if static method
+     * @param args          boxed or unboxed arguments (variable number)
+     * @return The boxed value returned by the Groovy method call
+     * @throws Exception
+     * @see #run(boolean, String, String, String, Object, Object...)
+     */
+    public static Object run(String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
+        return run(false, filePath, className, methodName, inst, args);
     }
 
     /**
@@ -116,7 +212,7 @@ public class GroovyService {
         final String fileName = rootPath + "/" + (relativePath != null && !relativePath.isEmpty() ? relativePath + "/" : "") + className + ".groovy";
         final GroovyClassInfo ci = loadGroovyClass(fileName);
         if (ci == null)
-            throw new Exception("Groovy file " + fileName + " not found.");
+            throw new Exception("Groovy file " + new File(fileName).getAbsolutePath() + " not found.");
         return ci.gclass.invokeConstructor(args);
     }
 
@@ -206,7 +302,7 @@ public class GroovyService {
             long lastModified = (new File(fileName)).lastModified();
             if (lastModified == 0L) {
                 groovyClassCache.remove(fileName);
-                logger.error(fileName + " not found");
+                logger.error(new File(fileName).getAbsolutePath() + " not found");
                 return null;
             }
             if (lastModified == ci.lastModified) {
@@ -219,7 +315,7 @@ public class GroovyService {
         cleanGroovyCache();
         File fyle = new File(fileName);
         if (!fyle.exists()) {
-            logger.info(fileName + " not found");
+            logger.info(new File(fileName).getAbsolutePath() + " not found");
             return null;
         }
         try {
@@ -227,7 +323,7 @@ public class GroovyService {
             gclass = new GroovyClass(false, fileName);
             groovyClassCache.put(fileName, ci = new GroovyClassInfo(gclass, fyle.lastModified()));
         } catch (Exception e) {
-            logger.error("Error loading " + fileName, e);
+            logger.error("Error loading " + new File(fileName).getAbsolutePath(), e);
             return null;
         }
         return ci;
