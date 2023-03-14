@@ -306,7 +306,7 @@ class Utils {
     static isValidDomain(d) {
         if (!d || typeof d !== 'string' || d.length < 3)
             return false;
-        if (d.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789.]/gi, ''))
+        if (d.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789.-]/gi, ''))
             return false;
         if (d[0] === '.' ||  d[d.length-1] === '.')
             return false;
@@ -326,7 +326,7 @@ class Utils {
     static isValidEmailAddress(add) {
         if (!add || typeof add !== 'string' || add.length < 5)
             return false;
-        if (add.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789.]/gi, '') !== '@')
+        if (add.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789._-]/gi, '') !== '@')
             return false;
         const idx = add.indexOf("@");
         const dom = add.substr(idx+1);
