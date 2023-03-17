@@ -1303,22 +1303,32 @@ class Utils {
 
     /**
      * Dynamically change the height of a popup.
+     * Only works after a popup is open.
      *
      * @param {string} id popup id
      * @param {string} height  like "200px"
      */
     static popup_set_height(id, height) {
-        $('#' + id + '--height').css('height', height);
+        const ctl = $('#' + id + '--height');
+        if (ctl.length)
+            ctl.css('height', height);
+        else
+            console.log("Utils.popup_set_height:  can't set height before popup " + id + " is open");
     }
 
     /**
      * Dynamically change the width of a popup.
+     * Only works after a popup is open.
      *
      * @param {string} id popup id
      * @param {string} width  like "200px"
      */
     static popup_set_width(id, width) {
-        $('#' + id + '--width').css('width', width);
+        const ctl = $('#' + id + '--width');
+        if (ctl.length)
+            ctl.css('width', width);
+        else
+            console.log("Utils.popup_set_width:  can't set width before popup " + id + " is open");
     }
 
     /**
