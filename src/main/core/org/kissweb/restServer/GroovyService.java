@@ -57,6 +57,10 @@ public class GroovyService {
      * @see #getMethod(String, String, String, Object...)
      */
     public static Method getMethod(boolean ignoreMissing, String filePath, String className, String methodName, Object... args) throws Exception {
+        return getMethod2(ignoreMissing, filePath, className, methodName, args);
+    }
+
+    private static Method getMethod2(boolean ignoreMissing, String filePath, String className, String methodName, Object [] args) throws Exception {
         String rootPath = MainServlet.getApplicationPath();
         rootPath = StringUtils.drop(rootPath, -1);  //  drop the trailing slash
         if (filePath == null || filePath.isEmpty())
@@ -119,7 +123,7 @@ public class GroovyService {
      * @see #getMethod(boolean, String, String, String, Object...)
      */
     public static Method getMethod(String filePath, String className, String methodName, Object... args) throws Exception {
-        return getMethod(false, filePath, className, methodName, args);
+        return getMethod2(false, filePath, className, methodName, args);
     }
 
     /**
@@ -140,6 +144,10 @@ public class GroovyService {
      * @see #getMethod(String, String, String, Object...)
      */
     public static Object run(Method methp, Object inst, Object... args) throws Exception {
+        return run2(methp, inst, args);
+    }
+
+    private static Object run2(Method methp, Object inst, Object [] args) throws Exception {
         try {
             if (args == null) {
                 args = new Object[1];
@@ -176,8 +184,12 @@ public class GroovyService {
      * @see #run(String, String, String, Object, Object...)
      */
     public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
-        Method meth = getMethod(ignoreMissing, filePath, className, methodName, inst, args);
-        return run(meth, inst, args);
+        return run2(ignoreMissing, filePath, className, methodName, inst, args);
+    }
+
+    private static Object run2(boolean ignoreMissing, String filePath, String className, String methodName, Object inst, Object [] args) throws Exception {
+        Method meth = getMethod2(ignoreMissing, filePath, className, methodName, args);
+        return run2(meth, inst, args);
     }
 
     /**
@@ -201,7 +213,7 @@ public class GroovyService {
      * @see #run(boolean, String, String, String, Object, Object...)
      */
     public static Object run(String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
-        return run(false, filePath, className, methodName, inst, args);
+        return run2(false, filePath, className, methodName, inst, args);
     }
 
     /**
