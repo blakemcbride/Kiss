@@ -20,7 +20,7 @@
  *     Tasks      -  the application-specific build procedures (or tasks)
  */
 
-package builder;
+package org.kissweb.builder;
 
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -42,7 +42,7 @@ public class BuildUtils {
 
     private static final String Version = "1.0";
     private static String CACHE_DIR;
-    static boolean isWindows;
+    public static boolean isWindows;
 
     public static void main(String [] args) {
         String osName = System.getProperty("os.name");
@@ -118,7 +118,7 @@ public class BuildUtils {
         return null;  // not found
     }
 
-    static String getJavaPathOnWindows() {
+    public static String getJavaPathOnWindows() {
         String path = System.getenv("JAVA_HOME");
         if (path != null)
             return path;
@@ -133,7 +133,7 @@ public class BuildUtils {
         return null;
     }
 
-    static String getTomcatPath() {
+    public static String getTomcatPath() {
         return (new File("tomcat")).getAbsolutePath();
     }
 
@@ -172,11 +172,13 @@ public class BuildUtils {
     }
 
     public static void downloadAll(ForeignDependencies deps) {
-        deps.forEach(dep -> download(dep.filename, dep.targetPath, dep.source));
+        for (ForeignDependency dep : deps.getDependencies())
+            download(dep.filename, dep.targetPath, dep.source);
     }
 
     public static void delete(ForeignDependencies deps) {
-        deps.forEach(dep -> rm(dep.targetPath + File.separator + dep.filename));
+        for (ForeignDependency dep : deps.getDependencies())
+            rm(dep.targetPath + File.separator + dep.filename);
     }
 
     public static void println(String str) {
@@ -296,7 +298,6 @@ public class BuildUtils {
      *
      * @param dirName
      * @param fnameRegex
-     * @return
      */
     public static void rmRegex(String dirName, String fnameRegex) {
         File dir = new File(dirName);
@@ -629,13 +630,13 @@ public class BuildUtils {
                         }
                     });
                 if (fdep != null)
-                    fdep.forEach(x -> {
+                    for (ForeignDependency x : fdep.getDependencies()) {
                         try {
-                            bw.write(x.targetPath + "/" + x.filename + (isWindows ? ";" : ":"));
+                            bw.write(x.targetPath + "/" + x.filename + (isWindows? ";" : ":"));
                         } catch (IOException e) {
                             println("error writing to " + f.getAbsolutePath());
                         }
-                    });
+                    }
                 bw.newLine();
             }
         } catch (IOException e) {
@@ -689,7 +690,7 @@ public class BuildUtils {
      * @param destDir
      */
     public static void buildJavadoc(String srcPath, String libPath, String destDir) {
-        final boolean showOutput = false;
+        final boolean showOutput = true;  // good for debugging
         if (!new File(srcPath).exists())
             throw new RuntimeException("buildJavadoc: directory \"" + srcPath + "\" does not exist");
         mkdir(destDir);
@@ -848,7 +849,6 @@ public class BuildUtils {
      *
      * @param rootDir to be jar'ed up
      * @param jarFile name of the JAR file
-     * @return
      */
     public static void createJar(String rootDir, String jarFile) {
         File jf = new File(jarFile);
@@ -910,10 +910,9 @@ public class BuildUtils {
         if (ld != null)
             ld.forEach(dep -> unJar(rootDir, dep));
         if (fd != null)
-            fd.forEach(dep -> {
+            for (ForeignDependency dep : fd.getDependencies())
                 if (dep.filename.endsWith(".jar"))
                     unJar(rootDir, dep.targetPath + "/" + dep.filename);
-            });
     }
 
     public static void javac(LocalDependencies ldep, ForeignDependencies fdep, String sourcePath, String destPath, String filelist) {
@@ -932,7 +931,6 @@ public class BuildUtils {
 
     // Unfinished code to create WSDL's (I don't think they're needed anymore)
     public static void buildWS(LocalDependencies ldep, ForeignDependencies fdep, String dest, String sdir, String service) {
-        String javaHome = java.lang.System.getProperty("java.home");  // to find tools.jar
         String deps = writeDependencyArgsToFile(ldep, fdep);
         String cmd = "java -classpath @" + deps + " com.sun.tools.ws.WsGen -d " + dest + " -Xendorsed -keep -wsdl -r " + sdir + " -s " + sdir + " " + service;
         mkdir(sdir);
@@ -1035,7 +1033,7 @@ public class BuildUtils {
         return outputFile;
     }
 
-    public static class ForeignDependency {
+    private static class ForeignDependency {
         String filename;
         String targetPath;
         String source;
@@ -1047,10 +1045,6 @@ public class BuildUtils {
         }
     }
 
-    public interface DepInt {
-        void forEach(ForeignDependency dep);
-    }
-
     public static class ForeignDependencies {
         private final ArrayList<ForeignDependency> deps = new ArrayList<>();
 
@@ -1058,12 +1052,17 @@ public class BuildUtils {
             deps.add(new ForeignDependency(filename, targetPath, source));
         }
 
-        public void forEach(DepInt fun) {
-            deps.forEach(fun::forEach);
-        }
-
         public boolean isEmpty() {
             return deps.isEmpty();
+        }
+
+        public ArrayList<ForeignDependency> getDependencies() {
+            return deps;
+        }
+
+        public void print() {
+            for (ForeignDependency dep : deps)
+                println(dep.filename + " -> " + dep.targetPath + " (" + dep.source + ")");
         }
     }
 

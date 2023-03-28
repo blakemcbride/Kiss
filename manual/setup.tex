@@ -367,11 +367,11 @@ been tested on Linux, Mac, and Windows.  The system also includes an
 IDE integration with the included @emph{bld} system.
 
 The build system included with Kiss is written in Java and located
-under the @emph{builder} directory.  This build system also includes
-two driver batch files / shell scripts used to build and run the build
-system.  All that is needed to use this system is a Java compiler.
-(As a side note - this build system is generic and can be used to
-build other types of projects.)
+under the @emph{src/main/core/org/kissweb/builder/} directory.  This
+build system also includes two driver batch files / shell scripts used
+to build and run the build system.  All that is needed to use this
+system is a Java compiler.  (As a side note - this build system is
+generic and can be used to build other types of projects.)
 
 The build process is run from the command-line.  No IDE is necessary.
 There is no specific IDE integration.  None is needed because the system
@@ -500,7 +500,7 @@ Therefore, the following files will need to be manually verified.
 
 @itemize @bullet
 @item
-@code{builder/builder/Tasks.java}
+@code{src/main/core/org/kissweb/builder/Tasks.java}
 
 This file is left untouched by the upgrade process.  You may have
 custom tasks or modified existing tasks.  Be sure to check

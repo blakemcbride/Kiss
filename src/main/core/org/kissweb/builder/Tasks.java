@@ -23,9 +23,9 @@
  */
 
 
-package builder;
+package org.kissweb.builder;
 
-import static builder.BuildUtils.*;
+import static org.kissweb.builder.BuildUtils.*;
 
 public class Tasks {
 
@@ -65,6 +65,7 @@ public class Tasks {
         final String manifest = targetPath + "/META-INF/MANIFEST.MF";
         final String jarFile = BUILDDIR + "/kisscmd.jar";
         libs();
+
         unJarAllLibs(targetPath, localLibs, foreignLibs);
         buildJava("src/main/core", targetPath, localLibs, foreignLibs);
         rmTree(targetPath + "/META-INF");
@@ -246,9 +247,7 @@ public class Tasks {
         rmTree("tomcat");
         rm(tomcatTarFile);
         rm("manual/Kiss.pdf");
-
-        rmRegex("builder/builder", ".*\\.class");
-
+        
         rmTree(".project");
         rmTree(".settings");
         rmTree(".vscode");

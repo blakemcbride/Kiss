@@ -18,10 +18,8 @@ fi
 pushd $1
 ./bld clean
 popd
-rsync -av --delete builder/builder/BuildUtils.java $1/builder/builder
-rsync -av --delete builder/libs/ $1/builder/libs
 rsync -av libs/ $1/libs
-rsync -av --delete src/main/core/org/kissweb/ $1/src/main/core/org/kissweb
+rsync -av --exclude=src/main/core/org/kissweb/builder/Tasks.java --delete src/main/core/org/kissweb/ $1/src/main/core/org/kissweb
 rsync -av --delete src/main/frontend/kiss/ $1/src/main/frontend/kiss
 rsync -av bld $1
 rsync -av bld.cmd $1

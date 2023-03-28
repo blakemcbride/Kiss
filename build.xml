@@ -1,19 +1,23 @@
 <?xml version="1.0"?>
 <project name="Kiss" basedir="." default="all">
 
-  <!--  For docs on what each of these do see builder/builder/Tasks.java    -->
+  <!--  For docs on what each of these do, see src/main/core/org/kissweb/builder/Tasks.java    -->
   
   <target name="builder">
-    <javac classpath="builder/libs/commons-compress-1.20.jar" includeantruntime="false">
-      <src path="builder/builder"/>
+    <mkdir dir="build.work/exploded/WEB-INF/classes"/>
+    <javac classpath="libs/commons-compress-1.20.jar"
+           includeantruntime="false"
+           srcdir="src/main/core"
+           destdir="build.work/exploded/WEB-INF/classes"
+           includes="org/kissweb/builder/Tasks.java,org/kissweb/builder/BuildUtils.java">
     </javac>
   </target>
   
   <target name="all" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -21,8 +25,8 @@
   <target name="libs" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -30,8 +34,8 @@
   <target name="build" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -39,8 +43,8 @@
   <target name="war" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -48,8 +52,8 @@
   <target name="setupTomcat" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -57,8 +61,8 @@
   <target name="develop" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -66,8 +70,8 @@
   <target name="javadoc" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -75,8 +79,8 @@
   <target name="clean" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -84,8 +88,8 @@
   <target name="realclean" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="builder:builder/libs/*"/>
-      <arg value="builder.BuildUtils"/>
+      <arg value="build.work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="org.kissweb.builder.BuildUtils"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>

@@ -288,10 +288,10 @@ Moving forward, as time permits, the priorities are as follows:
 
 <p>Source code for all of <em>Kiss</em> and its dependencies is freely
 available.  The builder program located at
-<code>builder/builder/Tasks.java</code> contains the paths to all of the
-external dependencies (those not included in the <em>Kiss</em>
-distribution).  The following lists the paths to the internal
-dependencies (those included with <em>Kiss</em>):
+<code>src/main/core/org/kissweb/builder/Tasks.java</code> contains the paths
+to all of the external dependencies (those not included in the
+<em>Kiss</em> distribution).  The following lists the paths to the
+internal dependencies (those included with <em>Kiss</em>):
 </p>
 <dl compact="compact">
 <dt><span><code>abcl.jar</code></span></dt>
@@ -737,11 +737,11 @@ been tested on Linux, Mac, and Windows.  The system also includes an
 IDE integration with the included <em>bld</em> system.
 </p>
 <p>The build system included with Kiss is written in Java and located
-under the <em>builder</em> directory.  This build system also includes
-two driver batch files / shell scripts used to build and run the build
-system.  All that is needed to use this system is a Java compiler.
-(As a side note - this build system is generic and can be used to
-build other types of projects.)
+under the <em>src/main/core/org/kissweb/builder/</em> directory.  This
+build system also includes two driver batch files / shell scripts used
+to build and run the build system.  All that is needed to use this
+system is a Java compiler.  (As a side note - this build system is
+generic and can be used to build other types of projects.)
 </p>
 <p>The build process is run from the command-line.  No IDE is necessary.
 There is no specific IDE integration.  None is needed because the system
@@ -879,7 +879,7 @@ possible application-specific code that may have been added.
 Therefore, the following files will need to be manually verified.
 </p>
 <ul>
-<li> <code>builder/builder/Tasks.java</code>
+<li> <code>src/main/core/org/kissweb/builder/Tasks.java</code>
 
 <p>This file is left untouched by the upgrade process.  You may have
 custom tasks or modified existing tasks.  Be sure to check
