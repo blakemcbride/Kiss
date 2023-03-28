@@ -715,29 +715,55 @@ public class BuildUtils {
     }
 
     /**
-     * Run a command in the underlying OS in the foreground.
-     * Wait till it is done.
+     * This is the main driving method for all external procedure calls.
+     * <br><br>
+     * If <code>useShell</code> is <code>true</code> than normal shell processing (such as
+     * &gt;file and &lt;file) is performed.  Otherwise <code>exec</code> is called (which is faster).
+     * <br><br>
+     * If <code>wait</code> is <code>true</code> than this method waits for the process to complete.
+     * Otherwise, it returns immediately with the process object.
+     * <br><br>
+     * If <code>echoCmd</code> is <code>true</code> then the command being executed will be echoed to stdout.
+     * <br><br>
+     * If <code>showOutput</code> is <code>true</code> the output of the process is displayed to stdout.
+     * Otherwise, it is silent.
+     * <br><br>
+     * <code>startDir</code> provides the starting directory for the process.  If null, then the current
+     * directory is used.
+     * <br><br>
+     * <code>cmd</code> represents the command (with arguments) to be executed.  If <code>useShell</code> is true,
+     * then <code>cmd</code> can also use the shell syntax.
      *
-     * @param showOutput true if output should be shown
-     * @param startDir starting directory or null
-     * @param cmd the command to execute
+     * @param useShell
+     * @param wait
+     * @param echoCmd
+     * @param showOutput
+     * @param startDir
+     * @param cmd
+     * @return the process either running or completed (depending on wait)
      */
-    public static void runWait(boolean showOutput, String startDir, String cmd) {
-        println(cmd);
+    public static Process run(boolean useShell, boolean wait, boolean echoCmd, boolean showOutput, String startDir, String cmd) {
+        Process proc;
+        if (echoCmd)
+            println(cmd);
         File sdir = null;
         if (startDir != null) {
             sdir = new File(startDir);
             if (!sdir.exists())
                 mkdir(sdir);
             else if (sdir.isFile())
-                throw new RuntimeException("runWait: " + startDir + " is a file");
+                throw new RuntimeException("run: " + startDir + " is a file");
         }
         try {
-            Process proc;
             String[] mscmd = new String[3];
             if (isWindows) {
                 mscmd[0] = "cmd.exe";
                 mscmd[1] = "/C";
+                mscmd[2] = cmd;
+                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
+            } else if (useShell) {
+                mscmd[0] = "bash";
+                mscmd[1] = "-c";
                 mscmd[2] = cmd;
                 proc = Runtime.getRuntime().exec(mscmd, null, sdir);
             } else
@@ -746,56 +772,58 @@ public class BuildUtils {
                 (new StreamGobbler(proc.getErrorStream())).start();
                 (new StreamGobbler(proc.getInputStream())).start();
             }
-            if (proc.waitFor() != 0)
+            if (wait && proc.waitFor() != 0)
                 throw new RuntimeException("error executing " + cmd);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException("error executing " + cmd);
         }
+        return proc;
+    }
+
+    /**
+     * Run a command in the underlying OS in the foreground.
+     * Wait till it is done.
+     * This command does not support shell processing such as &gt; and &lt; etc.
+     *
+     * @param showOutput true if output should be shown
+     * @param startDir starting directory or null
+     * @param cmd the command to execute
+     * @see #run(boolean, boolean, boolean, boolean, String, String)
+     */
+    public static void runWait(boolean showOutput, String startDir, String cmd) {
+        run(false, true, true, showOutput, startDir, cmd);
     }
 
     /**
      * Run a command in the underlying OS shell in the foreground.
      * Wait till it is done.
-     * This command support all of the shell processing such as &gt; and &lt; etc.
+     * This command supports all of the shell processing such as &gt; and &lt; etc.
      *
      * @param startDir starting directory or null
      * @param cmd the command to execute
+     * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
     public static void runShell(String startDir, String cmd) {
-        println(cmd);
-        File sdir = null;
-        if (startDir != null) {
-            sdir = new File(startDir);
-            if (!sdir.exists())
-                mkdir(sdir);
-            else if (sdir.isFile())
-                throw new RuntimeException("runWait: " + startDir + " is a file");
-        }
-        try {
-            Process proc;
-            String[] mscmd = new String[3];
-            if (isWindows) {
-                mscmd[0] = "cmd.exe";
-                mscmd[1] = "/C";
-                mscmd[2] = cmd;
-                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
-            } else {
-                mscmd[0] = "bash";
-                mscmd[1] = "-c";
-                mscmd[2] = cmd;
-                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
-            }
-            if (proc.waitFor() != 0)
-                throw new RuntimeException("error executing " + cmd);
-        } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("error executing " + cmd);
-        }
+        run(true, true, true, false, startDir, cmd);
     }
 
+    /**
+     * Run a command in the underlying OS in the foreground.
+     *
+     * @param showOutput
+     * @param cmd
+     * @see #run(boolean, boolean, boolean, boolean, String, String)
+     */
     public static void runWait(boolean showOutput, String cmd) {
         runWait(showOutput, null, cmd);
     }    
-    
+
+    /**
+     * Run a command in the underlying OS shell in the foreground.
+     *
+     * @param cmd
+     * @see #run(boolean, boolean, boolean, boolean, String, String)
+     */
     public static void runShell(String cmd) {
         runShell(null, cmd);
     }
@@ -807,23 +835,10 @@ public class BuildUtils {
      *
      * @param cmd the command to execute
      * @return the Process
+     * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
     public static Process runBackground(String cmd) {
-        println(cmd);
-        try {
-            Process proc;
-            String[] mscmd = new String[3];
-            if (isWindows) {
-                mscmd[0] = "cmd.exe";
-                mscmd[1] = "/C";
-                mscmd[2] = cmd;
-                proc = Runtime.getRuntime().exec(mscmd, null, null);
-            } else
-                proc = Runtime.getRuntime().exec(cmd, null, null);
-            return proc;
-        } catch (IOException e) {
-            throw new RuntimeException("error executing " + cmd);
-        }
+        return run(false, false, true, false, null, cmd);
     }
 
     public static void killProcess(Process proc) {
