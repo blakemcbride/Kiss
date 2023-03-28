@@ -29,12 +29,15 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <version>0.9.5.5</version>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.codehaus.groovy/groovy -->
+    <!-- https://mvnrepository.com/artifact/org.apache.groovy/groovy-all -->
     <dependency>
-      <groupId>org.codehaus.groovy</groupId>
-      <artifactId>groovy</artifactId>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy-all</artifactId>
       <version>4.0.7</version>
+      <type>pom</type>
+      <scope>test</scope>
     </dependency>
+
 
     <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
     <dependency>
