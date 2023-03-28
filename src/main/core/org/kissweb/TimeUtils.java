@@ -76,12 +76,12 @@ public class TimeUtils {
      * Parse a string into an int representing a time in the form HHMM.
      * Intelligently parses the strings, for example:
      * <br><br>
-     * "330" -> 330<br>
-     * "0330" -> 330<br>
-     * "3:30" -> 330<br>
-     * "3.30" -> 330<br>
-     * "230 pm" -> 1430<br>
-     * "14:30" -> 1430<br>
+     * "330" -&gt; 330<br>
+     * "0330" -&gt; 330<br>
+     * "3:30" -&gt; 330<br>
+     * "3.30" -&gt; 330<br>
+     * "230 pm" -&gt; 1430<br>
+     * "14:30" -&gt; 1430<br>
      *
      * @param time
      * @return
