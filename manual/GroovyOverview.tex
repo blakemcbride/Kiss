@@ -1,0 +1,392 @@
+\input texinfo    @c -*-texinfo-*-
+@c %**start of header
+@setfilename GroovyOverview.html
+@settitle Groovy Overview
+@c %**end of header
+@setchapternewpage odd
+@codequoteundirected on
+@codequotebacktick on
+@tex
+\global\def\linkcolor{0 0 1}  % blue
+\global\def\urlcolor{0 0 1}   % blue
+@end tex
+
+@ifinfo
+Copyright  @copyright{} 2023 Blake McBride
+All rights reserved.
+@sp 1
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+@sp 1
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+@sp 1
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+@sp 1
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@end ifinfo
+
+@titlepage
+@title Groovy Overview
+@subtitle Part of the Kiss Web Development Framework
+@c @subtitle @today{}
+@subtitle April 4, 2023
+@author by Blake McBride
+@page
+@vskip 0pt plus 1filll
+Copyright  @copyright{} 2023 Blake McBride
+All rights reserved.
+@sp 1
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+@sp 1
+1. Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+@sp 1
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+@sp 1
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+@sp 1
+Windows and Microsoft are registered trademarks of
+Microsoft Corporation.  @TeX{}@ is a trademark of the American
+Mathematical Society. Other brand and product names are trademarks or
+registered trademarks of their respective holders.
+@sp 1
+This manual was typeset with the @TeX{}@ typesetting system developed by
+Donald Knuth utilizing the Texinfo format.
+@end titlepage
+@iftex
+@c @parskip = .5@baselineskip
+@font@smallfnt = cmr5
+@font@crfont = cmr7
+@end iftex
+
+@c @summarycontents
+@contents
+
+@chapter Why Groovy?
+Groovy is used for several reasons:
+
+@enumerate
+@item
+Groovy is only a little different from Java.  For the most part, if
+you know Java, you know Groovy.
+@item
+Groovy has several language features that make it significantly
+convenient in many situations.  (Although it also has a few
+annoyances too that you need to be mindful of!)
+@item
+Groovy normally compiles to regular Java class files, runs at full
+speed, and interacts Java <-> Groovy is if all code was Java or
+Groovy.
+@item
+Although Groovy can be compiled ahead-of-time just like Java, the
+way I am using it is to compile it at runtime.  This makes loading
+it take longer (although certainly sub-second) but once loaded, it
+runs at the same speed as compiled Java code.  Doing it this way
+has the following advantages:
+@enumerate a
+@item
+I can modify the code while the system is running!  The way I
+load files is to check the file date/time.  If it changes, I
+re-compile and load it.
+@item
+It is always clear to me what is dynamic (can be changed on a
+running system) and what is static (compiled ahead of time).
+All Java files are compiled ahead-of-time.  All Groovy files
+are compiled when loaded at runtime.  Note that this is just a
+convention I use and not a limitation of either Java or Groovy.
+@item
+Interestingly, and for reasons unclear to me, dynamically
+compiling and loading Groovy seems to be very significantly
+faster than doing the same thing in Java.
+@end enumerate
+@end enumerate
+
+@chapter Groovy -- The Good
+@enumerate
+@item
+Groovy integrates with Java seamlessly.  Groovy can call Java just
+as if everything was written in Groovy.  Java can call Groovy just
+as if it were Java.  Java and Groovy can be mixed and matched
+without a thought.
+   
+Although this is true of code compiled normally (ahead of time),
+there are special steps required to call code loaded at runtime
+from other code.  This is because the system has to find the code,
+compile, and load it if necessary before execution.
+@item
+Groovy has several types of strings.  One of the best features of
+Groovy are strings constants that are delineated with triple quotes
+(""").  These strings support embedded newlines.  This means you
+can have multi-line strings.  This comes in especially handy when
+representing SQL.  For example:
+@example
+       String sql = """select *
+                       from mytable
+                       where field = 'abc'
+                       order by some_field"""
+@end example
+@item
+In Java, to compare two strings you have to use:
+@example
+      str1 != null && str1.equals(str2)
+@end example
+   However, in Groovy, you can do:
+@example
+      str1 == str2
+@end example
+In Groovy, if you wish to see if they are the same object, use:
+@example   
+      str1.is(str2)
+@end example
+@item
+In Groovy there are some convenient mappings.  For example:
+@example
+   System.out.println("hello") becomes println("hello")
+@end example
+@item
+The last statement in a method has an implicit "return".  Therefore,
+you can write a method as follows:
+@example   
+   int add(int a, int b) @{
+       a + b
+   @}
+@end example
+@item
+Lambdas and closures.  In most situations lambdas and closures in
+Java are extremely clunky to use.  The net effect is that they are
+rarely used.  On the other hand, lambdas and closures in JavaScript
+are easy to define and use.  The net effect is that lambdas and
+closures are used very, very frequently in JavaScript.
+   
+Groovy lambdas and closures are like JavaScript.  They're easy to
+define and easy to use.  For example:
+@example   
+       static void meth1() @{
+            def fun = @{ a, b ->
+                double x = a + b
+                x * 5
+            @}
+            meth1(fun)
+        @}
+
+        static meth1(Closure fun) @{
+            println(fun(17.2, 4))
+        @}
+@end example
+
+The same thing in Java is:
+
+@example
+        interface MyInterface @{
+            double add(double a, double b);
+        @}
+
+        static void main(String[] args) @{
+            AtomicInteger y = new AtomicInteger(4);
+            MyInterface fun = (a, b) -> @{
+                double x = a + b;
+                y.set(5);
+                return x * 5;
+            @};
+            meth1(fun);
+            System.out.println(y.get());
+        @}
+
+        static void meth1(MyInterface fun) @{
+            System.out.println(fun.add(17.2, 4));
+        @}
+@end example
+    Note that Java:
+@enumerate a
+@item
+requires an interface (Java has several pre-defined
+interfaces that may be used)
+@item	   
+cannot directly change closure variables (y)
+@item	
+when calling the lambda, the lambda method name must be
+explicitly named
+@end enumerate
+@item
+In Groovy, the following are all treated like "false":
+@itemize @bullet
+@item
+false
+@item
+0
+@item
+""
+@item
+[]
+@item
+null
+@end itemize
+@example
+     Java:  if (str != null && !str.isEmpty()) @{ ... @}
+     Groovy:  if (str) @{ ... @}
+@end example
+@item
+Iteration conveniences
+@table @code
+@item      for (i in 1..10) ...
+@item      1.upto(10) ...           
+`it' is 1 to 10
+@item      10.times ...             
+loops from 0-9
+@item      0.step(10,2) ...         
+loops 0-0 in increments of 2
+@item      myLst.each @{ ... @}       
+loops each element. `it' has individual elements
+@end table
+@item
+String interpolation.  $VAR puts the value of VAR into a string.
+@example
+     Example:  "the value of x is $x"
+@end example
+Strings with single quotes do not support string interpolation.
+@example
+     Example:  'this is a string'
+@end example
+@item
+?. references the left side only if it is not null.  Therefore:
+@example
+    Java:  if (x != null && x.xyz()) @{ ... @}
+    Groovy:  if (x?.xyz()) @{ ... @}
+@end example
+@item
+Declaring an instance variable without a scope causes Groovy to
+automatically make it a bean.
+@item
+In Groovy, you can declare generic types with `def'. e.g.
+@example
+        def x = "hello"  // x is a String
+@end example
+This is the same as the Java `var' keyword.
+In Groovy, either can be used.
+(It's also the same as just declaring:
+Object x = "hello")
+@item
+An ArrayList can be defined with [] for example
+@example
+     def a = [1, 2, 3] // an ArrayList that can hold any type
+     a[3] = 'Hello'    // extends array
+@end example
+@item
+Groovy has many more significant conveniences
+@end enumerate
+
+@chapter Groovy -- The Bad
+Unfortunately, Groovy does have, what this author believes to be, some
+bad features.  In the end, however, it is believed that the good
+features outweigh the bad ones.  The following list enumerates them.
+@enumerate
+@item
+Java, C, and many other languages use the semicolon to specify the
+end of a statement.  However, in Groovy, it is optional.  This
+sometimes makes code difficult for a human to read.  Now you have
+to view a larger context in order to mentally determine the end of
+a statement.
+
+In spite of this fact, I tend not to terminate statements with a
+semicolon in Groovy because the IDE is constantly and annoyingly
+reminding me that the semicolon is not needed.  I don't use them to
+shut the IDE up.
+@item   
+Likewise, in some situations, Groovy allows the calling of
+functions without parenthesis.  For example, instead of writing:
+@example   
+      mymeth(arg1, arg2);
+@end example
+   In groovy you can use:
+@example
+      mymeth arg1, arg2
+@end example
+Just as in the previous complaint, this increases the difficulty
+for humans to evaluate the code.
+@item
+Groovy doesn't have the @code{char} type.  This means @code{'x'} is a string of
+length 1.  However, you often want a character.  In Groovy, you
+have to use:
+@example   
+      (char) 'x'
+        or
+      'x' as char
+@end example
+@item
+Double constants must end in ``D'' or ``d'' otherwise they're not a double,
+they're a @code{BigDecimal}!
+@example
+    3.14  // BigDecimal
+    3.14d // double
+@end example
+This and the prior item have caused countless problems due to this unexpected
+behavior.  Beware!
+@item
+Groovy does not make `private' elements private.  This is something
+many have complained about, but they refuse to correct.  It is major
+because when trying to understand a large system, one need look no
+further than a single file for truly private elements.  If there is no
+private, one must look throughout the entire system to determine of a
+given element is used.  This is a significant issue!
+@end enumerate    
+
+@chapter Calling Groovy in Kiss
+
+Groovy, like Java, may call compiled Java and Groovy code in the
+normal way.  This is always the case.  However, in @emph{KISS}, Groovy
+code is not compiled before the system is started up, as is normally
+the case, but is compiled at runtime when used.  This is to support
+the fact that all Groovy code in @emph{KISS} are microservices.
+In @emph{KISS}, each Groovy class is an independent microservice.
+This effects how Groovy methods are called in @emph{KISS}.
+
+Groovy microservices in @emph{KISS}, may make three types of calls as follows:
+@enumerate
+@item
+Intra-method Calls -- calls from one method to another in the same class
+@item
+Compiled Library Calls -- these are calls from Groovy to compiled Java
+code (@emph{KISS} core code, Java or Groovy compiled libraries, etc)
+@item 
+Microservice Calls - these are calls from one Groovy method to a Groovy
+method in another class / microservice
+@end enumerate
+In @emph{KISS}, the first two types of calls may be performed as you would normally
+perform them.  There are no special considerations.
+
+However type 3 calls require a special procedure.  This is to give @emph{KISS}
+an opportunity to compile an load the microservice before it is executed.
+See the manual for more details.
+
+    
+
+@bye
+

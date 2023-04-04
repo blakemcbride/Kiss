@@ -1,0 +1,322 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Groovy Overview</title>
+
+<meta name="description" content="Groovy Overview">
+<meta name="keywords" content="Groovy Overview">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<style type="text/css">
+<!--
+a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+span:hover a.copiable-anchor {visibility: visible}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<h1 class="settitle" align="center">Groovy Overview</h1>
+
+
+
+
+<div class="chapter" id="Why-Groovy_003f">
+<h2 class="chapter">1 Why Groovy?</h2>
+<p>Groovy is used for several reasons:
+</p>
+<ol>
+<li> Groovy is only a little different from Java.  For the most part, if
+you know Java, you know Groovy.
+</li><li> Groovy has several language features that make it significantly
+convenient in many situations.  (Although it also has a few
+annoyances too that you need to be mindful of!)
+</li><li> Groovy normally compiles to regular Java class files, runs at full
+speed, and interacts Java &lt;-&gt; Groovy is if all code was Java or
+Groovy.
+</li><li> Although Groovy can be compiled ahead-of-time just like Java, the
+way I am using it is to compile it at runtime.  This makes loading
+it take longer (although certainly sub-second) but once loaded, it
+runs at the same speed as compiled Java code.  Doing it this way
+has the following advantages:
+<ol type="a" start="1">
+<li> I can modify the code while the system is running!  The way I
+load files is to check the file date/time.  If it changes, I
+re-compile and load it.
+</li><li> It is always clear to me what is dynamic (can be changed on a
+running system) and what is static (compiled ahead of time).
+All Java files are compiled ahead-of-time.  All Groovy files
+are compiled when loaded at runtime.  Note that this is just a
+convention I use and not a limitation of either Java or Groovy.
+</li><li> Interestingly, and for reasons unclear to me, dynamically
+compiling and loading Groovy seems to be very significantly
+faster than doing the same thing in Java.
+</li></ol>
+</li></ol>
+
+</div>
+<div class="chapter" id="Groovy-_002d_002d-The-Good">
+<h2 class="chapter">2 Groovy &ndash; The Good</h2>
+<ol>
+<li> Groovy integrates with Java seamlessly.  Groovy can call Java just
+as if everything was written in Groovy.  Java can call Groovy just
+as if it were Java.  Java and Groovy can be mixed and matched
+without a thought.
+   
+<p>Although this is true of code compiled normally (ahead of time),
+there are special steps required to call code loaded at runtime
+from other code.  This is because the system has to find the code,
+compile, and load it if necessary before execution.
+</p></li><li> Groovy has several types of strings.  One of the best features of
+Groovy are strings constants that are delineated with triple quotes
+(&quot;&quot;&quot;).  These strings support embedded newlines.  This means you
+can have multi-line strings.  This comes in especially handy when
+representing SQL.  For example:
+<div class="example">
+<pre class="example">       String sql = &quot;&quot;&quot;select *
+                       from mytable
+                       where field = 'abc'
+                       order by some_field&quot;&quot;&quot;
+</pre></div>
+</li><li> In Java, to compare two strings you have to use:
+<div class="example">
+<pre class="example">      str1 != null &amp;&amp; str1.equals(str2)
+</pre></div>
+<p>However, in Groovy, you can do:
+</p><div class="example">
+<pre class="example">      str1 == str2
+</pre></div>
+<p>In Groovy, if you wish to see if they are the same object, use:
+</p><div class="example">
+<pre class="example">      str1.is(str2)
+</pre></div>
+</li><li> In Groovy there are some convenient mappings.  For example:
+<div class="example">
+<pre class="example">   System.out.println(&quot;hello&quot;) becomes println(&quot;hello&quot;)
+</pre></div>
+</li><li> The last statement in a method has an implicit &quot;return&quot;.  Therefore,
+you can write a method as follows:
+<div class="example">
+<pre class="example">   int add(int a, int b) {
+       a + b
+   }
+</pre></div>
+</li><li> Lambdas and closures.  In most situations lambdas and closures in
+Java are extremely clunky to use.  The net effect is that they are
+rarely used.  On the other hand, lambdas and closures in JavaScript
+are easy to define and use.  The net effect is that lambdas and
+closures are used very, very frequently in JavaScript.
+   
+<p>Groovy lambdas and closures are like JavaScript.  They&rsquo;re easy to
+define and easy to use.  For example:
+</p><div class="example">
+<pre class="example">       static void meth1() {
+            def fun = { a, b -&gt;
+                double x = a + b
+                x * 5
+            }
+            meth1(fun)
+        }
+
+        static meth1(Closure fun) {
+            println(fun(17.2, 4))
+        }
+</pre></div>
+
+<p>The same thing in Java is:
+</p>
+<div class="example">
+<pre class="example">        interface MyInterface {
+            double add(double a, double b);
+        }
+
+        static void main(String[] args) {
+            AtomicInteger y = new AtomicInteger(4);
+            MyInterface fun = (a, b) -&gt; {
+                double x = a + b;
+                y.set(5);
+                return x * 5;
+            };
+            meth1(fun);
+            System.out.println(y.get());
+        }
+
+        static void meth1(MyInterface fun) {
+            System.out.println(fun.add(17.2, 4));
+        }
+</pre></div>
+<p>Note that Java:
+</p><ol type="a" start="1">
+<li> requires an interface (Java has several pre-defined
+interfaces that may be used)
+</li><li> cannot directly change closure variables (y)
+</li><li> when calling the lambda, the lambda method name must be
+explicitly named
+</li></ol>
+</li><li> In Groovy, the following are all treated like &quot;false&quot;:
+<ul>
+<li> false
+</li><li> 0
+</li><li> &quot;&quot;
+</li><li> []
+</li><li> null
+</li></ul>
+<div class="example">
+<pre class="example">     Java:  if (str != null &amp;&amp; !str.isEmpty()) { ... }
+     Groovy:  if (str) { ... }
+</pre></div>
+</li><li> Iteration conveniences
+<dl compact="compact">
+<dt><span><code>for (i in 1..10) ...</code></span></dt>
+<dt><span><code>1.upto(10) ...</code></span></dt>
+<dd><p>&lsquo;it&rsquo; is 1 to 10
+</p></dd>
+<dt><span><code>10.times ...</code></span></dt>
+<dd><p>loops from 0-9
+</p></dd>
+<dt><span><code>0.step(10,2) ...</code></span></dt>
+<dd><p>loops 0-0 in increments of 2
+</p></dd>
+<dt><span><code>myLst.each { ... }</code></span></dt>
+<dd><p>loops each element. &lsquo;it&rsquo; has individual elements
+</p></dd>
+</dl>
+</li><li> String interpolation.  $VAR puts the value of VAR into a string.
+<div class="example">
+<pre class="example">     Example:  &quot;the value of x is $x&quot;
+</pre></div>
+<p>Strings with single quotes do not support string interpolation.
+</p><div class="example">
+<pre class="example">     Example:  'this is a string'
+</pre></div>
+</li><li> ?. references the left side only if it is not null.  Therefore:
+<div class="example">
+<pre class="example">    Java:  if (x != null &amp;&amp; x.xyz()) { ... }
+    Groovy:  if (x?.xyz()) { ... }
+</pre></div>
+</li><li> Declaring an instance variable without a scope causes Groovy to
+automatically make it a bean.
+</li><li> In Groovy, you can declare generic types with &lsquo;def&rsquo;. e.g.
+<div class="example">
+<pre class="example">        def x = &quot;hello&quot;  // x is a String
+</pre></div>
+<p>This is the same as the Java &lsquo;var&rsquo; keyword.
+In Groovy, either can be used.
+(It&rsquo;s also the same as just declaring:
+Object x = &quot;hello&quot;)
+</p></li><li> An ArrayList can be defined with [] for example
+<div class="example">
+<pre class="example">     def a = [1, 2, 3] // an ArrayList that can hold any type
+     a[3] = 'Hello'    // extends array
+</pre></div>
+</li><li> Groovy has many more significant conveniences
+</li></ol>
+
+</div>
+<div class="chapter" id="Groovy-_002d_002d-The-Bad">
+<h2 class="chapter">3 Groovy &ndash; The Bad</h2>
+<p>Unfortunately, Groovy does have, what this author believes to be, some
+bad features.  In the end, however, it is believed that the good
+features outweigh the bad ones.  The following list enumerates them.
+</p><ol>
+<li> Java, C, and many other languages use the semicolon to specify the
+end of a statement.  However, in Groovy, it is optional.  This
+sometimes makes code difficult for a human to read.  Now you have
+to view a larger context in order to mentally determine the end of
+a statement.
+
+<p>In spite of this fact, I tend not to terminate statements with a
+semicolon in Groovy because the IDE is constantly and annoyingly
+reminding me that the semicolon is not needed.  I don&rsquo;t use them to
+shut the IDE up.
+</p></li><li> Likewise, in some situations, Groovy allows the calling of
+functions without parenthesis.  For example, instead of writing:
+<div class="example">
+<pre class="example">      mymeth(arg1, arg2);
+</pre></div>
+<p>In groovy you can use:
+</p><div class="example">
+<pre class="example">      mymeth arg1, arg2
+</pre></div>
+<p>Just as in the previous complaint, this increases the difficulty
+for humans to evaluate the code.
+</p></li><li> Groovy doesn&rsquo;t have the <code>char</code> type.  This means <code>'x'</code> is a string of
+length 1.  However, you often want a character.  In Groovy, you
+have to use:
+<div class="example">
+<pre class="example">      (char) 'x'
+        or
+      'x' as char
+</pre></div>
+</li><li> Double constants must end in &ldquo;D&rdquo; or &ldquo;d&rdquo; otherwise they&rsquo;re not a double,
+they&rsquo;re a <code>BigDecimal</code>!
+<div class="example">
+<pre class="example">    3.14  // BigDecimal
+    3.14d // double
+</pre></div>
+<p>This and the prior item have caused countless problems due to this unexpected
+behavior.  Beware!
+</p></li><li> Groovy does not make &lsquo;private&rsquo; elements private.  This is something
+many have complained about, but they refuse to correct.  It is major
+because when trying to understand a large system, one need look no
+further than a single file for truly private elements.  If there is no
+private, one must look throughout the entire system to determine of a
+given element is used.  This is a significant issue!
+</li></ol>
+
+</div>
+<div class="chapter" id="Calling-Groovy-in-Kiss">
+<h2 class="chapter">4 Calling Groovy in Kiss</h2>
+
+<p>Groovy, like Java, may call compiled Java and Groovy code in the
+normal way.  This is always the case.  However, in <em>KISS</em>, Groovy
+code is not compiled before the system is started up, as is normally
+the case, but is compiled at runtime when used.  This is to support
+the fact that all Groovy code in <em>KISS</em> are microservices.
+In <em>KISS</em>, each Groovy class is an independent microservice.
+This effects how Groovy methods are called in <em>KISS</em>.
+</p>
+<p>Groovy microservices in <em>KISS</em>, may make three types of calls as follows:
+</p><ol>
+<li> Intra-method Calls &ndash; calls from one method to another in the same class
+</li><li> Compiled Library Calls &ndash; these are calls from Groovy to compiled Java
+code (<em>KISS</em> core code, Java or Groovy compiled libraries, etc)
+</li><li> Microservice Calls - these are calls from one Groovy method to a Groovy
+method in another class / microservice
+</li></ol>
+<p>In <em>KISS</em>, the first two types of calls may be performed as you would normally
+perform them.  There are no special considerations.
+</p>
+<p>However type 3 calls require a special procedure.  This is to give <em>KISS</em>
+an opportunity to compile an load the microservice before it is executed.
+See the manual for more details.
+</p>
+    
+
+<hr></div>
+
+
+
+</body>
+</html>

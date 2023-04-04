@@ -14,12 +14,7 @@ TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex \
 %.ps : %.dvi
 	dvips -T Letter -O 0in,-0.8in $*
 
-all: man/index.html jsdoc/index.html # Kiss.pdf
-
-Kiss.pdf : $(TEXFILES)
-	pdftex Kiss.tex
-	pdftex Kiss.tex
-	pdftex Kiss.tex
+all: man/index.html jsdoc/index.html GroovyOverview.html # Kiss.pdf GroovyOverview.pdf
 
 man/index.html :  $(TEXFILES)
 	makeinfo --html Kiss.tex
@@ -27,6 +22,19 @@ man/index.html :  $(TEXFILES)
 jsdoc/index.html: ../src/main/frontend/kiss/*.js ../src/main/frontend/kiss/component/components.js
 	rm -rf jsdoc
 	jsdoc -t /usr/local/lib/node_modules/docdash -c conf.json -d jsdoc $^
+
+Kiss.pdf : $(TEXFILES)
+	pdftex Kiss.tex
+	pdftex Kiss.tex
+	pdftex Kiss.tex
+
+GroovyOverview.html : GroovyOverview.tex
+	makeinfo --html --no-split GroovyOverview.tex
+
+GroovyOverview.pdf : GroovyOverview.tex
+	pdftex GroovyOverview.tex
+	pdftex GroovyOverview.tex
+	pdftex GroovyOverview.tex
 
 clean:
 	rm -f *.cp *.fn *.fns *.ky *.pg *.toc *.tp *.vr *.aux *.log

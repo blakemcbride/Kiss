@@ -135,6 +135,7 @@ atlassian-ide-plugin.xml
 /manual/*.tp
 /manual/*.vr
 /manual/Kiss.pdf
+/manual/GroovyOverview.pdf
 
 /nbproject/private/
 /dist/
