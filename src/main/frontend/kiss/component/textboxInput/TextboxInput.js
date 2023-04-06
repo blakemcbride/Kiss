@@ -138,6 +138,8 @@
                 sval = sval.toUpperCase();
                 jqObj.html(Utils.textToHtml(sval));
             }
+            if (max && sval && sval.length > max)
+                sval = Utils.take(sval, max);
             return sval
         };
 
@@ -277,10 +279,13 @@
         };
 
         jqObj.on('input', function (elm) {
-            let txt = Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
-            if (max && txt.length > max) {
+            let html = jqObj.html();
+            let txt = Utils.htmlToText(html).replace(/^\s+/, '');
+            if (max && (txt.length > max || html.length > max)) {
                 txt = Utils.take(txt, max);
-                jqObj.html(Utils.textToHtml(txt));
+                html = Utils.textToHtml(txt);
+                html = Utils.take(html, max);
+                jqObj.html(html);
             }
         });
 
