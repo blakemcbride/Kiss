@@ -5,7 +5,7 @@
 		<listener-class>org.kissweb.restServer.StartupListener</listener-class>
 	</listener>
 
-    <!--  Allow CORS on localhost for development  -->
+	<!--  Allow CORS on localhost for development  -->
 	<filter>
 		<filter-name>CorsFilter</filter-name>
 		<filter-class>org.apache.catalina.filters.CorsFilter</filter-class>
@@ -13,13 +13,15 @@
 		<init-param>
 			<param-name>cors.allowed.origins</param-name>
 			<!-- The following line is good for most situations including development and production.
+			     It is set up to allow the server that comes with Kiss (port 8000) as well as
+			     the IntelliJ server at port 63340.  This way you can debug the front-end within IntelliJ too.
 			     However, it doesn't support testing on a remote (non-localhost or mobile) device.
 			     This could be a problem when testing a mobile layout.  -->
-			<param-value>http://localhost:8000</param-value>
+			<param-value>http://localhost:8000,http://localhost:63342</param-value>
 			<!--  Or, the following line can be used (not both).  It totally bypasses CORS and allows any origin.
 			      This is fine for development purposes and for testing remote (non-localhost or mobile) devices.
-			      This setting should not be used in a production environment!  -->
-<!--			<param-value>*</param-value>     -->
+			      This setting should not be used in a production environment!  It would be a serious security flaw!  -->
+			<!--			<param-value>*</param-value> -->
 		</init-param>
 		<init-param>
 			<param-name>cors.allowed.methods</param-name>
@@ -39,10 +41,6 @@
 			<param-value>true</param-value>
 		</init-param>
 		-->
-		<init-param>
-			<param-name>cors.preflight.maxage</param-name>
-			<param-value>10</param-value>
-		</init-param>
 	</filter>
 	<filter-mapping>
 		<filter-name>CorsFilter</filter-name>

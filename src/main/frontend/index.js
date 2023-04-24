@@ -4,9 +4,10 @@
 'use strict';
 
 Utils.afterComponentsLoaded(function () {
-    const href = window.location.href;
-    let url = href.substr(0, href.lastIndexOf('/'));
-    url = url.replace('8000', '8080');
+    let url = Utils.getAppUrl();
+    if (url.startsWith('http://localhost:'))
+        url = 'http://localhost:8080';
+    // If you have a CORS problem, see src/main/frontend/WEB-INF/web.xml
     Server.setURL(url);
 
     const screenPixels = screen.height * screen.width;

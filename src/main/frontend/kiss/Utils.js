@@ -800,6 +800,20 @@ class Utils {
     }
 
     /**
+     * Returns the root URL of the application.
+     *
+     * @returns {string}
+     */
+    static getAppUrl() {
+        let loc = window.location.href;
+        let i = loc.indexOf('?');
+        if (i > 0)
+            loc = loc.substring(0, i);
+        i = loc.lastIndexOf('/');
+        return i > 0 ? loc.substring(0, i) : loc;
+    }
+
+    /**
      * Initialize a tagless component.
      *
      * @param {string} path back-end path to the component
