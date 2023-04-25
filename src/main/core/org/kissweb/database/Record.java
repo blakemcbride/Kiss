@@ -497,6 +497,8 @@ public class Record implements AutoCloseable {
     /**
      * Performs an SQL update on the record.  This is done by creating an actual update statement and
      * executing it against the database.  It does not affect any cursors.
+     * <br><br>
+     * This method is smart.  It only updates the fields that have changed, and if none have, it does nothing.
      *
      * @throws SQLException
      * @see Connection#commit()
@@ -506,13 +508,13 @@ public class Record implements AutoCloseable {
             throw new RuntimeException("Can't update record; not in select");
         if (table == null)
             throw new RuntimeException("Can't update record; no table name");
-        LinkedList<AbstractMap.SimpleEntry<String,Object>> cf = new LinkedList<>();
+        final ArrayList<AbstractMap.SimpleEntry<String,Object>> cf = new ArrayList<>();
         cols.forEach((key, val) -> {
             if (!ocols.containsKey(key) || ocols.get(key) != val)
-                cf.addFirst(new AbstractMap.SimpleEntry<>(key, val));
+                cf.add(new AbstractMap.SimpleEntry<>(key, val));
         });
         if (!cf.isEmpty()) {
-            StringBuilder sql = new StringBuilder("update " + table + " set ");
+            final StringBuilder sql = new StringBuilder("update " + table + " set ");
             boolean needComma = false;
             for (AbstractMap.SimpleEntry<String,Object> fld : cf) {
                 if (needComma)
@@ -526,7 +528,7 @@ public class Record implements AutoCloseable {
                 // Update a new record
                 sql.append(" where ");
                 boolean needAnd = false;
-                List<String> pc = conn.getPrimaryColumns(table);
+                final List<String> pc = conn.getPrimaryColumns(table);
                 if (pc == null)
                     throw new RuntimeException("Can't update table " + table + ": no primary key");
                 for (String pcol : pc) {
@@ -542,7 +544,7 @@ public class Record implements AutoCloseable {
                 cursor.prevsql = new StringBuilder(sql);
                 sql.append(" where ");
                 boolean needAnd = false;
-                List<String> pc = conn.getPrimaryColumns(table);
+                final List<String> pc = conn.getPrimaryColumns(table);
                 if (pc == null)
                     throw new RuntimeException("Can't update table " + table + ": no primary key");
                 for (String pcol : pc) {
@@ -600,10 +602,10 @@ public class Record implements AutoCloseable {
             */
         if (table == null)
             throw new RuntimeException("Can't delete record; no table name");
-        StringBuilder sql = new StringBuilder("delete from " + table + " where ");
+        final StringBuilder sql = new StringBuilder("delete from " + table + " where ");
         if (cursor == null || !cursor.cmd.isSelect) {
             boolean needAnd = false;
-            List<String> pc = conn.getPrimaryColumns(table);
+            final List<String> pc = conn.getPrimaryColumns(table);
             if (pc == null)
                 throw new RuntimeException("Can't delete from table " + table + ": no primary key");
             for (String col : pc) {
@@ -623,7 +625,7 @@ public class Record implements AutoCloseable {
         } else if (cursor.ustmt == null || !sql.equals(cursor.prevsql)) {
             cursor.prevsql = new StringBuilder(sql);
             boolean needAnd = false;
-            List<String> pc = conn.getPrimaryColumns(table);
+            final List<String> pc = conn.getPrimaryColumns(table);
             if (pc == null)
                 throw new RuntimeException("Can't delete from table " + table + ": no primary key");
             for (String col : pc) {
@@ -656,7 +658,7 @@ public class Record implements AutoCloseable {
      */
     public Object addRecordAutoInc() throws SQLException {
         if (pstmt == null) {
-            StringBuilder sql = new StringBuilder("insert into " + table + " (");
+            final StringBuilder sql = new StringBuilder("insert into " + table + " (");
             boolean needComma = false;
             for (String fld : cols.keySet())
                 if (cols.get(fld) != null) {
@@ -707,7 +709,7 @@ public class Record implements AutoCloseable {
         }
 
         //  update the column value
-        List<String> pcols = conn.getPrimaryColumns(table);
+        final List<String> pcols = conn.getPrimaryColumns(table);
         cols.put(pcols.get(0), nextId);
 
         if (ocols == null)
@@ -730,7 +732,7 @@ public class Record implements AutoCloseable {
      */
     public boolean addRecord() throws SQLException {
         if (pstmt == null) {
-            StringBuilder sql = new StringBuilder("insert into " + table + " (");
+            final StringBuilder sql = new StringBuilder("insert into " + table + " (");
             boolean needComma = false;
             for (String fld : cols.keySet())
                 if (cols.get(fld) != null) {
