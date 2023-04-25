@@ -14,7 +14,7 @@
 			<param-name>cors.allowed.origins</param-name>
 			<!-- The following line is good for most situations including development and production.
 			     It is set up to allow the server that comes with Kiss (port 8000) as well as
-			     the IntelliJ server at port 63340.  This way you can debug the front-end within IntelliJ too.
+			     the IntelliJ server at port 63342.  This way you can debug the front-end within IntelliJ too.
 			     However, it doesn't support testing on a remote (non-localhost or mobile) device.
 			     This could be a problem when testing a mobile layout.  -->
 			<param-value>http://localhost:8000,http://localhost:63342</param-value>
