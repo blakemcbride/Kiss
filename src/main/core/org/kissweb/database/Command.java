@@ -484,7 +484,7 @@ public class Command implements AutoCloseable {
                 while (r.next())
                     pcols.add(r.getString(4));
             } catch (SQLException e) {
-                return null;
+                throw new RuntimeException(e);
             }
         }
         return pcols;
