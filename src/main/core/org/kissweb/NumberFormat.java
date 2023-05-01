@@ -50,7 +50,7 @@ public class NumberFormat {
      *     <li>B = blank if zero</li>
      *     <li>C = add commas</li>
      *     <li>L = left justify number</li>
-     *     <li>P = put perenthises around negative numbers</li>
+     *     <li>P = put parentheses around negative numbers</li>
      *     <li>Z = zero fill</li>
      *     <li>D = floating dollar sign</li>
      *     <li>U = uppercase letters in conversion</li>
@@ -267,7 +267,7 @@ public class NumberFormat {
      *     <li>B = blank if zero</li>
      *     <li>C = add commas</li>
      *     <li>L = left justify number</li>
-     *     <li>P = put perenthises around negative numbers</li>
+     *     <li>P = put parentheses around negative numbers</li>
      *     <li>Z = zero fill</li>
      *     <li>D = floating dollar sign</li>
      *     <li>U = uppercase letters in conversion</li>
