@@ -38,7 +38,7 @@
                     default_option = attr[prop];
                     break;
 
-                // pre-existing attributes
+                // preexisting attributes
 
                 case 'multiple':
                     multiple = true;

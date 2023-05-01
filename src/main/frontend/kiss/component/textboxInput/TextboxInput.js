@@ -52,7 +52,7 @@
                     placeholder = Utils.removeQuotes(attr[prop]);
                     break;
 
-                // pre-existing attributes
+                // preexisting attributes
 
                 case 'style':
                     break;  // already dealing with this
