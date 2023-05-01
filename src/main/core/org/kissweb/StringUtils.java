@@ -37,7 +37,7 @@ import java.io.StringWriter;
 import java.util.Formatter;
 
 /**
- * This class contains many methods used to maniulate <code>String</code>s.
+ * This class contains many methods used to manipulate <code>String</code>s.
  *
  * @author Blake McBride
  */
