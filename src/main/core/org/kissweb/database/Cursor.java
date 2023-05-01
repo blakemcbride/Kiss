@@ -432,7 +432,7 @@ public class Cursor implements AutoCloseable {
     }
 
     /**
-     * This method works like <code>fetchOne</code> except that it adds the record columns to an existin JSON object
+     * This method works like <code>fetchOne</code> except that it adds the record columns to an existing JSON object
      * passed in.
      *
      * @param obj
