@@ -64,7 +64,7 @@ public class StringUtils {
      * If the string is longer than <code>n</code> it is cut short.
      * <br><br>
      * If <code>n</code> is negative, the same thing occurs but it starts at the back of the string.
-     * Thus padding or cuttin of the string occur at the start of the string.
+     * Thus padding or cutting of the string occur at the start of the string.
      *
      * @param s
      * @param n
