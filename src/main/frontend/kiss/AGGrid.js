@@ -378,7 +378,7 @@ class AGGrid {
 
     /**
      * Return the index of the selected row.  <code>null</code> is returned if no row is selected.
-     * If multiple rows are selected, the index of the forst selected row is returned.
+     * If multiple rows are selected, the index of the first selected row is returned.
      *
      * @returns {null|number}
      */
