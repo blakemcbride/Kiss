@@ -105,7 +105,7 @@ public class FTP implements AutoCloseable {
      * 
      */
     private ArrayList<String> check(ArrayList<String> allLines, String code, String code2) throws Exception {
-        /* I've seen the system return a success code before I get the file.  Thi is because it sent it, I just didn't receive it yet.
+        /* I've seen the system return a success code before I get the file.  This is because it sent it, I just didn't receive it yet.
            It is telling me it sent it.  So, I must check the previous response code too.
         */
         for (String response : allLines) {
