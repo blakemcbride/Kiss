@@ -214,7 +214,7 @@ public class StringUtils {
     }
 
 	/**
-	 * C-like sprintf method.  Format a string according to the format insering the arguments
+	 * C-like sprintf method.  Format a string according to the format inserting the arguments
      * as placed in the format string.
      *
 	 * @param fmt format string
