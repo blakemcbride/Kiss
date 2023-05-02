@@ -215,7 +215,7 @@ public class DelimitedFileWriter implements AutoCloseable {
 	}
 
     /**
-     * Outpud an integer column.
+     * Output an integer column.
      *
      * @param x
      * @throws Exception

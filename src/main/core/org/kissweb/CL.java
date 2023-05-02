@@ -130,7 +130,7 @@ public class CL {
     /**
      * Prompt user for a selection amongst a fixed set of choices.
      *
-     * @param options series of strings options seperated by commas
+     * @param options series of strings options separated by commas
      * @param prompt
      * @return the full option chosen
      */

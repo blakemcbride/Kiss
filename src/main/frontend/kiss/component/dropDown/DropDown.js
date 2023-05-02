@@ -34,7 +34,7 @@
                     default_option = attr[prop];
                     break;
 
-                // Pre-existing attributes
+                // Preexisting attributes
 
                 case 'style':
                     break;  // Already dealing with this.

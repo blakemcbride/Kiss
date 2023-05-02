@@ -64,7 +64,7 @@ public class Connection implements AutoCloseable {
 
     private final ConcurrentHashMap<String, String> primaryColName = new ConcurrentHashMap<>();  // table name, auto-inc primary key column name
     private final ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();  // table name, primary key column names
-    private final HashMap<String, Boolean> TableExistanceCache = new HashMap<>();
+    private final HashMap<String, Boolean> TableExistenceCache = new HashMap<>();
     private boolean externalConnection = false;
 
     java.sql.Connection conn;
@@ -634,8 +634,8 @@ public class Connection implements AutoCloseable {
             table = parts[parts.length - 1];
         }
 
-        if (TableExistanceCache.containsKey(table))
-            return TableExistanceCache.get(table);
+        if (TableExistenceCache.containsKey(table))
+            return TableExistenceCache.get(table);
         boolean res = false;
         try (Command cmd = newCommand()) {
             if (schema == null)
@@ -649,7 +649,7 @@ public class Connection implements AutoCloseable {
                 return false;
             }
         }
-        TableExistanceCache.put(table, res);
+        TableExistenceCache.put(table, res);
         return res;
     }
 

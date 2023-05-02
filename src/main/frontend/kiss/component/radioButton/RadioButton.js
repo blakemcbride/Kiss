@@ -62,7 +62,7 @@ Kiss.RadioButtons.groups = {};
                     nAttrs += ' ' + prop + '="' + value + '"';
                     break;
 
-                // pre-existing attributes
+                // preexisting attributes
 
                 case 'style':
                     break;  // already dealing with this

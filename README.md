@@ -2,7 +2,7 @@
 
 
 The KISS Framework is an application development framework for
-developing web-based business applications. KISS can alse be used to
+developing web-based business applications. KISS can also be used to
 build command-line utilities, and, in conjunction with
 [Electron](https://electronjs.org), desktop applications that are
 portable to Windows, Mac, and Linux.

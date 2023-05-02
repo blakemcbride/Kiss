@@ -400,7 +400,7 @@ public class JsonPath {
     public static void main(String [] argv) throws IOException {
         JSONObject jobj = toJson("input.json");
         JSONObject jobj2 = getObject(jobj, "context.System.application");
-        String s1 = getString(jobj, "context.Systsem.application.applicationId");
+        String s1 = getString(jobj, "context.System.application.applicationId");
         jobj = null;
     }
 }

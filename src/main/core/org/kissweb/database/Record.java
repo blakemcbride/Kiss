@@ -44,7 +44,7 @@ import java.util.*;
  * <br><br>
  * There are two ways of getting instances of this class.  The first way is by doing a
  * select against the database.  In that case, a <code>Record</code> or list of <code>Record's</code>
- * is returned.  The other way is to create a new row or record for inseration into the database.
+ * is returned.  The other way is to create a new row or record for insertion into the database.
  * In that case, one should create the new <code>Record</code> instance as follows:
  * <br><br>
  *  &nbsp;&nbsp;&nbsp;&nbsp;   <code>Record rec = db.newRecord('myTable');</code>

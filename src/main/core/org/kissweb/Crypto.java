@@ -185,8 +185,8 @@ public final class Crypto {
     public static String decrypt(String salt, String password, String encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
         cipher.init(Cipher.DECRYPT_MODE, key);
-        final byte[] decordedValue = base64Decode2(encryptedValue);
-        final byte[] decValue = cipher.doFinal(decordedValue);
+        final byte[] decodedValue = base64Decode2(encryptedValue);
+        final byte[] decValue = cipher.doFinal(decodedValue);
         return new String(decValue);
     }
 

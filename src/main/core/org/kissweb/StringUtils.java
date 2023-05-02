@@ -37,7 +37,7 @@ import java.io.StringWriter;
 import java.util.Formatter;
 
 /**
- * This class contains many methods used to maniulate <code>String</code>s.
+ * This class contains many methods used to manipulate <code>String</code>s.
  *
  * @author Blake McBride
  */
@@ -64,7 +64,7 @@ public class StringUtils {
      * If the string is longer than <code>n</code> it is cut short.
      * <br><br>
      * If <code>n</code> is negative, the same thing occurs but it starts at the back of the string.
-     * Thus padding or cuttin of the string occur at the start of the string.
+     * Thus padding or cutting of the string occur at the start of the string.
      *
      * @param s
      * @param n
@@ -214,7 +214,7 @@ public class StringUtils {
     }
 
 	/**
-	 * C-like sprintf method.  Format a string according to the format insering the arguments
+	 * C-like sprintf method.  Format a string according to the format inserting the arguments
      * as placed in the format string.
      *
 	 * @param fmt format string

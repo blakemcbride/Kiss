@@ -52,7 +52,7 @@ import java.util.logging.Logger;
 public class DelimitedFileReader implements AutoCloseable {
 
     private char delimiter;
-    private String delimeterString;
+    private String delimiterString;
     private char quote;
     private final ArrayList<String> lineValues = new ArrayList();
     private int fieldPos = 0;
@@ -74,7 +74,7 @@ public class DelimitedFileReader implements AutoCloseable {
         fyle = f;
         fr = new BufferedReader(new FileReader(f));
         this.delimiter = delimiter;
-        delimeterString = Character.toString(delimiter);
+        delimiterString = Character.toString(delimiter);
         this.quote = quote;
     }
 
@@ -242,7 +242,7 @@ public class DelimitedFileReader implements AutoCloseable {
         while (true) {
             if (line == null)
                 return false;
-            if (!line.trim().isEmpty()  &&  !line.replaceAll(delimeterString, "").trim().isEmpty())
+            if (!line.trim().isEmpty()  &&  !line.replaceAll(delimiterString, "").trim().isEmpty())
                 break;
             line = fr.readLine();
         }

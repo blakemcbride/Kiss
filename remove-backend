@@ -2,7 +2,7 @@
 
 # I've found that I often use multiple front-ends with a single back-end.
 # So, these additional front-ends do not have their own back-end.  This
-# script removed the back-end portion of the system to give me a convinient 
+# script removed the back-end portion of the system to give me a convenient 
 # starting point.
 
 if [ $# -ne 1 ] || [ 'remove' != $1 ]; then

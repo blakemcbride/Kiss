@@ -60,7 +60,7 @@
                     comma = false;
                     break;
 
-                // pre-existing attributes
+                // preexisting attributes
 
                 case 'style':
                     break;  // already dealing with this

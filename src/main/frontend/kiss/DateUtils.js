@@ -7,7 +7,7 @@
 'use strict';
 
 /**
- Function names are meant to tell what the input and output date date types they work on.
+ Function names are meant to tell what the input and output date types they work on.
  In terms of understanding the data types used to represent dates:
 
  int          20180322

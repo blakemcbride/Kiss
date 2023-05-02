@@ -252,7 +252,7 @@ public class Tasks {
         rmTree(".settings");
         rmTree(".vscode");
 
-        // intelliJ
+        // IntelliJ
         rmTree(".idea");
         rmTree("out");
         rmRegex(".", ".*\\.iml");
