@@ -1401,20 +1401,22 @@ class Utils {
 
     /**
      * Turn undefined, null, NaN, "", a number, or a string into a number.
+     * Handles M and K suffix.
      * Anything (except a valid string or number) becomes a zero.
      *
      * @param v
      * @returns {number}
      */
     static toNumber(v) {
-        if (!v  ||  (typeof v !== 'string'  &&  typeof v !== 'number'))
-            return 0;
         if (typeof v === 'number')
-            return v;
-        v = v.replace('$', '');
-        v = v.replace('%', '');
-        v = v.replace(/,/g, '');
-        return Utils.toNumber(Number(v));
+            return isNaN(v) ? 0 : v;
+        if (typeof v !== 'string'  ||  !v.trim())
+            return 0;
+        v = v.replace(/[kK]/, '000');
+        v = v.replace(/[mM]/, '000000');
+        v = v.replaceAll(/[,$% ]/g, '');
+        const r = Number(v);
+        return isNaN(r) ? 0 : r;
     }
 
     /**
