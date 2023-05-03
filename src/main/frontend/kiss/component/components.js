@@ -526,6 +526,7 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td> fixcap </td><td> auto-correct capitalization of each word (first char uppercase, rest lowercase) </td></tr>
      *     <tr><td>    minlength="5"     </td><td>     sets the minimum acceptable string length               </td></tr>
      *     <tr><td>    maxlength="20"     </td><td>     sets the maximum number of characters               </td></tr>
      *     <tr><td>    password     </td><td>     the character are not shown on the screen              </td></tr>

@@ -14,6 +14,7 @@
         let min = null;
         let password = false;
         let upcase = false;
+        let fixcap = false;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -30,6 +31,7 @@
                     break;
                 case 'upcase':
                     upcase = true;
+                    fixcap = false;
                     break;
                 case 'required':
                     if (!min)
@@ -38,7 +40,10 @@
                 case 'password':
                     password = true;
                     break;
-
+                case 'fixcap':
+                    fixcap = true;
+                    upcase = false;
+                    break;
 
                 // preexisting attributes
 
@@ -88,7 +93,10 @@
 
         newElm.getValue = function () {
             let sval = jqObj.val();
-            return sval ? sval.replace(/\s+/g, ' ').trim() : '';
+            sval = sval ? sval.replace(/\s+/g, ' ').trim() : '';
+            if (fixcap && sval)
+                sval = Utils.fixCapitalization(sval);
+            return sval;
         };
 
         newElm.setValue = function (val) {

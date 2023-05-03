@@ -1931,6 +1931,27 @@ class Utils {
         return s && s.replace(/\D/g, '').length === 9;
     }
 
+    /**
+     * This method attempts to correct incorrect word capitalization.
+     * It tries to assure that the first letter of each word is uppercase and the rest is lowercase.
+     * If the incoming string is already mixed-case, it leaves it alone.
+     *
+     * @param s {string}
+     * @returns {string}
+     */
+    static fixCapitalization(str) {
+        if (!str)
+            return str;
+        const nUpper = str.replace(/[^A-Z]/g, '').length;
+        const nLower = str.replace(/[^a-z]/g, '').length;
+        if (!(nLower + nUpper) || nLower && nUpper)
+            return str;
+
+        // Otherwise, capitalize the first letter of each word
+        return str.toLowerCase().replace(/(^|\s)\S/g, function(firstLetter) {
+            return firstLetter.toUpperCase();
+        });
+    }
 }
 
 // Class variables
