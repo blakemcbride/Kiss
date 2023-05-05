@@ -129,11 +129,12 @@
 
             if (controlCache) {
                 const now = getURLParameter("now");
-                const urlArgs = window.location.search.substring(1);
+                let urlArgs = window.location.search.substring(1);
                 if (now) {
                     const diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
                     if (diff > 30) {
                         window.onbeforeunload = null;
+                        urlArgs = urlArgs.replaceAll(/now=[^&]*&/g, '');
                         window.location.href = 'index.html?now=' + (new Date()).getTime() + (urlArgs ? '&' + urlArgs : '');
                     } else {
                         loadUtils();
