@@ -12,6 +12,7 @@
     const processor = function (elm, attr, content) {
         let nstyle, originalValue;
         let min = null;
+        let max = null;
         let password = false;
         let upcase = false;
         let fixcap = false;
@@ -47,6 +48,13 @@
 
                 // preexisting attributes
 
+                case 'maxlength':
+                    // Browsers already support this.  The problem is that after thousands of different users, I have
+                    // encountered a few browsers, for reasons I do not know, do not honor this.  Therefore, I need
+                    // to support this functionality myself.
+                    nattrs += ' ' + prop + '="' + attr[prop] + '"';  // retain default browser functionality
+                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    break;
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
@@ -108,6 +116,8 @@
             }
             if (upcase)
                 val = val.toUpperCase();
+            if (max && val.length > max)
+                val = val.substring(0, max);
             jqObj.val(originalValue = val);
             return this;
         };
@@ -231,6 +241,8 @@
 
         jqObj.on('input', function () {
             let val = jqObj.val().replace(/^\s+/, "");
+            if (max && val.length > max)
+                val = val.substring(0, max);
             jqObj.val(upcase ? val.toUpperCase() : val);
         });
     };
