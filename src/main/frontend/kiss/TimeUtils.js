@@ -273,5 +273,37 @@ class TimeUtils {
         return dt.getHours() * 100 + dt.getMinutes();
     }
 
+    /**
+     * Add hours to a time.
+     *
+     * @param time  HHMM
+     * @param hoursToAdd
+     * @returns {number} HHMM
+     */
+    static addHours(time, hoursToAdd) {
+        let hours = Math.floor(time / 100);
+        const minutes = time % 100;
+        hours = (hours + hoursToAdd) % 24;
+        if (hours < 0)
+            hours += 24;
+        return hours * 100 + minutes;
+    }
+
+    /**
+     * Add minutes to a time
+     *
+     * @param time HHMM
+     * @param minutesToAdd
+     * @returns {number} HHMM
+     */
+    static addMinutes(time, minutesToAdd) {
+        let totalMinutes = (Math.floor(time / 100) * 60) + (time % 100) + minutesToAdd;
+        if (totalMinutes < 0)
+            totalMinutes += 24 * 60;
+        const hours = Math.floor(totalMinutes / 60) % 24;
+        const minutes = totalMinutes % 60;
+        return hours * 100 + minutes;
+    }
+
 }
 
