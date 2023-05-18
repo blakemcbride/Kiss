@@ -1,7 +1,3 @@
-/*
- * Copyright 2022 STACK360 LLC
- * All rights reserved.
- */
 
 package org.kissweb;
 

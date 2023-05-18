@@ -1,5 +1,5 @@
 /*
- *  Copyright 2006-2013 Arahant LLC
+ *  Copyright 2006-2013 Blake McBride
  *  All Rights Reserved.
 */
 
