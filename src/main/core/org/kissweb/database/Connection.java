@@ -525,6 +525,19 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * Returns <code>true</code> if there are any records matching the given SQL statement and <code>false</code> otherwise.
+     *
+     * @param sql
+     * @param args
+     * @return
+     * @throws Exception
+     */
+    public boolean exists(String sql, Object... args) throws Exception {
+        Record r = fetchOne("select exists (" + sql + ")", args);
+        return (Boolean) r.get("exists");
+    }
+
+    /**
      * This method returns the total number of records that would be returned with a given select
      * in an efficient manner.  It is very useful when using the paging facility.
      * <br><br>

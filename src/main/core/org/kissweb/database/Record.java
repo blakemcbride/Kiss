@@ -222,6 +222,15 @@ public class Record implements AutoCloseable {
     }
 
     /**
+     * Return the <code>Boolean</code> value of the named column.
+     *
+     * @param cname
+     */
+    public Boolean getBoolean(String cname) throws SQLException {
+        return (Boolean) get(cname);
+    }
+
+    /**
      * Tests if a given column exists.
      * Returns <code>true</code> of the column exists, and <code>false</code> if it does not.
      *

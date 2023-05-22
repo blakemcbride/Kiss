@@ -52,7 +52,7 @@ import java.util.*;
  *  &nbsp;&nbsp;&nbsp;&nbsp;   <code>Cursor cursor = cmd.query("select .....</code>
  * <br><br>
  *     where <code>cmd</code> is an instance of Command.
- * @see Command#query(String, Object...) 
+ * @see Command#query(String, Object...)
  *
  * @author Blake McBride
  */

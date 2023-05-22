@@ -476,6 +476,19 @@ public class Command implements AutoCloseable {
         return Record.toJSONArray(query(true, page, max, sql, args).fetchAll());
     }
 
+    /**
+     * Returns <code>true</code> if there are any records matching the given SQL statement and <code>false</code> otherwise.
+     *
+     * @param sql
+     * @param args
+     * @return
+     * @throws Exception
+     */
+    public boolean exists(String sql, Object... args) throws Exception {
+        Record r = fetchOne("select exists (" + sql + ")", args);
+        return (Boolean) r.get("exists");
+    }
+
     List<String> getPriColumns(Cursor c) {
         if (pcols == null  ||  pcols.isEmpty()) {
             if (pcols == null)
