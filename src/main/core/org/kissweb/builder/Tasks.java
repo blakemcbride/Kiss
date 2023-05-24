@@ -286,7 +286,7 @@ public class Tasks {
         dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.5.1/postgresql-42.5.1.jar");
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
-        dep.add("sqlite-jdbc-3.40.0.0.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.40.0.0/sqlite-jdbc-3.40.0.0.jar");
+        dep.add("sqlite-jdbc-3.42.0.0.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar");
         //  https://github.com/dvare/dynamic-loader
         dep.add("dynamic-loader-3.1.jar", LIBS, "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.dvare&a=dynamic-loader&v=3.1&e=jar");
         // dep.add("dynamic-loader-3.0.jar", LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
