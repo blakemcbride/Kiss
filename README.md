@@ -1,7 +1,7 @@
 # KISS Web Application Full Stack Framework
 
 
-The KISS Framework is an application development framework for
+The KISS Framework is a Java-based, full-stack application development framework for
 developing web-based business applications. KISS can also be used to
 build command-line utilities, and, in conjunction with
 [Electron](https://electronjs.org), desktop applications that are
