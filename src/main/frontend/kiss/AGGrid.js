@@ -100,6 +100,7 @@ class AGGrid {
         if (!AGGrid.gridContext.length)
             AGGrid.newGridContext();
         AGGrid.addGrid(this);
+        this.gridOptions.api.sizeColumnsToFit();
         return this;
     }
 
