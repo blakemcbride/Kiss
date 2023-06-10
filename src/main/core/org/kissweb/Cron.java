@@ -188,7 +188,7 @@ public class Cron {
             try {
                 parameter = getParameter.get();
                 GroovyClass groovyClass = new GroovyClass(false, sfname);
-                Method methp = groovyClass.getMethod("run", argTypes);
+                Method methp = groovyClass.getMethod("start", argTypes);
                 methp.invoke(null, parameter);
                 success.accept(parameter);
             } catch (Exception e) {

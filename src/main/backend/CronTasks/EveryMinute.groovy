@@ -16,7 +16,7 @@ class EveryMinute {
      *
      * @param db
      */
-    static void run(Object obj) {
+    static void start(Object obj) {
         Connection db = (Connection) obj
         println("EveryMinute is running at " + DateTime.currentDateTimeFormatted())
         /*
