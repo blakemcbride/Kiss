@@ -29,14 +29,20 @@ import static org.kissweb.builder.BuildUtils.*;
 
 public class Tasks {
 
+    // Things that change semi-often
+    final String groovyVer = "4.0.12";
+    final String postgresqlVer = "42.5.1";
+    final String tomcatVer = "9.0.76";
+
+
     final String LIBS = "libs";
     final ForeignDependencies foreignLibs = buildForeignDependencies();
     final LocalDependencies localLibs = buildLocalDependencies();
-    final String tomcatTarFile = "apache-tomcat-9.0.65.tar.gz";
+    final String tomcatTarFile = "apache-tomcat-" + tomcatVer + ".tar.gz";
     final String BUILDDIR = "build.work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
-    final String postgresqlJar = "postgresql-42.5.1.jar";
-    final String groovyJar = "groovy-4.0.11.jar";
+    final String postgresqlJar = "postgresql-" + postgresqlVer + ".jar";
+    final String groovyJar = "groovy-" + groovyVer + ".jar";
     final String debugPort = "9000";
 
     /**
@@ -148,7 +154,7 @@ public class Tasks {
 
     void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v9.0.65/bin/apache-tomcat-9.0.65.tar.gz");
+            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
             gunzip(tomcatTarFile, "tomcat", 1);
             rmTree("tomcat/webapps/ROOT");
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
@@ -274,16 +280,16 @@ public class Tasks {
     private ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
         dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
-        dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/4.0.11/groovy-4.0.11.jar");
+        dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/" + groovyVer + "/" + groovyJar);
         dep.add("javax.servlet-api-4.0.1.jar", LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
         dep.add("log4j-core-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.19.0/log4j-core-2.19.0.jar");
         dep.add("log4j-api-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.19.0/log4j-api-2.19.0.jar");
         dep.add("log4j-1.2-api-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.19.0/log4j-1.2-api-2.19.0.jar");
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
         dep.add("mssql-jdbc-11.2.2.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.2.jre8/mssql-jdbc-11.2.2.jre8.jar");
-        dep.add("mysql-connector-java-8.0.30.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar");
+        dep.add("mysql-connector-java-8.0.30.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.33/mysql-connector-java-8.0.30.jar");
         dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
-        dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/42.5.1/postgresql-42.5.1.jar");
+        dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/" + postgresqlVer + "/" + postgresqlJar);
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
         dep.add("sqlite-jdbc-3.42.0.0.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar");
