@@ -104,6 +104,11 @@
             sval = sval ? sval.replace(/\s+/g, ' ').trim() : '';
             if (fixcap && sval)
                 sval = Utils.fixCapitalization(sval);
+            // I am using several techniques to limit the entry length.  However, when you have thousands of diverse users, still, somehow,
+            // the length is getting past the limit with a few users.  Their browser seems to defy every attempt I make to limit the entry length.
+            // I, therefore, make this one last effort.
+            if (max && sval.length > max)
+                sval = sval.substring(0, max);
             return sval;
         };
 
