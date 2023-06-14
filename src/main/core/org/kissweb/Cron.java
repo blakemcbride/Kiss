@@ -227,7 +227,7 @@ public class Cron {
 
         private boolean notHourToExecute(Calendar cal) {
             try {
-                int hour = cal.get(Calendar.HOUR);
+                int hour = cal.get(Calendar.HOUR_OF_DAY);
                 line = hours;
                 len = line.length();
                 pos = 0;
