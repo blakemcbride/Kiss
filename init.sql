@@ -12,11 +12,14 @@ INSERT INTO users (user_name, user_password, user_active) VALUES ('kiss', 'passw
 
 -- The following is only used for the SQL demo on the "SQL Access" screen
 
-CREATE TABLE test (
-    key smallint not null primary key,
-    data character varying(40)
+CREATE TABLE phone (
+    rec_id serial NOT NULL PRIMARY KEY,
+    last_name character varying(20) NOT NULL,
+    first_name character varying(20) NOT NULL,
+    phone_number character varying(25)
 );
 
-INSERT INTO test (key, data) VALUES (1, 'Record one');
-INSERT INTO test (key, data) VALUES (2, 'Record two');
-INSERT INTO test (key, data) VALUES (3, 'Record three');
+CREATE INDEX phone_name_idx ON phone (last_name, first_name);
+
+INSERT INTO phone (first_name, last_name, phone_number) VALUES ('Blake', 'McBride', '615-394-5566');
+
