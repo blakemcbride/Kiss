@@ -48,13 +48,6 @@
 
                 // preexisting attributes
 
-                case 'maxlength':
-                    // Browsers already support this.  The problem is that after thousands of different users, I have
-                    // encountered a few browsers, for reasons I do not know, do not honor this.  Therefore, I need
-                    // to support this functionality myself.
-                    nattrs += ' ' + prop + '="' + attr[prop] + '"';  // retain default browser functionality
-                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
-                    break;
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
@@ -104,25 +97,22 @@
             sval = sval ? sval.replace(/\s+/g, ' ').trim() : '';
             if (fixcap && sval)
                 sval = Utils.fixCapitalization(sval);
-            // I am using several techniques to limit the entry length.  However, when you have thousands of diverse users, still, somehow,
-            // the length is getting past the limit with a few users.  Their browser seems to defy every attempt I make to limit the entry length.
-            // I, therefore, make this one last effort.
-            if (max && sval.length > max)
-                sval = sval.substring(0, max);
+            if (Utils.forceASCII)
+                sval = Utils.toASCII(sval);
             return sval;
         };
 
         newElm.setValue = function (val) {
             if (val)
                 val = val.trim();
+            if (Utils.forceASCII)
+                val = Utils.toASCII(val);
             if (!val) {
                 jqObj.val(originalValue = '');
                 return this;
             }
             if (upcase)
                 val = val.toUpperCase();
-            if (max && val.length > max)
-                val = val.substring(0, max);
             jqObj.val(originalValue = val);
             return this;
         };
@@ -246,8 +236,8 @@
 
         jqObj.on('input', function () {
             let val = jqObj.val().replace(/^\s+/, "");
-            if (max && val.length > max)
-                val = val.substring(0, max);
+            if (Utils.forceASCII)
+                val = Utils.toASCII(val);
             jqObj.val(upcase ? val.toUpperCase() : val);
         });
     };

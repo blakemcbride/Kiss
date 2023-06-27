@@ -10,6 +10,8 @@ Utils.afterComponentsLoaded(function () {
     // If you have a CORS problem, see src/main/frontend/WEB-INF/web.xml
     Server.setURL(url);
 
+    Utils.forceASCII = false;  // Force all text entry to ASCII (see Utils.forceASCII)
+
     const screenPixels = screen.height * screen.width;
     if (screenPixels < 600000)
         Utils.loadPage("mobile/login");

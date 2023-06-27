@@ -134,6 +134,8 @@
         newElm.getValue = function () {
             let sval = resetContent ? '' : Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
             sval = sval ? sval.replace(/ +/g, ' ').trim() : '';
+            if (Utils.forceASCII)
+                sval = Utils.toASCII(sval);
             if (sval && upcase) {
                 sval = sval.toUpperCase();
                 jqObj.html(Utils.textToHtml(sval));
@@ -146,6 +148,8 @@
         newElm.setValue = function (val) {
              if (val)
                 val = val.trim();
+            if (Utils.forceASCII)
+                val = Utils.toASCII(val);
             if (!val) {
                 jqObj.text(originalValue='');
                 return this;
@@ -278,15 +282,20 @@
             return false;
         };
 
-        jqObj.on('input', function (elm) {
+        jqObj.on('input', function (event) {
+            let pos = getCursorPosition(event.currentTarget);
             let html = jqObj.html();
             let txt = Utils.htmlToText(html).replace(/^\s+/, '');
-            if (max && (txt.length > max || html.length > max)) {
+            if (Utils.forceASCII)
+                txt = Utils.toASCII(txt);
+            if (max && (txt.length > max || html.length > max))
                 txt = Utils.take(txt, max);
-                html = Utils.textToHtml(txt);
+            html = Utils.textToHtml(txt);
+            if (max && (txt.length > max || html.length > max))
                 html = Utils.take(html, max);
-                jqObj.html(html);
-            }
+            jqObj.html(html);
+            pos = pos > txt.length ? txt.length : pos;
+            setCursorPosition(event.currentTarget, pos);
         });
 
         jqObj.on('focus', function (elm) {
@@ -296,6 +305,27 @@
                 }, 1);
         });
     };
+
+    function getCursorPosition(div) {
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            if (range.commonAncestorContainer.parentNode === div) {
+                return range.startOffset;
+            }
+        }
+        return -1;  // Return -1 if the selected node is not in the div.
+    }
+
+    function setCursorPosition(div, position) {
+        const range = document.createRange();
+        range.setStart(div.firstChild, position);
+        range.setEnd(div.firstChild, position);
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
 
     const componentInfo = {
         name: 'TextboxInput',

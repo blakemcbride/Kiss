@@ -1420,6 +1420,19 @@ class Utils {
     }
 
     /**
+     * Converts a potentially non-ASCII string to ASCII.
+     *
+     * @param str
+     * @returns {str}
+     */
+    static toASCII(str) {
+        if (!str)
+            return str;
+        str = str.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // first, try to remove accents
+        return str.replace(/[^\x00-\x7F]/g, ""); // then, remove any remaining non-ASCII characters
+    }
+
+    /**
      * Displays a report given a URL from the back-end.
      * Correctly handles dual server development situations.
      *
@@ -1974,6 +1987,17 @@ Utils.lastScreenLoaded = {};  //  current stackframe
 Utils.suspendDepth = 0;  // when > 0 suspend buttons
 
 Utils.globalData = {};
+
+/**
+ * <code>forceASCII</code> forces ASCII representation of all text input.
+ * This solves the problem of Unicode characters being too long for an ASCII SQL column.
+ * If your database uses Unicode, then this should be set to <code>false</code>.
+ * If set to <code>true</code>, it should be set elsewhere so that this file can remain
+ * untouched.
+ * 
+ * @type {boolean}
+ */
+Utils.forceASCII = false;
 
 $(document).on('keypress', function(e) {
     if (Utils.enterFunction  &&  e.key === 'Enter')
