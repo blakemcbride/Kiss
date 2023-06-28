@@ -283,7 +283,7 @@
         };
 
         jqObj.on('input', function (event) {
-            let pos = getCursorPosition(event.currentTarget);
+            let pos = saveSelection(event.currentTarget);
             let html = jqObj.html();
             let txt = Utils.htmlToText(html).replace(/^\s+/, '');
             if (Utils.forceASCII)
@@ -295,7 +295,7 @@
                 html = Utils.take(html, max);
             jqObj.html(html);
             pos = pos > txt.length ? txt.length : pos;
-            setCursorPosition(event.currentTarget, pos);
+            restoreSelection(event.currentTarget, pos)
         });
 
         jqObj.on('focus', function (elm) {
@@ -306,25 +306,30 @@
         });
     };
 
-    function getCursorPosition(div) {
+    function restoreSelection(div, pos) {
+        div.focus();
         const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-            const range = selection.getRangeAt(0);
-            if (range.commonAncestorContainer.parentNode === div) {
-                return range.startOffset;
-            }
-        }
-        return -1;  // Return -1 if the selected node is not in the div.
-    }
-
-    function setCursorPosition(div, position) {
         const range = document.createRange();
-        range.setStart(div.firstChild, position);
-        range.setEnd(div.firstChild, position);
-
-        const selection = window.getSelection();
+        setRangeStart(range, div, pos);
+        range.collapse(true);
         selection.removeAllRanges();
         selection.addRange(range);
+    }
+
+    function setRangeStart(range, node, pos) {
+        if (node.nodeType === Node.TEXT_NODE)
+            if (node.textContent.length >= pos) {
+                range.setStart(node, pos);
+                return true;
+            } else
+                return false;
+
+        for (let child of node.childNodes)
+            if (setRangeStart(range, child, pos))
+                return true;
+            else
+                pos -= child.textContent.length;
+        return false;
     }
 
     const componentInfo = {
