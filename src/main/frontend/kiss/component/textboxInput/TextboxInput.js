@@ -1,14 +1,14 @@
 /*
       Author: Blake McBride
       Date:  4/25/18
+
+      I was using an editable div for a while to have finer control over html strings.
+      I went back to a textarea because it was too difficult to restore the cursor position
+      after the control changed through JavaScript.
+      This version does not support html.
  */
 
 /* global Utils, Component */
-
-/*
-  I need to use a div rather than a textarea because a textarea doesn't support HTML contents.  A div does.
-  (I think the problem had to do with newlines.)
- */
 
 'use strict';
 
@@ -20,9 +20,7 @@
         let max = null;
         let upcase = false;
         let disabled = false;
-        let resetContent = false;
-        let placeholder = null;
-        let nstyle = "background-color: white; border: 2px solid #d0d5d5; display: inline-block; padding: 5px; word-wrap: anywhere; overflow-y: auto; cursor: text;";
+        let nstyle = "resize: none; ";
         if (attr.style)
             nstyle += attr.style;
 
@@ -35,9 +33,6 @@
                 case 'minlength':
                     min = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
                     break;
-                case 'maxlength':
-                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
-                    break;
                 case 'upcase':
                     upcase = true;
                     break;
@@ -45,15 +40,17 @@
                     if (!min)
                         min = 1;
                     break;
-                case 'disabled':
-                    disabled = true;
-                    break;
-                case 'placeholder':
-                    placeholder = Utils.removeQuotes(attr[prop]);
-                    break;
 
                 // preexisting attributes
 
+                case 'maxlength':
+                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    nattrs += ' ' + prop + '="' + attr[prop] + '"';
+                    break;
+                case 'disabled':
+                    disabled = true;
+                    nattrs += ' ' + prop + '="' + attr[prop] + '"';
+                    break;
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
@@ -65,17 +62,10 @@
             }
         }
 
-        if (!disabled)
-            nattrs += ' contenteditable="true"';
-
         if (content)
             content = content.trim();
-        if (placeholder  &&  !content) {
-            content = '<span style="color: gray;">' + placeholder + '</span>';
-            resetContent = true;
-        }
 
-        const newElm = Utils.replaceHTML(id, elm, '<div style="{style}" {attr} id="{id}" >{content}</div>', {
+        const newElm = Utils.replaceHTML(id, elm, '<textarea style="{style}" {attr} id="{id}" >{content}</textarea>', {
             style: nstyle,
             attr: nattrs,
             content: content ? content.trim() : ''
@@ -96,17 +86,10 @@
 
         setColor(disabled);
 
-        function removePlaceholder() {
-            if (resetContent) {
-                jqObj.text('');
-                resetContent = false;
-            }
-        }
-
         jqObj.keydown((event) => {
             if (!max || event.key && event.key.length > 1 && event.key !== 'Enter')
                 return;
-            const txt = Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
+            const txt = Utils.htmlToText(jqObj.val()).replace(/^\s+/, '');
             if (txt && txt.length >= max) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -116,29 +99,28 @@
         jqObj.keyup(function (event) {
             if (event.code === "Tab")
                 return;
-            removePlaceholder();
             Utils.someControlValueChanged();
         });
 
         jqObj.focusout(() => {
-            if (upcase) {
-                let sval = resetContent ? '' : Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
-                sval = sval ? sval.replace(/ +/g, ' ') : '';
-                if (sval)
-                    jqObj.html(Utils.textToHtml(sval.toUpperCase()));
-            }
+            let sval = Utils.htmlToText(jqObj.val()).replace(/^\s+/, '');
+            sval = sval ? sval.replace(/ +/g, ' ') : '';
+            if (Utils.forceASCII)
+                sval = Utils.toASCII(sval);
+            if (sval)
+                jqObj.val(upcase ? sval.toUpperCase() : sval);
         });
 
         //--
 
         newElm.getValue = function () {
-            let sval = resetContent ? '' : Utils.htmlToText(jqObj.html()).replace(/^\s+/, '');
+            let sval = Utils.htmlToText(jqObj.val());
             sval = sval ? sval.replace(/ +/g, ' ').trim() : '';
             if (Utils.forceASCII)
                 sval = Utils.toASCII(sval);
             if (sval && upcase) {
                 sval = sval.toUpperCase();
-                jqObj.html(Utils.textToHtml(sval));
+                jqObj.val(sval);
             }
             if (max && sval && sval.length > max)
                 sval = Utils.take(sval, max);
@@ -146,26 +128,20 @@
         };
 
         newElm.setValue = function (val) {
-             if (val)
+            if (val)
                 val = val.trim();
             if (Utils.forceASCII)
                 val = Utils.toASCII(val);
             if (!val) {
-                jqObj.text(originalValue='');
+                jqObj.val(originalValue='');
                 return this;
             }
-            removePlaceholder();
-            jqObj.html(Utils.textToHtml(originalValue=val));
+            jqObj.val(originalValue=val);
             return this;
         };
 
         newElm.clear = function () {
             newElm.setValue('');
-            if (placeholder) {
-                const content = '<span style="color: gray;">' + placeholder + '</span>';
-                jqObj.html(content);
-                resetContent = true;
-            }
             return this;
         };
 
@@ -177,38 +153,38 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('contenteditable', !flg);
+            jqObj.prop('readonly', flg);
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('contenteditable', flg);
+            jqObj.prop('readonly', !flg);
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return jqObj.attr('contenteditable') === 'false';
+            return !!jqObj.attr('readonly');
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('contenteditable', !flg);
+            jqObj.prop('disabled', flg);
             setColor(flg);
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('contenteditable', flg);
+            jqObj.prop('disabled', !flg);
             setColor(!flg);
             return this;
         };
 
         newElm.isDisabled = function () {
-            return jqObj.attr('contenteditable') === 'false';
+            return jqObj.is(':disabled');
         };
 
         //--
@@ -250,7 +226,6 @@
             jqObj.off('keyup').keyup(function (event) {
                 if (!Utils.isChangeChar(event))
                     return;
-                removePlaceholder();
                 Utils.someControlValueChanged();
                 if (fun)
                     fun(event);
@@ -259,14 +234,13 @@
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('DOMSubtreeModified').on('DOMSubtreeModified', fun);
+            jqObj.off('change').change(fun);
             return this;
         };
 
         newElm.isError = function (desc) {
             if (min) {
                 let val = newElm.getValue();
-                val = val ? val.replace(/\s+/g, ' ').trim() : '';
                 if (val.length < min) {
                     let msg;
                     if (min === 1)
@@ -281,56 +255,7 @@
             }
             return false;
         };
-
-        jqObj.on('input', function (event) {
-            let pos = saveSelection(event.currentTarget);
-            let html = jqObj.html();
-            let txt = Utils.htmlToText(html).replace(/^\s+/, '');
-            if (Utils.forceASCII)
-                txt = Utils.toASCII(txt);
-            if (max && (txt.length > max || html.length > max))
-                txt = Utils.take(txt, max);
-            html = Utils.textToHtml(txt);
-            if (max && (txt.length > max || html.length > max))
-                html = Utils.take(html, max);
-            jqObj.html(html);
-            pos = pos > txt.length ? txt.length : pos;
-            restoreSelection(event.currentTarget, pos)
-        });
-
-        jqObj.on('focus', function (elm) {
-            if (resetContent)
-                setTimeout(function () {
-                    jqObj.caret(0);
-                }, 1);
-        });
     };
-
-    function restoreSelection(div, pos) {
-        div.focus();
-        const selection = window.getSelection();
-        const range = document.createRange();
-        setRangeStart(range, div, pos);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-    }
-
-    function setRangeStart(range, node, pos) {
-        if (node.nodeType === Node.TEXT_NODE)
-            if (node.textContent.length >= pos) {
-                range.setStart(node, pos);
-                return true;
-            } else
-                return false;
-
-        for (let child of node.childNodes)
-            if (setRangeStart(range, child, pos))
-                return true;
-            else
-                pos -= child.textContent.length;
-        return false;
-    }
 
     const componentInfo = {
         name: 'TextboxInput',

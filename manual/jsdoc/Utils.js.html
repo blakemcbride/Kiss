@@ -1692,7 +1692,7 @@ class Utils {
             .replace(/&lt;/g, "&amp;lt;")
             .replace(/>/g, "&amp;gt;")
             .replace(/"/g, "&amp;quot;")
-            .replace(/'/g, "&amp;#039;")
+            .replace(/'/g, "&amp;apos;")
             .replace(/\n/g, '&lt;br>')
 //            .replace(/ /g, '&amp;nbsp;')  kills text wrapping
             ;
@@ -1729,6 +1729,8 @@ class Utils {
             .replace(/&lt;\/div>/g, '')
             .replace(/&lt;span *[^>]*>/g, '')
             .replace(/&lt;\/span>/g, '')
+            .replace(/&lt;h1 *[^>]*>/g, '')
+            .replace(/&lt;\/h1>/g, '')
             .replace(/&lt;font *[^>]*>/g, '')
             .replace(/&lt;\/font>/g, '')
             .replace(/&lt;[ap] *[^>]*>/g, '')
@@ -1740,6 +1742,7 @@ class Utils {
             .replace(/&amp;lt;/g, '&lt;')
             .replace(/&amp;gt;/g, '>')
             .replace(/&amp;quot;/g, '"')
+            .replace(/&amp;apos;/g, "'")
             ;
     }
 

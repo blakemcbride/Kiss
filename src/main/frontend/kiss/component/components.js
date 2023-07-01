@@ -487,7 +487,6 @@ class components {
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    minlength="5"     </td><td>     sets the minimum acceptable string length               </td></tr>
      *     <tr><td>    maxlength="200"     </td><td>     sets the maximum number of characters               </td></tr>
-     *     <tr><td>    password     </td><td>     the character are not shown on the screen              </td></tr>
      *     <tr><td>    placeholder="" </td><td>   text to be displaced in the control until the user enters data </td><tr>
      *     <tr><td>    required     </td><td>     an entry is required (at least 1 character)              </td></tr>
      *     <tr><td>    upcase     </td><td>     when the user enters text, it is auto-upcased               </td></tr>

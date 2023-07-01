@@ -1648,7 +1648,7 @@ class Utils {
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;")
+            .replace(/'/g, "&apos;")
             .replace(/\n/g, '<br>')
 //            .replace(/ /g, '&nbsp;')  kills text wrapping
             ;
@@ -1685,6 +1685,8 @@ class Utils {
             .replace(/<\/div>/g, '')
             .replace(/<span *[^>]*>/g, '')
             .replace(/<\/span>/g, '')
+            .replace(/<h1 *[^>]*>/g, '')
+            .replace(/<\/h1>/g, '')
             .replace(/<font *[^>]*>/g, '')
             .replace(/<\/font>/g, '')
             .replace(/<[ap] *[^>]*>/g, '')
@@ -1696,6 +1698,7 @@ class Utils {
             .replace(/&lt;/g, '<')
             .replace(/&gt;/g, '>')
             .replace(/&quot;/g, '"')
+            .replace(/&apos;/g, "'")
             ;
     }
 
