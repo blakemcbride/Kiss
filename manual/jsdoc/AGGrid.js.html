@@ -51,7 +51,7 @@
  * This class is a wrapper around the public ag-grid utility.  It is intended that this class be used exclusively
  * rather than any of the raw ag-grid API.  It provides a higher-level and more convenient API.
  * &lt;br>&lt;br>
- * Please refer to agGrid documentation on &lt;a href="https://www.ag-grid.com/documentation-main/documentation.php">https://www.ag-grid.com/documentation-main/documentation.php&lt;/a> for more information.
+ * Please refer to ag-grid documentation on &lt;a href="https://www.ag-grid.com/documentation-main/documentation.php">https://www.ag-grid.com/documentation-main/documentation.php&lt;/a> for more information.
  *
  */
 class AGGrid {
@@ -71,6 +71,7 @@ class AGGrid {
      */
     constructor(id, columns, keyColumn=undefined) {
         this.id = id;
+        this.gridElement = document.querySelector('#' + id);
         this.columns = columns;
         this.rowSelection = AGGrid.SINGLE_SELECTION;
         this.data = [];
@@ -117,7 +118,8 @@ class AGGrid {
 
                     window.addEventListener('resize', function() {
                         setTimeout(function() {
-                            params.api.sizeColumnsToFit();
+                            if (self.gridElement.offsetParent!= null &amp;&amp; self.gridInstantiated)
+                                params.api.sizeColumnsToFit();
                         });
                     });
                 }
@@ -144,12 +146,14 @@ class AGGrid {
         if (!AGGrid.gridContext.length)
             AGGrid.newGridContext();
         AGGrid.addGrid(this);
-        this.gridOptions.api.sizeColumnsToFit();
+        if (this.gridElement.offsetParent != null)
+            this.gridOptions.api.sizeColumnsToFit();
         return this;
     }
 
     resizeColumns() {
-        this.gridOptions.api.sizeColumnsToFit();
+        if (this.gridElement.offsetParent != null &amp;&amp; this.gridInstantiated)
+            this.gridOptions.api.sizeColumnsToFit();
         return this;
     }
 
