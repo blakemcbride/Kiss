@@ -262,7 +262,7 @@ class Server {
      *
      * @param {string} cls
      * @param {string} meth
-     * @param {FormData|string} fd
+     * @param {FormData|string} fd ctl-id, FormData, FileList, or array of FileList
      * @param {object} injson
      *
      * @see Utils.getFileUploadCount
@@ -273,12 +273,32 @@ class Server {
         return new Promise(function (resolve, reject) {
             if (typeof fd === 'string')
                 fd = $$(fd).getFormData();
+            else if (Array.isArray(fd)) {
+                const flst = fd;
+                fd = new FormData();
+                let i = 0;
+                for (let j=0 ; j &lt; flst.length ; j++) {
+                    const files = flst[j];
+                    if (Array.isArray(files))
+                        for ( ; i &lt; files.length ; i++)
+                            fd.append('_file-' + i, files[i]);
+                    else
+                        fd.append('_file-' + i++, files);
+                }
+            } else if (fd instanceof FileList) {
+                const files = fd;
+                fd = new FormData();
+                for (let i=0 ; i &lt; files.length ; i++)
+                    fd.append('_file-' + i, files[i]);
+            }
             fd.append('_class', cls);
             fd.append('_method', meth);
             fd.append("_uuid", Server.uuid);
             if (injson)
-                for (let key in injson)
-                    fd.append(key, injson[key]);
+                for (let key in injson) {
+                    let val = injson[key];
+                    fd.append(key, typeof val === 'object' ? JSON.stringify(val) : val);
+                }
             Utils.waitMessage("File upload in progress.");
             Server.incCount();
             $.ajax({

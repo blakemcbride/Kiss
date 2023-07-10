@@ -214,7 +214,7 @@ class components {
      *     <tr><td>    readOnly([flg])     </td><td> set control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td> set control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
-     *     <tr><td>    uploadFile(idx) </td><td> the JavaScript <code>File</code> object of file number <code>idx</code> </td></tr>
+     *     <tr><td>    uploadFile(idx) </td><td> the JavaScript <code>FileList</code> object of file number <code>idx</code>. If <code>idx</code> is missing, the whole FileList is returned. </td></tr>
      *     <tr><td>    uploadFileExtension(idx) </td><td> the file name extension of file number <code>idx</code> </td></tr>
      *     <tr><td>    uploadFilename(idx) </td><td> the name of file number <code>idx</code> </td></tr>
      * </table>

@@ -58,11 +58,11 @@
         newElm.uploadFileExtension = function (idx) {
             const name = jqObj[0].files[idx].name;
             const i = name.lastIndexOf(".");
-            return i === -1 ? '' : name.substr(i+1);
+            return i === -1 ? '' : name.substring(i+1);
         };
 
         newElm.uploadFile = function (idx) {
-            return jqObj[0].files[idx];
+            return typeof idx === 'undefined' ? jqObj[0].files : jqObj[0].files[idx];
         };
 
         newElm.getFormData = function () {
