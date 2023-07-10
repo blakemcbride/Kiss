@@ -264,11 +264,13 @@ class Server {
      * @param {string} meth
      * @param {FormData|string} fd ctl-id, FormData, FileList, or array of FileList
      * @param {object} injson
+     * @param {string} waitMsg  optional wait message
+     * @param {string} successMessage optional success message
      *
      * @see Utils.getFileUploadCount
      * @see Utils.getFileUploadFormData
      */
-    static fileUploadSend(cls, meth, fd, injson=null) {
+    static fileUploadSend(cls, meth, fd, injson=null, waitMsg, successMessage) {
         Server.#checkTime();
         return new Promise(function (resolve, reject) {
             if (typeof fd === 'string')
@@ -299,7 +301,7 @@ class Server {
                     let val = injson[key];
                     fd.append(key, typeof val === 'object' ? JSON.stringify(val) : val);
                 }
-            Utils.waitMessage("File upload in progress.");
+            Utils.waitMessage(waitMsg ? waitMsg : "File upload in progress.");
             Server.incCount();
             $.ajax({
                 url: Server.url + '/rest',
@@ -313,7 +315,7 @@ class Server {
                     Utils.waitMessageEnd();
                     Server.decCount();
                     if (res._Success)
-                        await Utils.showMessage("Information", "Upload successful.");
+                        await Utils.showMessage("Information", successMessage ? successMessage : "Upload successful.");
                     else if (res._ErrorCode === 2) {
                         await Utils.showMessage("Error", res._ErrorMessage);
                         Server.logout();
