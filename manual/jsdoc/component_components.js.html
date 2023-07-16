@@ -554,8 +554,8 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>    &lt;code>true&lt;/code> if user control is hidden (not visible)             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>    &lt;code>true&lt;/code> if control is read-only             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>    &lt;code>true&lt;/code> if control is visible (not hidden)          &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>  execute fun when control changes              &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onKeyUp(fun)     &lt;/td>&lt;td> execute fun when key up    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>  execute fun if control value changed, as it loses focus     &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onKeyUp(fun)     &lt;/td>&lt;td> execute fun when control value changes    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td>     sets control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)       &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readWrite([flg])     &lt;/td>&lt;td>     sets control to read-write (or the reverse if the optional argument is &lt;code>false&lt;/code>)     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    setValue(val)     &lt;/td>&lt;td>     sets the string inside the control              &lt;/td>&lt;/tr>
@@ -598,7 +598,7 @@ class components {
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td> is the control visible?   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>  execute fun if control value changed, as it loses focus             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute fun when enter key hit   &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onKeyUp(fun)     &lt;/td>&lt;td> execute fun when key up    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onKeyUp(fun)     &lt;/td>&lt;td> execute fun when control value changes    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td> set control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readWrite([flg])     &lt;/td>&lt;td> set control to read-write (or the reverse if the optional argument is &lt;code>false&lt;/code>)    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    setPassword(val)     &lt;/td>&lt;td>     if &lt;code>true&lt;/code>, treat as a password control; if &lt;code>false&lt;/code>, treat as text input - previous value is returned   &lt;/td>&lt;/tr>

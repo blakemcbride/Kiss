@@ -89,18 +89,22 @@
         jqObj.keydown((event) => {
             if (!max || event.key && event.key.length > 1 && event.key !== 'Enter')
                 return;
-            const txt = Utils.htmlToText(jqObj.val()).replace(/^\s+/, '');
+            let txt = Utils.htmlToText(jqObj.val()).replace(/^\s+/, '');
+            txt = Utils.toASCII(txt);
             if (txt && txt.length >= max) {
                 event.preventDefault();
                 event.stopPropagation();
             }
         });
 
-        jqObj.keyup(function (event) {
+        function keyUpHandler(event) {
             if (event.code === "Tab")
                 return;
-            Utils.someControlValueChanged();
-        });
+            if (Utils.isChangeChar(event) || event.key === 'Enter')
+                Utils.someControlValueChanged();
+        }
+
+        jqObj.keyup(keyUpHandler);
 
         jqObj.focusout(() => {
             let sval = Utils.htmlToText(jqObj.val()).replace(/^\s+/, '');
@@ -224,10 +228,8 @@
 
         newElm.onKeyUp = function (fun) {
             jqObj.off('keyup').keyup(function (event) {
-                if (!Utils.isChangeChar(event))
-                    return;
-                Utils.someControlValueChanged();
-                if (fun)
+                keyUpHandler(event);
+                if (fun && (Utils.isChangeChar(event) || event.key === 'Enter'))
                     fun(event);
             });
             return this;
