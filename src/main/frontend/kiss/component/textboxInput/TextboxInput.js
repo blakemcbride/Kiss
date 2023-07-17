@@ -226,17 +226,21 @@
             return this;
         };
 
-        newElm.onKeyUp = function (fun) {
+        newElm.onCChange = function (fun) {
             jqObj.off('keyup').keyup(function (event) {
                 keyUpHandler(event);
                 if (fun && (Utils.isChangeChar(event) || event.key === 'Enter'))
-                    fun(event);
+                    fun(newElm.getValue());
             });
             return this;
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('change').change(fun);
+            jqObj.off('change');
+            if (fun)
+                jqObj.change(() => {
+                    fun(newElm.getValue());
+                });
             return this;
         };
 

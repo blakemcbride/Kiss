@@ -205,8 +205,23 @@
             return this;
         }
 
+        newElm.onCChange = function (fun) {
+            jqObj.off('keyup').keyup(function (event) {
+                if (!/^[0-9:aApPmM]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
+                    return;
+                keyUpHandler(event);
+                if (fun && Utils.isChangeChar(event))
+                    fun(newElm.getValue());
+            });
+            return this;
+        };
+
         newElm.onChange = function (fun) {
-            jqObj.off('change').change(fun);
+            jqObj.off('change');
+            if (fun)
+                jqObj.change(() => {
+                    fun(newElm.getValue());
+                });
             return this;
         };
 

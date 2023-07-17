@@ -16,6 +16,7 @@
         let min = null;
         let max = null;
         let required = false;
+        let changeFun;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -180,11 +181,21 @@
             return this;
         };
 
-        newElm.onChange = function (func) {
-            jqObj.off('change').on('change', function () {
-                Utils.someControlValueChanged();
-                func(jqObj.val());
-            });
+        newElm.onCChange = function (fun) {
+            jqObj.off('change');
+            if (fun)
+                jqObj.change(() => {
+                    fun(newElm.getIntValue());
+                });
+            return this;
+        };
+
+        newElm.onChange = function (fun) {
+            jqObj.off('focusoff');
+            if (fun)
+                jqObj.focusout(() => {
+                    fun(newElm.getIntValue());
+                });
             return this;
         };
 

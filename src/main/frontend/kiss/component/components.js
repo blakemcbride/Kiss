@@ -121,7 +121,8 @@ class components {
      *     <tr><td>    isHidden()     </td><td>   <code>true</code> if the control is hidden (not visible)    </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>   <code>true</code> if the control is read-only    </td></tr>
      *     <tr><td>    isVisible()     </td><td>   <code>true</code> if the control is visible (not hidden)    </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.  </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td> execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>    set control to read-only (or the reverse if the optional argument is <code>false</code>)  </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>    set control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
@@ -309,7 +310,8 @@ class components {
      *     <tr><td>    isHidden()     </td><td>   <code>true</code> if the control is hidden (not visible)    </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>   <code>true</code> if the control is read-only    </td></tr>
      *     <tr><td>    isVisible()     </td><td>   <code>true</code> if the control is visible (not hidden)    </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the state of this control changes.  </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td> execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>    set control to read-only (or the reverse if the optional argument is <code>false</code>)  </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>    set control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
@@ -354,9 +356,9 @@ class components {
      *     <tr><td>    isHidden()     </td><td>     is control hidden?   </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>     is control read-only?    </td></tr>
      *     <tr><td>    isVisible()     </td><td>     is control visible?   </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control               </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td> execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
-     *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when key up    </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td> set control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td> set control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the numeric value of the control              </td></tr>
@@ -510,8 +512,8 @@ class components {
      *     <tr><td>    isHidden()     </td><td>    <code>true</code> if user control is hidden (not visible)             </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>    <code>true</code> if control is read-only             </td></tr>
      *     <tr><td>    isVisible()     </td><td>    <code>true</code> if control is visible (not hidden)          </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>  execute fun if control value changed, as it loses focus     </td></tr>
-     *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when control value changes    </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td> execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>     sets control to read-only (or the reverse if the optional argument is <code>false</code>)       </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>     sets control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
@@ -552,9 +554,9 @@ class components {
      *     <tr><td>    isHidden()     </td><td> is the control hidden? </td></tr>
      *     <tr><td>    isReadOnly()     </td><td> is the control read-only?    </td></tr>
      *     <tr><td>    isVisible()     </td><td> is the control visible?   </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>  execute fun if control value changed, as it loses focus             </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td> execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
-     *     <tr><td>    onKeyUp(fun)     </td><td> execute fun when control value changes    </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td> set control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td> set control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    setPassword(val)     </td><td>     if <code>true</code>, treat as a password control; if <code>false</code>, treat as text input - previous value is returned   </td></tr>
@@ -620,7 +622,8 @@ class components {
      *     <tr><td>    isHidden()     </td><td>     <code>true</code> if control is hidden (not visible)     </td></tr>
      *     <tr><td>    isReadOnly()     </td><td>     <code>true</code> if control is read-only     </td></tr>
      *     <tr><td>    isVisible()     </td><td>     <code>true</code> if control is visible (not hidden)    </td></tr>
-     *     <tr><td>    onChange(fun)     </td><td>  execute fun if control value changed, as it loses focus             </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td> execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>   sets control to read-only (or the reverse if the optional argument is <code>false</code>)   </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>    sets control to read-write (or the reverse if the optional argument is <code>false</code>)      </td></tr>

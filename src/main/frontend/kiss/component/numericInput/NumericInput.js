@@ -16,7 +16,6 @@
         let required = false;
         let min = 0;
         let max = null;
-        let onchange;
         let enterFunction = null;
         let comma = true;
         if (attr.style)
@@ -131,17 +130,24 @@
             return originalValue !== newElm.getValue();
         };
 
-        newElm.onKeyUp = function (fun) {
+        newElm.onCChange = function (fun) {
             jqObj.off('keyup').keyup(function (event) {
+                if (!/^[0-9.-]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
+                    return;
                 keyUpHandler(event);
-                if (fun)
-                    fun(event);
+                if (fun && Utils.isChangeChar(event))
+                    fun(newElm.getValue());
             });
             return this;
         };
 
         newElm.onChange = function (fun) {
-            onchange = fun;
+            jqObj.off('change');
+            if (fun)
+                jqObj.change(() => {
+                    fun(newElm.getValue());
+                });
+            return this;
         };
 
         //--
@@ -248,11 +254,11 @@
         jqObj.on('input', function () {
             let val = jqObj.val().trim();
             if (dollar)
-                if ($.isNumeric(min)  &&  min >= 0)
+                if (typeof min === 'number'  &&  min >= 0)
                     val = val.replace(/[^0-9.,$]/g, '');  // remove characters
                 else
                     val = val.replace(/[^0-9.,$-]/g, '');  // remove characters
-            else if ($.isNumeric(min)  &&  min >= 0)
+            else if (typeof min === 'number'  &&  min >= 0)
                 val = val.replace(/[^0-9.,]/g, '');  // remove characters
             else
                 val = val.replace(/[^0-9.,-]/g, '');  // remove characters
@@ -283,8 +289,6 @@
         });
 
         jqObj.on('focusout', function () {
-            if (onchange)
-                onchange();
             let sval = jqObj.val();
             let ndp = dp;
             sval = sval.replace(/[^0-9.-]/g, '');  // remove commas and other characters
