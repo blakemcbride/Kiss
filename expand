@@ -1,0 +1,12 @@
+#!/bin/bash
+#set -x
+
+# Shrink all JavaScript files
+
+FILES=`find . -name '*.js-orig' -type f  |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./build.work/' |grep -v '^\./src/main/frontend/lib/'`
+for file in $FILES; do
+	ofile=${file::-5}
+	mv $file $ofile
+	echo $file " -> " $ofile
+done
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+#set -x
+
+# Restore original (uncompressed) JavaScript files
+
+FILES=`find . -name '*.js' -type f  |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./build.work/' |grep -v '^\./src/main/frontend/lib/'`
+for file in $FILES; do
+	ofile=$file-orig
+	if [ -f $ofile ]; then
+		echo 'Original file' $ofile 'exists; cannot continue.'
+		exit 0
+	fi
+	mv $file $ofile
+	echo $ofile " -> " $file
+	uglifyjs $ofile -cm >$file
+done
+
