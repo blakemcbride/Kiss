@@ -261,8 +261,9 @@ public class ProcessServlet implements Runnable {
                 injson.put(name, value);
             }
         } else {
-            String instr = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            String instr;
             try {
+                instr = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
                 injson = new JSONObject(instr);
             } catch (Exception e) {
                 errorReturn(response, "Unable to parse request json", e);
