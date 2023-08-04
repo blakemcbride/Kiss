@@ -47,7 +47,10 @@
                     break;
 
                 // preexisting attributes
-
+                case 'maxlength':
+                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    nattrs += ' ' + prop + '="' + attr[prop] + '"';
+                    break;
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
@@ -99,6 +102,8 @@
                 sval = Utils.fixCapitalization(sval);
             if (Utils.forceASCII)
                 sval = Utils.toASCII(sval);
+            if (max && sval && sval.length > max)
+                sval = Utils.take(sval, max);
             return sval;
         };
 
