@@ -56,7 +56,6 @@ class AGGrid {
             rowSelection: this.rowSelection,
             suppressRowDeselection: this.rowSelection === AGGrid.MULTI_SELECTION,
             suppressHorizontalScroll: this.suppressHorizontalScroll,
-            suppressCellSelection: true,
             components: this.components,
             suppressRowClickSelection: this.suppressRowClickSelection,
             suppressRowHoverHighlight: this.suppressRowClickSelection,
@@ -88,8 +87,8 @@ class AGGrid {
             // suppressPropertyNamesCheck: true
         };
 
-        if (self.keyColumn)
-            this.gridOptions.getRowNodeId = data => data[self.keyColumn];
+        //if (self.keyColumn)
+        //    this.gridOptions.getRowNodeId = data => data[self.keyColumn];
 
         let eGridDiv = document.querySelector('#' + this.id);
         if (!eGridDiv)

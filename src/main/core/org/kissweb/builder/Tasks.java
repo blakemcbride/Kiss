@@ -248,12 +248,24 @@ public class Tasks {
 
     void realclean() {
         clean();
-        rmTree("src/main/frontend/lib");
+        rmRegex("src/main/frontend/lib", "jquery.*");
         delete(foreignLibs);
         rmTree("tomcat");
         rm(tomcatTarFile);
         rm("manual/Kiss.pdf");
-        
+
+        /* libraries that don't have their version number in the file name
+           must be removed from cache.
+           Now we must include them with Kiss because they are no longer available through a CDN.
+         */
+        //removeFromCache("ag-grid-community.noStyle.min.js");
+        //removeFromCache("ag-grid.min.css");
+        //removeFromCache("ag-theme-balham.min.css");
+    }
+
+    void ideclean() {
+        realclean();
+
         rmTree(".project");
         rmTree(".settings");
         rmTree(".vscode");
@@ -263,23 +275,17 @@ public class Tasks {
         rmTree("out");
         rmRegex(".", ".*\\.iml");
         rmRegex("src", ".*\\.iml");
-	
+
         // NetBeans
         rmTree("dist");
         rmTree("nbproject");
         rmTree("build");
         rm("nbbuild.xml");
-
-        // libraries that don't have their version number in the file name
-        // must be removed from cache
-        removeFromCache("ag-grid-community.noStyle.min.js");
-        removeFromCache("ag-grid.min.css");
-        removeFromCache("ag-theme-balham.min.css");
     }
 
     private ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
-        dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
+        dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.<9.5.5/c3p0-0.9.5.5.jar");
         dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/" + groovyVer + "/" + groovyJar);
         dep.add("javax.servlet-api-4.0.1.jar", LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
         dep.add("log4j-core-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.19.0/log4j-core-2.19.0.jar");
@@ -287,7 +293,8 @@ public class Tasks {
         dep.add("log4j-1.2-api-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.19.0/log4j-1.2-api-2.19.0.jar");
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
         dep.add("mssql-jdbc-11.2.2.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.2.jre8/mssql-jdbc-11.2.2.jre8.jar");
-        dep.add("mysql-connector-java-8.0.30.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.33/mysql-connector-java-8.0.30.jar");
+        // Oracle has removed these files from their public repository
+        //dep.add("mysql-connector-java-8.0.30.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.33/mysql-connector-java-8.0.30.jar");
         dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
         dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/" + postgresqlVer + "/" + postgresqlJar);
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
@@ -297,9 +304,10 @@ public class Tasks {
         dep.add("dynamic-loader-3.1.jar", LIBS, "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.dvare&a=dynamic-loader&v=3.1&e=jar");
         // dep.add("dynamic-loader-3.0.jar", LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
         dep.add("jquery-3.6.3.min.js", "src/main/frontend/lib", "https://code.jquery.com/jquery-3.6.3.min.js");
-        dep.add("ag-grid-community.noStyle.min.js", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/ag-grid-community.noStyle.min.js");
-        dep.add("ag-grid.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-grid.min.css");
-        dep.add("ag-theme-balham.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-theme-balham.min.css");
+        // ag-grid appears to no longer be available through a CDN.  Therefore, I am simply including it with the Kiss distribution
+        //dep.add("ag-grid-community.noStyle.min.js", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/ag-grid-community.noStyle.min.js");
+        //dep.add("ag-grid.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-grid.min.css");
+        //dep.add("ag-theme-balham.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-theme-balham.min.css");
         return dep;
     }
 

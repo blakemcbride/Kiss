@@ -317,6 +317,12 @@ SQLite
 
 Support for other databases is easy to add.
 
+Please note that Oracle has removed public distribution of their 
+JDBC driver for MySQL.  What this means is that if you want to use
+MySQL, you will have to manually download and install the JDBC driver.
+It's name will be something like @emph{mssql-jdbc-11.2.2.jre8.jar} and
+it will need to be installed in the @emph{libs} directory.
+
 @emph{setMaxWorkerThreads} defines how many REST services may be
 processed in parallel.  Service requests beyond this are placed in a
 FIFO queue and processed as worker threads become available.  This

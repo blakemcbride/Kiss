@@ -140,6 +140,6 @@ atlassian-ide-plugin.xml
 /nbproject/private/
 /dist/
 
-src/main/frontend/lib
+src/main/frontend/lib/jquery*
 
 /build/
