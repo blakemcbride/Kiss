@@ -2,7 +2,7 @@
 
 #  View tomcat log while developing.
 
-SCRIPT_DIR=`dirname $(readlink -f $0)`
+SCRIPT_DIR=`dirname $0`
 cd $SCRIPT_DIR
 
 if [ ! -f tomcat/logs/catalina.out ]; then
