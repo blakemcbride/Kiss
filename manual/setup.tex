@@ -74,7 +74,6 @@ After doing a @code{git clone}, all that is needed is the following:
 @example
     ./bld  develop                      [Linux, Mac, BSD, etc.]
          -or-
-    build-builder                       [Windows]
     bld  develop                        [Windows]
 @end example
 
@@ -379,16 +378,10 @@ is rarely built.  After the first build, application development is done
 without any build process.
 
 The build system, which comes in source form, must be built before it
-can be used to build @emph{Kiss}.  Under Linux, Mac, BSD, etc., the
-build system gets built automatically.  However, under Windows, the 
-following command is needed once to build the build system:
+can be used to build @emph{Kiss}.  However, the build system gets built
+automatically by @emph{bld}.
 
-@example
-    build-builder             [Windows]
-@end example
-
-Once the build system has been built, you can see what operations it
-can perform by typing:
+You can see what operations it can perform by typing:
 
 @example
     ./bld listTasks           [Linux, Mac, BSD, etc.]
