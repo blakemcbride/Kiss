@@ -1,0 +1,54 @@
+
+This system has been tested on:
+    Linux
+    Mac
+    Windows
+    Windows Subsystem for Linux (WSL)
+
+Testing procedure:
+
+QUICK TEST (Linux, Mac, and WSL)
+
+1.  rm -rf ~/.bld.cache
+2.  open another terminal and go to ~/intellijProjects/Kiss
+3.  execute the following in the 2nd terminal:  ./view-log
+4.  back in the 1st terminal:  ./bld realclean
+5.  back in the 1st terminal:  ./bld develop
+
+          -or-
+
+FULL TEST (Linux, Mac, and WSL)
+
+1.  Switch to Java 8 (Linux only)
+    sudo alternatives --config java
+    sudo alternatives --config javac
+2.  cd
+3.  rm -rf .bld.cache
+4.  mkdir tmp
+5.  cd tmp
+6.  rm -rf Kiss
+7.  git clone https://github.com/blakemcbride/Kiss.git
+8.  cd Kiss
+9.  open another terminal and go to ~/tmp/Kiss
+10.  execute the following in the 2nd terminal:  ./view-log
+11.  back in the 1st terminal:  ./bld develop
+
+
+FULL TEST (Windows)
+
+1.  cd %userprofile%
+2.  rd /q/s .bld.cache
+3.  rd /q/s Kiss
+4.  git clone https://github.com/blakemcbride/Kiss.git
+5.  cd Kiss
+6.  bld develop
+
+
+FULL CLEANUP (Linux, Mac, and WSL)
+
+1.  Switch to Java 17 (Linux only)
+    sudo alternatives --config java
+    sudo alternatives --config javac
+2.  rm -rf ~/tmp/Kiss
+
+
