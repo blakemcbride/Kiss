@@ -87,8 +87,8 @@ class AGGrid {
             // suppressPropertyNamesCheck: true
         };
 
-        //if (self.keyColumn)
-        //    this.gridOptions.getRowNodeId = data => data[self.keyColumn];
+        if (self.keyColumn)
+            this.gridOptions.getRowId = data => data.data[self.keyColumn];
 
         let eGridDiv = document.querySelector('#' + this.id);
         if (!eGridDiv)
