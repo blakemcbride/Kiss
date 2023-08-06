@@ -144,7 +144,9 @@ public class Tasks {
      */
     void war() {
         build();
+        copy("build.work/exploded/WEB-INF/web-secure.xml", "build.work/exploded/WEB-INF/web.xml");
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
+        copy("build.work/exploded/WEB-INF/web-unsafe.xml", "build.work/exploded/WEB-INF/web.xml");
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
     }
 

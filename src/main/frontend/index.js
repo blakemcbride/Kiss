@@ -5,8 +5,9 @@
 
 Utils.afterComponentsLoaded(function () {
     let url = Utils.getAppUrl();
-    if (url.startsWith('http://localhost:'))
-        url = 'http://localhost:8080';
+    url = url.replace(/:8000/, ':8080');
+//    if (url.startsWith('http://localhost:'))
+//        url = 'http://localhost:8080';
     // If you have a CORS problem, see src/main/frontend/WEB-INF/web.xml
     Server.setURL(url);
 

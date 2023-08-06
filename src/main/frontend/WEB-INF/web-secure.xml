@@ -17,11 +17,11 @@
 			     the IntelliJ server at port 63342.  This way you can debug the front-end within IntelliJ too.
 			     However, it doesn't support testing on a remote (non-localhost or mobile) device.
 			     This could be a problem when testing a mobile layout.  -->
-			<!-- <param-value>http://localhost:8000,http://localhost:63342</param-value>   -->
+			<param-value>http://localhost:8000,http://localhost:63342</param-value>
 			<!--  Or, the following line can be used (not both).  It totally bypasses CORS and allows any origin.
 			      This is fine for development purposes and for testing remote (non-localhost or mobile) devices.
 			      This setting should not be used in a production environment!  It would be a serious security flaw!  -->
-			<param-value>*</param-value>
+			<!--			<param-value>*</param-value> -->
 		</init-param>
 		<init-param>
 			<param-name>cors.allowed.methods</param-name>
