@@ -94,7 +94,7 @@ class Server {
      * @returns data returned from the back-end
      */
     static async call(cls, meth, injson=null) {
-        Server.#checkTime();
+        Server.checkTime();
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
@@ -166,7 +166,7 @@ class Server {
      * @see Utils.toBase64
      */
     static async binaryCall(cls, meth, injson=null) {
-        Server.#checkTime();
+        Server.checkTime();
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
@@ -266,7 +266,7 @@ class Server {
      * @see Utils.getFileUploadFormData
      */
     static fileUploadSend(cls, meth, fd, injson=null, waitMsg, successMessage) {
-        Server.#checkTime();
+        Server.checkTime();
         return new Promise(function (resolve, reject) {
             if (typeof fd === 'string')
                 fd = $$(fd).getFormData();
@@ -345,7 +345,7 @@ class Server {
      * The return value is &lt;code>false&lt;/code> if all the web services complete and &lt;code>true&lt;/code> if there is an error.
      */
     static callAll(pa /*, ... each subsequent arg is a function to handle the result of the next promise in pa */) {
-        Server.#checkTime();
+        Server.checkTime();
         const args = arguments;
         return new Promise(function (resolve, reject) {
             Promise.all(pa).then(function (ret) {
@@ -400,7 +400,7 @@ class Server {
         Server.setMaxInactivitySeconds(hours * 60 * 60);
     }
 
-    static async #checkTime() {
+    static async checkTime() {
         if (!Server.maxInactiveSeconds)
             return;
         const now = (new Date()).getTime() / 1000;
