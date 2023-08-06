@@ -12,11 +12,6 @@
  */
 class Server {
 
-    // class variables
-    static #errorMessage = 'Error communicating with the server.';
-    static #timeLastCall;
-    static #maxInactiveSeconds = 0;  // max number of seconds between calls or zero for no max (or auto logout)
-
     /**
      * Set the URL of the back-end.
      *
@@ -82,8 +77,8 @@ class Server {
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (1): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.#errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 return;
             }
             try {
@@ -101,8 +96,8 @@ class Server {
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (2): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.#errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
             }
         };
 
@@ -154,16 +149,16 @@ class Server {
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (3): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.#errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 return;
             }
             try {
                 const res = await response.arrayBuffer();
                 Server.decCount();
                 if (!res) {
-                    await Utils.showMessage('Error', Server.#errorMessage);
-                    resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
+                    await Utils.showMessage('Error', Server.errorMessage);
+                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 }
                 //               let str = String.fromCharCode.apply(null, new Uint8Array(res));    sometimes causes stack overflow
                 const bytes = new Uint8Array(res);
@@ -189,8 +184,8 @@ class Server {
                 if (pass < 3)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 Server.decCount();
-                await Utils.showMessage('Error', Server.#errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
+                await Utils.showMessage('Error', Server.errorMessage);
+                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
             }
         };
 
@@ -282,8 +277,8 @@ class Server {
                 error: async function (hdr, status, error) {
                     Utils.waitMessageEnd();
                     Server.decCount();
-                    await Utils.showMessage("Error", Server.#errorMessage);
-                    resolve({_Success: false, _ErrorMessage: Server.#errorMessage});
+                    await Utils.showMessage("Error", Server.errorMessage);
+                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 }
             });
         });
@@ -335,8 +330,8 @@ class Server {
      * @param seconds
      */
     static setMaxInactivitySeconds(seconds) {
-        Server.#maxInactiveSeconds = seconds;
-        Server.#timeLastCall = (new Date()).getTime() / 1000; // seconds since 1970
+        Server.maxInactiveSeconds = seconds;
+        Server.timeLastCall = (new Date()).getTime() / 1000; // seconds since 1970
     }
 
     /**
@@ -362,16 +357,21 @@ class Server {
     }
 
     static async #checkTime() {
-        if (!Server.#maxInactiveSeconds)
+        if (!Server.maxInactiveSeconds)
             return;
         const now = (new Date()).getTime() / 1000;
-        if (now - Server.#timeLastCall > Server.#maxInactiveSeconds) {
+        if (now - Server.timeLastCall > Server.maxInactiveSeconds) {
             await Utils.showMessage("Warning", "Auto logout due to inactivity.  Please re-login.");
             Server.logout();
         } else
-            Server.#timeLastCall = now;
+            Server.timeLastCall = now;
     }
 }
+
+    // class variables
+Server.errorMessage = 'Error communicating with the server.';
+Server.timeLastCall;
+Server.maxInactiveSeconds = 0;  // max number of seconds between calls or zero for no max (or auto logout)
 
 
 
