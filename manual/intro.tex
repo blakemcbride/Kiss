@@ -218,6 +218,66 @@ if (res._Success) @{
 @}
 @end example
     
+
+@section Supported Environments
+
+@subsection Development Environment
+
+The following development platforms are supported by the @emph{Kiss}
+framework:
+
+@itemize @bullet
+@item
+Linux
+@item
+Mac
+@item
+Windows
+@item
+WSL under Windows
+@end itemize
+
+@subsection Production Environment
+
+
+The following production platforms are supported by the @emph{Kiss}
+framework:
+
+@itemize @bullet
+@item
+Linux
+@item
+Windows Server
+@end itemize
+
+
+@subsection Databases Supported
+
+
+The following database servers are supported by the @emph{Kiss}
+framework:
+
+@itemize @bullet
+@item
+PostgreSQL
+@item
+Microsoft SQL Server
+@item
+MySQL
+@item
+Oracle
+@item
+SQLite
+@end itemize
+
+
+@subsection Java
+
+The system is tested with Java verion 8 and 17.  Any Java version above 8
+is expected to work.
+
+
+
 @section HTML component usage
    
 To use a component add to HTML:
@@ -240,23 +300,19 @@ Non-custom attributes do what you's expect them to do.
 The system also supports tag-less components.  This provides an easy
 way to package arbitrary blocks of code (that can have screens too).
 
-@section System Maturity And Future
+@section System Maturity And Stability
 
-Largely, the Kiss system, in the form of running applications, has
-been used in production environments for a few years.  The effort to
-tease away the generic parts and generalize them is recent (2018).
-Moving forward, as time permits, the priorities are as follows:
+The Kiss system has been used in production environments for a several
+years.  Additionally, several commercial applications utilize @emph{Kiss}.
+In spite of this, however, @emph{Kiss} is constantly being adjusted
+in response to additional needs, evolving environments, and bug fixes.
 
-@enumerate
-@item
-Improve documentation
-@item
-More examples
-@item
-Greater front-end functionality (modal windows, grid control, etc. - note that these can be done by any other known facility.  They just don't come included with Kiss yet.)
-@item
-Support more back-end languages (such as Python, JavaScript, Ruby, etc.)
-@end enumerate
+We use @emph{Kiss} daily in a Linux and PostgreSQL environment.
+Therefore, it is best tested there.  While we support all of the listed
+environments, they receive a bit less testing.  If you encounter a problem,
+please reach out to us.  It is probably easy for us to fix, and we
+are happy to do so.
+
 
 @section Getting All Source Code
 

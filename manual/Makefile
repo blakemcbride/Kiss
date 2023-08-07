@@ -17,7 +17,7 @@ TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex \
 all: man/index.html jsdoc/index.html GroovyOverview.html # Kiss.pdf GroovyOverview.pdf
 
 man/index.html :  $(TEXFILES)
-	makeinfo --html Kiss.tex
+	makeinfo --html Kiss.tex -o man
 
 jsdoc/index.html: ../src/main/frontend/kiss/*.js ../src/main/frontend/kiss/component/components.js
 	rm -rf jsdoc

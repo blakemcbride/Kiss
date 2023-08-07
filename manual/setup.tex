@@ -58,6 +58,18 @@ required under Linux and Mac but not under Windows.  When running on
 Windows, use ``bld'' rather than ``./bld'' and the same for all the
 other commands shown.
 
+Note.  The @emph{Kiss} system includes a file named @code{pom.xml}.
+However, @emph{Kiss} is @emph{not} a maven project.  The
+@code{pom.xml} file is only included to provide @emph{GitHub} with a
+list of dependencies.  Unfortunately, this file sometimes confuses IDEs
+into interpreting the existence of that file as the project being a
+@emph{maven} project.  Therefore, in some instances, it is a good idea
+to delete that file prior to IDE configuration.
+
+The @code{build.xml} file is also not used by the @emph{Kiss} system per se.
+It is an integration with @emph{ant} for IDE integration.
+
+
 @section Super-Quick-Start
 
 This is the simplest and shortest path to a running system.  It assumes:
@@ -181,7 +193,7 @@ You should download and install the following pre-requisites.
 
 @enumerate
 @item
-Java JDK 8,11, or 17 from many sources including @uref{https://www.azul.com/downloads/zulu-community} or 
+Java JDK 8, 11, or 17 from many sources including @uref{https://www.azul.com/downloads/zulu-community} or 
 @uref{https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html} or
 @uref{https://developers.redhat.com/products/openjdk/download} or
 @uref{https://adoptopenjdk.net}
