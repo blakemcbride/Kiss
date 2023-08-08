@@ -51,7 +51,6 @@ configure, and run Kiss, tomcat, and the required JAR files:
 
     git clone https://github.com/blakemcbride/Kiss.git
     cd Kiss
-    build-builder
     bld develop
 
 In either environment, you can then go to `http://localhost:8000`
