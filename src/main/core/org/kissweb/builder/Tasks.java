@@ -224,7 +224,8 @@ public class Tasks {
         else
             runWait(true, "tomcat/bin/debug");
         proc = runBackground("java -jar SimpleWebServer.jar -d src/main/frontend");
-        println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out");
+        println("***** SERVER IS RUNNING *****");
+        println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out or via the view-log command");
         println("You can browse to http://localhost:8000   (do not use port 8080)");
         println("The app can also be debugged at port " + debugPort);
         println("hit any key to stop tomcat");
