@@ -162,6 +162,7 @@ public class Tasks {
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
         }
         if (isWindows) {
+            System.err.println("Setting up tomcat.  Please wait...");
             rm("tomcat\\conf\\tomcat-users.xml");
             // The following is needed by NetBeans
             writeToFile("tomcat\\conf\\tomcat-users.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
