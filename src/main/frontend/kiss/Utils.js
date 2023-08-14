@@ -819,17 +819,8 @@ class Utils {
      * @param {string} path back-end path to the component
      */
     static useTaglessComponent(path) {
-        let npath;
-        const loadScript = function (arg) {
-            getScript(npath + '.js' + arg);
-        };
-
-        const loadComponent = function (arg) {
-            npath = path.charAt(0).toLowerCase() + path.substr(1) + '/' + path.charAt(0).toUpperCase() + path.substr(1);
-            npath = '/kiss/component/' + npath;
-            loadScript(arg);
-        };
-        loadComponent(Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
+        const npath = path.charAt(0).toLowerCase() + path.substring(1) + '/' + path.charAt(0).toUpperCase() + path.substring(1);
+        getScript('/kiss/component/' + npath + '.js');
     }
 
     // internal
@@ -889,25 +880,15 @@ class Utils {
      * @param {string} path back-end path to the component HTML and JS files.
      */
     static useComponent(path) {
-        let npath;
         Component.ComponentsBeingLoaded++;
-        const loadScript = function (arg) {
-            getScript(npath + '.js' + arg).then(function () {
-                if (!--Component.ComponentsBeingLoaded && Component.AfterAllComponentsLoaded) {
-                    Utils.rescan();  // does all the tag replacement
-                    Component.AfterAllComponentsLoaded();
-                    Component.AfterAllComponentsLoaded = null;
-                }
-            });
-        };
-
-        const loadComponent = function (arg) {
-            npath = path.charAt(0).toLowerCase() + path.substr(1) + '/' + path.charAt(0).toUpperCase() + path.substr(1);
-            npath = 'kiss/component/' + npath;
-            loadScript(arg);
-        };
-
-        loadComponent(Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
+        const npath = 'kiss/component/' + path.charAt(0).toLowerCase() + path.substring(1) + '/' + path.charAt(0).toUpperCase() + path.substring(1) + '.js';
+        getScript(npath).then(function () {
+            if (!--Component.ComponentsBeingLoaded && Component.AfterAllComponentsLoaded) {
+                Utils.rescan();  // does all the tag replacement
+                Component.AfterAllComponentsLoaded();
+                Component.AfterAllComponentsLoaded = null;
+            }
+        });
     }
 
     static getAllAttributes(elm) {
@@ -972,7 +953,7 @@ class Utils {
         return new Promise(async function (resolve, reject) {
             let response;
             try {
-                response = await fetch(url, {
+                response = await fetch(url + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), {
                     method: 'GET',
                     headers: {
                         'Content-type': 'text/plain'
@@ -1021,15 +1002,14 @@ class Utils {
             Utils.lastScreenLoaded.initialFocus = initialFocus;
             Utils.lastScreenLoaded.argv  = argv;
             Utils.lastScreenLoaded.retv = retv;
-            const pg = page + '.html' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '');
-            Utils.getHTML(pg).then(function (text) {
+            Utils.getHTML(page + '.html').then(function (text) {
                 if (tag)
                     $('#' + tag).html(text);
                 else
                     $('body').html(text);
                 Utils.rescan();  // does all the tag replacement
                 window.scrollTo(0, 0);
-                getScript(page + '.js' + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : '')).then(function () {
+                getScript(page + '.js').then(function () {
                     if (initialFocus) {
                         const ctl = $$(initialFocus);
                         if (ctl)

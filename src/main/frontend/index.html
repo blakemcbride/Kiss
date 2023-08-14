@@ -9,13 +9,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <link rel="stylesheet" href="normalize.css">
-    <link rel="stylesheet" href="normalize2.css">
+    <link rel="stylesheet" href="normalize.css?nocache=20230813">
+    <link rel="stylesheet" href="normalize2.css?nocache=20230813">
 
-    <link rel="stylesheet" href="kiss/Utils.css">
+    <link rel="stylesheet" href="kiss/Utils.css?nocache=20230813">
 
-    <link rel="stylesheet" href="lib/ag-grid.min.css">
-    <link rel="stylesheet" href="lib/ag-theme-balham.min.css">
+    <link rel="stylesheet" href="lib/ag-grid.min.css?nocache=20230813">
+    <link rel="stylesheet" href="lib/ag-theme-balham.min.css?nocache=20230813">
 
 
     <style>
@@ -45,6 +45,10 @@
 
     <script>
 
+        // cache control
+        const softwareVersion = "20201108";   // version of the entire system
+        const controlCache = true;            // normally true but use false during debugging
+
         /**
          * Load a JavaScript file
          */
@@ -53,7 +57,7 @@
                 const head = document.getElementsByTagName("head")[0];
                 const script = document.createElement("script");
                 script.type = "text/javascript";
-                script.src = url;
+                script.src = url + (controlCache ? '?ver=' + softwareVersion : '');
 
                 // Handle Script loading
                 {
@@ -93,10 +97,6 @@
 
         function startup() {
 
-            // cache control
-            const softwareVersion = "20201108";   // version of the entire system
-            const controlCache = true;            // normally true but use false during debugging
-
             const afterLoad = function () {
                 Utils.softwareVersion = softwareVersion;
                 Utils.controlCache = controlCache;
@@ -109,10 +109,10 @@
 
             const loadScript = function (script, fun) {
                 if (fun)
-                    getScript(script + (controlCache ? '?ver=' + softwareVersion : '')).then(fun);
+                    getScript(script).then(fun);
                 else {
                     numLoaded++;
-                    getScript(script + (controlCache ? '?ver=' + softwareVersion : '')).then(function () {
+                    getScript(script).then(function () {
                         if (!--numLoaded)
                             afterLoad();
                     });
@@ -158,7 +158,7 @@
 <body onload="startup()">
 
 <script src="lib/jquery-3.6.3.min.js"></script>
-<script src="lib/ag-grid-community.min.noStyle.js"></script>
+<script src="lib/ag-grid-community.min.noStyle.js?nocache=20230813"></script>
 
 </body>
 
