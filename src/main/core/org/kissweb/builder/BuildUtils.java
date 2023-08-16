@@ -42,7 +42,7 @@ public class BuildUtils {
 
     private static final String Version = "1.0";
     private static String CACHE_DIR;
-    public static boolean isWindows;
+    static boolean isWindows;
 
     public static void main(String [] args) {
         String osName = System.getProperty("os.name");
@@ -118,7 +118,7 @@ public class BuildUtils {
         return null;  // not found
     }
 
-    public static String getJavaPathOnWindows() {
+    static String getJavaPathOnWindows() {
         String path = System.getenv("JAVA_HOME");
         if (path != null)
             return path;
@@ -133,7 +133,7 @@ public class BuildUtils {
         return null;
     }
 
-    public static String getTomcatPath() {
+    static String getTomcatPath() {
         return (new File("tomcat")).getAbsolutePath();
     }
 
@@ -171,12 +171,12 @@ public class BuildUtils {
         return Paths.get(".").toAbsolutePath().normalize().toString();
     }
 
-    public static void downloadAll(ForeignDependencies deps) {
+    static void downloadAll(ForeignDependencies deps) {
         for (ForeignDependency dep : deps.getDependencies())
             download(dep.filename, dep.targetPath, dep.source);
     }
 
-    public static void delete(ForeignDependencies deps) {
+    static void delete(ForeignDependencies deps) {
         for (ForeignDependency dep : deps.getDependencies())
             rm(dep.targetPath + File.separator + dep.filename);
     }
@@ -247,6 +247,30 @@ public class BuildUtils {
             } catch (Exception e) {
                 throw new RuntimeException("error copying " + source + " to " +dest);
             }
+    }
+
+    /**
+     * Copy file regardless of file date
+     *
+     * @param source file
+     * @param dest  file or directory
+     */
+    public static void copyForce(String source, String dest) {
+        File sfile = new File(source);
+        File dfile = new File(dest);
+        if (!sfile.exists())
+            throw new RuntimeException("copy: " + source + " does not exist");
+        if (sfile.isDirectory())
+            throw new RuntimeException("copy: " + source + " is a directory");
+        if (dfile.exists()  &&  dfile.isDirectory())
+            dfile = new File(dfile, sfile.getName());
+        try {
+            println("copying " + source + " -> " + dest);
+            mkdir(dfile.getParentFile());
+            Files.copy(sfile.toPath(), dfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            throw new RuntimeException("error copying " + source + " to " +dest);
+        }
     }
 
     /**
@@ -946,6 +970,7 @@ public class BuildUtils {
 
     // Unfinished code to create WSDL's (I don't think they're needed anymore)
     public static void buildWS(LocalDependencies ldep, ForeignDependencies fdep, String dest, String sdir, String service) {
+        String javaHome = java.lang.System.getProperty("java.home");  // to find tools.jar
         String deps = writeDependencyArgsToFile(ldep, fdep);
         String cmd = "java -classpath @" + deps + " com.sun.tools.ws.WsGen -d " + dest + " -Xendorsed -keep -wsdl -r " + sdir + " -s " + sdir + " " + service;
         mkdir(sdir);
@@ -1060,22 +1085,22 @@ public class BuildUtils {
         }
     }
 
-    public static class ForeignDependencies {
+    static class ForeignDependencies {
         private final ArrayList<ForeignDependency> deps = new ArrayList<>();
 
-        public void add(String filename, String targetPath, String source) {
+        void add(String filename, String targetPath, String source) {
             deps.add(new ForeignDependency(filename, targetPath, source));
         }
 
-        public boolean isEmpty() {
+        boolean isEmpty() {
             return deps.isEmpty();
         }
 
-        public ArrayList<ForeignDependency> getDependencies() {
+        ArrayList<ForeignDependency> getDependencies() {
             return deps;
         }
 
-        public void print() {
+        void print() {
             for (ForeignDependency dep : deps)
                 println(dep.filename + " -> " + dep.targetPath + " (" + dep.source + ")");
         }
