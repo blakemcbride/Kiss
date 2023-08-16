@@ -144,9 +144,9 @@ public class Tasks {
      */
     void war() {
         build();
-        copy("build.work/exploded/WEB-INF/web-secure.xml", "build.work/exploded/WEB-INF/web.xml");
+        copyForce("build.work/exploded/WEB-INF/web-secure.xml", "build.work/exploded/WEB-INF/web.xml");
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
-        copy("build.work/exploded/WEB-INF/web-unsafe.xml", "build.work/exploded/WEB-INF/web.xml");
+        copyForce("build.work/exploded/WEB-INF/web-unsafe.xml", "build.work/exploded/WEB-INF/web.xml");
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
     }
 
@@ -216,9 +216,8 @@ public class Tasks {
     void develop() {
         Process proc;
         build();
-        war();
         setupTomcat();
-        deployWar();
+        copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
         if (isWindows)
             runWait(true, "tomcat\\bin\\debug.cmd");
         else

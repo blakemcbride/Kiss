@@ -283,26 +283,13 @@ directory for samples and further documentation.
 
 @subsection CORS
 
-Typically, for security reasons, web servers prevent web services from
+For security reasons, web servers prevent web services from
 an application that didn't come from the same application.  This is
 known as Cross-Origin Resource Sharing or CORS.  @emph{Kiss} fully
-supports this standard.  However, there are times when you do not want 
-this protection during the development process.
+supports this security standard. 
 
-As shipped, @emph{Kiss} fully supports CORS except for
-@code{localhost:8000}.  This is needed for the development process and
-would not cause a security problem in a production environment.
-
-The problem occurs when you are running your development environment
-on a laptop or desktop but want to test on a mobile device.  In this
-case, you would be running the server and the application on two
-different devices (since we use two servers in the development
-process).  In order to allow this (for development purposes only), you
-would need to change the setting in
-@code{src/main/frontend/WEB-INF/web.xml} See comments in that file for
-instructions.  Note that if this file is changed, the @emph{Kiss}
-system will have to be rebuilt.  Do not leave the setting open in a
-production environment!
+@emph{Kiss} automatically enables full CORS protection on production
+environments and allows CORS in the development environment.
 
 @anchor{Front-end Development}@section Front-end Development
 
