@@ -43,9 +43,15 @@ import java.util.*;
 
 
 /**
- * Instances of this class represent a row into a result set.  Cursors are forward-only and read-only from the database's
- * perspective so are very efficient and shouldn't create an actual cursor on the database side.  If a single table is
- * selected from, rows may be updated or deleted via these facilities without the use of a database cursor.
+ * Instances of this class represent a row into a result set.  If a single table is selected from, rows may be updated
+ * or deleted via these facilities.
+ * <br><br>
+ * It is important to understand that this class represents a Kiss Cursor and not a true database cursor!  When queries
+ * occur, Kiss downloads all the records in the result set either in memory or a local disk file and then closes any
+ * database cursor.  The advantage of this approach is that there is never a problem with multiple database cursors
+ * being open simultaneously or nested in code (which often causes database performance issues or interference).
+ * However, from the application's perspective, a Kiss Cursor works just like a database cursor and has all the same
+ * functionality.
  * <br><br>
  * A new cursor is created with the following code:
  * <br><br>
@@ -124,14 +130,14 @@ public class Cursor implements AutoCloseable {
     }
 
     /**
-     * This method is used to advance the row pointer and return the next <code>Record</code>
+     * This method is used to advance the row pointer first and then return the (next) <code>Record</code>
      * instance representing the next row.  If there are no more records, <code>null</code>
      * is returned and the cursor is closed.
      *
      * @return
      * @throws SQLException
      *
-     *  @see #getRecord()
+     * @see #getRecord()
      * @see #isNext()
      */
     public Record next() throws Exception {

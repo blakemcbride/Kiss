@@ -122,7 +122,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Execute a select statement returning a Cursor that may be used to
+     * Execute a select statement returning a Kiss Cursor (not a database cursor) that may be used to
      * obtain each subsequent row.  This is useful when a large number of records
      * is possible and fetching all into memory at one time is unneeded.  This can
      * save a significant amount of memory since only one record is in memory at a time.
@@ -141,6 +141,7 @@ public class Command implements AutoCloseable {
      * @return
      * @throws SQLException
      *
+     * @see Cursor
      * @see #fetchAll(String, Object...)
      * @see #fetchOne(String, Object...)
      * @see #query(int, String, Object...)
@@ -150,7 +151,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Execute a select statement returning a Cursor that may be used to
+     * Execute a select statement returning a Kiss Cursor (not a database cursor) that may be used to
      * obtain each subsequent row.
      * <br><br>
      * The maximum number of records returned is given by <code>max</code>.
@@ -173,6 +174,7 @@ public class Command implements AutoCloseable {
      * @return
      * @throws SQLException
      *
+     * @see Cursor
      * @see #fetchAll(String, Object...)
      * @see #fetchOne(String, Object...)
      * @see #query(String, Object...)
@@ -182,7 +184,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Execute a select statement returning a Cursor that may be used to
+     * Execute a select statement returning a Kiss Cursor (not a database cursor) that may be used to
      * obtain each subsequent row.  This version is used for paging results.
      * The total result set is broken down into <code>max</code> sized pages (starting at zero)
      * You can then choose which group of <code>max</code> records wanted.
@@ -210,6 +212,7 @@ public class Command implements AutoCloseable {
      * @return
      * @throws SQLException
      *
+     * @see Cursor
      * @see #fetchAll(String, Object...)
      * @see #fetchOne(String, Object...)
      * @see #query(String, Object...)
@@ -269,7 +272,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Read in the first record and then close the cursor.
+     * Read in the first record and then close the Kiss cursor.
      * The record can be updated or deleted if it was a single-table select and
      * the primary key was selected.
      * <br><br>
@@ -335,7 +338,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Fetch all of the records and close the cursor.
+     * Fetch all the records and close the Kiss cursor.
      * The records can be updated or deleted if there was a single-table select and
      * the primary key was selected.
      * <br><br>
@@ -365,7 +368,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * This method is the same as <code>fetchAll</code> except that it return the list of records as a JSON array
+     * This method is the same as <code>fetchAll</code> except that it returns the list of records as a JSON array
      * of JSON objects where each object represents a column.
      *
      * @param sql
@@ -380,7 +383,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Fetch all (but no more than <code>max</code>) records and then close the cursor.
+     * Fetch all (but no more than <code>max</code>) records and then close the Kiss cursor.
      * The records can be updated or deleted if there was a single-table select and
      * the primary key was selected.
      * <br><br>
@@ -411,7 +414,7 @@ public class Command implements AutoCloseable {
     }
 
     /**
-     * Fetch all (but no more than <code>max</code>) records and then close the cursor.
+     * Fetch all (but no more than <code>max</code>) records and then close the Kiss cursor.
      * <br><br>
      * <code>page</code> determine which block of <code>max</code> records to read.
      * <code>page</code> starts at zero and is used for paging output.
