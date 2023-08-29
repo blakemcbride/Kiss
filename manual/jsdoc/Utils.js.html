@@ -1265,6 +1265,11 @@ class Utils {
      * @see Utils.popup_close
      */
     static popup_open(id, focus_ctl=null, replace = false) {
+        const w = $('#' + id);
+        if (!w.length)
+            throw new Error(`Popup ${id} not found.`);
+        else if (w.length > 1)
+            throw new Error(`Popup ${id} found more than once.`);
 
         let prior_offset = null;
 
@@ -1277,7 +1282,6 @@ class Utils {
             Utils.popup_close();
         }
 
-        const w = $('#' + id);
         let content;
         let both_parts;
         let header;
