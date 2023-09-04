@@ -279,4 +279,18 @@ public class StringUtils {
 		return c == null ? null : c.toString();
 	}
 
+	/**
+	 * Splits a string into an array of substrings based on a specified delimiter character.
+	 * Unlike the Java version, this one correctly handles empty strings.
+	 *
+	 * @param  s  the string to be split
+	 * @param  r  the delimiter regex
+	 * @return    an array of substrings
+	 */
+	public static String [] split(String s, String r) {
+		if (s == null || s.isEmpty())
+			return new String[0];
+		return s.split(r);
+	}
+
 }
