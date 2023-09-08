@@ -293,4 +293,45 @@ public class StringUtils {
 		return s.split(r);
 	}
 
+	/**
+	 * Converts HTML text to plain text.
+	 * Also corrects some Unicode characters.
+	 *
+	 * @param  html  the HTML text to be converted
+	 * @return       the converted plain text
+	 */
+	public static String htmlToText(String html) {
+		if (html == null || html.isEmpty())
+			return "";
+		return html
+				.replaceAll("<br *[^>]*>", "\n")
+
+				// iPhone uses Unicode!  Convert to ASCII.
+				.replaceAll("\u2018", "'")
+				.replaceAll("\u2019", "'")
+				.replaceAll("\u201B", "'")
+				.replaceAll("\u201C", "\"")
+				.replaceAll("\u201F", "\"")
+				.replaceAll("\u201D", "\"")
+				.replaceAll("\u275D", "\"")
+				.replaceAll("\u275E", "\"")
+				.replaceAll("\u301D", "\"")
+				.replaceAll("\u301E", "\"")
+				.replaceAll("\u275B", "'")
+				.replaceAll("\u275C", "'")
+
+				.replaceAll("<[^>]*>", " ")
+
+				// these need to be last
+				.replaceAll("&sp;", " ")
+				.replaceAll("&nbsp;", " ")
+				.replaceAll("&amp;", "&")
+				.replaceAll("&lt;", "<")
+				.replaceAll("&gt;", ">")
+				.replaceAll("&quot;", "\"")
+				.replaceAll("&apos;", "'")
+				.replaceAll(" {2}", "  ")
+				;
+	}
+
 }
