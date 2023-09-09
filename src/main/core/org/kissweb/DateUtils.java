@@ -189,7 +189,7 @@ public class DateUtils {
         if (m == 0)
             return null;
         y = guessYear(y);
-        return new GregorianCalendar(y, m-1, d);
+        return new GregorianCalendar(y, m-1, d, 0, 0);
     }
 
     /**
@@ -199,7 +199,7 @@ public class DateUtils {
      * @return
      */
     public static Calendar toCalendar(int dat) {
-        return dat == 0 ? null : new GregorianCalendar(year(dat), month(dat)-1, day(dat));
+        return dat == 0 ? null : new GregorianCalendar(year(dat), month(dat)-1, day(dat), 0, 0);
     }
 
     /**
