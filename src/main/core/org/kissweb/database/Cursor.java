@@ -251,16 +251,11 @@ public class Cursor implements AutoCloseable {
                                 break;
                             case Types.CHAR:
                             case Types.VARCHAR:
-                                short slen = (short) ((String) val).length();
-                                oos.writeShort(slen);
-                                if (slen > 0)
-                                    oos.writeUTF((String) val);
-                                break;
                             case Types.LONGVARCHAR:
                                 len = ((String) val).length();
                                 oos.writeInt(len);
                                 if (len > 0)
-                                    oos.writeUTF((String) val);
+                                    oos.writeObject(val);
                                 break;
                             case Types.TIMESTAMP:
                             case Types.TIMESTAMP_WITH_TIMEZONE:
@@ -367,13 +362,9 @@ public class Cursor implements AutoCloseable {
                     break;
                 case Types.CHAR:
                 case Types.VARCHAR:
-                    short slen = cacheStream.readShort();
-                    cols.put(ci.name, obj=slen > 0 ? cacheStream.readUTF() : "");
-                    ocols.put(ci.name, obj);
-                    break;
                 case Types.LONGVARCHAR:
-                    len = cacheStream.readShort();
-                    cols.put(ci.name, obj=len > 0 ? cacheStream.readUTF() : "");
+                    len = cacheStream.readInt();
+                    cols.put(ci.name, obj=len > 0 ? cacheStream.readObject() : "");
                     ocols.put(ci.name, obj);
                     break;
                 case Types.TIMESTAMP:
