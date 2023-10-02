@@ -1,7 +1,7 @@
 @echo off
 if "%~1"=="" (
     echo.
-    echo * * * This is to be run from the Kiss clone and not the application directory. * * *
+    echo * * * This is to be run from the virgin Kiss clone and not your application project directory. * * *
     echo.
     echo src/main/core/org/kissweb/Tasks.java will have to be updated manually.
     echo.
