@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>System Setup (Kiss Manual)</title>
+
+<meta name="description" content="System Setup (Kiss Manual)">
+<meta name="keywords" content="System Setup (Kiss Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="Orientation.html" rel="next" title="Orientation">
+<link href="Introduction.html" rel="prev" title="Introduction">
+<style type="text/css">
+<!--
+div.example {margin-left: 3.2em}
+ul.mark-bullet {list-style-type: disc}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<div class="chapter-level-extent" id="System-Setup">
+<div class="nav-panel">
+<p>
+Next: <a href="Orientation.html" accesskey="n" rel="next">Orientation</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<h2 class="chapter" id="System-Setup-1">2 System Setup</h2>
+
+<a class="anchor" id="Important"></a><ul class="mini-toc">
+<li><a href="#Important-1" accesskey="1">Important</a></li>
+<li><a href="#Super_002dQuick_002dStart" accesskey="2">Super-Quick-Start</a></li>
+<li><a href="#Quick_002dStart-Checklist-1" accesskey="3">Quick-Start Checklist</a></li>
+<li><a href="#Runtime-Environments" accesskey="4">Runtime Environments</a></li>
+<li><a href="#Pre_002drequisites-1" accesskey="5">Pre-requisites</a></li>
+<li><a href="#Download-Kiss-1" accesskey="6">Download Kiss</a></li>
+<li><a href="#Documentation" accesskey="7">Documentation</a></li>
+<li><a href="#Setup-And-Configuration-1" accesskey="8">Setup And Configuration</a></li>
+<li><a href="#Bypassing-Authentication" accesskey="9">Bypassing Authentication</a></li>
+<li><a href="#Building-The-System">Building The System</a></li>
+<li><a href="#Kiss-Framework-Updates">Kiss Framework Updates</a></li>
+<li><a href="#What-Do-I-Do-With-It-Now_003f">What Do I Do With It Now?</a></li>
+</ul>
+<div class="section-level-extent" id="Important-1">
+<h3 class="section">2.1 Important</h3>
+
+<p>The <em class="emph">Kiss</em> system comes with its own build system, so it doesn&rsquo;t
+use build systems such as <em class="emph">ant</em>, <em class="emph">maven</em>, or <em class="emph">gradle</em>.
+It works under Linux, Mac, Windows, etc. This included build system
+will make things such as downloading remote libraries, installing and
+configuring a web server, building <em class="emph">Kiss</em>, and running
+<em class="emph">Kiss</em> for development purposes easy, intelligent, and automatic.
+This new build system can be used in conjunction with your favorite IDE.
+</p>
+<p>The build system (called it <em class="emph">bld</em>) is small and written in Java.
+Its source code is included with the <em class="emph">Kiss</em> source code.  So, a
+Java compiler will be needed before anything will work.  
+Java 8, 11, and 17 are supported.
+</p>
+<p>When building the system for the first time, <em class="emph">BLD</em> will
+automatically download and cache required libraries (jar files), install and
+configure the development server (tomcat), build the system, and it
+can even be used to launch the development-mode server.  After building
+the system the first time, application development proceeds without
+any need for re-compiles or re-builds.
+</p>
+<p>The program that runs <em class="emph">BLD</em> is &ldquo;<em class="emph">bld</em>&rdquo; under Unix-like
+systems and &ldquo;<em class="emph">bld.cmd</em>&rdquo; under Windows.  In this manual,
+&ldquo;<em class="emph">bld</em>&rdquo; will be shown as &ldquo;<em class="emph">./bld</em>&rdquo;.  The &ldquo;./&rdquo; is
+required under Linux and Mac but not under Windows.  When running on
+Windows, use &ldquo;bld&rdquo; rather than &ldquo;./bld&rdquo; and the same for all the
+other commands shown.
+</p>
+<p>Note.  The <em class="emph">Kiss</em> system includes a file named <code class="code">pom.xml</code>.
+However, <em class="emph">Kiss</em> is <em class="emph">not</em> a maven project.  The
+<code class="code">pom.xml</code> file is only included to provide <em class="emph">GitHub</em> with a
+list of dependencies.  Unfortunately, this file sometimes confuses IDEs
+into interpreting the existence of that file as the project being a
+<em class="emph">maven</em> project.  Therefore, in some instances, it is a good idea
+to delete that file prior to IDE configuration.
+</p>
+<p>The <code class="code">build.xml</code> file is also not used by the <em class="emph">Kiss</em> system per se.
+It is an integration with <em class="emph">ant</em> for IDE integration.
+</p>
+
+</div>
+<div class="section-level-extent" id="Super_002dQuick_002dStart">
+<h3 class="section">2.2 Super-Quick-Start</h3>
+
+<p>This is the simplest and shortest path to a running system.  It assumes:
+</p>
+<ol class="enumerate">
+<li> you have a JDK installed
+</li><li> you have an Internet connection
+</li></ol>
+
+<p>After doing a <code class="code">git clone</code>, all that is needed is the following:
+</p>
+<div class="example">
+<pre class="example-preformatted">    ./bld  develop                      [Linux, Mac, BSD, etc.]
+         -or-
+    bld  develop                        [Windows]
+</pre></div>
+
+<p>This will build the system, install tomcat, deploy the app, and run
+the server.  At this point you will be able to go your browser at the
+following URL:
+</p>
+<div class="example">
+<pre class="example-preformatted">    http://localhost:8000
+</pre></div>
+
+<p>Be sure not to use port 8080.  Although port 8080 will appear to work,
+you will not be able to do front-end development while the system is
+running.  Port 8000 will allow front-end development while the system
+is running.
+</p>
+<p>At this point, you can do all development without any build
+procedures.  You can add or change anything on the front-end or
+back-end while the system is running.
+</p>
+<p>All application back-end code is located under the <code class="code">src/main/backend</code>
+directory.
+</p>
+<p>All application front-end code is located under the <code class="code">src/main/frontend</code>
+directory.
+</p>
+<p>If you change anything in either place, the system will notice the change 
+and deliver it with the next request.
+</p>
+
+<a class="anchor" id="Quick_002dStart-Checklist"></a></div>
+<div class="section-level-extent" id="Quick_002dStart-Checklist-1">
+<h3 class="section">2.3 Quick-Start Checklist</h3>
+
+<p>This is a more detailed and expanded description of the same
+super-quick-start.
+</p>
+<p>The following enumerates the steps necessary to get the system up and running:
+</p>
+<ol class="enumerate">
+<li> See <a class="xref" href="#Pre_002drequisites">Pre-requisites</a>
+</li><li> See <a class="xref" href="#Download-Kiss">Download Kiss</a>
+</li><li> See <a class="xref" href="#Setup-And-Configuration">Setup And Configuration</a>
+</li><li> The development server can be run without an IDE by running: <code class="code">./bld develop</code>
+</li><li> Once the server starts up, you can access it on your browser by going to 
+<code class="code">http://localhost:8000</code>  You can also debug the back-end by
+attaching to the process at port 9000.
+
+<p>Alternatively, your IDE can be configured to run the development
+process entirely through it.
+</p></li></ol>
+
+<p>Once the development server is running under <em class="emph">bld</em>, you can stop it 
+by hitting any key.
+</p>
+</div>
+<div class="section-level-extent" id="Runtime-Environments">
+<h3 class="section">2.4 Runtime Environments</h3>
+
+<p>As shipped, there are two different environments that <em class="emph">Kiss</em> may
+run in as follows:
+</p>
+<ol class="enumerate">
+<li> Development
+</li><li> Production
+</li></ol>
+
+<p>The <em class="emph">Production</em> scenario is created with a single command
+(<code class="code">./bld war</code>) and produces a single <code class="code">war</code> file (located in
+the <code class="code">build.work</code> directory) that can be deployed to your production
+environment.
+</p>
+<p>Before doing anything with the <em class="emph">Development</em> environment, it is
+important that you have the <em class="emph">JAVA_HOME</em> environment variable set
+correctly to the root of your JDK (Java Developer Kit).  Doing this
+varies according to the OS you are using and various other Java
+installation possibilities.  There are plenty of instructions on the
+Internet for this.
+</p>
+<p>The <em class="emph">Development</em> environment consists of two servers.  One
+serves the back-end REST services, and the second serves the front-end
+HTML, CSS, and JavaScript files.  By using this method, both front-end
+and back-end source files can be changed on a running system and take
+effect immediately without any builds, compiles, server reboots,
+re-deploys, or file copies.  (This is also true of a production
+environment &ndash; with a single server &ndash; when the new files are put in place.)
+</p>
+<p>Back-end REST services are debugged, and edited through the IDE.
+Saving a source file is all that is needed to have it take effect.
+</p>
+<p>The front-end (HTML, CSS, and JavaScript files) are served by a simple
+server supplied with the <em class="emph">Kiss</em> system.  This server is only used
+during the development process.  See <a class="xref" href="Developing.html#Front_002dend-Development">Front-end Development</a>.
+(Source code to this server is available at
+<a class="uref" href="https://github.com/blakemcbride/SimpleWebServer">https://github.com/blakemcbride/SimpleWebServer</a>) Debugging the
+front-end is done through the browser debugger.  There is no setup,
+and the front-end server runs by executing a single command.
+</p>
+<a class="anchor" id="Pre_002drequisites"></a></div>
+<div class="section-level-extent" id="Pre_002drequisites-1">
+<h3 class="section">2.5 Pre-requisites</h3>
+
+<p>You should download and install the following pre-requisites.
+</p>
+<ol class="enumerate">
+<li> Java JDK 8, 11, or 17 from many sources including <a class="uref" href="https://www.azul.com/downloads/zulu-community">https://www.azul.com/downloads/zulu-community</a> or 
+<a class="uref" href="https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html">https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html</a> or
+<a class="uref" href="https://developers.redhat.com/products/openjdk/download">https://developers.redhat.com/products/openjdk/download</a> or
+<a class="uref" href="https://adoptopenjdk.net">https://adoptopenjdk.net</a>
+</li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL,
+Oracle, SQLite)
+</li><li> IDE (e.g.&nbsp;<a class="uref" href="https://www.jetbrains.com/idea">IntelliJ</a>, VSCode, NetBeans, eclipse)
+</li><li> GIT source code control system
+</li></ol>
+
+<p>Correctly setting the <em class="emph">JAVA_HOME</em> environment variable to the root of your
+JDK is necessary.  Setting this varies from OS to OS and also depends on where it
+gets installed.  Instructions for setting this variable are all over the Internet.
+</p>
+<p>The system was built and tested with JDK 8, 11 and 17,
+<a class="uref" href="https://www.postgresql.org">PostgreSQL</a>,
+<a class="uref" href="https://www.jetbrains.com/idea">IntelliJ</a>, and
+<a class="uref" href="http://tomcat.apache.org">tomcat</a>.  Other environments such as
+IIS, Glassfish, eclipse, should work fine but may require some
+configuration.
+</p>
+<p><em class="emph">Kiss</em> comes with its own build system.  See <a class="xref" href="#Important">Important</a>
+</p>
+<p>Install the above according to their instructions.
+</p>
+<ul class="mini-toc">
+<li><a href="#Groff-and-PDF" accesskey="1">Groff and PDF</a></li>
+</ul>
+<div class="subsection-level-extent" id="Groff-and-PDF">
+<h4 class="subsection">2.5.1 Groff and PDF</h4>
+
+<p>The <em class="emph">Kiss</em> reporting facilities are dependent on the full
+<em class="emph">groff</em> system and the ability to convert Postscript files to PDF
+files.  This is generally true on Linux, however, the full
+<em class="emph">groff</em> package may need to be installed.  Mac&rsquo;s are fine.  These
+packages are not on Windows and must be installed.
+</p>
+<p>Correctly installing <em class="emph">groff</em> and <em class="emph">ghostscript</em> will allow the
+reporting facilities to work under Windows.  They may be obtained from:
+</p>
+<p><a class="uref" href="https://sourceforge.net/projects/ezwinports">https://sourceforge.net/projects/ezwinports</a>
+</p>
+<p><a class="uref" href="https://www.ghostscript.com">https://www.ghostscript.com</a>
+</p>
+
+<a class="anchor" id="Download-Kiss"></a></div>
+</div>
+<div class="section-level-extent" id="Download-Kiss-1">
+<h3 class="section">2.6 Download Kiss</h3>
+
+<p>Kiss is located at <a class="uref" href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
+</p>
+<p>It can be downloaded via the following command:
+</p>
+<p><code class="code">git clone https://github.com/blakemcbride/Kiss.git</code>
+</p>
+</div>
+<div class="section-level-extent" id="Documentation">
+<h3 class="section">2.7 Documentation</h3>
+
+<p>The <em class="emph">Kiss</em> documentation consists of three parts; this manual,
+the detailed back-end API documentation contained in the JavaDocs, and
+the detailed front-end API documentation.  The JavaDocs do not come
+with the system, but you can generate them yourself with what is
+provided.  See <a class="xref" href="Orientation.html#javadoc">Creating JavaDocs</a>.
+</p>
+<p>This manual may be created in two forms.  The first is in an HTML
+form.  The system comes with this.  You can also generate a nicely
+formatted PDF file with the following commands (if you have all of the
+formatting tools installed):
+</p>
+<div class="example">
+<pre class="example-preformatted">cd manual
+make Kiss.pdf
+</pre></div>
+
+<p>Updates to the HTML file are achieved with the following commands:
+</p><div class="example">
+<pre class="example-preformatted">cd manual
+make
+</pre></div>
+
+<p>All of the documentation can be accessed with your browser.  For
+example, if the root of <em class="emph">Kiss</em> is located at
+<code class="code">/my/home/path/kiss</code> then you will be able to access the three
+manuals at the following URL&rsquo;s:
+</p>
+<div class="example">
+<pre class="example-preformatted">file:///my/home/path/kiss/manual/man/index.html
+
+file:///my/home/path/kiss/build.work/javadoc/index.html
+
+file:///my/home/path/kiss/manual/jsdoc/index.html
+</pre></div>
+
+<a class="anchor" id="Setup-And-Configuration"></a></div>
+<div class="section-level-extent" id="Setup-And-Configuration-1">
+<h3 class="section">2.8 Setup And Configuration</h3>
+
+<p>The system is configured by the contents of a single file
+<code class="code">src/main/backend/KissInit.groovy</code> A reboot of the web server
+is required if any of the parameters in this file are changed.
+</p>
+<p>Given that <em class="emph">Kiss</em> is for business applications, it authenticates its
+users.  In order for this to work, there is usually a database of valid
+users.  This information is persisted in an SQL database.  Therefore a
+database is normally required.  However, for testing purposes, if no
+database is configured, the system will still run and allow any
+username and password to succeed.
+</p>
+<p>As shipped, the system comes configured as follows:
+</p>
+<table class="multitable">
+<tbody><tr><td>Database type</td><td>SQLite</td></tr>
+<tr><td>Host</td><td>localhost</td></tr>
+<tr><td>Database</td><td>DB.sqlite</td></tr>
+<tr><td>Database user</td><td>[empty]</td></tr>
+<tr><td>Database user password</td><td>[empty]</td></tr>
+</tbody>
+</table>
+
+<p>Valid options for the Database type are as follows:
+</p>
+<ul class="itemize mark-bullet">
+<li>PostgreSQL
+</li><li>MicrosoftServer
+</li><li>MySQL
+</li><li>Oracle
+</li><li>SQLite
+</li></ul>
+
+<p>Support for other databases is easy to add.
+</p>
+<p><em class="emph">setMaxWorkerThreads</em> defines how many REST services may be
+processed in parallel.  Service requests beyond this are placed in a
+FIFO queue and processed as worker threads become available.  This
+capability drastically improves the system&rsquo;s ability to handle a large
+number of simultaneous users.
+</p>
+<p>The remaining parameters should be self-explanatory.  Use the format
+shown in the example.
+</p>
+<p>Although <em class="emph">Kiss</em> comes with a default demo database, another one
+should be configured in live or more substantial development
+environments.  An SQL script file, named <code class="code">init.sql</code>, is included
+with the system to initialize said database.  Application specific tables
+may be added to this database.
+</p>
+<p>The default username is <em class="emph">kiss</em>, and the default password is
+<em class="emph">password</em>
+</p>
+</div>
+<div class="section-level-extent" id="Bypassing-Authentication">
+<h3 class="section">2.9 Bypassing Authentication</h3>
+
+<p>On rare occasions, it is necessary to bypass authentication.  In other
+words, be able to execute a web service without being logged in.  One
+example of this is registering a new user.  If the user isn&rsquo;t already a
+valid user, they can&rsquo;t execute services in order to register.
+</p>
+<p><em class="emph">Kiss</em> has a way of dealing with this scenario.  This is done in
+the same configuration file where all of the configuration options are
+located.  In the file <code class="code">src/main/backend/KissInit.groovy</code>.  In
+that file, you are able to specify specific web methods that may be
+called without authentication.  That file has an example.
+</p>
+<p>It should be noted that it is recommended that something like a
+<em class="emph">captcha</em> be used to at least be confident you are
+communicating with a human.  Additionally, it should be noted that the
+danger of providing unauthenticated services is somewhat mitigated by
+the combination of <em class="emph">HTTPS</em> and <em class="emph">CORS</em>.
+</p>
+</div>
+<div class="section-level-extent" id="Building-The-System">
+<h3 class="section">2.10 Building The System</h3>
+
+<p>Although the system may be built with the included build system
+(called <em class="emph">bld</em>) <em class="emph">or</em> your favorite IDE, the <em class="emph">bld</em>
+system should be used for the initial step which downloads the external
+dependencies (jar files).
+</p>
+<p>The build system included with <em class="emph">Kiss</em> (called <em class="emph">bld</em>) has
+been tested on Linux, Mac, and Windows.  The system also includes an
+<em class="emph">Ant</em> build file (named <em class="emph">build.xml</em>) that is only used for
+IDE integration with the included <em class="emph">bld</em> system.
+</p>
+<p>The build system included with Kiss is written in Java and located
+under the <em class="emph">src/main/core/org/kissweb/builder/</em> directory.  This
+build system also includes two driver batch files / shell scripts used
+to build and run the build system.  All that is needed to use this
+system is a Java compiler.  (As a side note - this build system is
+generic and can be used to build other types of projects.)
+</p>
+<p>The build process is run from the command-line.  No IDE is necessary.
+There is no specific IDE integration.  None is needed because the system
+is rarely built.  After the first build, application development is done
+without any build process.
+</p>
+<p>The build system, which comes in source form, must be built before it
+can be used to build <em class="emph">Kiss</em>.  However, the build system gets built
+automatically by <em class="emph">bld</em>.
+</p>
+<p>You can see what operations it can perform by typing:
+</p>
+<div class="example">
+<pre class="example-preformatted">    ./bld listTasks           [Linux, Mac, BSD, etc.]
+        -or-
+    bld listTasks             [Windows]
+</pre></div>
+
+<p>Those tasks that require prior tasks will evoke the dependent tasks
+automatically.  The system is smart enough not to repeat tasks that
+are unneeded.
+</p>
+<p>The main tasks that will be of interest to you are as follows:
+</p>
+<dl class="table">
+<dt><code class="code">libs</code></dt>
+<dd><p>This task is only required if you intend to use your IDE to build the
+remainder of the system.  It installs the required dependencies.
+</p></dd>
+<dt><code class="code">develop</code></dt>
+<dd><p>This will cause the entire system to build (not repeating unnecessary
+steps) and start up a tomcat instance to run the system in a
+development mode.  The system will be available from your local
+browser at <code class="code">http://localhost:8000</code>.  You may debug the
+application by attaching to the running <em class="emph">tomcat</em> server at port
+9000.
+</p></dd>
+<dt><code class="code">war</code></dt>
+<dd><p>This will cause the system to generate the single file needed by a
+production system.  It will end up in <em class="emph">build.work/Kiss.war</em>
+</p></dd>
+</dl>
+
+<p>Other tasks which may be useful are as follows:
+</p>
+<dl class="table">
+<dt><code class="code">clean</code></dt>
+<dd><p>This task removes all files built but retains files that were downloaded from
+repositories (although <em class="emph">bld</em> caches those files anyway.)
+</p></dd>
+<dt><code class="code">realclean</code></dt>
+<dd><p>This removes all built and downloaded files so the system should be everything
+you need to build it without any extraneous files
+</p></dd>
+<dt><code class="code">all</code></dt>
+<dd><p>This performs all of the steps necessary to setup and build the system but
+doesn&rsquo;t start up the tomcat server.
+</p></dd>
+<dt><code class="code">javadoc</code></dt>
+<dd><p>This task creates the javadoc files that end up in <code class="code">build.work/javadoc</code>
+</p></dd>
+<dt><code class="code">kisscmd</code></dt>
+<dd><p>This task creates a command-line JAR that can be used in a non-web, command-line application.
+This is useful when creating applications that perform various utility functions.  This
+JAR cannot be used in any web environment.  See <code class="code">src/main/core/org/kissweb/Main.java</code>
+</p></dd>
+</dl>
+
+<p>See <a class="xref" href="#Important">Important</a> and See <a class="xref" href="#Quick_002dStart-Checklist">Quick-Start Checklist</a>.
+</p>
+<ul class="mini-toc">
+<li><a href="#Using-an-IDE" accesskey="1">Using an IDE</a></li>
+</ul>
+<div class="subsection-level-extent" id="Using-an-IDE">
+<h4 class="subsection">2.10.1 Using an IDE</h4>
+
+<p>Most IDE&rsquo;s can be used to develop and debug the application.  There are two
+way to do this as follows:
+</p>
+<ol class="enumerate">
+<li> Using <em class="emph">bld</em> to build and run the development environment.
+</li><li> Using your IDE to build and run the development environment.
+</li></ol>
+
+<p>Using <em class="emph">bld</em> to build and run the development environment is the
+easiest to start off with but is somewhat klunky on an ongoing basis.
+Its main advantage is that it is portable and doesn&rsquo;t require a lot of
+IDE configuration.  The back-end development server is configured and
+started by <em class="emph">bld</em> by simply running <em class="emph">./bld develop</em> After
+that, the IDE can be used to debug it by <em class="emph">attaching</em> to port
+9000.
+</p>
+<p><em class="emph">Kiss</em> also comes with an <em class="emph">ant</em> build that simply calls the
+native <em class="emph">bld</em> program.  This is useful as an intermediary between
+<em class="emph">bld</em> and the IDE since many IDE&rsquo;s support <em class="emph">ant</em>.
+</p>
+<p>Using your IDE to run the entire process is a bit tedious to initially
+setup but makes the entire process simpler from that point forward.
+Unfortunately, configuring your IDE is completely different for each
+IDE.  Instructions for setting up some of the IDEs is located under the
+<code class="code">manual/IDE-Setup</code> directory.
+</p>
+
+</div>
+</div>
+<div class="section-level-extent" id="Kiss-Framework-Updates">
+<h3 class="section">2.11 Kiss Framework Updates</h3>
+
+<p>The <em class="emph">Kiss</em> framework is continually enhanced.  <em class="emph">Kiss</em>
+includes a mechanism to upgrade your application. 
+</p>
+<p>The process of upgrading your application is as follows:
+</p>
+<ol class="enumerate">
+<li> Go to the directory containing a virgin clone of the <em class="emph">Kiss</em> framework (not your application).
+</li><li> Update your clone via: <code class="code">git pull</code>
+</li><li> While remaining in the virgin <em class="emph">Kiss</em> clone directory (and not your application directory),
+run the following command:  
+
+<div class="example">
+<pre class="example-preformatted"><code class="code">./upgrade-kiss &lt;path-to-your-application&gt;</code> (Linux &amp; macOS)
+
+<code class="code">upgrade-kiss &lt;path-to-your-application&gt;</code> (Windows)
+</pre></div>
+
+</li></ol>
+
+<p><strong class="strong">Caveat</strong>
+</p>
+<p>While this upgrade process upgrades the majority of the system, there
+are a few files that are not auto-updated to be sure not to clobber
+possible application-specific code that may have been added.
+Therefore, the following files will need to be manually verified.
+</p>
+<ul class="itemize mark-bullet">
+<li><code class="code">src/main/core/org/kissweb/builder/Tasks.java</code>
+
+<p>This file is left untouched by the upgrade process.  You may have
+custom tasks or modified existing tasks.  Be sure to check
+<code class="code">buildForeignDependencies()</code>.
+</p></li><li><code class="code">libs</code>
+
+<p>The upgrade process installs new or updated JAR files that are part of
+the <em class="emph">Kiss</em> system.  However, you may have added
+application-specific JAR files.  After the upgrade, be sure to manually delete any
+outdated JAR files that come with <em class="emph">Kiss</em> that have been upgraded
+by this process.
+</p></li></ul>
+
+
+</div>
+<div class="section-level-extent" id="What-Do-I-Do-With-It-Now_003f">
+<h3 class="section">2.12 What Do I Do With It Now?</h3>
+
+<p>What you have at this point is the beginnings of your new application.
+<em class="emph">Kiss</em> is provided as a running and deployable system.  It is
+expected that you would modify what&rsquo;s there to suit your application
+needs.
+</p>
+<p>Besides this narrative, you would need the JavaDocs located under the
+<code class="code">build.work/javadoc</code> directory for back-end API specific documentation and
+front-end API reference located in the <em class="emph">manual/jsdoc</em> directory.
+</p>
+
+
+</div>
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Next: <a href="Orientation.html">Orientation</a>, Previous: <a href="Introduction.html">Introduction</a>, Up: <a href="index.html">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Front-end API (Kiss Manual)</title>
+
+<meta name="description" content="Front-end API (Kiss Manual)">
+<meta name="keywords" content="Front-end API (Kiss Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="Back_002dend-API.html" rel="next" title="Back-end API">
+<link href="Developing.html" rel="prev" title="Developing">
+<style type="text/css">
+<!--
+div.example {margin-left: 3.2em}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<div class="chapter-level-extent" id="Front_002dend-API">
+<div class="nav-panel">
+<p>
+Next: <a href="Back_002dend-API.html" accesskey="n" rel="next">Back-end API</a>, Previous: <a href="Developing.html" accesskey="p" rel="prev">Developing</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<h2 class="chapter" id="Front_002dend-API-1">5 Front-end API</h2>
+
+<p>The front-end API are all the facilities that run on the browser.
+This includes HTML, CSS, JavaScript, image files, etc.  The <em class="emph">Kiss</em>
+back-end does not produce or modify HTML or JavaScript code.  These
+files are served, unaltered, by the server as they are on the back-end
+disk.  The <code class="code">Kiss</code> model is that the browser receives these files
+from the server, and that they include all the code that the browser
+needs to perform its function.  Besides these static files, all data
+is communicated between the back-end and front-end via REST services.
+</p>
+<p>Having all of the display logic running on the front-end or user&rsquo;s
+browser makes a lot of sense for the following reasons:
+</p>
+<ol class="enumerate">
+<li> Minimize the dependence the front-end and back-end have on each other.  This means that one end can be changed without necessitating
+the need for the other to change.  In other words, they are minimally dependent on each other.
+<ol class="enumerate" type="a" start="1">
+<li> In this rapidly changing environment, minimizing dependencies means minimizing the amount of code that has to be changed as technology changes.
+</li><li> Code is easier to understand and maintain since you don&rsquo;t have four totally different languages in the same file.
+</li></ol>
+</li><li> Push as much processing to the client side so that the back-end can scale easier.
+</li></ol>
+
+<p>All of this leads to the following:
+</p><ol class="enumerate">
+<li> Shorter development time
+</li><li> Easier to maintain
+</li><li> Be most prepared for future changes
+</li><li> Reduces server costs
+</li><li> Reduced development time and cost
+</li></ol>
+
+<p>The front-end API is documented in the file <code class="code">manual/jsdoc/index.html</code>.
+</p>
+
+
+<ul class="mini-toc">
+<li><a href="#Calling-REST-Services" accesskey="1">Calling REST Services</a></li>
+<li><a href="#Kiss-Components" accesskey="2">Kiss Components</a></li>
+<li><a href="#Modal-Popup-Windows" accesskey="3">Modal Popup Windows</a></li>
+<li><a href="#File-Uploads" accesskey="4">File Uploads</a></li>
+<li><a href="#Utilities" accesskey="5">Utilities</a></li>
+<li><a href="#Controlling-Browser-Cache-1" accesskey="6">Controlling Browser Cache</a></li>
+<li><a href="#Additional-Resources" accesskey="7">Additional Resources</a></li>
+</ul>
+<div class="section-level-extent" id="Calling-REST-Services">
+<h3 class="section">5.1 Calling REST Services</h3>
+
+<p>On the front-end, the class <code class="code">Server</code> is what deals with the REST
+communications between the front-end and back-end.  In it, there are a
+handful of methods that deal with the environment such as the back-end
+URL.  All communications between the back-end and front-end are done
+with JSON.
+</p>
+<p>The way it works is the login service requires a username and
+password, and it returns a login token (uuid).  That token is used in
+all future calls, and it gets automatically invalidated after a certain
+amount of non-use time.  There is no state kept on the back-end.  Each
+REST call must login to the back-end with the provided token in order
+to be authenticated to communicate.
+</p>
+<p>The method used to communicate is named <code class="code">Server.call()</code>. It is passed the
+path to the REST service, the REST service method name, and a JSON
+object that is send to the back-end method.  A <code class="code">Promise</code> is
+returned that is used to obtain the result of the call.  This
+can also be used with <code class="code">async/await</code>.
+</p>
+<p>There is also a <code class="code">logout</code> method that simply erases the
+login token so that future communications cannot occur.
+</p>
+<p>The <code class="code">Server</code> class also includes a method (<code class="code">fileUploadSend</code>)
+that makes it easy to upload files.
+</p>
+</div>
+<div class="section-level-extent" id="Kiss-Components">
+<h3 class="section">5.2 Kiss Components</h3>
+
+
+<p>Although HTML provides what is needed for real applications, it
+provides those facilities in too low a level to be useful without a
+lot of custom code.  Custom components (tags) allow you to encapsulate
+that advanced behavior into what is used as and appears as native
+functionality.
+</p>
+<p><em class="emph">Kiss</em> provides the ability to create your own custom HTML tags
+or elements as well as use those provided by <em class="emph">Kiss</em>.  There are
+two principal user methods that make this work.
+<code class="code">Utils.useComponent</code> is used to load either a <em class="emph">Kiss</em> defined
+component or one you define yourself (there is no difference).  This
+loads the JavaScript file that defines the new tag.  All of the
+components that come with the <em class="emph">Kiss</em> system are under the
+<code class="code">src/main/frontend/kiss/component</code> directory.  You can see those
+files for examples of how custom tags are defined.
+</p>
+<p>New application pages are loaded with the <code class="code">Utils.loadPage</code>
+method.  In addition to loading the HTML and JavaScript code
+associated with that page, this method performs the processing
+necessary to make the components work.  It does this intelligently so
+that, for example, one component can use another component without any
+special loading order requirement.
+</p>
+<p>Briefly, the code that describes the custom tag must describe what the
+tag is replaced with.  Ultimately, it must boil down to straight HTML,
+CSS, and JavaScript code.
+</p>
+
+<ul class="mini-toc">
+<li><a href="#Tagless-Components" accesskey="1">Tagless Components</a></li>
+</ul>
+<div class="subsection-level-extent" id="Tagless-Components">
+<h4 class="subsection">5.2.1 Tagless Components</h4>
+
+<p>Let&rsquo;s say you have a pop-up window that allows a user to search for employees, or product, or whatever.
+The user gets a variety of search capabilities and the selected item is returned. Let&rsquo;s further say
+that you need this functionality in several places within your application.  These are tagless
+components.  They aren&rsquo;t placed with a custom tag.  They are a response to an event like a button push.
+Tagless components allow you to encapsulate a block of functionality (including pop-up windows) into
+a neat package that can be re-used in any number of places.
+</p>
+<p>The method used to load tagless components is
+<code class="code">Utils.useTaglessComponent</code>.  Later, when the tagless component
+is needed, one would execute <code class="code">Kiss.MyComponent.run(in_data, on_exit)</code> (where
+<code class="code">MyComponent</code> is the name of your tagless component.  
+<code class="code">in_data</code> represents possible data passed to the component on entry.
+<code class="code">on_exit</code> is a function that gets executed when the component exits.
+Arguments passed to <code class="code">on_exit</code> are determined by the component.
+</p>
+
+</div>
+</div>
+<div class="section-level-extent" id="Modal-Popup-Windows">
+<h3 class="section">5.3 Modal Popup Windows</h3>
+
+<p><em class="emph">Kiss</em> supports draggable, modal popup windows. <em class="emph">HTML</em> is
+used to describe the layout of the popup, and JavaScript is used to
+control the appearance of the popup.
+</p>
+<p>The <em class="emph">HTML</em> portion is represented as a top-level <code class="code">popup</code> tag
+that represents the entire popup.  Withing the top-level <code class="code">popup</code>
+there most be two child tags named <code class="code">popup-title</code> and
+<code class="code">popup-body</code>.  The first represents the single line header, and
+the second represents the body of the popup window.
+</p>
+<p>The top-level <code class="code">popup</code> tag&rsquo;s attribute section must contain the following:
+</p>
+<dl class="table">
+<dt><code class="code">id=&quot;my-popup&quot;</code></dt>
+<dd><p>an ID is needed to reference the popup
+</p></dd>
+<dt><code class="code">width=&quot;600px&quot; height=&quot;300px&quot;</code></dt>
+<dd><p>Set the height and width of the popup
+</p></dd>
+</dl>
+
+<p>An examples is as follows:
+</p>
+<div class="example">
+<pre class="example-preformatted">&lt;popup id=&quot;my-popup&quot; width=&quot;600px&quot; height=&quot;300px&quot;&gt;
+    &lt;popup-title&gt;The title&lt;/popup-title&gt;
+    &lt;popup-body&gt;
+        The content
+        &lt;div style=&quot;display: inline-block; position: absolute; bottom: 20px; right: 20px;&quot;&gt;
+            &lt;push-button id=&quot;cancel&quot; style=&quot;margin-left: 15px;&quot;&gt;Cancel&lt;/push-button&gt;
+            &lt;push-button id=&quot;ok&quot; style=&quot;margin-left: 15px;&quot;&gt;Ok&lt;/push-button&gt;
+        &lt;/div&gt;
+    &lt;/popup-body&gt;
+&lt;/popup&gt;
+</pre></div>
+
+<p>There are only two JavaScript functions used to control the popup.
+</p>
+<dl class="table">
+<dt><code class="code">Utils.popup_open(id [, focus-id])</code></dt>
+<dd><p>open the popup indicated by the <code class="code">id</code>, and if <code class="code">focus-id</code> is present, set initial focus to that control
+</p></dd>
+<dt><code class="code">Utils.popup_close()</code></dt>
+<dd><p>close the most recent popup
+</p></dd>
+</dl>
+
+<p>Your defined responses to the buttons on the popup determines your dealing with the
+data on the popup and when to close it.
+</p>
+</div>
+<div class="section-level-extent" id="File-Uploads">
+<h3 class="section">5.4 File Uploads</h3>
+
+<p><em class="emph">Kiss</em> includes facilities that make it easy to upload a file or
+multiple files.  The way to use it is as follows:
+</p>
+<p>The HTML would contain two controls; a file input and a button.  The file
+input looks as follows:
+</p>
+<div class="example">
+<pre class="example-preformatted">&lt;file-upload id=&quot;myUpload&quot;&gt;Upload File&lt;/file-upload&gt;
+</pre></div>
+
+<p>The file input control allows the user to select the file or files to
+be uploaded.  If multiple files are to be allowed the <code class="code">multiple</code>
+attribute should be added to the HTML.
+</p>
+<p>The button is used to activate the upload process.  Your code that
+sends the file(s) to the server should be attached to this button.
+</p>
+<p>The <code class="code">file-upload</code> control contains the helper functions
+<code class="code">numberOfUploadedFiles</code> and <code class="code">getFormData</code>, and the main
+function used to send the files is <code class="code">fileUploadSend</code> in the
+<code class="code">Server</code> class.  The code would look like the following:
+</p>
+<div class="example">
+<pre class="example-preformatted">   $$('upload').onclick(async () =&gt; {
+        if ($$('the-file').numberOfUploadFiles() &lt; 1) {
+            Utils.showMessage('Error', 'You must first select a file to upload.');
+            return;
+        }
+        const fd = $$('the-file').getFormData();
+        let data = {
+            var1: 22,    // just some random data we want to sent to the back-end
+            var2: 33
+        }
+        const r = await Server.fileUploadSend('theService, 'theMethod', fd, data);
+    });
+</pre></div>
+
+<p>Back-end code would look like this:
+</p>
+<div class="example">
+<pre class="example-preformatted">public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet) throws Exception {
+    String var1 = inJson.getString(&quot;var1&quot;);
+    String var2 = inJson.getString(&quot;var2&quot;);
+    if (servlet.getUploadFileCount() == 0)
+        throw new Exception(&quot;No file specified.&quot;);
+        
+    String originalFileName = servlet.getUploadFileName(0);
+    
+    
+    BufferedInputStream bis = servlet.getUploadBufferedInputStream(0);
+    // do something with the file stream
+    bis.close();
+    
+         -or-
+         
+    String localFileName = servlet.saveUploadFile(0);
+}
+</pre></div>
+
+
+
+
+</div>
+<div class="section-level-extent" id="Utilities">
+<h3 class="section">5.5 Utilities</h3>
+
+<p><em class="emph">Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
+These utilities are located under the <code class="code">src/main/frontend/kiss</code> directory and have names such as
+<code class="code">DateTimeUtils.js</code>, <code class="code">DateUtils</code>, <code class="code">TimeUtils</code>, <code class="code">Utils</code>, etc.  These utilities
+are documented in the front-end API documentation.
+</p>
+</div>
+<div class="section-level-extent" id="Controlling-Browser-Cache-1">
+<h3 class="section">5.6 Controlling Browser Cache</h3>
+
+<p>Browser&rsquo;s have a mind of their own in term of deciding when to use
+their cache for a file and when to download a new one.  This can cause
+no end of trouble when code gets changed.  Some user files end up
+being old from the browser cache, and others are freshly downloaded.
+The old and new files don&rsquo;t agree with each other and all sorts of
+errors occur.
+</p>
+<p><em class="emph">Kiss</em> includes a facility to assure that all files are
+downloaded afresh whenever the application changes while still taking
+maximal advantage of the browser cache when the files have not
+changed.  The only cost for this capability is the requirement
+that the <code class="code">index.html</code> file <em class="emph">always</em> gets loaded afresh.
+To that end, <em class="emph">Kiss</em> has code to ignore browser cache and always load
+<code class="code">index.html</code> afresh.
+</p>
+<p><code class="code">index.html</code> contains two variables names <code class="code">softwareVersion</code> and <code class="code">controlCache</code>.
+Assuming <code class="code">controlCache</code> is <code class="code">true</code>, <em class="emph">Kiss</em> has code that forces the browser
+to re-load all files whenever <code class="code">softwareVersion</code> changes.  After the code is re-loaded,
+the browser cache will work as normal to maximally cache the files until the next
+<code class="code">softwareVersion</code> change.
+</p>
+</div>
+<div class="section-level-extent" id="Additional-Resources">
+<h3 class="section">5.7 Additional Resources</h3>
+
+<p>Although not a part of the <em class="emph">Kiss</em> system, there are some very
+valuable technologies and libraries that have been used with
+<em class="emph">Kiss</em> in order to create some very powerful solutions.
+</p>
+<p>The first is the Lovefield library that adds SQL capabilities on the
+browser side.  Data is persisted on the user&rsquo;s browser and remains
+through browser or machine re-boots.  The library is located at
+<a class="uref" href="https://github.com/google/lovefield">https://github.com/google/lovefield</a>
+</p>
+<p>A recent technology that has been used to enable browser application
+that run when there is no Internet connection is called <em class="emph">Service
+Workers</em>.  There is a package at <br>
+<a class="uref" href="https://developers.google.com/web/tools/workbox">https://developers.google.com/web/tools/workbox</a> that makes
+working with service workers very easy.
+</p>
+
+
+
+
+</div>
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Next: <a href="Back_002dend-API.html">Back-end API</a>, Previous: <a href="Developing.html">Developing</a>, Up: <a href="index.html">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

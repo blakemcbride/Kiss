@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Introduction (Kiss Manual)</title>
+
+<meta name="description" content="Introduction (Kiss Manual)">
+<meta name="keywords" content="Introduction (Kiss Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="System-Setup.html" rel="next" title="System Setup">
+<link href="index.html" rel="prev" title="Top">
+<style type="text/css">
+<!--
+div.example {margin-left: 3.2em}
+ul.mark-bullet {list-style-type: disc}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<div class="chapter-level-extent" id="Introduction">
+<div class="nav-panel">
+<p>
+Next: <a href="System-Setup.html" accesskey="n" rel="next">System Setup</a>, Previous: <a href="index.html" accesskey="p" rel="prev">Kiss Developer Manual</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<h2 class="chapter" id="Introduction-1">1 Introduction</h2>
+
+<p>The <em class="emph">KISS Framework</em> is an application development framework for
+developing web-based business applications, portable desktop
+applications, and command-line utilities.  The main home for
+<em class="emph">Kiss</em> is <a class="uref" href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
+</p>
+
+<p>Kiss&rsquo; focus is on simplicity and development speed.  By being simple
+to develop in, development and support of the application can occur
+more rapidly.  Simplicity is achieved by abstracting away as much
+common functionality as possible so that developer lines of code are
+maximally applicable to the application solution rather than
+infrastructure and support of the framework.  Throughout the
+framework, business-normal defaults have been employed in order to
+minimize commonly needed functionality.
+</p>
+<p>Another goal of the <em class="emph">Kiss</em> framework is to be a complete web-based
+application development solution.  <em class="emph">Kiss</em> isn&rsquo;t a browser solution
+alone, nor is it a back-end solution.  <em class="emph">Kiss</em> includes solutions for
+both ends &ndash; although the two sides may largely be used independently.
+</p>
+<p><em class="emph">Kiss</em> attempts to create a consistent interface.  This can greatly
+simply code even in simple cases.  For example, in terms of an input
+text control, why would you disable/enable it with:
+</p>
+<div class="example">
+<pre class="example-preformatted">$('#id').prop('disable', false);
+$('#id').prop('disable', true);
+</pre></div>
+
+<p>and then hide/show it with:
+</p>
+<div class="example">
+<pre class="example-preformatted">$('#id').hide();
+$('#id').show();
+</pre></div>
+
+<p><em class="emph">Kiss</em> provides a consistent interface.  With <em class="emph">Kiss</em>, you would do:
+</p>
+<div class="example">
+<pre class="example-preformatted">$$('id').disable();
+$$('id').enable();
+$$('id').hide();
+$$('id').show();
+</pre></div>
+    
+<p><em class="emph">Kiss</em> is designed to be simple to get started with, simple to learn,
+and simple to use.  <em class="emph">Kiss</em> does this while supporting important
+technologies such as micro-services, front-end components, and SQL.
+</p>
+<p>The term <em class="emph">single page application</em> has several, subtly different,
+meanings.  One meaning is that the entire application code is bundled
+into a single file or HTTP GET request.  In that sense, <em class="emph">Kiss</em> is not a
+single page application.  This makes no sense for a business
+application that could have hundreds of screens.
+</p>
+<p>Another meaning of the term <em class="emph">single page application</em> is that there is
+only a single <code class="code">html</code> tag and all of the remaining pages are
+modifications of the original <code class="code">html</code> tag contents.  In this
+sense, <em class="emph">Kiss</em> is a <em class="emph">single page application</em>.  <em class="emph">Kiss</em>
+applications lazy-load as needed.  Browser cache is leveraged to
+minimize Internet traffic.
+</p>
+<p><em class="emph">Kiss</em> is used in a production environment and built by someone with
+more than 30 years experience as a framework designer and a business
+application software engineer.  So <em class="emph">Kiss</em> is not a proof of concept.
+</p>
+<p><em class="emph">Kiss</em> was built as a solution to the challenges faced by the author
+when developing web-based business applications.  As such, <em class="emph">Kiss</em> is
+more a solution for business application development than for the
+development of public facing company presentation web sites.
+</p>
+<p>Another goal of <em class="emph">Kiss</em> is to keep the front-end and back-end as
+independent of each other as possible.  To this end, communications
+between the front-end and back-end occur via REST services and JSON.
+This accomplished two things.  First, it allows your organization to be
+best prepared for the ever-evolving software environment.  Pieces can
+be changed and enhanced without causing massive re-writes of the entire
+system.  The second advantage is that by pushing as much processing to
+the front-end as possible (rendering the display on the front-end),
+the system can better scale.
+</p>
+<ul class="mini-toc">
+<li><a href="#Kiss-Highlights" accesskey="1"><em class="emph">Kiss</em> Highlights</a></li>
+<li><a href="#Supported-Environments" accesskey="2">Supported Environments</a></li>
+<li><a href="#HTML-component-usage" accesskey="3">HTML component usage</a></li>
+<li><a href="#System-Maturity-And-Stability" accesskey="4">System Maturity And Stability</a></li>
+<li><a href="#Getting-All-Source-Code" accesskey="5">Getting All Source Code</a></li>
+<li><a href="#Support_002c-Contact_002c-And-Links" accesskey="6">Support, Contact, And Links</a></li>
+<li><a href="#License" accesskey="7">License</a></li>
+<li><a href="#Acknowledgments" accesskey="8">Acknowledgments</a></li>
+</ul>
+<div class="section-level-extent" id="Kiss-Highlights">
+<h3 class="section">1.1 <em class="emph">Kiss</em> Highlights</h3>
+
+<p>Some highlights of the <em class="emph">Kiss</em> system include:
+</p>
+<ul class="mini-toc">
+<li><a href="#Back_002dend-Highlights" accesskey="1">Back-end Highlights</a></li>
+<li><a href="#Front_002dend-Highlights" accesskey="2">Front-end Highlights</a></li>
+<li><a href="#Back_002dend-Web-Service-Example" accesskey="3">Back-end Web Service Example</a></li>
+<li><a href="#Front_002dend-Web-Service-Usage-Example" accesskey="4">Front-end Web Service Usage Example</a></li>
+</ul>
+<div class="subsection-level-extent" id="Back_002dend-Highlights">
+<h4 class="subsection">1.1.1 Back-end Highlights</h4>
+
+<ol class="enumerate">
+<li> Micro services - add, change, or delete a web service on a running system.
+</li><li> Each web-method is in a single file and are very simple.  No
+configuration files or setup code needed.
+</li><li> Easy access to common SQL databases with support for nested queries
+without cursor interference.
+</li><li> All REST services are stateless.  However, the system fully
+authenticates each request.
+</li><li> Changes to web services occur immediately, on a running system,
+without the need to reboot the application.
+</li><li> A growing class library to handle common business application needs.
+</li><li> Back-end framework is written in Java, and the system is portable to
+Linux or Windows servers.
+</li><li> Web services may be written in Groovy, Java or Common Lisp.  Python,
+JavaScript, Ruby, and Scala are expected to follow soon.
+</li><li> User authentication
+</li><li> Asynchronous back-end REST services (via a queue and thread pool)
+provide support for heavy loads and high throughput.
+</li><li> A powerful and convenient class library for dealing with SQL persistence that
+supports PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
+</li></ol>
+
+</div>
+<div class="subsection-level-extent" id="Front_002dend-Highlights">
+<h4 class="subsection">1.1.2 Front-end Highlights</h4>
+
+<ol class="enumerate">
+<li> Build your own HTML components thus encapsulating any amount of code
+into a simple, custom HTML tag.
+</li><li> Browser cache control.  Never ask your users to clear their browser cache again.
+</li><li> All code written in JavaScript/HTML/CSS.  No need for a complex build
+and debug process, nor any need to learn yet another language.
+</li><li> Growing list of included business oriented components designed to
+provide simple access to fully functional business components.
+</li><li> Straight forward means of designing your own components without a lot
+of hidden and unpredictable magic.
+</li><li> System is small and concise, rather then hundreds of megabytes other
+systems take up.
+</li><li> Consistent and simple API.
+</li></ol>
+
+</div>
+<div class="subsection-level-extent" id="Back_002dend-Web-Service-Example">
+<h4 class="subsection">1.1.3 Back-end Web Service Example</h4>
+
+
+<p>The following example depicts a complete back-end web service.  The
+path to the file is its URL.  The class name is the web method name.
+</p>
+<p>The file is a text file, but compiled code gets executed.
+Authentication occurs before <code class="code">main</code> is called.
+</p>
+<p>Simply drop the file in place and the web service and method become
+immediately available on a running system.  Changes to the service
+take effect immediately (no need to reboot the server app).  There are
+no configuration files or other code that needs to be changed.
+</p>
+<p>For example, the following file is located in the
+<code class="code">services</code> directory.
+</p>
+<div class="example">
+<pre class="example-preformatted">class MyWebService {
+    void myWebMethod(JSONObject injson, JSONObject outjson) {
+        int num1 = injson.getInt(&quot;num1&quot;);
+        int num2 = injson.getInt(&quot;num2&quot;);
+        outjson.put(&quot;result&quot;, num1 + num2);
+    }
+}
+</pre></div>
+
+</div>
+<div class="subsection-level-extent" id="Front_002dend-Web-Service-Usage-Example">
+<h4 class="subsection">1.1.4 Front-end Web Service Usage Example</h4>
+
+<p>The following front-end example utilizes the web service defined in the
+previous sub-section.
+</p>
+<div class="example">
+<pre class="example-preformatted">let data = {
+    num1:  22,
+    num2:  11
+};
+let res = await Server.call(&quot;services/MyWebService&quot;, &quot;myWebMethod&quot;, data);
+if (res._Success) {
+    let result = res.result;
+    //...
+}
+</pre></div>
+    
+
+</div>
+</div>
+<div class="section-level-extent" id="Supported-Environments">
+<h3 class="section">1.2 Supported Environments</h3>
+
+<ul class="mini-toc">
+<li><a href="#Development-Environment" accesskey="1">Development Environment</a></li>
+<li><a href="#Production-Environment" accesskey="2">Production Environment</a></li>
+<li><a href="#Databases-Supported" accesskey="3">Databases Supported</a></li>
+<li><a href="#Java" accesskey="4">Java</a></li>
+</ul>
+<div class="subsection-level-extent" id="Development-Environment">
+<h4 class="subsection">1.2.1 Development Environment</h4>
+
+<p>The following development platforms are supported by the <em class="emph">Kiss</em>
+framework:
+</p>
+<ul class="itemize mark-bullet">
+<li>Linux
+</li><li>Mac
+</li><li>Windows
+</li><li>WSL under Windows
+</li></ul>
+
+</div>
+<div class="subsection-level-extent" id="Production-Environment">
+<h4 class="subsection">1.2.2 Production Environment</h4>
+
+
+<p>The following production platforms are supported by the <em class="emph">Kiss</em>
+framework:
+</p>
+<ul class="itemize mark-bullet">
+<li>Linux
+</li><li>Windows Server
+</li></ul>
+
+
+</div>
+<div class="subsection-level-extent" id="Databases-Supported">
+<h4 class="subsection">1.2.3 Databases Supported</h4>
+
+
+<p>The following database servers are supported by the <em class="emph">Kiss</em>
+framework:
+</p>
+<ul class="itemize mark-bullet">
+<li>PostgreSQL
+</li><li>Microsoft SQL Server
+</li><li>MySQL
+</li><li>Oracle
+</li><li>SQLite
+</li></ul>
+
+
+</div>
+<div class="subsection-level-extent" id="Java">
+<h4 class="subsection">1.2.4 Java</h4>
+
+<p>The system is tested with Java verion 8 and 17.  Any Java version above 8
+is expected to work.
+</p>
+
+
+</div>
+</div>
+<div class="section-level-extent" id="HTML-component-usage">
+<h3 class="section">1.3 HTML component usage</h3>
+   
+<p>To use a component add to HTML:
+</p>
+<div class="example">
+<pre class="example-preformatted">&lt;my-component&gt;&lt;/my-component&gt;
+</pre></div>
+
+<p>Add to JavaScript:
+</p>
+<div class="example">
+<pre class="example-preformatted">Utils.useComponent('MyComponent');
+</pre></div>
+    
+<p>The component can put any HTML in the component location, have any
+functionality, have its own modal windows, and use other components.
+The component can have custom and non-custom attributes (like style).
+Non-custom attributes do what you&rsquo;s expect them to do.
+</p>
+<p>The system also supports tag-less components.  This provides an easy
+way to package arbitrary blocks of code (that can have screens too).
+</p>
+</div>
+<div class="section-level-extent" id="System-Maturity-And-Stability">
+<h3 class="section">1.4 System Maturity And Stability</h3>
+
+<p>The Kiss system has been used in production environments for a several
+years.  Additionally, several commercial applications utilize <em class="emph">Kiss</em>.
+In spite of this, however, <em class="emph">Kiss</em> is constantly being adjusted
+in response to additional needs, evolving environments, and bug fixes.
+</p>
+<p>We use <em class="emph">Kiss</em> daily in a Linux and PostgreSQL environment.
+Therefore, it is best tested there.  While we support all of the listed
+environments, they receive a bit less testing.  If you encounter a problem,
+please reach out to us.  It is probably easy for us to fix, and we
+are happy to do so.
+</p>
+
+</div>
+<div class="section-level-extent" id="Getting-All-Source-Code">
+<h3 class="section">1.5 Getting All Source Code</h3>
+
+<p>Source code for all of <em class="emph">Kiss</em> and its dependencies is freely
+available.  The builder program located at
+<code class="code">src/main/core/org/kissweb/builder/Tasks.java</code> contains the paths
+to all of the external dependencies (those not included in the
+<em class="emph">Kiss</em> distribution).  The following lists the paths to the
+internal dependencies (those included with <em class="emph">Kiss</em>):
+</p>
+<dl class="table">
+<dt><code class="code">abcl.jar</code></dt>
+<dd><p><a class="url" href="https://common-lisp.net/project/armedbear">https://common-lisp.net/project/armedbear</a>
+</p></dd>
+<dt><code class="code">json.jar</code></dt>
+<dd><p><a class="url" href="https://github.com/blakemcbride/JSON-java">https://github.com/blakemcbride/JSON-java</a>
+</p></dd>
+<dt><code class="code">SimpleWebServer.jar (only used during development)</code></dt>
+<dd><p><a class="url" href="https://github.com/blakemcbride/SimpleWebServer">https://github.com/blakemcbride/SimpleWebServer</a>
+</p></dd>
+</dl>
+
+</div>
+<div class="section-level-extent" id="Support_002c-Contact_002c-And-Links">
+<h3 class="section">1.6 Support, Contact, And Links</h3>
+
+<p>The <em class="emph">Kiss</em> main web site is at <a class="uref" href="http://kissweb.org">http://kissweb.org</a>
+</p>
+<p>Source code is at <a class="uref" href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
+</p>
+<p>Public discussion and support is available at <br> <a class="uref" href="https://groups.google.com/forum/#!forum/kissweb">https://groups.google.com/forum/#!forum/kissweb</a>
+</p>
+<p>Issue tracking is at <a class="uref" href="https://github.com/blakemcbride/Kiss/issues">https://github.com/blakemcbride/Kiss/issues</a>
+</p>
+<p>Commercial support is available.  Contact us via email at <a class="email" href="mailto:kissweb.org@gmail.com">kissweb.org@gmail.com</a>
+</p>
+</div>
+<div class="section-level-extent" id="License">
+<h3 class="section">1.7 License</h3>
+
+<p>Copyright (c) 2018 Blake McBride (blake@mcbridemail.com)
+</p>
+<p>Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+&ldquo;Software&rdquo;), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+</p>
+<p>1. Redistributions of source code must retain the above copyright
+notice, this list of conditions, and the following disclaimer.
+</p>
+<p>2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+</p>
+<p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+&ldquo;AS IS&rdquo; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+</p>
+</div>
+<div class="section-level-extent" id="Acknowledgments">
+<h3 class="section">1.8 Acknowledgments</h3>
+
+<p>The Kiss design, code, documentation, and web site were written by
+Blake McBride.  The author gratefully acknowledges and appreciates,
+among others, the following:
+</p>
+
+<p>Apache Groovy located at <a class="uref" href="http://groovy-lang.org">http://groovy-lang.org</a>
+</p>
+<p>Dynamic Loader located at <a class="uref" href="https://github.com/dvare/dynamic-loader">https://github.com/dvare/dynamic-loader</a>
+</p>
+<p>JSON-Java located at <a class="uref" href="https://github.com/stleary/JSON-java">https://github.com/stleary/JSON-java</a>
+(although I am using a modified version available at
+<a class="uref" href="https://github.com/blakemcbride/JSON-java">https://github.com/blakemcbride/JSON-java</a>)
+</p>
+<p>C3P0 located at <a class="uref" href="https://www.mchange.com/projects/c3p0">https://www.mchange.com/projects/c3p0</a>
+</p>
+<p>Texinfo located at <a class="uref" href="https://www.gnu.org/software/texinfo/">https://www.gnu.org/software/texinfo/</a>
+</p>
+<p>ABCL project located at <a class="uref" href="https://common-lisp.net/project/armedbear">https://common-lisp.net/project/armedbear</a>
+</p>
+<p>Melaine Sarbey (<a class="email" href="mailto:melswildart@gmail.com">melswildart@gmail.com</a>) for creating the Kiss logo.
+</p>
+
+
+
+</div>
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Next: <a href="System-Setup.html">System Setup</a>, Previous: <a href="index.html">Kiss Developer Manual</a>, Up: <a href="index.html">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

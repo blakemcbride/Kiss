@@ -27,6 +27,7 @@
 @c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+@node System Setup
 @chapter System Setup
 
 @anchor{Important}@section Important
@@ -476,24 +477,28 @@ IDE.  Instructions for setting up some of the IDEs is located under the
 @code{manual/IDE-Setup} directory.
 
 
-@section System Upgrades
+@section Kiss Framework Updates
 
 The @emph{Kiss} framework is continually enhanced.  @emph{Kiss}
-includes a mechanism to upgrade your application.  However, this
-automated upgrade process currently only works on Unix-like operating
-systems such as macOS and Linux.  On Windows, a manual process will
-need to be employed.
+includes a mechanism to upgrade your application. 
 
 The process of upgrading your application is as follows:
 
 @enumerate
 @item
-Go to the directory containing a clone of the @emph{Kiss} framework (not your application).
+Go to the directory containing a virgin clone of the @emph{Kiss} framework (not your application).
 @item
 Update your clone via: @code{git pull}
 @item
-While remaining in the @emph{Kiss} clone directory (and not your application directory),
-run the following command:  @code{./upgrade-application <path-to-your-application>}
+While remaining in the virgin @emph{Kiss} clone directory (and not your application directory),
+run the following command:  
+
+@example
+@code{./upgrade-kiss <path-to-your-application>} (Linux & macOS)
+
+@code{upgrade-kiss <path-to-your-application>} (Windows)
+@end example
+
 @end enumerate
 
 @strong{Caveat}

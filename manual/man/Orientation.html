@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Orientation (Kiss Manual)</title>
+
+<meta name="description" content="Orientation (Kiss Manual)">
+<meta name="keywords" content="Orientation (Kiss Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="Developing.html" rel="next" title="Developing">
+<link href="System-Setup.html" rel="prev" title="System Setup">
+<style type="text/css">
+<!--
+div.example {margin-left: 3.2em}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<div class="chapter-level-extent" id="Orientation">
+<div class="nav-panel">
+<p>
+Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<h2 class="chapter" id="Orientation-1">3 Orientation</h2>
+
+
+<p>The entire source code comes with the system and is convenient when
+debugging, however, only a few areas in the system would normally be
+of concern when building an application as follows.
+</p>
+
+<ul class="mini-toc">
+<li><a href="#Back_002dend-Application-Files" accesskey="1">Back-end Application Files</a></li>
+<li><a href="#Front_002dend-Application-Files" accesskey="2">Front-end Application Files</a></li>
+<li><a href="#Database" accesskey="3">Database</a></li>
+<li><a href="#Single-Page-Application" accesskey="4">Single Page Application</a></li>
+<li><a href="#Controlling-Browser-Cache" accesskey="5">Controlling Browser Cache</a></li>
+<li><a href="#Creating-JavaDocs" accesskey="6">Creating JavaDocs</a></li>
+<li><a href="#Deploying-A-Kiss-Application" accesskey="7">Deploying A Kiss Application</a></li>
+<li><a href="#Learning-The-System" accesskey="8">Learning The System</a></li>
+</ul>
+<div class="section-level-extent" id="Back_002dend-Application-Files">
+<h3 class="section">3.1 Back-end Application Files</h3>
+
+<dl class="table">
+<dt><code class="code">src/main/backend/KissInit.groovy</code></dt>
+<dd><p>This file is used to configure the system. See <a class="xref" href="System-Setup.html#Setup-And-Configuration">Setup And Configuration</a>
+</p></dd>
+<dt><code class="code">src/main/backend</code></dt>
+<dd><p>All other files under this directory represent the application
+back-end.  All the files are used and distributed in source form.  The
+Kiss system compiles them at runtime but does not save the compiled form.
+Updates to files under this directory take affect
+immediately on a running system.
+</p></dd>
+</dl>
+
+
+</div>
+<div class="section-level-extent" id="Front_002dend-Application-Files">
+<h3 class="section">3.2 Front-end Application Files</h3>
+
+<p>Files under the <code class="code">src/main/frontend</code> directory represent the
+front-end of the application.
+</p>
+<p>All files under the <code class="code">src/main/frontend/kiss</code> directory are part of
+the <em class="emph">Kiss</em> system and would normally not need to be touched.
+</p>
+<p><code class="code">index.html</code> and <code class="code">index.js</code> are also part of the <em class="emph">Kiss</em>
+system and aren&rsquo;t normally modified.
+</p>
+<p><code class="code">login.html</code> and <code class="code">login.js</code> represent the user login page
+and would be modified to suit your needs.
+</p>
+<p>Other directories such as <code class="code">page1</code> represent other user pages and
+would be the application specific screens you create.  The included
+<code class="code">page1</code> directory is only an example page.
+</p>
+</div>
+<div class="section-level-extent" id="Database">
+<h3 class="section">3.3 Database</h3>
+
+<p><em class="emph">Kiss</em> supports Microsoft SQL Server, Oracle, PostgreSQL, MySQL, and
+SQLite.
+</p>
+<p>As shipped, <em class="emph">Kiss</em> comes configured with an embedded SQLite
+server and database.  While this is fine for a demo or small
+application, a real database should be configured for real use.
+The included database is located in the <code class="code">backend</code> directory
+and is named <code class="code">DB.sqlite</code>
+</p>
+<p>Although <em class="emph">Kiss</em> has no preferred database, PostgreSQL is strongly
+recommended because it is free, full featured, fast, rock solid, and
+portable on all major platforms.
+</p>
+<p>See <a class="xref" href="System-Setup.html#Setup-And-Configuration">Setup And Configuration</a>
+</p>
+
+</div>
+<div class="section-level-extent" id="Single-Page-Application">
+<h3 class="section">3.4 Single Page Application</h3>
+
+<p><em class="emph">Kiss</em> applications are single page applications in the sense
+that there is a single <code class="code">&lt;body&gt;</code> tag and all other pages
+essentially get placed into that tag on a single page.  However,
+<em class="emph">Kiss</em> is not a single page application in the sense that the
+entire application gets loaded with a single <code class="code">GET</code> request.  This
+doesn&rsquo;t make sense for a large business application in which many
+hundreds of pages may exist.  <em class="emph">Kiss</em> lazy-loads pages as they are
+used, and except for browser cache, eliminates them once another page
+is loaded.
+</p>
+</div>
+<div class="section-level-extent" id="Controlling-Browser-Cache">
+<h3 class="section">3.5 Controlling Browser Cache</h3>
+
+<p>The user&rsquo;s browser cache can be controlled from the file
+<code class="code">src/main/frontend/index.html</code> In that file you will see two lines
+that look as follows:
+</p>
+<div class="example">
+<pre class="example-preformatted">var softwareVersion = &quot;1&quot;;  // version of the entire system
+var controlCache = false;   // normally true but use false during 
+                            // debugging
+</pre></div>
+
+<p>If <code class="code">controlCache</code> is set to <code class="code">true</code>, each time <code class="code">softwareVersion</code>
+is incremented all users starting the application will be forced to
+load new code from the server and not use their browser&rsquo;s cache.  Once
+they download the new version, normal browser cache activity will
+occur.
+</p>
+
+<a class="anchor" id="javadoc"></a></div>
+<div class="section-level-extent" id="Creating-JavaDocs">
+<h3 class="section">3.6 Creating JavaDocs</h3>
+
+<p>JavaDocs for the <em class="emph">Kiss</em> system will need to be created.  It is
+created from the command line by issuing the following command:
+</p>
+<div class="example">
+<pre class="example-preformatted">./bld javadoc              [Linux, Mac, BSD, etc.]
+    -or-
+bld javadoc                [Windows]
+</pre></div>
+
+<p>The JavaDoc files end up in the <code class="code">build.work/javadoc</code> directory.
+</p>
+
+</div>
+<div class="section-level-extent" id="Deploying-A-Kiss-Application">
+<h3 class="section">3.7 Deploying A Kiss Application</h3>
+
+<p>The only file needed to deploy the application is <code class="code">Kiss.war</code> It
+can be built by typing <code class="code">./bld war</code> at a command prompt.
+<code class="code">Kiss.war</code> ends up in the <code class="code">build.work</code> directory.  If you
+have your IDE create the <code class="code">Kiss.war</code> file, it will likely not
+work.  The <em class="emph">Kiss</em> system requires a special build process because
+application files are distributed in source form.  Therefore, <code class="code">bld</code>
+should be used to create the production WAR file.
+</p>
+<p>If using <em class="emph">tomcat</em>, <code class="code">Kiss.war</code> should be placed in the
+<code class="code">webapps</code> directory.  When <em class="emph">tomcat</em> starts, it will see the
+file, unpack it, and run it.  The application will be available at
+<code class="code">[HOST]/Kiss</code>
+</p>
+<p>Renaming <code class="code">Kiss.war</code> to <code class="code">ABC.war</code>, for example, will cause
+the application path to change to <code class="code">[HOST]/ABC</code>
+</p>
+</div>
+<div class="section-level-extent" id="Learning-The-System">
+<h3 class="section">3.8 Learning The System</h3>
+
+<p>In order to start getting a feel for how <code class="code">Kiss</code> applications
+function, in terms of the back-end, look at files in the
+<code class="code">src/main/backend/services</code> directory.  With <code class="code">Kiss</code> you can
+develop applications in several different languages.  The <code class="code">services</code>
+example shows the same code in all of the supported languages.
+</p>
+<p>In terms of the front-end, see the example files under <code class="code">src/main/frontend/page1</code>
+</p>
+
+
+</div>
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>

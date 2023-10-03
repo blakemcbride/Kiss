@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Back-end API (Kiss Manual)</title>
+
+<meta name="description" content="Back-end API (Kiss Manual)">
+<meta name="keywords" content="Back-end API (Kiss Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="Front_002dend-API.html" rel="prev" title="Front-end API">
+<style type="text/css">
+<!--
+div.example {margin-left: 3.2em}
+ul.mark-bullet {list-style-type: disc}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<div class="chapter-level-extent" id="Back_002dend-API">
+<div class="nav-panel">
+<p>
+Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+<h2 class="chapter" id="Back_002dend-API-1">6 Back-end API</h2>
+
+<p>In addition to the full API provided by the Java system, and any additional
+JAR files you add, <em class="emph">Kiss</em> comes with an API that assists with the
+development of business application with <em class="emph">Kiss</em>.  These 
+API&rsquo;s may be broadly grouped as follows:
+</p>
+<ol class="enumerate">
+<li> Database API
+</li><li> JSON API
+</li><li> Utilities
+</li></ol>
+
+<p>An overview of these API&rsquo;s is contained in this chapter.  Detailed
+documentation is contained in the JavaDocs.  See <a class="xref" href="Orientation.html#javadoc">Creating JavaDocs</a>.
+</p>
+<ul class="mini-toc">
+<li><a href="#Database-API" accesskey="1">Database API</a></li>
+<li><a href="#Microservices" accesskey="2">Microservices</a></li>
+<li><a href="#JSON" accesskey="3">JSON</a></li>
+<li><a href="#Utilities-1" accesskey="4">Utilities</a></li>
+</ul>
+<div class="section-level-extent" id="Database-API">
+<h3 class="section">6.1 Database API</h3>
+
+<p><em class="emph">Kiss</em> comes with a powerful library for accessing SQL databases.
+Code for this is located under <code class="code">org.kissweb.database</code> It is
+currently being used in production environments.  This API provides
+the following benefits:
+</p>
+<ul class="itemize mark-bullet">
+<li>Automatic connection and statement pooling
+</li><li>Vastly simpler API than bare JDBC
+</li><li>Handling of parameterized arguments
+</li><li>Auto generation of SQL for single record adds, edits, and deletions
+</li><li>Auto handling for cases of cursor interference on nested queries
+</li><li>Supports transactions out-of-the-box
+</li></ul>
+
+<p>As shipped, this library supports PostgreSQL, Microsoft Server,
+Oracle, MySQL, and SQLite.
+</p>
+<p>The detailed documentation for the database utilities are in the
+JavaDocs which you must generate. (See <a class="xref" href="Orientation.html#javadoc">Creating JavaDocs</a>.)
+This section provides an overview.
+</p>
+<p>The <em class="emph">Kiss</em> database routines revolve around four main classes as follows:
+</p>
+<dl class="table">
+<dt><code class="code">Connection</code></dt>
+<dd><p>This represents a connection to an SQL database.
+</p></dd>
+<dt><code class="code">Command</code></dt>
+<dd><p>This represents a single action or command against the database.
+</p></dd>
+<dt><code class="code">Cursor</code></dt>
+<dd><p>If the action is a <code class="code">select</code>, the <code class="code">Cursor</code> represents a
+pointer into the result set.
+</p></dd>
+<dt><code class="code">Record</code></dt>
+<dd><p>This class represents a single row within a table or result set.
+</p></dd>
+</dl>
+
+<p>The <code class="code">Connection</code> class contains several convenience methods that
+are used in simple cases where only a single action is being
+performed.  These methods should not be used when multiple
+simultaneous actions are taking place at once (by that single thread).
+This issue is not a problem in multi-user or multi-threaded
+situations.  It is only a problem when a single thread is doing one
+action while another action is still open.
+</p>
+<p>You will notice that your REST services are passed a <em class="emph">Connection</em>
+argument.  <em class="emph">Kiss</em> automatically forms a unique connection for
+each REST service call and closes it when the call is done.
+Therefore, you will not normally need to create your own connection.
+Additionally, <em class="emph">Kiss</em> automatically starts a new transaction with
+each REST service and commits it when the service is done.  However,
+if the service throws any exception, the transaction is rolled back
+instead.
+</p>
+<p>You would not normally write SQL for single record adds, updates, and
+deletes.  Using the <em class="emph">Record</em> API, <code class="code">Kiss</code> automatically
+generates these statements for you.
+</p>
+<p>In addition to the above, these utilities provide full support for transactions and parameters.
+</p>
+</div>
+<div class="section-level-extent" id="Microservices">
+<h3 class="section">6.2 Microservices</h3>
+
+<p>Microservices are classes that may be added, changed, or deleted while
+the system is running.  In spite of this, however, all microservices
+are fully compiled and run at full speed.  This has two major advantages.
+</p>
+<p>First, in a development environment, all development may be done without 
+the need to bring the development server down, rebuild, re-deploy, and reboot
+the development server.  This means development time is significantly reduced.
+Additionally, IDE debuggers function in an environment such as this so
+the debugging process may proceed normally.
+</p>
+<p>Second, in a production environment, the system may be upgraded
+without disrupting existing users on the system.  Of course users
+actively using the exact features you have just changed could be
+affected (if their front-end and back-ends do not agree).
+A simple re-try would put everything back in sync.
+</p>
+<p>Kiss microservices are on a class basis.  What that means is that a
+microservice is always a single and whole class.  You cannot have more
+than one class in a microservice.  Microservices can call
+core components of the system just as regular methods can.  However,
+if one wishes to have one microservice call another microservice,
+the calling mechanism is a little more clunky.  However, using this
+clunkier mechanism retains all of the dynamic features of the system.
+</p>
+<p>Defining microservices in Kiss involves defining a normal class just
+as you would write a class in any circumstance.  No special
+configuration, wiring, declarations, or additional steps are required.
+Microservice additions, changes, and deletions take affect as soon as
+you save the source file.  All microservices are compiled at runtime
+by the system automatically.  So there is no compilation step that
+you need to perform.
+</p>
+<p>The only caveat to the above is that remote microservices (described
+below) expect a certain method signature (standard arguments).  This
+is only to assure that the front-end and back-end can communicate as
+expected.  Local microservices do not have this requirement.
+</p>
+<ul class="mini-toc">
+<li><a href="#Microservice-Language" accesskey="1">Microservice Language</a></li>
+<li><a href="#Types-Of-Microservices" accesskey="2">Types Of Microservices</a></li>
+<li><a href="#Remote-Microservices" accesskey="3">Remote Microservices</a></li>
+<li><a href="#Defining-Remote-Services" accesskey="4">Defining Remote Services</a></li>
+<li><a href="#Local-Microservices" accesskey="5">Local Microservices</a></li>
+</ul>
+<div class="subsection-level-extent" id="Microservice-Language">
+<h4 class="subsection">6.2.1 Microservice Language</h4>
+
+<p>In Kiss, microservices can be written in Java, Groovy, or Common Lisp.
+However, Groovy microservices have been used exclusively in all
+current environments that we are aware of.  Therefore, Groovy
+microservices are best tested.
+</p>
+<p>The reasons Groovy was used are as follows:
+</p>
+<ol class="enumerate">
+<li> Groovy was the easiest and most natural to implement.
+</li><li> Groovy runs as fast as Java and has full and natural access to all 
+Java facilities.
+</li><li> The actual loading of Groovy services is the fastest of the three languages.
+</li><li> Groovy is largely a super-set of Java so if you know Java, you basically
+know Groovy.  Learning of additional Groovy facilities can occur over
+time.
+</li><li> Groovy offers a small number of conveniences over Java.
+</li></ol>
+
+<p>Having said all this, however, all three languages are fully supported
+and there are no known bugs in any of the languages supported.
+</p>
+</div>
+<div class="subsection-level-extent" id="Types-Of-Microservices">
+<h4 class="subsection">6.2.2 Types Of Microservices</h4>
+
+<p>There are two types of microservices as follows:
+</p>
+<ol class="enumerate">
+<li> Remote (REST) Services
+</li><li> Local Services
+</li></ol>
+
+<p>Remote services are generally called by a (likely JavaScript)
+front-end or a remote client typically over <em class="emph">HTTP</em> or
+<em class="emph">HTTPS</em>.  Local services are services that are called locally,
+from within the system as, for example, one microservice calling a
+method in a different microservice.
+</p>
+</div>
+<div class="subsection-level-extent" id="Remote-Microservices">
+<h4 class="subsection">6.2.3 Remote Microservices</h4>
+
+<p>In <em class="emph">Kiss</em>, remote microservices appear to the outside world as
+typical <em class="emph">REST</em> services.  They may be called by a
+<em class="emph">JavaScript</em> front-end, web service client, or any other facility
+that can talk to <em class="emph">REST</em> services.
+</p>
+<p><em class="emph">Kiss</em> <em class="emph">REST</em> services are asynchronous <em class="emph">HTTP</em> or
+<em class="emph">HTTPS</em> services.  Internally they are processed utilizing a
+thread pool to assure optimal CPU utilization.  The number of threads
+in the thread pool is controlled by a configuration parameter given in
+the <code class="code">KissInit.groovy</code> file.
+</p>
+<p><em class="emph">Kiss</em> comes with <em class="emph">JavaScript</em> code so that <code class="code">Kiss</code>
+<code class="code">REST</code> services can be easily accessed from a typical front-end.
+This code resides in a single file and can and has been used by
+alternative front-ends such as <em class="emph">Angular</em> and <code class="code">React</code>.
+</p>
+<p>There is no need to handle authentication.  <em class="emph">Kiss</em> handles that
+automatically.  So, when your web method is called, you know who
+they are and that they have been authenticated.
+</p>
+</div>
+<div class="subsection-level-extent" id="Defining-Remote-Services">
+<h4 class="subsection">6.2.4 Defining Remote Services</h4>
+
+<p>Remote REST microservices typically reside under the
+<code class="code">backend/services</code> directory.  You can organize them any way you
+like.  A microservice is equivalent to a class.  The class name is the
+microservice name.  The methods in that class that have a certain
+signature (particular set of arguments) are the web methods.
+</p>
+<p>A REST web microservice has the following signature:
+</p>
+<div class="example">
+<pre class="example-preformatted">void myMethod(JSONObject injson, 
+              JSONObject outjson, 
+              Connection db, 
+              ProcessServlet servlet) {
+...
+}
+</pre></div>
+
+<dl class="table">
+<dt>&lsquo;<samp class="samp">injson</samp>&rsquo;</dt>
+<dd><p>This is a <code class="code">JSON</code> object that contains all of the arguments passed
+in from the front-end.
+</p></dd>
+<dt>&lsquo;<samp class="samp">outjson</samp>&rsquo;</dt>
+<dd><p>This is a <code class="code">JSON</code> object which will contain all of the results
+sent back to the front-end.  Whatever is put in this object gets sent back to the front-end.
+</p></dd>
+<dt>&lsquo;<samp class="samp">db</samp>&rsquo;</dt>
+<dd><p>This is a database connection that can be used to access the SQL database.  The
+connection is unique and independent of all other services.
+</p></dd>
+<dt>&lsquo;<samp class="samp">servlet</samp>&rsquo;</dt>
+<dd><p>This object provides access to various system facilities uniquely related
+to this call.
+</p></dd>
+</dl>
+
+<p>See <a class="xref" href="#json">JSON</a> and the <code class="code">JavaDoc</code> for additional information.
+</p>
+
+</div>
+<div class="subsection-level-extent" id="Local-Microservices">
+<h4 class="subsection">6.2.5 Local Microservices</h4>
+
+<p>Local microservices are simply regular classes.  They typically reside
+in the <code class="code">backend/services</code> directory organized anyway you like.
+Although methods within a particular microservice/class can call each
+other in the normal way, there is an extra step required for one
+microservice to call method in a different microservice.  One of the
+reasons for this is so the system can be certain the latest version of
+the service is loaded and that it is fully compiled before you attempt
+to use it.
+</p>
+<p>In Groovy, a method in one class/microservice can call a method
+in a different class/microservice via the following methods.
+</p>
+<ul class="itemize mark-bullet">
+<li>GroovyService.run
+</li><li>GroovyService.getMethod
+</li></ul>
+
+<p>See the <em class="emph">Javadoc</em>.
+</p>
+<a class="anchor" id="json"></a></div>
+</div>
+<div class="section-level-extent" id="JSON">
+<h3 class="section">6.3 JSON</h3>
+
+<p>The first two arguments to all REST methods is <code class="code">injson</code> and
+<code class="code">outjson</code>.  <code class="code">injson</code> is a <code class="code">JSONObject</code> that contains
+the data passed in <em class="emph">from</em> the front-end.  <code class="code">outjson</code> is a
+pre-initialized, empty <code class="code">JSONObject</code> that will be <em class="emph">returned
+to</em> the front-end.  The rest service should read the data passed in
+from <code class="code">injson</code>, perform any needed processes, and put the result
+into <code class="code">outjson</code> to be returned to the front-end.
+</p>
+<p>A modified version of a publicly available JSON Java package is
+included and used to access JSON from the front-end and create JSON to
+return to the front-end.  This package has many methods but only a few are
+commonly used.
+</p>
+<p>There are two main data type of interest.  They are <code class="code">JSONObject</code> and
+<code class="code">JSONArray</code>.  They hold the JSON types indicated by their names.
+</p>
+<p>Command useful for getting data out of <code class="code">injson</code>:
+</p>
+<ul class="itemize mark-bullet">
+<li>JSONObject.has(String key)
+</li><li>JSONObject.getString(String key)
+</li><li>JSONObject.getBoolean(String key)
+</li><li>JSONObject.getInt(String key)
+</li><li>JSONObject.getLong(String key)
+</li><li>JSONObject.getDouble(String key)
+</li><li>JSONObject.getFloat(String key)
+</li><li>JSONObject.getJSONArray(String key)
+</li><li>JSONArray.length()
+</li><li>JSONArray.getString(int index)
+</li><li>JSONArray.getBoolean(int index)
+</li><li>JSONArray.getInt(int index)
+</li><li>JSONArray.getLong(int index)
+</li><li>JSONArray.getFloat(int index)
+</li><li>JSONArray.getDouble(int index)
+</li><li>JSONArray.getString(int index)
+</li><li>JSONArray.getJSONArray(int index)
+</li></ul>
+
+<p>Again, <code class="code">outjson</code> is supplied as a pre-initialized, but empty,
+<code class="code">JSONObject</code>.  It is up to the REST service code to populate it
+with the return data.  Useful JSON utilities include the following:
+</p>
+<ul class="itemize mark-bullet">
+<li>JSONObject.put(String label, Object data)
+</li><li>new JSONObject()
+</li><li>new JSONArray()
+</li><li>JSONArray.put(Object obj)
+</li></ul>
+
+
+</div>
+<div class="section-level-extent" id="Utilities-1">
+<h3 class="section">6.4 Utilities</h3>
+
+<p><em class="emph">Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
+These utilities are located under the <code class="code">src/main/core/org/kissweb</code> directory and have names such as
+<code class="code">DateTime.java</code>, <code class="code">NumberFormat</code>, etc.  These utilities
+are documented in the JavaDocs.
+</p>
+
+</div>
+</div>
+<div class="chapter-level-extent" id="Command-Line-Utility">
+<h2 class="chapter">7 Command Line Utility</h2>
+</div>
+<div class="chapter-level-extent" id="Command-Line-Utility-1">
+<h2 class="chapter">8 Command Line Utility</h2>
+
+<p>In addition to utilizing <em class="emph">Kiss</em> as a web application development
+system, <em class="emph">Kiss</em> also provides a command line interface.  This interface
+allows you to build quick but powerful utilities to do things like updating
+a database, parsing a CSV file, interfacing with a third-party REST service,
+and more.  Basically, all of <em class="emph">Kiss</em> is available except the <em class="emph">Kiss</em>
+REST server.
+</p>
+<p>Although this system supports <em class="emph">PostgreSQL</em> out-of-the-box, it
+also supports any of the other databases with a slightly more complex
+command line.
+</p>
+<ul class="mini-toc">
+<li><a href="#Building-The-Utility" accesskey="1">Building The Utility</a></li>
+<li><a href="#Using-The-System" accesskey="2">Using The System</a></li>
+<li><a href="#Databases-Other-Than-PostgreSQL" accesskey="3">Databases Other Than PostgreSQL</a></li>
+</ul>
+<div class="section-level-extent" id="Building-The-Utility">
+<h3 class="section">8.1 Building The Utility</h3>
+
+<p>The build system (<em class="emph">bld</em>) has the ability to build a <em class="emph">JAR</em>
+file named <em class="emph">KissGP.jar</em>.  The <em class="emph">GP</em> stands for <em class="emph">Groovy</em>
+and <em class="emph">PostgreSQL</em>.  Basically, it is a <em class="emph">JAR</em> file capable of
+running <em class="emph">Groovy</em> scripts in the context of all of the <em class="emph">Kiss</em>
+utilities including access to a <em class="emph">PostgreSQL</em> database.
+</p>
+<p>(It should be noted that although <em class="emph">Groovy</em> scripts are text /
+source files, they nevertheless run at full compiled speed because
+they are compiled at runtime.)
+</p>
+<p>To build the <em class="emph">JAR</em> file, type the following:
+</p>
+<div class="example">
+<pre class="example-preformatted">./bld KissGP
+</pre></div>
+
+<p>A file named <em class="emph">KissGP.jar</em> will be created in the <em class="emph">build.work</em>
+directory.  That, in addition to the <em class="emph">JDK</em>, is all that is needed to
+use the system.
+</p>
+</div>
+<div class="section-level-extent" id="Using-The-System">
+<h3 class="section">8.2 Using The System</h3>
+
+<p>To use the <em class="emph">Kiss</em> command line interface you first create the
+<em class="emph">Groovy</em> program you would like to run.  It may use all of the
+<em class="emph">Groovy</em> and <em class="emph">Kiss</em> API.  For example, let&rsquo;s start with
+something simple.  Create the following file named
+<em class="emph">test1.groovy</em>:
+</p>
+<div class="example">
+<pre class="example-preformatted">static void main(String [] args) {
+    println &quot;Hello world!&quot;
+}
+</pre></div>
+
+<p>You can then run the program as follows:
+</p>
+<div class="example">
+<pre class="example-preformatted">java -jar KissGP.jar test1
+</pre></div>
+
+<p><em class="emph">test1.groovy</em> can be extended arbitrarily to perform any function needed.
+</p>
+</div>
+<div class="section-level-extent" id="Databases-Other-Than-PostgreSQL">
+<h3 class="section">8.3 Databases Other Than PostgreSQL</h3>
+
+<p>Although <em class="emph">KissGP.jar</em> comes bundled with support for the
+<em class="emph">PostgreSQL</em> database, <em class="emph">KissGP.jar</em> can support databases
+other than <em class="emph">PostgreSQL</em> by adding the driver for the database and
+using a slightly more complex command line as follows.
+</p>
+<p>To use <em class="emph">KissGP.jar</em> with Microsoft SQL Server, for example, you&rsquo;d
+have to include the database driver for it in addition to the
+<em class="emph">KissGP.jar</em> file and the file with your program.  The command
+line would look as follows:
+</p>
+<div class="example">
+<pre class="example-preformatted">java -cp mssql-jdbc-8.2.0.jre8.jar -jar KissGP.jar test1
+</pre></div>
+
+<p>The same is true of the other databases.  Please note that the drivers
+you&rsquo;ll need are already in the <em class="emph">libs</em> directory.
+</p>
+
+
+
+
+</div>
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>
