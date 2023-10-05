@@ -299,6 +299,20 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * Executes the given SQL statement immediately (outside any transaction).
+     *
+     * @param  sql the SQL statement to be executed
+     * @throws SQLException if a database access error occurs
+     */
+    public void executeImmediate(String sql) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            conn.setAutoCommit(true);
+            stmt.executeUpdate(sql);
+            conn.setAutoCommit(false);
+        }
+    }
+
+    /**
      * This is the main way of creating a new Command instance.
      *
      * @return
