@@ -61,7 +61,9 @@ additional compiles or deploys.
 The system comes with (essentially) three manuals as follows:
 
 
-User Manual:        [manual/man/index.html](https://blakemcbride.github.io/Kiss/manual/man)
+User Manual (HTML):        [manual/man/index.html](https://blakemcbride.github.io/Kiss/manual/man)
+
+User Manual (PDF):  [Kiss.pdf](https://blakemcbride.us/software/kiss/Kiss.pdf)
 
 Front-end API:      [manual/jsdoc/index.html](https://blakemcbride.github.io/Kiss/manual/jsdoc)
 

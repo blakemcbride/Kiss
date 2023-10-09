@@ -44,3 +44,6 @@ realclean: clean
 	rm -f *.dvi *.ps *.pdf
 
 
+updateserver: Kiss.pdf
+	scp Kiss.pdf root@blakemcbride.us://srv/www/blakemcbride.us/software/kiss
+
