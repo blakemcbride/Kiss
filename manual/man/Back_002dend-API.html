@@ -15,6 +15,7 @@
 <link href="index.html" rel="start" title="Top">
 <link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
 <link href="index.html" rel="up" title="Top">
+<link href="Command-Line-Utility.html" rel="next" title="Command Line Utility">
 <link href="Front_002dend-API.html" rel="prev" title="Front-end API">
 <style type="text/css">
 <!--
@@ -30,9 +31,71 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (October 10, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
+
+<style>
+body {
+	margin: 0 auto;
+        padding: 20px;
+        max-width: 800px;
+	background-color: #fffff8; 
+}
+body {
+    font-family: "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #333; /* dark gray */
+    margin-top: 20px;
+}
+a {
+    color: #007BFF; /* blue */
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table, th, td {
+    border: 1px solid #ddd; /* light gray */
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* very light gray */
+}
+pre, code {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #f5f5f5; /* light grey */
+    border: 1px solid #e0e0e0; /* slightly darker grey for the border */
+    padding: 10px; /* space inside the box */
+    overflow-x: auto; /* adds horizontal scroll if the content is too wide */
+}
+h1 {  /* section titles */
+    color: #2c3e50; /* example dark blue color */
+}
+
+h2, h3, h4 {  /* subsection titles */
+    color: #e74c3c; /* example red color */
+}
+:not(pre) > code {
+    background-color: #f5f5f5; /* Light gray */
+    padding: 2px 4px;  /* Adjust this value */
+    border-radius: 3px; /* Optional: adds rounded corners */
+    margin: 0;  /* Adjust if needed */
+}
+
+</style>
+
+
 <h2 class="chapter" id="Back_002dend-API-1">6 Back-end API</h2>
 
 <p>In addition to the full API provided by the Java system, and any additional
@@ -366,106 +429,10 @@ are documented in the JavaDocs.
 
 </div>
 </div>
-<div class="chapter-level-extent" id="Command-Line-Utility">
-<h2 class="chapter">7 Command Line Utility</h2>
-</div>
-<div class="chapter-level-extent" id="Command-Line-Utility-1">
-<h2 class="chapter">8 Command Line Utility</h2>
-
-<p>In addition to utilizing <em class="emph">Kiss</em> as a web application development
-system, <em class="emph">Kiss</em> also provides a command line interface.  This interface
-allows you to build quick but powerful utilities to do things like updating
-a database, parsing a CSV file, interfacing with a third-party REST service,
-and more.  Basically, all of <em class="emph">Kiss</em> is available except the <em class="emph">Kiss</em>
-REST server.
-</p>
-<p>Although this system supports <em class="emph">PostgreSQL</em> out-of-the-box, it
-also supports any of the other databases with a slightly more complex
-command line.
-</p>
-<ul class="mini-toc">
-<li><a href="#Building-The-Utility" accesskey="1">Building The Utility</a></li>
-<li><a href="#Using-The-System" accesskey="2">Using The System</a></li>
-<li><a href="#Databases-Other-Than-PostgreSQL" accesskey="3">Databases Other Than PostgreSQL</a></li>
-</ul>
-<div class="section-level-extent" id="Building-The-Utility">
-<h3 class="section">8.1 Building The Utility</h3>
-
-<p>The build system (<em class="emph">bld</em>) has the ability to build a <em class="emph">JAR</em>
-file named <em class="emph">KissGP.jar</em>.  The <em class="emph">GP</em> stands for <em class="emph">Groovy</em>
-and <em class="emph">PostgreSQL</em>.  Basically, it is a <em class="emph">JAR</em> file capable of
-running <em class="emph">Groovy</em> scripts in the context of all of the <em class="emph">Kiss</em>
-utilities including access to a <em class="emph">PostgreSQL</em> database.
-</p>
-<p>(It should be noted that although <em class="emph">Groovy</em> scripts are text /
-source files, they nevertheless run at full compiled speed because
-they are compiled at runtime.)
-</p>
-<p>To build the <em class="emph">JAR</em> file, type the following:
-</p>
-<div class="example">
-<pre class="example-preformatted">./bld KissGP
-</pre></div>
-
-<p>A file named <em class="emph">KissGP.jar</em> will be created in the <em class="emph">build.work</em>
-directory.  That, in addition to the <em class="emph">JDK</em>, is all that is needed to
-use the system.
-</p>
-</div>
-<div class="section-level-extent" id="Using-The-System">
-<h3 class="section">8.2 Using The System</h3>
-
-<p>To use the <em class="emph">Kiss</em> command line interface you first create the
-<em class="emph">Groovy</em> program you would like to run.  It may use all of the
-<em class="emph">Groovy</em> and <em class="emph">Kiss</em> API.  For example, let&rsquo;s start with
-something simple.  Create the following file named
-<em class="emph">test1.groovy</em>:
-</p>
-<div class="example">
-<pre class="example-preformatted">static void main(String [] args) {
-    println &quot;Hello world!&quot;
-}
-</pre></div>
-
-<p>You can then run the program as follows:
-</p>
-<div class="example">
-<pre class="example-preformatted">java -jar KissGP.jar test1
-</pre></div>
-
-<p><em class="emph">test1.groovy</em> can be extended arbitrarily to perform any function needed.
-</p>
-</div>
-<div class="section-level-extent" id="Databases-Other-Than-PostgreSQL">
-<h3 class="section">8.3 Databases Other Than PostgreSQL</h3>
-
-<p>Although <em class="emph">KissGP.jar</em> comes bundled with support for the
-<em class="emph">PostgreSQL</em> database, <em class="emph">KissGP.jar</em> can support databases
-other than <em class="emph">PostgreSQL</em> by adding the driver for the database and
-using a slightly more complex command line as follows.
-</p>
-<p>To use <em class="emph">KissGP.jar</em> with Microsoft SQL Server, for example, you&rsquo;d
-have to include the database driver for it in addition to the
-<em class="emph">KissGP.jar</em> file and the file with your program.  The command
-line would look as follows:
-</p>
-<div class="example">
-<pre class="example-preformatted">java -cp mssql-jdbc-8.2.0.jre8.jar -jar KissGP.jar test1
-</pre></div>
-
-<p>The same is true of the other databases.  Please note that the drivers
-you&rsquo;ll need are already in the <em class="emph">libs</em> directory.
-</p>
-
-
-
-
-</div>
-</div>
 <hr>
 <div class="nav-panel">
 <p>
-Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (October 10, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

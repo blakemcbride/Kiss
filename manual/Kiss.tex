@@ -1,7 +1,7 @@
 \input texinfo    @c -*-texinfo-*-
 @c %**start of header
 @setfilename man.inf
-@set VERSION October 9, 2023
+@set VERSION @today
 @settitle Kiss Manual
 @c %**end of header
 @setchapternewpage odd
@@ -40,11 +40,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @end ifinfo
 
+@html
+@include style.css
+@end html
+
 @titlepage
 @title Kiss
 @subtitle Developer Manual
 @c @subtitle @today{}
-@subtitle @value{VERSION}
+@subtitle @today{}
 @author by Blake McBride
 @page
 @vskip 0pt plus 1filll
@@ -96,7 +100,7 @@ Donald Knuth utilizing the Texinfo format.
 @contents
 
 @node Top
-@top Kiss Developer Manual
+@top Kiss Developer Manual (@today{})
 
 @include intro.tex
 @include setup.tex

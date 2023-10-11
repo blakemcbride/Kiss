@@ -1,6 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 6.8, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Groovy Overview</title>
@@ -15,21 +15,8 @@
 <link href="#SEC_Contents" rel="contents" title="Table of Contents">
 <style type="text/css">
 <!--
-a.copiable-anchor {visibility: hidden; text-decoration: none; line-height: 0em}
-a.summary-letter {text-decoration: none}
-blockquote.indentedblock {margin-right: 0em}
-div.display {margin-left: 3.2em}
 div.example {margin-left: 3.2em}
-kbd {font-style: oblique}
-pre.display {font-family: inherit}
-pre.format {font-family: inherit}
-pre.menu-comment {font-family: serif}
-pre.menu-preformatted {font-family: serif}
-span.nolinebreak {white-space: nowrap}
-span.roman {font-family: initial; font-weight: normal}
-span.sansserif {font-family: sans-serif; font-weight: normal}
-span:hover a.copiable-anchor {visibility: visible}
-ul.no-bullet {list-style: none}
+ul.mark-bullet {list-style-type: disc}
 -->
 </style>
 
@@ -37,16 +24,55 @@ ul.no-bullet {list-style: none}
 </head>
 
 <body lang="en">
-<h1 class="settitle" align="center">Groovy Overview</h1>
+
+
+<style>
+body {
+	margin: 0 auto;
+        padding: 20px;
+        max-width: 800px;
+}
+body {
+    font-family: Arial, sans-serif; /* or another font of your choice */
+    font-size: 16px;
+    line-height: 1.5;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #333; /* dark gray */
+    margin-top: 20px;
+}
+a {
+    color: #007BFF; /* blue */
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table, th, td {
+    border: 1px solid #ddd; /* light gray */
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* very light gray */
+}
+
+</style>
 
 
 
 
-<div class="chapter" id="Why-Groovy_003f">
+<div class="chapter-level-extent" id="Why-Groovy_003f">
 <h2 class="chapter">1 Why Groovy?</h2>
 <p>Groovy is used for several reasons:
 </p>
-<ol>
+<ol class="enumerate">
 <li> Groovy is only a little different from Java.  For the most part, if
 you know Java, you know Groovy.
 </li><li> Groovy has several language features that make it significantly
@@ -60,7 +86,7 @@ way I am using it is to compile it at runtime.  This makes loading
 it take longer (although certainly sub-second) but once loaded, it
 runs at the same speed as compiled Java code.  Doing it this way
 has the following advantages:
-<ol type="a" start="1">
+<ol class="enumerate" type="a" start="1">
 <li> I can modify the code while the system is running!  The way I
 load files is to check the file date/time.  If it changes, I
 re-compile and load it.
@@ -76,9 +102,9 @@ faster than doing the same thing in Java.
 </li></ol>
 
 </div>
-<div class="chapter" id="Groovy-_002d_002d-The-Good">
+<div class="chapter-level-extent" id="Groovy-_002d_002d-The-Good">
 <h2 class="chapter">2 Groovy &ndash; The Good</h2>
-<ol>
+<ol class="enumerate">
 <li> Groovy integrates with Java seamlessly.  Groovy can call Java just
 as if everything was written in Groovy.  Java can call Groovy just
 as if it were Java.  Java and Groovy can be mixed and matched
@@ -94,31 +120,31 @@ Groovy are strings constants that are delineated with triple quotes
 can have multi-line strings.  This comes in especially handy when
 representing SQL.  For example:
 <div class="example">
-<pre class="example">       String sql = &quot;&quot;&quot;select *
+<pre class="example-preformatted">       String sql = &quot;&quot;&quot;select *
                        from mytable
                        where field = 'abc'
                        order by some_field&quot;&quot;&quot;
 </pre></div>
 </li><li> In Java, to compare two strings you have to use:
 <div class="example">
-<pre class="example">      str1 != null &amp;&amp; str1.equals(str2)
+<pre class="example-preformatted">      str1 != null &amp;&amp; str1.equals(str2)
 </pre></div>
 <p>However, in Groovy, you can do:
 </p><div class="example">
-<pre class="example">      str1 == str2
+<pre class="example-preformatted">      str1 == str2
 </pre></div>
 <p>In Groovy, if you wish to see if they are the same object, use:
 </p><div class="example">
-<pre class="example">      str1.is(str2)
+<pre class="example-preformatted">      str1.is(str2)
 </pre></div>
 </li><li> In Groovy there are some convenient mappings.  For example:
 <div class="example">
-<pre class="example">   System.out.println(&quot;hello&quot;) becomes println(&quot;hello&quot;)
+<pre class="example-preformatted">   System.out.println(&quot;hello&quot;) becomes println(&quot;hello&quot;)
 </pre></div>
 </li><li> The last statement in a method has an implicit &quot;return&quot;.  Therefore,
 you can write a method as follows:
 <div class="example">
-<pre class="example">   int add(int a, int b) {
+<pre class="example-preformatted">   int add(int a, int b) {
        a + b
    }
 </pre></div>
@@ -131,7 +157,7 @@ closures are used very, very frequently in JavaScript.
 <p>Groovy lambdas and closures are like JavaScript.  They&rsquo;re easy to
 define and easy to use.  For example:
 </p><div class="example">
-<pre class="example">       static void meth1() {
+<pre class="example-preformatted">       static void meth1() {
             def fun = { a, b -&gt;
                 double x = a + b
                 x * 5
@@ -147,7 +173,7 @@ define and easy to use.  For example:
 <p>The same thing in Java is:
 </p>
 <div class="example">
-<pre class="example">        interface MyInterface {
+<pre class="example-preformatted">        interface MyInterface {
             double add(double a, double b);
         }
 
@@ -167,7 +193,7 @@ define and easy to use.  For example:
         }
 </pre></div>
 <p>Note that Java:
-</p><ol type="a" start="1">
+</p><ol class="enumerate" type="a" start="1">
 <li> requires an interface (Java has several pre-defined
 interfaces that may be used)
 </li><li> cannot directly change closure variables (y)
@@ -175,51 +201,51 @@ interfaces that may be used)
 explicitly named
 </li></ol>
 </li><li> In Groovy, the following are all treated like &quot;false&quot;:
-<ul>
-<li> false
-</li><li> 0
-</li><li> &quot;&quot;
-</li><li> []
-</li><li> null
+<ul class="itemize mark-bullet">
+<li>false
+</li><li>0
+</li><li>&quot;&quot;
+</li><li>[]
+</li><li>null
 </li></ul>
 <div class="example">
-<pre class="example">     Java:  if (str != null &amp;&amp; !str.isEmpty()) { ... }
+<pre class="example-preformatted">     Java:  if (str != null &amp;&amp; !str.isEmpty()) { ... }
      Groovy:  if (str) { ... }
 </pre></div>
 </li><li> Iteration conveniences
-<dl compact="compact">
-<dt><span><code>for (i in 1..10) ...</code></span></dt>
-<dt><span><code>1.upto(10) ...</code></span></dt>
+<dl class="table">
+<dt><code class="code">for (i in 1..10) ...</code></dt>
+<dt><code class="code">1.upto(10) ...</code></dt>
 <dd><p>&lsquo;it&rsquo; is 1 to 10
 </p></dd>
-<dt><span><code>10.times ...</code></span></dt>
+<dt><code class="code">10.times ...</code></dt>
 <dd><p>loops from 0-9
 </p></dd>
-<dt><span><code>0.step(10,2) ...</code></span></dt>
+<dt><code class="code">0.step(10,2) ...</code></dt>
 <dd><p>loops 0-0 in increments of 2
 </p></dd>
-<dt><span><code>myLst.each { ... }</code></span></dt>
+<dt><code class="code">myLst.each { ... }</code></dt>
 <dd><p>loops each element. &lsquo;it&rsquo; has individual elements
 </p></dd>
 </dl>
 </li><li> String interpolation.  $VAR puts the value of VAR into a string.
 <div class="example">
-<pre class="example">     Example:  &quot;the value of x is $x&quot;
+<pre class="example-preformatted">     Example:  &quot;the value of x is $x&quot;
 </pre></div>
 <p>Strings with single quotes do not support string interpolation.
 </p><div class="example">
-<pre class="example">     Example:  'this is a string'
+<pre class="example-preformatted">     Example:  'this is a string'
 </pre></div>
 </li><li> ?. references the left side only if it is not null.  Therefore:
 <div class="example">
-<pre class="example">    Java:  if (x != null &amp;&amp; x.xyz()) { ... }
+<pre class="example-preformatted">    Java:  if (x != null &amp;&amp; x.xyz()) { ... }
     Groovy:  if (x?.xyz()) { ... }
 </pre></div>
 </li><li> Declaring an instance variable without a scope causes Groovy to
 automatically make it a bean.
 </li><li> In Groovy, you can declare generic types with &lsquo;def&rsquo;. e.g.
 <div class="example">
-<pre class="example">        def x = &quot;hello&quot;  // x is a String
+<pre class="example-preformatted">        def x = &quot;hello&quot;  // x is a String
 </pre></div>
 <p>This is the same as the Java &lsquo;var&rsquo; keyword.
 In Groovy, either can be used.
@@ -227,19 +253,19 @@ In Groovy, either can be used.
 Object x = &quot;hello&quot;)
 </p></li><li> An ArrayList can be defined with [] for example
 <div class="example">
-<pre class="example">     def a = [1, 2, 3] // an ArrayList that can hold any type
+<pre class="example-preformatted">     def a = [1, 2, 3] // an ArrayList that can hold any type
      a[3] = 'Hello'    // extends array
 </pre></div>
 </li><li> Groovy has many more significant conveniences
 </li></ol>
 
 </div>
-<div class="chapter" id="Groovy-_002d_002d-The-Bad">
+<div class="chapter-level-extent" id="Groovy-_002d_002d-The-Bad">
 <h2 class="chapter">3 Groovy &ndash; The Bad</h2>
 <p>Unfortunately, Groovy does have, what this author believes to be, some
 bad features.  In the end, however, it is believed that the good
 features outweigh the bad ones.  The following list enumerates them.
-</p><ol>
+</p><ol class="enumerate">
 <li> Java, C, and many other languages use the semicolon to specify the
 end of a statement.  However, in Groovy, it is optional.  This
 sometimes makes code difficult for a human to read.  Now you have
@@ -253,26 +279,26 @@ shut the IDE up.
 </p></li><li> Likewise, in some situations, Groovy allows the calling of
 functions without parenthesis.  For example, instead of writing:
 <div class="example">
-<pre class="example">      mymeth(arg1, arg2);
+<pre class="example-preformatted">      mymeth(arg1, arg2);
 </pre></div>
 <p>In groovy you can use:
 </p><div class="example">
-<pre class="example">      mymeth arg1, arg2
+<pre class="example-preformatted">      mymeth arg1, arg2
 </pre></div>
 <p>Just as in the previous complaint, this increases the difficulty
 for humans to evaluate the code.
-</p></li><li> Groovy doesn&rsquo;t have the <code>char</code> type.  This means <code>'x'</code> is a string of
+</p></li><li> Groovy doesn&rsquo;t have the <code class="code">char</code> type.  This means <code class="code">'x'</code> is a string of
 length 1.  However, you often want a character.  In Groovy, you
 have to use:
 <div class="example">
-<pre class="example">      (char) 'x'
+<pre class="example-preformatted">      (char) 'x'
         or
       'x' as char
 </pre></div>
 </li><li> Double constants must end in &ldquo;D&rdquo; or &ldquo;d&rdquo; otherwise they&rsquo;re not a double,
-they&rsquo;re a <code>BigDecimal</code>!
+they&rsquo;re a <code class="code">BigDecimal</code>!
 <div class="example">
-<pre class="example">    3.14  // BigDecimal
+<pre class="example-preformatted">    3.14  // BigDecimal
     3.14d // double
 </pre></div>
 <p>This and the prior item have caused countless problems due to this unexpected
@@ -286,35 +312,35 @@ given element is used.  This is a significant issue!
 </li></ol>
 
 </div>
-<div class="chapter" id="Calling-Groovy-in-Kiss">
+<div class="chapter-level-extent" id="Calling-Groovy-in-Kiss">
 <h2 class="chapter">4 Calling Groovy in Kiss</h2>
 
 <p>Groovy, like Java, may call compiled Java and Groovy code in the
-normal way.  This is always the case.  However, in <em>KISS</em>, Groovy
+normal way.  This is always the case.  However, in <em class="emph">KISS</em>, Groovy
 code is not compiled before the system is started up, as is normally
 the case, but is compiled at runtime when used.  This is to support
-the fact that all Groovy code in <em>KISS</em> are microservices.
-In <em>KISS</em>, each Groovy class is an independent microservice.
-This effects how Groovy methods are called in <em>KISS</em>.
+the fact that all Groovy code in <em class="emph">KISS</em> are microservices.
+In <em class="emph">KISS</em>, each Groovy class is an independent microservice.
+This effects how Groovy methods are called in <em class="emph">KISS</em>.
 </p>
-<p>Groovy microservices in <em>KISS</em>, may make three types of calls as follows:
-</p><ol>
+<p>Groovy microservices in <em class="emph">KISS</em>, may make three types of calls as follows:
+</p><ol class="enumerate">
 <li> Intra-method Calls &ndash; calls from one method to another in the same class
 </li><li> Compiled Library Calls &ndash; these are calls from Groovy to compiled Java
-code (<em>KISS</em> core code, Java or Groovy compiled libraries, etc)
+code (<em class="emph">KISS</em> core code, Java or Groovy compiled libraries, etc)
 </li><li> Microservice Calls - these are calls from one Groovy method to a Groovy
 method in another class / microservice
 </li></ol>
-<p>In <em>KISS</em>, the first two types of calls may be performed as you would normally
+<p>In <em class="emph">KISS</em>, the first two types of calls may be performed as you would normally
 perform them.  There are no special considerations.
 </p>
-<p>However type 3 calls require a special procedure.  This is to give <em>KISS</em>
+<p>However type 3 calls require a special procedure.  This is to give <em class="emph">KISS</em>
 an opportunity to compile an load the microservice before it is executed.
 See the manual for more details.
 </p>
     
 
-<hr></div>
+</div>
 
 
 
