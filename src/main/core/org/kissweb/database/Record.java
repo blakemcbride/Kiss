@@ -611,6 +611,8 @@ public class Record implements AutoCloseable {
             */
         if (table == null)
             throw new RuntimeException("Can't delete record; no table name");
+        int ncpkey = 0; // number of primary key columns
+        Object pkval = null;  // primary key value
         final StringBuilder sql = new StringBuilder("delete from " + table + " where ");
         if (cursor == null || !cursor.cmd.isSelect) {
             boolean needAnd = false;
@@ -618,18 +620,26 @@ public class Record implements AutoCloseable {
             if (pc == null)
                 throw new RuntimeException("Can't delete from table " + table + ": no primary key");
             for (String col : pc) {
-                if (needAnd)
+                if (needAnd) {
                     sql.append(" and ");
-                else
+                    ncpkey++;
+                } else {
                     needAnd = true;
+                    ncpkey = 1;
+                }
                 sql.append(col).append("=?");
             }
             try (PreparedStatement ustmt = conn.conn.prepareStatement(sql.toString())) {
                 int i = 1;
-                for (String pcol : conn.getPrimaryColumns(table))
+                for (String pcol : conn.getPrimaryColumns(table)) {
+                    if (i == 1)
+                        pkval = cols.get(pcol);
                     ustmt.setObject(i++, Connection.fixDate(cols.get(pcol)));
+                }
                 ustmt.execute();
             }
+            if (conn.deleteCallback != null && ncpkey == 1)
+                conn.deleteCallback.accept(table, pkval);
             return;
         } else if (cursor.ustmt == null || !sql.equals(cursor.prevsql)) {
             cursor.prevsql = new StringBuilder(sql);
@@ -638,10 +648,13 @@ public class Record implements AutoCloseable {
             if (pc == null)
                 throw new RuntimeException("Can't delete from table " + table + ": no primary key");
             for (String col : pc) {
-                if (needAnd)
+                if (needAnd) {
                     sql.append(" and ");
-                else
+                    ncpkey++;
+                } else {
                     needAnd = true;
+                    ncpkey = 1;
+                }
                 sql.append(col).append("=?");
             }
             if (cursor.ustmt != null)
@@ -650,9 +663,14 @@ public class Record implements AutoCloseable {
         } else
             cursor.ustmt.clearParameters();
         int i = 1;
-        for (String pcol : cursor.cmd.getPriColumns(cursor))
+        for (String pcol : cursor.cmd.getPriColumns(cursor)) {
+            if (i == 1)
+                pkval = cols.get(pcol);
             cursor.ustmt.setObject(i++, Connection.fixDate(ocols.get(pcol)));
+        }
         cursor.ustmt.execute();
+        if (conn.deleteCallback != null && ncpkey == 1)
+            conn.deleteCallback.accept(table, pkval);
     }
 
     /**

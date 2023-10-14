@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
 
 
 /**
@@ -66,6 +67,9 @@ public class Connection implements AutoCloseable {
     private final ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();  // table name, primary key column names
     private final HashMap<String, Boolean> TableExistenceCache = new HashMap<>();
     private boolean externalConnection = false;
+
+    /* A function that gets called whenever a record is deleted  */
+    BiConsumer<String,Object> deleteCallback = null;
 
     java.sql.Connection conn;
     DatabaseMetaData dmd;
@@ -811,6 +815,19 @@ public class Connection implements AutoCloseable {
      */
     public static java.sql.Date toDate(int dt) {
         return dt == 0 ? null : new java.sql.Date(DateUtils.toDate(dt).getTime());
+    }
+
+    /**
+     * Sets the connection-wide delete callback method.  This callback
+     * gets called whenever <code>Record.delete()</code> is called.
+     *
+     * @param  deleteCallback  the callback function to be set
+     * @return                 the previous delete callback
+     */
+    public BiConsumer<String,Object> setDeleteCallback(BiConsumer<String,Object> deleteCallback) {
+        BiConsumer<String,Object> oldCallback = this.deleteCallback;
+        this.deleteCallback = deleteCallback;
+        return oldCallback;
     }
 
     /**
