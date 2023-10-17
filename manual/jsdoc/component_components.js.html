@@ -227,12 +227,16 @@ class components {
     static drop_down() {}
 
     /**
-     * This HTML tag, "file-upload", adds functionality and a consistent and convenient API to the HTML provided file input.
+     * This HTML tag, "file-upload", adds functionality and a consistent and convenient facility uploading files and taking pictures with the camera.
+     * &lt;br>
+     * Please note: When this control is used, you must use &lt;code>Server.fileUploadSend()&lt;/code> rather than &lt;code>Server.call()&lt;/code>.
      * &lt;br>&lt;br>
      * &lt;table>
      *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
      *     &lt;tr>&lt;td>    multiple     &lt;/td>&lt;td>     the user may select multiple files              &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required (at least 1 file)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required (at least 1 file)          &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    accept     &lt;/td>&lt;td>     types of files allowed (see HTML input type="file")          &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    custom     &lt;/td>&lt;td>     rather than the native HTML control, use a Kiss button to upload files.         &lt;/td>&lt;/tr>
      * &lt;/table>
      * &lt;br>
      * &lt;strong>Content&lt;/strong>

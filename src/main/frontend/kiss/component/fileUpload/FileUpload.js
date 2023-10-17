@@ -18,6 +18,8 @@
         let nattrs = '';
         let id;
         let required = false;
+        let accept = '';
+        let custom = false;  // if true, hide the file input and display a push-button instead
         for (let prop in attr) {
             switch (prop) {
 
@@ -25,9 +27,15 @@
                 case 'required':
                     required = true;
                     break;
+                case 'custom':
+                    custom = true;
+                    break;
 
                 // preexisting attributes
 
+                case 'accept':
+                    accept = Utils.removeQuotes(attr[prop]);
+                    break;
                 case 'style':
                     break;  // already dealing with this
                 case 'id':
@@ -39,13 +47,32 @@
             }
         }
 
-        const newElm = Utils.replaceHTML(id, elm, '<input id="{id}" type="file" style="{style}" {attr}>', {
-            style: nstyle,
-            attr: nattrs
-        });
+        let newElm;
+        if (custom) {
+            newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input id="{id}" type="file"  accept="{accept}" {attr} style="display: none;"><input type="button" id="{btnid}" value="{content}"></div>', {
+                style: nstyle,
+                attr: nattrs,
+                accept: accept,
+                content: content ? content.trim() : '',
+                btnid: id + '-btn'
+            });
+        } else {
+            newElm = Utils.replaceHTML(id, elm, '<input id="{id}" type="file" style="{style}" accept="{accept}" {attr}>', {
+                style: nstyle,
+                attr: nattrs,
+                accept: accept
+            });
+        }
+
         if (!newElm)
             return;
         const jqObj = newElm.jqObj;
+
+        if (custom) {
+            $('#' + id + '-btn').on('click', function () {
+                jqObj.click();
+            });
+        }
 
         newElm.numberOfUploadFiles = function () {
             return jqObj[0].files.length;
