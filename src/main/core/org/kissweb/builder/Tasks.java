@@ -204,7 +204,7 @@ public class Tasks {
     }
 
     /**
-     * Build and run the system
+     * Build and run both the front-end and back-end
      *
      * 1. download needed jar files
      * 2. build the system into a deployable war file
@@ -235,6 +235,38 @@ public class Tasks {
         else
             runWait(true, "tomcat/bin/shutdown.sh");
         killProcess(proc);
+    }
+
+    /**
+     * Build and run the back-end only
+     *
+     * 1. download needed jar files
+     * 2. build the system into a deployable war file
+     * 3. set up a local tomcat server
+     * 4. deploy the war file to the local tomcat
+     * 5. build JavaDocs
+     * 6. run the local tomcat
+     */
+    void developBackend() {
+        Process proc;
+        build();
+        setupTomcat();
+        copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
+        if (isWindows)
+            runWait(true, "tomcat\\bin\\debug.cmd");
+        else
+            runWait(true, "tomcat/bin/debug");
+        println("***** BACKEND IS RUNNING *****");
+        println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out or via the view-log command");
+        println("You'll need to start the front-end server independently.");
+        println("The app can also be debugged at port " + debugPort);
+        println("hit any key to stop the backend server");
+        readChar();
+        println("shutting down tomcat");
+        if (isWindows)
+            runWait(true, "tomcat\\bin\\stopdebug.cmd");
+        else
+            runWait(true, "tomcat/bin/shutdown.sh");
     }
 
     void javadoc() {
