@@ -275,7 +275,7 @@ public class BuildUtils {
 
     /**
      * Copies all files that match a (Java!) regex from one directory to another excluding another (Java!) regex.
-     *
+     * <br><br>
      * Normally only copies files that have a later date unless <code>force</code> is <code>true</code>
      *
      * @param srcDir
@@ -360,7 +360,7 @@ public class BuildUtils {
 
     /**
      * Copy one directory tree to another
-     *
+     * <br><br>
      * The regular expression applies to file names and not directory names.
      * If includeRegex is null, all files are included.
      *
@@ -390,7 +390,7 @@ public class BuildUtils {
 
     /**
      * Copy one directory tree to another
-     *
+     * <br><br>
      * The regular expression applies to file names and not directory names.
      * If includeRegex is null, all files are included.
      * If excludeRegex is null, no files are excluded.
@@ -910,7 +910,7 @@ public class BuildUtils {
 
     /**
      * Unpack a JAR file.
-     *
+     * <br><br>
      * A tag file is also created in order to track the date of the unjar vs. the date of the jar file.
      *
      * @param rootDir where to unjar the files
@@ -1054,7 +1054,7 @@ public class BuildUtils {
 
     /**
      * Ungzip an input file into an output file.
-     * <p>
+     * <br><br>
      * The output file is created in the output folder, having the same name
      * as the input file, minus the '.gz' extension.
      *

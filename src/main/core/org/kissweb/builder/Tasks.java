@@ -47,11 +47,11 @@ public class Tasks {
 
     /**
      * Build the whole system
-     *
-     * 1. download needed jar files
-     * 2. build the system into a deployable war file
-     * 3. set up a local tomcat server
-     * 4. deploy the war file to the local tomcat
+     * <br><br>
+     * 1. download needed jar files<br>
+     * 2. build the system into a deployable war file<br>
+     * 3. set up a local tomcat server<br>
+     * 4. deploy the war file to the local tomcat<br>
      * 5. build JavaDocs
      */
     void all() {
@@ -101,11 +101,11 @@ public class Tasks {
     /**
      * Create an executable JAR that includes Kiss, Groovy, and the PostgreSQL driver.
      * It runs an arbitrary groovy file in the context of Kiss and PostgreSQL.
-     *
+     * <br><br>
      * All that is needed is KissGP.jar
-     *
+     * <br><br>
      * Usage:  java -jar KissGP.jar [groovy-file] [args]...
-     *
+     * <br><br>
      * Other databases can be used also.  See the manual.
      */
     void KissGP() {
@@ -205,13 +205,13 @@ public class Tasks {
 
     /**
      * Build and run both the front-end and back-end
-     *
-     * 1. download needed jar files
-     * 2. build the system into a deployable war file
-     * 3. set up a local tomcat server
-     * 4. deploy the war file to the local tomcat
-     * 5. build JavaDocs
-     * 6. run the local tomcat
+     * <br><br>
+     * 1. download needed jar files<br>
+     * 2. build the system into a deployable war file<br>
+     * 3. set up a local tomcat server<br>
+     * 4. deploy the war file to the local tomcat<br>
+     * 5. build JavaDocs<br>
+     * 6. run the local tomcat<br>
      */
     void develop() {
         Process proc;
@@ -239,13 +239,13 @@ public class Tasks {
 
     /**
      * Build and run the back-end only
-     *
-     * 1. download needed jar files
-     * 2. build the system into a deployable war file
-     * 3. set up a local tomcat server
-     * 4. deploy the war file to the local tomcat
-     * 5. build JavaDocs
-     * 6. run the local tomcat
+     * <br><br>
+     * 1. download needed jar files<br>
+     * 2. build the system into a deployable war file<br>
+     * 3. set up a local tomcat server<br>
+     * 4. deploy the war file to the local tomcat<br>
+     * 5. build JavaDocs<br>
+     * 6. run the local tomcat<br>
      */
     void developBackend() {
         Process proc;
