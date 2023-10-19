@@ -15,5 +15,3 @@ jar cvf ..\..\..\%FILE% *
 REM Return to the original directory
 cd ..\..\..
 
-echo Frontend package (%FILE%) created successfully.
-
