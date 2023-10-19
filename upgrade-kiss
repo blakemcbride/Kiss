@@ -23,7 +23,9 @@ popd
 rsync -av libs/ $1/libs
 rsync -av --exclude=builder/Tasks.java --delete src/main/core/org/kissweb/ $1/src/main/core/org/kissweb
 rsync -av --delete src/main/frontend/kiss/ $1/src/main/frontend/kiss
-rsync -av --delete src/main/frontend/WEB-INF/ $1/src/main/frontend/WEB-INF
+rsync -av --delete src/main/core/WEB-INF/ $1/src/main/core/WEB-INF
+rsync -av --delete src/main/core/META-INF/ $1/src/main/core/META-INF
+rm -rf $1/src/main/frontend/WEB-INF $1/src/main/frontend/META-INF
 rsync -av src/main/frontend/lib/ $1/src/main/frontend/lib
 rsync -av bld $1
 rsync -av bld.cmd $1
