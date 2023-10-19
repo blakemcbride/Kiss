@@ -137,6 +137,7 @@ public class Tasks {
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         copyRegex("src/main/core/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
         copy("src/main/core/log4j2.xml", explodedDir + "/WEB-INF/classes");
+        copyForce("src/main/core/WEB-INF/web-unsafe.xml", explodedDir + "/WEB-INF/web.xml");
     }
 
     /**
@@ -144,9 +145,9 @@ public class Tasks {
      */
     void war() {
         build();
-        copyForce("build.work/exploded/WEB-INF/web-secure.xml", "build.work/exploded/WEB-INF/web.xml");
+        copyForce("src/main/core/WEB-INF/web-secure.xml", explodedDir + "/WEB-INF/web.xml");
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
-        copyForce("build.work/exploded/WEB-INF/web-unsafe.xml", "build.work/exploded/WEB-INF/web.xml");
+        copyForce("src/main/core/WEB-INF/web-unsafe.xml", explodedDir + "/WEB-INF/web.xml");
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
     }
 

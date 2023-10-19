@@ -13,15 +13,6 @@ if "%~1" neq "remove" (
     exit /b
 )
 
-REM Remove specific files and directories within src/main/frontend
-del /q src\main\frontend\kiss
-del /q src\main\frontend\lib
-del /q src\main\frontend\mobile
-del /q src\main\frontend\screens
-del /q src\main\frontend\*.html
-del /q src\main\frontend\*.js
-del /q src\main\frontend\*.css
-
-REM Remove other specified files and directories
+del /q src\main\frontend
 del /q .git* remove-backend* make-front-end SimpleWebServer.jar upgrade-kiss* *.md
 rmdir /s /q expand LICENSE.txt list-both serv* shrink make-frontend

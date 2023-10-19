@@ -17,5 +17,5 @@ fi
 
 rm -rf .git* libs bld* build* init* KissGP* LIC* manual* pom.xml README.md
 rm -rf runcmd test.csv upgrade-* view-log
-rm -rf src/main/backend src/main/core src/main/frontend/{META-INF,WEB-INF}
+rm -rf src/main/backend src/main/core
 rm -rf CONTRIBUTING.md notes 
