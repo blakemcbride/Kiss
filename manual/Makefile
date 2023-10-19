@@ -1,6 +1,6 @@
 
 TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex \
-          backendapi.tex frontendapi.tex commandline.tex desktop.tex
+          backendapi.tex frontendapi.tex commandline.tex splitsystem.tex desktop.tex
 
 
 %.dvi : %.tex

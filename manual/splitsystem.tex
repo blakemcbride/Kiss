@@ -1,0 +1,160 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+@node Split System
+
+@html
+@include style.css
+@end html
+
+@chapter Split System
+
+@emph{Kiss} comes as a complete system that includes both the front-end and back-end.
+This works well for most situations.  However, sometimes a web application may have a
+single back-end that serves several different front-ends.  Or, perhaps you prefer to keep
+the front-end and back-end projects separate.  @emph{Kiss} has a mechanism to support the
+ability to split the front-end and back-end.
+
+This chapter will detail the steps needed to accomplish this.
+
+@section Back-end-only System
+
+A back-end-only system is a complete system minus the front-end portion of the system.
+The git repo is also deleted since it is meaningless in this scenario.
+
+@subsection Creating
+
+In order to create a back-end-only system you start with a complete
+@emph{Kiss} system cleanly checked out and delete the front-end
+portion.  That leads you with a back-end-only system.  However, before
+doing that, you must install the third-party libraries.  The following
+commands will accomplish this whole process.
+
+@example
+./bld libs                   (Linux or Mac)
+./remove-frontend remove
+    or
+bld libs                     (Windows)
+remove-frontend remove
+@end example
+
+Once these command have been run, what you have left is a back-end-only system.  The git 
+repository it came in will have been deleted as well as the front-end portion of the system.
+The procedure for developing, deploying, and upgrading the system will be slightly modified as 
+described herein.
+
+
+@subsection Developing
+
+The main difference between developing on a back-end-only system vs.\ a 
+whole system is just that the command used to start the back-end is
+slightly different.  The locations of all of the back-end pieces are
+the same.  Once running, the system may be modified while running just
+the same.
+
+Use the following command to build and run the back-end:
+@example
+./bld developBackend         (Linux or Mac)
+     or
+bld developBackend           (Windows)
+@end example
+
+Viewing the server log is done in the same way as before.
+
+
+@subsection Deploying
+
+Deploying the back-ed is done just as before except now, instead of a single file containing the whole system, 
+you have a single file that represents the back-end only.  When deploying the front-end and back-end portions,
+they will be treated as two separate systems to the server.
+
+@subsection Upgrading
+
+Upgrading a back-end-only project is done the same way as upgrading a full system except that after the upgrade, you'll need to run the 
+@code{remove-frontend} script again. @xref{updates,,System Updates}
+
+@section Front-end-only System
+
+A front-end-only system is a complete system minus the backend-end portion of the system.
+The git repo is also deleted since it is meaningless in this scenario.
+
+@subsection Creating
+
+In order to create a front-end-only system you start with a complete
+@emph{Kiss} system cleanly checked out and delete the back-end
+portion.  That leads you with a front-end-only system.  However, before
+doing that, you must install the third-party libraries.  The following
+commands will accomplish this whole process.
+
+@example
+./bld libs                   (Linux or Mac)
+./remove-backend remove
+    or
+bld libs                     (Windows)
+remove-backend remove
+@end example
+
+Once these command have been run, what you have left is a front-end-only system.  The git 
+repository it came in will have been deleted as well as the backend-end portion of the system.
+The procedure for developing, deploying, and upgrading the system will be slightly modified as 
+described herein.
+
+
+@subsection Developing
+
+Before running the front-end, you should start the back-end as described above.
+
+There are no steps required to edit front-end files.  However, you must serve them.  This can be accomplished with the following command:
+
+@example
+./serve          (Linux or Mac)
+    or
+serve            (Windows)
+@end example
+
+Presuming the back-end is running, you can access the running system at @code{http://localhost:8000}
+
+As before, you can edit front-end files while the system is running.
+
+@subsection Deploying
+
+The front-end must be distributed as a seperate @emph{war} file named @emph{frontend.war}.  
+This file can be created with the following command:
+
+@example
+./make-frontend         (Linux or Mac)
+     or
+make-frontend           (Windows)
+@end example
+
+From your server's perspective, the front-end and back-end are two different systems.
+
+@subsection Upgrading
+
+Upgrading a front-end-only project is done the same way as upgrading a full system except that after the upgrade, you'll need to run the 
+@code{remove-backend} script again. @xref{updates,,System Updates}

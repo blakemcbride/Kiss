@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Split System (Kiss Manual)</title>
+
+<meta name="description" content="Split System (Kiss Manual)">
+<meta name="keywords" content="Split System (Kiss Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="Desktop-Application.html" rel="next" title="Desktop Application">
+<link href="Command-Line-Utility.html" rel="prev" title="Command Line Utility">
+<style type="text/css">
+<!--
+div.example {margin-left: 3.2em}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<div class="chapter-level-extent" id="Split-System">
+<div class="nav-panel">
+<p>
+Next: <a href="Desktop-Application.html" accesskey="n" rel="next">Desktop Applications</a>, Previous: <a href="Command-Line-Utility.html" accesskey="p" rel="prev">Command Line Utility</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (October 18, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+
+<style>
+body {
+	margin: 0 auto;
+        padding: 20px;
+        max-width: 800px;
+	background-color: #fffff8; 
+}
+body {
+    font-family: "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #333; /* dark gray */
+    margin-top: 20px;
+}
+a {
+    color: #007BFF; /* blue */
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table, th, td {
+    border: 1px solid #ddd; /* light gray */
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* very light gray */
+}
+pre, code {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #f5f5f5; /* light grey */
+    border: 1px solid #e0e0e0; /* slightly darker grey for the border */
+    padding: 10px; /* space inside the box */
+    overflow-x: auto; /* adds horizontal scroll if the content is too wide */
+}
+h1 {  /* section titles */
+    color: #2c3e50; /* example dark blue color */
+}
+
+h2, h3, h4 {  /* subsection titles */
+    color: #e74c3c; /* example red color */
+}
+:not(pre) > code {
+    background-color: #f5f5f5; /* Light gray */
+    padding: 2px 4px;  /* Adjust this value */
+    border-radius: 3px; /* Optional: adds rounded corners */
+    margin: 0;  /* Adjust if needed */
+}
+
+</style>
+
+
+<h2 class="chapter" id="Split-System-1">8 Split System</h2>
+
+<p><em class="emph">Kiss</em> comes as a complete system that includes both the front-end and back-end.
+This works well for most situations.  However, sometimes a web application may have a
+single back-end that serves several different front-ends.  Or, perhaps you prefer to keep
+the front-end and back-end projects separate.  <em class="emph">Kiss</em> has a mechanism to support the
+ability to split the front-end and back-end.
+</p>
+<p>This chapter will detail the steps needed to accomplish this.
+</p>
+<ul class="mini-toc">
+<li><a href="#Back_002dend_002donly-System" accesskey="1">Back-end-only System</a></li>
+<li><a href="#Front_002dend_002donly-System" accesskey="2">Front-end-only System</a></li>
+</ul>
+<div class="section-level-extent" id="Back_002dend_002donly-System">
+<h3 class="section">8.1 Back-end-only System</h3>
+
+<p>A back-end-only system is a complete system minus the front-end portion of the system.
+The git repo is also deleted since it is meaningless in this scenario.
+</p>
+<ul class="mini-toc">
+<li><a href="#Creating" accesskey="1">Creating</a></li>
+<li><a href="#Developing-2" accesskey="2">Developing</a></li>
+<li><a href="#Deploying" accesskey="3">Deploying</a></li>
+<li><a href="#Upgrading" accesskey="4">Upgrading</a></li>
+</ul>
+<div class="subsection-level-extent" id="Creating">
+<h4 class="subsection">8.1.1 Creating</h4>
+
+<p>In order to create a back-end-only system you start with a complete
+<em class="emph">Kiss</em> system cleanly checked out and delete the front-end
+portion.  That leads you with a back-end-only system.  However, before
+doing that, you must install the third-party libraries.  The following
+commands will accomplish this whole process.
+</p>
+<div class="example">
+<pre class="example-preformatted">./bld libs                   (Linux or Mac)
+./remove-frontend remove
+    or
+bld libs                     (Windows)
+remove-frontend remove
+</pre></div>
+
+<p>Once these command have been run, what you have left is a back-end-only system.  The git 
+repository it came in will have been deleted as well as the front-end portion of the system.
+The procedure for developing, deploying, and upgrading the system will be slightly modified as 
+described herein.
+</p>
+
+</div>
+<div class="subsection-level-extent" id="Developing-2">
+<h4 class="subsection">8.1.2 Developing</h4>
+
+<p>The main difference between developing on a back-end-only system vs.\ a 
+whole system is just that the command used to start the back-end is
+slightly different.  The locations of all of the back-end pieces are
+the same.  Once running, the system may be modified while running just
+the same.
+</p>
+<p>Use the following command to build and run the back-end:
+</p><div class="example">
+<pre class="example-preformatted">./bld developBackend         (Linux or Mac)
+     or
+bld developBackend           (Windows)
+</pre></div>
+
+<p>Viewing the server log is done in the same way as before.
+</p>
+
+</div>
+<div class="subsection-level-extent" id="Deploying">
+<h4 class="subsection">8.1.3 Deploying</h4>
+
+<p>Deploying the back-ed is done just as before except now, instead of a single file containing the whole system, 
+you have a single file that represents the back-end only.  When deploying the front-end and back-end portions,
+they will be treated as two separate systems to the server.
+</p>
+</div>
+<div class="subsection-level-extent" id="Upgrading">
+<h4 class="subsection">8.1.4 Upgrading</h4>
+
+<p>Upgrading a back-end-only project is done the same way as upgrading a full system except that after the upgrade, you&rsquo;ll need to run the 
+<code class="code">remove-frontend</code> script again. See <a class="xref" href="System-Setup.html#updates">System Updates</a>
+</p>
+</div>
+</div>
+<div class="section-level-extent" id="Front_002dend_002donly-System">
+<h3 class="section">8.2 Front-end-only System</h3>
+
+<p>A front-end-only system is a complete system minus the backend-end portion of the system.
+The git repo is also deleted since it is meaningless in this scenario.
+</p>
+<ul class="mini-toc">
+<li><a href="#Creating-1" accesskey="1">Creating</a></li>
+<li><a href="#Developing-3" accesskey="2">Developing</a></li>
+<li><a href="#Deploying-1" accesskey="3">Deploying</a></li>
+<li><a href="#Upgrading-1" accesskey="4">Upgrading</a></li>
+</ul>
+<div class="subsection-level-extent" id="Creating-1">
+<h4 class="subsection">8.2.1 Creating</h4>
+
+<p>In order to create a front-end-only system you start with a complete
+<em class="emph">Kiss</em> system cleanly checked out and delete the back-end
+portion.  That leads you with a front-end-only system.  However, before
+doing that, you must install the third-party libraries.  The following
+commands will accomplish this whole process.
+</p>
+<div class="example">
+<pre class="example-preformatted">./bld libs                   (Linux or Mac)
+./remove-backend remove
+    or
+bld libs                     (Windows)
+remove-backend remove
+</pre></div>
+
+<p>Once these command have been run, what you have left is a front-end-only system.  The git 
+repository it came in will have been deleted as well as the backend-end portion of the system.
+The procedure for developing, deploying, and upgrading the system will be slightly modified as 
+described herein.
+</p>
+
+</div>
+<div class="subsection-level-extent" id="Developing-3">
+<h4 class="subsection">8.2.2 Developing</h4>
+
+<p>Before running the front-end, you should start the back-end as described above.
+</p>
+<p>There are no steps required to edit front-end files.  However, you must serve them.  This can be accomplished with the following command:
+</p>
+<div class="example">
+<pre class="example-preformatted">./serve          (Linux or Mac)
+    or
+serve            (Windows)
+</pre></div>
+
+<p>Presuming the back-end is running, you can access the running system at <code class="code">http://localhost:8000</code>
+</p>
+<p>As before, you can edit front-end files while the system is running.
+</p>
+</div>
+<div class="subsection-level-extent" id="Deploying-1">
+<h4 class="subsection">8.2.3 Deploying</h4>
+
+<p>The front-end must be distributed as a seperate <em class="emph">war</em> file named <em class="emph">frontend.war</em>.  
+This file can be created with the following command:
+</p>
+<div class="example">
+<pre class="example-preformatted">./make-frontend         (Linux or Mac)
+     or
+make-frontend           (Windows)
+</pre></div>
+
+<p>From your server&rsquo;s perspective, the front-end and back-end are two different systems.
+</p>
+</div>
+<div class="subsection-level-extent" id="Upgrading-1">
+<h4 class="subsection">8.2.4 Upgrading</h4>
+
+<p>Upgrading a front-end-only project is done the same way as upgrading a full system except that after the upgrade, you&rsquo;ll need to run the 
+<code class="code">remove-backend</code> script again. See <a class="xref" href="System-Setup.html#updates">System Updates</a>
+</p>
+
+
+</div>
+</div>
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Next: <a href="Desktop-Application.html">Desktop Applications</a>, Previous: <a href="Command-Line-Utility.html">Command Line Utility</a>, Up: <a href="index.html">Kiss Developer Manual (October 18, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>
