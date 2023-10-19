@@ -13,6 +13,8 @@ if "%~1" neq "remove" (
     exit /b
 )
 
-del /q src\main\frontend
-del /q .git* remove-backend* make-front-end SimpleWebServer.jar upgrade-kiss* *.md
-rmdir /s /q expand LICENSE.txt list-both serv* shrink make-frontend
+rmdir /s /q .git .github libs build.work manual src\main\frontend notes
+del /q .gitattributes .gitignore init* KissGP* LIC*
+del /q runcmd test.csv upgrade-* *.md remove-backend*
+del /q   SimpleWebServer.jar upgrade-kiss*
+del /q expand LICENSE.txt list-both serve* shrink make-frontend

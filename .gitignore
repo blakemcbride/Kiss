@@ -1,3 +1,4 @@
+frontend.war
 build.work
 builder/builder/*.class
 apache-tomcat-*
