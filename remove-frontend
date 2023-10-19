@@ -14,7 +14,7 @@ if [ $# -ne 1 ] || [ 'remove' != $1 ]; then
 	exit
 fi
 
-
-rm -rf .git* src/main/frontend remove-backend* make-front-end SimpleWebServer.jar upgrade-kiss* *.md
+rm -rf src/main/frontend/{kiss,lib,mobile,screens,*.html,*.js,*.css}
+rm -rf .git* remove-backend* make-front-end SimpleWebServer.jar upgrade-kiss* *.md
 rm -rf expand LICENSE.txt list-both serv* shrink make-frontend
 
