@@ -24,6 +24,7 @@
         let enterFunction = null;
         let nattrs = '';
         let id;
+        let typing = false;
         for (let prop in attr) {
             switch (prop) {
 
@@ -191,11 +192,29 @@
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('focusoff');
-            if (fun)
-                jqObj.focusout(() => {
-                    fun(newElm.getIntValue());
+            /* The problem here is that the user can either type a date or select a date on a calendar popup.
+               We need to know the difference so that if they click on the calendar popup we can execute the
+               change function without requiring them to lose focus.  However, if they are typing we require them
+               to lose focus so we know they're done typing.
+
+               To complicate matters.  Chrome and Firefox act differently.  When you are typing and hit a tab, Chrome
+               takes you completely out of the control while Firefox takes you to the calendar icon.
+             */
+            jqObj.off('blur').off('change').off('keydown');
+            if (fun) {
+                jqObj.on('keydown', (event) => {
+                    typing = true;
                 });
+                jqObj.on('change', (event) => {
+                    if (!typing)
+                        fun(newElm.getIntValue());
+                });
+                jqObj.on('blur', (event) => {
+                    if (typing)
+                        fun(newElm.getIntValue());
+                    typing = false;
+                });
+            }
             return this;
         };
 
