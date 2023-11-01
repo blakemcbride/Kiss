@@ -25,6 +25,8 @@ import java.util.Set;
 /**
  * Author: Blake McBride
  * Date: 5/4/18
+ *
+ * This is the main entry point for asynchronous server requests used by Kiss.
  */
 @WebServlet(urlPatterns="/rest", asyncSupported = true)
 @MultipartConfig
@@ -34,8 +36,8 @@ public class MainServlet extends HttpServlet {
     private static Connection.ConnectionType connectionType;
     private static String host;                      // set by KissInit.groovy
     private static String database;                  // set by KissInit.groovy
-    private static String user;                      // set by KissInit.groovy
-    private static String password;                  // set by KissInit.groovy
+    private static String user;                      // database username, set by KissInit.groovy
+    private static String password;                  // database password, set by KissInit.groovy
     private static String applicationPath;           // where the application files are
     private static String rootPath;                  // the root of the entire application
     private static boolean underIDE = false;
@@ -60,7 +62,7 @@ public class MainServlet extends HttpServlet {
         if (queueManager == null)
             queueManager = new org.kissweb.restServer.QueueManager(maxWorkerThreads);
         ServletOutputStream out = response.getOutputStream();
-        response.setStatus(202);
+        response.setStatus(202);  // async accept
         out.flush();  //  this causes the first response
 
         queueManager.add(request, response, out);
