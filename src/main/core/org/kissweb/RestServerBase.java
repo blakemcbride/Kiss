@@ -23,6 +23,10 @@ public abstract class RestServerBase extends HttpServlet {
 
     /**
      * Support for Basic Authentication.
+     * <br><br>
+     * The way basic authentication works is that the client uses a URL with the following format:<br>
+     * <code>https://[username]:[password]@[full-URL]</code><br>
+     * The <code>username</code> and <code>password</code> are validated against what is passed in.
      *
      * @param request
      * @param response

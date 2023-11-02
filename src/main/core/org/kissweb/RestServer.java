@@ -27,6 +27,8 @@ import java.io.IOException;
  * (2) Be sure to set the <code>urlPattern</code>.
  * <br><br>
  * (3) If basic authentication is being used, enable it by setting <code></code> and set the <code>username</code> and <code>password</code>.
+ * <br><br>
+ * (4) Since this will be Java code, Kiss will have to be rebuilt.
  */
 @WebServlet(urlPatterns="/myservice")
 @MultipartConfig
