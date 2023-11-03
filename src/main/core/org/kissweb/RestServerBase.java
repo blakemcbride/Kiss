@@ -250,7 +250,7 @@ public abstract class RestServerBase extends HttpServlet {
      * @param  contentType  the content type indicates the associated content is text
      * @return              true if the content type is text, false otherwise
      */
-    public static boolean isTextBasedContentType(String contentType) {
+    public static boolean isTextContentType(String contentType) {
         return TEXT_BASED_CONTENT_TYPES.contains(contentType);
     }
 
@@ -262,6 +262,6 @@ public abstract class RestServerBase extends HttpServlet {
      * @return              true if the content type is binary, false otherwise
      */
     public static boolean isBinaryContentType(String contentType) {
-        return !isTextBasedContentType(contentType);
+        return !isTextContentType(contentType);
     }
 }
