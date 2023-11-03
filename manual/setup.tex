@@ -164,7 +164,7 @@ Production
 
 The @emph{Production} scenario is created with a single command
 (@code{./bld war}) and produces a single @code{war} file (located in
-the @code{build.work} directory) that can be deployed to your production
+the @code{work} directory) that can be deployed to your production
 environment.
 
 Before doing anything with the @emph{Development} environment, it is
@@ -284,7 +284,7 @@ manuals at the following URL's:
 @example
 file:///my/home/path/kiss/manual/man/index.html
 
-file:///my/home/path/kiss/build.work/javadoc/index.html
+file:///my/home/path/kiss/work/javadoc/index.html
 
 file:///my/home/path/kiss/manual/jsdoc/index.html
 @end example
@@ -426,7 +426,7 @@ application by attaching to the running @emph{tomcat} server at port
 9000.
 @item war
 This will cause the system to generate the single file needed by a
-production system.  It will end up in @emph{build.work/Kiss.war}
+production system.  It will end up in @emph{work/Kiss.war}
 @end table
 
 Other tasks which may be useful are as follows:
@@ -442,7 +442,7 @@ you need to build it without any extraneous files
 This performs all of the steps necessary to setup and build the system but
 doesn't start up the tomcat server.
 @item javadoc
-This task creates the javadoc files that end up in @code{build.work/javadoc}
+This task creates the javadoc files that end up in @code{work/javadoc}
 @item kisscmd
 This task creates a command-line JAR that can be used in a non-web, command-line application.
 This is useful when creating applications that perform various utility functions.  This
@@ -539,5 +539,5 @@ expected that you would modify what's there to suit your application
 needs.
 
 Besides this narrative, you would need the JavaDocs located under the
-@code{build.work/javadoc} directory for back-end API specific documentation and
+@code{work/javadoc} directory for back-end API specific documentation and
 front-end API reference located in the @emph{manual/jsdoc} directory.

@@ -3,9 +3,9 @@ setlocal
 
 :: Define the directories and files
 set "JAVA_FILE_1=src\main\core\org\kissweb\builder\Tasks.java"
-set "CLASS_FILE_1=build.work\exploded\WEB-INF\classes\org\kissweb\builder\Tasks.class"
+set "CLASS_FILE_1=work\exploded\WEB-INF\classes\org\kissweb\builder\Tasks.class"
 set "JAVA_FILE_2=src\main\core\org\kissweb\builder\BuildUtils.java"
-set "CLASS_FILE_2=build.work\exploded\WEB-INF\classes\org\kissweb\builder\BuildUtils.class"
+set "CLASS_FILE_2=work\exploded\WEB-INF\classes\org\kissweb\builder\BuildUtils.class"
 
 :: Set a flag if any source file is newer than its corresponding class file or the class file doesn't exist
 set "buildRequired=0"
@@ -25,14 +25,14 @@ if not exist "%CLASS_FILE_2%" (
 :: If either .java file is newer, compile the .java files to .class files
 if "%buildRequired%"=="1" (
     echo Building the builder
-    if not exist build.work\exploded\WEB-INF\classes (
-        mkdir build.work\exploded\WEB-INF\classes
+    if not exist work\exploded\WEB-INF\classes (
+        mkdir work\exploded\WEB-INF\classes
     )
-    javac -cp libs\commons-compress-1.20.jar "%JAVA_FILE_1%" "%JAVA_FILE_2%" -d build.work\exploded\WEB-INF\classes
+    javac -cp libs\commons-compress-1.20.jar "%JAVA_FILE_1%" "%JAVA_FILE_2%" -d work\exploded\WEB-INF\classes
 )
 
 :: Run the BuildUtils class
-java -cp "build.work\exploded\WEB-INF\classes;libs\commons-compress-1.20.jar" org.kissweb.builder.BuildUtils %*
+java -cp "work\exploded\WEB-INF\classes;libs\commons-compress-1.20.jar" org.kissweb.builder.BuildUtils %*
 
 endlocal
 

@@ -5,10 +5,10 @@
      
      First, the single file needed is KissGP.jar
      It can be created with:  ./bld KissGP
-     It will end up in the build.work directory.
+     It will end up in the work directory.
      
      Second, to run this file, use:  
-        java -jar build.work/KissGP.jar KissGP.groovy
+        java -jar work/KissGP.jar KissGP.groovy
 */
 
 import org.kissweb.DateTime

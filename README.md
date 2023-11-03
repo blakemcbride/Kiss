@@ -73,4 +73,4 @@ The back-end JavaDoc must be built by you.  This can be done by typing:
         -or-
     bld javadoc                 [Windows]
 
-You then get:  `build.work/javadoc/index.html`
+You then get:  `work/javadoc/index.html`

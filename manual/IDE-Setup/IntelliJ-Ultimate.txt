@@ -35,7 +35,7 @@ Modules
 			src/main/backend
 			src/main/core
 		Mark as excluded
-			build.work
+			work
 			tomcat
 	Dependencies
 		Java

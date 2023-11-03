@@ -21,7 +21,7 @@ import java.util.Objects;
  * The command-line jar file is built with:
  *     <code>./bld kisscmd</code>
  * <br><br>
- * This creates the file: build.work/kisscmd.jar
+ * This creates the file: work/kisscmd.jar
  * <br><br>
  * To execute do:
  *     <code>java -jar kisscmd.jar</code>

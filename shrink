@@ -3,7 +3,7 @@
 
 # Restore original (uncompressed) JavaScript files
 
-FILES=`find . -name '*.js' -type f  |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./build.work/' |grep -v '^\./src/main/frontend/lib/'`
+FILES=`find . -name '*.js' -type f  |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./work/' |grep -v '^\./src/main/frontend/lib/'`
 for file in $FILES; do
 	ofile=$file-orig
 	if [ -f $ofile ]; then

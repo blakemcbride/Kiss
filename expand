@@ -3,7 +3,7 @@
 
 # Shrink all JavaScript files
 
-FILES=`find . -name '*.js-orig' -type f  |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./build.work/' |grep -v '^\./src/main/frontend/lib/'`
+FILES=`find . -name '*.js-orig' -type f  |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./work/' |grep -v '^\./src/main/frontend/lib/'`
 for file in $FILES; do
 	ofile=${file::-5}
 	mv $file $ofile

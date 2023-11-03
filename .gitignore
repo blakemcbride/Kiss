@@ -1,5 +1,6 @@
 frontend.war
 build.work
+work
 builder/builder/*.class
 apache-tomcat-*
 tomcat

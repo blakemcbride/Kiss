@@ -2,5 +2,5 @@
 #
 # List both compressed and uncompressed JavaScript files
 
-find . -type f |grep -E '*.js$|*.js-orig$' |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./build.work/' |grep -v '^\./src/main/frontend/lib/' |sort |xargs ls -l
+find . -type f |grep -E '*.js$|*.js-orig$' |grep -v '^\./tomcat/' |grep -v '^\./manual/' |grep -v '^\./work/' |grep -v '^\./src/main/frontend/lib/' |sort |xargs ls -l
 

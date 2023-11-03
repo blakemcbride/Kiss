@@ -639,7 +639,7 @@ public class BuildUtils {
         return f.getAbsolutePath();
     }
 
-    private static String writeDependencyArgsToFile(LocalDependencies ldep, ForeignDependencies fdep) {
+    private static String writeDependencyArgsToFile(LocalDependencies ldep, ForeignDependencies fdep, String additionalSourceRoot) {
         File f;
         try {
             f = File.createTempFile("Dependencies-", ".inp");
@@ -661,6 +661,8 @@ public class BuildUtils {
                             println("error writing to " + f.getAbsolutePath());
                         }
                     }
+                if (additionalSourceRoot != null)
+                    bw.write(additionalSourceRoot);
                 bw.newLine();
             }
         } catch (IOException e) {
@@ -690,7 +692,7 @@ public class BuildUtils {
         }
     }
 
-    public static void buildJava(String srcPath, String destDir, LocalDependencies localLibs, ForeignDependencies foreignLibs) {
+    public static void buildJava(String srcPath, String destDir, LocalDependencies localLibs, ForeignDependencies foreignLibs, String additionalSourceRoot) {
         File sf = new File(srcPath);
         if (!sf.exists())
             throw new RuntimeException("buildJava: directory \"" + srcPath + "\" does not exist");
@@ -701,7 +703,7 @@ public class BuildUtils {
         ArrayList<File> ood = outOfDateSourceFiles(allFiles, srcPath, destDir, ".java", ".class");
         if (ood != null  &&  !ood.isEmpty()) {
             String argsFile = writeArgsToFile(ood);
-            javac(localLibs, foreignLibs, srcPath, destDir, argsFile);
+            javac(localLibs, foreignLibs, srcPath, destDir, argsFile, additionalSourceRoot);
             rm(argsFile);
         }
     }
@@ -954,13 +956,13 @@ public class BuildUtils {
                     unJar(rootDir, dep.targetPath + "/" + dep.filename);
     }
 
-    public static void javac(LocalDependencies ldep, ForeignDependencies fdep, String sourcePath, String destPath, String filelist) {
+    public static void javac(LocalDependencies ldep, ForeignDependencies fdep, String sourcePath, String destPath, String filelist, String additionalSourceRoot) {
         if (!new File(sourcePath).exists())
             throw new RuntimeException("javac: \"" + sourcePath + "\" does not exist");
         mkdir(destPath);
         String cmd, argsFile = null;
         if (ldep != null  &&  !ldep.isEmpty()  ||  fdep != null  &&  !fdep.isEmpty()) {
-            argsFile = writeDependencyArgsToFile(ldep, fdep);
+            argsFile = writeDependencyArgsToFile(ldep, fdep, additionalSourceRoot);
             cmd = "javac -g @" + argsFile + " -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
         } else
             cmd = "javac -g -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
@@ -971,7 +973,7 @@ public class BuildUtils {
     // Unfinished code to create WSDL's (I don't think they're needed anymore)
     public static void buildWS(LocalDependencies ldep, ForeignDependencies fdep, String dest, String sdir, String service) {
         String javaHome = java.lang.System.getProperty("java.home");  // to find tools.jar
-        String deps = writeDependencyArgsToFile(ldep, fdep);
+        String deps = writeDependencyArgsToFile(ldep, fdep, null);
         String cmd = "java -classpath @" + deps + " com.sun.tools.ws.WsGen -d " + dest + " -Xendorsed -keep -wsdl -r " + sdir + " -s " + sdir + " " + service;
         mkdir(sdir);
         runWait(true, cmd);

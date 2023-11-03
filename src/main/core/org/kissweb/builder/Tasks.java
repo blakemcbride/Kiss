@@ -39,7 +39,7 @@ public class Tasks {
     final ForeignDependencies foreignLibs = buildForeignDependencies();
     final LocalDependencies localLibs = buildLocalDependencies();
     final String tomcatTarFile = "apache-tomcat-" + tomcatVer + ".tar.gz";
-    final String BUILDDIR = "build.work";
+    final String BUILDDIR = "work";
     final String explodedDir = BUILDDIR + "/" + "exploded";
     final String postgresqlJar = "postgresql-" + postgresqlVer + ".jar";
     final String groovyJar = "groovy-" + groovyVer + ".jar";
@@ -73,7 +73,7 @@ public class Tasks {
         libs();
 
         unJarAllLibs(targetPath, localLibs, foreignLibs);
-        buildJava("src/main/core", targetPath, localLibs, foreignLibs);
+        buildJava("src/main/core", targetPath, localLibs, foreignLibs, null);
         rmTree(targetPath + "/META-INF");
         createManifest(manifest, "org.kissweb.Main");
         createJar(targetPath, jarFile);
@@ -92,7 +92,7 @@ public class Tasks {
      */
     void jar() {
         libs();
-        buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
+        buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         createJar(explodedDir + "/WEB-INF/classes", BUILDDIR + "/Kiss.jar");
         //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
@@ -133,7 +133,8 @@ public class Tasks {
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
         copyTree("src/main/backend", explodedDir + "/WEB-INF/backend");
         copyTree("libs", explodedDir + "/WEB-INF/lib");
-        buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs);
+        buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
+        buildJava("src/main/backend/precompiled", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         copyRegex("src/main/core/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
         copy("src/main/core/log4j2.xml", explodedDir + "/WEB-INF/classes");
@@ -277,6 +278,7 @@ public class Tasks {
 
     void clean() {
         rmTree(BUILDDIR);
+        rmTree("build.work");  // used in the past
         rm("manual/Kiss.log");
         rm("manual/Kiss.aux");
         rm("manual/Kiss.toc");
