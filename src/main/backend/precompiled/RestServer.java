@@ -23,12 +23,17 @@ import java.io.IOException;
  * into your application.  You must create your own version of this file for each service.
  * <br><br>
  * (1) This class is essentially a template.  You would copy this class and edit it for your particular needs.
+ * It must reside under the <code>precompiled</code> directory.
  * <br><br>
  * (2) Be sure to set the <code>urlPattern</code>.
  * <br><br>
  * (3) If basic authentication is being used, enable it by setting <code></code> and set the <code>username</code> and <code>password</code>.
  * <br><br>
  * (4) Since this will be Java code, Kiss will have to be rebuilt.
+ * <br><br>
+ * REST servers must exist in the <code>precompiled</code> directory because they must be compiled
+ * into the system rather than compiled at runtime because they are called by external
+ * systems and must always be available.
  */
 @WebServlet(urlPatterns="/myservice")
 @MultipartConfig
