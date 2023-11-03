@@ -3,12 +3,10 @@ package org.kissweb;
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Base64;
 
 /**
  * Author: Blake McBride<br>
@@ -21,8 +19,6 @@ public final class Crypto {
     private static final String ALGORITHM = "AES";
     private static String defaultPassword;
     private static final Cipher cipher;
-    private static final Base64.Decoder base64Decoder = Base64.getDecoder();
-    private final static Base64.Encoder base64Encoder = Base64.getEncoder();
     private final static Random random = new Random();
 
     static {
@@ -50,7 +46,7 @@ public final class Crypto {
         final Key key = generateKey(salt, password);
         cipher.init(Cipher.ENCRYPT_MODE, key);
         final byte[] encValue = cipher.doFinal(valueToEnc.getBytes());
-        return base64Encode2(encValue);
+        return Base64.encode(encValue);
     }
 
     /**
@@ -185,7 +181,7 @@ public final class Crypto {
     public static String decrypt(String salt, String password, String encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
         cipher.init(Cipher.DECRYPT_MODE, key);
-        final byte[] decodedValue = base64Decode2(encryptedValue);
+        final byte[] decodedValue = Base64.decode(encryptedValue);
         final byte[] decValue = cipher.doFinal(decodedValue);
         return new String(decValue);
     }
@@ -330,57 +326,13 @@ public final class Crypto {
     }
 
     /**
-     * Base64 encode
-     *
-     * @param ba
-     * @return
-     */
-    public static String base64Encode(byte [] ba) {
-        final String c = base64Encoder.encodeToString(ba);
-        return c.replaceAll("\n", "");
-    }
-
-    /**
-     * Base64 encode without the trailing =
-     *
-     * @param ba
-     * @return
-     */
-    private static String base64Encode2(byte [] ba) {
-        final String c = base64Encoder.encodeToString(ba);
-        return c.substring(0, c.length()-1).replaceAll("\n", "");
-    }
-
-    /**
-     * Base 64 decode
-     *
-     * @param s
-     * @return
-     * @throws IOException
-     */
-    public static byte [] base64Decode(String s) throws IOException {
-        return base64Decoder.decode(s);
-    }
-
-    /**
-     * Base 64 decode adding the trailing =
-     *
-     * @param s
-     * @return
-     * @throws IOException
-     */
-    private static byte [] base64Decode2(String s) throws IOException {
-        return base64Decoder.decode(s + "=");
-    }
-
-    /**
      * Create a random salt.
      * It is always 11 bytes long.
      */
     private static String createSalt() {
         final long rl = random.nextLong();
         final byte [] ba = longtoBytes(rl);
-        return base64Encode2(ba);
+        return Base64.encode(ba);
     }
 
     public static void main(String [] args) throws Exception {
@@ -410,8 +362,8 @@ public final class Crypto {
         byte [] d1 = decryptWithRandomSalt(password, e1);
         byte [] d2 = decryptWithRandomSalt(password, e2);
         System.out.println("\n" + unencrypted + " (" + unencrypted.length() + ")");
-        System.out.println(base64Encode2(e1) + " (" + e1.length + ")");
-        System.out.println(base64Encode2(e2) + " (" + e2.length + ")");
+        System.out.println(Base64.encode(e1) + " (" + e1.length + ")");
+        System.out.println(Base64.encode(e2) + " (" + e2.length + ")");
         System.out.println(new String(d1) + " (" + d1.length + ")");
         System.out.println(new String(d2) + " (" + d2.length + ")");
     }
