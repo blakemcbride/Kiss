@@ -2,6 +2,11 @@ package org.kissweb;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
 
 /**
  * Author: Blake McBride
@@ -53,11 +58,34 @@ public class Base64 {
      * @param  value  the string to be checked
      * @return        true if the string is a valid Base64 string, false otherwise
      */
-    public static boolean isBase64(String value) {
+    public static boolean mightBeBase64(String value) {
         if (value == null || value.isEmpty())
             return false;
         if ((value.length() % 4) != 0)
             return false; // Base64 string length should be multiple of 4
         return BASE64_PATTERN.matcher(value).matches();
+    }
+
+    /**
+     * Determines whether the given content might be binary.
+     *
+     * @param  content  the content to be checked
+     * @return          true if the content might be binary, false if it's likely to be text
+     */
+    public static boolean mightBeBinary(String content) {
+        CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+        decoder.onMalformedInput(CodingErrorAction.REPORT);
+        decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+
+        try {
+            // Attempt to decode the content as UTF-8
+            decoder.decode(ByteBuffer.wrap(content.getBytes(StandardCharsets.UTF_8)));
+        } catch (CharacterCodingException e) {
+            // If a decoding error occurs, it is likely to be binary content
+            return true;
+        }
+
+        // No decoding error, it's likely to be text content
+        return false;
     }
 }
