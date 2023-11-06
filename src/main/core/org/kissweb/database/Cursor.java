@@ -74,6 +74,7 @@ public class Cursor implements AutoCloseable {
     private ObjectInputStream cacheStream;
     private ColumnInfo [] columnInfo;
     private ArrayList<Record> memoryCache;
+    private long size;
 
     /**
      * Read in the entire result set and cache locally.  This can be done via a temporary disk file or in-memory.
@@ -188,12 +189,14 @@ public class Cursor implements AutoCloseable {
         } catch (SQLException e) {
             tname = null;
         }
+        size = 0;
         if (useMemoryCache || maxRecords > 0  &&  maxRecords <= BATCH_SIZE) {
             cacheFile = null;
             cacheStream = null;
             memoryCache = new ArrayList<>();
 
             while (rset.next()) {
+                size++;
                 HashMap<String,Object> ocols = new HashMap<>();
                 LinkedHashMap<String,Object> cols = new LinkedHashMap<>();
                 int ncols = mdata.getColumnCount();
@@ -214,6 +217,7 @@ public class Cursor implements AutoCloseable {
                  BufferedOutputStream bos = new BufferedOutputStream(fos);
                  ObjectOutputStream oos = new ObjectOutputStream(bos)) {
                 while (rset.next()) {
+                    size++;
                     int len;
                     if (ncols == -1) {
                         ncols = mdata.getColumnCount();
@@ -883,6 +887,15 @@ public class Cursor implements AutoCloseable {
      */
     public Byte [] getByteArray(String cname) throws SQLException {
         return (Byte []) get(cname);
+    }
+
+    /**
+     * Returns the number of records in the cursor.
+     *
+     * @return
+     */
+    public long size() {
+        return size;
     }
 
 }
