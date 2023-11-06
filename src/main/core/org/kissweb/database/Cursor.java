@@ -881,8 +881,8 @@ public class Cursor implements AutoCloseable {
      *
      * @see Record#get(String)
      */
-    public byte [] getByteArray(String cname) throws SQLException {
-        return (byte []) get(cname);
+    public Byte [] getByteArray(String cname) throws SQLException {
+        return (Byte []) get(cname);
     }
 
 }

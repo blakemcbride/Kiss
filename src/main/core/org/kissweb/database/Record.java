@@ -486,8 +486,8 @@ public class Record implements AutoCloseable {
      *
      * @see Cursor#get(String)
      */
-    public byte [] getByteArray(String cname) throws SQLException {
-        return (byte []) get(cname);
+    public Byte [] getByteArray(String cname) throws SQLException {
+        return (Byte []) get(cname);
     }
 
     /**
