@@ -114,6 +114,17 @@ public class FileUtils {
         Files.write(Paths.get(fileName), vec, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
 
+        /**
+     * Write byte array to file fileName.  File is created if it doesn't exist and truncated otherwise.
+     *
+     * @param fileName
+     * @param vec
+     * @throws IOException
+     */
+    public static void write(String fileName, Byte [] vec) throws IOException {
+        Files.write(Paths.get(fileName), ArrayUtils.toPrimitiveByteArray(vec), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
+    }
+
     /**
      * Append String to file fileName.  File is created if it doesn't exist and appended otherwise.
      *
@@ -134,6 +145,17 @@ public class FileUtils {
      */
     public static void append(String fileName, byte [] vec) throws IOException {
         Files.write(Paths.get(fileName), vec, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
+    }
+
+    /**
+     * Append byte array to file fileName.  File is created if it doesn't exist and appended otherwise.
+     *
+     * @param fileName
+     * @param vec
+     * @throws IOException
+     */
+    public static void append(String fileName, Byte [] vec) throws IOException {
+        Files.write(Paths.get(fileName), ArrayUtils.toPrimitiveByteArray(vec), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
     }
 
     /**
