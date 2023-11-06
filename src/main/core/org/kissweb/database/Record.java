@@ -34,6 +34,7 @@ package org.kissweb.database;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.kissweb.ArrayUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -486,8 +487,11 @@ public class Record implements AutoCloseable {
      *
      * @see Cursor#get(String)
      */
-    public Byte [] getByteArray(String cname) throws SQLException {
-        return (Byte []) get(cname);
+    public byte [] getByteArray(String cname) throws SQLException {
+        Object ba = get(cname);
+        if (ba instanceof byte[])
+            return (byte[]) ba;
+        return ArrayUtils.toPrimitiveByteArray((Byte[]) ba);
     }
 
     /**
