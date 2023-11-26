@@ -120,18 +120,9 @@ public class DelimitedFileReader implements AutoCloseable {
         try {
             if (fr != null)
                 fr.close();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         } finally {
             fr = null;
-        }
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        try {
-            close();        // close open files
-        } finally {
-            super.finalize();
         }
     }
 
@@ -199,10 +190,10 @@ public class DelimitedFileReader implements AutoCloseable {
             nextLine();
             for (int i = 0; i < lineValues.size(); i++) {
                 String name = getString(i);
-                if (name != null && name.length() > 0)
+                if (name != null && !name.isEmpty())
                     nameMap.put(name, i);
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
 
         }
     }
@@ -298,7 +289,7 @@ public class DelimitedFileReader implements AutoCloseable {
                             sb.setLength(0); // start work on next token
                             state = State.AFTER_DELIMITER;
                         } else if (c == quote) {
-                            if (sb.length() == 0 || sb.toString().trim().length() == 0) {
+                            if (sb.isEmpty() || sb.toString().trim().isEmpty()) {
                                 state = State.QUOTE;
                                 sb.setLength(0);
                             } else
