@@ -58,6 +58,8 @@ within your browser to use the system.  After that, both the front-end
 and the back-end code can be changed while the system is running. No need for
 additional compiles or deploys.
 
+## Documentation
+
 The system comes with (essentially) three manuals as follows:
 
 
