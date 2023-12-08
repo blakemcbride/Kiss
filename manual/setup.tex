@@ -84,6 +84,8 @@ This is the simplest and shortest path to a running system.  It assumes:
 @item
 you have a JDK installed
 @item
+you have your JAVA_HOME and JRE_HOME environment variables set correctly
+@item
 you have an Internet connection
 @end enumerate
 
@@ -168,11 +170,11 @@ the @code{work} directory) that can be deployed to your production
 environment.
 
 Before doing anything with the @emph{Development} environment, it is
-important that you have the @emph{JAVA_HOME} environment variable set
-correctly to the root of your JDK (Java Developer Kit).  Doing this
-varies according to the OS you are using and various other Java
-installation possibilities.  There are plenty of instructions on the
-Internet for this.
+important that you have the @emph{JAVA_HOME} and @emph{JRE_HOME}
+environment variables set correctly to the root of your JDK (Java
+Developer Kit).  Doing this varies according to the OS you are using
+and various other Java installation possibilities.  There are plenty
+of instructions on the Internet for this.
 
 The @emph{Development} environment consists of two servers.  One
 serves the back-end REST services, and the second serves the front-end
@@ -212,9 +214,10 @@ IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, ecl
 GIT source code control system
 @end enumerate
 
-Correctly setting the @emph{JAVA_HOME} environment variable to the root of your
-JDK is necessary.  Setting this varies from OS to OS and also depends on where it
-gets installed.  Instructions for setting this variable are all over the Internet.
+Correctly setting the @emph{JAVA_HOME} and @emph{JRE_HOME} environment
+variables to the root of your JDK is necessary.  Setting this varies
+from OS to OS and also depends on where it gets installed.
+Instructions for setting this variable are all over the Internet.
 
 The system was built and tested with JDK 8, 11 and 17,
 @uref{https://www.postgresql.org,PostgreSQL},

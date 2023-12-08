@@ -41,6 +41,8 @@ Presuming you have the Java JDK (tested with Java 8, 11, and 17), GIT, and an
 Internet connection, you can run the following commands to download, install,
 configure, and run Kiss, tomcat, and the required JAR files:
 
+Be sure the JAVA_HOME and JRE_HOME environment variables are set correctly!
+
 ### Linux, Mac, BSD, etc.
 
     git clone https://github.com/blakemcbride/Kiss.git
