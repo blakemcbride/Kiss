@@ -104,7 +104,7 @@ class DateTimeUtils {
 
     /**
      * Format a Date or number of milliseconds since 1970 UTC to a string representation
-     * looking like mm/dd/yyyy hh:mm AM/PM
+     * looking like mm/dd/yyyy hh:mm AM/PM or dd/mm/yyyy hh:mm AM/PM (if locally appropriate)
      *
      * @param {Date|string|number} dt
      * @returns {string}
@@ -135,7 +135,10 @@ class DateTimeUtils {
             min = '0' + min.toString();
         else
             min = min.toString();
-        return (dt.getMonth() + 1).toString() + '/' + dt.getDate().toString() + '/' + dt.getFullYear().toString() + ' ' + hours.toString() + ':' + min + sf;
+        if (DateUtils.detectDateFormat() === "MM/DD/YYYY")
+            return (dt.getMonth() + 1).toString() + '/' + dt.getDate().toString() + '/' + dt.getFullYear().toString() + ' ' + hours.toString() + ':' + min + sf;
+        else
+            return dt.getDate().toString() + '/' + (dt.getMonth() + 1).toString() + '/' + dt.getFullYear().toString() + ' ' + hours.toString() + ':' + min + sf;
     }
 
     /**
