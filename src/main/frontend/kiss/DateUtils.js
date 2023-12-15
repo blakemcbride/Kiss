@@ -11,26 +11,53 @@
  In terms of understanding the data types used to represent dates:
 
  int          20180322
- str          "3/22/[20]18"
- str2         "3/22/18"
- str4         "3/22/2018"
+ str          "3/22/[20]18" (or similar international format)
+ str2         "3/22/18" (or similar international format)
+ str4         "3/22/2018" (or similar international format)
  SQL          "2018-03-22"
  Date         JavaScript Date object
  */
 class DateUtils {
 
     /**
+     * Detects the date format based on the given locale.
+     *
+     * @param {string} [locale=navigator.language] - optional locale used to determine the date format.
+     * @return {string} The detected date format. Possible values are 'MM/DD/YYYY', 'DD/MM/YYYY', or 'Unknown Format'.
+     */
+    static detectDateFormat(locale = navigator.language) {
+        const testDate = new Date(2023, 0, 21); // 21st January 2023
+        const formattedDate = new Intl.DateTimeFormat(locale, {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).format(testDate);
+
+        const parts = formattedDate.match(/(\d{2})/g);
+        if (parts.length > 2) {
+            if (parts[0] === '01') {
+                return 'MM/DD/YYYY';
+            } else if (parts[1] === '01') {
+                return 'DD/MM/YYYY';
+            }
+        }
+        return 'Unknown Format';
+    }
+
+    /**
      * Converts a string in any of the following formats to an int YYYYMMDD:
-     *     "mM/dD/yyYY"
-     *     "mmddyyyy"
+     *     "mM/dD/yyYY" or "dD/mM/yyYY"  (depending on locale)
+     *     "mmddyyyy" or "ddmmyyyy" (depending on locale)
      *     "yyyymmdd"
      *     "YYYY-MM-DD" or "YYYY/MM/DD"
      * Bad dates return 0
+     * Takes into account local standard formats.
      *
      * @param {string} dateString
      * @returns {number}
      */
     static strToInt(dateString) {
+        const format = DateUtils.detectDateFormat();
         dateString = dateString.trim();
         dateString = dateString.replace(/-/g, '/');
         dateString = dateString.replace(/\./g, '/');
@@ -39,7 +66,7 @@ class DateUtils {
         let month;
         let year;
 
-        if (/^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(dateString)) {  //  mM/dD/yyYY
+        if (format === "MM/DD/YYYY" && /^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(dateString)) {  //  mM/dD/yyYY
             let sp = dateString.indexOf(" ");
             if (sp > 5)
                 dateString = dateString.substring(0, sp);
@@ -47,15 +74,30 @@ class DateUtils {
             day = parseInt(parts[1], 10);
             month = parseInt(parts[0], 10);
             year = parseInt(parts[2], 10);
+        } else if (format === "DD/MM/YYYY" && /^\d{1,2}\/\d{1,2}\/\d{2,4}/.test(dateString)) {  //  dD/mM/yyYY
+            let sp = dateString.indexOf(" ");
+            if (sp > 5)
+                dateString = dateString.substring(0, sp);
+            const parts = dateString.split("/");
+            month = parseInt(parts[1], 10);
+            day = parseInt(parts[0], 10);
+            year = parseInt(parts[2], 10);
         } else if (/^\d{4}[-/]\d{2}[-/]\d{2}/.test(dateString)) {  // YYYY-MM-DD or YYYY/MM/DD
             year = parseInt(dateString.substring(0, 4), 10);
             month = parseInt(dateString.substring(5, 7), 10);
             day = parseInt(dateString.substring(8, 10), 10);
         } else if (/^\d{8}$/.test(dateString)) {  // NNNNNNNN
-            // assume MMDDYYYY
-            month = parseInt(dateString.substring(0, 2), 10);
-            day = parseInt(dateString.substring(2, 4), 10);
-            year = parseInt(dateString.substring(4, 8), 10);
+            if (format === "MM/DD/YYYY") {
+                // assume MMDDYYYY
+                month = parseInt(dateString.substring(0, 2), 10);
+                day = parseInt(dateString.substring(2, 4), 10);
+                year = parseInt(dateString.substring(4, 8), 10);
+            } else {
+                // assume DDMMYYYY
+                day = parseInt(dateString.substring(0, 2), 10);
+                month = parseInt(dateString.substring(2, 4), 10);
+                year = parseInt(dateString.substring(4, 8), 10);
+            }
             if (month < 1 || month > 12 || day < 1 || day > 31 || year < 1900 || year > 2100) {
                 // assume YYYYMMDD
                 year = parseInt(dateString.substring(0, 4), 10);
@@ -179,21 +221,25 @@ class DateUtils {
     }
 
     /**
-     * Convert numeric YYYYMMDD to string mm/dd/yyyy
+     * Convert numeric YYYYMMDD to string mm/dd/yyyy or whatever format is locally appropriate
      *
      * @param {number} dt
+     * @param {string} [locale=navigator.language] - optional locale to use for formatting the date. Defaults to the user's browser language.
      * @returns {string}
      */
-    static intToStr4(dt) {
+    static intToStr4(dt, locale = navigator.language) {
         if (typeof dt === 'string')
             dt = Number(dt);
         if (!dt)
             return '';
-        const y = Math.floor(dt / 10000);
-        dt -= y * 10000;
-        const m = Math.floor(dt / 100);
-        const d = Math.floor(dt - m * 100);
-        return Utils.zeroPad(m.toString(), 2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 4);
+        const year = parseInt(dt.toString().slice(0, 4), 10);
+        const month = parseInt(dt.toString().slice(4, 6), 10) - 1; // Subtract 1 because months are 0-indexed
+        const day = parseInt(dt.toString().slice(6, 8), 10);
+
+        const date = new Date(year, month, day);
+
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        return new Intl.DateTimeFormat(locale, options).format(date);
     }
 
     /**
@@ -213,22 +259,25 @@ class DateUtils {
     }
 
     /**
-     * Convert numeric YYYYMMDD to string mm/dd/yy
+     * Convert numeric YYYYMMDD to string mm/dd/yy or whatever format is locally appropriate
      *
      * @param {number} dt
+     * @param {string} [locale=navigator.language] - optional locale to use for formatting the date. Defaults to the user's browser language.
      * @returns {string}
      */
-    static intToStr2(dt) {
+    static intToStr2(dt, locale = navigator.language) {
         if (typeof dt === 'string')
             dt = Number(dt);
         if (!dt)
             return '';
-        let y = Math.floor(dt / 10000);
-        dt -= y * 10000;
-        y %= 100;
-        const m = Math.floor(dt / 100);
-        const d = Math.floor(dt - m * 100);
-        return Utils.zeroPad(m.toString(), 2) + '/' + Utils.zeroPad(d, 2) + '/' + Utils.zeroPad(y, 2);
+        const year = parseInt(dt.toString().slice(0, 4), 10);
+        const month = parseInt(dt.toString().slice(4, 6), 10) - 1; // Subtract 1 because months are 0-indexed
+        const day = parseInt(dt.toString().slice(6, 8), 10);
+
+        const date = new Date(year, month, day);
+
+        const options = { year: '2-digit', month: '2-digit', day: '2-digit' };
+        return new Intl.DateTimeFormat(locale, options).format(date);
     }
 
     /**

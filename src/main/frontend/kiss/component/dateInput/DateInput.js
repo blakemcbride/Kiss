@@ -61,7 +61,7 @@
         const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} placeholder="{placeholder}" id="{id}">', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content ? content.trim() : (placeholder ? 'mm/dd/yyyy' : '')
+            placeholder: content ? content.trim() : (placeholder ? DateUtils.detectDateFormat().toLowerCase() : '')
         });
         if (!newElm)
             return;
