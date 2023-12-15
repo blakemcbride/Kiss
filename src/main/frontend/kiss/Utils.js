@@ -495,6 +495,201 @@ class Utils {
         return s.substring(0, s.length + n);
     }
 
+    static localeCurrencyMap = {
+        'en-US': 'USD', // United States Dollar
+        'en-GB': 'GBP', // British Pound Sterling
+        'de-DE': 'EUR', // Euro (Germany)
+        'fr-FR': 'EUR', // Euro (France)
+        'es-ES': 'EUR', // Euro (Spain)
+        'it-IT': 'EUR', // Euro (Italy)
+        'nl-NL': 'EUR', // Euro (Netherlands)
+        'el-GR': 'EUR', // Euro (Greece)
+        'pt-PT': 'EUR', // Euro (Portugal)
+        'ja-JP': 'JPY', // Japanese Yen
+        'zh-CN': 'CNY', // Chinese Yuan
+        'ru-RU': 'RUB', // Russian Ruble
+        'in-IN': 'INR', // Indian Rupee
+        'ar-SA': 'SAR', // Saudi Riyal
+        'ko-KR': 'KRW', // South Korean Won
+        'tr-TR': 'TRY', // Turkish Lira
+        'sv-SE': 'SEK', // Swedish Krona
+        'da-DK': 'DKK', // Danish Krone
+        'nb-NO': 'NOK', // Norwegian Krone
+        'fi-FI': 'EUR', // Euro (Finland)
+        'pl-PL': 'PLN', // Polish Zloty
+        'cs-CZ': 'CZK', // Czech Koruna
+        'hu-HU': 'HUF', // Hungarian Forint
+        'ro-RO': 'RON', // Romanian Leu
+        'bg-BG': 'BGN', // Bulgarian Lev
+        'en-CA': 'CAD', // Canadian Dollar
+        'en-AU': 'AUD', // Australian Dollar
+        'en-NZ': 'NZD', // New Zealand Dollar
+        'th-TH': 'THB', // Thai Baht
+        'id-ID': 'IDR', // Indonesian Rupiah
+        'ms-MY': 'MYR', // Malaysian Ringgit
+        'vi-VN': 'VND', // Vietnamese Dong
+        'tl-PH': 'PHP', // Philippine Peso
+        'he-IL': 'ILS', // Israeli New Shekel
+        'ar-AE': 'AED', // United Arab Emirates Dirham
+        'en-ZA': 'ZAR', // South African Rand
+        'en-SG': 'SGD', // Singapore Dollar
+        'en-HK': 'HKD', // Hong Kong Dollar
+        'es-MX': 'MXN', // Mexican Peso
+        'pt-BR': 'BRL', // Brazilian Real
+        'en-IE': 'EUR', // Euro (Ireland)
+        'en-CH': 'CHF', // Swiss Franc (Switzerland)
+        'nl-BE': 'EUR', // Euro (Belgium)
+        'en-AT': 'EUR', // Euro (Austria)
+        'en-CY': 'EUR', // Euro (Cyprus)
+        'et-EE': 'EUR', // Euro (Estonia)
+        'fi-AX': 'EUR', // Euro (Åland Islands)
+        'fr-GF': 'EUR', // Euro (French Guiana)
+        'es-AR': 'ARS', // Argentine Peso
+        'pt-AO': 'AOA', // Angolan Kwanza
+        'en-BS': 'BSD', // Bahamian Dollar
+        'en-BB': 'BBD', // Barbadian Dollar
+        'en-BZ': 'BZD', // Belize Dollar
+        'en-BM': 'BMD', // Bermudian Dollar
+        'es-BO': 'BOB', // Bolivian Boliviano
+        'nl-BQ': 'USD', // United States Dollar (Caribbean Netherlands)
+        'pt-CV': 'CVE', // Cape Verdean Escudo
+        'en-KY': 'KYD', // Cayman Islands Dollar
+        'es-CL': 'CLP', // Chilean Peso
+        'es-CO': 'COP', // Colombian Peso
+        'es-CR': 'CRC', // Costa Rican Colón
+        'es-CU': 'CUP', // Cuban Peso
+        'en-DM': 'XCD', // East Caribbean Dollar (Dominica)
+        'es-DO': 'DOP', // Dominican Peso
+        'fr-DJ': 'DJF', // Djiboutian Franc
+        'ar-DZ': 'DZD', // Algerian Dinar
+        'en-EG': 'EGP', // Egyptian Pound
+        'am-ET': 'ETB', // Ethiopian Birr
+        'en-FJ': 'FJD', // Fijian Dollar
+        'fr-GA': 'XAF', // Central African CFA Franc (Gabon)
+        'en-GH': 'GHS', // Ghanaian Cedi
+        'en-GM': 'GMD', // Gambian Dalasi
+        'en-GY': 'GYD', // Guyanese Dollar
+        'es-GT': 'GTQ', // Guatemalan Quetzal
+        'en-GD': 'XCD', // East Caribbean Dollar (Grenada)
+        'fr-GP': 'EUR', // Euro (Guadeloupe)
+        'es-HN': 'HNL', // Honduran Lempira
+        'en-JM': 'JMD', // Jamaican Dollar
+        'ar-JO': 'JOD', // Jordanian Dinar
+        'kk-KZ': 'KZT', // Kazakhstani Tenge
+        'rw-RW': 'RWF', // Rwandan Franc
+        'ko-KP': 'KPW', // North Korean Won
+        'ar-KW': 'KWD', // Kuwaiti Dinar
+        'kk-KG': 'KGS', // Kyrgyzstani Som
+        'lo-LA': 'LAK', // Lao Kip
+        'lv-LV': 'EUR', // Euro (Latvia)
+        'ar-LB': 'LBP', // Lebanese Pound
+        'st-ST': 'STD', // São Tomé and Príncipe Dobra
+        // ... add more as needed
+    };
+
+    /**
+     *  Numeric formatter.  Takes a number and converts it to a nicely formatted String (for number in base 10).
+     *  Correctly handles international formatting rules.
+     *
+     * @param {number} num    number to be formatted
+     * @param {string} msk    format mask - any combination of the following:<br>
+     *  <ul>
+     *     <li>B = blank if zero</li>
+     *     <li>C = add commas</li>
+     *     <li>L = left justify number</li>
+     *     <li>P = put parentheses around negative numbers</li>
+     *     <li>Z = zero fill</li>
+     *     <li>D = floating dollar or monetary symbol</li>
+     *     <li>M = monetary (same as 'D')</li>
+     *     <li>R = add a percent sign to the end of the number</li>
+     *  </ul>
+     * @param  {number} wth    total field width (0 means auto)
+     * @param  {number} dp    number of decimal places (-1 means auto)
+     * @return {string} string the formatted String
+     *<p>
+     * example:
+     *<br><br>
+     *    let r = Utils.format(-12345.348, "CP", 12, 2);
+     *<br><br>
+     *    result in r:  "(12,345.35)"
+     * </p>
+     */
+    static format(num, msk, wth, dp) {
+        const options = {};
+        let blnk=false, comma=false, left=false, paren=false, zfill=false, dol=false, ucase=false, percent=false;
+        if (msk) {
+            msk = msk.toUpperCase();
+            for (let i2 = 0; i2 < msk.length; i2++)
+                switch (msk.charAt(i2)) {
+                    case 'B':  // blank if zero
+                        blnk = true;
+                        break;
+                    case 'S':  //  add separator
+                    case 'C':  //  add commas
+                        comma = true;
+                        break;
+                    case 'L':  //  left justify
+                        left = true;
+                        break;
+                    case 'P':  //  parens around negative numbers
+                        paren = true;
+                        break;
+                    case 'Z':  //  zero fill
+                        zfill = true;
+                        break;
+                    case 'M':  //  monetary
+                    case 'D':  //  dollar sign
+                        dol = true;
+                        break;
+                    case 'U':  //  upper case letters
+                        ucase = true;
+                        break;
+                    case 'R':  //  add percent
+                        percent = true;
+                        break;
+                }
+        }
+        if (percent)
+            num /= 100;
+        if (blnk && num < .0001 && num > -.0001)
+            return wth > 0 ? ' '.repeat(wth) : '';
+        options.useGrouping = comma;
+        if (dp !== -1) {
+            options.minimumFractionDigits = dp;
+            options.maximumFractionDigits = dp;
+        }
+        if (dol) {
+            options.style = "currency";
+            let currency = this.localeCurrencyMap[navigator.language];
+            if (!currency)
+                currency = "USD";
+            options.currency = currency;
+            if (paren)
+                options.currencySign = "accounting";
+        } else if (percent)
+            options.style = "percent";
+        let ret;
+        if (!dol && paren) {
+            if (num < 0)
+                ret = '(' + (new Intl.NumberFormat(navigator.language, options)).format(-num) + ')';
+            else
+                ret = (new Intl.NumberFormat(navigator.language, options)).format(num) + ' ';
+        } else
+            ret = (new Intl.NumberFormat(navigator.language, options)).format(num);
+        if (wth > 0) {
+            if (ret.length > wth)
+                if (comma)
+                    return Utils.format(num, base, msk.replaceAll("[Cc]", ""), wth, dp);
+                else
+                    return '*'.repeat(wth);
+            if (left)
+                ret = ret.padEnd(wth, ' ');
+            else
+                ret = ret.padStart(wth, zfill ? '0' : ' ');
+        }
+        return ret;
+    }
+
     /**
      *  Numeric formatter.  Takes a number and converts it to a nicely formatted String in a specified number base.
      *
@@ -713,35 +908,6 @@ class Utils {
                 buf[i++] = '*';
 
         return buf.join('');
-    }
-
-    /**
-     *  Numeric formatter.  Takes a number and converts it to a nicely formatted String (for number in base 10).
-     *
-     * @param {number} num    number to be formatted
-     * @param {string} msk    format mask - any combination of the following:<br>
-     *  <ul>
-     *     <li>B = blank if zero</li>
-     *     <li>C = add commas</li>
-     *     <li>L = left justify number</li>
-     *     <li>P = put parentheses around negative numbers</li>
-     *     <li>Z = zero fill</li>
-     *     <li>D = floating dollar sign</li>
-     *     <li>R = add a percent sign to the end of the number</li>
-     *  </ul>
-     * @param  {number} wth    total field width (0 means auto)
-     * @param  {number} dp    number of decimal places (-1 means auto)
-     * @return {string} string the formatted String
-     *<p>
-     * example:
-     *<br><br>
-     *    let r = Utils.format(-12345.348, "CP", 12, 2);
-     *<br><br>
-     *    result in r:  "(12,345.35)"
-     * </p>
-     */
-    static format(num, msk, wth, dp) {
-        return Utils.formatb(num, 10, msk, wth, dp);
     }
 
     /**
