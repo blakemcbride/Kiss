@@ -584,6 +584,82 @@ class Utils {
         'lv-LV': 'EUR', // Euro (Latvia)
         'ar-LB': 'LBP', // Lebanese Pound
         'st-ST': 'STD', // São Tomé and Príncipe Dobra
+        'fr-CI': 'XOF', // CFA Franc BCEAO (Ivory Coast)
+        'pt-MZ': 'MZN', // Mozambican Metical
+        'sw-TZ': 'TZS', // Tanzanian Shilling
+        'en-KE': 'KES', // Kenyan Shilling
+        'fr-CM': 'XAF', // Central African CFA Franc (Cameroon)
+        'en-NG': 'NGN', // Nigerian Naira
+        'fr-MG': 'MGA', // Malagasy Ariary
+        'en-UG': 'UGX', // Ugandan Shilling
+        'en-ZM': 'ZMW', // Zambian Kwacha
+        'fr-BF': 'XOF', // CFA Franc BCEAO (Burkina Faso)
+        'fr-SN': 'XOF', // CFA Franc BCEAO (Senegal)
+        'en-LR': 'LRD', // Liberian Dollar
+        'en-SL': 'SLL', // Sierra Leonean Leone
+        'ar-SD': 'SDG', // Sudanese Pound
+        'ar-ER': 'ERN', // Eritrean Nakfa
+        'so-SO': 'SOS', // Somali Shilling
+        'ar-EG': 'EGP', // Egyptian Pound (Egypt)
+        'sw-KE': 'KES', // Kenyan Shilling (Kenya)
+        'en-TZ': 'TZS', // Tanzanian Shilling (Tanzania)
+        'fr-BJ': 'XOF', // West African CFA franc (Benin)
+        'en-ZW': 'ZWL', // Zimbabwean Dollar (Zimbabwe)
+        'en-NA': 'NAD', // Namibian Dollar (Namibia)
+        'fr-CD': 'CDF', // Congolese Franc (Democratic Republic of the Congo)
+        'pt-GW': 'XOF', // CFA Franc BCEAO (Guinea-Bissau)
+        'fr-MC': 'EUR', // Euro (Monaco)
+        'en-SC': 'SCR', // Seychellois Rupee (Seychelles)
+        'en-AG': 'XCD', // East Caribbean Dollar (Antigua and Barbuda)
+        'fr-BI': 'BIF', // Burundian Franc (Burundi)
+        'fr-TD': 'XAF', // Central African CFA Franc (Chad)
+        'fr-KM': 'KMF', // Comorian Franc (Comoros)
+        'pt-TL': 'USD', // United States Dollar (East Timor)
+        'en-FK': 'FKP', // Falkland Islands Pound (Falkland Islands)
+        'fr-GQ': 'XAF', // Central African CFA Franc (Equatorial Guinea)
+        'en-SH': 'SHP', // Saint Helena Pound (Saint Helena)
+        'en-KI': 'AUD', // Australian Dollar (Kiribati)
+        'en-MH': 'USD', // United States Dollar (Marshall Islands)
+        'en-FM': 'USD', // United States Dollar (Micronesia)
+        'en-NR': 'AUD', // Australian Dollar (Nauru)
+        'en-PW': 'USD', // United States Dollar (Palau)
+        'en-PG': 'PGK', // Papua New Guinean Kina (Papua New Guinea)
+        'en-WS': 'WST', // Samoan Tala (Samoa)
+        'en-SB': 'SBD', // Solomon Islands Dollar (Solomon Islands)
+        'en-TO': 'TOP', // Tongan Paʻanga (Tonga)
+        'en-TV': 'AUD', // Australian Dollar (Tuvalu)
+        'en-VU': 'VUV', // Vanuatu Vatu (Vanuatu)
+        'fr-PF': 'XPF', // CFP Franc (French Polynesia)
+        'fr-NC': 'XPF', // CFP Franc (New Caledonia)
+        'fr-WF': 'XPF', // CFP Franc (Wallis and Futuna)
+        'en-GG': 'GBP', // British Pound Sterling (Guernsey)
+        'en-IM': 'GBP', // British Pound Sterling (Isle of Man)
+        'en-JE': 'GBP', // British Pound Sterling (Jersey)
+        'en-GI': 'GIP', // Gibraltar Pound (Gibraltar)
+        'fr-ML': 'XOF', // West African CFA franc (Mali)
+        'pt-ST': 'STN', // São Tomé and Príncipe Dobra (São Tomé and Príncipe)
+        'fr-NE': 'XOF', // West African CFA franc (Niger)
+        'en-LS': 'LSL', // Lesotho Loti (Lesotho)
+        'en-BW': 'BWP', // Botswana Pula (Botswana)
+        'en-MU': 'MUR', // Mauritian Rupee (Mauritius)
+        'ar-IQ': 'IQD', // Iraqi Dinar (Iraq)
+        'ar-LY': 'LYD', // Libyan Dinar (Libya)
+        'ar-MA': 'MAD', // Moroccan Dirham (Morocco)
+        'ar-TN': 'TND', // Tunisian Dinar (Tunisia)
+        'ar-YE': 'YER', // Yemeni Rial (Yemen)
+        'en-BN': 'BND', // Brunei Dollar (Brunei)
+        'ms-BN': 'BND', // Brunei Dollar (Brunei, Malay)
+        'km-KH': 'KHR', // Cambodian Riel (Cambodia)
+        'my-MM': 'MMK', // Myanmar Kyat (Myanmar)
+        'ne-NP': 'NPR', // Nepalese Rupee (Nepal)
+        'dz-BT': 'BTN', // Bhutanese Ngultrum (Bhutan)
+        'en-BT': 'BTN', // Bhutanese Ngultrum (Bhutan, English)
+        'en-MV': 'MVR', // Maldivian Rufiyaa (Maldives)
+        'dv-MV': 'MVR', // Maldivian Rufiyaa (Maldives, Dhivehi)
+        'en-CK': 'NZD', // New Zealand Dollar (Cook Islands)
+        'bi-KI': 'AUD', // Australian Dollar (Kiribati, Gilbertese)
+        'sm-WF': 'XPF', // CFP Franc (Wallis and Futuna, Samoan)
+        'ty-PF': 'XPF', // CFP Franc (French Polynesia, Tahitian)
         // ... add more as needed
     };
 
