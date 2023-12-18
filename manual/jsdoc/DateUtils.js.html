@@ -70,22 +70,27 @@ class DateUtils {
      * @return {string} The detected date format. Possible values are 'MM/DD/YYYY', 'DD/MM/YYYY', or 'Unknown Format'.
      */
     static detectDateFormat(locale = navigator.language) {
-        const testDate = new Date(2023, 0, 21); // 21st January 2023
-        const formattedDate = new Intl.DateTimeFormat(locale, {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        }).format(testDate);
+        if (!DateUtils.intFormat || DateUtils.locale !== locale) {
+            DateUtils.locale = locale;
+            const testDate = new Date(2023, 0, 21); // 21st January 2023
+            const formattedDate = new Intl.DateTimeFormat(locale, {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(testDate);
 
-        const parts = formattedDate.match(/(\d{2})/g);
-        if (parts.length > 2) {
-            if (parts[0] === '01') {
-                return 'MM/DD/YYYY';
-            } else if (parts[1] === '01') {
-                return 'DD/MM/YYYY';
+            const parts = formattedDate.match(/(\d{2})/g);
+            if (parts.length > 2) {
+                if (parts[0] === '01') {
+                    DateUtils.intFormat = 'MM/DD/YYYY';
+                } else if (parts[1] === '01') {
+                    DateUtils.intFormat = 'DD/MM/YYYY';
+                }
             }
+            if (!DateUtils.intFormat)
+                DateUtils.intFormat = 'Unknown Format';
         }
-        return 'Unknown Format';
+        return DateUtils.intFormat;
     }
 
     /**

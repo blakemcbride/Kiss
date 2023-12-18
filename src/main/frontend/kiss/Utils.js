@@ -1634,15 +1634,66 @@ class Utils {
      * @returns {number}
      */
     static toNumber(v) {
+
+        /**
+         * Removes the currency symbol from the beginning of the given amount string.
+         *
+         * @param {string} amountString - The amount string from which to remove the currency symbol.
+         * @return {string} The amount string with the currency symbol removed.
+         */
+        function removeCurrencySymbol(amountString) {
+            // Expanded list of common currency symbols
+            const symbols = [
+                '$', '€', '£', '¥', '₹', '₽', 'R', '₺', 'A$', 'C$', 'NZ$', 'S$', 'HK$', 'kr', 'Mex$', 'Fr',
+                'CHF', 'SEK', 'DKK', 'NOK', 'THB', '₪', '₫', '₱', 'RM', 'zł', 'Kč', 'HUF', '₡', '₲',
+                'Q', '₸', '₼', 'лв', '₴', '₾', '֏', '₼', 'Bs.', '₭', '₦', '₨', '₲', '₵', '₸'
+            ];
+
+            // Remove the symbol if it is present
+            for (let symbol of symbols)
+                if (amountString.startsWith(symbol))
+                    return amountString.replace(symbol, '').trim();
+
+            // Return the original string if no symbol was found
+            return amountString;
+        }
+
+        /**
+         * Detects the grouping separator used in numeric formatting based on the specified locale.
+         *
+         * @param {string} [locale=navigator.language] - The locale to use for formatting the number.  Defaults to the local locale.
+         * @return {string} The grouping separator character used in numeric formatting, or an empty string if not found.
+         */
+        function detectGroupingSeparator(locale = navigator.language) {
+            if (Utils.numericGroupCharacter === undefined) {
+                const largeNumber = 1234567; // Use a number that will definitely have grouping separators
+                const formattedNumber = new Intl.NumberFormat(locale).format(largeNumber);
+
+                // Find the character that is not a digit and comes after the first digit (which will be the grouping separator)
+                for (let i = 0; i < formattedNumber.length; i++) {
+                    if (!/\d/.test(formattedNumber[i]) && /\d/.test(formattedNumber[i - 1])) {
+                        Utils.numericGroupCharacter = formattedNumber[i];
+                        break;
+                    }
+                }
+                if (Utils.numericGroupCharacter === undefined)
+                    Utils.numericGroupCharacter = '';
+            }
+            return Utils.numericGroupCharacter;
+        }
+
         if (typeof v === 'number')
             return isNaN(v) ? 0 : v;
         if (typeof v !== 'string'  ||  !v.trim())
             return 0;
-        v = v.replace(/[kK]/, '000');
-        v = v.replace(/[mM]/, '000000');
-        v = v.replaceAll(/[,$% ]/g, '');
+        v = removeCurrencySymbol(v).replaceAll('[ %]', '').replaceAll(detectGroupingSeparator(), '');
+        let kilo, mega;
+        if (kilo = (/k/i.test(v)))
+            v = v.replace(/k/i, '');
+        if (mega = (/m/i.test(v)))
+            v = v.replace(/m/i, '');
         const r = Number(v);
-        return isNaN(r) ? 0 : r;
+        return isNaN(r) ? 0 : r * (kilo ? 1000 : mega ? 1000000 : 1);
     }
 
     /**
