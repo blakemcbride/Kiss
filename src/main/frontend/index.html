@@ -20,6 +20,10 @@
 
     <style>
 
+        .ck-powered-by {
+            display: none;
+        }
+
         html, body {
             width: 100%;
             box-sizing: border-box;
@@ -127,6 +131,7 @@
                 loadScript("kiss/NumberUtils.js");
                 loadScript("kiss/Server.js");
                 loadScript("kiss/AGGrid.js");
+                loadScript("kiss/Editor.js");
             };
 
             $.ajaxSetup({ cache: controlCache });  // utilize browser cache to the fullest when version hasn't changed
@@ -159,6 +164,7 @@
 
 <script src="lib/jquery-3.6.3.min.js"></script>
 <script src="lib/ag-grid-community.min.noStyle.js?nocache=20230813"></script>
+<script src="lib/ckeditor.js?nocache=20230813"></script>
 
 </body>
 

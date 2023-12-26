@@ -1491,6 +1491,8 @@ class Utils {
         });
         if (typeof AGGrid !== 'undefined')
             AGGrid.newGridContext();
+         if (typeof Editor !== 'undefined')
+            Editor.newEditorContext();
         Utils.newEnterContext();
         if (!w.hasClass('popup-background')) {
             let width = w.css('width');
@@ -1580,6 +1582,8 @@ class Utils {
         const context = Utils.popup_context.pop();
         if (typeof AGGrid !== 'undefined')
             AGGrid.popGridContext();
+        if (typeof Editor !== 'undefined')
+            Editor.popEditorContext();
         Utils.popEnterContext();
         $('#' + context.id).hide();
         Utils.globalEnterHandler(context.globalEnterHandler);
@@ -1868,6 +1872,10 @@ class Utils {
         if (typeof AGGrid !== 'undefined') {
             AGGrid.popAllGridContexts();
             AGGrid.newGridContext();   //  for the new screen we are loading
+        }
+        if (typeof Editor !== 'undefined') {
+            Editor.popAllEditorContexts();
+            Editor.newEditorContext();   //  for the new screen we are loading
         }
         Utils.clearAllEnterContexts();
         Utils.newEnterContext();

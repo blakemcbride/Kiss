@@ -4,6 +4,8 @@
 
 
 /**
+ * Provide a grid control.
+ * <br><br>
  * This class is a wrapper around the public ag-grid utility.  It is intended that this class be used exclusively
  * rather than any of the raw ag-grid API.  It provides a higher-level and more convenient API.
  * <br><br>

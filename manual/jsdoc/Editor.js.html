@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>Server.js - Documentation</title>
+    <title>Editor.js - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -32,7 +32,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">Server.js</h1>
+    <h1 class="page-title">Editor.js</h1>
     
 
     
@@ -42,385 +42,201 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/* global Utils */
-
-/**
- * Created by Blake McBride on 9/24/16.
+            <pre class="prettyprint source linenums"><code>/**
+ * Provide a word-processor-like control.
+ * &lt;br>&lt;br>
+ * This class is a wrapper around the public CKEditor 5 utility.  It is intended that this class be used exclusively
+ * rather than any of the raw CKEditor API.  It provides a higher-level and more convenient API.
+ * &lt;br>&lt;br>
+ * Please refer to CKEditor documentation on &lt;a href="https://ckeditor.com/docs">https://ckeditor.com/docs&lt;/a> for more information.
  */
+class Editor {
 
-
-'use strict';
-
-/**
- * This class provides the facilities used to communicate with the back-end.
- */
-class Server {
-
-    /**
-     * Set the URL of the back-end.
-     *
-     * @param {string} url
-     */
-    static setURL(url) {
-        Server.url = url;
+    constructor(parentId) {
+        this.parentId = parentId;
+        this.editorId = parentId + "-editor";
+        this.toolbarId = parentId + "-toolbar";
     }
 
-    // internal
-    static setUUID(uuid) {
-        Server.uuid = uuid;
-    }
+    async initialize() {
+        const self = this;
 
-    /**
-     *  Removes the user association between the back-end and front-end.
-     */
-    static logout() {
-        Utils.suspendDepth = 0;
-        document.body.style.cursor = 'default';
-        Utils.cleanup();  //  clean up any context information
-        Server.uuid = '';
-        window.onbeforeunload = null;  //  allow logout
-        location.reload();
-    }
+        const parentDiv = document.getElementById(this.parentId);
+        parentDiv.style.border = '1px solid black';
+        parentDiv.style.backgroundColor = 'white';
 
-    /**
-     * Evoke a back-end REST service.
-     * &lt;br>&lt;br>
-     * This function is typically called with an &lt;code>await&lt;/code> or a &lt;code>then&lt;/code> in order to process the result.
-     *
-     * @param {string} cls the web service to be called
-     * @param {string} meth  the web method
-     * @param {object} injson data to be passed to the back-end
-     *
-     * @returns data returned from the back-end
-     */
-    static async call(cls, meth, injson=null) {
-        Server.checkTime();
-        const path = "rest";  // path to servlet
-        if (!injson)
-            injson = {};
-        else
-            injson = { ...injson };  // shallow copy
-        injson._uuid = Server.uuid;
-        injson._method = meth;
-        injson._class = cls;
+        // Create toolbar div
+        const toolbarDiv = document.createElement('div');
+        toolbarDiv  .id = this.toolbarId;
+        parentDiv.appendChild(toolbarDiv  );
 
-        const doCall = async function (cls, meth, injson, pass, resolve, reject) {
-            let response;
-            if (pass === 1)
-                Server.incCount();
-            try {
-                response = await fetch(Server.url + '/' + path, {
-                    method: 'POST',
-                    body: JSON.stringify(injson),
-                    headers: {
-                        'Content-Type': 'application/json'
+        // Create editor div
+        const editorDiv = document.createElement('div');
+        editorDiv.id = this.editorId;
+        const parentHeight = parseInt(parentDiv.style.height);
+        editorDiv.style.height = (parentHeight - 41) + 'px';
+        parentDiv.appendChild(editorDiv);
+
+        return new Promise(function (resolve, reject) {
+            DecoupledEditor
+                .create( editorDiv, {
+                    fontSize: {
+                        options: [
+                            9,
+                            11,
+                            13,
+                            'default',
+                            17,
+                            19,
+                            21,
+                            23,
+                            25
+                        ],
+                        supportAllValues: true
                     }
-                });
-            } catch (err) {
-                if (pass &lt; 3)
-                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                console.log("Server communication error (1): " + cls + "." + meth + "(): " + err.message);
-                Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
-                return;
-            }
-            try {
-                const res = await response.json();
-                Server.decCount();
-                if (!res._Success)
-                    if (res._ErrorCode === 2) {
-                        await Utils.showMessage('Error', res._ErrorMessage);
-                        Server.logout();
-                    } else
-                        await Utils.showMessage('Error', res._ErrorMessage);
-                resolve(res);
-            } catch (err) {
-                if (pass &lt; 3)
-                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                console.log("Server communication error (2): " + cls + "." + meth + "(): " + err.message);
-                Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
-            }
-        };
-
-        return new Promise(function (resolve, reject) {
-            doCall(cls, meth, injson, 1, resolve, reject);
-        });
-
-    }
-
-    /**
-     * Perform a binary call.  JSON is sent and JSON is returned.
-     * However, a new element will be in the returned json called '_data'.
-     * _data will contain the binary data.
-     * This method is often used to retrieve images.
-     * The back-end service should call &lt;code>servlet.returnBinary()&lt;/code>
-     *
-     * @param cls
-     * @param meth
-     * @param injson
-     * @returns {Promise&lt;unknown>}
-     *
-     * @see Utils.toBase64
-     */
-    static async binaryCall(cls, meth, injson=null) {
-        Server.checkTime();
-        const path = "rest";  // path to servlet
-        if (!injson)
-            injson = {};
-        else
-            injson = { ...injson };  // shallow copy
-        injson._uuid = Server.uuid;
-        injson._method = meth;
-        injson._class = cls;
-
-        const doCall = async function (cls, meth, injson, pass, resolve, reject) {
-            let response;
-            if (pass === 1)
-                Server.incCount();
-            try {
-                response = await fetch(Server.url + '/' + path, {
-                    method: 'POST',
-                    body: JSON.stringify(injson),
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-            } catch (err) {
-                if (pass &lt; 3)
-                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                console.log("Server communication error (3): " + cls + "." + meth + "(): " + err.message);
-                Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
-                return;
-            }
-            try {
-                const res = await response.arrayBuffer();
-                Server.decCount();
-                if (!res) {
-                    await Utils.showMessage('Error', Server.errorMessage);
-                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
-                }
-                //               let str = String.fromCharCode.apply(null, new Uint8Array(res));    sometimes causes stack overflow
-                const bytes = new Uint8Array(res);
-                let json = '';
-                let i = 0;
-                let c = ' ';
-                const m = bytes.length;
-                while (c !== '\x03' &amp;&amp; i &lt; m) {
-                    c = String.fromCharCode(bytes[i++]);
-                    if (c !== '\x03')
-                        json += c;
-                }
-                const ret = JSON.parse(json);
-                if (!ret._Success)
-                    if (ret._ErrorCode === 2) {
-                        await Utils.showMessage('Error', ret._ErrorMessage);
-                        Server.logout();
-                    } else
-                        await Utils.showMessage('Error', ret._ErrorMessage);
-                ret._data = bytes.slice(i, bytes.length);
-                resolve(ret);
-            } catch (err) {
-                if (pass &lt; 3)
-                    return doCall(cls, meth, injson, pass + 1, resolve, reject);
-                Server.decCount();
-                await Utils.showMessage('Error', Server.errorMessage);
-                resolve({_Success: false, _ErrorMessage: Server.errorMessage});
-            }
-        };
-
-        return new Promise(function (resolve, reject) {
-            doCall(cls, meth, injson, 1, resolve, reject);
-        });
-
-    }
-
-    static incCount() {
-        if (++Utils.suspendDepth === 1)
-            document.body.style.cursor = 'wait';
-    }
-
-    static decCount() {
-        if (--Utils.suspendDepth === 0)
-            document.body.style.cursor = 'default';
-    }
-
-    /**
-     * Send the file upload to the server.
-     * This method displays a wait message and a final status message.
-     * &lt;br>&lt;br>
-     * &lt;code>fd&lt;/code> can either be form data or it can be the ID of the file upload control.
-     *
-     * @param {string} cls
-     * @param {string} meth
-     * @param {FormData|string} fd ctl-id, FormData, FileList, or array of FileList
-     * @param {object} injson
-     * @param {string} waitMsg  optional wait message
-     * @param {string} successMessage optional success message
-     *
-     * @see Utils.getFileUploadCount
-     * @see Utils.getFileUploadFormData
-     */
-    static fileUploadSend(cls, meth, fd, injson=null, waitMsg, successMessage) {
-        Server.checkTime();
-        return new Promise(function (resolve, reject) {
-            if (typeof fd === 'string')
-                fd = $$(fd).getFormData();
-            else if (Array.isArray(fd)) {
-                const flst = fd;
-                fd = new FormData();
-                let i = 0;
-                for (let j=0 ; j &lt; flst.length ; j++) {
-                    const files = flst[j];
-                    if (Array.isArray(files))
-                        for ( ; i &lt; files.length ; i++)
-                            fd.append('_file-' + i, files[i]);
-                    else
-                        fd.append('_file-' + i++, files);
-                }
-            } else if (fd instanceof FileList) {
-                const files = fd;
-                fd = new FormData();
-                for (let i=0 ; i &lt; files.length ; i++)
-                    fd.append('_file-' + i, files[i]);
-            }
-            fd.append('_class', cls);
-            fd.append('_method', meth);
-            fd.append("_uuid", Server.uuid);
-            if (injson)
-                for (let key in injson) {
-                    let val = injson[key];
-                    fd.append(key, typeof val === 'object' ? JSON.stringify(val) : val);
-                }
-            Utils.waitMessage(waitMsg ? waitMsg : "File upload in progress.");
-            Server.incCount();
-            $.ajax({
-                url: Server.url + '/rest',
-                type: 'POST',
-                processData: false,
-                contentType: false,
-                data: fd,
-                dataType: 'json',  // what is coming back
-                cache: false,
-                success: async function (res, status, hdr) {
-                    Utils.waitMessageEnd();
-                    Server.decCount();
-                    if (res._Success)
-                        await Utils.showMessage("Information", successMessage ? successMessage : "Upload successful.");
-                    else if (res._ErrorCode === 2) {
-                        await Utils.showMessage("Error", res._ErrorMessage);
-                        Server.logout();
-                    } else
-                        await Utils.showMessage("Error", res._ErrorMessage);
-                    resolve(res);
-                },
-                error: async function (hdr, status, error) {
-                    Utils.waitMessageEnd();
-                    Server.decCount();
-                    await Utils.showMessage("Error", Server.errorMessage);
-                    resolve({_Success: false, _ErrorMessage: Server.errorMessage});
-                }
-            });
+                } )
+                .then( editor => {
+                    toolbarDiv.appendChild(editor.ui.view.toolbar.element);
+                    resolve( editor );
+                } )
+                .catch( error => {
+                    console.error( error );
+                    reject( undefined );
+                } );
         });
     }
 
     /**
-     * Used to call a number of simultaneous web services and wait till they're all done
-     * before processing any of their results.
-     * &lt;br>&lt;br>
-     * This function takes a variable number of arguments.
-     * &lt;br>&lt;br>
-     * The first argument is an array of the Promises from each web service call.
-     * &lt;br>&lt;br>
-     * Each remaining argument is a function that gets the result from the positionally corresponding
-     * promise in the first argument.  If any are null there is no function executed for that returned promise.
-     * Each function that gets executed gets passed the return value of the associated web service.
-     * &lt;br>&lt;br>
-     * You can wait for this function to complete asynchronously by calling it with an await.
-     * &lt;br>&lt;br>
-     * The return value is &lt;code>false&lt;/code> if all the web services complete and &lt;code>true&lt;/code> if there is an error.
+     * Creates a new instance of the Editor class and initializes it.
+     *
+     * @param {string} parentId - The ID of the editor div.
+     * @return {Promise&lt;Editor>} A promise that resolves to the initialized Editor instance.
      */
-    static callAll(pa /*, ... each subsequent arg is a function to handle the result of the next promise in pa */) {
-        Server.checkTime();
-        const args = arguments;
-        return new Promise(function (resolve, reject) {
-            Promise.all(pa).then(function (ret) {
-                for (let i = 0; i &lt; ret.length; i++)
-                    if (!ret[i]._Success) {
-                        if (ret[i]._ErrorCode === 2)
-                            Server.logout();
-                        resolve(true);  //  error
-                        return;
-                    }
-                for (let i=1 ; i &lt; args.length  &amp;&amp;  i &lt;= ret.length ; i++) {
-                    let fun = args[i];
-                    if (fun)
-                        fun(ret[i-1]);
-                }
-                resolve(false);  //  success
-            });
+    static async create(parentId) {
+        const ins = new Editor(parentId);
+        ins.editor = await ins.initialize();
+        Editor.addEditor(ins);
+        return ins;
+    }
+
+    /**
+     * Retrieves the HTML content from the editor.
+     *
+     * @return {string} The HTML content of the editor.
+     */
+    getHtml() {
+        return this.editor.getData();
+    }
+
+    /**
+     * Sets the HTML content in the editor.
+     *
+     * @param html
+     */
+    setHtml(html) {
+        this.editor.setData(html);
+    }
+
+    /**
+     * Clears the content of the editor.
+     */
+    clear() {
+        this.editor.setData('');
+    }
+
+    /**
+     * Sets the editor to read-only mode.
+     */
+    readOnly() {
+        this.editor.enableReadOnlyMode('xx');
+    }
+
+    /**
+     * Sets the editor to read-write mode.
+     */
+    readWrite() {
+        this.editor.disableReadOnlyMode('xx');
+    }
+
+    /**
+     * Dispose of the editor when it is no longer needed.
+     * Generally, Kiss handles this automatically.
+     */
+    dispose() {
+        this.editor.destroy().then(() => {
+            const parentDiv = document.getElementById(this.parentId);
+
+            // Check if the first child exists and remove it
+            const toolbar = document.getElementById(this.toolbarId);
+            if (toolbar) 
+                parentDiv.removeChild(toolbar);
+
+            // Check if the second child exists and remove it
+            const editor = document.getElementById(this.editorId);
+            if (editor) 
+                parentDiv.removeChild(editor);
+        } ).catch(error => {
+            console.log(error);
         });
     }
-
+    
     /**
-     * Set the maximum number of seconds between calls or zero for no max.
-     * If the maximum number of seconds is exceeded, the user will be logged out
-     * on their next attempt to make a service call.
-     *
-     * @param seconds
+     * Create a new editor context.
      */
-    static setMaxInactivitySeconds(seconds) {
-        Server.maxInactiveSeconds = seconds;
-        Server.timeLastCall = (new Date()).getTime() / 1000; // seconds since 1970
+    static newEditorContext() {
+        Editor.editorContext.push([]);
     }
 
     /**
-     * Set the maximum number of minutes between calls or zero for no max.
-     * If the maximum number of minutes is exceeded, the user will be logged out
-     * on their next attempt to make a service call.
+     * Add an editor to the current context.
      *
-     * @param minutes
+     * @param editor
      */
-    static setMaxInactivityMinutes(minutes) {
-        Server.setMaxInactivitySeconds(minutes * 60);
+    static addEditor(editor) {
+        const cc = Editor.editorContext[Editor.editorContext.length - 1];
+        cc.push(editor);
     }
 
     /**
-     * Set the maximum number of hours between calls or zero for no max.
-     * If the maximum number of hours is exceeded, the user will be logged out
-     * on their next attempt to make a service call.
-     *
-     * @param hours
+     * Destroy all editors in last context and remove the context
      */
-    static setMaxInactivityHours(hours) {
-        Server.setMaxInactivitySeconds(hours * 60 * 60);
+    static popEditorContext() {
+        const c = Editor.editorContext.pop();
+        if (c)
+            for (let i = 0; i &lt; c.length; i++)
+                c[i].dispose();
     }
 
-    static async checkTime() {
-        if (!Server.maxInactiveSeconds)
-            return;
-        const now = (new Date()).getTime() / 1000;
-        if (now - Server.timeLastCall > Server.maxInactiveSeconds) {
-            await Utils.showMessage("Warning", "Auto logout due to inactivity.  Please re-login.");
-            Server.logout();
-        } else
-            Server.timeLastCall = now;
+    /**
+     * Destroys all popup and screen editors that have been created
+     */
+    static popAllEditorContexts() {
+        while (Editor.editorContext.length)
+            Editor.popEditorContext();
+    }
+
+    /**
+     * Print the contents of the editor
+     */
+    printEditorContent() {
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write('&lt;html lang="en">&lt;head>&lt;title>Print&lt;/title>&lt;/head>&lt;body>');
+        printWindow.document.write(this.editor.getData()); // Get the data from CKEditor
+        printWindow.document.write('&lt;/body>&lt;/html>');
+        printWindow.document.close();
+
+        printWindow.focus();
+        printWindow.print();
+
+        printWindow.close();
     }
 }
 
-    // class variables
-Server.errorMessage = 'Error communicating with the server.';
-Server.timeLastCall;
-Server.maxInactiveSeconds = 0;  // max number of seconds between calls or zero for no max (or auto logout)
-
-
-
-
-</code></pre>
+Editor.editorContext = [];      //  An array of arrays.  The outer array represents a stack of contexts.
+                                //  The inner array is an array of editors that'll need to be disposed.
+                                //  Basically, each context (except the first) represents a popup.
+                                //  The first represents the current screen.
+                                //  Each inner array contains an array of editors in that context.</code></pre>
         </article>
     </section>
 
