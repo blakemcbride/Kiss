@@ -85,6 +85,15 @@ class Editor {
     }
 
     /**
+     * Retrieves the text (not HTML) content of the editor.
+     *
+     * @returns {string}
+     */
+    getText() {
+        return Utils.htmlToText(this.editor.getData());
+    }
+
+    /**
      * Sets the HTML content in the editor.
      *
      * @param html
