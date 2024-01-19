@@ -30,9 +30,9 @@ import static org.kissweb.builder.BuildUtils.*;
 public class Tasks {
 
     // Things that change semi-often
-    final String groovyVer = "4.0.12";
-    final String postgresqlVer = "42.5.1";
-    final String tomcatVer = "9.0.76";
+    final String groovyVer = "4.0.18";
+    final String postgresqlVer = "42.7.1";
+    final String tomcatVer = "9.0.85";
 
 
     final String LIBS = "libs";
@@ -326,18 +326,18 @@ public class Tasks {
         dep.add("c3p0-0.9.5.5.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
         dep.add(groovyJar, LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/" + groovyVer + "/" + groovyJar);
         dep.add("javax.servlet-api-4.0.1.jar", LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
-        dep.add("log4j-core-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.19.0/log4j-core-2.19.0.jar");
-        dep.add("log4j-api-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.19.0/log4j-api-2.19.0.jar");
-        dep.add("log4j-1.2-api-2.19.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.19.0/log4j-1.2-api-2.19.0.jar");
+        dep.add("log4j-core-2.22.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.22.0/log4j-core-2.22.0.jar");
+        dep.add("log4j-api-2.22.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.22.0/log4j-api-2.22.0.jar");
+        dep.add("log4j-1.2-api-2.22.0.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.22.0/log4j-1.2-api-2.22.0.jar");
         dep.add("mchange-commons-java-0.2.20.jar", LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
-        dep.add("mssql-jdbc-11.2.2.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/11.2.2.jre8/mssql-jdbc-11.2.2.jre8.jar");
+        dep.add("mssql-jdbc-12.4.2.jre8.jar", LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre8/mssql-jdbc-12.4.2.jre8.jar");
         // Oracle has removed these files from their public repository
         //dep.add("mysql-connector-java-8.0.30.jar", LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.33/mysql-connector-java-8.0.30.jar");
         dep.add("ojdbc10-19.3.0.0.jar", LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
         dep.add(postgresqlJar, LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/" + postgresqlVer + "/" + postgresqlJar);
         dep.add("slf4j-api-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add("slf4j-simple-1.7.30.jar", LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
-        dep.add("sqlite-jdbc-3.42.0.0.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar");
+        dep.add("sqlite-jdbc-3.45.0.0.jar", LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.45.0.0/sqlite-jdbc-3.45.0.0.jar");
         //  https://github.com/dvare/dynamic-loader
         dep.add("dynamic-loader-3.1.jar", LIBS, "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.dvare&a=dynamic-loader&v=3.1&e=jar");
         // dep.add("dynamic-loader-3.0.jar", LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
