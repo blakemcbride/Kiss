@@ -41,6 +41,7 @@ class AGGrid {
         this.suppressRowClickSelection = false;
         this.suppressHorizontalScroll = true;
         this.rowStyleFun = null;
+        this.disableCtl = false;
     }
 
     /**
@@ -465,7 +466,7 @@ class AGGrid {
     setOnSelectionChanged(fn) {
         const self = this;
         this.gridOptions.onSelectionChanged = function () {
-            if (fn)
+            if (fn && !self.disableCtl)
                 fn(self.gridOptions.api.getSelectedRows());
         };
         return this;
@@ -478,9 +479,10 @@ class AGGrid {
      * @returns {AGGrid}
      */
     setOnRowDoubleClicked(fn) {
+        const self = this;
         if (fn)
             this.gridOptions.onRowDoubleClicked = () => {
-                if (!Utils.suspendDepth)
+                if (!Utils.suspendDepth && !self.disableCtl)
                     fn();
             };
         else
@@ -646,6 +648,24 @@ class AGGrid {
         const msk = params.colDef.mask ? params.colDef.mask : '';
         const dp  = params.colDef.decimalPlaces ? params.colDef.decimalPlaces : 0;
         return Utils.format(val, msk, 0, dp);
+    }
+
+    /**
+     * Disables the clicks on the AGGrid control.
+     *
+     * @param {boolean} flg - true=disable, false=enable
+     */
+    disable(flg = true) {
+        this.disableCtl = flg;
+    }
+
+    /**
+     * Enables the clicks on the AGGrid control.
+     *
+     * @param {boolean} flg - true=enable, false=disable
+     */
+    enable(flg = true) {
+        this.disableCtl = !flg;
     }
 
 }
