@@ -218,17 +218,23 @@ Kiss.RadioButtons.isReadOnly = function (group) {
 
 //--
 
-Kiss.RadioButtons.hide = function (group) {
+Kiss.RadioButtons.hide = function (group, flg=true) {
     const ids = Kiss.RadioButtons.groups[group].ids;
     ids.forEach(id => {
-        $('#' + id + '--div').hide();
+        if (flg)
+            $('#' + id + '--div').hide();
+        else
+            $('#' + id + '--div').show();
     });
 };
 
-Kiss.RadioButtons.show = function (group) {
+Kiss.RadioButtons.show = function (group, flg=true) {
     const ids = Kiss.RadioButtons.groups[group].ids;
     ids.forEach(id => {
-        $('#' + id + '--div').show();
+        if (flg)
+            $('#' + id + '--div').show();
+        else
+            $('#' + id + '--div').hide();
     });
 };
 
@@ -268,12 +274,12 @@ Kiss.RadioButtons.resetGroups = function () {
     return this;
 };
 
-Kiss.RadioButtons.enable = function (group) {
-    $('input[type=radio][name="' + group + '"]').attr('disabled', false);
+Kiss.RadioButtons.enable = function (group, flg=true) {
+    $('input[type=radio][name="' + group + '"]').attr('disabled', !flg);
 };
 
-Kiss.RadioButtons.disable = function (group) {
-    $('input[type=radio][name="' + group + '"]').attr('disabled', true);
+Kiss.RadioButtons.disable = function (group, flg=true) {
+    $('input[type=radio][name="' + group + '"]').attr('disabled', flg);
 };
 
 Kiss.RadioButtons.isDisabled = function (group) {

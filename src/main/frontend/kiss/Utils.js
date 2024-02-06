@@ -63,20 +63,20 @@ function $$(id) {
         rbObj.isError = function (lbl) {
             return Kiss.RadioButtons.isError(id, lbl);
         };
-        rbObj.enable = function () {
-            Kiss.RadioButtons.enable(id);
+        rbObj.enable = function (flg=true) {
+            Kiss.RadioButtons.enable(id, flg);
             return rbObj;
         };
-        rbObj.disable = function () {
-            Kiss.RadioButtons.disable(id);
+        rbObj.disable = function (flg=true) {
+            Kiss.RadioButtons.disable(id, flg);
             return rbObj;
         };
-        rbObj.hide = function () {
-            Kiss.RadioButtons.hide(id);
+        rbObj.hide = function (flg=true) {
+            Kiss.RadioButtons.hide(id, flg);
             return rbObj;
         };
-        rbObj.show = function () {
-            Kiss.RadioButtons.show(id);
+        rbObj.show = function (flg=true) {
+            Kiss.RadioButtons.show(id, flg);
             return rbObj;
         };
         rbObj.isHidden = function () {
