@@ -116,33 +116,44 @@ public class Connection implements AutoCloseable {
      * Create a connection string appropriate for the indicated database type.  This method is only used in special situations.
      *
      * @param type
-     * @param host
+     * @param host (can use null for localhost)
+     * @param port (use null for default)
      * @param dbname
-     * @param user
+     * @param user (use null for integrated security)
      * @param pw
      * @return
      *
      * @see Connection(ConnectionType, String, String, String, String)
      */
-    public static String makeConnectionString(ConnectionType type, String host, String dbname, String user, String pw) {
+    public static String makeConnectionString(ConnectionType type, String host, Integer port, String dbname, String user, String pw) {
         String connectionString;
 
+        if (host == null)
+            host = "localhost";
         if (type == ConnectionType.PostgreSQL) {
-            connectionString = "jdbc:postgresql://" + host + "/" + dbname + "?user=" + user + "&password=" + pw;
+            if (port == null)
+                port = 5432;
+            connectionString = "jdbc:postgresql://" + host + ":" + port + "/" + dbname + "?user=" + user + "&password=" + pw;
         } else if (type == ConnectionType.MicrosoftServer) {
-            connectionString = "jdbc:sqlserver://" + host + ";databaseName=" + dbname + ";";
+            if (port == null)
+                port = 1433;
+            connectionString = "jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + dbname + ";";
             if (user != null && !"".equals(user))
                 connectionString += "user=" + user + ";password=" + pw + ";";
             else
                 connectionString += "integratedSecurity=true;";
         } else if (type == ConnectionType.MySQL) {
-            connectionString = "jdbc:mysql://" + host + "/" + dbname + "?user=" + user + "&password=" + pw;
+            if (port == null)
+                port = 3306;
+            connectionString = "jdbc:mysql://" + host + ":" + port + "/" + dbname + "?user=" + user + "&password=" + pw;
         } else if (type == ConnectionType.SQLite) {
             connectionString = "jdbc:sqlite:" + dbname;
             if (pw != null && !pw.isEmpty())
                 connectionString += ";Password=" + pw + ";";
         } else if (type == ConnectionType.Oracle) {
-            connectionString = "jdbc:oracle:thin:" + user + "/" + pw + "@" + dbname;
+            if (port == null)
+                port = 1521;
+            connectionString = "jdbc:oracle:thin:" + user + "/" + pw + "@//" + host + ":" + port + "/" + dbname;
         } else
             throw new UnsupportedOperationException();
         return connectionString;
@@ -199,7 +210,8 @@ public class Connection implements AutoCloseable {
      * This is the main method of forming a new database connection.
      *
      * @param type
-     * @param host
+     * @param host (null for localhost)
+     * @param port (null for default)
      * @param dbname
      * @param user
      * @param pw
@@ -208,8 +220,8 @@ public class Connection implements AutoCloseable {
      *
      * @see Connection(ConnectionType, String, String)
      */
-    public Connection(ConnectionType type, String host, String dbname, String user, String pw) throws SQLException, ClassNotFoundException {
-        this(type, makeConnectionString(type, host, dbname, user, pw));
+    public Connection(ConnectionType type, String host, Integer port, String dbname, String user, String pw) throws SQLException, ClassNotFoundException {
+        this(type, makeConnectionString(type, host, port, dbname, user, pw));
         ctype = type;
         dmd = conn.getMetaData();
     }
@@ -218,15 +230,16 @@ public class Connection implements AutoCloseable {
      * This is the main method of forming a new database connection when Windows authentication is used.
      *
      * @param type
-     * @param host
+     * @param host (null for localhost)
+     * @param port (null for default)
      * @param dbname
      * @throws SQLException
      * @throws ClassNotFoundException
      *
      * @see Connection(ConnectionType, String, String, String, String)
      */
-    public Connection(ConnectionType type, String host, String dbname) throws SQLException, ClassNotFoundException {
-        this(type, makeConnectionString(type, host, dbname, null, null));
+    public Connection(ConnectionType type, String host, Integer port, String dbname) throws SQLException, ClassNotFoundException {
+        this(type, makeConnectionString(type, host, port, dbname, null, null));
         ctype = type;
         dmd = conn.getMetaData();
     }

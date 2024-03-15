@@ -35,6 +35,7 @@ public class MainServlet extends HttpServlet {
     private static final Logger logger = Logger.getLogger(MainServlet.class);
     private static Connection.ConnectionType connectionType;
     private static String host;                      // set by KissInit.groovy
+    private static Integer port;                     // optionally set by KissInit.groovy
     private static String database;                  // set by KissInit.groovy
     private static String user;                      // database username, set by KissInit.groovy
     private static String password;                  // database password, set by KissInit.groovy
@@ -258,10 +259,13 @@ public class MainServlet extends HttpServlet {
             return;
         }
         if (cpds == null) {
-            logger.info("* * * Attempting to connect to database " + host + ":" + database + ":" + user);
+            if (port == null)
+                logger.info("* * * Attempting to connect to database " + host + ":" + database + ":" + user);
+            else
+                logger.info("* * * Attempting to connect to database " + host + ":" + port + ":" + database + ":" + user);
             if (connectionType == Connection.ConnectionType.SQLite  &&  database != null  &&  !database.isEmpty() &&  database.charAt(0) != '/')
                 database = applicationPath + database;
-            String cstr = Connection.makeConnectionString(connectionType, host, database, user, password);
+            String cstr = Connection.makeConnectionString(connectionType, host, port, database, user, password);
             Connection con;
             try {
                 con = new Connection(connectionType, cstr);
@@ -299,8 +303,16 @@ public class MainServlet extends HttpServlet {
         host = hostp;
     }
 
+    public static void setPort(int portp) {
+        port = portp;
+    }
+
     public static String getHost() {
         return host;
+    }
+
+    public static Integer getPort() {
+        return port;
     }
 
     public static String getUser() {

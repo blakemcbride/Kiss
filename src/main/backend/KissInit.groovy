@@ -7,6 +7,7 @@ class KissInit {
     static void init() {
         MainServlet.setConnectionType Connection.ConnectionType.SQLite
         MainServlet.setHost "localhost"
+        //MainServlet.setPort 5432                // specify the database port if not the database default
         MainServlet.setDatabase "DB.sqlite"       // the name of the database, leave blank for none (and no authentication)
         MainServlet.setUser ""                    // database user (not application user login)
         MainServlet.setPassword ""                // database password (not application user password)

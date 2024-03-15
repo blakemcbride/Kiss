@@ -14,7 +14,7 @@ public class Test {
         String pw;
 
         try {
-            DB = new Connection(Connection.ConnectionType.PostgreSQL, "localhost", "fos", "postgres", "postgres");
+            DB = new Connection(Connection.ConnectionType.PostgreSQL, "localhost", null, "fos", "postgres", "postgres");
             cmd = DB.newCommand();
             Record rec;
 
