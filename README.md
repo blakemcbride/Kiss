@@ -78,3 +78,9 @@ The back-end JavaDoc must be built by you.  This can be done by typing:
     bld javadoc                 [Windows]
 
 You then get:  `work/javadoc/index.html`
+
+## Support
+
+Commercial support is available from [blake@mcbridemail.com](mailto:blake@mcbridemail.com)
+
+Please help fund this project at [https://www.gofundme.com/f/kissweb](https://www.gofundme.com/f/kissweb)
