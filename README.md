@@ -83,4 +83,4 @@ You then get:  `work/javadoc/index.html`
 
 Commercial support is available from [blake@mcbridemail.com](mailto:blake@mcbridemail.com)
 
-Please help fund this project at [https://www.gofundme.com/f/kissweb](https://www.gofundme.com/f/kissweb)
+Please help fund this project at [https://www.gofundme.com/kissweb](https://www.gofundme.com/kissweb)
