@@ -1,3 +1,5 @@
+![](Kiss-logo.svg)
+
 # KISS Web Application Full Stack Framework
 
 
