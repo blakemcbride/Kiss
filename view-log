@@ -8,7 +8,7 @@ cd $SCRIPT_DIR
 if [ ! -f tomcat/logs/catalina.out ]; then
 	echo Waiting for system startup
 	while [ ! -f tomcat/logs/catalina.out ]; do
-		sleep .1s
+		sleep .1
 	done
 fi
 
