@@ -244,11 +244,17 @@ class Utils {
 
     /**
      * Display a modal popup with a message.  The message stays there until the application executes waitMessageEnd().
-     * This method is used when the user needs to be notified to wait for a long running process.
+     * This method is used when the user needs to be notified to wait for a long-running process.
+     * <br><br>
+     * This method tracks nested wait messages.
+     * It displays the last one but shows previous ones once the last one has ended.
      *
      * @param {string} message the message to be displayed
      */
     static waitMessage(message) {
+        Utils.waitMessageStack.push(message);
+        if (Utils.waitMessageStack.length > 1 && Utils.waitMessageStack[Utils.waitMessageStack.length-2] === message)
+            return;
         if (!$('#wmsg-modal').length) {
             $('body').append(
                 '<div id="wmsg-modal" class="msg-modal">' +
@@ -273,10 +279,15 @@ class Utils {
     }
 
     /**
-     * This terminates the wait message initiated by waitMessage()
+     * This terminates the wait message initiated by <code>waitMessage()</code>
+     * unless there is a previous one in which case it reverts to the previous one.
      */
     static waitMessageEnd() {
-        $('#wmsg-modal').hide();
+        Utils.waitMessageStack.pop();
+        if (!Utils.waitMessageStack.length)
+            $('#wmsg-modal').hide();
+        else
+            $('#wmsg-message').text(Utils.waitMessageStack[Utils.waitMessageStack.length-1]);
     }
 
     static getID(id) {
@@ -2275,6 +2286,12 @@ Utils.lastScreenLoaded = {};  //  current stackframe
 Utils.suspendDepth = 0;  // when > 0 suspend buttons
 
 Utils.globalData = {};
+
+/**
+ * This is a stack for the <code>Utils.waitMessage</code> method.
+ * Each element contains a string which is the message at each nesting level.
+ */
+Utils.waitMessageStack = [];
 
 /**
  * <code>forceASCII</code> forces ASCII representation of all text input.
