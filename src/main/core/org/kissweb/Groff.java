@@ -442,15 +442,16 @@ public class Groff {
                 builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=11i", "-rO=" + sideMargin + "i", "-rW=" + (8.5 - 2 * sideMargin) + "i", mmfname);
             builder.redirectError(new File("NUL:"));
         } else {
+            // I need to generate a PS file and convert it to a PDF rather than creating the PDF directly otherwise I can't support pictures.
             if (landscape)
-                builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=8.5i", "-P-l", "-rO="+sideMargin+"i", "-rW=" + (11-2*sideMargin) + "i", mmfname);
+                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO=" + sideMargin + "i -rW=" + (11 - 2 * sideMargin) + "i " + mmfname + " |ps2pdf - " + pdfname);
             else
-                builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=11i", "-rO="+sideMargin+"i", "-rW=" + (8.5-2*sideMargin) + "i", mmfname);
+                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO=" + sideMargin + "i -rW=" + (8.5 - 2 * sideMargin) + "i " + mmfname + " |ps2pdf - " + pdfname);
             builder.redirectError(new File("/dev/null"));
         }
         builder.redirectOutput(new File(pdfname));
         Process p = builder.start();
-        boolean r = p.waitFor(1L, TimeUnit.MINUTES);
+        boolean r = p.waitFor(2L, TimeUnit.MINUTES);
         if (deleteGroffFile)
             (new File(mmfname)).delete();
         if (!r)
