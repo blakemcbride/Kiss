@@ -23,11 +23,12 @@ public class Groff {
     private PrintWriter pw;
     private String pdfname;
     private String mmfname;
+    private boolean pics = false;  // are we displaying images?
     private boolean landscape;
     private String title;
     private boolean atTop = true;
     private boolean autoPageHeader = true;
-    private boolean deleteGroffFile = true;
+    private boolean deleteIntermediateFiles = true;
     private String footerLeft = "";
     private String footerRight = "";
     private int numberOfColumns;
@@ -41,6 +42,7 @@ public class Groff {
     private final List<String> pageTitleLines = new ArrayList<>();
     private boolean grayEveryOtherLineFlg = true;
     private String mmString;
+    private long waitMinutes = 1L;
 
     static {
         String os = System.getProperty("os.name").toLowerCase();
@@ -86,7 +88,7 @@ public class Groff {
         groff.pdfname = FileUtils.createReportFile(fnamePrefix, ".pdf").getAbsolutePath();
         groff.mmfname = FileUtils.createReportFile(fnamePrefix, ".mm").getAbsolutePath();
         groff.mmString = FileUtils.readFile(mmTemplateFileName);
-        groff.deleteGroffFile = true;
+        groff.deleteIntermediateFiles = true;
         return groff;
     }
 
@@ -379,10 +381,10 @@ public class Groff {
     }
 
     /**
-     * Prevent the deletion of the intermediate Groff file for debugging purposes.
+     * Prevent the deletion of the intermediate files for debugging purposes.
      */
-    public void dontDeleteGroffFile() {
-        deleteGroffFile = false;
+    public void dontDeleteIntermediateFiles() {
+        deleteIntermediateFiles = false;
     }
 
     /**
@@ -399,8 +401,22 @@ public class Groff {
             writePageHeader(title);
             autoPageHeader = false;
         }
-        if (str != null)
+        if (str != null) {
+            if (str.startsWith(".PSPIC "))
+                pics = true;
             pw.println(str);
+        }
+    }
+
+    /**
+     * Output a Postscript image.  The height of the picture is calculated for the picture to retain its aspect ratio
+     * along with the width specification.
+     *
+     * @param fname the path to the postscript image file
+     * @param witdh the output width of this picture
+     */
+    public void outPSPIC(String fname, String witdh) {
+        out(".PSPIC " + fname + " " + witdh);
     }
 
     /**
@@ -416,7 +432,7 @@ public class Groff {
      */
     public String process(float sideMargin) throws IOException, InterruptedException {
         ProcessBuilder builder;
-        String psfname = null;
+        String psfname = pdfname.replaceAll("\\.pdf$", ".ps");
         if (mmString != null) {
             // Process a template
             FileUtils.write(mmfname, mmString);
@@ -434,33 +450,55 @@ public class Groff {
             else
                 builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO=" + sideMargin + "i -rW=" + (8.5 - 2 * sideMargin) + "i " + mmfname + " |pstopdf -i -o " + pdfname);
             builder.redirectError(new File("/dev/null"));
+            builder.redirectOutput(new File(psfname));
         } else if (isWindows) {
-            psfname = pdfname.replaceAll("\\.pdf$", ".ps");
             if (landscape)
                 builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=8.5i", "-P-l", "-rO=" + sideMargin + "i", "-rW=" + (11 - 2 * sideMargin) + "i", mmfname);
             else
                 builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=11i", "-rO=" + sideMargin + "i", "-rW=" + (8.5 - 2 * sideMargin) + "i", mmfname);
             builder.redirectError(new File("NUL:"));
+            builder.redirectOutput(new File(psfname));
         } else {
-            // I need to generate a PS file and convert it to a PDF rather than creating the PDF directly otherwise I can't support pictures.
-            if (landscape)
-                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO=" + sideMargin + "i -rW=" + (11 - 2 * sideMargin) + "i " + mmfname + " |ps2pdf - " + pdfname);
-            else
-                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO=" + sideMargin + "i -rW=" + (8.5 - 2 * sideMargin) + "i " + mmfname + " |ps2pdf - " + pdfname);
+            // When displaying pictures, groff must generate a PS file rather than a PDF file.
+            // Also using pipe slows it down, so I have to use an intermediate file
+            if (pics) {
+                // produce a PS file
+                if (landscape)
+                    builder = new ProcessBuilder("groff", "-mm", "-t", "-P-pletter", "-rL=8.5i", "-P-l", "-rO="+sideMargin+"i", "-rW=" + (11-2*sideMargin) + "i", mmfname);
+                else
+                    builder = new ProcessBuilder("groff", "-mm", "-t", "-P-pletter", "-rL=11i", "-rO="+sideMargin+"i", "-rW=" + (8.5-2*sideMargin) + "i", mmfname);
+                builder.redirectOutput(new File(psfname));
+            } else {
+                // produce a PDF file
+                if (landscape)
+                    builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=8.5i", "-P-l", "-rO="+sideMargin+"i", "-rW=" + (11-2*sideMargin) + "i", mmfname);
+                else
+                    builder = new ProcessBuilder("groff", "-mm", "-t", "-Tpdf", "-P-pletter", "-rL=11i", "-rO="+sideMargin+"i", "-rW=" + (8.5-2*sideMargin) + "i", mmfname);
+                builder.redirectOutput(new File(pdfname));
+            }
             builder.redirectError(new File("/dev/null"));
         }
-        builder.redirectOutput(new File(pdfname));
         Process p = builder.start();
         boolean r = p.waitFor(2L, TimeUnit.MINUTES);
-        if (deleteGroffFile)
+        if (deleteIntermediateFiles)
             (new File(mmfname)).delete();
         if (!r)
             throw new InterruptedException();
         if (isWindows) {
             builder = new ProcessBuilder("cmd", "/c", "ps2pdf.bat", psfname, pdfname);
             p = builder.start();
-            r = p.waitFor(1L, TimeUnit.MINUTES);
-            (new File(psfname)).delete();
+            r = p.waitFor(waitMinutes, TimeUnit.MINUTES);
+            if (deleteIntermediateFiles)
+                (new File(psfname)).delete();
+            if (!r)
+                throw new InterruptedException();
+        } else if (!isMac && pics) {
+            // convert PS file to PDF
+            builder = new ProcessBuilder("/bin/bash", "-c", "ps2pdf " + psfname + " " + pdfname);
+            p = builder.start();
+            r = p.waitFor(waitMinutes, TimeUnit.MINUTES);
+            if (deleteIntermediateFiles)
+                (new File(psfname)).delete();
             if (!r)
                 throw new InterruptedException();
         }
@@ -507,5 +545,14 @@ public class Groff {
      */
     public String getGroffFileName() {
         return mmfname;
+    }
+
+    /**
+     * Set the number of minutes to wait for groff to finish.  The default is 1 minute.
+     *
+     * @param m
+     */
+    public void setWaitMinutes(long m) {
+        waitMinutes = m;
     }
 }
