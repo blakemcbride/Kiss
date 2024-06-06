@@ -342,6 +342,8 @@ public class Tasks {
         dep.add("dynamic-loader-3.1.jar", LIBS, "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.dvare&a=dynamic-loader&v=3.1&e=jar");
         // dep.add("dynamic-loader-3.0.jar", LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
         dep.add("jquery-3.6.3.min.js", "src/main/frontend/lib", "https://code.jquery.com/jquery-3.6.3.min.js");
+        dep.add("pdfbox-2.0.31.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.31/pdfbox-2.0.31.jar");
+        dep.add("fontbox-2.0.31.jar", LIBS, "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/2.0.31/fontbox-2.0.31.jar");
         // ag-grid appears to no longer be available through a CDN.  Therefore, I am simply including it with the Kiss distribution
         //dep.add("ag-grid-community.noStyle.min.js", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/ag-grid-community.noStyle.min.js");
         //dep.add("ag-grid.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-grid.min.css");
