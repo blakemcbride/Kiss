@@ -140,6 +140,24 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <version>25.1.0</version>
     </dependency>
 
+    <dependency>
+        <groupId>org.apache.pdfbox</groupId>
+        <artifactId>pdfbox</artifactId>
+        <version>2.0.31</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>fontbox</artifactId>
+      <version>2.0.31</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.oracle.ojdbc</groupId>
+      <artifactId>ojdbc10</artifactId>
+      <version>19.3.0.0</version>
+    </dependency>
+
   </dependencies>  
   
 </project>
