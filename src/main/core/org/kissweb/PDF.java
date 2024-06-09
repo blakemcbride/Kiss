@@ -22,6 +22,10 @@ import java.io.IOException;
 
 /**
  * This class creates PDF files with text, images, and line graphics.
+ * <br><br>
+ * There are two classes in Kiss used to create PDF reports: PDF and Groff.
+ * PDF is used when graphics and images are needed.  Groff is used when text and tables are needed.
+ * It is possible to use both in the same report by creating the PDF with one and appending with the other.
  *
  * Author: Blake McBride
  * Date: 3/5/16
