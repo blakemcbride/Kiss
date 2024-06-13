@@ -167,7 +167,7 @@ public class DateTime {
     }
 
     /**
-     * Return the date formatted as mm/dd/yyyy hh:mm AM/PM
+     * Return the current date formatted as mm/dd/yyyy hh:mm AM/PM
      *
      * @return
      */
@@ -203,6 +203,22 @@ public class DateTime {
         if (date == null)
             return "";
         SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mm a");
+        return df.format(date);
+    }
+
+    /**
+     * Format a date passed into a string formatted as determined by <code>fmt</code>
+     *
+     * @param date
+     * @param fmt
+     * @return
+     *
+     * @see java.text.SimpleDateFormat for information about fmt
+     */
+    public static String format(Date date, String fmt) {
+        if (date == null)
+            return "";
+        SimpleDateFormat df = new SimpleDateFormat(fmt);
         return df.format(date);
     }
 
