@@ -84,7 +84,7 @@ public class Connection implements AutoCloseable {
      *
      * @param db
      *
-     * @see Connection(ConnectionType, String, String, String, String)
+     * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
     public Connection(java.sql.Connection db) {
         this.conn = db;
@@ -123,7 +123,7 @@ public class Connection implements AutoCloseable {
      * @param pw
      * @return
      *
-     * @see Connection(ConnectionType, String, String, String, String)
+     * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
     public static String makeConnectionString(ConnectionType type, String host, Integer port, String dbname, String user, String pw) {
         String connectionString;
@@ -165,7 +165,7 @@ public class Connection implements AutoCloseable {
      * @param type
      * @return
      *
-     * @see Connection(ConnectionType, String, String, String, String)
+     * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
     public static String getDriverName(ConnectionType type) {
         String driver;
@@ -195,7 +195,7 @@ public class Connection implements AutoCloseable {
      * @throws ClassNotFoundException
      * @throws SQLException
      *
-     * @see Connection(ConnectionType, String, String, String, String)
+     * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
     public Connection(ConnectionType type, String connectionString) throws ClassNotFoundException, SQLException {
         String driver = getDriverName(type);
@@ -218,7 +218,7 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      * @throws ClassNotFoundException
      *
-     * @see Connection(ConnectionType, String, String)
+     * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
     public Connection(ConnectionType type, String host, Integer port, String dbname, String user, String pw) throws SQLException, ClassNotFoundException {
         this(type, makeConnectionString(type, host, port, dbname, user, pw));
@@ -236,7 +236,7 @@ public class Connection implements AutoCloseable {
      * @throws SQLException
      * @throws ClassNotFoundException
      *
-     * @see Connection(ConnectionType, String, String, String, String)
+     * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
     public Connection(ConnectionType type, String host, Integer port, String dbname) throws SQLException, ClassNotFoundException {
         this(type, makeConnectionString(type, host, port, dbname, null, null));
