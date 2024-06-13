@@ -134,14 +134,14 @@
             if (flg)
                 jqObj.hide();
             else
-                qObj.show();
+                qObj.show().css('visibility', 'visible');
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.show();
+                jqObj.show().css('visibility', 'visible');
             else
                 jqObj.hide();
             return this;

@@ -146,14 +146,14 @@ Kiss.RadioButtons.groups = {};
             if (flg)
                 $('#' + id + '--div').hide();
             else
-                $('#' + id + '--div').show();
+                $('#' + id + '--div').show().css('visibility', 'visible');
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                $('#' + id + '--div').show();
+                $('#' + id + '--div').show().css('visibility', 'visible');
             else
                 $('#' + id + '--div').hide();
             return this;
@@ -224,7 +224,7 @@ Kiss.RadioButtons.hide = function (group, flg=true) {
         if (flg)
             $('#' + id + '--div').hide();
         else
-            $('#' + id + '--div').show();
+            $('#' + id + '--div').show().css('visibility', 'visible');
     });
 };
 
@@ -232,7 +232,7 @@ Kiss.RadioButtons.show = function (group, flg=true) {
     const ids = Kiss.RadioButtons.groups[group].ids;
     ids.forEach(id => {
         if (flg)
-            $('#' + id + '--div').show();
+            $('#' + id + '--div').show().css('visibility', 'visible');
         else
             $('#' + id + '--div').hide();
     });
