@@ -448,14 +448,7 @@ public class Groff {
             pw.flush();
             pw.close();
         }
-        if (isMac) {
-            if (landscape)
-                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=8.5i -P-l -rO=" + sideMargin + "i -rW=" + (11 - 2 * sideMargin) + "i " + mmfname + " |pstopdf -i -o " + pdfname);
-            else
-                builder = new ProcessBuilder("/bin/sh", "-c", "groff -mm -t -P-pletter -rL=11i -rO=" + sideMargin + "i -rW=" + (8.5 - 2 * sideMargin) + "i " + mmfname + " |pstopdf -i -o " + pdfname);
-            builder.redirectError(new File("/dev/null"));
-            builder.redirectOutput(new File(psfname));
-        } else if (isWindows) {
+        if (isWindows) {
             if (landscape)
                 builder = new ProcessBuilder("cmd", "/c", "groff", "-mm", "-t", "-P-pletter", "-rL=8.5i", "-P-l", "-rO=" + sideMargin + "i", "-rW=" + (11 - 2 * sideMargin) + "i", mmfname);
             else
@@ -496,7 +489,7 @@ public class Groff {
                 (new File(psfname)).delete();
             if (!r)
                 throw new InterruptedException();
-        } else if (!isMac && pics) {
+        } else if (pics) {
             // convert PS file to PDF
             builder = new ProcessBuilder("/bin/bash", "-c", "ps2pdf " + psfname + " " + pdfname);
             p = builder.start();
