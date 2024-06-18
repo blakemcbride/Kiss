@@ -188,8 +188,7 @@ public class PDF {
     public void newPage() {
         try {
             if (contentStream != null) {
-                if (inText)
-                    contentStream.endText();
+                endText();
                 contentStream.close();
             }
             page = new PDPage(pageSize);
@@ -225,8 +224,7 @@ public class PDF {
     public void getPage(int n) {
         try {
             if (contentStream != null) {
-                if (inText)
-                    contentStream.endText();
+                endText();
                 contentStream.close();
             }
             page = doc.getPage(n);
@@ -264,10 +262,7 @@ public class PDF {
      */
     public void drawLine(float ya, float xa, float yb, float xb, float thickness) {
         try {
-            if (inText) {
-                contentStream.endText();
-                inText = false;
-            }
+            endText();
             contentStream.setLineWidth(thickness);
             contentStream.moveTo(xa, pageHeight-ya);
             contentStream.lineTo(xb, pageHeight-yb);
@@ -289,11 +284,7 @@ public class PDF {
      */
     public void drawRect(float ya, float xa, float yb, float xb, float thickness, int fill) {
         try {
-            if (inText) {
-                contentStream.endText();
-                inText = false;
-            }
-
+            endText();
             contentStream.addRect(xa, pageHeight-ya, xb-xa, ya-yb);
 
             if (fill > -1) {
@@ -327,10 +318,7 @@ public class PDF {
      */
     public void imageOut(float ypos, float xpos, float scale, String filename) {
         try {
-            if (inText) {
-                contentStream.endText();
-                inText = false;
-            }
+            endText();
             PDImageXObject pdImage = PDImageXObject.createFromFile(filename, doc);
             contentStream.drawImage(pdImage, xpos, pageHeight-ypos, pdImage.getWidth()*scale, pdImage.getHeight()*scale);
         } catch (IOException e) {
@@ -350,10 +338,7 @@ public class PDF {
      */
     public void imageOut(float ypos, float xpos, float scale, byte [] image) {
         try {
-            if (inText) {
-                contentStream.endText();
-                inText = false;
-            }
+            endText();
             ByteArrayInputStream bais = new ByteArrayInputStream(image);
             BufferedImage bim = ImageIO.read(bais);
             bais.close();
@@ -374,10 +359,7 @@ public class PDF {
      */
     public void imageOutWidth(float ypos, float xpos, float width, String filename) {
         try {
-            if (inText) {
-                contentStream.endText();
-                inText = false;
-            }
+            endText();
             PDImageXObject pdImage = PDImageXObject.createFromFile(filename, doc);
             float aspectRatio = (float) pdImage.getHeight() / pdImage.getWidth();
             float height = width * aspectRatio;
@@ -397,10 +379,7 @@ public class PDF {
      */
     public void imageOutHeight(float ypos, float xpos, float height, String filename) {
         try {
-            if (inText) {
-                contentStream.endText();
-                inText = false;
-            }
+            endText();
             PDImageXObject pdImage = PDImageXObject.createFromFile(filename, doc);
             float aspectRatio = (float) pdImage.getWidth() / pdImage.getHeight();
             float width = height * aspectRatio;
@@ -421,10 +400,7 @@ public class PDF {
      */
     public void imageOut(float ypos, float xpos, float ypos2, float xpos2, byte [] image) {
         try {
-            if (inText) {
-                contentStream.endText();
-                inText = false;
-            }
+            endText();
             ByteArrayInputStream bais = new ByteArrayInputStream(image);
             BufferedImage bim = ImageIO.read(bais);
             bais.close();
@@ -474,8 +450,7 @@ public class PDF {
     public void endDocument() {
         try {
             if (contentStream != null) {
-                if (inText)
-                    contentStream.endText();
+                endText();
                 contentStream.close();
             }
             doc.save(outputFilename);
