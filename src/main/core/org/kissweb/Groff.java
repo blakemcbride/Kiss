@@ -314,7 +314,7 @@ public class Groff {
      */
     public void endTable() {
         if (inTable) {
-            if (row.length() > 0) {
+            if (!row.isEmpty()) {
                 if (row.toString().startsWith("T{\n")) {
                     pw.print("T{\n");
                     if (grayEveryOtherLineFlg && !inTitle && currentRow++ % 2 == 1)
@@ -482,7 +482,9 @@ public class Groff {
         if (!r)
             throw new InterruptedException();
         if (isWindows) {
-            builder = new ProcessBuilder("cmd", "/c", "ps2pdf.bat", psfname, pdfname);
+            //builder = new ProcessBuilder("cmd", "/c", "ps2pdf.bat", psfname, pdfname);
+            builder = new ProcessBuilder("cmd", "/c", "gswin64c", "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite", "-sOutputFile=" + pdfname, psfname);
+            builder.redirectError(new File("NUL:"));
             p = builder.start();
             r = p.waitFor(waitMinutes, TimeUnit.MINUTES);
             if (deleteIntermediateFiles)
