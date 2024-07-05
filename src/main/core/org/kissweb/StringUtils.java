@@ -35,6 +35,7 @@ package org.kissweb;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Formatter;
+import java.util.Vector;
 
 /**
  * This class contains many methods used to manipulate <code>String</code>s.
@@ -334,4 +335,108 @@ public class StringUtils {
 				;
 	}
 
+	/**
+	 * Finds the string from the given vector of strings that most closely matches the input string.
+	 * <br><br>
+	 * This method normalizes the input and the vector strings by removing spaces and converting to lowercase
+     * before comparing them using the Jaro-Winkler distance algorithm.
+     *
+     * @param strings a vector of strings to compare against the input string
+     * @param input the input string that may contain typos, case, or space differences
+     * @return the string from the vector that most closely matches the input string
+	 */
+    public static String findClosestMatch(Vector<String> strings, String input) {
+        String closestMatch = null;
+        double maxSimilarity = -1;
+
+        // Preprocess the input string
+        String normalizedInput = normalizeString(input);
+
+        for (String str : strings) {
+            // Preprocess the current string from the vector
+            String normalizedStr = normalizeString(str);
+            double similarity = jaroWinklerDistance(normalizedInput, normalizedStr);
+            if (similarity > maxSimilarity) {
+                maxSimilarity = similarity;
+                closestMatch = str;
+            }
+        }
+        return closestMatch;
+    }
+
+    // Normalize the string by removing spaces and converting to lower case
+    private static String normalizeString(String str) {
+        return str.replaceAll("\\s", "").toLowerCase();
+    }
+
+    // Jaro-Winkler distance algorithm implementation
+    private static double jaroWinklerDistance(String s1, String s2) {
+        if (s1.equals(s2))
+            return 1.0;
+
+        int[] mtp = matches(s1, s2);
+        float m = (float) mtp[0];
+        if (m == 0)
+            return 0.0;
+        float j = ((m / s1.length() + m / s2.length() + (m - mtp[1]) / m)) / 3;
+        float jw = j < 0.7 ? j : j + Math.min(0.1f, 1.0f / mtp[3]) * mtp[2] * (1 - j);
+        return jw;
+    }
+
+    private static int[] matches(String s1, String s2) {
+        String max, min;
+        if (s1.length() > s2.length()) {
+            max = s1;
+            min = s2;
+        } else {
+            max = s2;
+            min = s1;
+        }
+
+        int range = Math.max(max.length() / 2 - 1, 0);
+        boolean[] matchIndexes = new boolean[max.length()];
+        boolean[] matchFlags = new boolean[min.length()];
+
+        int matches = 0;
+        for (int i = 0; i < min.length(); i++) {
+            int start = Math.max(i - range, 0);
+            int end = Math.min(i + range + 1, max.length());
+            for (int j = start; j < end; j++)
+                if (!matchFlags[i] && max.charAt(j) == min.charAt(i) && !matchIndexes[j]) {
+                    matchIndexes[j] = true;
+                    matchFlags[i] = true;
+                    matches++;
+                    break;
+                }
+        }
+
+        char[] ms1 = new char[matches];
+        char[] ms2 = new char[matches];
+        int si = 0;
+        for (int i = 0; i < min.length(); i++)
+            if (matchFlags[i]) {
+                ms1[si] = min.charAt(i);
+                si++;
+            }
+        si = 0;
+        for (int i = 0; i < max.length(); i++)
+            if (matchIndexes[i]) {
+                ms2[si] = max.charAt(i);
+                si++;
+            }
+
+        int transpositions = 0;
+        for (int i = 0; i < ms1.length; i++)
+            if (ms1[i] != ms2[i])
+                transpositions++;
+
+        int prefix = 0;
+        for (int i = 0; i < min.length(); i++)
+            if (s1.charAt(i) == s2.charAt(i))
+                prefix++;
+            else
+                break;
+
+        return new int[] { matches, transpositions / 2, prefix, max.length() };
+    }
 }
