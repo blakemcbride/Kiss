@@ -1731,6 +1731,10 @@ class Utils {
      * @param url {string} report url
      */
     static showReport(url) {
+        if (!url) {
+            console.log("Utils.showReport:  no url provided");
+            return;
+        }
         let path;
         if (url.charAt(0) !== '/')
             url = '/' + url;
