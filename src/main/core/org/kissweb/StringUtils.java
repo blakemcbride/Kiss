@@ -74,6 +74,8 @@ public class StringUtils {
      * @see #drop(String, int)
      */
     public static String take(String s, int n) {
+		if (s == null)
+			return null;
         int len = s.length();
         if (len == n)
             return s;
@@ -174,7 +176,7 @@ public class StringUtils {
      * @see #take(String, int)
      */
     public static String drop(String s, int n) {
-        if (n == 0)
+        if (n == 0 || s == null)
             return s;
         int len = s.length();
         if (n >= len || -n >= len)
@@ -191,6 +193,8 @@ public class StringUtils {
      * @return
      */
     public static String rightStrip(String s) {
+		if (s == null)
+			return null;
         return s.replaceAll("\\s+$", "");
     }
 
@@ -201,6 +205,8 @@ public class StringUtils {
 	 * @return
 	 */
 	public static String leftStrip(String s) {
+		if (s == null)
+			return null;
         return s.replaceAll("^\\s+", "");
     }
 
