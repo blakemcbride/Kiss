@@ -211,6 +211,8 @@ public class StringUtils {
 	 * @return
 	 */
 	public static String centerStrip(String s) {
+		if (s == null)
+			return null;
         return s.trim();
     }
 
