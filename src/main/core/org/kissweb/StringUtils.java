@@ -35,7 +35,10 @@ package org.kissweb;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Formatter;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
+import java.text.Normalizer;
 
 /**
  * This class contains many methods used to manipulate <code>String</code>s.
@@ -406,7 +409,7 @@ public class StringUtils {
         boolean[] matchFlags = new boolean[min.length()];
 
         int matches = 0;
-        for (int i = 0; i < min.length(); i++) {
+        for (int i = 0 ; i < min.length() ; i++) {
             int start = Math.max(i - range, 0);
             int end = Math.min(i + range + 1, max.length());
             for (int j = start; j < end; j++)
@@ -421,30 +424,119 @@ public class StringUtils {
         char[] ms1 = new char[matches];
         char[] ms2 = new char[matches];
         int si = 0;
-        for (int i = 0; i < min.length(); i++)
+        for (int i = 0 ; i < min.length() ; i++)
             if (matchFlags[i]) {
                 ms1[si] = min.charAt(i);
                 si++;
             }
         si = 0;
-        for (int i = 0; i < max.length(); i++)
+        for (int i = 0 ; i < max.length() ; i++)
             if (matchIndexes[i]) {
                 ms2[si] = max.charAt(i);
                 si++;
             }
 
         int transpositions = 0;
-        for (int i = 0; i < ms1.length; i++)
+        for (int i = 0 ; i < ms1.length ; i++)
             if (ms1[i] != ms2[i])
                 transpositions++;
 
         int prefix = 0;
-        for (int i = 0; i < min.length(); i++)
+        for (int i = 0 ; i < min.length() ; i++)
             if (s1.charAt(i) == s2.charAt(i))
                 prefix++;
             else
                 break;
 
         return new int[] { matches, transpositions / 2, prefix, max.length() };
+    }
+
+	private static final Map<String, String> nonAsciiReplacements = new HashMap<>();
+
+    static {
+        // Populate the map with common non-ASCII characters and their ASCII approximations
+        nonAsciiReplacements.put("’", "'");
+        nonAsciiReplacements.put("‘", "'");
+        nonAsciiReplacements.put("‛", "'");
+        nonAsciiReplacements.put("‚", "'");
+        nonAsciiReplacements.put("“", "\"");
+        nonAsciiReplacements.put("”", "\"");
+        nonAsciiReplacements.put("„", "\"");
+        nonAsciiReplacements.put("«", "<<");
+        nonAsciiReplacements.put("»", ">>");
+        nonAsciiReplacements.put("—", "-");
+        nonAsciiReplacements.put("–", "-");
+        nonAsciiReplacements.put("−", "-");
+        nonAsciiReplacements.put("ç", "c");
+        nonAsciiReplacements.put("ß", "ss");
+        nonAsciiReplacements.put("ñ", "n");
+        nonAsciiReplacements.put("ø", "o");
+        nonAsciiReplacements.put("æ", "ae");
+        nonAsciiReplacements.put("œ", "oe");
+        nonAsciiReplacements.put("©", "(c)");
+        nonAsciiReplacements.put("®", "(r)");
+        nonAsciiReplacements.put("€", "EUR");
+        nonAsciiReplacements.put("£", "GBP");
+        nonAsciiReplacements.put("¥", "JPY");
+        nonAsciiReplacements.put("á", "a");
+        nonAsciiReplacements.put("à", "a");
+        nonAsciiReplacements.put("ä", "a");
+        nonAsciiReplacements.put("â", "a");
+        nonAsciiReplacements.put("ã", "a");
+        nonAsciiReplacements.put("å", "a");
+        nonAsciiReplacements.put("é", "e");
+        nonAsciiReplacements.put("è", "e");
+        nonAsciiReplacements.put("ë", "e");
+        nonAsciiReplacements.put("ê", "e");
+        nonAsciiReplacements.put("í", "i");
+        nonAsciiReplacements.put("ì", "i");
+        nonAsciiReplacements.put("ï", "i");
+        nonAsciiReplacements.put("î", "i");
+        nonAsciiReplacements.put("ó", "o");
+        nonAsciiReplacements.put("ò", "o");
+        nonAsciiReplacements.put("ö", "o");
+        nonAsciiReplacements.put("ô", "o");
+        nonAsciiReplacements.put("õ", "o");
+        nonAsciiReplacements.put("ú", "u");
+        nonAsciiReplacements.put("ù", "u");
+        nonAsciiReplacements.put("ü", "u");
+        nonAsciiReplacements.put("û", "u");
+        nonAsciiReplacements.put("ý", "y");
+        nonAsciiReplacements.put("ÿ", "y");
+        nonAsciiReplacements.put("Æ", "AE");
+        nonAsciiReplacements.put("Œ", "OE");
+        nonAsciiReplacements.put("™", "TM");
+        nonAsciiReplacements.put("¶", "P");
+        nonAsciiReplacements.put("§", "S");
+        nonAsciiReplacements.put("°", "o");
+        nonAsciiReplacements.put("þ", "th");
+        nonAsciiReplacements.put("Þ", "TH");
+        nonAsciiReplacements.put("ð", "d");
+        nonAsciiReplacements.put("Ð", "D");
+        // Add more replacements as needed
+    }
+
+    /**
+     * Converts a string to ASCII by replacing non-ASCII characters with their ASCII approximations
+     * and removing other non-ASCII characters.
+     *
+     * @param input the original string
+     * @return the ASCII string
+     */
+    public static String toAscii(String input) {
+        // Replace common non-ASCII characters with ASCII equivalents
+        for (Map.Entry<String, String> entry : nonAsciiReplacements.entrySet())
+            input = input.replace(entry.getKey(), entry.getValue());
+
+        // Normalize the string to decompose characters
+        String normalizedString = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        // Remove diacritical marks
+        String asciiString = normalizedString.replaceAll("\\p{M}", "");
+
+        // Remove any remaining non-ASCII characters
+        asciiString = asciiString.replaceAll("[^\\x00-\\x7F]", "");
+
+        return asciiString;
     }
 }
