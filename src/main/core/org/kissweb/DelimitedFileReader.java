@@ -145,7 +145,7 @@ public class DelimitedFileReader implements AutoCloseable {
     public double getDouble(String fld) {
         if (nameMap == null)
             return 0.0;
-        int i = nameMap.get(fld);
+        int i = nameMap.get(fld.toLowerCase());
         try {
             return Double.parseDouble(getString(i));
         } catch (NumberFormatException e) {
@@ -180,6 +180,7 @@ public class DelimitedFileReader implements AutoCloseable {
 
     /**
      * Read the first row and map column title names to indexes.
+     * Column titles are case-insensitive.
      *
      */
     public void readHeader() {
@@ -191,11 +192,41 @@ public class DelimitedFileReader implements AutoCloseable {
             for (int i = 0; i < lineValues.size(); i++) {
                 String name = getString(i);
                 if (name != null && !name.isEmpty())
-                    nameMap.put(name, i);
+                    nameMap.put(name.toLowerCase(), i);
             }
         } catch (Exception ignored) {
 
         }
+    }
+
+    /**
+     * Checks if the given column header exists in the delimited file.
+     * Note that this only works after <code>readHeader()</code> has been called.
+     *
+     * @param  header   the header to check for
+     * @return          true if the header exists, false otherwise
+     */
+    public boolean hasHeader(String header) {
+        return nameMap.containsKey(header.toLowerCase());
+    }
+
+    /**
+     * Checks if the given column titles exist in the delimited file.
+     * Note that this only works after <code>readHeader()</code> has been called.
+     *
+     * @param  colNames   an array of column names to check
+     * @return             a list of column names that do not exist in the nameMap, or null if all column names exist
+     */
+    public ArrayList<String> checkHeaders(String [] colNames) {
+        ArrayList<String> res = null;
+        for (String colName : colNames) {
+            if (!nameMap.containsKey(colName.toLowerCase())) {
+                if (res == null)
+                    res = new ArrayList<>();
+                res.add(colName);
+            }
+        }
+        return res;
     }
 
     /**
@@ -356,7 +387,7 @@ public class DelimitedFileReader implements AutoCloseable {
     public String getString(String fld) {
         if (nameMap == null)
             return "";
-        int item = nameMap.get(fld);
+        int item = nameMap.get(fld.toLowerCase());
         if (item >= lineValues.size())
             return "";
         return lineValues.get(item);
@@ -415,7 +446,7 @@ public class DelimitedFileReader implements AutoCloseable {
     public int getInt(String fld) {
         if (nameMap == null)
             return 0;
-        int item = nameMap.get(fld);
+        int item = nameMap.get(fld.toLowerCase());
         try {
             return Integer.parseInt(getString(item));
         } catch (NumberFormatException numberFormatException) {
