@@ -677,7 +677,14 @@ public class Cursor implements AutoCloseable {
      * @see Record#getInt(String)
      */
     public Integer getInt(String cname) throws SQLException {
-        return (Integer) get(cname);
+        Object obj = get(cname);
+        if (obj == null)
+            return null;
+        if (obj.getClass() == Integer.class)
+            return (Integer) obj;
+        if (obj.getClass() == Short.class)
+            return ((Short) obj).intValue();
+        throw new SQLException("column " + cname + " is not an integer or short");
     }
 
     /**
@@ -691,7 +698,16 @@ public class Cursor implements AutoCloseable {
      * @see Record#getLong(String)
      */
     public Long getLong(String cname) throws SQLException {
-        return (Long) get(cname);
+        Object obj = get(cname);
+        if (obj == null)
+            return null;
+        if (obj.getClass() == Long.class)
+            return (Long) obj;
+        if (obj.getClass() == Integer.class)
+            return ((Integer) obj).longValue();
+        if (obj.getClass() == Short.class)
+            return ((Short) obj).longValue();
+        throw new SQLException("column " + cname + " is not a long or integer or short");
     }
 
     /**
@@ -705,7 +721,20 @@ public class Cursor implements AutoCloseable {
      * @see Record#getFloat(String)
      */
     public Float getFloat(String cname) throws SQLException {
-        return (Float) get(cname);
+        Object obj = get(cname);
+        if (obj == null)
+            return null;
+        if (obj.getClass() == Float.class)
+            return (Float) obj;
+        if (obj.getClass() == Double.class)
+            return ((Double) obj).floatValue();
+        if (obj.getClass() == Integer.class)
+            return ((Integer) obj).floatValue();
+        if (obj.getClass() == Short.class)
+            return ((Short) obj).floatValue();
+        if (obj.getClass() == Long.class)
+            return ((Long) obj).floatValue();
+        throw new SQLException("column " + cname + " is not a float or double or integer or short or long");
     }
 
     /**
@@ -719,7 +748,20 @@ public class Cursor implements AutoCloseable {
      * @see Record#getDouble(String)
      */
     public Double getDouble(String cname) throws SQLException {
-        return (Double) get(cname);
+        Object obj = get(cname);
+        if (obj == null)
+            return null;
+        if (obj.getClass() == Double.class)
+            return (Double) obj;
+        if (obj.getClass() == Float.class)
+            return ((Float) obj).doubleValue();
+        if (obj.getClass() == Integer.class)
+            return ((Integer) obj).doubleValue();
+        if (obj.getClass() == Short.class)
+            return ((Short) obj).doubleValue();
+        if (obj.getClass() == Long.class)
+            return ((Long) obj).doubleValue();
+        throw new SQLException("column " + cname + " is not a float or double or integer or short or long");
     }
 
     /**
