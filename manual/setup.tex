@@ -137,7 +137,7 @@ The following enumerates the steps necessary to get the system up and running:
 @item
 @xref{Download Kiss}
 @item
-@xref{Setup And Configuration}
+@xref{Setup and Configuration}
 @item
 The development server can be run without an IDE by running: @code{./bld develop}
 @item
@@ -197,21 +197,52 @@ and the front-end server runs by executing a single command.
 
 @anchor{Pre-requisites}@section Pre-requisites
 
-You should download and install the following pre-requisites.
+@emph{Kiss} requires a few common pre-requisits as follows:
+
 
 @enumerate
 @item
-Java JDK 8, 11, or 17 from many sources including @uref{https://www.azul.com/downloads/zulu-community} or 
-@uref{https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html} or
-@uref{https://developers.redhat.com/products/openjdk/download} or
-@uref{https://adoptopenjdk.net}
+Java JDK 8, 11, or 17.  (At present, @emph{Kiss} does not support Java 21.)
 @item
-An SQL database server (e.g.@ PostgreSQL, Microsoft SQL Server, MySQL,
-Oracle, SQLite)
+SQL Database Server --- @emph{Kiss} comes with the @emph{SQLite} database.  However, in a production
+system you're likely to prefer a more substantial database server.  @emph{Kiss} supports a variety of SQL database servers including 
+PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 @item
-IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, eclipse)
+IDE --- Although @emph{Kiss} does not require an IDE, one is stongly recommended (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, eclipse)
 @item
 GIT source code control system
+@item
+Groff --- @emph{Kiss} utilizes the open-source @emph{groff} typsetting system in order to produce PDF reports.
+@end enumerate
+
+On Linux, most of these packages may be obtained utilizing the normal
+package manager that comes with your distribution.
+
+The following sub-sections detail how to get those pre-requisits for Windows and Mac.
+
+@subsection Windows
+
+
+You may obtain the requirements under Windows as follows.
+
+@enumerate
+@item
+Java JDK 8, 11, or 17 for many OSs at:
+@itemize @bullet
+@item
+@uref{https://www.azul.com/downloads}
+@item
+@uref{https://aws.amazon.com/corretto}
+@item
+@uref{https://adoptopenjdk.net}
+@item
+@uref{https://developers.redhat.com/products/openjdk/download}
+@end itemize
+@item
+@emph{Kiss} comes with the SQLite database.  However, you may install other databases such as PostgreSQL, Microsoft SQL Server, MySQL,
+Oracle, or SQLite.
+@item
+IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, eclipse)
 @end enumerate
 
 Correctly setting the @emph{JAVA_HOME} and @emph{JRE_HOME} environment
@@ -219,31 +250,43 @@ variables to the root of your JDK is necessary.  Setting this varies
 from OS to OS and also depends on where it gets installed.
 Instructions for setting this variable are all over the Internet.
 
-The system was built and tested with JDK 8, 11 and 17,
-@uref{https://www.postgresql.org,PostgreSQL},
-@uref{https://www.jetbrains.com/idea,IntelliJ}, and
-@uref{https://tomcat.apache.org,tomcat}.  Other environments such as 
-IIS, Glassfish, eclipse, should work fine but may require some
-configuration.
+The remaining requirements may be obtained through the
+@emph{Chocolatey} Windows Package Manager located at
+@uref{https://chocolatey.org} Their ``community'' version is free. We used their ``Individual'' install.
+The following packages should be installed after installing the choco
+package manager:
 
-@emph{Kiss} comes with its own build system.  @xref{Important}
+@itemize @bullet
+@item
+choco install groff
+@item
+choco install strawberryperl
+@item
+choco install ghostscript
+@item
+choco install git
+@end itemize
 
-Install the above according to their instructions.
+After installing these programs you must exit and re-start any terminals you have running.
 
-@subsection Groff and PDF
 
-The @emph{Kiss} reporting facilities are dependent on the full
-@emph{groff} system and the ability to convert Postscript files to PDF
-files.  This is generally true on Linux, however, the full
-@emph{groff} package may need to be installed.  Mac's are fine.  These
-packages are not on Windows and must be installed.
+@subsection Mac
 
-Correctly installing @emph{groff} and @emph{ghostscript} will allow the
-reporting facilities to work under Windows.  They may be obtained from:
+Mac requirements may be obtained via the @emph{brew} package manager available at @*@uref{https://brew.sh}
+Once @code{brew} is installed,you can install the remainder of the requirements with the following commands:
 
-@uref{https://sourceforge.net/projects/ezwinports}
+@itemize @bullet
+@item
+brew install openjdk@@17
+@item
+(Add the following line to your @code{~/.zshrc} file and then re-start your terminal.)@*
+export JAVA_HOME="$(brew --prefix)/opt/openjdk@@17"
+@item
+brew install git
+@item
+brew install groff
+@end itemize
 
-@uref{https://www.ghostscript.com}
 
 
 @anchor{Download Kiss}@section Download Kiss
@@ -253,6 +296,18 @@ Kiss is located at @uref{https://github.com/blakemcbride/Kiss}
 It can be downloaded via the following command:
 
 @code{git clone https://github.com/blakemcbride/Kiss.git}
+
+@section Quick Test
+
+Once everything has been set up, you can easily build and run the system with the following commands:
+
+@example
+git clone https://github.com/blakemcbride/Kiss.git
+cd Kiss
+./bld develop (or "bld develop" under Windows)
+@end example
+
+Once the system is up, you can go to the following address with your browser: @code{http://localhost:8000}
 
 @section Documentation
 
@@ -292,10 +347,10 @@ file:///my/home/path/kiss/work/javadoc/index.html
 file:///my/home/path/kiss/manual/jsdoc/index.html
 @end example
 
-@anchor{Setup And Configuration}@section Setup And Configuration
+@anchor{Setup and Configuration}@section Setup and Configuration
 
 The system is configured by the contents of a single file
-@code{src/main/backend/KissInit.groovy} A reboot of the web server
+@*@code{src/main/backend/KissInit.groovy} A reboot of the web server
 is required if any of the parameters in this file are changed.
 
 Given that @emph{Kiss} is for business applications, it authenticates its

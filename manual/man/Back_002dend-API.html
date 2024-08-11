@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.1, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Back-end API (Kiss Manual)</title>
@@ -19,7 +19,9 @@
 <link href="Front_002dend-API.html" rel="prev" title="Front-end API">
 <style type="text/css">
 <!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
 div.example {margin-left: 3.2em}
+span:hover a.copiable-link {visibility: visible}
 ul.mark-bullet {list-style-type: disc}
 -->
 </style>
@@ -31,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -96,7 +98,7 @@ h2, h3, h4 {  /* subsection titles */
 </style>
 
 
-<h2 class="chapter" id="Back_002dend-API-1">6 Back-end API</h2>
+<h2 class="chapter" id="Back_002dend-API-1"><span>6 Back-end API<a class="copiable-link" href="#Back_002dend-API-1"> &para;</a></span></h2>
 
 <p>In addition to the full API provided by the Java system, and any additional
 JAR files you add, <em class="emph">Kiss</em> comes with an API that assists with the
@@ -119,7 +121,7 @@ documentation is contained in the JavaDocs.  See <a class="xref" href="Orientati
 <li><a href="#Utilities-1" accesskey="4">Utilities</a></li>
 </ul>
 <div class="section-level-extent" id="Database-API">
-<h3 class="section">6.1 Database API</h3>
+<h3 class="section"><span>6.1 Database API<a class="copiable-link" href="#Database-API"> &para;</a></span></h3>
 
 <p><em class="emph">Kiss</em> comes with a powerful library for accessing SQL databases.
 Code for this is located under <code class="code">org.kissweb.database</code> It is
@@ -185,7 +187,7 @@ generates these statements for you.
 </p>
 </div>
 <div class="section-level-extent" id="Microservices">
-<h3 class="section">6.2 Microservices</h3>
+<h3 class="section"><span>6.2 Microservices<a class="copiable-link" href="#Microservices"> &para;</a></span></h3>
 
 <p>Microservices are classes that may be added, changed, or deleted while
 the system is running.  In spite of this, however, all microservices
@@ -232,7 +234,7 @@ expected.  Local microservices do not have this requirement.
 <li><a href="#Local-Microservices" accesskey="5">Local Microservices</a></li>
 </ul>
 <div class="subsection-level-extent" id="Microservice-Language">
-<h4 class="subsection">6.2.1 Microservice Language</h4>
+<h4 class="subsection"><span>6.2.1 Microservice Language<a class="copiable-link" href="#Microservice-Language"> &para;</a></span></h4>
 
 <p>In Kiss, microservices can be written in Java, Groovy, or Common Lisp.
 However, Groovy microservices have been used exclusively in all
@@ -257,7 +259,7 @@ and there are no known bugs in any of the languages supported.
 </p>
 </div>
 <div class="subsection-level-extent" id="Types-Of-Microservices">
-<h4 class="subsection">6.2.2 Types Of Microservices</h4>
+<h4 class="subsection"><span>6.2.2 Types Of Microservices<a class="copiable-link" href="#Types-Of-Microservices"> &para;</a></span></h4>
 
 <p>There are two types of microservices as follows:
 </p>
@@ -274,7 +276,7 @@ method in a different microservice.
 </p>
 </div>
 <div class="subsection-level-extent" id="Remote-Microservices">
-<h4 class="subsection">6.2.3 Remote Microservices</h4>
+<h4 class="subsection"><span>6.2.3 Remote Microservices<a class="copiable-link" href="#Remote-Microservices"> &para;</a></span></h4>
 
 <p>In <em class="emph">Kiss</em>, remote microservices appear to the outside world as
 typical <em class="emph">REST</em> services.  They may be called by a
@@ -298,7 +300,7 @@ they are and that they have been authenticated.
 </p>
 </div>
 <div class="subsection-level-extent" id="Defining-Remote-Services">
-<h4 class="subsection">6.2.4 Defining Remote Services</h4>
+<h4 class="subsection"><span>6.2.4 Defining Remote Services<a class="copiable-link" href="#Defining-Remote-Services"> &para;</a></span></h4>
 
 <p>Remote REST microservices typically reside under the
 <code class="code">backend/services</code> directory.  You can organize them any way you
@@ -341,7 +343,7 @@ to this call.
 
 </div>
 <div class="subsection-level-extent" id="Local-Microservices">
-<h4 class="subsection">6.2.5 Local Microservices</h4>
+<h4 class="subsection"><span>6.2.5 Local Microservices<a class="copiable-link" href="#Local-Microservices"> &para;</a></span></h4>
 
 <p>Local microservices are simply regular classes.  They typically reside
 in the <code class="code">backend/services</code> directory organized anyway you like.
@@ -365,7 +367,7 @@ in a different class/microservice via the following methods.
 <a class="anchor" id="json"></a></div>
 </div>
 <div class="section-level-extent" id="JSON">
-<h3 class="section">6.3 JSON</h3>
+<h3 class="section"><span>6.3 JSON<a class="copiable-link" href="#JSON"> &para;</a></span></h3>
 
 <p>The first two arguments to all REST methods is <code class="code">injson</code> and
 <code class="code">outjson</code>.  <code class="code">injson</code> is a <code class="code">JSONObject</code> that contains
@@ -419,7 +421,7 @@ with the return data.  Useful JSON utilities include the following:
 
 </div>
 <div class="section-level-extent" id="Utilities-1">
-<h3 class="section">6.4 Utilities</h3>
+<h3 class="section"><span>6.4 Utilities<a class="copiable-link" href="#Utilities-1"> &para;</a></span></h3>
 
 <p><em class="emph">Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code class="code">src/main/core/org/kissweb</code> directory and have names such as
@@ -432,7 +434,7 @@ are documented in the JavaDocs.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

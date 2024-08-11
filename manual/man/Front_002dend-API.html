@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.1, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Front-end API (Kiss Manual)</title>
@@ -19,7 +19,9 @@
 <link href="Developing.html" rel="prev" title="Developing">
 <style type="text/css">
 <!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
 div.example {margin-left: 3.2em}
+span:hover a.copiable-link {visibility: visible}
 -->
 </style>
 
@@ -30,7 +32,7 @@ div.example {margin-left: 3.2em}
 <div class="chapter-level-extent" id="Front_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="Back_002dend-API.html" accesskey="n" rel="next">Back-end API</a>, Previous: <a href="Developing.html" accesskey="p" rel="prev">Developing</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Back_002dend-API.html" accesskey="n" rel="next">Back-end API</a>, Previous: <a href="Developing.html" accesskey="p" rel="prev">Developing</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -95,7 +97,7 @@ h2, h3, h4 {  /* subsection titles */
 </style>
 
 
-<h2 class="chapter" id="Front_002dend-API-1">5 Front-end API</h2>
+<h2 class="chapter" id="Front_002dend-API-1"><span>5 Front-end API<a class="copiable-link" href="#Front_002dend-API-1"> &para;</a></span></h2>
 
 <p>The front-end API are all the facilities that run on the browser.
 This includes HTML, CSS, JavaScript, image files, etc.  The <em class="emph">Kiss</em>
@@ -142,7 +144,7 @@ the need for the other to change.  In other words, they are minimally dependent 
 <li><a href="#Additional-Resources" accesskey="7">Additional Resources</a></li>
 </ul>
 <div class="section-level-extent" id="Calling-REST-Services">
-<h3 class="section">5.1 Calling REST Services</h3>
+<h3 class="section"><span>5.1 Calling REST Services<a class="copiable-link" href="#Calling-REST-Services"> &para;</a></span></h3>
 
 <p>On the front-end, the class <code class="code">Server</code> is what deals with the REST
 communications between the front-end and back-end.  In it, there are a
@@ -171,7 +173,7 @@ that makes it easy to upload files.
 </p>
 </div>
 <div class="section-level-extent" id="Kiss-Components">
-<h3 class="section">5.2 Kiss Components</h3>
+<h3 class="section"><span>5.2 Kiss Components<a class="copiable-link" href="#Kiss-Components"> &para;</a></span></h3>
 
 
 <p>Although HTML provides what is needed for real applications, it
@@ -206,7 +208,7 @@ CSS, and JavaScript code.
 <li><a href="#Tagless-Components" accesskey="1">Tagless Components</a></li>
 </ul>
 <div class="subsection-level-extent" id="Tagless-Components">
-<h4 class="subsection">5.2.1 Tagless Components</h4>
+<h4 class="subsection"><span>5.2.1 Tagless Components<a class="copiable-link" href="#Tagless-Components"> &para;</a></span></h4>
 
 <p>Let&rsquo;s say you have a pop-up window that allows a user to search for employees, or product, or whatever.
 The user gets a variety of search capabilities and the selected item is returned. Let&rsquo;s further say
@@ -227,7 +229,7 @@ Arguments passed to <code class="code">on_exit</code> are determined by the comp
 </div>
 </div>
 <div class="section-level-extent" id="Modal-Popup-Windows">
-<h3 class="section">5.3 Modal Popup Windows</h3>
+<h3 class="section"><span>5.3 Modal Popup Windows<a class="copiable-link" href="#Modal-Popup-Windows"> &para;</a></span></h3>
 
 <p><em class="emph">Kiss</em> supports draggable, modal popup windows. <em class="emph">HTML</em> is
 used to describe the layout of the popup, and JavaScript is used to
@@ -281,7 +283,7 @@ data on the popup and when to close it.
 </p>
 </div>
 <div class="section-level-extent" id="File-Uploads">
-<h3 class="section">5.4 File Uploads</h3>
+<h3 class="section"><span>5.4 File Uploads<a class="copiable-link" href="#File-Uploads"> &para;</a></span></h3>
 
 <p><em class="emph">Kiss</em> includes facilities that make it easy to upload a file or
 multiple files.  The way to use it is as follows:
@@ -347,7 +349,7 @@ function used to send the files is <code class="code">fileUploadSend</code> in t
 
 </div>
 <div class="section-level-extent" id="Utilities">
-<h3 class="section">5.5 Utilities</h3>
+<h3 class="section"><span>5.5 Utilities<a class="copiable-link" href="#Utilities"> &para;</a></span></h3>
 
 <p><em class="emph">Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code class="code">src/main/frontend/kiss</code> directory and have names such as
@@ -356,7 +358,7 @@ are documented in the front-end API documentation.
 </p>
 </div>
 <div class="section-level-extent" id="Controlling-Browser-Cache-1">
-<h3 class="section">5.6 Controlling Browser Cache</h3>
+<h3 class="section"><span>5.6 Controlling Browser Cache<a class="copiable-link" href="#Controlling-Browser-Cache-1"> &para;</a></span></h3>
 
 <p>Browser&rsquo;s have a mind of their own in term of deciding when to use
 their cache for a file and when to download a new one.  This can cause
@@ -381,7 +383,7 @@ the browser cache will work as normal to maximally cache the files until the nex
 </p>
 </div>
 <div class="section-level-extent" id="Additional-Resources">
-<h3 class="section">5.7 Additional Resources</h3>
+<h3 class="section"><span>5.7 Additional Resources<a class="copiable-link" href="#Additional-Resources"> &para;</a></span></h3>
 
 <p>Although not a part of the <em class="emph">Kiss</em> system, there are some very
 valuable technologies and libraries that have been used with
@@ -407,7 +409,7 @@ working with service workers very easy.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Back_002dend-API.html">Back-end API</a>, Previous: <a href="Developing.html">Developing</a>, Up: <a href="index.html">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Back_002dend-API.html">Back-end API</a>, Previous: <a href="Developing.html">Developing</a>, Up: <a href="index.html">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

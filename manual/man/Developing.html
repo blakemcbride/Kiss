@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.1, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Developing (Kiss Manual)</title>
@@ -19,7 +19,9 @@
 <link href="Orientation.html" rel="prev" title="Orientation">
 <style type="text/css">
 <!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
 div.example {margin-left: 3.2em}
+span:hover a.copiable-link {visibility: visible}
 -->
 </style>
 
@@ -30,7 +32,7 @@ div.example {margin-left: 3.2em}
 <div class="chapter-level-extent" id="Developing">
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -95,7 +97,7 @@ h2, h3, h4 {  /* subsection titles */
 </style>
 
 
-<h2 class="chapter" id="Developing-1">4 Developing</h2>
+<h2 class="chapter" id="Developing-1"><span>4 Developing<a class="copiable-link" href="#Developing-1"> &para;</a></span></h2>
 
 <p>This section details the development process with <em class="emph">Kiss</em>.  The
 details provided will be for IntelliJ but can be adapted to other
@@ -122,7 +124,7 @@ there too.
 <li><a href="#Authentication" accesskey="5">Authentication</a></li>
 </ul>
 <div class="section-level-extent" id="Overview">
-<h3 class="section">4.1 Overview</h3>
+<h3 class="section"><span>4.1 Overview<a class="copiable-link" href="#Overview"> &para;</a></span></h3>
 
 <p>The following details the normal steps to boot up a development environment.
 Once this environment is set up, it may remain active for the whole day.
@@ -161,7 +163,7 @@ Back-end changes with take effect immediately.
 <li><a href="#IDE" accesskey="1">IDE</a></li>
 </ul>
 <div class="subsection-level-extent" id="IDE">
-<h4 class="subsection">4.1.1 IDE</h4>
+<h4 class="subsection"><span>4.1.1 IDE<a class="copiable-link" href="#IDE"> &para;</a></span></h4>
 
 <p>While development with <em class="emph">Kiss</em> does not require an IDE, most
 developers utilize an IDE (Integrated Development Environment).  
@@ -174,7 +176,7 @@ information.
 </div>
 </div>
 <div class="section-level-extent" id="Back_002dend-Development">
-<h3 class="section">4.2 Back-end Development</h3>
+<h3 class="section"><span>4.2 Back-end Development<a class="copiable-link" href="#Back_002dend-Development"> &para;</a></span></h3>
 
 <p>The back-end works differently in development and production
 environments.  Although in both environments back-end and front-end
@@ -203,7 +205,7 @@ should have a sub-directory named <code class="code">src/main/backend</code>.
 <li><a href="#CORS" accesskey="6">CORS</a></li>
 </ul>
 <div class="subsection-level-extent" id="REST-Server">
-<h4 class="subsection">4.2.1 REST Server</h4>
+<h4 class="subsection"><span>4.2.1 REST Server<a class="copiable-link" href="#REST-Server"> &para;</a></span></h4>
 
 <p>There are two different methods of running the back-end REST server as
 follows.
@@ -213,7 +215,7 @@ follows.
 <li><a href="#BLD" accesskey="2">BLD</a></li>
 </ul>
 <div class="subsubsection-level-extent" id="IDE-1">
-<h4 class="subsubsection">4.2.1.1 IDE</h4>
+<h4 class="subsubsection"><span>4.2.1.1 IDE<a class="copiable-link" href="#IDE-1"> &para;</a></span></h4>
 
 <p>Running of the IDE back-end requires the following:
 </p>
@@ -236,7 +238,7 @@ they were compiled before the system was booted.
 </p>
 </div>
 <div class="subsubsection-level-extent" id="BLD">
-<h4 class="subsubsection">4.2.1.2 BLD</h4>
+<h4 class="subsubsection"><span>4.2.1.2 BLD<a class="copiable-link" href="#BLD"> &para;</a></span></h4>
 
 <p>Utilizing the included <em class="emph">Kiss build system (bld)</em> the many steps required 
 to install and configure tomcat and the IDE are unnecessary.  The whole process
@@ -259,7 +261,7 @@ the front-end server is started too.
 </div>
 </div>
 <div class="subsection-level-extent" id="Application-Code">
-<h4 class="subsection">4.2.2 Application Code</h4>
+<h4 class="subsection"><span>4.2.2 Application Code<a class="copiable-link" href="#Application-Code"> &para;</a></span></h4>
 
 <p>All communications between the front-end and back-end occur over REST
 services you define.  Each REST service exists in its own
@@ -308,7 +310,7 @@ be defined and used within web service classes.
 </p>
 <a class="anchor" id="cached_005fuser_005fdata"></a></div>
 <div class="subsection-level-extent" id="Cached-User-Data">
-<h4 class="subsection">4.2.3 Cached User Data</h4>
+<h4 class="subsection"><span>4.2.3 Cached User Data<a class="copiable-link" href="#Cached-User-Data"> &para;</a></span></h4>
 
 <p>During the login process, user-specific data may be cached.  This
 often occurs in the <code class="code">login</code> Groovy method of the <code class="code">Login</code>
@@ -325,7 +327,7 @@ application-specific class.
 </p>
 </div>
 <div class="subsection-level-extent" id="Programming-Languages">
-<h4 class="subsection">4.2.4 Programming Languages</h4>
+<h4 class="subsection"><span>4.2.4 Programming Languages<a class="copiable-link" href="#Programming-Languages"> &para;</a></span></h4>
 
 <p>At this point, <em class="emph">Kiss</em> supports the development of back-end REST
 services in the Java, Groovy, or Common Lisp languages.  Groovy was
@@ -357,7 +359,7 @@ especially if there are requests.
 </p>
 </div>
 <div class="subsection-level-extent" id="Cron">
-<h4 class="subsection">4.2.5 Cron</h4>
+<h4 class="subsection"><span>4.2.5 Cron<a class="copiable-link" href="#Cron"> &para;</a></span></h4>
 
 <p><em class="emph">Kiss</em> has the ability to run any number of commands at specified
 intervals.  For example, you could run a process every hour and
@@ -378,7 +380,7 @@ directory for samples and further documentation.
 </p>
 </div>
 <div class="subsection-level-extent" id="CORS">
-<h4 class="subsection">4.2.6 CORS</h4>
+<h4 class="subsection"><span>4.2.6 CORS<a class="copiable-link" href="#CORS"> &para;</a></span></h4>
 
 <p>For security reasons, web servers prevent web services from
 an application that didn&rsquo;t come from the same application.  This is
@@ -391,7 +393,7 @@ environments and allows CORS in the development environment.
 <a class="anchor" id="Front_002dend-Development"></a></div>
 </div>
 <div class="section-level-extent" id="Front_002dend-Development-1">
-<h3 class="section">4.3 Front-end Development</h3>
+<h3 class="section"><span>4.3 Front-end Development<a class="copiable-link" href="#Front_002dend-Development-1"> &para;</a></span></h3>
 
 <p>A separate server is used so that development files will be served
 rather than the front-end that was present when the back-end server
@@ -445,7 +447,7 @@ editing files under the <code class="code">src/main/frontend</code> directory.
 <li><a href="#Mobile-Interface" accesskey="1">Mobile Interface</a></li>
 </ul>
 <div class="subsection-level-extent" id="Mobile-Interface">
-<h4 class="subsection">4.3.1 Mobile Interface</h4>
+<h4 class="subsection"><span>4.3.1 Mobile Interface<a class="copiable-link" href="#Mobile-Interface"> &para;</a></span></h4>
 
 <p>It is often necessary to support mobile devices.  Although many
 applications support mobile applications through pages that use
@@ -463,7 +465,7 @@ detects the platform and loads different pages based on the platform.
 </div>
 </div>
 <div class="section-level-extent" id="Reports-And-Exports">
-<h3 class="section">4.4 Reports And Exports</h3>
+<h3 class="section"><span>4.4 Reports And Exports<a class="copiable-link" href="#Reports-And-Exports"> &para;</a></span></h3>
 
 <p>Creating reports and exports requires both front-end and back-end components.
 The back-end usually creates the file to be sent to the front-end.  It then returns
@@ -488,7 +490,7 @@ and downloads the file.
 </p>
 <a class="anchor" id="authentication"></a></div>
 <div class="section-level-extent" id="Authentication">
-<h3 class="section">4.5 Authentication</h3>
+<h3 class="section"><span>4.5 Authentication<a class="copiable-link" href="#Authentication"> &para;</a></span></h3>
 
 <p><em class="emph">Kiss</em> has built-in authentication.  However, each application has its
 own method of storing and validating users.  Additionally, each application
@@ -508,7 +510,7 @@ See that file for more details.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

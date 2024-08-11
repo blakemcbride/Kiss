@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.1, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>System Setup (Kiss Manual)</title>
@@ -19,7 +19,9 @@
 <link href="Introduction.html" rel="prev" title="Introduction">
 <style type="text/css">
 <!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
 div.example {margin-left: 3.2em}
+span:hover a.copiable-link {visibility: visible}
 ul.mark-bullet {list-style-type: disc}
 -->
 </style>
@@ -31,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="System-Setup">
 <div class="nav-panel">
 <p>
-Next: <a href="Orientation.html" accesskey="n" rel="next">Orientation</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Orientation.html" accesskey="n" rel="next">Orientation</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -96,7 +98,7 @@ h2, h3, h4 {  /* subsection titles */
 </style>
 
 
-<h2 class="chapter" id="System-Setup-1">2 System Setup</h2>
+<h2 class="chapter" id="System-Setup-1"><span>2 System Setup<a class="copiable-link" href="#System-Setup-1"> &para;</a></span></h2>
 
 <a class="anchor" id="Important"></a><ul class="mini-toc">
 <li><a href="#Important-1" accesskey="1">Important</a></li>
@@ -105,15 +107,16 @@ h2, h3, h4 {  /* subsection titles */
 <li><a href="#Runtime-Environments" accesskey="4">Runtime Environments</a></li>
 <li><a href="#Pre_002drequisites-1" accesskey="5">Pre-requisites</a></li>
 <li><a href="#Download-Kiss-1" accesskey="6">Download Kiss</a></li>
-<li><a href="#Documentation" accesskey="7">Documentation</a></li>
-<li><a href="#Setup-And-Configuration-1" accesskey="8">Setup And Configuration</a></li>
-<li><a href="#Bypassing-Authentication" accesskey="9">Bypassing Authentication</a></li>
+<li><a href="#Quick-Test" accesskey="7">Quick Test</a></li>
+<li><a href="#Documentation" accesskey="8">Documentation</a></li>
+<li><a href="#Setup-and-Configuration-1" accesskey="9">Setup and Configuration</a></li>
+<li><a href="#Bypassing-Authentication">Bypassing Authentication</a></li>
 <li><a href="#Building-The-System">Building The System</a></li>
 <li><a href="#Kiss-Framework-Updates">Kiss Framework Updates</a></li>
 <li><a href="#What-Do-I-Do-With-It-Now_003f">What Do I Do With It Now?</a></li>
 </ul>
 <div class="section-level-extent" id="Important-1">
-<h3 class="section">2.1 Important</h3>
+<h3 class="section"><span>2.1 Important<a class="copiable-link" href="#Important-1"> &para;</a></span></h3>
 
 <p>The <em class="emph">Kiss</em> system comes with its own build system, so it doesn&rsquo;t
 use build systems such as <em class="emph">ant</em>, <em class="emph">maven</em>, or <em class="emph">gradle</em>.
@@ -156,7 +159,7 @@ It is an integration with <em class="emph">ant</em> for IDE integration.
 
 </div>
 <div class="section-level-extent" id="Super_002dQuick_002dStart">
-<h3 class="section">2.2 Super-Quick-Start</h3>
+<h3 class="section"><span>2.2 Super-Quick-Start<a class="copiable-link" href="#Super_002dQuick_002dStart"> &para;</a></span></h3>
 
 <p>This is the simplest and shortest path to a running system.  It assumes:
 </p>
@@ -203,7 +206,7 @@ and deliver it with the next request.
 
 <a class="anchor" id="Quick_002dStart-Checklist"></a></div>
 <div class="section-level-extent" id="Quick_002dStart-Checklist-1">
-<h3 class="section">2.3 Quick-Start Checklist</h3>
+<h3 class="section"><span>2.3 Quick-Start Checklist<a class="copiable-link" href="#Quick_002dStart-Checklist-1"> &para;</a></span></h3>
 
 <p>This is a more detailed and expanded description of the same
 super-quick-start.
@@ -213,7 +216,7 @@ super-quick-start.
 <ol class="enumerate">
 <li> See <a class="xref" href="#Pre_002drequisites">Pre-requisites</a>
 </li><li> See <a class="xref" href="#Download-Kiss">Download Kiss</a>
-</li><li> See <a class="xref" href="#Setup-And-Configuration">Setup And Configuration</a>
+</li><li> See <a class="xref" href="#Setup-and-Configuration">Setup and Configuration</a>
 </li><li> The development server can be run without an IDE by running: <code class="code">./bld develop</code>
 </li><li> Once the server starts up, you can access it on your browser by going to 
 <code class="code">http://localhost:8000</code>  You can also debug the back-end by
@@ -228,7 +231,7 @@ by hitting any key.
 </p>
 </div>
 <div class="section-level-extent" id="Runtime-Environments">
-<h3 class="section">2.4 Runtime Environments</h3>
+<h3 class="section"><span>2.4 Runtime Environments<a class="copiable-link" href="#Runtime-Environments"> &para;</a></span></h3>
 
 <p>As shipped, there are two different environments that <em class="emph">Kiss</em> may
 run in as follows:
@@ -271,19 +274,47 @@ and the front-end server runs by executing a single command.
 </p>
 <a class="anchor" id="Pre_002drequisites"></a></div>
 <div class="section-level-extent" id="Pre_002drequisites-1">
-<h3 class="section">2.5 Pre-requisites</h3>
+<h3 class="section"><span>2.5 Pre-requisites<a class="copiable-link" href="#Pre_002drequisites-1"> &para;</a></span></h3>
 
-<p>You should download and install the following pre-requisites.
+<p><em class="emph">Kiss</em> requires a few common pre-requisits as follows:
+</p>
+
+<ol class="enumerate">
+<li> Java JDK 8, 11, or 17.  (At present, <em class="emph">Kiss</em> does not support Java 21.)
+</li><li> SQL Database Server &mdash; <em class="emph">Kiss</em> comes with the <em class="emph">SQLite</em> database.  However, in a production
+system you&rsquo;re likely to prefer a more substantial database server.  <em class="emph">Kiss</em> supports a variety of SQL database servers including 
+PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
+</li><li> IDE &mdash; Although <em class="emph">Kiss</em> does not require an IDE, one is stongly recommended (e.g.&nbsp;<a class="uref" href="https://www.jetbrains.com/idea">IntelliJ</a>, VSCode, NetBeans, eclipse)
+</li><li> GIT source code control system
+</li><li> Groff &mdash; <em class="emph">Kiss</em> utilizes the open-source <em class="emph">groff</em> typsetting system in order to produce PDF reports.
+</li></ol>
+
+<p>On Linux, most of these packages may be obtained utilizing the normal
+package manager that comes with your distribution.
+</p>
+<p>The following sub-sections detail how to get those pre-requisits for Windows and Mac.
+</p>
+<ul class="mini-toc">
+<li><a href="#Windows" accesskey="1">Windows</a></li>
+<li><a href="#Mac" accesskey="2">Mac</a></li>
+</ul>
+<div class="subsection-level-extent" id="Windows">
+<h4 class="subsection"><span>2.5.1 Windows<a class="copiable-link" href="#Windows"> &para;</a></span></h4>
+
+
+<p>You may obtain the requirements under Windows as follows.
 </p>
 <ol class="enumerate">
-<li> Java JDK 8, 11, or 17 from many sources including <a class="uref" href="https://www.azul.com/downloads/zulu-community">https://www.azul.com/downloads/zulu-community</a> or 
-<a class="uref" href="https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html">https://docs.aws.amazon.com/corretto/latest/corretto-8-ug/downloads-list.html</a> or
-<a class="uref" href="https://developers.redhat.com/products/openjdk/download">https://developers.redhat.com/products/openjdk/download</a> or
-<a class="uref" href="https://adoptopenjdk.net">https://adoptopenjdk.net</a>
-</li><li> An SQL database server (e.g.&nbsp;PostgreSQL, Microsoft SQL Server, MySQL,
-Oracle, SQLite)
+<li> Java JDK 8, 11, or 17 for many OSs at:
+<ul class="itemize mark-bullet">
+<li><a class="uref" href="https://www.azul.com/downloads">https://www.azul.com/downloads</a>
+</li><li><a class="uref" href="https://aws.amazon.com/corretto">https://aws.amazon.com/corretto</a>
+</li><li><a class="uref" href="https://adoptopenjdk.net">https://adoptopenjdk.net</a>
+</li><li><a class="uref" href="https://developers.redhat.com/products/openjdk/download">https://developers.redhat.com/products/openjdk/download</a>
+</li></ul>
+</li><li> <em class="emph">Kiss</em> comes with the SQLite database.  However, you may install other databases such as PostgreSQL, Microsoft SQL Server, MySQL,
+Oracle, or SQLite.
 </li><li> IDE (e.g.&nbsp;<a class="uref" href="https://www.jetbrains.com/idea">IntelliJ</a>, VSCode, NetBeans, eclipse)
-</li><li> GIT source code control system
 </li></ol>
 
 <p>Correctly setting the <em class="emph">JAVA_HOME</em> and <em class="emph">JRE_HOME</em> environment
@@ -291,41 +322,43 @@ variables to the root of your JDK is necessary.  Setting this varies
 from OS to OS and also depends on where it gets installed.
 Instructions for setting this variable are all over the Internet.
 </p>
-<p>The system was built and tested with JDK 8, 11 and 17,
-<a class="uref" href="https://www.postgresql.org">PostgreSQL</a>,
-<a class="uref" href="https://www.jetbrains.com/idea">IntelliJ</a>, and
-<a class="uref" href="https://tomcat.apache.org">tomcat</a>.  Other environments such as 
-IIS, Glassfish, eclipse, should work fine but may require some
-configuration.
+<p>The remaining requirements may be obtained through the
+<em class="emph">Chocolatey</em> Windows Package Manager located at
+<a class="uref" href="https://chocolatey.org">https://chocolatey.org</a> Their &ldquo;community&rdquo; version is free. We used their &ldquo;Individual&rdquo; install.
+The following packages should be installed after installing the choco
+package manager:
 </p>
-<p><em class="emph">Kiss</em> comes with its own build system.  See <a class="xref" href="#Important">Important</a>
-</p>
-<p>Install the above according to their instructions.
-</p>
-<ul class="mini-toc">
-<li><a href="#Groff-and-PDF" accesskey="1">Groff and PDF</a></li>
-</ul>
-<div class="subsection-level-extent" id="Groff-and-PDF">
-<h4 class="subsection">2.5.1 Groff and PDF</h4>
+<ul class="itemize mark-bullet">
+<li>choco install groff
+</li><li>choco install strawberryperl
+</li><li>choco install ghostscript
+</li><li>choco install git
+</li></ul>
 
-<p>The <em class="emph">Kiss</em> reporting facilities are dependent on the full
-<em class="emph">groff</em> system and the ability to convert Postscript files to PDF
-files.  This is generally true on Linux, however, the full
-<em class="emph">groff</em> package may need to be installed.  Mac&rsquo;s are fine.  These
-packages are not on Windows and must be installed.
+<p>After installing these programs you must exit and re-start any terminals you have running.
 </p>
-<p>Correctly installing <em class="emph">groff</em> and <em class="emph">ghostscript</em> will allow the
-reporting facilities to work under Windows.  They may be obtained from:
+
+</div>
+<div class="subsection-level-extent" id="Mac">
+<h4 class="subsection"><span>2.5.2 Mac<a class="copiable-link" href="#Mac"> &para;</a></span></h4>
+
+<p>Mac requirements may be obtained via the <em class="emph">brew</em> package manager available at <br><a class="uref" href="https://brew.sh">https://brew.sh</a>
+Once <code class="code">brew</code> is installed,you can install the remainder of the requirements with the following commands:
 </p>
-<p><a class="uref" href="https://sourceforge.net/projects/ezwinports">https://sourceforge.net/projects/ezwinports</a>
-</p>
-<p><a class="uref" href="https://www.ghostscript.com">https://www.ghostscript.com</a>
-</p>
+<ul class="itemize mark-bullet">
+<li>brew install openjdk@17
+</li><li>(Add the following line to your <code class="code">~/.zshrc</code> file and then re-start your terminal.)<br>
+export JAVA_HOME=&quot;$(brew &ndash;prefix)/opt/openjdk@17&quot;
+</li><li>brew install git
+</li><li>brew install groff
+</li></ul>
+
+
 
 <a class="anchor" id="Download-Kiss"></a></div>
 </div>
 <div class="section-level-extent" id="Download-Kiss-1">
-<h3 class="section">2.6 Download Kiss</h3>
+<h3 class="section"><span>2.6 Download Kiss<a class="copiable-link" href="#Download-Kiss-1"> &para;</a></span></h3>
 
 <p>Kiss is located at <a class="uref" href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
 </p>
@@ -334,8 +367,22 @@ reporting facilities to work under Windows.  They may be obtained from:
 <p><code class="code">git clone https://github.com/blakemcbride/Kiss.git</code>
 </p>
 </div>
+<div class="section-level-extent" id="Quick-Test">
+<h3 class="section"><span>2.7 Quick Test<a class="copiable-link" href="#Quick-Test"> &para;</a></span></h3>
+
+<p>Once everything has been set up, you can easily build and run the system with the following commands:
+</p>
+<div class="example">
+<pre class="example-preformatted">git clone https://github.com/blakemcbride/Kiss.git
+cd Kiss
+./bld develop (or &quot;bld develop&quot; under Windows)
+</pre></div>
+
+<p>Once the system is up, you can go to the following address with your browser: <code class="code">http://localhost:8000</code>
+</p>
+</div>
 <div class="section-level-extent" id="Documentation">
-<h3 class="section">2.7 Documentation</h3>
+<h3 class="section"><span>2.8 Documentation<a class="copiable-link" href="#Documentation"> &para;</a></span></h3>
 
 <p>The <em class="emph">Kiss</em> documentation consists of three parts; this manual,
 the detailed back-end API documentation contained in the JavaDocs, and
@@ -372,12 +419,12 @@ file:///my/home/path/kiss/work/javadoc/index.html
 file:///my/home/path/kiss/manual/jsdoc/index.html
 </pre></div>
 
-<a class="anchor" id="Setup-And-Configuration"></a></div>
-<div class="section-level-extent" id="Setup-And-Configuration-1">
-<h3 class="section">2.8 Setup And Configuration</h3>
+<a class="anchor" id="Setup-and-Configuration"></a></div>
+<div class="section-level-extent" id="Setup-and-Configuration-1">
+<h3 class="section"><span>2.9 Setup and Configuration<a class="copiable-link" href="#Setup-and-Configuration-1"> &para;</a></span></h3>
 
 <p>The system is configured by the contents of a single file
-<code class="code">src/main/backend/KissInit.groovy</code> A reboot of the web server
+<br><code class="code">src/main/backend/KissInit.groovy</code> A reboot of the web server
 is required if any of the parameters in this file are changed.
 </p>
 <p>Given that <em class="emph">Kiss</em> is for business applications, it authenticates its
@@ -430,7 +477,7 @@ may be added to this database.
 </p>
 </div>
 <div class="section-level-extent" id="Bypassing-Authentication">
-<h3 class="section">2.9 Bypassing Authentication</h3>
+<h3 class="section"><span>2.10 Bypassing Authentication<a class="copiable-link" href="#Bypassing-Authentication"> &para;</a></span></h3>
 
 <p>On rare occasions, it is necessary to bypass authentication.  In other
 words, be able to execute a web service without being logged in.  One
@@ -451,7 +498,7 @@ the combination of <em class="emph">HTTPS</em> and <em class="emph">CORS</em>.
 </p>
 </div>
 <div class="section-level-extent" id="Building-The-System">
-<h3 class="section">2.10 Building The System</h3>
+<h3 class="section"><span>2.11 Building The System<a class="copiable-link" href="#Building-The-System"> &para;</a></span></h3>
 
 <p>Although the system may be built with the included build system
 (called <em class="emph">bld</em>) <em class="emph">or</em> your favorite IDE, the <em class="emph">bld</em>
@@ -543,7 +590,7 @@ JAR cannot be used in any web environment.  See <code class="code">src/main/core
 <li><a href="#Using-an-IDE" accesskey="1">Using an IDE</a></li>
 </ul>
 <div class="subsection-level-extent" id="Using-an-IDE">
-<h4 class="subsection">2.10.1 Using an IDE</h4>
+<h4 class="subsection"><span>2.11.1 Using an IDE<a class="copiable-link" href="#Using-an-IDE"> &para;</a></span></h4>
 
 <p>Most IDE&rsquo;s can be used to develop and debug the application.  There are two
 way to do this as follows:
@@ -575,7 +622,7 @@ IDE.  Instructions for setting up some of the IDEs is located under the
 <a class="anchor" id="updates"></a></div>
 </div>
 <div class="section-level-extent" id="Kiss-Framework-Updates">
-<h3 class="section">2.11 Kiss Framework Updates</h3>
+<h3 class="section"><span>2.12 Kiss Framework Updates<a class="copiable-link" href="#Kiss-Framework-Updates"> &para;</a></span></h3>
 
 <p>The <em class="emph">Kiss</em> framework is continually enhanced.  <em class="emph">Kiss</em>
 includes a mechanism to upgrade your application. 
@@ -621,7 +668,7 @@ by this process.
 
 </div>
 <div class="section-level-extent" id="What-Do-I-Do-With-It-Now_003f">
-<h3 class="section">2.12 What Do I Do With It Now?</h3>
+<h3 class="section"><span>2.13 What Do I Do With It Now?<a class="copiable-link" href="#What-Do-I-Do-With-It-Now_003f"> &para;</a></span></h3>
 
 <p>What you have at this point is the beginnings of your new application.
 <em class="emph">Kiss</em> is provided as a running and deployable system.  It is
@@ -639,7 +686,7 @@ front-end API reference located in the <em class="emph">manual/jsdoc</em> direct
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Orientation.html">Orientation</a>, Previous: <a href="Introduction.html">Introduction</a>, Up: <a href="index.html">Kiss Developer Manual (December 8, 2023)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Orientation.html">Orientation</a>, Previous: <a href="Introduction.html">Introduction</a>, Up: <a href="index.html">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 
