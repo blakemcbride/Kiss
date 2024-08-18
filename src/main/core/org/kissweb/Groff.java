@@ -376,9 +376,11 @@ public class Groff {
             pw.println("'tl '''" + DateTime.currentDateTimeFormattedTZ() + "'");
         else if (!runDate.isEmpty())
             pw.println("'tl '''" + runDate + "'");
-        pw.println("'ce " + (1 + pageTitleLines.size()));
-        if (title != null && !title.isEmpty())
+        if (title != null && !title.isEmpty()) {
+            pw.println("'ce " + (1 + pageTitleLines.size()));
             pw.println(title);
+        } else if (!pageTitleLines.isEmpty())
+            pw.println("'ce " + pageTitleLines.size());
         for (String line : pageTitleLines)
             pw.println(line);
         pw.println("'SP");
