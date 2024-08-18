@@ -62,7 +62,7 @@ public class Groff {
      * On the front-end side, see JavaScript Utils.showReport()
      *
      * @param fnamePrefix final PDF file name prefix
-     * @param title     report title
+     * @param title     report title or null
      * @param landscape true if landscape format, portrait otherwise
      * @throws IOException
      */
@@ -377,7 +377,8 @@ public class Groff {
         else if (!runDate.isEmpty())
             pw.println("'tl '''" + runDate + "'");
         pw.println("'ce " + (1 + pageTitleLines.size()));
-        pw.println(title);
+        if (title != null && !title.isEmpty())
+            pw.println(title);
         for (String line : pageTitleLines)
             pw.println(line);
         pw.println("'SP");
