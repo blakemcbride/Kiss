@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Developing">
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 30, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -203,6 +203,7 @@ should have a sub-directory named <code class="code">src/main/backend</code>.
 <li><a href="#Programming-Languages" accesskey="4">Programming Languages</a></li>
 <li><a href="#Cron" accesskey="5">Cron</a></li>
 <li><a href="#CORS" accesskey="6">CORS</a></li>
+<li><a href="#Unit-Tests" accesskey="7">Unit Tests</a></li>
 </ul>
 <div class="subsection-level-extent" id="REST-Server">
 <h4 class="subsection"><span>4.2.1 REST Server<a class="copiable-link" href="#REST-Server"> &para;</a></span></h4>
@@ -390,6 +391,38 @@ supports this security standard.
 <p><em class="emph">Kiss</em> automatically enables full CORS protection on production
 environments and allows CORS in the development environment.
 </p>
+</div>
+<div class="subsection-level-extent" id="Unit-Tests">
+<h4 class="subsection"><span>4.2.7 Unit Tests<a class="copiable-link" href="#Unit-Tests"> &para;</a></span></h4>
+
+<p><em class="emph">Kiss</em> supports <code class="code">jUnit</code> unit tests.  The tests are located
+under the <code class="code">src/test</code> directory.  The directory hierarchy under
+the <code class="code">src/test</code> should mirror that of the <code class="code">src/main</code>
+directory.
+</p>
+<p>Unit tests may be run as follows:
+</p>
+<ol class="enumerate">
+<li> Add or change unit tests or code to be tested.
+</li><li> Build <em class="emph">KissUnitTest.jar</em> by executing:
+<div class="example">
+<pre class="example-preformatted">    ./bld UnitTest
+</pre></div>
+<p>This creates the <code class="code">work/KissUnitTest.jar</code> file which contains
+the entire <em class="emph">Kiss</em> system and unit tests.
+</p></li></ol>
+
+<p>All tests can be run by running the following command:
+</p><div class="example">
+<pre class="example-preformatted">java -jar work/KissUnitTest.jar -cp work/KissUnitTest.jar 
+                                                  --scan-class-path
+</pre></div>
+<p>Alternatively, a single test can be run as follows:
+</p><div class="example">
+<pre class="example-preformatted">java -jar work/KissUnitTest.jar --select-class org.kissweb.IniFileTest
+</pre></div>
+<p>where <code class="code">org.kissweb.IniFileTest</code> is the full path to the desired test.
+</p>
 <a class="anchor" id="Front_002dend-Development"></a></div>
 </div>
 <div class="section-level-extent" id="Front_002dend-Development-1">
@@ -510,7 +543,7 @@ See that file for more details.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (August 10, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (August 30, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

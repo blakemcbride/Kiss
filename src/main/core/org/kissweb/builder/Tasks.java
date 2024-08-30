@@ -90,12 +90,18 @@ public class Tasks {
      * Create Kiss.jar.  This is a JAR file that can be used in other apps as a
      * utility library.
      */
-    void jar() {
+    private void jar(boolean unitTest) {
         libs();
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
+        if (unitTest)
+            buildJava("src/test/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         createJar(explodedDir + "/WEB-INF/classes", BUILDDIR + "/Kiss.jar");
         //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
+    }
+
+    void jar() {
+        jar(false);
     }
 
     /**
@@ -112,7 +118,7 @@ public class Tasks {
         final String name = "KissGP";
         final String workDir = BUILDDIR + "/" + name;
         final String jarName = workDir + ".jar";
-        jar();
+        jar(false);
         rmTree(workDir);
         rm(jarName);
         unJar(workDir, BUILDDIR + "/Kiss.jar");
@@ -120,6 +126,31 @@ public class Tasks {
         unJar(workDir, "libs/json.jar");
         rm(workDir + "/META-INF/MANIFEST.MF");
         unJar(workDir, "libs/" + groovyJar);
+        createJar(workDir, jarName);
+        rmTree(workDir);
+    }
+
+    void UnitTest() {
+        final String name = "KissUnitTest";
+        final String workDir = BUILDDIR + "/" + name;
+        final String jarName = workDir + ".jar";
+        jar(true);
+        rmTree(workDir);
+        rm(jarName);
+        unJar(workDir, BUILDDIR + "/Kiss.jar");
+        unJar(workDir, "libs/" + postgresqlJar);
+        unJar(workDir, "libs/json.jar");
+
+        // jUnit stuff
+        unJar(workDir, "libs/junit-jupiter-engine-5.11.0.jar");
+        unJar(workDir, "libs/junit-jupiter-api-5.11.0.jar");
+        unJar(workDir, "libs/junit-jupiter-params-5.11.0.jar");
+        unJar(workDir, "libs/junit-platform-console-1.11.0.jar");
+        unJar(workDir, "libs/junit-platform-console-standalone-1.11.0.jar");
+
+        unJar(workDir, "libs/" + groovyJar);
+        rm(workDir + "/META-INF/MANIFEST.MF");
+        writeToFile(workDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\nMain-Class: org.junit.platform.console.ConsoleLauncher\nClass-Path: KissUnitTest.jar\n");
         createJar(workDir, jarName);
         rmTree(workDir);
     }
@@ -134,6 +165,7 @@ public class Tasks {
         copyTree("src/main/backend", explodedDir + "/WEB-INF/backend");
         copyTree("libs", explodedDir + "/WEB-INF/lib");
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
+        buildJava("src/test/core", explodedDir + "/WEB-INF/test-classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
         buildJava("src/main/backend/precompiled", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
         rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
         copyRegex("src/main/core/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
@@ -348,6 +380,14 @@ public class Tasks {
         //dep.add("ag-grid-community.noStyle.min.js", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/ag-grid-community.noStyle.min.js");
         //dep.add("ag-grid.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-grid.min.css");
         //dep.add("ag-theme-balham.min.css", "src/main/frontend/lib", "https://cdnjs.cloudflare.com/ajax/libs/ag-grid/25.1.0/styles/ag-theme-balham.min.css");
+
+        // jUnit
+        dep.add("junit-jupiter-5.11.0.jar", LIBS, "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter/5.11.0/junit-jupiter-5.11.0.jar");
+        dep.add("junit-jupiter-api-5.11.0.jar", LIBS, "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-api/5.11.0/junit-jupiter-api-5.11.0.jar");
+        dep.add("junit-jupiter-engine-5.11.0.jar", LIBS, "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.11.0/junit-jupiter-engine-5.11.0.jar");
+        dep.add("apiguardian-api-1.1.2.jar", LIBS, "https://repo1.maven.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar");
+        dep.add("junit-platform-console-1.11.0.jar", LIBS, "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console/1.11.0/junit-platform-console-1.11.0.jar");
+        dep.add("junit-platform-console-standalone-1.11.0.jar", LIBS, "https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.11.0/junit-platform-console-standalone-1.11.0.jar");
         return dep;
     }
 

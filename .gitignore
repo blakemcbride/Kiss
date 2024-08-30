@@ -18,6 +18,8 @@ libs/sqlite-jdbc-*.jar
 libs/dynamic-loader-*.jar
 libs/fontbox-*.jar
 libs/pdfbox-*.jar
+libs/junit-*.jar
+libs/apiguardian*.jar
 
 
 # Gradle

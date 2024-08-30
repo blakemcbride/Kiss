@@ -297,6 +297,38 @@ supports this security standard.
 @emph{Kiss} automatically enables full CORS protection on production
 environments and allows CORS in the development environment.
 
+@subsection Unit Tests
+
+@emph{Kiss} supports @code{jUnit} unit tests.  The tests are located
+under the @code{src/test} directory.  The directory hierarchy under
+the @code{src/test} should mirror that of the @code{src/main}
+directory.
+
+Unit tests may be run as follows:
+
+@enumerate
+@item
+Add or change unit tests or code to be tested.
+@item
+Build @emph{KissUnitTest.jar} by executing:
+@example
+    ./bld UnitTest
+@end example
+This creates the @code{work/KissUnitTest.jar} file which contains
+the entire @emph{Kiss} system and unit tests.
+@end enumerate
+
+All tests can be run by running the following command:
+@example
+java -jar work/KissUnitTest.jar -cp work/KissUnitTest.jar 
+                                                  --scan-class-path
+@end example
+Alternatively, a single test can be run as follows:
+@example
+java -jar work/KissUnitTest.jar --select-class org.kissweb.IniFileTest
+@end example
+where @code{org.kissweb.IniFileTest} is the full path to the desired test.
+
 @anchor{Front-end Development}@section Front-end Development
 
 A separate server is used so that development files will be served
