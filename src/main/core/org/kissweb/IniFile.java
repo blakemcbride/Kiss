@@ -54,6 +54,12 @@ public class IniFile {
         return ini;
     }
 
+    /**
+     * Removes quotes from the start and end of a string.
+     *
+     * @param s  the string to remove quotes from
+     * @return  the string with quotes removed, or null if the input string is null
+     */
     private static String unquote(String s) {
         if (s == null)
             return null;
@@ -65,6 +71,11 @@ public class IniFile {
         return s;
     }
 
+    /**
+     * Parse an ini file.
+     *
+     * @param fname  the filename of the ini file to parse
+     */
     private void parse(String fname) throws IOException {
         HashMap<String, String> section = new HashMap<>();
         String sectionName = null;
