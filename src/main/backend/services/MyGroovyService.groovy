@@ -8,11 +8,21 @@ import org.kissweb.restServer.GroovyService
 import org.kissweb.restServer.ProcessServlet
 import org.kissweb.restServer.MainServlet
 
+/**
+ * <code>MyGroovyService</code> is the name of the web service.  This is all you need.
+ * There is no build process or configuration.  It can be added, changed, or deleted on a running system.
+ * It gets auto-compiled and loaded whenever it changes.  It always runs at full compiled speed.
+ */
 class MyGroovyService {
 
-    /*
-             Keep in mind that this is a compiled and cached script so it runs as fast as regular compiled Java.
-             It gets auto-recompiled and loaded whenever it changes.
+    /**
+     * <code>addNumbers</code> is a complete web method.  When called by the front-end, the system authenticates the
+     * call before this point is reached.  So you know all calls are authenticated.
+     *
+     * @param injson json data from the front-end
+     * @param outjson json data to be sent back to the front-end
+     * @param db connection to the SQL database
+     * @param servlet information specific to this particular call
      */
     void addNumbers(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         Integer num1 = injson.getInt("num1")
@@ -30,6 +40,15 @@ class MyGroovyService {
          */
     }
 
+    /**
+     * <code>hasDatabase</code> is a complete web method.  When called by the front-end, the system authenticates the
+     * call before this point is reached.  So you know all calls are authenticated.
+     *
+     * @param injson json data from the front-end
+     * @param outjson json data to be sent back to the front-end
+     * @param db connection to the SQL database
+     * @param servlet information specific to this particular call
+     */
     void hasDatabase(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         outjson.put("hasDatabase", MainServlet.hasDatabase())
     }
