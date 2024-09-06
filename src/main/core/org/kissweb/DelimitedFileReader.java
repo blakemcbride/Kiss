@@ -145,7 +145,9 @@ public class DelimitedFileReader implements AutoCloseable {
     public double getDouble(String fld) {
         if (nameMap == null)
             return 0.0;
-        int i = nameMap.get(fld.toLowerCase());
+        Integer i = nameMap.get(fld.toLowerCase());
+        if (i == null)
+            return 0.0;
         try {
             return Double.parseDouble(getString(i));
         } catch (NumberFormatException e) {
@@ -387,8 +389,8 @@ public class DelimitedFileReader implements AutoCloseable {
     public String getString(String fld) {
         if (nameMap == null)
             return "";
-        int item = nameMap.get(fld.toLowerCase());
-        if (item >= lineValues.size())
+        Integer item = nameMap.get(fld.toLowerCase());
+        if (item == null || item >= lineValues.size())
             return "";
         return lineValues.get(item);
     }
@@ -446,7 +448,9 @@ public class DelimitedFileReader implements AutoCloseable {
     public int getInt(String fld) {
         if (nameMap == null)
             return 0;
-        int item = nameMap.get(fld.toLowerCase());
+        Integer item = nameMap.get(fld.toLowerCase());
+        if (item == null)
+            return 0;
         try {
             return Integer.parseInt(getString(item));
         } catch (NumberFormatException numberFormatException) {
