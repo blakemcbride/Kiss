@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Orientation">
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 30, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (September 8, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -195,12 +195,12 @@ is loaded.
 that look as follows:
 </p>
 <div class="example">
-<pre class="example-preformatted">var softwareVersion = &quot;1&quot;;  // version of the entire system
-var controlCache = false;   // normally true but use false during 
+<pre class="example-preformatted">SystemInfo.softwareVersion = &quot;1&quot;;  // version of the entire system
+SystemInfo.controlCache = false;   // normally true but use false during
                             // debugging
 </pre></div>
 
-<p>If <code class="code">controlCache</code> is set to <code class="code">true</code>, each time <code class="code">softwareVersion</code>
+<p>If <code class="code">SystemInfo.controlCache</code> is set to <code class="code">true</code>, each time <code class="code">SystemInfo.softwareVersion</code>
 is incremented all users starting the application will be forced to
 load new code from the server and not use their browser&rsquo;s cache.  Once
 they download the new version, normal browser cache activity will
@@ -262,7 +262,7 @@ example shows the same code in all of the supported languages.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Developer Manual (August 30, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Developer Manual (September 8, 2024)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

@@ -1206,7 +1206,7 @@ class Utils {
         return new Promise(async function (resolve, reject) {
             let response;
             try {
-                response = await fetch(url + (Utils.controlCache ? '?ver=' + Utils.softwareVersion : ''), {
+                response = await fetch(url + (SystemInfo.controlCache ? '?ver=' + SystemInfo.softwareVersion : ''), {
                     method: 'GET',
                     headers: {
                         'Content-type': 'text/plain'

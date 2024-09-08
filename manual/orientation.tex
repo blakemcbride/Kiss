@@ -110,12 +110,12 @@ The user's browser cache can be controlled from the file
 that look as follows:
 
 @example
-var softwareVersion = "1";  // version of the entire system
-var controlCache = false;   // normally true but use false during 
+SystemInfo.softwareVersion = "1";  // version of the entire system
+SystemInfo.controlCache = false;   // normally true but use false during
                             // debugging
 @end example
 
-If @code{controlCache} is set to @code{true}, each time @code{softwareVersion}
+If @code{SystemInfo.controlCache} is set to @code{true}, each time @code{SystemInfo.softwareVersion}
 is incremented all users starting the application will be forced to
 load new code from the server and not use their browser's cache.  Once
 they download the new version, normal browser cache activity will

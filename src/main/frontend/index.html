@@ -49,9 +49,14 @@
 
     <script>
 
-        // cache control
-        const softwareVersion = "20201108";   // version of the entire system
-        const controlCache = true;            // normally true but use false during debugging
+        const SystemInfo = {};
+
+        // The following parameters must be set in a production system
+        SystemInfo.softwareVersion = "EDIT-1";  // used to identify a unique system
+        SystemInfo.releaseDate = "EDIT-2";
+        SystemInfo.controlCache = false;  // normally true but use false during debugging EDIT-3
+        // The following is only set on a production system that has the front-end and back-end separated
+        //SystemInfo.backendUrl = 'https://[YOUR-URL]/[back-end]]';
 
         /**
          * Load a JavaScript file
@@ -61,7 +66,7 @@
                 const head = document.getElementsByTagName("head")[0];
                 const script = document.createElement("script");
                 script.type = "text/javascript";
-                script.src = url + (controlCache ? '?ver=' + softwareVersion : '');
+                script.src = url + (SystemInfo.controlCache ? '?ver=' + SystemInfo.softwareVersion : '');
 
                 // Handle Script loading
                 {
@@ -102,8 +107,6 @@
         function startup() {
 
             const afterLoad = function () {
-                Utils.softwareVersion = softwareVersion;
-                Utils.controlCache = controlCache;
                 loadScript("index.js", function () {
                     // do nothing
                 });
@@ -134,9 +137,9 @@
                 loadScript("kiss/Editor.js");
             };
 
-            $.ajaxSetup({ cache: controlCache });  // utilize browser cache to the fullest when version hasn't changed
+            $.ajaxSetup({ cache: SystemInfo.controlCache });  // utilize browser cache to the fullest when version hasn't changed
 
-            if (controlCache) {
+            if (SystemInfo.controlCache) {
                 const now = getURLParameter("now");
                 let urlArgs = window.location.search.substring(1);
                 if (now) {

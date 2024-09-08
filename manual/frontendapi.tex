@@ -296,11 +296,11 @@ that the @code{index.html} file @emph{always} gets loaded afresh.
 To that end, @emph{Kiss} has code to ignore browser cache and always load
 @code{index.html} afresh.
 
-@code{index.html} contains two variables names @code{softwareVersion} and @code{controlCache}.
-Assuming @code{controlCache} is @code{true}, @emph{Kiss} has code that forces the browser
-to re-load all files whenever @code{softwareVersion} changes.  After the code is re-loaded,
+@code{index.html} contains two variables named @code{SystemInfo.softwareVersion} and @code{SystemInfo.controlCache}.
+Assuming @code{SystemInfo.controlCache} is @code{true}, @emph{Kiss} has code that forces the browser
+to re-load all files whenever @code{SystemInfo.softwareVersion} changes.  After the code is re-loaded,
 the browser cache will work as normal to maximally cache the files until the next
-@code{softwareVersion} change.
+@code{SystemInfo.softwareVersion} change.
 
 @section Additional Resources
 

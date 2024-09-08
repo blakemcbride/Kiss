@@ -6,7 +6,7 @@
 Utils.afterComponentsLoaded(function () {
     let url = Utils.getAppUrl();
     url = url.replace(/:8000/, ':8080');
-    Server.setURL(url);
+    Server.setURL(SystemInfo.backendUrl || url);
 
     Utils.forceASCII = false;  // Force all text entry to ASCII (see Utils.forceASCII)
 
