@@ -67,9 +67,9 @@ public class Cursor implements AutoCloseable {
     private static final int BATCH_SIZE = 100;  // number of records retrieved from the database server at a time
     Command cmd;
     String tname;
-    PreparedStatement ustmt;
+    PreparedStatement pstmt;
+    StringBuilder prevsql;  // this is the sql last used by pstmt
     private final ResultSetMetaData mdata;
-    StringBuilder prevsql;
     private Record lastRec;
     private File cacheFile;
     private ObjectInputStream cacheStream;
@@ -91,7 +91,8 @@ public class Cursor implements AutoCloseable {
      */
     Cursor(boolean useMemoryCache, int max, Command cmd) throws SQLException, IOException {
         this.cmd = cmd;
-        cmd.pstat.setFetchSize(BATCH_SIZE);
+        final int bs = max == 0 ? BATCH_SIZE : max;
+        cmd.pstat.setFetchSize(bs);
         ResultSet rset = cmd.pstat.executeQuery();
         mdata = rset.getMetaData();
         cmd.isSelect = true;
@@ -196,7 +197,7 @@ public class Cursor implements AutoCloseable {
             cacheStream = null;
             memoryCache = new ArrayList<>();
 
-            while (rset.next()) {
+            while (rset.next() && (maxRecords == 0 || size < maxRecords)) {
                 size++;
                 HashMap<String,Object> ocols = new HashMap<>();
                 LinkedHashMap<String,Object> cols = new LinkedHashMap<>();
@@ -217,7 +218,7 @@ public class Cursor implements AutoCloseable {
             try (FileOutputStream fos = new FileOutputStream(cacheFile);
                  BufferedOutputStream bos = new BufferedOutputStream(fos);
                  ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-                while (rset.next()) {
+                while (rset.next() && (maxRecords == 0 || size < maxRecords)) {
                     size++;
                     int len;
                     if (ncols == -1) {
@@ -495,9 +496,9 @@ public class Cursor implements AutoCloseable {
     @Override
     public void close() throws SQLException {
         closeCache();
-        if (ustmt != null) {
-            ustmt.close();
-            ustmt = null;
+        if (pstmt != null) {
+            pstmt.close();
+            pstmt = null;
         }
         prevsql = null;
         lastRec = null;

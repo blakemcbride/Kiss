@@ -594,7 +594,7 @@ public class Record implements AutoCloseable {
                     sql.append(pcol).append("=?");
                 }
                 pstmt = conn.conn.prepareStatement(sql.toString());
-            } else if (cursor.ustmt == null  ||  !sql.equals(cursor.prevsql)) {
+            } else if (cursor.pstmt == null  ||  !sql.equals(cursor.prevsql)) {
                 //  Update a record read in + new statement
                 cursor.prevsql = new StringBuilder(sql);
                 sql.append(" where ");
@@ -609,14 +609,13 @@ public class Record implements AutoCloseable {
                         needAnd = true;
                     sql.append(pcol).append("=?");
                 }
-                if (cursor.ustmt != null)
-                    cursor.ustmt.close();
-                cursor.ustmt = cursor.cmd.conn.conn.prepareStatement(sql.toString());
-                pstmt = cursor.ustmt;
+                if (cursor.pstmt != null  &&  !cursor.pstmt.isClosed())
+                    cursor.pstmt.close();
+                pstmt = cursor.pstmt = cursor.cmd.conn.conn.prepareStatement(sql.toString());
             } else {
                 // Update a record read in - re-use same prepared statement
-                cursor.ustmt.clearParameters();
-                pstmt = cursor.ustmt;
+                cursor.pstmt.clearParameters();
+                pstmt = cursor.pstmt;
             }
             int i = 1;
             for (AbstractMap.SimpleEntry<String,Object> fld : cf) {
@@ -687,7 +686,7 @@ public class Record implements AutoCloseable {
             if (conn.deleteCallback != null && ncpkey == 1)
                 conn.deleteCallback.accept(table, pkval);
             return;
-        } else if (cursor.ustmt == null || !sql.equals(cursor.prevsql)) {
+        } else if (cursor.pstmt == null || !sql.equals(cursor.prevsql)) {
             cursor.prevsql = new StringBuilder(sql);
             boolean needAnd = false;
             final List<String> pc = conn.getPrimaryColumns(table);
@@ -703,18 +702,18 @@ public class Record implements AutoCloseable {
                 }
                 sql.append(col).append("=?");
             }
-            if (cursor.ustmt != null)
-                cursor.ustmt.close();
-            cursor.ustmt = cursor.cmd.conn.conn.prepareStatement(sql.toString());
+            if (cursor.pstmt != null && !cursor.pstmt.isClosed())
+                cursor.pstmt.close();
+            cursor.pstmt = cursor.cmd.conn.conn.prepareStatement(sql.toString());
         } else
-            cursor.ustmt.clearParameters();
+            cursor.pstmt.clearParameters();
         int i = 1;
         for (String pcol : cursor.cmd.getPriColumns(cursor)) {
             if (i == 1)
                 pkval = cols.get(pcol);
-            cursor.ustmt.setObject(i++, Connection.fixDate(ocols.get(pcol)));
+            cursor.pstmt.setObject(i++, Connection.fixDate(ocols.get(pcol)));
         }
-        cursor.ustmt.execute();
+        cursor.pstmt.execute();
         if (conn.deleteCallback != null && ncpkey == 1)
             conn.deleteCallback.accept(table, pkval);
     }
@@ -994,7 +993,8 @@ public class Record implements AutoCloseable {
     public void close() {
         if (pstmt != null) {
             try {
-                pstmt.close();
+                if (!pstmt.isClosed())
+                    pstmt.close();
             } catch (SQLException ignored) {
             }
             pstmt = null;

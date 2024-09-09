@@ -36,6 +36,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.kissweb.DateUtils;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -591,6 +592,112 @@ public class Connection implements AutoCloseable {
              */
             Record rec = cmd.fetchOne(sql, args);
             return rec.getLong("count");
+        }
+    }
+
+    /**
+     * Execute a select statement returning a Kiss Cursor (not a database cursor) that may be used to
+     * obtain each subsequent row.  This is useful when a large number of records
+     * is possible and fetching all into memory at one time is unneeded.  This can
+     * save a significant amount of memory since only one record is in memory at a time.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
+     * @param sql the sql statement with ? parameters
+     * @param args the parameter values
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor
+     * @see #fetchAll(String, Object...)
+     * @see #fetchOne(String, Object...)
+     * @see #query(int, String, Object...)
+     */
+    public Cursor query(String sql, Object ... args) throws SQLException, IOException {
+        try (Command cmd = newCommand()) {
+            return cmd.query(false, 0, 0, sql, args);
+        }
+    }
+
+    /**
+     * Execute a select statement returning a Kiss Cursor (not a database cursor) that may be used to
+     * obtain each subsequent row.
+     * <br><br>
+     * The maximum number of records returned is given by <code>max</code>.
+     * This is useful when a large number of records
+     * is possible and fetching all into memory at one time is unneeded.  This can
+     * save a significant amount of memory since only one record is in memory at a time.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
+     * @param max
+     * @param sql the sql statement with ? parameters
+     * @param args the parameter values
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor
+     * @see #fetchAll(String, Object...)
+     * @see #fetchOne(String, Object...)
+     * @see #query(String, Object...)
+     */
+    public Cursor query(int max, String sql, Object ... args) throws SQLException, IOException {
+        try (Command cmd = newCommand()) {
+            return cmd.query(false, 0, max, sql, args);
+        }
+    }
+
+    /**
+     * Execute a select statement returning a Kiss Cursor (not a database cursor) that may be used to
+     * obtain each subsequent row.  This version is used for paging results.
+     * The total result set is broken down into <code>max</code> sized pages (starting at zero)
+     * You can then choose which group of <code>max</code> records wanted.
+     * <br><br>
+     * The <code>page</code> parameter selects the desired page of results (starting at zero).
+     * <br><br>
+     * The maximum number of records returned is given by <code>max</code>.
+     * This is useful when a large number of records
+     * is possible and fetching all into memory at one time is unneeded.  This can
+     * save a significant amount of memory since only one record is in memory at a time.
+     * <br><br>
+     * The SQL string may contain parameters indicated by the '?' character.
+     * A variable number of arguments to this method are used to fill those parameters.
+     * Each argument gets applied to each '?' parameter in the same order as they appear
+     * in the SQL statement. An SQL prepared statement is used.
+     * <br><br>
+     * This method normally takes a variable argument list representing the consecutive parameters.
+     * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
+     * represents the parameters rather than an in-line list of parameters.
+     * <br><br>
+     * @param page starting at zero
+     * @param max
+     * @param sql the sql statement with ? parameters
+     * @param args the parameter values
+     * @return
+     * @throws SQLException
+     *
+     * @see Cursor
+     * @see #fetchAll(String, Object...)
+     * @see #fetchOne(String, Object...)
+     * @see #query(String, Object...)
+     */
+    public Cursor query(int page, int max, String sql, Object ... args) throws SQLException, IOException {
+        try (Command cmd = newCommand()) {
+            return cmd.query(false, page, max, sql, args);
         }
     }
 

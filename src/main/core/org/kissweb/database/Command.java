@@ -234,7 +234,7 @@ public class Command implements AutoCloseable {
      * @throws SQLException
      * @throws IOException
      */
-    private Cursor query(boolean useMemoryCache, int page, int max, String sql, Object ... args) throws SQLException, IOException {
+    Cursor query(boolean useMemoryCache, int page, int max, String sql, Object ... args) throws SQLException, IOException {
         if (page != 0 && max > 0)
             sql = conn.page(page, max, sql);
         else if (max > 0)
@@ -513,7 +513,8 @@ public class Command implements AutoCloseable {
     public void close() {
         if (pstat != null) {
             try {
-                pstat.close();
+                if (!pstat.isClosed())
+                    pstat.close();
             } catch (SQLException e) {
                 // e.printStackTrace();
             }
