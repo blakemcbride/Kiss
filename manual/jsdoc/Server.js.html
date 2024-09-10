@@ -309,9 +309,10 @@ class Server {
                 success: async function (res, status, hdr) {
                     Utils.waitMessageEnd();
                     Server.decCount();
-                    if (res._Success)
-                        await Utils.showMessage("Information", successMessage ? successMessage : "Upload successful.");
-                    else if (res._ErrorCode === 2) {
+                    if (res._Success) {
+                        if (successMessage)
+                            await Utils.showMessage("Information", successMessage);
+                    } else if (res._ErrorCode === 2) {
                         await Utils.showMessage("Error", res._ErrorMessage);
                         Server.logout();
                     } else
