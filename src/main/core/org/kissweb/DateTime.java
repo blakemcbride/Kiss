@@ -242,6 +242,9 @@ public class DateTime {
      * @param dateFormat
      * @param timeZone
      * @return
+     *
+     * @see java.text.SimpleDateFormat for information about dateFormat
+     *
      */
     public static String currentDateTimeFormatted(String dateFormat, String timeZone) {
         Date date = new Date();
@@ -255,6 +258,8 @@ public class DateTime {
      *
      * @param dateFormat
      * @return
+     *
+     * @see java.text.SimpleDateFormat for information about dateFormat
      */
     public static String currentDateTimeFormatted(String dateFormat) {
         Date date = new Date();
