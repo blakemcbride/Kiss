@@ -31,7 +31,7 @@ public class TimeUtils {
     public static String formatMilitary(int tm) {
         final int min = tm % 100;
         final int hour = tm / 100;
-        return hour + ":" + NumberFormat.Format(min, "Z", 2, 0);
+        return NumberFormat.Format(hour, "Z", 2, 0) + ":" + NumberFormat.Format(min, "Z", 2, 0);
     }
 
     /**
@@ -49,7 +49,7 @@ public class TimeUtils {
             side = "PM";
         } else
             side = "AM";
-        return hour + ":" + NumberFormat.Format(min, "Z", 2, 0) + ' ' + side;
+        return (hour == 0 ? 12 : hour) + ":" + NumberFormat.Format(min, "Z", 2, 0) + ' ' + side;
     }
 
     /**
@@ -140,8 +140,11 @@ public class TimeUtils {
         }
         if (c == ' ')
             c = time.charAt(i);
-        if (c == 'P' || c == 'p')
-            hour += 12;
+        if (c == 'P' || c == 'p') {
+            if (hour < 12)
+                hour += 12;
+        } else if (hour == 12)
+            hour = 0;
         return hour * 100 + minutes;
     }
 
