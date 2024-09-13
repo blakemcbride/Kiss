@@ -1094,6 +1094,11 @@ public class BuildUtils {
             deps.add(new ForeignDependency(filename, targetPath, source));
         }
 
+        void add(String targetPath, String source) {
+            final String filename = source.substring(source.lastIndexOf('/') + 1);
+            deps.add(new ForeignDependency(filename, targetPath, source));
+        }
+
         boolean isEmpty() {
             return deps.isEmpty();
         }
