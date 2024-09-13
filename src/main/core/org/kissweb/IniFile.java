@@ -293,17 +293,6 @@ public class IniFile {
     }
 
     /**
-     * Puts a key-value pair into a specified section of the ini file.
-     *
-     * @param section the section to put the key-value pair into
-     * @param key     the key to put into the section
-     * @param value   the value to put into the section
-     */
-    public void put(String section, String key, Object value) {
-        put(section, key, value);
-    }
-
-    /**
      * Save the in-memory ini file to the specified file.
      *
      * @param fname
@@ -393,7 +382,7 @@ public class IniFile {
      * Retrieves the Boolean value of a key from the ini file from the <code>null</code> section.
      *
      * @param  key     the key to search for
-     * @return         the value of the key if found, null otherwise
+     * @return         the value of the key if found, false otherwise
      */
     public boolean getBoolean(String key) {
         return getBoolean(null, key);
@@ -413,7 +402,7 @@ public class IniFile {
      * Retrieves the integer value representing a date as YYYYMMDD of a key from the ini file from the <code>null</code> section.
      *
      * @param  key     the key to search for
-     * @return         the value of the key if found, null otherwise
+     * @return         the value of the key if found, 0 otherwise
      */
     public int getDateInt(String key) {
         return getDateInt(null, key);
@@ -423,7 +412,7 @@ public class IniFile {
      * Retrieves the integer value representing a date as HHMM of a key from the ini file from the <code>null</code> section.
      *
      * @param  key     the key to search for
-     * @return         the value of the key if found, null otherwise
+     * @return         the value of the key if found, 0 otherwise
      */
     public int getTimeInt(String key) {
         return getTimeInt(null, key);
@@ -434,7 +423,6 @@ public class IniFile {
      *
      * @param  key     the key to put into the section
      * @param  value   the value to put into the section
-     * @return
      */
     public void put(String key, String value) {
         put(null, key, value);
@@ -445,7 +433,6 @@ public class IniFile {
      *
      * @param  key     the key to put into the section
      * @param  value   the value to put into the section
-     * @return
      */
     public void put(String key, int value) {
         put(null, key, value);
@@ -456,7 +443,6 @@ public class IniFile {
      *
      * @param  key     the key to put into the section
      * @param  value   the value to put into the section
-     * @return
      */
     public void put(String key, double value) {
         put(null, key, value);
@@ -467,7 +453,6 @@ public class IniFile {
      *
      * @param  key     the key to put into the section
      * @param  value   the value to put into the section
-     * @return
      */
     public void put(String key, boolean value) {
         put(null, key, value);
@@ -478,7 +463,6 @@ public class IniFile {
      *
      * @param  key     the key to put into the section
      * @param  value   the value to put into the section
-     * @return
      */
     public void put(String key, char value) {
         put(null, key, value);
@@ -489,7 +473,6 @@ public class IniFile {
      *
      * @param  key     the key to put into the section
      * @param  value   the value to put into the section
-     * @return
      */
     public void put(String key, long value) {
         put(null, key, value);
@@ -500,20 +483,8 @@ public class IniFile {
      *
      * @param  key     the key to put into the section
      * @param  value   the value to put into the section
-     * @return
      */
     public void put(String key, Date value) {
-        put(null, key, value);
-    }
-
-    /**
-     * Puts a key-value pair into the ini file in the <code>null</code> section.
-     *
-     * @param  key     the key to put into the section
-     * @param  value   the value to put into the section
-     * @return
-     */
-    public void put(String key, Object value) {
         put(null, key, value);
     }
 
@@ -521,7 +492,6 @@ public class IniFile {
      * Removes the value associated with the given key from the ini file in the <code>null</code> section.
      *
      * @param  key     the key to remove the value for
-     * @return
      */
     public void removeValue(String key) {
         removeValue(null, key);
@@ -531,7 +501,6 @@ public class IniFile {
      * Removes the key-value pair associated with the given key from the ini file in the <code>null</code> section.
      *
      * @param  key     the key to remove the value for
-     * @return
      */
     public void removeKey(String key) {
         removeKey(null, key);

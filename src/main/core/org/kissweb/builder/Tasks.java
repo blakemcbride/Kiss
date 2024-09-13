@@ -100,6 +100,10 @@ public class Tasks {
         //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
     }
 
+    /**
+     * Build Kiss.jar<br><br>
+     * This is a JAR file that can be used in other apps as a utility library.
+     */
     void jar() {
         jar(false);
     }
@@ -130,6 +134,9 @@ public class Tasks {
         rmTree(workDir);
     }
 
+    /**
+     * Build the system for unit testing. (KissUnitTest.jar)
+     */
     void UnitTest() {
         final String name = "KissUnitTest";
         final String workDir = BUILDDIR + "/" + name;
@@ -188,6 +195,9 @@ public class Tasks {
         copy(BUILDDIR + "/Kiss.war", "tomcat/webapps/ROOT.war");
     }
 
+    /**
+     * Unpack and install tomcat
+     */
     void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
             download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
@@ -303,11 +313,21 @@ public class Tasks {
             runWait(true, "tomcat/bin/shutdown.sh");
     }
 
+    /**
+     * build the javdoc files
+     */
     void javadoc() {
         libs();
         buildJavadoc("src/main/core", "libs", BUILDDIR + "/javadoc");
     }
 
+    /**
+     * Remove:<br>
+     * -- all files that were built<br><br>
+     * Do not remove:<br>
+     * -- the downloaded jar files, tomcat<br>
+     * -- the IDE files
+     */
     void clean() {
         rmTree(BUILDDIR);
         rmTree("build.work");  // used in the past
@@ -316,6 +336,13 @@ public class Tasks {
         rm("manual/Kiss.toc");
     }
 
+    /**
+     * Remove:<br>
+     * -- all files that were built<br>
+     * -- the downloaded jar files, tomcat<br><br>
+     * Do not remove:<br>
+     * -- the IDE files
+     */
     void realclean() {
         clean();
         rmRegex("src/main/frontend/lib", "jquery.*");
@@ -333,6 +360,12 @@ public class Tasks {
         //removeFromCache("ag-theme-balham.min.css");
     }
 
+    /**
+     * Remove:<br>
+     * -- all files that were built<br>
+     * -- the downloaded jar files, tomcat<br>
+     * -- the IDE files
+     */
     void ideclean() {
         realclean();
 
@@ -353,6 +386,12 @@ public class Tasks {
         rm("nbbuild.xml");
     }
 
+    /**
+     * Specify the jars used by the system but not included in the distribution.
+     * These are the jars that are to be downloaded byt the build system.
+     *
+     * @return
+     */
     private ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
@@ -391,6 +430,12 @@ public class Tasks {
         return dep;
     }
 
+    /**
+     * This specifies the jar files used by the system that are included in the distribution.
+     * (All are open-source but exist in other projects.)
+     *
+     * @return
+     */
     private LocalDependencies buildLocalDependencies() {
         final LocalDependencies dep = new LocalDependencies();
         dep.add("libs/abcl.jar");
