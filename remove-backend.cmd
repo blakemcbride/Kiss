@@ -13,7 +13,7 @@ if "%~1" neq "remove" (
     exit /b
 )
 
-rmdir /s /q .git .github libs work build.work manual src\main\backend src\main\core notes 2>nul
+rmdir /s /q .git .github libs work build.work manual src\main\backend src\main\core src\test notes 2>nul
 del /q .gitattributes .gitignore bld* build.xml init* KissGP* LIC* pom.xml README.md 2>nul
 del /q runcmd test.csv upgrade-* view-log CONTRIBUTING.md 2>nul
 del /q build-builder* remove-frontend* 2>nul
