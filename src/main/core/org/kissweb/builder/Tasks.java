@@ -413,7 +413,7 @@ public class Tasks {
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.45.0.0/sqlite-jdbc-3.45.0.0.jar");
         //  https://github.com/dvare/dynamic-loader
-        dep.add(LIBS, "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.dvare&a=dynamic-loader&v=3.1&e=jar");
+        dep.add("dynamic-loader-3.1.jar", LIBS, "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.dvare&a=dynamic-loader&v=3.1&e=jar");
         // dep.add(LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
         dep.add("src/main/frontend/lib", "https://code.jquery.com/jquery-3.6.3.min.js");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/2.0.31/pdfbox-2.0.31.jar");
