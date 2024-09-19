@@ -141,6 +141,8 @@ public class DelimitedFileWriter implements AutoCloseable {
 	private void writeWithQuote(String x) throws IOException {
 		if (x == null)
 			x = "";
+		else
+			x = x.trim();
 		if (fcount++ > 0)
 			fw.write(delimiter);
 		fw.write(quote + x.replaceAll(quote, quote + quote) + quote);
@@ -149,6 +151,8 @@ public class DelimitedFileWriter implements AutoCloseable {
 	private void writeWithQuoteUpperCase(String x) throws IOException {
 		if (x == null)
 			x = "";
+		else
+			x = x.trim();
 		if (fcount++ > 0)
 			fw.write(delimiter);
 		fw.write(quote + x.toUpperCase().replaceAll(quote, quote + quote) + quote);
@@ -157,6 +161,8 @@ public class DelimitedFileWriter implements AutoCloseable {
 	private void write(String x) throws IOException {
 		if (x == null)
 			x = "";
+		else
+			x = x.trim();
 		if (fcount++ > 0)
 			fw.write(delimiter);
 		if (x.contains(delimiter)  ||  x.contains(quote))
@@ -186,6 +192,8 @@ public class DelimitedFileWriter implements AutoCloseable {
 	public void writeField(int charLimit, String x) throws Exception {
 		if (x == null)
 			x = "";
+		else
+			x = x.trim();
 		if (x.length() > charLimit)
 			x = StringUtils.rightStrip(x.substring(0, charLimit));
 		write(x);

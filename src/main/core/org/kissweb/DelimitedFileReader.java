@@ -375,7 +375,10 @@ public class DelimitedFileReader implements AutoCloseable {
     public String getString(int item) {
         if (item >= lineValues.size())
             return "";
-        return lineValues.get(item);
+        String s = lineValues.get(item);
+        if (s != null)
+            s = s.trim();
+        return s;
     }
 
     /**
@@ -389,10 +392,13 @@ public class DelimitedFileReader implements AutoCloseable {
     public String getString(String fld) {
         if (nameMap == null)
             return "";
-        Integer item = nameMap.get(fld.toLowerCase());
+        final Integer item = nameMap.get(fld.toLowerCase());
         if (item == null || item >= lineValues.size())
             return "";
-        return lineValues.get(item);
+        String s = lineValues.get(item);
+        if (s != null)
+            s = s.trim();
+        return s;
     }
 
     /**
