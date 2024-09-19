@@ -245,6 +245,9 @@ public class Tasks {
                     "./catalina.sh jpda start\n");
             makeExecutable("tomcat/bin/debug");
         }
+        if (isSunOS) {
+            writeToFile("tomcat/bin/setenv.sh","export JAVA_OPTS=\"-Dorg.sqlite.lib.path=/usr/lib/amd64 -Dorg.sqlite.lib.name=libsqlite3.so\"\n");
+        }
     }
 
     /**

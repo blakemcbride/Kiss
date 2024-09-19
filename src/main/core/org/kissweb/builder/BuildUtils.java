@@ -43,10 +43,15 @@ public class BuildUtils {
     private static final String Version = "1.0";
     private static String CACHE_DIR;
     static boolean isWindows;
+    static boolean isLinux;
+    static boolean isSunOS;  // includes OpenIndiana (only tested on OpenIndiana)
 
     public static void main(String [] args) {
         String osName = System.getProperty("os.name");
+        isLinux = osName.startsWith("Linux");
         isWindows = osName.startsWith("Windows");
+        isSunOS = osName.startsWith("SunOS");
+        System.out.println("Running on " + osName);
         if (args.length < 1)
             args = new String[]{ "help" };
         Tasks ins = new Tasks();
