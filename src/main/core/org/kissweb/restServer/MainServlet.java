@@ -48,6 +48,10 @@ public class MainServlet extends HttpServlet {
     private static Cron cron;
     private static final Set<String> allowedWithoutAuthentication = new HashSet<>();
     private static final Hashtable<String,Object> environment = new Hashtable<>();  // general application-specific values
+    public static boolean isLinux = false;
+    public static boolean isMacOS = false;
+    public static boolean isWindows = false;
+    public static boolean isSunOS = false; // also includes OpenIndiana
 
     private QueueManager queueManager;
 
@@ -159,6 +163,11 @@ public class MainServlet extends HttpServlet {
     static void initializeSystem(String path) {
         Level level = logger.getLevel();
         logger.setLevel(Level.ALL);
+        final String osName = System.getProperty("os.name");
+        isLinux = osName.startsWith("Linux");
+        isMacOS = osName.startsWith("Mac OS X");
+        isWindows = osName.startsWith("Windows");
+        isSunOS = osName.startsWith("SunOS");
         setApplicationPathInternal(path);
         org.kissweb.restServer.ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, null, null, "KissInit", "init");
         if (res == ProcessServlet.ExecutionReturn.Success) {
