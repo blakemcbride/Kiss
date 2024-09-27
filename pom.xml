@@ -32,10 +32,8 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <!-- https://mvnrepository.com/artifact/org.apache.groovy/groovy-all -->
     <dependency>
       <groupId>org.apache.groovy</groupId>
-      <artifactId>groovy-all</artifactId>
+      <artifactId>groovy</artifactId>
       <version>4.0.23</version>
-      <type>pom</type>
-      <scope>test</scope>
     </dependency>
 
 
@@ -44,7 +42,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>4.0.1</version>
-      <scope>provided</scope>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
@@ -66,7 +63,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-1.2-api</artifactId>
       <version>2.22.0</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.mchange/mchange-commons-java -->
@@ -109,7 +105,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.30</version>
-      <scope>test</scope>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
@@ -162,30 +157,35 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>5.11.0</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>5.11.0</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <version>5.11.0</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-console</artifactId>
       <version>1.11.0</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-console-standalone</artifactId>
       <version>1.11.0</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>  
