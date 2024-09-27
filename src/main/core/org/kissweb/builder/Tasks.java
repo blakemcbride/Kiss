@@ -30,7 +30,7 @@ import static org.kissweb.builder.BuildUtils.*;
 public class Tasks {
 
     // Things that change semi-often
-    final String groovyVer = "4.0.18";
+    final String groovyVer = "4.0.23";
     final String postgresqlVer = "42.7.2";
     final String tomcatVer = "9.0.85";
 
