@@ -1,4 +1,4 @@
-#
+#!/usr/bin/env bash
 
 # I've found that I often use multiple front-ends with a single back-end.
 # So, this single back-end has no front-end code.  This script

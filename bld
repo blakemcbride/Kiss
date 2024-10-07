@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 if [ src/main/core/org/kissweb/builder/Tasks.java -nt work/exploded/WEB-INF/classes/org/kissweb/builder/Tasks.class ] || [ src/main/core/org/kissweb/builder/BuildUtils.java -nt work/exploded/WEB-INF/classes/org/kissweb/builder/BuildUtils.class ]; then
   echo Building the builder
   mkdir -p work/exploded/WEB-INF/classes

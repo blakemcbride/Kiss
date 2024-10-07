@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Upgrade a Kiss-based application with the latest version of Kiss.
 

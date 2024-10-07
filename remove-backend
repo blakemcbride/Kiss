@@ -1,4 +1,4 @@
-#
+#!/usr/bin/env bash
 
 # I've found that I often use multiple front-ends with a single back-end.
 # So, these additional front-ends do not have their own back-end.  This

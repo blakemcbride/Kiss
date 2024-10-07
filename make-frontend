@@ -1,4 +1,4 @@
-#
+#!/usr/bin/env bash
 
 # This script is used to package up a front-end-only system
 
