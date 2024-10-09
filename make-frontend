@@ -2,7 +2,7 @@
 
 # This script is used to package up a front-end-only system
 
-FILE=frontend.war
+FILE=$(basename `pwd`).war
 
 rm -f $FILE
 cd src/main/frontend
