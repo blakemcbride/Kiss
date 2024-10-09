@@ -4,9 +4,17 @@
 'use strict';
 
 Utils.afterComponentsLoaded(function () {
-    let url = Utils.getAppUrl();
-    url = url.replace(/:8000/, ':8080');
-    Server.setURL(SystemInfo.backendUrl || url);
+    if (SystemInfo.backendUrl) {
+        // explicit backend URL
+        Server.setURL(SystemInfo.backendUrl);
+    } else if (window.location.protocol === "http:" && window.location.port >= 8000) {
+        //  Development environment
+        Server.setURL('http://' + window.location.hostname + ':8080');
+    } else {
+        //  Production environment with front-end & back-end as one unit
+        let url = Utils.getAppUrl();
+        Server.setURL(url);
+    }
 
     Utils.forceASCII = false;  // Force all text entry to ASCII (see Utils.forceASCII)
 
