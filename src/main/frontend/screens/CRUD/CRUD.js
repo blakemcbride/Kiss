@@ -20,8 +20,16 @@
         $$('edit').disable();
         $$('delete').disable();
         const res = await Server.call(WS, 'getRecords');
-        if (res._Success)
+        if (res._Success) {
+            if (res.nodb) {
+                Utils.showMessage('Error', 'The CRUD function cannot be used without a database.');
+                $$('new').disable();
+                $$('report').disable();
+                $$('export').disable();
+                return;
+            }
             grid.addRecords(res.rows);
+        }
     }
 
     updateGrid();

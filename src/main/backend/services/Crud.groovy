@@ -29,6 +29,10 @@ class Crud {
      * @param servlet information specific to this particular call
      */
     void getRecords(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
+        if (db == null) {
+            outjson.put("nodb", true)
+            return
+        }
         List<Record> recs = db.fetchAll("select * from phone order by last_name, first_name")
         JSONArray rows = new JSONArray();
         for (Record rec : recs) {
