@@ -18,11 +18,11 @@
         let max = null;
         let enterFunction = null;
         let comma = true;
+        let leftJustify = false;
         if (attr.style)
             nstyle = attr.style;
         else
             nstyle = '';
-        nstyle += ' text-align: right;';
 
         let dp = 0;
         let nattrs = '';
@@ -58,6 +58,9 @@
                 case 'no-comma':
                     comma = false;
                     break;
+                case 'left-justify':
+                    leftJustify = true;
+                    break;
 
                 // preexisting attributes
 
@@ -71,6 +74,9 @@
                     break;
             }
         }
+        if (!leftJustify)
+            nstyle += ' text-align: right;';
+
 
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
