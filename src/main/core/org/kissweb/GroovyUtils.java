@@ -65,4 +65,32 @@ public class GroovyUtils {
 
         return res;
     }
+
+    /**
+     * Executes the given Groovy code and returns the result.
+     *
+     * <p>This method allows dynamic execution of Groovy code provided as a string,
+     * without passing any variables into the script. It is a convenience method
+     * that calls {@link #runGroovyCode(String, Map)} with a {@code null} arguments map.
+     *
+     * @param pgm the Groovy code to execute, provided as a {@code String}
+     * @return the result of the Groovy script execution, which can be any {@code Object} returned by the script
+     * @throws groovy.lang.GroovyRuntimeException if an error occurs during compilation or execution of the Groovy code
+     * @throws IllegalArgumentException if the {@code pgm} parameter is {@code null} or empty
+     *
+     * @see #runGroovyCode(String, Map)
+     *
+     * <h3>Example Usage:</h3>
+     * <pre>{@code
+     * public static void main(String[] args) {
+     *     String groovyCode = "return 'Hello, World!'";
+     *
+     *     Object result = runGroovyCode(groovyCode);
+     *     System.out.println(result); // Outputs: Hello, World!
+     * }
+     * }</pre>
+     */
+    public static Object runGroovyCode(String pgm) {
+        return runGroovyCode(pgm, null);
+    }
 }
