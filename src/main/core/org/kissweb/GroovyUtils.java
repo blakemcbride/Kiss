@@ -1,7 +1,10 @@
 package org.kissweb;
 
+import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
+
+import java.util.Map;
 
 /**
  * Miscellaneous Groovy utilities
@@ -9,20 +12,48 @@ import groovy.lang.GroovyShell;
 public class GroovyUtils {
 
     /**
-     * Run arbitrary Groovy code.  The context of the Groovy code is erased once execution is complete.
-     * An exception is thrown if execution fails.
+     * Executes the given Groovy code with the specified arguments and returns the result.
      *
-     * @param pgm the Groovy code to be run
-     * @return the result of the executed code
+     * <p>This method allows dynamic execution of Groovy code provided as a string.
+     * Variables can be passed to the Groovy script via a map of arguments, making them
+     * accessible within the script's context.
+     *
+     * @param pgm  the Groovy code to execute, provided as a {@code String}
+     * @param args a {@code Map<String, Object>} containing variable names and their values
+     *             to be passed into the Groovy script; may be {@code null} if no variables are needed
+     * @return the result of the Groovy script execution, which can be any Object returned by the script
+     * @throws groovy.lang.GroovyRuntimeException if an error occurs during compilation or execution of the Groovy code
+     * @throws IllegalArgumentException if the {@code pgm} parameter is {@code null} or empty
+     *
+     * @see groovy.lang.GroovyShell#evaluate(String)
+     * @see groovy.lang.Binding
+     *
+     * <h3>Example Usage:</h3>
+     * <pre>{@code
+     * public static void main(String[] args) {
+     *     String groovyCode = "return 'Hello, ' + name + '!'";
+     *     Map<String, Object> arguments = new HashMap<>();
+     *     arguments.put("name", "World");
+     *
+     *     Object result = runGroovyCode(groovyCode, arguments);
+     *     System.out.println(result); // Outputs: Hello, World!
+     * }
+     * }</pre>
      */
-    public static Object runGroovyCode(String pgm) {
+    public static Object runGroovyCode(String pgm, Map<String, Object> args) {
 
         // Create a custom GroovyClassLoader
-        ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
+        final ClassLoader parentClassLoader = Thread.currentThread().getContextClassLoader();
         GroovyClassLoader customClassLoader = new GroovyClassLoader(parentClassLoader);
 
-        // Create a GroovyShell with the custom class loader
-        GroovyShell shell = new GroovyShell(customClassLoader);
+        // Create a Binding and set variables
+        final Binding binding = new Binding();
+        if (args != null)
+            for (Map.Entry<String, Object> entry : args.entrySet())
+                binding.setVariable(entry.getKey(), entry.getValue());
+
+        // Create a GroovyShell with the custom class loader and binding
+        GroovyShell shell = new GroovyShell(customClassLoader, binding);
 
         // Execute the code
         Object res = shell.evaluate(pgm);
