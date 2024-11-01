@@ -34,7 +34,7 @@
 
 @chapter Back-end API
 
-In addition to the full API provided by the Java system, and any additional
+In addition to the full API provided by the Java system and any additional
 JAR files you add, @emph{Kiss} comes with an API that assists with the
 development of business application with @emph{Kiss}.  These 
 API's may be broadly grouped as follows:
@@ -48,7 +48,7 @@ JSON API
 Utilities
 @end enumerate
 
-An overview of these API's is contained in this chapter.  Detailed
+An overview of these APIs is contained in this chapter.  Detailed
 documentation is contained in the JavaDocs.  @xref{javadoc,,Creating JavaDocs}.
 
 @section Database API
@@ -76,7 +76,7 @@ Supports transactions out-of-the-box
 As shipped, this library supports PostgreSQL, Microsoft Server,
 Oracle, MySQL, and SQLite.
 
-The detailed documentation for the database utilities are in the
+The detailed documentation for the database utilities is in the
 JavaDocs which you must generate. (@xref{javadoc,,Creating JavaDocs}.)
 This section provides an overview.
 
@@ -126,13 +126,13 @@ are fully compiled and run at full speed.  This has two major advantages.
 First, in a development environment, all development may be done without 
 the need to bring the development server down, rebuild, re-deploy, and reboot
 the development server.  This means development time is significantly reduced.
-Additionally, IDE debuggers function in an environment such as this so
+Additionally, IDE debuggers function in an environment such as this, so
 the debugging process may proceed normally.
 
 Second, in a production environment, the system may be upgraded
-without disrupting existing users on the system.  Of course users
+without disrupting existing users on the system.  Of course, users
 actively using the exact features you have just changed could be
-affected (if their front-end and back-ends do not agree).
+affected (if their front-end and back-end do not agree).
 A simple re-try would put everything back in sync.
 
 Kiss microservices are on a class basis.  What that means is that a
@@ -146,9 +146,9 @@ clunkier mechanism retains all of the dynamic features of the system.
 Defining microservices in Kiss involves defining a normal class just
 as you would write a class in any circumstance.  No special
 configuration, wiring, declarations, or additional steps are required.
-Microservice additions, changes, and deletions take affect as soon as
+Microservice additions, changes, and deletions take effect as soon as
 you save the source file.  All microservices are compiled at runtime
-by the system automatically.  So there is no compilation step that
+by the system automatically, so there is no compilation step that
 you need to perform.
 
 The only caveat to the above is that remote microservices (described
@@ -182,9 +182,9 @@ Groovy offers a small number of conveniences over Java.
 @end enumerate
 
 Having said all this, however, all three languages are fully supported
-and there are no known bugs in any of the languages supported.
+and there are no known bugs in any of the supported languages.
 
-@subsection Types Of Microservices
+@subsection Types of Microservices
 
 There are two types of microservices as follows:
 
@@ -229,7 +229,7 @@ Remote REST microservices typically reside under the
 @code{backend/services} directory.  You can organize them any way you
 like.  A microservice is equivalent to a class.  The class name is the
 microservice name.  The methods in that class that have a certain
-signature (particular set of arguments) are the web methods.
+signature (a particular set of arguments) are the web methods.
 
 A REST web microservice has the following signature:
 
@@ -247,7 +247,7 @@ void myMethod(JSONObject injson,
 This is a @code{JSON} object that contains all of the arguments passed
 in from the front-end.
 @item outjson
-This is a @code{JSON} object which will contain all of the results
+This is a @code{JSON} object that will contain all of the results
 sent back to the front-end.  Whatever is put in this object gets sent back to the front-end.
 @item db
 This is a database connection that can be used to access the SQL database.  The
@@ -263,10 +263,10 @@ to this call.
 @subsection Local Microservices
 
 Local microservices are simply regular classes.  They typically reside
-in the @code{backend/services} directory organized anyway you like.
+in the @code{backend/services} directory organized any way you like.
 Although methods within a particular microservice/class can call each
 other in the normal way, there is an extra step required for one
-microservice to call method in a different microservice.  One of the
+microservice to call a method in a different microservice.  One of the
 reasons for this is so the system can be certain the latest version of
 the service is loaded and that it is fully compiled before you attempt
 to use it.
@@ -285,11 +285,11 @@ See the @emph{Javadoc}.
 
 @anchor{json}@section JSON
 
-The first two arguments to all REST methods is @code{injson} and
+The first two arguments to all REST methods are @code{injson} and
 @code{outjson}.  @code{injson} is a @code{JSONObject} that contains
 the data passed in @emph{from} the front-end.  @code{outjson} is a
 pre-initialized, empty @code{JSONObject} that will be @emph{returned
-to} the front-end.  The rest service should read the data passed in
+to} the front-end.  The REST service should read the data passed in
 from @code{injson}, perform any needed processes, and put the result
 into @code{outjson} to be returned to the front-end.
 
@@ -298,7 +298,7 @@ included and used to access JSON from the front-end and create JSON to
 return to the front-end.  This package has many methods but only a few are
 commonly used.
 
-There are two main data type of interest.  They are @code{JSONObject} and
+There are two main data types of interest.  They are @code{JSONObject} and
 @code{JSONArray}.  They hold the JSON types indicated by their names.
 
 @noindent

@@ -34,7 +34,7 @@
 
 @chapter Front-end API
 
-The front-end API are all the facilities that run on the browser.
+The front-end API is all the facilities that run on the browser.
 This includes HTML, CSS, JavaScript, image files, etc.  The @emph{Kiss}
 back-end does not produce or modify HTML or JavaScript code.  These
 files are served, unaltered, by the server as they are on the back-end
@@ -83,12 +83,12 @@ The front-end API is documented in the file @code{manual/jsdoc/index.html}.
 
 On the front-end, the class @code{Server} is what deals with the REST
 communications between the front-end and back-end.  In it, there are a
-handful of methods that deal with the environment such as the back-end
+handful of methods that deal with the environment, such as the back-end
 URL.  All communications between the back-end and front-end are done
 with JSON.
 
 The way it works is the login service requires a username and
-password, and it returns a login token (uuid).  That token is used in
+password, and it returns a login token (UUID).  That token is used in
 all future calls, and it gets automatically invalidated after a certain
 amount of non-use time.  There is no state kept on the back-end.  Each
 REST call must login to the back-end with the provided token in order
@@ -96,7 +96,7 @@ to be authenticated to communicate.
 
 The method used to communicate is named @code{Server.call()}. It is passed the
 path to the REST service, the REST service method name, and a JSON
-object that is send to the back-end method.  A @code{Promise} is
+object that is sent to the back-end method.  A @code{Promise} is
 returned that is used to obtain the result of the call.  This
 can also be used with @code{async/await}.
 
@@ -110,7 +110,7 @@ that makes it easy to upload files.
 
 
 Although HTML provides what is needed for real applications, it
-provides those facilities in too low a level to be useful without a
+provides those facilities at too low a level to be useful without a
 lot of custom code.  Custom components (tags) allow you to encapsulate
 that advanced behavior into what is used as and appears as native
 functionality.
@@ -139,17 +139,17 @@ CSS, and JavaScript code.
 
 @subsection Tagless Components
 
-Let's say you have a pop-up window that allows a user to search for employees, or product, or whatever.
+Let's say you have a pop-up window that allows a user to search for employees, products, or whatever.
 The user gets a variety of search capabilities and the selected item is returned. Let's further say
 that you need this functionality in several places within your application.  These are tagless
 components.  They aren't placed with a custom tag.  They are a response to an event like a button push.
 Tagless components allow you to encapsulate a block of functionality (including pop-up windows) into
-a neat package that can be re-used in any number of places.
+a neat package that can be reused in any number of places.
 
 The method used to load tagless components is
 @code{Utils.useTaglessComponent}.  Later, when the tagless component
 is needed, one would execute @code{Kiss.MyComponent.run(in_data, on_exit)} (where
-@code{MyComponent} is the name of your tagless component.  
+@code{MyComponent} is the name of your tagless component).  
 @code{in_data} represents possible data passed to the component on entry.
 @code{on_exit} is a function that gets executed when the component exits.
 Arguments passed to @code{on_exit} are determined by the component.
@@ -162,8 +162,8 @@ used to describe the layout of the popup, and JavaScript is used to
 control the appearance of the popup.
 
 The @emph{HTML} portion is represented as a top-level @code{popup} tag
-that represents the entire popup.  Withing the top-level @code{popup}
-there most be two child tags named @code{popup-title} and
+that represents the entire popup.  Within the top-level @code{popup}
+there must be two child tags named @code{popup-title} and
 @code{popup-body}.  The first represents the single line header, and
 the second represents the body of the popup window.
 
@@ -177,7 +177,7 @@ Set the height and width of the popup
 @end table
 
 @noindent
-An examples is as follows:
+An example is as follows:
 
 @example
 <popup id="my-popup" width="600px" height="300px">
@@ -203,7 +203,7 @@ close the most recent popup
 @end table
 
 @noindent
-Your defined responses to the buttons on the popup determines your dealing with the
+Your defined responses to the buttons on the popup determine your dealings with the
 data on the popup and when to close it.
 
 @section File Uploads
@@ -211,7 +211,7 @@ data on the popup and when to close it.
 @emph{Kiss} includes facilities that make it easy to upload a file or
 multiple files.  The way to use it is as follows:
 
-The HTML would contain two controls; a file input and a button.  The file
+The HTML would contain two controls: a file input and a button.  The file
 input looks as follows:
 
 @example
@@ -239,10 +239,10 @@ function used to send the files is @code{fileUploadSend} in the
         @}
         const fd = $$('the-file').getFormData();
         let data = @{
-            var1: 22,    // just some random data we want to sent to the back-end
+            var1: 22,    // just some random data we want to send to the back-end
             var2: 33
         @}
-        const r = await Server.fileUploadSend('theService, 'theMethod', fd, data);
+        const r = await Server.fileUploadSend('theService', 'theMethod', fd, data);
     @});
 @end example
 
@@ -263,7 +263,7 @@ public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet
     // do something with the file stream
     bis.close();
     
-         -or-
+         // or
          
     String localFileName = servlet.saveUploadFile(0);
 @}
@@ -276,12 +276,12 @@ public void theMethod(JSONObject inJson, JSONObject outJson, MainServlet servlet
 
 @emph{Kiss} includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the @code{src/main/frontend/kiss} directory and have names such as
-@code{DateTimeUtils.js}, @code{DateUtils}, @code{TimeUtils}, @code{Utils}, etc.  These utilities
+@code{DateTimeUtils.js}, @code{DateUtils.js}, @code{TimeUtils.js}, @code{Utils.js}, etc.  These utilities
 are documented in the front-end API documentation.
 
 @section Controlling Browser Cache
 
-Browser's have a mind of their own in term of deciding when to use
+Browsers have a mind of their own in terms of deciding when to use
 their cache for a file and when to download a new one.  This can cause
 no end of trouble when code gets changed.  Some user files end up
 being old from the browser cache, and others are freshly downloaded.
@@ -298,7 +298,7 @@ To that end, @emph{Kiss} has code to ignore browser cache and always load
 
 @code{index.html} contains two variables named @code{SystemInfo.softwareVersion} and @code{SystemInfo.controlCache}.
 Assuming @code{SystemInfo.controlCache} is @code{true}, @emph{Kiss} has code that forces the browser
-to re-load all files whenever @code{SystemInfo.softwareVersion} changes.  After the code is re-loaded,
+to reload all files whenever @code{SystemInfo.softwareVersion} changes.  After the code is re-loaded,
 the browser cache will work as normal to maximally cache the files until the next
 @code{SystemInfo.softwareVersion} change.
 
@@ -308,12 +308,12 @@ Although not a part of the @emph{Kiss} system, there are some very
 valuable technologies and libraries that have been used with
 @emph{Kiss} in order to create some very powerful solutions.
 
-The first is the Lovefield library that adds SQL capabilities on the
+The first is the Lovefield library, which adds SQL capabilities on the
 browser side.  Data is persisted on the user's browser and remains
-through browser or machine re-boots.  The library is located at
+through browser or machine reboots.  The library is located at
 @uref{https://github.com/google/lovefield}
 
-A recent technology that has been used to enable browser application
+A recent technology that has been used to enable browser applications
 that run when there is no Internet connection is called @emph{Service
 Workers}.  There is a package at @*
 @uref{https://developers.google.com/web/tools/workbox} that makes

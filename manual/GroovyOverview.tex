@@ -103,11 +103,11 @@ Groovy is only a little different from Java.  For the most part, if
 you know Java, you know Groovy.
 @item
 Groovy has several language features that make it significantly
-convenient in many situations.  (Although it also has a few
-annoyances too that you need to be mindful of!)
+more convenient in many situations.  (Although it also has a few
+annoyances that you need to be mindful of!)
 @item
 Groovy normally compiles to regular Java class files, runs at full
-speed, and interacts Java <-> Groovy is if all code was Java or
+speed, and interacts with Java <-> Groovy as if all code were Java or
 Groovy.
 @item
 Although Groovy can be compiled ahead-of-time just like Java, the
@@ -137,17 +137,17 @@ faster than doing the same thing in Java.
 @enumerate
 @item
 Groovy integrates with Java seamlessly.  Groovy can call Java just
-as if everything was written in Groovy.  Java can call Groovy just
+as if everything were written in Groovy.  Java can call Groovy just
 as if it were Java.  Java and Groovy can be mixed and matched
 without a thought.
    
 Although this is true of code compiled normally (ahead of time),
 there are special steps required to call code loaded at runtime
 from other code.  This is because the system has to find the code,
-compile, and load it if necessary before execution.
+compile it, and load it if necessary before execution.
 @item
 Groovy has several types of strings.  One of the best features of
-Groovy are strings constants that are delineated with triple quotes
+Groovy is strings constants that are delineated with triple quotes
 (""").  These strings support embedded newlines.  This means you
 can have multi-line strings.  This comes in especially handy when
 representing SQL.  For example:
@@ -264,11 +264,11 @@ Iteration conveniences
 @item      1.upto(10) ...           
 `it' is 1 to 10
 @item      10.times ...             
-loops from 0-9
+loops from 0 to 9
 @item      0.step(10,2) ...         
-loops 0-0 in increments of 2
+loops from  0 to 10 in increments of 2
 @item      myLst.each @{ ... @}       
-loops each element. `it' has individual elements
+loops through each element. `it' has individual elements
 @end table
 @item
 String interpolation.  $VAR puts the value of VAR into a string.
@@ -325,11 +325,11 @@ reminding me that the semicolon is not needed.  I don't use them to
 shut the IDE up.
 @item   
 Likewise, in some situations, Groovy allows the calling of
-functions without parenthesis.  For example, instead of writing:
+functions without parentheses.  For example, instead of writing:
 @example   
       mymeth(arg1, arg2);
 @end example
-   In groovy you can use:
+   In Groovy you can use:
 @example
       mymeth arg1, arg2
 @end example
@@ -356,13 +356,13 @@ behavior.  Beware!
 @item
 Groovy does not make `private' elements private.  This is something
 many have complained about, but they refuse to correct.  It is major
-because when trying to understand a large system, one need look no
+because when trying to understand a large system, one needs to look no
 further than a single file for truly private elements.  If there is no
-private, one must look throughout the entire system to determine of a
+private, one must look throughout the entire system to determine if a
 given element is used.  This is a significant issue!
 @end enumerate    
 
-@chapter Calling Groovy in Kiss
+@chapter Calling Groovy in KISS
 
 Groovy, like Java, may call compiled Java and Groovy code in the
 normal way.  This is always the case.  However, in @emph{KISS}, Groovy
@@ -370,9 +370,9 @@ code is not compiled before the system is started up, as is normally
 the case, but is compiled at runtime when used.  This is to support
 the fact that all Groovy code in @emph{KISS} are microservices.
 In @emph{KISS}, each Groovy class is an independent microservice.
-This effects how Groovy methods are called in @emph{KISS}.
+This affects how Groovy methods are called in @emph{KISS}.
 
-Groovy microservices in @emph{KISS}, may make three types of calls as follows:
+Groovy microservices in @emph{KISS} may make three types of calls as follows:
 @enumerate
 @item
 Intra-method Calls -- calls from one method to another in the same class
@@ -387,7 +387,7 @@ In @emph{KISS}, the first two types of calls may be performed as you would norma
 perform them.  There are no special considerations.
 
 However type 3 calls require a special procedure.  This is to give @emph{KISS}
-an opportunity to compile an load the microservice before it is executed.
+an opportunity to compile and load the microservice before it is executed.
 See the manual for more details.
 
     

@@ -101,8 +101,8 @@ h2, h3, h4 {  /* subsection titles */
 
 
 <p>The entire source code comes with the system and is convenient when
-debugging, however, only a few areas in the system would normally be
-of concern when building an application as follows.
+debugging; however, only a few areas in the system would normally be
+of concern when building an application, as follows.
 </p>
 
 <ul class="mini-toc">
@@ -126,7 +126,7 @@ of concern when building an application as follows.
 <dd><p>All other files under this directory represent the application
 back-end.  All the files are used and distributed in source form.  The
 Kiss system compiles them at runtime but does not save the compiled form.
-Updates to files under this directory take affect
+Updates to files under this directory take effect
 immediately on a running system.
 </p></dd>
 </dl>
@@ -149,7 +149,7 @@ system and aren&rsquo;t normally modified.
 and would be modified to suit your needs.
 </p>
 <p>Other directories such as <code class="code">page1</code> represent other user pages and
-would be the application specific screens you create.  The included
+would be the application-specific screens you create.  The included
 <code class="code">page1</code> directory is only an example page.
 </p>
 </div>
@@ -166,7 +166,7 @@ The included database is located in the <code class="code">backend</code> direct
 and is named <code class="code">DB.sqlite</code>
 </p>
 <p>Although <em class="emph">Kiss</em> has no preferred database, PostgreSQL is strongly
-recommended because it is free, full featured, fast, rock solid, and
+recommended because it is free, full-featured, fast, rock solid, and
 portable on all major platforms.
 </p>
 <p>See <a class="xref" href="System-Setup.html#Setup-and-Configuration">Setup and Configuration</a>
@@ -176,10 +176,10 @@ portable on all major platforms.
 <div class="section-level-extent" id="Single-Page-Application">
 <h3 class="section"><span>3.4 Single Page Application<a class="copiable-link" href="#Single-Page-Application"> &para;</a></span></h3>
 
-<p><em class="emph">Kiss</em> applications are single page applications in the sense
+<p><em class="emph">Kiss</em> applications are single-page applications in the sense
 that there is a single <code class="code">&lt;body&gt;</code> tag and all other pages
 essentially get placed into that tag on a single page.  However,
-<em class="emph">Kiss</em> is not a single page application in the sense that the
+<em class="emph">Kiss</em> is not a single-page application in the sense that the
 entire application gets loaded with a single <code class="code">GET</code> request.  This
 doesn&rsquo;t make sense for a large business application in which many
 hundreds of pages may exist.  <em class="emph">Kiss</em> lazy-loads pages as they are
@@ -191,7 +191,7 @@ is loaded.
 <h3 class="section"><span>3.5 Controlling Browser Cache<a class="copiable-link" href="#Controlling-Browser-Cache"> &para;</a></span></h3>
 
 <p>The user&rsquo;s browser cache can be controlled from the file
-<code class="code">src/main/frontend/index.html</code> In that file you will see two lines
+<code class="code">src/main/frontend/index.html</code> In that file, you will see two lines
 that look as follows:
 </p>
 <div class="example">
@@ -211,7 +211,7 @@ occur.
 <div class="section-level-extent" id="Creating-JavaDocs">
 <h3 class="section"><span>3.6 Creating JavaDocs<a class="copiable-link" href="#Creating-JavaDocs"> &para;</a></span></h3>
 
-<p>JavaDocs for the <em class="emph">Kiss</em> system will need to be created.  It is
+<p>JavaDocs for the <em class="emph">Kiss</em> system will need to be created.  They are
 created from the command line by issuing the following command:
 </p>
 <div class="example">
@@ -235,8 +235,8 @@ work.  The <em class="emph">Kiss</em> system requires a special build process be
 application files are distributed in source form.  Therefore, <code class="code">bld</code>
 should be used to create the production WAR file.
 </p>
-<p>If using <em class="emph">tomcat</em>, <code class="code">Kiss.war</code> should be placed in the
-<code class="code">webapps</code> directory.  When <em class="emph">tomcat</em> starts, it will see the
+<p>If using <em class="emph">Tomcat</em>, <code class="code">Kiss.war</code> should be placed in the
+<code class="code">webapps</code> directory.  When <em class="emph">Tomcat</em> starts, it will see the
 file, unpack it, and run it.  The application will be available at
 <code class="code">[HOST]/Kiss</code>
 </p>

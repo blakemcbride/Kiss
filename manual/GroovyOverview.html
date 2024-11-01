@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.0.2, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.1, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Groovy Overview</title>
@@ -15,7 +15,9 @@
 <link href="#SEC_Contents" rel="contents" title="Table of Contents">
 <style type="text/css">
 <!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
 div.example {margin-left: 3.2em}
+span:hover a.copiable-link {visibility: visible}
 ul.mark-bullet {list-style-type: disc}
 -->
 </style>
@@ -31,9 +33,10 @@ body {
 	margin: 0 auto;
         padding: 20px;
         max-width: 800px;
+	background-color: #fffff8; 
 }
 body {
-    font-family: Arial, sans-serif; /* or another font of your choice */
+    font-family: "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 16px;
     line-height: 1.5;
 }
@@ -62,6 +65,26 @@ th, td {
 tr:nth-child(even) {
     background-color: #f2f2f2; /* very light gray */
 }
+pre, code {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #f5f5f5; /* light grey */
+    border: 1px solid #e0e0e0; /* slightly darker grey for the border */
+    padding: 10px; /* space inside the box */
+    overflow-x: auto; /* adds horizontal scroll if the content is too wide */
+}
+h1 {  /* section titles */
+    color: #2c3e50; /* example dark blue color */
+}
+
+h2, h3, h4 {  /* subsection titles */
+    color: #e74c3c; /* example red color */
+}
+:not(pre) > code {
+    background-color: #f5f5f5; /* Light gray */
+    padding: 2px 4px;  /* Adjust this value */
+    border-radius: 3px; /* Optional: adds rounded corners */
+    margin: 0;  /* Adjust if needed */
+}
 
 </style>
 
@@ -69,17 +92,17 @@ tr:nth-child(even) {
 
 
 <div class="chapter-level-extent" id="Why-Groovy_003f">
-<h2 class="chapter">1 Why Groovy?</h2>
+<h2 class="chapter"><span>1 Why Groovy?<a class="copiable-link" href="#Why-Groovy_003f"> &para;</a></span></h2>
 <p>Groovy is used for several reasons:
 </p>
 <ol class="enumerate">
 <li> Groovy is only a little different from Java.  For the most part, if
 you know Java, you know Groovy.
 </li><li> Groovy has several language features that make it significantly
-convenient in many situations.  (Although it also has a few
-annoyances too that you need to be mindful of!)
+more convenient in many situations.  (Although it also has a few
+annoyances that you need to be mindful of!)
 </li><li> Groovy normally compiles to regular Java class files, runs at full
-speed, and interacts Java &lt;-&gt; Groovy is if all code was Java or
+speed, and interacts with Java &lt;-&gt; Groovy as if all code were Java or
 Groovy.
 </li><li> Although Groovy can be compiled ahead-of-time just like Java, the
 way I am using it is to compile it at runtime.  This makes loading
@@ -103,19 +126,19 @@ faster than doing the same thing in Java.
 
 </div>
 <div class="chapter-level-extent" id="Groovy-_002d_002d-The-Good">
-<h2 class="chapter">2 Groovy &ndash; The Good</h2>
+<h2 class="chapter"><span>2 Groovy &ndash; The Good<a class="copiable-link" href="#Groovy-_002d_002d-The-Good"> &para;</a></span></h2>
 <ol class="enumerate">
 <li> Groovy integrates with Java seamlessly.  Groovy can call Java just
-as if everything was written in Groovy.  Java can call Groovy just
+as if everything were written in Groovy.  Java can call Groovy just
 as if it were Java.  Java and Groovy can be mixed and matched
 without a thought.
    
 <p>Although this is true of code compiled normally (ahead of time),
 there are special steps required to call code loaded at runtime
 from other code.  This is because the system has to find the code,
-compile, and load it if necessary before execution.
+compile it, and load it if necessary before execution.
 </p></li><li> Groovy has several types of strings.  One of the best features of
-Groovy are strings constants that are delineated with triple quotes
+Groovy is strings constants that are delineated with triple quotes
 (&quot;&quot;&quot;).  These strings support embedded newlines.  This means you
 can have multi-line strings.  This comes in especially handy when
 representing SQL.  For example:
@@ -219,13 +242,13 @@ explicitly named
 <dd><p>&lsquo;it&rsquo; is 1 to 10
 </p></dd>
 <dt><code class="code">10.times ...</code></dt>
-<dd><p>loops from 0-9
+<dd><p>loops from 0 to 9
 </p></dd>
 <dt><code class="code">0.step(10,2) ...</code></dt>
-<dd><p>loops 0-0 in increments of 2
+<dd><p>loops from  0 to 10 in increments of 2
 </p></dd>
 <dt><code class="code">myLst.each { ... }</code></dt>
-<dd><p>loops each element. &lsquo;it&rsquo; has individual elements
+<dd><p>loops through each element. &lsquo;it&rsquo; has individual elements
 </p></dd>
 </dl>
 </li><li> String interpolation.  $VAR puts the value of VAR into a string.
@@ -261,7 +284,7 @@ Object x = &quot;hello&quot;)
 
 </div>
 <div class="chapter-level-extent" id="Groovy-_002d_002d-The-Bad">
-<h2 class="chapter">3 Groovy &ndash; The Bad</h2>
+<h2 class="chapter"><span>3 Groovy &ndash; The Bad<a class="copiable-link" href="#Groovy-_002d_002d-The-Bad"> &para;</a></span></h2>
 <p>Unfortunately, Groovy does have, what this author believes to be, some
 bad features.  In the end, however, it is believed that the good
 features outweigh the bad ones.  The following list enumerates them.
@@ -277,11 +300,11 @@ semicolon in Groovy because the IDE is constantly and annoyingly
 reminding me that the semicolon is not needed.  I don&rsquo;t use them to
 shut the IDE up.
 </p></li><li> Likewise, in some situations, Groovy allows the calling of
-functions without parenthesis.  For example, instead of writing:
+functions without parentheses.  For example, instead of writing:
 <div class="example">
 <pre class="example-preformatted">      mymeth(arg1, arg2);
 </pre></div>
-<p>In groovy you can use:
+<p>In Groovy you can use:
 </p><div class="example">
 <pre class="example-preformatted">      mymeth arg1, arg2
 </pre></div>
@@ -305,15 +328,15 @@ they&rsquo;re a <code class="code">BigDecimal</code>!
 behavior.  Beware!
 </p></li><li> Groovy does not make &lsquo;private&rsquo; elements private.  This is something
 many have complained about, but they refuse to correct.  It is major
-because when trying to understand a large system, one need look no
+because when trying to understand a large system, one needs to look no
 further than a single file for truly private elements.  If there is no
-private, one must look throughout the entire system to determine of a
+private, one must look throughout the entire system to determine if a
 given element is used.  This is a significant issue!
 </li></ol>
 
 </div>
-<div class="chapter-level-extent" id="Calling-Groovy-in-Kiss">
-<h2 class="chapter">4 Calling Groovy in Kiss</h2>
+<div class="chapter-level-extent" id="Calling-Groovy-in-KISS">
+<h2 class="chapter"><span>4 Calling Groovy in KISS<a class="copiable-link" href="#Calling-Groovy-in-KISS"> &para;</a></span></h2>
 
 <p>Groovy, like Java, may call compiled Java and Groovy code in the
 normal way.  This is always the case.  However, in <em class="emph">KISS</em>, Groovy
@@ -321,9 +344,9 @@ code is not compiled before the system is started up, as is normally
 the case, but is compiled at runtime when used.  This is to support
 the fact that all Groovy code in <em class="emph">KISS</em> are microservices.
 In <em class="emph">KISS</em>, each Groovy class is an independent microservice.
-This effects how Groovy methods are called in <em class="emph">KISS</em>.
+This affects how Groovy methods are called in <em class="emph">KISS</em>.
 </p>
-<p>Groovy microservices in <em class="emph">KISS</em>, may make three types of calls as follows:
+<p>Groovy microservices in <em class="emph">KISS</em> may make three types of calls as follows:
 </p><ol class="enumerate">
 <li> Intra-method Calls &ndash; calls from one method to another in the same class
 </li><li> Compiled Library Calls &ndash; these are calls from Groovy to compiled Java
@@ -335,7 +358,7 @@ method in another class / microservice
 perform them.  There are no special considerations.
 </p>
 <p>However type 3 calls require a special procedure.  This is to give <em class="emph">KISS</em>
-an opportunity to compile an load the microservice before it is executed.
+an opportunity to compile and load the microservice before it is executed.
 See the manual for more details.
 </p>
     

@@ -51,7 +51,7 @@ The git repo is also deleted since it is meaningless in this scenario.
 
 In order to create a back-end-only system you start with a complete
 @emph{Kiss} system cleanly checked out and delete the front-end
-portion.  That leads you with a back-end-only system.  However, before
+portion.  That leaves you with a back-end-only system.  However, before
 doing that, you must install the third-party libraries.  The following
 commands will accomplish this whole process.
 
@@ -63,7 +63,7 @@ bld libs                     (Windows)
 remove-frontend remove
 @end example
 
-Once these command have been run, what you have left is a back-end-only system.  The git 
+Once these commands have been run, what you have left is a back-end-only system.  The git 
 repository it came in will have been deleted as well as the front-end portion of the system.
 The procedure for developing, deploying, and upgrading the system will be slightly modified as 
 described herein.
@@ -71,9 +71,9 @@ described herein.
 
 @subsection Developing
 
-The main difference between developing on a back-end-only system vs.\ a 
+The main difference between developing on a back-end-only system vs.@: a 
 whole system is just that the command used to start the back-end is
-slightly different.  The locations of all of the back-end pieces are
+slightly different.  The locations of all the back-end pieces are
 the same.  Once running, the system may be modified while running just
 the same.
 
@@ -89,9 +89,9 @@ Viewing the server log is done in the same way as before.
 
 @subsection Deploying
 
-Deploying the back-ed is done just as before except now, instead of a single file containing the whole system, 
+Deploying the back-end is done just as before except now, instead of a single file containing the whole system, 
 you have a single file that represents the back-end only.  When deploying the front-end and back-end portions,
-they will be treated as two separate systems to the server.
+they will be treated as two separate systems by the server.
 
 @subsection Upgrading
 
@@ -100,14 +100,14 @@ Upgrading a back-end-only project is done the same way as upgrading a full syste
 
 @section Front-end-only System
 
-A front-end-only system is a complete system minus the backend-end portion of the system.
+A front-end-only system is a complete system minus the back-end portion of the system.
 The git repo is also deleted since it is meaningless in this scenario.
 
 @subsection Creating
 
 In order to create a front-end-only system you start with a complete
 @emph{Kiss} system cleanly checked out and delete the back-end
-portion.  That leads you with a front-end-only system.  However, before
+portion.  That leaves you with a front-end-only system.  However, before
 doing that, you must install the third-party libraries.  The following
 commands will accomplish this whole process.
 
@@ -120,7 +120,7 @@ remove-backend remove
 @end example
 
 Once these command have been run, what you have left is a front-end-only system.  The git 
-repository it came in will have been deleted as well as the backend-end portion of the system.
+repository it came in will have been deleted as well as the back-end portion of the system.
 The procedure for developing, deploying, and upgrading the system will be slightly modified as 
 described herein.
 
@@ -143,7 +143,7 @@ As before, you can edit front-end files while the system is running.
 
 @subsection Deploying
 
-The front-end must be distributed as a seperate @emph{war} file named @emph{frontend.war}.  
+The front-end must be distributed as a separate @emph{war} file named @emph{frontend.war}.  
 This file can be created with the following command:
 
 @example

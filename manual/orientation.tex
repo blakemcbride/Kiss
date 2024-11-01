@@ -37,8 +37,8 @@
 
 
 The entire source code comes with the system and is convenient when
-debugging, however, only a few areas in the system would normally be
-of concern when building an application as follows.
+debugging; however, only a few areas in the system would normally be
+of concern when building an application, as follows.
 
 
 @section Back-end Application Files
@@ -50,7 +50,7 @@ This file is used to configure the system. @xref{Setup and Configuration}
 All other files under this directory represent the application
 back-end.  All the files are used and distributed in source form.  The
 Kiss system compiles them at runtime but does not save the compiled form.
-Updates to files under this directory take affect
+Updates to files under this directory take effect
 immediately on a running system.
 @end table
 
@@ -70,7 +70,7 @@ system and aren't normally modified.
 and would be modified to suit your needs.
 
 Other directories such as @code{page1} represent other user pages and
-would be the application specific screens you create.  The included
+would be the application-specific screens you create.  The included
 @code{page1} directory is only an example page.
 
 @section Database
@@ -85,7 +85,7 @@ The included database is located in the @code{backend} directory
 and is named @code{DB.sqlite}
 
 Although @emph{Kiss} has no preferred database, PostgreSQL is strongly
-recommended because it is free, full featured, fast, rock solid, and
+recommended because it is free, full-featured, fast, rock solid, and
 portable on all major platforms.
 
 @xref{Setup and Configuration}
@@ -93,10 +93,10 @@ portable on all major platforms.
 
 @section Single Page Application
 
-@emph{Kiss} applications are single page applications in the sense
+@emph{Kiss} applications are single-page applications in the sense
 that there is a single @code{<body>} tag and all other pages
 essentially get placed into that tag on a single page.  However,
-@emph{Kiss} is not a single page application in the sense that the
+@emph{Kiss} is not a single-page application in the sense that the
 entire application gets loaded with a single @code{GET} request.  This
 doesn't make sense for a large business application in which many
 hundreds of pages may exist.  @emph{Kiss} lazy-loads pages as they are
@@ -106,7 +106,7 @@ is loaded.
 @section Controlling Browser Cache
 
 The user's browser cache can be controlled from the file
-@code{src/main/frontend/index.html} In that file you will see two lines
+@code{src/main/frontend/index.html} In that file, you will see two lines
 that look as follows:
 
 @example
@@ -124,7 +124,7 @@ occur.
 
 @anchor{javadoc} @section Creating JavaDocs
 
-JavaDocs for the @emph{Kiss} system will need to be created.  It is
+JavaDocs for the @emph{Kiss} system will need to be created.  They are
 created from the command line by issuing the following command:
 
 @example
@@ -147,8 +147,8 @@ work.  The @emph{Kiss} system requires a special build process because
 application files are distributed in source form.  Therefore, @code{bld}
 should be used to create the production WAR file.
 
-If using @emph{tomcat}, @code{Kiss.war} should be placed in the
-@code{webapps} directory.  When @emph{tomcat} starts, it will see the
+If using @emph{Tomcat}, @code{Kiss.war} should be placed in the
+@code{webapps} directory.  When @emph{Tomcat} starts, it will see the
 file, unpack it, and run it.  The application will be available at
 @code{[HOST]/Kiss}
 

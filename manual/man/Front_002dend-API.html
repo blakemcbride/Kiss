@@ -99,7 +99,7 @@ h2, h3, h4 {  /* subsection titles */
 
 <h2 class="chapter" id="Front_002dend-API-1"><span>5 Front-end API<a class="copiable-link" href="#Front_002dend-API-1"> &para;</a></span></h2>
 
-<p>The front-end API are all the facilities that run on the browser.
+<p>The front-end API is all the facilities that run on the browser.
 This includes HTML, CSS, JavaScript, image files, etc.  The <em class="emph">Kiss</em>
 back-end does not produce or modify HTML or JavaScript code.  These
 files are served, unaltered, by the server as they are on the back-end
@@ -148,12 +148,12 @@ the need for the other to change.  In other words, they are minimally dependent 
 
 <p>On the front-end, the class <code class="code">Server</code> is what deals with the REST
 communications between the front-end and back-end.  In it, there are a
-handful of methods that deal with the environment such as the back-end
+handful of methods that deal with the environment, such as the back-end
 URL.  All communications between the back-end and front-end are done
 with JSON.
 </p>
 <p>The way it works is the login service requires a username and
-password, and it returns a login token (uuid).  That token is used in
+password, and it returns a login token (UUID).  That token is used in
 all future calls, and it gets automatically invalidated after a certain
 amount of non-use time.  There is no state kept on the back-end.  Each
 REST call must login to the back-end with the provided token in order
@@ -161,7 +161,7 @@ to be authenticated to communicate.
 </p>
 <p>The method used to communicate is named <code class="code">Server.call()</code>. It is passed the
 path to the REST service, the REST service method name, and a JSON
-object that is send to the back-end method.  A <code class="code">Promise</code> is
+object that is sent to the back-end method.  A <code class="code">Promise</code> is
 returned that is used to obtain the result of the call.  This
 can also be used with <code class="code">async/await</code>.
 </p>
@@ -177,7 +177,7 @@ that makes it easy to upload files.
 
 
 <p>Although HTML provides what is needed for real applications, it
-provides those facilities in too low a level to be useful without a
+provides those facilities at too low a level to be useful without a
 lot of custom code.  Custom components (tags) allow you to encapsulate
 that advanced behavior into what is used as and appears as native
 functionality.
@@ -210,17 +210,17 @@ CSS, and JavaScript code.
 <div class="subsection-level-extent" id="Tagless-Components">
 <h4 class="subsection"><span>5.2.1 Tagless Components<a class="copiable-link" href="#Tagless-Components"> &para;</a></span></h4>
 
-<p>Let&rsquo;s say you have a pop-up window that allows a user to search for employees, or product, or whatever.
+<p>Let&rsquo;s say you have a pop-up window that allows a user to search for employees, products, or whatever.
 The user gets a variety of search capabilities and the selected item is returned. Let&rsquo;s further say
 that you need this functionality in several places within your application.  These are tagless
 components.  They aren&rsquo;t placed with a custom tag.  They are a response to an event like a button push.
 Tagless components allow you to encapsulate a block of functionality (including pop-up windows) into
-a neat package that can be re-used in any number of places.
+a neat package that can be reused in any number of places.
 </p>
 <p>The method used to load tagless components is
 <code class="code">Utils.useTaglessComponent</code>.  Later, when the tagless component
 is needed, one would execute <code class="code">Kiss.MyComponent.run(in_data, on_exit)</code> (where
-<code class="code">MyComponent</code> is the name of your tagless component.  
+<code class="code">MyComponent</code> is the name of your tagless component).  
 <code class="code">in_data</code> represents possible data passed to the component on entry.
 <code class="code">on_exit</code> is a function that gets executed when the component exits.
 Arguments passed to <code class="code">on_exit</code> are determined by the component.
@@ -236,8 +236,8 @@ used to describe the layout of the popup, and JavaScript is used to
 control the appearance of the popup.
 </p>
 <p>The <em class="emph">HTML</em> portion is represented as a top-level <code class="code">popup</code> tag
-that represents the entire popup.  Withing the top-level <code class="code">popup</code>
-there most be two child tags named <code class="code">popup-title</code> and
+that represents the entire popup.  Within the top-level <code class="code">popup</code>
+there must be two child tags named <code class="code">popup-title</code> and
 <code class="code">popup-body</code>.  The first represents the single line header, and
 the second represents the body of the popup window.
 </p>
@@ -252,7 +252,7 @@ the second represents the body of the popup window.
 </p></dd>
 </dl>
 
-<p>An examples is as follows:
+<p>An example is as follows:
 </p>
 <div class="example">
 <pre class="example-preformatted">&lt;popup id=&quot;my-popup&quot; width=&quot;600px&quot; height=&quot;300px&quot;&gt;
@@ -278,7 +278,7 @@ the second represents the body of the popup window.
 </p></dd>
 </dl>
 
-<p>Your defined responses to the buttons on the popup determines your dealing with the
+<p>Your defined responses to the buttons on the popup determine your dealings with the
 data on the popup and when to close it.
 </p>
 </div>
@@ -288,7 +288,7 @@ data on the popup and when to close it.
 <p><em class="emph">Kiss</em> includes facilities that make it easy to upload a file or
 multiple files.  The way to use it is as follows:
 </p>
-<p>The HTML would contain two controls; a file input and a button.  The file
+<p>The HTML would contain two controls: a file input and a button.  The file
 input looks as follows:
 </p>
 <div class="example">
@@ -315,10 +315,10 @@ function used to send the files is <code class="code">fileUploadSend</code> in t
         }
         const fd = $$('the-file').getFormData();
         let data = {
-            var1: 22,    // just some random data we want to sent to the back-end
+            var1: 22,    // just some random data we want to send to the back-end
             var2: 33
         }
-        const r = await Server.fileUploadSend('theService, 'theMethod', fd, data);
+        const r = await Server.fileUploadSend('theService', 'theMethod', fd, data);
     });
 </pre></div>
 
@@ -338,7 +338,7 @@ function used to send the files is <code class="code">fileUploadSend</code> in t
     // do something with the file stream
     bis.close();
     
-         -or-
+         // or
          
     String localFileName = servlet.saveUploadFile(0);
 }
@@ -353,14 +353,14 @@ function used to send the files is <code class="code">fileUploadSend</code> in t
 
 <p><em class="emph">Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code class="code">src/main/frontend/kiss</code> directory and have names such as
-<code class="code">DateTimeUtils.js</code>, <code class="code">DateUtils</code>, <code class="code">TimeUtils</code>, <code class="code">Utils</code>, etc.  These utilities
+<code class="code">DateTimeUtils.js</code>, <code class="code">DateUtils.js</code>, <code class="code">TimeUtils.js</code>, <code class="code">Utils.js</code>, etc.  These utilities
 are documented in the front-end API documentation.
 </p>
 </div>
 <div class="section-level-extent" id="Controlling-Browser-Cache-1">
 <h3 class="section"><span>5.6 Controlling Browser Cache<a class="copiable-link" href="#Controlling-Browser-Cache-1"> &para;</a></span></h3>
 
-<p>Browser&rsquo;s have a mind of their own in term of deciding when to use
+<p>Browsers have a mind of their own in terms of deciding when to use
 their cache for a file and when to download a new one.  This can cause
 no end of trouble when code gets changed.  Some user files end up
 being old from the browser cache, and others are freshly downloaded.
@@ -377,7 +377,7 @@ To that end, <em class="emph">Kiss</em> has code to ignore browser cache and alw
 </p>
 <p><code class="code">index.html</code> contains two variables named <code class="code">SystemInfo.softwareVersion</code> and <code class="code">SystemInfo.controlCache</code>.
 Assuming <code class="code">SystemInfo.controlCache</code> is <code class="code">true</code>, <em class="emph">Kiss</em> has code that forces the browser
-to re-load all files whenever <code class="code">SystemInfo.softwareVersion</code> changes.  After the code is re-loaded,
+to reload all files whenever <code class="code">SystemInfo.softwareVersion</code> changes.  After the code is re-loaded,
 the browser cache will work as normal to maximally cache the files until the next
 <code class="code">SystemInfo.softwareVersion</code> change.
 </p>
@@ -389,12 +389,12 @@ the browser cache will work as normal to maximally cache the files until the nex
 valuable technologies and libraries that have been used with
 <em class="emph">Kiss</em> in order to create some very powerful solutions.
 </p>
-<p>The first is the Lovefield library that adds SQL capabilities on the
+<p>The first is the Lovefield library, which adds SQL capabilities on the
 browser side.  Data is persisted on the user&rsquo;s browser and remains
-through browser or machine re-boots.  The library is located at
+through browser or machine reboots.  The library is located at
 <a class="uref" href="https://github.com/google/lovefield">https://github.com/google/lovefield</a>
 </p>
-<p>A recent technology that has been used to enable browser application
+<p>A recent technology that has been used to enable browser applications
 that run when there is no Internet connection is called <em class="emph">Service
 Workers</em>.  There is a package at <br>
 <a class="uref" href="https://developers.google.com/web/tools/workbox">https://developers.google.com/web/tools/workbox</a> that makes

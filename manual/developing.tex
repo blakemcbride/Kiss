@@ -37,7 +37,7 @@
 
 This section details the development process with @emph{Kiss}.  The
 details provided will be for IntelliJ but can be adapted to other
-IDE's.  The use of an IDE is tremendously beneficial because of the
+IDEs.  The use of an IDE is tremendously beneficial because of the
 graphical debugging and intelligent code completion capabilities.
 
 A good development environment includes two separate servers running
@@ -49,7 +49,7 @@ front-end files can be edited and saved.  Their changes take effect
 immediately.
 
 Of course, in a production environment, only a single server would be
-utilized and front-end and back-end changes take effect immediately
+utilized, and front-end and back-end changes take effect immediately
 there too.
 
 @section Overview
@@ -91,7 +91,7 @@ At this point, development, testing, and debugging can occur unabated.
 There should be no need to rebuild or bring anything down.
 
 Front-end changes will appear as soon as you re-load the page on your browser.
-Back-end changes with take effect immediately.
+Back-end changes will take effect immediately.
 
 @subsection IDE
 
@@ -100,14 +100,14 @@ developers utilize an IDE (Integrated Development Environment).
 @emph{Kiss} includes an effort to assist with IDE integration
 (such as an @emph{ant} interface to our build system).
 
-See the files under the @code{manual/IDE-Setup} director for further
+See the files under the @code{manual/IDE-Setup} directory for further
 information.
 
 @section Back-end Development
 
 The back-end works differently in development and production
 environments.  Although in both environments back-end and front-end
-changes take effect immediately, setup of the production environment
+changes take effect immediately, the setup of the production environment
 copies all files into the production environment, whereas in a
 development environment the source and production code are split.  In
 order to facilitate rapid and easy development, it is important that
@@ -130,31 +130,31 @@ follows.
 
 @subsubsection IDE
 
-Running of the IDE back-end requires the following:
+Running the IDE back-end requires the following:
 
 @enumerate
 @item
 The IDE is completely configured.
 @item
-The system was build with the IDE
+The system was built with the IDE.
 @end enumerate
 
-Typically, the IDE manages a tomcat instance and serves up the core
+Typically, the IDE manages a Tomcat instance and serves up the core
 back-end code serving the REST services.  That code detects that it is
 running under an IDE and re-routes all back-end application files back
 to the source directories.
 
 Although back-end files are edited in source form and run in compiled
-form, back-end code can be debugged (including break-points) as if
-they were compiled before the system was booted.
+form, back-end code can be debugged (including breakpoints) as if
+it were compiled before the system was booted.
 
 Once the back-end server is up, application files changed under the
 @code{src/main/backend} directory will take effect immediately.
 
 @subsubsection BLD
 
-Utilizing the included @emph{Kiss build system (bld)} the many steps required 
-to install and configure tomcat and the IDE are unnecessary.  The whole process
+Utilizing the included @emph{Kiss build system (bld)}, the many steps required 
+to install and configure Tomcat and the IDE are unnecessary.  The whole process
 (for the back-end portion) can be done as follows:
 
 @enumerate
@@ -165,9 +165,9 @@ the following:  @code{./bld develop}
 Note:  Remember that all commands that start with @code{./} would drop
 the @code{./} under Windows.
 @end enumerate
-At this point, the back-end will be running.  From within your IDE you
+At this point, the back-end will be running.  From within your IDE, you
 can attach to the process at port 9000 to debug the back-end (including
-breakpoints, etc.)
+breakpoints, etc.).
 
 Remember, however, that you won't be able to use or debug the application until
 the front-end server is started too.
@@ -179,7 +179,7 @@ services you define.  Each REST service exists in its own
 file or class.  Web methods are methods within those classes.
 
 As architected, directories under @code{src/main/backend}
-represent the application's REST services.  Each class / file under that
+represent the application's REST services.  Each class/file under that
 directory represents a web service.  The name of the class is the name
 of the web service.
 
@@ -211,11 +211,11 @@ A new database connection is formed, and a new database transaction is started.
 @item
 The requested web service is identified (and loaded and compiled if needed).
 @item
-The @code{outjson} object that is filled in by the web service that is to be returned to the front-end.
+The @code{outjson} object is filled in by the web service that is to be returned to the front-end.
 @item
 Upon completion of the REST service, @emph{Kiss} commits the transaction, closes the database connection, and returns @code{outjson} to the front-end.
 @item
-If, however, the REST service threw an exception, @emph{Kiss} rolls back the transaction, closes the database, and sends an error return to the front-end.
+If, however, the REST service throws an exception, @emph{Kiss} rolls back the transaction, closes the database, and sends an error return to the front-end.
 @end enumerate
 
 Additional class and instance methods, that are not web methods, may
@@ -233,7 +233,7 @@ Every web service has access to this data via the following method:
 
 @example
         servlet.getUserData().getUserData("dataName")
-        servlet.getUserData().putUserData("dataName", "datValue")
+        servlet.getUserData().putUserData("dataName", "dataValue")
 @end example
 
 @xref{authentication,,Authentication}
@@ -262,8 +262,8 @@ first call.  It is, however, reasonably fast on all subsequent calls.
 The code that interfaces Java to Lisp is under the
 @code{src/main/core/org/kissweb/lisp} directory.
 
-Do to the easy and natural connection between Java and many other JVM
-languages, interfaces to those languages is very easy.  It is
+Due to the easy and natural connection between Java and many other JVM
+languages, interfaces to those languages are very easy.  It is
 anticipated that support for many of these other languages (such as
 Scala, Clojure, JRuby, Jython, and Kotlin) will likely follow,
 especially if there are requests.
@@ -272,7 +272,7 @@ especially if there are requests.
 
 @emph{Kiss} has the ability to run any number of commands at specified
 intervals.  For example, you could run a process every hour and
-another process every Tuesday at 3 PM, etc.  This facility echos 
+another process every Tuesday at 3 PM, etc.  This facility echoes 
 the standard Unix or Linux @code{cron} facility.
 
 The file that determines what gets run and when is @*
@@ -281,7 +281,7 @@ the @code{Groovy} language and exist in the
 @code{src/main/backend/CronTasks} directory.
 
 All contents of the @code{src/main/backend/CronTasks} can be changed
-on a running system.  The change will get noticed and take effect.
+on a running system.  The change will be noticed and take effect.
 There is no need to restart the system.
 
 Look at the files in the @code{src/main/backend/CronTasks}
@@ -290,11 +290,11 @@ directory for samples and further documentation.
 @subsection CORS
 
 For security reasons, web servers prevent web services from
-an application that didn't come from the same application.  This is
+an application that doesn't come from the same origin.  This is
 known as Cross-Origin Resource Sharing or CORS.  @emph{Kiss} fully
 supports this security standard. 
 
-@emph{Kiss} automatically enables full CORS protection on production
+@emph{Kiss} automatically enables full CORS protection in production
 environments and allows CORS in the development environment.
 
 @subsection Unit Tests
@@ -318,7 +318,7 @@ This creates the @code{work/KissUnitTest.jar} file which contains
 the entire @emph{Kiss} system and unit tests.
 @end enumerate
 
-All tests can be run by running the following command:
+All tests can be run by executing the following command:
 @example
 java -jar work/KissUnitTest.jar -cp work/KissUnitTest.jar 
                                                   --scan-class-path
@@ -333,7 +333,7 @@ where @code{org.kissweb.IniFileTest} is the full path to the desired test.
 
 A separate server is used so that development files will be served
 rather than the front-end that was present when the back-end server
-was started.  This is the same whether your are using the IDE or
+was started.  This is the same whether you are using the IDE or
 @emph{bld} back-end server modes.
 
 Once the back-end and front-end servers are running, the front-end can
@@ -375,7 +375,7 @@ If you disable the browser cache through the browser developer console
 settings, changes you make to the front-end will appear by just
 reloading the page.  On Chrome, for example, the browser cache can be
 turned off by going into the page debugger (F12), then
-@code{settings}, and then select @code{Disable cache (while DevTools
+@code{settings}, and then selecting @code{Disable cache (while DevTools
 is open)}
 
 You can now develop the front-end portion of your application by
@@ -392,7 +392,7 @@ simpler and more effective -- especially for complex screens.
 Although @emph{Kiss} has always supported responsive design,
 @emph{Kiss} also supports the ability to have different pages for
 different platforms.  If you look at @code{src/main/frontend/index.js}
-you will see how @code{Kiss} handles this.  Basically @code{Kiss}
+you will see how @code{Kiss} handles this.  Basically, @code{Kiss}
 detects the platform and loads different pages based on the platform.
 
 
@@ -426,9 +426,9 @@ own method of storing and validating users.  Additionally, each application
 may have its own user-specific data it may want to retain between web service
 calls. @emph{Kiss} has a generic and easy way of handling these needs.
 
-Application-specific user login and data is handled by the Groovy file
+Application-specific user login and data are handled by the Groovy file
 located in the @code{backend} directory named @code{Login.groovy}.
-That file must have two methods; @code{login} and @code{checkLogin}.  
+That file must have two methods: @code{login} and @code{checkLogin}.  
 See that file for more details.
 
 @xref{cached_user_data,,Cached User Data}

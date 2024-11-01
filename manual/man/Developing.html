@@ -101,7 +101,7 @@ h2, h3, h4 {  /* subsection titles */
 
 <p>This section details the development process with <em class="emph">Kiss</em>.  The
 details provided will be for IntelliJ but can be adapted to other
-IDE&rsquo;s.  The use of an IDE is tremendously beneficial because of the
+IDEs.  The use of an IDE is tremendously beneficial because of the
 graphical debugging and intelligent code completion capabilities.
 </p>
 <p>A good development environment includes two separate servers running
@@ -113,7 +113,7 @@ front-end files can be edited and saved.  Their changes take effect
 immediately.
 </p>
 <p>Of course, in a production environment, only a single server would be
-utilized and front-end and back-end changes take effect immediately
+utilized, and front-end and back-end changes take effect immediately
 there too.
 </p>
 <ul class="mini-toc">
@@ -157,7 +157,7 @@ the front-end will not immediately appear in the browser.)
 There should be no need to rebuild or bring anything down.
 </p>
 <p>Front-end changes will appear as soon as you re-load the page on your browser.
-Back-end changes with take effect immediately.
+Back-end changes will take effect immediately.
 </p>
 <ul class="mini-toc">
 <li><a href="#IDE" accesskey="1">IDE</a></li>
@@ -170,7 +170,7 @@ developers utilize an IDE (Integrated Development Environment).
 <em class="emph">Kiss</em> includes an effort to assist with IDE integration
 (such as an <em class="emph">ant</em> interface to our build system).
 </p>
-<p>See the files under the <code class="code">manual/IDE-Setup</code> director for further
+<p>See the files under the <code class="code">manual/IDE-Setup</code> directory for further
 information.
 </p>
 </div>
@@ -180,7 +180,7 @@ information.
 
 <p>The back-end works differently in development and production
 environments.  Although in both environments back-end and front-end
-changes take effect immediately, setup of the production environment
+changes take effect immediately, the setup of the production environment
 copies all files into the production environment, whereas in a
 development environment the source and production code are split.  In
 order to facilitate rapid and easy development, it is important that
@@ -218,21 +218,21 @@ follows.
 <div class="subsubsection-level-extent" id="IDE-1">
 <h4 class="subsubsection"><span>4.2.1.1 IDE<a class="copiable-link" href="#IDE-1"> &para;</a></span></h4>
 
-<p>Running of the IDE back-end requires the following:
+<p>Running the IDE back-end requires the following:
 </p>
 <ol class="enumerate">
 <li> The IDE is completely configured.
-</li><li> The system was build with the IDE
+</li><li> The system was built with the IDE.
 </li></ol>
 
-<p>Typically, the IDE manages a tomcat instance and serves up the core
+<p>Typically, the IDE manages a Tomcat instance and serves up the core
 back-end code serving the REST services.  That code detects that it is
 running under an IDE and re-routes all back-end application files back
 to the source directories.
 </p>
 <p>Although back-end files are edited in source form and run in compiled
-form, back-end code can be debugged (including break-points) as if
-they were compiled before the system was booted.
+form, back-end code can be debugged (including breakpoints) as if
+it were compiled before the system was booted.
 </p>
 <p>Once the back-end server is up, application files changed under the
 <code class="code">src/main/backend</code> directory will take effect immediately.
@@ -241,8 +241,8 @@ they were compiled before the system was booted.
 <div class="subsubsection-level-extent" id="BLD">
 <h4 class="subsubsection"><span>4.2.1.2 BLD<a class="copiable-link" href="#BLD"> &para;</a></span></h4>
 
-<p>Utilizing the included <em class="emph">Kiss build system (bld)</em> the many steps required 
-to install and configure tomcat and the IDE are unnecessary.  The whole process
+<p>Utilizing the included <em class="emph">Kiss build system (bld)</em>, the many steps required 
+to install and configure Tomcat and the IDE are unnecessary.  The whole process
 (for the back-end portion) can be done as follows:
 </p>
 <ol class="enumerate">
@@ -252,9 +252,9 @@ the following:  <code class="code">./bld develop</code>
 <p>Note:  Remember that all commands that start with <code class="code">./</code> would drop
 the <code class="code">./</code> under Windows.
 </p></li></ol>
-<p>At this point, the back-end will be running.  From within your IDE you
+<p>At this point, the back-end will be running.  From within your IDE, you
 can attach to the process at port 9000 to debug the back-end (including
-breakpoints, etc.)
+breakpoints, etc.).
 </p>
 <p>Remember, however, that you won&rsquo;t be able to use or debug the application until
 the front-end server is started too.
@@ -269,7 +269,7 @@ services you define.  Each REST service exists in its own
 file or class.  Web methods are methods within those classes.
 </p>
 <p>As architected, directories under <code class="code">src/main/backend</code>
-represent the application&rsquo;s REST services.  Each class / file under that
+represent the application&rsquo;s REST services.  Each class/file under that
 directory represents a web service.  The name of the class is the name
 of the web service.
 </p>
@@ -299,9 +299,9 @@ for that web service.  Each web method is passed four arguments as follows:
 </li><li> The user gets authenticated.
 </li><li> A new database connection is formed, and a new database transaction is started.
 </li><li> The requested web service is identified (and loaded and compiled if needed).
-</li><li> The <code class="code">outjson</code> object that is filled in by the web service that is to be returned to the front-end.
+</li><li> The <code class="code">outjson</code> object is filled in by the web service that is to be returned to the front-end.
 </li><li> Upon completion of the REST service, <em class="emph">Kiss</em> commits the transaction, closes the database connection, and returns <code class="code">outjson</code> to the front-end.
-</li><li> If, however, the REST service threw an exception, <em class="emph">Kiss</em> rolls back the transaction, closes the database, and sends an error return to the front-end.
+</li><li> If, however, the REST service throws an exception, <em class="emph">Kiss</em> rolls back the transaction, closes the database, and sends an error return to the front-end.
 </li></ol>
 
 <p>Additional class and instance methods, that are not web methods, may
@@ -321,7 +321,7 @@ application-specific class.
 </p>
 <div class="example">
 <pre class="example-preformatted">        servlet.getUserData().getUserData(&quot;dataName&quot;)
-        servlet.getUserData().putUserData(&quot;dataName&quot;, &quot;datValue&quot;)
+        servlet.getUserData().putUserData(&quot;dataName&quot;, &quot;dataValue&quot;)
 </pre></div>
 
 <p>See <a class="xref" href="#authentication">Authentication</a>
@@ -352,8 +352,8 @@ first call.  It is, however, reasonably fast on all subsequent calls.
 The code that interfaces Java to Lisp is under the
 <code class="code">src/main/core/org/kissweb/lisp</code> directory.
 </p>
-<p>Do to the easy and natural connection between Java and many other JVM
-languages, interfaces to those languages is very easy.  It is
+<p>Due to the easy and natural connection between Java and many other JVM
+languages, interfaces to those languages are very easy.  It is
 anticipated that support for many of these other languages (such as
 Scala, Clojure, JRuby, Jython, and Kotlin) will likely follow,
 especially if there are requests.
@@ -364,7 +364,7 @@ especially if there are requests.
 
 <p><em class="emph">Kiss</em> has the ability to run any number of commands at specified
 intervals.  For example, you could run a process every hour and
-another process every Tuesday at 3 PM, etc.  This facility echos 
+another process every Tuesday at 3 PM, etc.  This facility echoes 
 the standard Unix or Linux <code class="code">cron</code> facility.
 </p>
 <p>The file that determines what gets run and when is <br>
@@ -373,7 +373,7 @@ the <code class="code">Groovy</code> language and exist in the
 <code class="code">src/main/backend/CronTasks</code> directory.
 </p>
 <p>All contents of the <code class="code">src/main/backend/CronTasks</code> can be changed
-on a running system.  The change will get noticed and take effect.
+on a running system.  The change will be noticed and take effect.
 There is no need to restart the system.
 </p>
 <p>Look at the files in the <code class="code">src/main/backend/CronTasks</code>
@@ -384,11 +384,11 @@ directory for samples and further documentation.
 <h4 class="subsection"><span>4.2.6 CORS<a class="copiable-link" href="#CORS"> &para;</a></span></h4>
 
 <p>For security reasons, web servers prevent web services from
-an application that didn&rsquo;t come from the same application.  This is
+an application that doesn&rsquo;t come from the same origin.  This is
 known as Cross-Origin Resource Sharing or CORS.  <em class="emph">Kiss</em> fully
 supports this security standard. 
 </p>
-<p><em class="emph">Kiss</em> automatically enables full CORS protection on production
+<p><em class="emph">Kiss</em> automatically enables full CORS protection in production
 environments and allows CORS in the development environment.
 </p>
 </div>
@@ -412,7 +412,7 @@ directory.
 the entire <em class="emph">Kiss</em> system and unit tests.
 </p></li></ol>
 
-<p>All tests can be run by running the following command:
+<p>All tests can be run by executing the following command:
 </p><div class="example">
 <pre class="example-preformatted">java -jar work/KissUnitTest.jar -cp work/KissUnitTest.jar 
                                                   --scan-class-path
@@ -430,7 +430,7 @@ the entire <em class="emph">Kiss</em> system and unit tests.
 
 <p>A separate server is used so that development files will be served
 rather than the front-end that was present when the back-end server
-was started.  This is the same whether your are using the IDE or
+was started.  This is the same whether you are using the IDE or
 <em class="emph">bld</em> back-end server modes.
 </p>
 <p>Once the back-end and front-end servers are running, the front-end can
@@ -470,7 +470,7 @@ environment through your browser at <code class="code">http://localhost:8000</co
 settings, changes you make to the front-end will appear by just
 reloading the page.  On Chrome, for example, the browser cache can be
 turned off by going into the page debugger (F12), then
-<code class="code">settings</code>, and then select <code class="code">Disable cache (while DevTools
+<code class="code">settings</code>, and then selecting <code class="code">Disable cache (while DevTools
 is open)</code>
 </p>
 <p>You can now develop the front-end portion of your application by
@@ -491,7 +491,7 @@ simpler and more effective &ndash; especially for complex screens.
 <p>Although <em class="emph">Kiss</em> has always supported responsive design,
 <em class="emph">Kiss</em> also supports the ability to have different pages for
 different platforms.  If you look at <code class="code">src/main/frontend/index.js</code>
-you will see how <code class="code">Kiss</code> handles this.  Basically <code class="code">Kiss</code>
+you will see how <code class="code">Kiss</code> handles this.  Basically, <code class="code">Kiss</code>
 detects the platform and loads different pages based on the platform.
 </p>
 
@@ -530,9 +530,9 @@ own method of storing and validating users.  Additionally, each application
 may have its own user-specific data it may want to retain between web service
 calls. <em class="emph">Kiss</em> has a generic and easy way of handling these needs.
 </p>
-<p>Application-specific user login and data is handled by the Groovy file
+<p>Application-specific user login and data are handled by the Groovy file
 located in the <code class="code">backend</code> directory named <code class="code">Login.groovy</code>.
-That file must have two methods; <code class="code">login</code> and <code class="code">checkLogin</code>.  
+That file must have two methods: <code class="code">login</code> and <code class="code">checkLogin</code>.  
 See that file for more details.
 </p>
 <p>See <a class="xref" href="#cached_005fuser_005fdata">Cached User Data</a>

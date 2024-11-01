@@ -107,7 +107,7 @@ applications, and command-line utilities.  The main home for
 </p>
 
 <p>Kiss&rsquo; focus is on simplicity and development speed.  By being simple
-to develop in, development and support of the application can occur
+to develop in, the development and support of the application can occur
 more rapidly.  Simplicity is achieved by abstracting away as much
 common functionality as possible so that developer lines of code are
 maximally applicable to the application solution rather than
@@ -121,7 +121,7 @@ alone, nor is it a back-end solution.  <em class="emph">Kiss</em> includes solut
 both ends &ndash; although the two sides may largely be used independently.
 </p>
 <p><em class="emph">Kiss</em> attempts to create a consistent interface.  This can greatly
-simply code even in simple cases.  For example, in terms of an input
+simplify code even in simple cases.  For example, in terms of an input
 text control, why would you disable/enable it with:
 </p>
 <div class="example">
@@ -149,7 +149,7 @@ $$('id').show();
 and simple to use.  <em class="emph">Kiss</em> does this while supporting important
 technologies such as micro-services, front-end components, and SQL.
 </p>
-<p>The term <em class="emph">single page application</em> has several, subtly different,
+<p>The term <em class="emph">single page application</em> has several, subtly different
 meanings.  One meaning is that the entire application code is bundled
 into a single file or HTTP GET request.  In that sense, <em class="emph">Kiss</em> is not a
 single page application.  This makes no sense for a business
@@ -163,7 +163,7 @@ applications lazy-load as needed.  Browser cache is leveraged to
 minimize Internet traffic.
 </p>
 <p><em class="emph">Kiss</em> is used in a production environment and built by someone with
-more than 30 years experience as a framework designer and a business
+more than 30 years of experience as a framework designer and a business
 application software engineer.  So <em class="emph">Kiss</em> is not a proof of concept.
 </p>
 <p><em class="emph">Kiss</em> was built as a solution to the challenges faced by the author
@@ -174,9 +174,9 @@ development of public facing company presentation web sites.
 <p>Another goal of <em class="emph">Kiss</em> is to keep the front-end and back-end as
 independent of each other as possible.  To this end, communications
 between the front-end and back-end occur via REST services and JSON.
-This accomplished two things.  First, it allows your organization to be
+This accomplishes two things.  First, it allows your organization to be
 best prepared for the ever-evolving software environment.  Pieces can
-be changed and enhanced without causing massive re-writes of the entire
+be changed and enhanced without causing massive rewrites of the entire
 system.  The second advantage is that by pushing as much processing to
 the front-end as possible (rendering the display on the front-end),
 the system can better scale.
@@ -207,16 +207,16 @@ the system can better scale.
 
 <ol class="enumerate">
 <li> Micro services - add, change, or delete a web service on a running system.
-</li><li> Each web-method is in a single file and are very simple.  No
-configuration files or setup code needed.
+</li><li> Each web method is in a single file and is very simple.  No
+configuration files or setup code are needed.
 </li><li> Easy access to common SQL databases with support for nested queries
 without cursor interference.
 </li><li> All REST services are stateless.  However, the system fully
 authenticates each request.
-</li><li> Changes to web services occur immediately, on a running system,
+</li><li> Changes to web services occur immediately on a running system,
 without the need to reboot the application.
 </li><li> A growing class library to handle common business application needs.
-</li><li> Back-end framework is written in Java, and the system is portable to
+</li><li> The back-end framework is written in Java, and the system is portable to
 Linux or Windows servers.
 </li><li> Web services may be written in Groovy, Java or Common Lisp.  Python,
 JavaScript, Ruby, and Scala are expected to follow soon.
@@ -232,16 +232,16 @@ supports PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 <h4 class="subsection"><span>1.1.2 Front-end Highlights<a class="copiable-link" href="#Front_002dend-Highlights"> &para;</a></span></h4>
 
 <ol class="enumerate">
-<li> Build your own HTML components thus encapsulating any amount of code
+<li> Build your own HTML components, thus encapsulating any amount of code
 into a simple, custom HTML tag.
 </li><li> Browser cache control.  Never ask your users to clear their browser cache again.
-</li><li> All code written in JavaScript/HTML/CSS.  No need for a complex build
+</li><li> All code is written in JavaScript/HTML/CSS.  No need for a complex build
 and debug process, nor any need to learn yet another language.
 </li><li> Growing list of included business oriented components designed to
 provide simple access to fully functional business components.
 </li><li> Straight forward means of designing your own components without a lot
 of hidden and unpredictable magic.
-</li><li> System is small and concise, rather then hundreds of megabytes other
+</li><li> System is small and concise, rather than hundreds of megabytes other
 systems take up.
 </li><li> Consistent and simple API.
 </li></ol>
@@ -331,6 +331,7 @@ framework:
 <ul class="itemize mark-bullet">
 <li>Linux
 </li><li>Windows Server
+</li><li>BSD
 </li><li>OpenIndiana
 </li></ul>
 
@@ -356,7 +357,7 @@ framework:
 <div class="subsection-level-extent" id="Java">
 <h4 class="subsection"><span>1.2.4 Java<a class="copiable-link" href="#Java"> &para;</a></span></h4>
 
-<p>The system is tested with Java verion 8 and 17.  Any Java version above 8
+<p>The system is tested with Java versions 8, 11, 17, and 21.  Any Java version above 8
 is expected to work.
 </p>
 
@@ -366,7 +367,7 @@ is expected to work.
 <div class="section-level-extent" id="HTML-component-usage">
 <h3 class="section"><span>1.3 HTML component usage<a class="copiable-link" href="#HTML-component-usage"> &para;</a></span></h3>
    
-<p>To use a component add to HTML:
+<p>To use a component, add to HTML:
 </p>
 <div class="example">
 <pre class="example-preformatted">&lt;my-component&gt;&lt;/my-component&gt;
@@ -381,7 +382,7 @@ is expected to work.
 <p>The component can put any HTML in the component location, have any
 functionality, have its own modal windows, and use other components.
 The component can have custom and non-custom attributes (like style).
-Non-custom attributes do what you&rsquo;s expect them to do.
+Non-custom attributes do what you&rsquo;d expect them to do.
 </p>
 <p>The system also supports tag-less components.  This provides an easy
 way to package arbitrary blocks of code (that can have screens too).
@@ -390,7 +391,7 @@ way to package arbitrary blocks of code (that can have screens too).
 <div class="section-level-extent" id="System-Maturity-And-Stability">
 <h3 class="section"><span>1.4 System Maturity And Stability<a class="copiable-link" href="#System-Maturity-And-Stability"> &para;</a></span></h3>
 
-<p>The Kiss system has been used in production environments for a several
+<p>The Kiss system has been used in production environments for several
 years.  Additionally, several commercial applications utilize <em class="emph">Kiss</em>.
 In spite of this, however, <em class="emph">Kiss</em> is constantly being adjusted
 in response to additional needs, evolving environments, and bug fixes.
@@ -433,7 +434,7 @@ internal dependencies (those included with <em class="emph">Kiss</em>):
 </p>
 <p>Source code is at <a class="uref" href="https://github.com/blakemcbride/Kiss">https://github.com/blakemcbride/Kiss</a>
 </p>
-<p>Public discussion and support is available at <br> 
+<p>Public discussion and support are available at <br> 
 <a class="uref" href="https://github.com/blakemcbride/Kiss/discussions">https://github.com/blakemcbride/Kiss/discussions</a>
 </p>
 <p>Issue tracking is at <a class="uref" href="https://github.com/blakemcbride/Kiss/issues">https://github.com/blakemcbride/Kiss/issues</a>

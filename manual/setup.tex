@@ -45,14 +45,14 @@ configuring a web server, building @emph{Kiss}, and running
 @emph{Kiss} for development purposes easy, intelligent, and automatic.
 This new build system can be used in conjunction with your favorite IDE.
 
-The build system (called it @emph{bld}) is small and written in Java.
+The build system (called @emph{bld}) is small and written in Java.
 Its source code is included with the @emph{Kiss} source code.  So, a
 Java compiler will be needed before anything will work.  
 Java 8, 11, 17, and 21 are supported.
 
 When building the system for the first time, @emph{BLD} will
 automatically download and cache required libraries (jar files), install and
-configure the development server (tomcat), build the system, and it
+configure the development server (Tomcat), build the system, and it
 can even be used to launch the development-mode server.  After building
 the system the first time, application development proceeds without
 any need for re-compiles or re-builds.
@@ -65,11 +65,11 @@ Windows, use ``bld'' rather than ``./bld'' and the same for all the
 other commands shown.
 
 Note.  The @emph{Kiss} system includes a file named @code{pom.xml}.
-However, @emph{Kiss} is @emph{not} a maven project.  The
+However, @emph{Kiss} is @emph{not} a Maven project.  The
 @code{pom.xml} file is only included to provide @emph{GitHub} with a
 list of dependencies.  Unfortunately, this file sometimes confuses IDEs
 into interpreting the existence of that file as the project being a
-@emph{maven} project.  Therefore, in some instances, it is a good idea
+@emph{Maven} project.  Therefore, in some instances, it is a good idea
 to delete that file prior to IDE configuration.
 
 The @code{build.xml} file is also not used by the @emph{Kiss} system per se.
@@ -97,8 +97,8 @@ After doing a @code{git clone}, all that is needed is the following:
     bld  develop                        [Windows]
 @end example
 
-This will build the system, install tomcat, deploy the app, and run
-the server.  At this point you will be able to go your browser at the
+This will build the system, install Tomcat, deploy the app, and run
+the server.  At this point you will be able to go to your browser at the
 following URL:
 
 @example
@@ -197,7 +197,7 @@ and the front-end server runs by executing a single command.
 
 @anchor{Pre-requisites}@section Pre-requisites
 
-@emph{Kiss} requires a few common pre-requisits as follows:
+@emph{Kiss} requires a few common pre-requisites as follows:
 
 
 @enumerate
@@ -208,17 +208,17 @@ SQL Database Server --- @emph{Kiss} comes with the @emph{SQLite} database.  Howe
 system you're likely to prefer a more substantial database server.  @emph{Kiss} supports a variety of SQL database servers including 
 PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 @item
-IDE --- Although @emph{Kiss} does not require an IDE, one is stongly recommended (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, eclipse)
+IDE --- Although @emph{Kiss} does not require an IDE, one is strongly recommended (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, Eclipse)
 @item
 GIT source code control system
 @item
-Groff --- @emph{Kiss} utilizes the open-source @emph{groff} typsetting system in order to produce PDF reports.
+Groff --- @emph{Kiss} utilizes the open-source @emph{groff} typesetting system in order to produce PDF reports.
 @end enumerate
 
 On Linux, most of these packages may be obtained utilizing the normal
 package manager that comes with your distribution.
 
-The following sub-sections detail how to get those pre-requisits for Windows and Mac.
+The following sub-sections detail how to get those pre-requisites for Windows and Mac.
 
 @subsection Windows
 
@@ -242,7 +242,7 @@ Java JDK 8, 11, 17, or 21 for many OSs at:
 @emph{Kiss} comes with the SQLite database.  However, you may install other databases such as PostgreSQL, Microsoft SQL Server, MySQL,
 Oracle, or SQLite.
 @item
-IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, eclipse)
+IDE (e.g.@ @uref{https://www.jetbrains.com/idea,IntelliJ}, VSCode, NetBeans, Eclipse)
 @end enumerate
 
 Correctly setting the @emph{JAVA_HOME} and @emph{JRE_HOME} environment
@@ -267,7 +267,7 @@ choco install ghostscript
 choco install git
 @end itemize
 
-After installing these programs you must exit and re-start any terminals you have running.
+After installing these programs, you must exit and re-start any terminals you have running.
 
 
 @subsection Mac
@@ -337,7 +337,7 @@ make
 All of the documentation can be accessed with your browser.  For
 example, if the root of @emph{Kiss} is located at
 @code{/my/home/path/kiss} then you will be able to access the three
-manuals at the following URL's:
+manuals at the following URLs:
 
 @example
 file:///my/home/path/kiss/manual/man/index.html
@@ -349,7 +349,7 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 
 @anchor{Setup and Configuration}@section Setup and Configuration
 
-The system is configured by the contents of a single file
+The system is configured by the contents of a single file:
 @*@code{src/main/backend/KissInit.groovy} A reboot of the web server
 is required if any of the parameters in this file are changed.
 
@@ -403,8 +403,8 @@ shown in the example.
 
 Although @emph{Kiss} comes with a default demo database, another one
 should be configured in live or more substantial development
-environments.  An SQL script file, named @code{init.sql}, is included
-with the system to initialize said database.  Application specific tables
+environments.  An SQL script file named @code{init.sql} is included
+with the system to initialize said database.  Application-specific tables
 may be added to this database.
 
 The default username is @emph{kiss}, and the default password is
@@ -413,18 +413,18 @@ The default username is @emph{kiss}, and the default password is
 @section Bypassing Authentication
 
 On rare occasions, it is necessary to bypass authentication.  In other
-words, be able to execute a web service without being logged in.  One
+words, one should be able to execute a web service without being logged in.  One
 example of this is registering a new user.  If the user isn't already a
 valid user, they can't execute services in order to register.
 
 @emph{Kiss} has a way of dealing with this scenario.  This is done in
 the same configuration file where all of the configuration options are
-located.  In the file @code{src/main/backend/KissInit.groovy}.  In
+located specifically in the file @code{src/main/backend/KissInit.groovy}.  In
 that file, you are able to specify specific web methods that may be
 called without authentication.  That file has an example.
 
 It should be noted that it is recommended that something like a
-@emph{captcha} be used to at least be confident you are
+@emph{captcha} be used to at least ensure that you are
 communicating with a human.  Additionally, it should be noted that the
 danger of providing unauthenticated services is somewhat mitigated by
 the combination of @emph{HTTPS} and @emph{CORS}.
@@ -441,7 +441,7 @@ been tested on Linux, Mac, and Windows.  The system also includes an
 @emph{Ant} build file (named @emph{build.xml}) that is only used for
 IDE integration with the included @emph{bld} system.
 
-The build system included with Kiss is written in Java and located
+The build system included with Kiss is written in Java and is located
 under the @emph{src/main/core/org/kissweb/builder/} directory.  This
 build system also includes two driver batch files / shell scripts used
 to build and run the build system.  All that is needed to use this
@@ -477,10 +477,10 @@ This task is only required if you intend to use your IDE to build the
 remainder of the system.  It installs the required dependencies.
 @item develop
 This will cause the entire system to build (not repeating unnecessary
-steps) and start up a tomcat instance to run the system in a
+steps) and start up a Tomcat instance to run the system in a
 development mode.  The system will be available from your local
 browser at @code{http://localhost:8000}.  You may debug the
-application by attaching to the running @emph{tomcat} server at port
+application by attaching to the running @emph{Tomcat} server at port
 9000.
 @item war
 This will cause the system to generate the single file needed by a
@@ -495,12 +495,12 @@ This task removes all files built but retains files that were downloaded from
 repositories (although @emph{bld} caches those files anyway.)
 @item realclean
 This removes all built and downloaded files so the system should be everything
-you need to build it without any extraneous files
+you need to build it without any extraneous files.
 @item all
 This performs all of the steps necessary to setup and build the system but
-doesn't start up the tomcat server.
+doesn't start up the Tomcat server.
 @item javadoc
-This task creates the javadoc files that end up in @code{work/javadoc}
+This task creates the Javadoc files that end up in @code{work/javadoc}
 @item kisscmd
 This task creates a command-line JAR that can be used in a non-web, command-line application.
 This is useful when creating applications that perform various utility functions.  This
@@ -511,8 +511,8 @@ JAR cannot be used in any web environment.  See @code{src/main/core/org/kissweb/
 
 @subsection Using an IDE
 
-Most IDE's can be used to develop and debug the application.  There are two
-way to do this as follows:
+Most IDEs can be used to develop and debug the application.  There are two
+ways to do this as follows:
 
 @enumerate
 @item
@@ -531,12 +531,12 @@ that, the IDE can be used to debug it by @emph{attaching} to port
 
 @emph{Kiss} also comes with an @emph{ant} build that simply calls the
 native @emph{bld} program.  This is useful as an intermediary between
-@emph{bld} and the IDE since many IDE's support @emph{ant}.
+@emph{bld} and the IDE since many IDEs support @emph{ant}.
 
 Using your IDE to run the entire process is a bit tedious to initially
 setup but makes the entire process simpler from that point forward.
 Unfortunately, configuring your IDE is completely different for each
-IDE.  Instructions for setting up some of the IDEs is located under the
+IDE.  Instructions for setting up some of the IDEs are located under the
 @code{manual/IDE-Setup} directory.
 
 
@@ -593,9 +593,9 @@ by this process.
 
 What you have at this point is the beginnings of your new application.
 @emph{Kiss} is provided as a running and deployable system.  It is
-expected that you would modify what's there to suit your application
+expected that you will modify what's there to suit your application
 needs.
 
-Besides this narrative, you would need the JavaDocs located under the
-@code{work/javadoc} directory for back-end API specific documentation and
+Besides this narrative, you will need the JavaDocs located under the
+@code{work/javadoc} directory for back-end API-specific documentation and
 front-end API reference located in the @emph{manual/jsdoc} directory.
