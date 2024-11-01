@@ -1352,6 +1352,9 @@ class Utils {
 
     /**
      * Re-load the prior screen.
+     * &lt;br>&lt;br>
+     * Be careful.  While this function loads the old screen, execution continues after this call
+     * and not in the new screen until this screen's code exits.
      *
      * @param {object} retv values being returned to the prior screen
      * @param {number} howmany how many screens to go back (default 1)

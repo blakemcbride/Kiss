@@ -28,7 +28,7 @@ public class GroovyUtils {
      * @see groovy.lang.GroovyShell#evaluate(String)
      * @see groovy.lang.Binding
      *
-     * <h3>Example Usage:</h3>
+     * <div><b>Example Usage:</b></div>
      * <pre>{@code
      * public static void main(String[] args) {
      *     String groovyCode = "return 'Hello, ' + name + '!'";
@@ -80,7 +80,7 @@ public class GroovyUtils {
      *
      * @see #runGroovyCode(String, Map)
      *
-     * <h3>Example Usage:</h3>
+     * <div><b>Example Usage:</b></div>
      * <pre>{@code
      * public static void main(String[] args) {
      *     String groovyCode = "return 'Hello, World!'";

@@ -322,7 +322,7 @@ public class DelimitedFileReader implements AutoCloseable {
                             sb.setLength(0); // start work on next token
                             state = State.AFTER_DELIMITER;
                         } else if (c == quote) {
-                            if (sb.isEmpty() || sb.toString().trim().isEmpty()) {
+                            if (sb.length() == 0 || sb.toString().trim().isEmpty()) {
                                 state = State.QUOTE;
                                 sb.setLength(0);
                             } else

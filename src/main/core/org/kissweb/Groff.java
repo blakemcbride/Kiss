@@ -314,7 +314,7 @@ public class Groff {
      */
     public void endTable() {
         if (inTable) {
-            if (!row.isEmpty()) {
+            if (row.length() != 0) {
                 if (row.toString().startsWith("T{\n")) {
                     pw.print("T{\n");
                     if (grayEveryOtherLineFlg && !inTitle && currentRow++ % 2 == 1)
