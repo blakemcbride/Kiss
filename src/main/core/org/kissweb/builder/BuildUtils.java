@@ -46,13 +46,15 @@ public class BuildUtils {
     static boolean isLinux;
     static boolean isMacOS;
     static boolean isSunOS;  // includes OpenIndiana (only tested on OpenIndiana)
+    static boolean isHaiku;
 
     public static void main(String [] args) {
         String osName = System.getProperty("os.name");
         isLinux = osName.startsWith("Linux");
         isMacOS = osName.startsWith("Mac OS X");
         isWindows = osName.startsWith("Windows");
-        isSunOS = osName.startsWith("SunOS");
+        isSunOS = osName.startsWith("SunOS");  // includes OpenIndiana
+        isHaiku = osName.startsWith("Haiku");
         System.out.println("Running on " + osName);
         if (args.length < 1)
             args = new String[]{ "help" };

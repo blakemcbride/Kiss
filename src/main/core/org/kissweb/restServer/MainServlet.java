@@ -52,6 +52,7 @@ public class MainServlet extends HttpServlet {
     public static boolean isMacOS = false;
     public static boolean isWindows = false;
     public static boolean isSunOS = false; // also includes OpenIndiana
+    public static boolean isHaiku = false;
 
     private QueueManager queueManager;
 
@@ -167,7 +168,8 @@ public class MainServlet extends HttpServlet {
         isLinux = osName.startsWith("Linux");
         isMacOS = osName.startsWith("Mac OS X");
         isWindows = osName.startsWith("Windows");
-        isSunOS = osName.startsWith("SunOS");
+        isSunOS = osName.startsWith("SunOS");  // includes OpenIndiana
+        isHaiku = osName.startsWith("Haiku");
         setApplicationPathInternal(path);
         org.kissweb.restServer.ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, null, null, "KissInit", "init");
         if (res == ProcessServlet.ExecutionReturn.Success) {

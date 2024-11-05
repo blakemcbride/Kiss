@@ -8,8 +8,8 @@ class KissInit {
         MainServlet.setConnectionType Connection.ConnectionType.SQLite
         MainServlet.setHost "localhost"
         //MainServlet.setPort 5432                // specify the database port if not the database default
-        if (!MainServlet.isSunOS)
-            // Under SunOS (OpenIndiana) SQLite doesn't work unless you build a custom jar
+        if (!MainServlet.isSunOS && !MainServlet.isHaiku)
+            // Under SunOS (OpenIndiana) and Haiku SQLite doesn't work unless you build a custom jar
             // Other databases work fine but you have to setup their server
             MainServlet.setDatabase "DB.sqlite"   // the name of the database, leave blank for none (and no authentication)
         MainServlet.setUser ""                    // database user (not application user login)
