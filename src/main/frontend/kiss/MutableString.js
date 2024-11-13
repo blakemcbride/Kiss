@@ -95,19 +95,27 @@ class MutableString {
     /**
      * Removes the first n characters from the mutable string.
      * @param {number} n - The number of characters to remove from the beginning.
+     * @returns {string} - The characters that were removed.
      */
     removeFromStart(n) {
-        if (n > 0 && n <= this.characters.length)
-            this.characters.splice(0, n);
+        if (n > 0 && n <= this.characters.length) {
+            const removed = this.characters.splice(0, n);
+            return removed.join("");
+        }
+        return "";  // Return an empty string if no characters are removed
     }
 
     /**
      * Removes the last n characters from the mutable string.
      * @param {number} n - The number of characters to remove from the end.
+     * @returns {string} - The characters that were removed.
      */
     removeFromEnd(n) {
-        if (n > 0 && n <= this.characters.length)
-            this.characters.splice(this.characters.length - n, n);
+        if (n > 0 && n <= this.characters.length) {
+            const removed = this.characters.splice(this.characters.length - n, n);
+            return removed.join("");
+        }
+        return "";  // Return an empty string if no characters are removed
     }
 
     /**
