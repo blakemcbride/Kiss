@@ -49,7 +49,7 @@
 
         let newElm;
         if (custom) {
-            newElm = Utils.replaceHTML(id, elm, '<div style="{style}"><input id="{id}" type="file"  accept="{accept}" {attr} style="display: none;"><input type="button" id="{btnid}" value="{content}"></div>', {
+            newElm = Utils.replaceHTML(id, elm, '<div style="{style}; display: inline-block;"><input id="{id}" type="file"  accept="{accept}" {attr} style="display: none;"><input type="button" id="{btnid}" value="{content}"></div>', {
                 style: nstyle,
                 attr: nattrs,
                 accept: accept,
