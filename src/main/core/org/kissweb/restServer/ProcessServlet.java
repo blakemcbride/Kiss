@@ -233,6 +233,37 @@ public class ProcessServlet implements Runnable {
         return fileName;
     }
 
+    /**
+     * When doing the file-upload method of REST service, everything gets transmitted as strings.
+     * I need to convert them back to their correct type.
+     * I am using 'S' as a standard to signify string.
+     */
+    private static Object getObject(HttpServletRequest request, String name) {
+        final String value = request.getParameter(name);
+        if (value != null) {
+            if (!value.isEmpty()) {
+                if (name.charAt(0) == '_') // no special processing - all strings
+                    return value;
+                if (value.charAt(0) == 'S')
+                    return value.substring(1);
+            }
+            if (value.equals("true"))
+                return true;
+            if (value.equals("false"))
+                return false;
+            if (value.equals("null"))
+                return null;
+            if (value.contains("."))
+                return Double.parseDouble(value);
+            long lnum = Long.parseLong(value);
+            if (lnum <= Integer.MAX_VALUE && lnum >= Integer.MIN_VALUE)
+                return Integer.parseInt(value);
+            else
+                return lnum;
+        } else
+            return null;
+    }
+
     private void run2() throws IOException {
         servletContext = request.getServletContext();
         String _className;
@@ -257,7 +288,7 @@ public class ProcessServlet implements Runnable {
             Enumeration<String> names = request.getParameterNames();
             while (names.hasMoreElements()) {
                 String name = names.nextElement();
-                String value = request.getParameter(name);
+                Object value = getObject(request, name);
                 injson.put(name, value);
             }
         } else {

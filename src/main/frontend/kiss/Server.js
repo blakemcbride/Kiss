@@ -234,15 +234,15 @@ class Server {
                     const files = flst[j];
                     if (Array.isArray(files))
                         for ( ; i < files.length ; i++)
-                            fd.append('_file-' + i, files[i]);
+                            fd.append('_file-' + i, 'S' + files[i]);
                     else
-                        fd.append('_file-' + i++, files);
+                        fd.append('_file-' + i++, 'S' + files);
                 }
             } else if (fd instanceof FileList) {
                 const files = fd;
                 fd = new FormData();
                 for (let i=0 ; i < files.length ; i++)
-                    fd.append('_file-' + i, files[i]);
+                    fd.append('_file-' + i, 'S' + files[i]);
             }
             fd.append('_class', cls);
             fd.append('_method', meth);
@@ -250,7 +250,11 @@ class Server {
             if (injson)
                 for (let key in injson) {
                     let val = injson[key];
-                    fd.append(key, typeof val === 'object' ? JSON.stringify(val) : val);
+                    if (typeof val === 'object' && val !== null)
+                        val = JSON.stringify(val);
+                    else if (typeof val === 'string')
+                        val = 'S' + val;
+                    fd.append(key, val);
                 }
             Utils.waitMessage(waitMsg ? waitMsg : "File upload in progress.");
             Server.incCount();
