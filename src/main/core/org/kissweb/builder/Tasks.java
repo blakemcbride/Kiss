@@ -30,8 +30,8 @@ import static org.kissweb.builder.BuildUtils.*;
 public class Tasks {
 
     // Things that change semi-often
-    final String groovyVer = "4.0.23";
-    final String postgresqlVer = "42.7.2";
+    final String groovyVer = "4.0.24";
+    final String postgresqlVer = "42.7.4";
     final String tomcatVer = "9.0.85";
 
 
@@ -393,7 +393,7 @@ public class Tasks {
 
     /**
      * Specify the jars used by the system but not included in the distribution.
-     * These are the jars that are to be downloaded byt the build system.
+     * These are the jars that are to be downloaded by the build system.
      *
      * @return
      */
@@ -413,7 +413,7 @@ public class Tasks {
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/" + postgresqlVer + "/" + postgresqlJar);
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
-        dep.add(LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.45.0.0/sqlite-jdbc-3.45.0.0.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.47.1.0/sqlite-jdbc-3.47.1.0.jar");
         //  https://github.com/dvare/dynamic-loader
         dep.add("dynamic-loader-3.2.jar", LIBS, "https://oss.sonatype.org/service/local/artifact/maven/redirect?r=releases&g=org.dvare&a=dynamic-loader&v=3.2&e=jar");
         // dep.add(LIBS, "https://oss.sonatype.org/service/local/repositories/releases/content/org/dvare/dynamic-loader/3.0/dynamic-loader-3.0.jar");
@@ -427,6 +427,7 @@ public class Tasks {
 
         // jUnit
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter/5.11.0/junit-jupiter-5.11.0.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-params/5.11.0/junit-jupiter-params-5.11.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-api/5.11.0/junit-jupiter-api-5.11.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.11.0/junit-jupiter-engine-5.11.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar");
