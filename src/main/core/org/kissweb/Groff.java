@@ -191,6 +191,15 @@ public class Groff {
     }
 
     /**
+     * Force a new page if there isn't at least <code>n</code> lines available on the current page.
+     *
+     * @param n number of lines needed
+     */
+    public void needLines(int n) {
+        out(".ne " + n);
+    }
+
+    /**
      * Output a column that may wrap vertically.
      *
      * @param col
