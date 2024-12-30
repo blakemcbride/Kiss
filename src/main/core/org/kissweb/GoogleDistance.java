@@ -67,7 +67,26 @@ public class GoogleDistance {
                     return -1;
             }
             JSONObject dis = elm0.getJSONObject("distance");
-            return (int) ((double) dis.getInt("value") / 1606.244);
+            return (int) ((double) dis.getInt("value") / 1609.344);
+        } catch (Throwable ex) {
+            return -1;
+        }
+    }
+
+    /**
+     * Return the estimated travel distance in meters.
+     * <br><br>
+     * Returns -1 on error.
+     */
+    public int meters() {
+        try {
+            if (elm0 == null) {
+                elm0 = getElm0();
+                if (elm0 == null)
+                    return -1;
+            }
+            JSONObject dis = elm0.getJSONObject("distance");
+            return dis.getInt("value");
         } catch (Throwable ex) {
             return -1;
         }
