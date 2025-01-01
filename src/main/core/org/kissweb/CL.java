@@ -33,10 +33,19 @@ public class CL {
     private static String padding = "  ";
 
     /**
-     * End, help, or nothing.
+     * Evaluate entered response.
+     * <p>
+     *     This utility routine evaluates a string, returning one of the following values:
+     *     <ul>
+     *         <li>{@link #NOTHING} if the string is null or empty</li>
+     *         <li>{@link #HELP} if the string is "help" (ignoring case)</li>
+     *         <li>{@link #END} if the string is "end" (ignoring case)</li>
+     *         <li>{@link #VALUE} otherwise</li>
+     *     </ul>
+     * </p>
      *
-     * @param s
-     * @return
+     * @param s the string to be evaluated
+     * @return one of {@link #NOTHING}, {@link #HELP}, {@link #END}, or {@link #VALUE}
      */
     public static int EHN(String s) {
         if (s == null)
@@ -54,9 +63,9 @@ public class CL {
     /**
      * Prompt user for a character input.
      *
-     * @param choices
+     * @param choices a string of all valid single character responses
      * @param prompt
-     * @return
+     * @return the single character that was entered
      */
     public static String inputCharacter(String choices, String prompt) {
         while (true) {
@@ -75,11 +84,16 @@ public class CL {
 
     /**
      * Prompt user for a string input.
+     * <p>
+     *     The string is valid if its length is between
+     *     the <code>min</code> and <code>max</code> arguments
+     *     (inclusive).
+     * </p>
      *
-     * @param prompt
-     * @param min
-     * @param max
-     * @return
+     * @param min the minimum number of characters
+     * @param max the maximum number of characters
+     * @param prompt the prompt to be displayed
+     * @return the entered string
      */
     public static String inputString(int min, int max, String prompt) {
         while (true) {
@@ -96,12 +110,17 @@ public class CL {
 
     /**
      * Prompt user for a numeric input.
+     * <p>
+     *     The numeric value is valid if it is between
+     *     the <code>min</code> and <code>max</code> arguments
+     *     (inclusive) and has the correct number of decimal places.
+     * </p>
      *
-     * @param prompt
-     * @param min
-     * @param max
-     * @param decimalPlaces
-     * @return
+     * @param min the minimum number
+     * @param max the maximum number
+     * @param decimalPlaces the number of decimal places
+     * @param prompt the prompt to be displayed
+     * @return the entered string
      */
     public static String inputNumber(double min, double max, int decimalPlaces, String prompt) {
         while (true) {
@@ -136,11 +155,11 @@ public class CL {
     }
 
     /**
-     * Prompt user for a selection amongst a fixed set of choices.
+     * Prompt user for a string input among a list of choices.
      *
-     * @param options series of strings options separated by commas
+     * @param options a comma-separated string of all valid responses
      * @param prompt
-     * @return the full option chosen
+     * @return the selected string
      */
     public static String inputList(String options, String prompt) {
         final String [] m = options.split(",");
@@ -176,11 +195,13 @@ public class CL {
     /**
      * Prompt user for a date input.
      * Also accepted are "today", "yesterday", and "tomorrow".
+     * The date is expected to be in the MM/DD/YYYY or other common formats.
+     * The date is valid if it is between the given min and max values.
      *
-     * @param min YYYYMMDD
-     * @param max YYYYMMDD
+     * @param min minimum acceptable date int the YYYYMMDD format
+     * @param max maximum acceptable date in the YYYYMMDD format
      * @param prompt
-     * @return EHN or date as a string in the YYYYMMDD format
+     * @return EHN string or date as a string in the YYYYMMDD format
      */
     public static String inputDate(int min, int max, String prompt) {
         while (true) {
@@ -208,9 +229,8 @@ public class CL {
     }
 
     /**
-     * Display an error message.
-     *
-     * @param msg
+     * Display an error message and abort any command string processing.
+     * @param msg the error message to display.
      */
     public static void error(String msg) {
         System.out.println("\n***  " + msg + "  ***\n");
@@ -220,6 +240,12 @@ public class CL {
         error("Error in command string; returning to manual input.");
     }
 
+    /**
+     * Private helper method to read a line of input from the user.
+     *
+     * @param prompt the prompt to display to the user
+     * @return the line of input entered by the user
+     */
     private static String input(String prompt) {
         if (commandString.isEmpty()) {
             System.out.print(prompt + padding);
