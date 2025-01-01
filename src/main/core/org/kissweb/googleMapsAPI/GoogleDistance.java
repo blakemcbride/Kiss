@@ -1,7 +1,10 @@
-package org.kissweb;
+package org.kissweb.googleMapsAPI;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.kissweb.RestClient;
+import org.kissweb.URLBuilder;
+
 import java.io.IOException;
 
 /**
@@ -15,19 +18,8 @@ import java.io.IOException;
 public class GoogleDistance {
 
     private final static String URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
-    private static String API_KEY;  // from Google
     private JSONObject result = null;
     private JSONObject elm0 = null;
-
-    /**
-     * This key must be set before you can find any distances or times.
-     * The key comes from Google.
-     *
-     * @param key
-     */
-    public static void setAPIKey(String key) {
-        API_KEY = key;
-    }
 
     /**
      * Performs the actual query through Google.
@@ -44,7 +36,7 @@ public class GoogleDistance {
         url.addParameter("origins", add1);
         url.addParameter("destinations", add2);
         url.addParameter("units", "imperial");
-        url.addParameter("key", API_KEY);
+        url.addParameter("key", GoogleAPIKey.getAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
@@ -125,7 +117,7 @@ public class GoogleDistance {
      * Example use of this class.
      */
     private void example() {
-        GoogleDistance.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        GoogleAPIKey.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         GoogleDistance gm = new GoogleDistance("995 Meridian Blvd, Franklin, TN 37067", "7270 Gary Ave, Miami Beach, FL");
         int miles = gm.miles();
         int minutes = gm.minutes();

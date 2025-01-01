@@ -1,7 +1,9 @@
-package org.kissweb;
+package org.kissweb.googleMapsAPI;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.kissweb.RestClient;
+import org.kissweb.URLBuilder;
 
 import java.io.IOException;
 
@@ -14,18 +16,7 @@ import java.io.IOException;
 public class GoogleReverseGeocode {
 
     private final static String URL = "https://maps.googleapis.com/maps/api/geocode/json";
-    private static String API_KEY;  // from Google
     private JSONObject result = null;
-
-    /**
-     * This key must be set before you can find any distances or times.
-     * The key comes from Google.
-     *
-     * @param key
-     */
-    public static void setAPIKey(String key) {
-        API_KEY = key;
-    }
 
     /**
      * Performs the actual query through Google.
@@ -35,7 +26,7 @@ public class GoogleReverseGeocode {
         final URLBuilder url = new URLBuilder(URL);
         url.addParameter("latlng", latitude + "," + longitude);
         url.addParameter("sensor", "true");
-        url.addParameter("key", API_KEY);
+        url.addParameter("key", GoogleAPIKey.getAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
@@ -78,7 +69,7 @@ public class GoogleReverseGeocode {
      * Example use of this class.
      */
     private void example() {
-        GoogleReverseGeocode.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        GoogleAPIKey.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         GoogleReverseGeocode grg = new GoogleReverseGeocode(27.09876, -83.589023);
         String cs = grg.getCityState();
     }
