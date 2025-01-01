@@ -19,6 +19,13 @@ import java.util.function.Supplier;
  */
 public class CL {
 
+    public static final int NEXT = 1;
+    public static final int PREVIOUS = -1;
+
+    public static final int END = -1000;
+    public static final int HELP = -1001;
+    public static final int NOTHING = -1002;
+
     private static BufferedReader reader;
     private static String commandString = "";
     private static String delimiter = ":";
@@ -32,14 +39,14 @@ public class CL {
      */
     public static int EHN(String s) {
         if (s == null)
-            return 3;  // nothing
+            return NOTHING;
         s = s.trim();
         if (s.isEmpty())
-            return 3;  // nothing
+            return NOTHING;
         if ("end".equals(s))
-            return 1;  // end
+            return END;
         if ("help".equals(s))
-            return 2;  // help
+            return HELP;
         return 0;  //  valid input
     }
 
@@ -262,21 +269,25 @@ public class CL {
     }
 
     public static class Questions {
-        private final ArrayList<Entry> questions = new ArrayList<>();
-        private final int start;
-
-        public Questions(int start) {
-            this.start = start;
-        }
+        private static final ArrayList<Entry> questions = new ArrayList<>();
+        private static final int start = 1000;
+        private static int current = start;
 
         /**
          * Add a question.
          *
-         * @param label
+         * The application-defined function take no arguments and returns an integer.
+         * If the return value is below <code>start</code>, it specifies a relative index of the next question.
+         * For example <code>1</code> means the question defined after the current question.
+         * And <code>-1</code> means the question defined before the current question.
+         * Alternatively, the function could return the label (the return value of the add method) of the next question.
+         *
          * @param fun
          */
-        public void add(int label, Supplier<Integer> fun) {
+        public static int add(Supplier<Integer> fun) {
+            int label = current++;
             questions.add(new Entry(label, fun));
+            return label;
         }
 
         /**
@@ -284,7 +295,7 @@ public class CL {
          *
          * @return
          */
-        public boolean run() {
+        public static boolean run() {
             int len = questions.size();
             int i = 0;
             while (i < len && i >= 0) {

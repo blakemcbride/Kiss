@@ -6,132 +6,123 @@ import static org.kissweb.CL.*;
  *
  * Class that demonstrates the use of the CL class.
  *
+ * To run:  java -cp Kiss.jar org.kissweb.CLExample
+ *
  * Author: Blake McBride
  * Date: 1/5/22
  */
 public class CLExample {
 
-    private static final int START = 1000;
-    private static final int NAME = START;
-    private static final int AGE = START + 1;
-    private static final int YEAR = START + 2;
-    private static final int SEX = START + 3;
-    private static final int COLOR = START + 4;
+    private static int NAME = CL.Questions.add(CLExample::getName);
+    private static int AGE = CL.Questions.add(CLExample::getAge);
+    private static int YEAR = CL.Questions.add(CLExample::getDate);
+    private static int SEX = CL.Questions.add(CLExample::getSex);
+    private static int COLOR = CL.Questions.add(CLExample::getColor);
 
-    private String name;
-    private int age;
-    private int year;
-    private char sex;
-    private String color;
+    private static String name;
+    private static int age;
+    private static int year;
+    private static char sex;
+    private static String color;
 
     public static void main(String [] args) {
-        new CLExample().main();
-    }
-
-    private void main() {
-        Questions q = new Questions(START);
-        q.add(NAME, this::getName);
-        q.add(AGE, this::getAge);
-        q.add(YEAR, this::getDate);
-        q.add(SEX, this::getSex);
-        q.add(COLOR, this::getColor);
-        boolean r = q.run();
+        boolean r = CL.Questions.run();
         if (r)
             println(name + " " + age + " " + year + " " + sex + " " + color);
         else
             println("aborted");
     }
 
-    private int getName() {
+    private static int getName() {
         while (true) {
             name = inputString(1, 30, "What is your name");
             switch (EHN(name)) {
-                case 1:  // end
-                    return -1;
-                case 2: // help
+                case END:
+                    return PREVIOUS;
+                case HELP:
                     println("The name help text");
                     continue;
-                case 3:  // nothing
+                case NOTHING:
                     continue;
             }
             break;
         }
-        return 1;
+        return NEXT;
     }
 
-    private int getAge() {
+    private static int getAge() {
         String res;
         while (true) {
             res = inputNumber(10, 110, 0, "What is your age");
             switch (EHN(res)) {
-                case 1:  // end
-                    return -1;
-                case 2: // help
+                case END:
+                    return PREVIOUS;
+                case HELP:
                     println("The age help text");
                     continue;
-                case 3:  // nothing
+                case NOTHING:
                     continue;
             }
             break;
         }
         age = (int) NumberUtils.parseLong(res);
-        return 1;
+        return NEXT;
     }
 
-    private int getDate() {
+    private static int getDate() {
         String res;
         while (true) {
             res = inputDate(19000101, 21991231, "What date did you graduate high school");
             switch (EHN(res)) {
-                case 1:  // end
-                    return -1;
-                case 2: // help
+                case END:
+                    return PREVIOUS;
+                case HELP:
                     println("The year help text");
                     continue;
-                case 3:  // nothing
+                case NOTHING:
                     continue;
             }
             break;
         }
         year = NumberUtils.parseInt(res);
-        return 1;
+        return NEXT;
     }
 
-    private int getSex() {
+    private static int getSex() {
         String res;
         while (true) {
             res = inputCharacter("mf", "What is your sex");
             switch (EHN(res)) {
-                case 1:  // end
-                    return -1;
-                case 2: // help
+                case END:
+                    return PREVIOUS;
+                case HELP:
                     println("The sex help text");
                     continue;
-                case 3:  // nothing
+                case NOTHING:
                     continue;
             }
             break;
         }
         sex = res.charAt(0);
-        return 1;
+        return NEXT;
     }
 
-    private int getColor() {
+    private static int getColor() {
         String res;
         while (true) {
             res = inputList("red,blue,orange,brown", "What is your favorite color");
             switch (EHN(res)) {
-                case 1:  // end
-                    return -1;
-                case 2: // help
+                case END:
+                    return PREVIOUS;
+                case HELP:
                     println("The color help text");
                     continue;
-                case 3:  // nothing
+                case NOTHING:
                     continue;
             }
             break;
         }
         color = res;
-        return 1;
+        return NEXT;
     }
 }
