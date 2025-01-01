@@ -25,6 +25,7 @@ public class CL {
     public static final int END = -1000;
     public static final int HELP = -1001;
     public static final int NOTHING = -1002;
+    public static final int VALUE = -1003;
 
     private static BufferedReader reader;
     private static String commandString = "";
@@ -43,11 +44,11 @@ public class CL {
         s = s.trim();
         if (s.isEmpty())
             return NOTHING;
-        if ("end".equals(s))
+        if ("end".equalsIgnoreCase(s))
             return END;
-        if ("help".equals(s))
+        if ("help".equalsIgnoreCase(s))
             return HELP;
-        return 0;  //  valid input
+        return VALUE;
     }
 
     /**
@@ -61,7 +62,7 @@ public class CL {
         while (true) {
             String s = input(prompt+" [" + choices + "]?");
             int i = EHN(s);
-            if (i != 0)
+            if (i != VALUE)
                 return s;
             int len = s.length();
             if (len > 1 || !choices.contains(s)) {
@@ -84,7 +85,7 @@ public class CL {
         while (true) {
             String s = input(prompt+"?");
             int i = EHN(s);
-            if (i != 0)
+            if (i != VALUE)
                 return s;
             int len = s.length();
             if (len >= min && len <= max)
@@ -106,7 +107,7 @@ public class CL {
         while (true) {
             String s = input(prompt+"?");
             int i = EHN(s);
-            if (i != 0)
+            if (i != VALUE)
                 return s;
             if (!NumberUtils.isValidNumber(s)) {
                 if (decimalPlaces == 0)
@@ -146,14 +147,14 @@ public class CL {
         while (true) {
             final String s = input(prompt+"?");
             int i = EHN(s);
-            if (i == 2) {
+            if (i == HELP) {
                 println("\nValid responses are:");
                 for (String value : m)
                     println("    " + value);
                 println("");
                 continue;
             }
-            if (i != 0)
+            if (i != VALUE)
                 return s;
 
             int nMatches = 0;
@@ -185,7 +186,7 @@ public class CL {
         while (true) {
             final String s = input(prompt+"?");
             final int i = EHN(s);
-            if (i != 0)
+            if (i != VALUE)
                 return s;
             if ("today".equals(s))
                 return DateUtils.today() + "";

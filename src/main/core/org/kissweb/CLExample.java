@@ -41,13 +41,13 @@ public class CLExample {
                     return PREVIOUS;
                 case HELP:
                     println("The name help text");
-                    continue;
+                    break;
                 case NOTHING:
-                    continue;
+                    break;
+                case VALUE:
+                    return NEXT;
             }
-            break;
         }
-        return NEXT;
     }
 
     private static int getAge() {
@@ -59,14 +59,14 @@ public class CLExample {
                     return PREVIOUS;
                 case HELP:
                     println("The age help text");
-                    continue;
+                    break;
                 case NOTHING:
-                    continue;
+                    break;
+                case VALUE:
+                    age = (int) NumberUtils.parseLong(res);
+                    return NEXT;
             }
-            break;
         }
-        age = (int) NumberUtils.parseLong(res);
-        return NEXT;
     }
 
     private static int getDate() {
@@ -78,14 +78,14 @@ public class CLExample {
                     return PREVIOUS;
                 case HELP:
                     println("The year help text");
-                    continue;
+                    break;
                 case NOTHING:
-                    continue;
+                    break;
+                case VALUE:
+                    year = NumberUtils.parseInt(res);
+                    return NEXT;
             }
-            break;
         }
-        year = NumberUtils.parseInt(res);
-        return NEXT;
     }
 
     private static int getSex() {
@@ -97,14 +97,14 @@ public class CLExample {
                     return PREVIOUS;
                 case HELP:
                     println("The sex help text");
-                    continue;
+                    break;
                 case NOTHING:
-                    continue;
+                    break;
+                case VALUE:
+                    sex = res.charAt(0);
+                    return NEXT;
             }
-            break;
         }
-        sex = res.charAt(0);
-        return NEXT;
     }
 
     private static int getColor() {
@@ -116,13 +116,13 @@ public class CLExample {
                     return PREVIOUS;
                 case HELP:
                     println("The color help text");
-                    continue;
+                    break;
                 case NOTHING:
-                    continue;
+                    break;
+                case VALUE:
+                    color = res;
+                    return NEXT;
             }
-            break;
         }
-        color = res;
-        return NEXT;
     }
 }
