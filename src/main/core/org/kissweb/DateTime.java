@@ -53,6 +53,20 @@ public class DateTime {
     }
 
     /**
+     * Create a DateTime object from a date (YYYYMMDD) and time (HHMM) in the specified time zone.
+     *
+     * @param dt YYYYMMDD
+     * @param time HHMM
+     * @param timeZoneId
+     */
+    public DateTime(int dt, int time, String timeZoneId) {
+        if (dt == 0 && time == 0)
+            zdt = null;
+        else
+            zdt = ZonedDateTime.of(DateUtils.year(dt), DateUtils.month(dt), DateUtils.day(dt), TimeUtils.hour(time), TimeUtils.minutes(time), 0, 0, ZoneId.of(timeZoneId));
+    }
+
+    /**
      * Create a DateTime from a Date object.
      *
      * @param dt
@@ -83,6 +97,36 @@ public class DateTime {
      */
     public static DateTime now() {
         return new DateTime(ZonedDateTime.now());
+    }
+
+    /**
+     * Create a new DateTime object that represents the current date/time in the specified
+     * time zone.
+     *
+     * @param timeZoneId
+     *            The time zone ID to use.  Examples include "America/New_York",
+     *            "America/Chicago", "Europe/London", etc.
+     * @return
+     */
+    public static DateTime now(String timeZoneId) {
+        return new DateTime(ZonedDateTime.now(ZoneId.of(timeZoneId)));
+    }
+
+    /**
+     * Changes the time zone associated with this DateTime object to the specified
+     * time zone and returns the modified DateTime object.
+     * <br><br>
+     * The date and time remain the same, but the time zone is changed to the new
+     * one.
+     *
+     * @param timeZoneId
+     *            The ID of the new time zone.  Examples include "America/New_York",
+     *            "America/Chicago", "Europe/London", etc.
+     * @return This DateTime object, now with the new time zone.
+     */
+    public DateTime changeTimeZone(String timeZoneId) {
+        zdt = zdt.withZoneSameInstant(ZoneId.of(timeZoneId));
+        return this;
     }
 
     /**

@@ -6,6 +6,7 @@
 package org.kissweb;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 /**
  * TimeUtils class.  Deals with time represented as an int formatted as HHMM.
@@ -19,6 +20,19 @@ public class TimeUtils {
         final Calendar cal = Calendar.getInstance();
         final int hour = cal.get(Calendar.HOUR_OF_DAY);
         final int min  = cal.get(Calendar.MINUTE);
+        return hour * 100 + min;
+    }
+
+    /**
+     * Returns the current time in a given timezone in the format HHMM since midnight.
+     * @param timeZoneId the timezone to use
+     * @return the current time in the given timezone as an int formatted as HHMM
+     */
+    public static int now(String timeZoneId) {
+        // Get a calendar instance for the specified time zone
+        final Calendar cal = Calendar.getInstance(TimeZone.getTimeZone(timeZoneId));
+        final int hour = cal.get(Calendar.HOUR_OF_DAY);
+        final int min = cal.get(Calendar.MINUTE);
         return hour * 100 + min;
     }
 

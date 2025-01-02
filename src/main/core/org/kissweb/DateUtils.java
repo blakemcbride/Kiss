@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import static java.time.LocalDate.of;
 
@@ -32,6 +33,21 @@ public class DateUtils {
         Calendar c = Calendar.getInstance();
         int y = c.get(Calendar.YEAR);
         int m = c.get(Calendar.MONTH) + 1;
+        int d = c.get(Calendar.DAY_OF_MONTH);
+        return y * 10000 + m * 100 + d;
+    }
+
+    /**
+     * Returns the current date in the specified time zone as an integer formatted as YYYYMMDD.
+     *
+     * @param timeZoneId - the time zone to use when computing the current date
+     * @return the current date as an integer formatted as YYYYMMDD in the specified time zone
+     */
+    public static int today(String timeZoneId) {
+        // Get a calendar instance for the specified time zone
+        Calendar c = Calendar.getInstance(TimeZone.getTimeZone(timeZoneId));
+        int y = c.get(Calendar.YEAR);
+        int m = c.get(Calendar.MONTH) + 1; // Months are zero-based in Calendar
         int d = c.get(Calendar.DAY_OF_MONTH);
         return y * 10000 + m * 100 + d;
     }
