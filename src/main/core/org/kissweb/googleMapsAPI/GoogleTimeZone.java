@@ -14,47 +14,107 @@ import java.io.IOException;
  */
 public class GoogleTimeZone {
 
-    private final static String URL = "https://maps.googleapis.com/maps/api/timezone/json";
-    private JSONObject result = null;
+    private static final String TIMEZONE_URL = "https://maps.googleapis.com/maps/api/timezone/json";
+    private static final String GEOCODE_URL  = "https://maps.googleapis.com/maps/api/geocode/json";
 
     /**
      * Perform a timezone query.
      * <br><br>
      * Example:
      * <pre>
-     * GoogleMapsAPI gma = GoogleMapsAPI.getTimezone(38.234567, -85.003456);
-     * String timezoneID = gma.getTimezone();
+     * String timezoneID = GoogleMapsAPI.getTimezone(38.234567, -85.003456);
      * </pre>
      * @param latitude  latitude
      * @param longitude  longitude
-     * @return GoogleMapsAPI object
+     * @return timeZoneId
      * @throws IOException
      */
-    public static GoogleTimeZone getTimezone(double latitude, double longitude) throws IOException {
+    public static String getTimezone(double latitude, double longitude) throws IOException {
         final GoogleTimeZone gma = new GoogleTimeZone();
-        final URLBuilder url = new URLBuilder(URL);
+        final URLBuilder url = new URLBuilder(TIMEZONE_URL);
         url.addParameter("location", latitude + "," + longitude);
         url.addParameter("timestamp", ""+(System.currentTimeMillis() / 1000));
         url.addParameter("key", GoogleAPIKey.getAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
-        gma.result = rc.jsonCall("GET", surl);
-        return gma;
-    }
-
-    /**
-     * Via the use of <code>getTimezone</code> return the timezone ID associated with the last query.
-     * <br><br>
-     * Returns null on error.
-     * @return timezone ID
-     */
-    public String getTimezone() {
+        JSONObject result = rc.jsonCall("GET", surl);
         try {
             return result.getString("timeZoneId");
         } catch (Throwable ex) {
             return null;
         }
+    }
+
+    /**
+     * Perform a timezone query based on an address.
+     * <br><br>
+     * Example:
+     * <pre>
+     * String timezoneID = GoogleMapsAPI.getTimezone("1600 Amphitheatre Parkway, Mountain View, CA");
+     * </pre>
+     * @param address  address
+     * @return timeZoneId
+     * @throws IOException
+     */
+    public static String getTimezone(String address) throws IOException {
+        double[] latLng = geocode(address);
+        if (latLng == null)
+            return null;
+        return getTimezone(latLng[0], latLng[1]);
+    }
+
+    /**
+     * Perform a timezone query based on an address broken into its parts.
+     * <br><br>
+     * Example:
+     * <pre>
+     * String timezoneID = GoogleMapsAPI.getTimezone("1600 Amphitheatre Parkway", null, "Mountain View", "CA", "94043");
+     * </pre>
+     * @param street1  street address 1
+     * @param street2  street address 2 (optional)
+     * @param city     city
+     * @param state    state
+     * @param zip      zip code (optional)
+     * @return timeZoneId
+     * @throws IOException
+     */
+    public static String getTimezone(String street1, String street2, String city, String state, String zip) throws IOException {
+        String address = street1;
+        if (street2 != null)
+            address += ", " + street2;
+        address += ", " + city + ", " + state;
+        if (zip != null)
+            address += " " + zip;
+        return getTimezone(address);
+    }
+
+    /**
+     * Helper method that uses the Google Geocoding API to get lat/long from an address.
+     */
+    private static double[] geocode(String address) throws IOException {
+        URLBuilder url = new URLBuilder(GEOCODE_URL);
+        url.addParameter("address", address);
+        url.addParameter("key", GoogleAPIKey.getAPIKey());
+
+        RestClient rc = new RestClient();
+        JSONObject response = rc.jsonCall("GET", url.build());
+
+        if (!response.has("results") || response.getJSONArray("results").length() == 0) {
+            // No results or invalid response
+            return null;
+        }
+
+        JSONObject location = response
+                .getJSONArray("results")
+                .getJSONObject(0)
+                .getJSONObject("geometry")
+                .getJSONObject("location");
+
+        double lat = location.getDouble("lat");
+        double lng = location.getDouble("lng");
+
+        return new double[] { lat, lng };
     }
 
 }
