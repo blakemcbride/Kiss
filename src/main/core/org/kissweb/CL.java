@@ -42,7 +42,6 @@ public class CL {
      *         <li>{@link #END} if the string is "end" (ignoring case)</li>
      *         <li>{@link #VALUE} otherwise</li>
      *     </ul>
-     * </p>
      *
      * @param s the string to be evaluated
      * @return one of {@link #NOTHING}, {@link #HELP}, {@link #END}, or {@link #VALUE}
