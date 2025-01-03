@@ -37,6 +37,8 @@ import org.json.JSONObject;
 import org.kissweb.ArrayUtils;
 
 import java.sql.*;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 
@@ -180,6 +182,24 @@ public class Record implements AutoCloseable {
      */
     public Record setDateTime(String name, java.util.Date val) {
         cols.put(name.toLowerCase(), val == null ? null : new java.sql.Timestamp(val.getTime()));
+        return this;
+    }
+
+    /**
+     * Set the date and time value of a column in the record.
+     * This is especially useful for columns with timezone information.
+     *
+     * @param name the column name
+     * @param val the value to set.
+     * @return
+     *
+     * @see Cursor#set(String, Object)
+     * @see #setDateOnly(String, java.util.Date)
+     * @see #setTime(String, long)
+     * @see #set(String, Object)
+     */
+    public Record setDateTime(String name, ZonedDateTime val) {
+        cols.put(name.toLowerCase(), val);
         return this;
     }
 
@@ -430,23 +450,51 @@ public class Record implements AutoCloseable {
 
     /**
      * Return the <code>java.util.Date</code> value of the named column.
-     * Date and time information.
+     * If the column had timezone information, it is stripped off.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
      * @param cname
      * @return
      * @throws SQLException
      *
+     * @see #getZonedDateTime(String) 
      * @see Cursor#getDateOnly(String)
      * @see #getTime(String)
      * @see #getDateTimeMS(String)
      */
     public java.util.Date getDateTime(String cname) throws SQLException {
-        Timestamp ts = (Timestamp) get(cname);
+        Object val = get(cname);
+        if (val instanceof ZonedDateTime) {
+            Instant instant = ((ZonedDateTime) val).toInstant();
+            java.util.Date date = java.util.Date.from(instant);
+            return date;
+        }
+        Timestamp ts = (Timestamp) val;
         if (ts == null)
             return null;
         return new java.util.Date(ts.getTime());
     }
+
+    /**
+     * Return the <code>ZonedDateTime</code> value of the named column.
+     * Time zone information is preserved.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname
+     * @return
+     * @throws SQLException
+     *
+     * @see #getDateTime(String)
+     * @see #getDateTimeMS(String)
+     * @see #getTime(String)
+     */
+    public ZonedDateTime getZonedDateTime(String cname) throws SQLException {
+        ZonedDateTime ts = (ZonedDateTime) get(cname);
+        if (ts == null)
+            return null;
+        return ts;
+    }
+
 
     /**
      * Return the date/time value as the number of milliseconds since 1970 UTC.

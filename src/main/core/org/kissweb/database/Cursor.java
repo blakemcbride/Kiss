@@ -40,6 +40,7 @@ import org.kissweb.ArrayUtils;
 
 import java.io.*;
 import java.sql.*;
+import java.time.ZonedDateTime;
 import java.util.*;
 
 
@@ -203,7 +204,11 @@ public class Cursor implements AutoCloseable {
                 LinkedHashMap<String,Object> cols = new LinkedHashMap<>();
                 int ncols = mdata.getColumnCount();
                 for (int i=1 ; i <= ncols ; i++) {
-                    Object val = rset.getObject(i);
+                    Object val;
+                    if (mdata.getColumnType(i) == Types.TIMESTAMP_WITH_TIMEZONE)
+                        val = rset.getObject(i, ZonedDateTime.class);
+                    else
+                        val = rset.getObject(i);
                     String name = mdata.getColumnName(i).toLowerCase();
                     cols.put(name, val);
                     ocols.put(name, val);
@@ -229,8 +234,12 @@ public class Cursor implements AutoCloseable {
                     }
                     oos.writeInt(RECORD_BEGINNING);
                     for (int i = 0; i < ncols; i++) {
-                        Object val = rset.getObject(i+1);
                         ColumnInfo ci = columnInfo[i];
+                        Object val;
+                        if (ci.type == Types.TIMESTAMP_WITH_TIMEZONE)
+                            val = rset.getObject(i+1, ZonedDateTime.class);
+                        else
+                            val = rset.getObject(i+1);
                         oos.writeInt(ci.type);
                         if (val == null) {
                             oos.writeInt(NULL_FIELD);
