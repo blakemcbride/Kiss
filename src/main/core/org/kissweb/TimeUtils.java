@@ -98,7 +98,7 @@ public class TimeUtils {
      * "14:30" -&gt; 1430<br>
      *
      * @param time
-     * @return
+     * @return time as HHMM or -1 on error
      */
     public static int parse(String time) {
         if (time == null ||  time.isEmpty())

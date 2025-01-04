@@ -188,6 +188,9 @@ public class Record implements AutoCloseable {
     /**
      * Set the date and time value of a column in the record.
      * This is especially useful for columns with timezone information.
+     * <br><br>
+     * If the underlying database does not actually store a timezone (like PostgreSQL) then this method will
+     * fail.
      *
      * @param name the column name
      * @param val the value to set.
@@ -479,6 +482,9 @@ public class Record implements AutoCloseable {
      * Return the <code>ZonedDateTime</code> value of the named column.
      * Time zone information is preserved.
      * A <code>null</code> is returned on <code>null</code> valued columns.
+     * <br><br>
+     * If the underlying database does not actually store a timezone (like PostgreSQL) then this method will
+     * fail.
      *
      * @param cname
      * @return
@@ -494,7 +500,6 @@ public class Record implements AutoCloseable {
             return null;
         return ts;
     }
-
 
     /**
      * Return the date/time value as the number of milliseconds since 1970 UTC.
