@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
@@ -216,7 +217,7 @@ public class DateTime {
      * @return
      */
     public String format() {
-        return DateTime.format(getDate());
+        return DateTime.format(zdt);
     }
 
     /**
@@ -244,10 +245,65 @@ public class DateTime {
      * @return
      */
     public static String format(Date date) {
+        return format(date, "MM/dd/yyyy h:mm a", null);
+    }
+
+    /**
+     * Format a date passed into a string mm/dd/yyyy hh:mm AM/PM.
+     *
+     * @param date The date to format.
+     * @return The formatted string.
+     */
+    public static String format(ZonedDateTime date) {
+        return format(date, "MM/dd/yyyy h:mm a", null);
+    }
+
+    /**
+     * Format a date passed into a string according to a format specification.
+     *
+     * @param date The date to format.
+     * @param fmt The format string.
+     * @return The formatted string.
+     */
+    public static String format(ZonedDateTime date, String fmt) {
+        return format(date, fmt, null);
+    }
+
+    /**
+     * Format a date passed into a string according to a format specification.
+     *
+     * @param date The date to format.
+     * @param fmt The format string.
+     * @param timeZoneId The ID of the time zone to use when formatting the date.
+     * If not null or empty, the time zone is set to that zone before formatting.
+     * @return The formatted string.
+     */
+    public static String format(Date date, String fmt, String timeZoneId) {
         if (date == null)
             return "";
-        SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mm a");
+        final SimpleDateFormat df = new SimpleDateFormat(fmt);
+        if (timeZoneId != null && !timeZoneId.trim().isEmpty())
+            df.setTimeZone(TimeZone.getTimeZone(timeZoneId));
         return df.format(date);
+    }
+
+    /**
+     * Format a ZonedDateTime into a string using the given format string.
+     * If <code>timeZoneId</code> is not null or empty, the time zone is set to that
+     * zone before formatting.
+     *
+     * @param dateTime The ZonedDateTime to format
+     * @param fmt The format string
+     * @param timeZoneId The time zone ID to use, if not null or empty
+     * @return The formatted string
+     */
+    public static String format(ZonedDateTime dateTime, String fmt, String timeZoneId) {
+        if (dateTime == null)
+            return "";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(fmt);
+        if (timeZoneId != null && !timeZoneId.trim().isEmpty())
+            dateTime = dateTime.withZoneSameInstant(ZoneId.of(timeZoneId));
+        return dateTime.format(formatter);
     }
 
     /**
@@ -260,10 +316,7 @@ public class DateTime {
      * @see java.text.SimpleDateFormat for information about fmt
      */
     public static String format(Date date, String fmt) {
-        if (date == null)
-            return "";
-        SimpleDateFormat df = new SimpleDateFormat(fmt);
-        return df.format(date);
+        return format(date, fmt, null);
     }
 
     /**
@@ -273,10 +326,7 @@ public class DateTime {
      * @return
      */
     public static String formatTZ(Date date) {
-        if (date == null)
-            return "";
-        SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mm a zzz");
-        return df.format(date);
+        return format(date, "MM/dd/yyyy h:mm a zzz", null);
     }
 
     /**
@@ -291,10 +341,7 @@ public class DateTime {
      *
      */
     public static String currentDateTimeFormatted(String dateFormat, String timeZone) {
-        Date date = new Date();
-        SimpleDateFormat df = new SimpleDateFormat(dateFormat);
-        df.setTimeZone(TimeZone.getTimeZone(timeZone));
-        return df.format(date);
+        return format(new Date(), dateFormat, timeZone);
     }
 
     /**
@@ -306,18 +353,25 @@ public class DateTime {
      * @see java.text.SimpleDateFormat for information about dateFormat
      */
     public static String currentDateTimeFormatted(String dateFormat) {
-        Date date = new Date();
-        SimpleDateFormat df = new SimpleDateFormat(dateFormat);
-        return df.format(date);
+        return format(new Date(), dateFormat, null);
     }
 
     /**
-     * Returns number of milliseconds since 1970.
+     * Returns number of milliseconds since 1970 UTC.
      *
      * @return
      */
     public long getMilliseconds() {
         return zdt.toInstant().toEpochMilli();
+    }
+
+    /**
+     * Returns number of seconds since 1970 UTC.
+     *
+     * @return
+     */
+    public long getSeconds() {
+        return zdt.toInstant().toEpochMilli() / 1000;
     }
     
     /**
