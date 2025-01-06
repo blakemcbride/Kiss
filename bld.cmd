@@ -24,7 +24,7 @@ if not exist "%CLASS_FILE_2%" (
 
 :: If either .java file is newer, compile the .java files to .class files
 if "%buildRequired%"=="1" (
-    echo Building the builder
+    echo building the builder
     if not exist work\exploded\WEB-INF\classes (
         mkdir work\exploded\WEB-INF\classes
     )
