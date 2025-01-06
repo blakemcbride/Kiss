@@ -77,6 +77,7 @@ public class BuildUtils {
                     println("version    (builtin)");
                     break;
                 case "version":
+                case "--version":
                     println("bld version " + Version);
                     break;
                 case "help":
