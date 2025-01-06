@@ -63,30 +63,29 @@ public class BuildUtils {
         Tasks ins = new Tasks();
         for (String arg : args)
             switch (arg) {
-                case "listTasks":
+                case "list-tasks":
                     Method [] meths = Tasks.class.getDeclaredMethods();
 
-                    verbose = true;
                     for (Method meth : meths) {
                         Type[] p = meth.getGenericParameterTypes();
                         int mods = meth.getModifiers();
                         if (!Modifier.isPrivate(mods)  &&  p.length == 0)
                             println(meth.getName());
                     }
-                    println("listTasks (builtin)");
-                    println("help      (builtin)");
-                    println("version   (builtin)");
+                    println("list-tasks (builtin)");
+                    println("help       (builtin)");
+                    println("version    (builtin)");
                     break;
                 case "version":
-                    verbose = true;
                     println("bld version " + Version);
                     break;
                 case "help":
                 case "-h":
                 case "--help":
-                    verbose = true;
-                    println("Use: bld listTasks          to get a list of tasks");
-                    println("Use: bld [task]             to execute the task");
+                    println("Use: bld  list-tasks         to get a list of tasks");
+                    println("Use: bld  [-v]  <task>       to execute the task");
+                    println("Use: bld  help               this message");
+                    println("Use: bld  version            display version of bld");
                     break;
                 case "-v":
                 case "--verbose":
