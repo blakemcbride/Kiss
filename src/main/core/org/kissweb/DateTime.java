@@ -281,6 +281,8 @@ public class DateTime {
     public static String format(Date date, String fmt, String timeZoneId) {
         if (date == null)
             return "";
+        if (fmt == null)
+            fmt = "MM/dd/yyyy h:mm a";
         final SimpleDateFormat df = new SimpleDateFormat(fmt);
         if (timeZoneId != null && !timeZoneId.trim().isEmpty())
             df.setTimeZone(TimeZone.getTimeZone(timeZoneId));
@@ -300,6 +302,8 @@ public class DateTime {
     public static String format(ZonedDateTime dateTime, String fmt, String timeZoneId) {
         if (dateTime == null)
             return "";
+        if (fmt == null)
+            fmt = "MM/dd/yyyy h:mm a";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(fmt);
         if (timeZoneId != null && !timeZoneId.trim().isEmpty())
             dateTime = dateTime.withZoneSameInstant(ZoneId.of(timeZoneId));
