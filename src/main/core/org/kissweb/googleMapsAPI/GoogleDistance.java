@@ -36,7 +36,7 @@ public class GoogleDistance {
         url.addParameter("origins", add1);
         url.addParameter("destinations", add2);
         url.addParameter("units", "imperial");
-        url.addParameter("key", GoogleAPIKey.getAPIKey());
+        url.addParameter("key", GoogleAPIKey.getValidAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();

@@ -30,11 +30,10 @@ public class GoogleTimeZone {
      * @throws IOException
      */
     public static String getTimezone(double latitude, double longitude) throws IOException {
-        final GoogleTimeZone gma = new GoogleTimeZone();
         final URLBuilder url = new URLBuilder(TIMEZONE_URL);
         url.addParameter("location", latitude + "," + longitude);
         url.addParameter("timestamp", ""+(System.currentTimeMillis() / 1000));
-        url.addParameter("key", GoogleAPIKey.getAPIKey());
+        url.addParameter("key", GoogleAPIKey.getValidAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
@@ -95,7 +94,7 @@ public class GoogleTimeZone {
     private static double[] geocode(String address) throws IOException {
         URLBuilder url = new URLBuilder(GEOCODE_URL);
         url.addParameter("address", address);
-        url.addParameter("key", GoogleAPIKey.getAPIKey());
+        url.addParameter("key", GoogleAPIKey.getValidAPIKey());
 
         RestClient rc = new RestClient();
         JSONObject response = rc.jsonCall("GET", url.build());

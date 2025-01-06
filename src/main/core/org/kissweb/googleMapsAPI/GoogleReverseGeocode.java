@@ -26,7 +26,7 @@ public class GoogleReverseGeocode {
         final URLBuilder url = new URLBuilder(URL);
         url.addParameter("latlng", latitude + "," + longitude);
         url.addParameter("sensor", "true");
-        url.addParameter("key", GoogleAPIKey.getAPIKey());
+        url.addParameter("key", GoogleAPIKey.getValidAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
