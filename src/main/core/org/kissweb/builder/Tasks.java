@@ -27,29 +27,54 @@ package org.kissweb.builder;
 
 import static org.kissweb.builder.BuildUtils.*;
 
+/**
+ * This class contains the tasks that are executed by the build system.
+ * <br><br>
+ * The build system finds the names of the tasks through reflection.
+ * It also does camelCase conversion.  So a task named abcDef may be evoked
+ * as abc-def.
+ * <br><br>
+ * Each task must be declared as a public static method with no parameters.
+ */
 public class Tasks {
 
     // Things that change semi-often
-    final String groovyVer = "4.0.24";
-    final String postgresqlVer = "42.7.4";
-    final String tomcatVer = "9.0.85";
+    final static String groovyVer = "4.0.24";
+    final static String postgresqlVer = "42.7.4";
+    final static String tomcatVer = "9.0.85";
 
 
-    final String LIBS = "libs";
-    final ForeignDependencies foreignLibs = buildForeignDependencies();
-    final LocalDependencies localLibs = buildLocalDependencies();
-    final String tomcatTarFile = "apache-tomcat-" + tomcatVer + ".tar.gz";
-    final String BUILDDIR = "work";
-    final String explodedDir = BUILDDIR + "/" + "exploded";
-    final String postgresqlJar = "postgresql-" + postgresqlVer + ".jar";
-    final String groovyJar = "groovy-" + groovyVer + ".jar";
-    final String debugPort = "9000";
+    final static String LIBS = "libs";
+    final static ForeignDependencies foreignLibs = buildForeignDependencies();
+    final static LocalDependencies localLibs = buildLocalDependencies();
+    final static String tomcatTarFile = "apache-tomcat-" + tomcatVer + ".tar.gz";
+    final static String BUILDDIR = "work";
+    final static String explodedDir = BUILDDIR + "/" + "exploded";
+    final static String postgresqlJar = "postgresql-" + postgresqlVer + ".jar";
+    final static String groovyJar = "groovy-" + groovyVer + ".jar";
+    final static String debugPort = "9000";
 
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
-        BuildUtils.build(args, Tasks.class, Tasks::listTasks);
+    /**
+     * Main entry point for the build system.  It tells the build system what arguments were passed in
+     * and what class contains all the tasks.
+     *
+     * @param args the arguments to the program
+     * @throws Exception if exception is thrown
+     * @throws InstantiationException if the class cannot be instantiated
+     */
+    public static void main(String[] args) throws Exception {
+        BuildUtils.build(args, Tasks.class);
     }
 
-    static void listTasks() {
+    /**
+     * Display a list of valid tasks.  It is called by the build system
+     * when the user selects the 'list-tasks' task.
+     * <br><br>
+     * The build system expects this method to be named listTasks.
+     *
+     * @see BuildUtils#build
+     */
+    public static void listTasks() {
         println("");
         println("develop                  build and run the entire system");
         println("develop-backend          build and run backend only");
@@ -83,7 +108,7 @@ public class Tasks {
      * 4. deploy the war file to the local tomcat<br>
      * 5. build JavaDocs
      */
-    void build() {
+    public static void build() {
         war();
         setupTomcat();
         deployWar();
@@ -95,7 +120,7 @@ public class Tasks {
      * You can put your custom code in the org.kissweb.Main class and build the runnable jar.
      * For a possible better solution, see the KissGP target.
      */
-    void kisscmd() {
+    public static void kisscmd() {
         final String targetPath = BUILDDIR + "/cmdline";
         final String manifest = targetPath + "/META-INF/MANIFEST.MF";
         final String jarFile = BUILDDIR + "/kisscmd.jar";
@@ -111,7 +136,7 @@ public class Tasks {
     /**
      * Download needed foreign libraries
      */
-    void libs() {
+    public static void libs() {
         downloadAll(foreignLibs);
     }
 
@@ -119,7 +144,7 @@ public class Tasks {
      * Create Kiss.jar.  This is a JAR file that can be used in other apps as a
      * utility library.
      */
-    private void jar(boolean unitTest) {
+    private static void jar(boolean unitTest) {
         libs();
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
         if (unitTest)
@@ -133,7 +158,7 @@ public class Tasks {
      * Build Kiss.jar<br><br>
      * This is a JAR file that can be used in other apps as a utility library.
      */
-    void jar() {
+    public static void jar() {
         jar(false);
     }
 
@@ -147,7 +172,7 @@ public class Tasks {
      * <br><br>
      * Other databases can be used also.  See the manual.
      */
-    void KissGP() {
+    public static void KissGP() {
         final String name = "KissGP";
         final String workDir = BUILDDIR + "/" + name;
         final String jarName = workDir + ".jar";
@@ -166,7 +191,7 @@ public class Tasks {
     /**
      * Build the system for unit testing. (KissUnitTest.jar)
      */
-    void unitTests() {
+    public static void unitTests() {
         final String name = "KissUnitTest";
         final String workDir = BUILDDIR + "/" + name;
         final String jarName = workDir + ".jar";
@@ -194,7 +219,7 @@ public class Tasks {
     /**
      * Build the system into explodedDir
      */
-    void buildSystem() {
+    public static void buildSystem() {
         libs();
         copyTree("src/main/frontend", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
@@ -212,7 +237,7 @@ public class Tasks {
     /**
      * Build the system and create the deployable WAR file.
      */
-    void war() {
+    public static void war() {
         buildSystem();
         copyForce("src/main/core/WEB-INF/web-secure.xml", explodedDir + "/WEB-INF/web.xml");
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
@@ -220,14 +245,14 @@ public class Tasks {
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
     }
 
-    private void deployWar() {
+    private static void deployWar() {
         copy(BUILDDIR + "/Kiss.war", "tomcat/webapps/ROOT.war");
     }
 
     /**
      * Unpack and install tomcat
      */
-    void setupTomcat() {
+    public static void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
             download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
             gunzip(tomcatTarFile, "tomcat", 1);
@@ -291,7 +316,7 @@ public class Tasks {
      * 5. build JavaDocs<br>
      * 6. run the local tomcat<br>
      */
-    void develop() {
+    public static void develop() {
         Process proc;
         buildSystem();
         setupTomcat();
@@ -325,7 +350,7 @@ public class Tasks {
      * 5. build JavaDocs<br>
      * 6. run the local tomcat<br>
      */
-    void developBackend() {
+    public static void developBackend() {
         Process proc;
         buildSystem();
         setupTomcat();
@@ -350,7 +375,7 @@ public class Tasks {
     /**
      * build the javdoc files
      */
-    void javadoc() {
+    public static void javadoc() {
         libs();
         buildJavadoc("src/main/core", "libs", BUILDDIR + "/javadoc");
     }
@@ -362,7 +387,7 @@ public class Tasks {
      * -- the downloaded jar files, tomcat<br>
      * -- the IDE files
      */
-    void clean() {
+    public static void clean() {
         rmTree(BUILDDIR);
         rmTree("build.work");  // used in the past
         rm("manual/Kiss.log");
@@ -377,7 +402,7 @@ public class Tasks {
      * Do not remove:<br>
      * -- the IDE files
      */
-    void realclean() {
+    public static void realclean() {
         clean();
         rmRegex("src/main/frontend/lib", "jquery.*");
         delete(foreignLibs);
@@ -400,7 +425,7 @@ public class Tasks {
      * -- the downloaded jar files, tomcat<br>
      * -- the IDE files
      */
-    void ideclean() {
+    public static void ideclean() {
         realclean();
 
         rmTree(".project");
@@ -426,7 +451,7 @@ public class Tasks {
      *
      * @return
      */
-    private ForeignDependencies buildForeignDependencies() {
+    private static ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/" + groovyVer + "/" + groovyJar);
@@ -471,7 +496,7 @@ public class Tasks {
      *
      * @return
      */
-    private LocalDependencies buildLocalDependencies() {
+    private static LocalDependencies buildLocalDependencies() {
         final LocalDependencies dep = new LocalDependencies();
         dep.add("libs/abcl.jar");
         dep.add("libs/json.jar");

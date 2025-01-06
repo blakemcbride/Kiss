@@ -50,7 +50,7 @@ public class BuildUtils {
     public static boolean isHaiku;
     public static boolean isFreeBSD;
 
-    public static void build(String [] args, Class<?> tasksClass, Runnable listTasks) throws InstantiationException, IllegalAccessException {
+    public static void build(String [] args, Class<?> tasksClass) throws Exception {
         String osName = System.getProperty("os.name");
         isLinux = osName.startsWith("Linux");
         isMacOS = osName.startsWith("Mac OS X");
@@ -60,7 +60,6 @@ public class BuildUtils {
         isFreeBSD = osName.startsWith("FreeBSD");
         if (args.length < 1)
             args = new String[]{ "help" };
-        Object ins = tasksClass.newInstance();
         for (String arg : args)
             switch (arg) {
                 case "list-tasks":
@@ -74,7 +73,12 @@ public class BuildUtils {
                             println(meth.getName());
                     }
                      */
-                    listTasks.run();
+                    try {
+                        Method listTasksMethod = tasksClass.getMethod("listTasks");
+                        listTasksMethod.invoke(null);
+                    } catch (Exception e) {
+                        // ignore
+                    }
                     println("list-tasks (builtin)");
                     println("help       (builtin)");
                     println("version    (builtin)");
@@ -101,18 +105,14 @@ public class BuildUtils {
                     try {
                         arg = convertToCamelCase(arg);
 
-                        meth = tasksClass.getDeclaredMethod(arg);
-                        int mods = meth.getModifiers();
-                        Type[] p = meth.getGenericParameterTypes();
-                        if (Modifier.isPrivate(mods)  ||  p.length != 0)
-                            throw new NoSuchMethodException("");
+                        meth = tasksClass.getMethod(arg);
                     } catch (NoSuchMethodException e) {
                         printError("can't find task " + arg);
                         return;
                     }
 
                     try {
-                        meth.invoke(ins);
+                        meth.invoke(null);
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         if (e.getCause() == null)
                             printError(e.getMessage());
