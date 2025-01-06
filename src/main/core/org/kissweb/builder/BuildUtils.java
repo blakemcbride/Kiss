@@ -101,6 +101,7 @@ public class BuildUtils {
                     printlnIfVerbose("running on " + osName);
                     Method meth;
                     try {
+                        arg = convertToCamelCase(arg);
                         meth = Tasks.class.getDeclaredMethod(arg);
                         int mods = meth.getModifiers();
                         Type[] p = meth.getGenericParameterTypes();
@@ -1214,5 +1215,35 @@ public class BuildUtils {
             if (!dontNeedSleep)
                 Thread.sleep(sleepLength);
         }
+    }
+
+    /**
+     * Convert a string from dashed notation to camel case notation.
+     *
+     * @param input
+     *            The string in dashed notation.
+     * @return The string in camel case notation.
+     */
+    public static String convertToCamelCase(String input) {
+        if (input == null || input.isEmpty())
+            return input;
+
+        StringBuilder result = new StringBuilder();
+        boolean capitalizeNext = false;
+
+        for (char c : input.toCharArray()) {
+            if (c == '-') {
+                capitalizeNext = true;
+            } else {
+                if (capitalizeNext) {
+                    result.append(Character.toUpperCase(c));
+                    capitalizeNext = false;
+                } else {
+                    result.append(c);
+                }
+            }
+        }
+
+        return result.toString();
     }
 }

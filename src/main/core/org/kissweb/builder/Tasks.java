@@ -48,7 +48,7 @@ public class Tasks {
     static void help() {
         println("");
         println("develop                  build and run the entire system");
-        println("developBackend           build and run backend only");
+        println("develop-backend          build and run backend only");
         println("build                    build the entire system but don't run it");
         println("war                      create deployable war file");
 
@@ -65,8 +65,8 @@ public class Tasks {
         println("");
 
         println("libs                     download foreign jar files");
-        println("setupTomcat              set up tomcat");
-        println("UnitTest                 run unit tests");
+        println("setup-tomcat             set up tomcat");
+        println("unit-tests               build the system for unit testing (KissUnitTest.jar)");
         println("");
     }
 
@@ -162,7 +162,7 @@ public class Tasks {
     /**
      * Build the system for unit testing. (KissUnitTest.jar)
      */
-    void UnitTest() {
+    void unitTests() {
         final String name = "KissUnitTest";
         final String workDir = BUILDDIR + "/" + name;
         final String jarName = workDir + ".jar";
