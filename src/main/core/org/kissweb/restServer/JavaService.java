@@ -22,7 +22,7 @@ import java.util.*;
  */
 class JavaService {
 
-    private static final transient Logger logger = Logger.getLogger(JavaService.class);
+    private static final Logger logger = Logger.getLogger(JavaService.class);
 
     private static final HashMap<String, JavaClassInfo> javaClassCache = new HashMap<>();
 

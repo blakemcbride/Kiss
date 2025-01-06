@@ -32,7 +32,7 @@ if "%buildRequired%"=="1" (
 )
 
 :: Run the BuildUtils class
-java -cp "work\exploded\WEB-INF\classes;libs\commons-compress-1.20.jar" org.kissweb.builder.BuildUtils %*
+java -cp "work\exploded\WEB-INF\classes;libs\commons-compress-1.20.jar" org.kissweb.builder.Tasks %*
 
 endlocal
 

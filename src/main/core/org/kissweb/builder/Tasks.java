@@ -45,7 +45,11 @@ public class Tasks {
     final String groovyJar = "groovy-" + groovyVer + ".jar";
     final String debugPort = "9000";
 
-    static void help() {
+    public static void main(String[] args) throws InstantiationException, IllegalAccessException {
+        BuildUtils.build(args, Tasks.class, Tasks::listTasks);
+    }
+
+    static void listTasks() {
         println("");
         println("develop                  build and run the entire system");
         println("develop-backend          build and run backend only");

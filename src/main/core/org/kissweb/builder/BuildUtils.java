@@ -38,21 +38,19 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import static org.kissweb.builder.Tasks.help;
-
 public class BuildUtils {
 
     private static final String Version = "1.0";
     private static String CACHE_DIR;
     private static boolean verbose = false;
-    static boolean isWindows;
-    static boolean isLinux;
-    static boolean isMacOS;
-    static boolean isSunOS;  // includes OpenIndiana (only tested on OpenIndiana)
-    static boolean isHaiku;
-    static boolean isFreeBSD;
+    public static boolean isWindows;
+    public static boolean isLinux;
+    public static boolean isMacOS;
+    public static boolean isSunOS;  // includes OpenIndiana (only tested on OpenIndiana)
+    public static boolean isHaiku;
+    public static boolean isFreeBSD;
 
-    public static void main(String [] args) {
+    public static void build(String [] args, Class<?> tasksClass, Runnable listTasks) throws InstantiationException, IllegalAccessException {
         String osName = System.getProperty("os.name");
         isLinux = osName.startsWith("Linux");
         isMacOS = osName.startsWith("Mac OS X");
@@ -62,7 +60,7 @@ public class BuildUtils {
         isFreeBSD = osName.startsWith("FreeBSD");
         if (args.length < 1)
             args = new String[]{ "help" };
-        Tasks ins = new Tasks();
+        Object ins = tasksClass.newInstance();
         for (String arg : args)
             switch (arg) {
                 case "list-tasks":
@@ -76,7 +74,7 @@ public class BuildUtils {
                             println(meth.getName());
                     }
                      */
-                    help();
+                    listTasks.run();
                     println("list-tasks (builtin)");
                     println("help       (builtin)");
                     println("version    (builtin)");
@@ -102,7 +100,8 @@ public class BuildUtils {
                     Method meth;
                     try {
                         arg = convertToCamelCase(arg);
-                        meth = Tasks.class.getDeclaredMethod(arg);
+
+                        meth = tasksClass.getDeclaredMethod(arg);
                         int mods = meth.getModifiers();
                         Type[] p = meth.getGenericParameterTypes();
                         if (Modifier.isPrivate(mods)  ||  p.length != 0)
@@ -143,7 +142,7 @@ public class BuildUtils {
         return null;  // not found
     }
 
-    static String getJavaPathOnWindows() {
+    public static String getJavaPathOnWindows() {
         String path = System.getenv("JAVA_HOME");
         if (path != null)
             return path;
@@ -158,7 +157,7 @@ public class BuildUtils {
         return null;
     }
 
-    static String getTomcatPath() {
+    public static String getTomcatPath() {
         return (new File("tomcat")).getAbsolutePath();
     }
 
