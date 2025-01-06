@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+import static org.kissweb.builder.Tasks.help;
+
 public class BuildUtils {
 
     private static final String Version = "1.0";
@@ -64,6 +66,7 @@ public class BuildUtils {
         for (String arg : args)
             switch (arg) {
                 case "list-tasks":
+                    /*
                     Method [] meths = Tasks.class.getDeclaredMethods();
 
                     for (Method meth : meths) {
@@ -72,6 +75,8 @@ public class BuildUtils {
                         if (!Modifier.isPrivate(mods)  &&  p.length == 0)
                             println(meth.getName());
                     }
+                     */
+                    help();
                     println("list-tasks (builtin)");
                     println("help       (builtin)");
                     println("version    (builtin)");

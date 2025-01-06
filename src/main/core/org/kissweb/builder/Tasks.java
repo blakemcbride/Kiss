@@ -45,6 +45,31 @@ public class Tasks {
     final String groovyJar = "groovy-" + groovyVer + ".jar";
     final String debugPort = "9000";
 
+    static void help() {
+        println("");
+        println("develop                  build and run the entire system");
+        println("developBackend           build and run backend only");
+        println("build                    build the entire system but don't run it");
+        println("war                      create deployable war file");
+
+        println("");
+        println("clean                    remove all compiled files");
+        println("realclean                + remove downloaded jar files and tomcat");
+        println("ideclean                 + IDE files");
+        println("");
+
+        println("jar                      build Kiss.jar");
+        println("javadoc                  build javadoc files");
+        println("kisscmd                  build a command-line executable jar file");
+        println("KissGP                   + include Groovy, and the PostgreSQL driver");
+        println("");
+
+        println("libs                     download foreign jar files");
+        println("setupTomcat              set up tomcat");
+        println("UnitTest                 run unit tests");
+        println("");
+    }
+
     /**
      * Build the whole system
      * <br><br>
@@ -54,7 +79,7 @@ public class Tasks {
      * 4. deploy the war file to the local tomcat<br>
      * 5. build JavaDocs
      */
-    void all() {
+    void build() {
         war();
         setupTomcat();
         deployWar();
@@ -165,7 +190,7 @@ public class Tasks {
     /**
      * Build the system into explodedDir
      */
-    void build() {
+    void buildSystem() {
         libs();
         copyTree("src/main/frontend", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
@@ -184,7 +209,7 @@ public class Tasks {
      * Build the system and create the deployable WAR file.
      */
     void war() {
-        build();
+        buildSystem();
         copyForce("src/main/core/WEB-INF/web-secure.xml", explodedDir + "/WEB-INF/web.xml");
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
         copyForce("src/main/core/WEB-INF/web-unsafe.xml", explodedDir + "/WEB-INF/web.xml");
@@ -264,7 +289,7 @@ public class Tasks {
      */
     void develop() {
         Process proc;
-        build();
+        buildSystem();
         setupTomcat();
         copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
         if (isWindows)
@@ -298,7 +323,7 @@ public class Tasks {
      */
     void developBackend() {
         Process proc;
-        build();
+        buildSystem();
         setupTomcat();
         copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
         if (isWindows)
