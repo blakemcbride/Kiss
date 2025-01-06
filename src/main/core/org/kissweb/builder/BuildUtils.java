@@ -93,7 +93,7 @@ public class BuildUtils {
                     verbose = true;
                     break;
                 default:
-                    println("running on " + osName);
+                    printlnIfVerbose("running on " + osName);
                     Method meth;
                     try {
                         meth = Tasks.class.getDeclaredMethod(arg);
@@ -118,7 +118,7 @@ public class BuildUtils {
                     }
                     break;
             }
-        println("done");
+        printlnIfVerbose("done");
     }
 
     private static File findJavaPathWindows(File f) {
@@ -166,7 +166,7 @@ public class BuildUtils {
         if (!exists(target)) {
             String cache = cacheDir() + fname;
             if (exists(cache)) {
-                println("copying " + target + " from cache");
+                printlnIfVerbose("copying " + target + " from cache");
                 try {
                     Files.copy(Paths.get(cache), Paths.get(target), StandardCopyOption.REPLACE_EXISTING);
                 } catch (IOException e) {
@@ -175,7 +175,7 @@ public class BuildUtils {
                 return;
             }
             try {
-                println("downloading " + target + " from " + sourcePath);
+                printlnIfVerbose("downloading " + target + " from " + sourcePath);
                 try (BufferedInputStream in = new BufferedInputStream(new URL(sourcePath).openStream())) {
                     Path cpath = Paths.get(cache);
                     Files.copy(in, cpath, StandardCopyOption.REPLACE_EXISTING);
@@ -201,9 +201,13 @@ public class BuildUtils {
             rm(dep.targetPath + File.separator + dep.filename);
     }
 
-    public static void println(String str) {
+    public static void printlnIfVerbose(String str) {
         if (verbose)
             System.out.println(str == null ? "" : str);
+    }
+
+    public static void println(String str) {
+        System.out.println(str == null ? "" : str);
     }
 
     public static void printError(String str) {
@@ -215,7 +219,7 @@ public class BuildUtils {
             return;
         if (d.exists()  &&  !d.isDirectory())
             throw new RuntimeException("mkdir: error creating directory " + d.getAbsolutePath() + "; file with that name exists");
-        println("creating directory " + d.getAbsolutePath());
+        printlnIfVerbose("creating directory " + d.getAbsolutePath());
         if (!d.mkdirs())
             throw new RuntimeException("mkdir: error creating directory " + d.getAbsolutePath());
     }
@@ -233,7 +237,7 @@ public class BuildUtils {
             File parent = new File(to).getParentFile();
             if (parent != null)
                 parent.mkdirs();
-            println("moving " + from + " to " + to);
+            printlnIfVerbose("moving " + from + " to " + to);
             Files.move(Paths.get(from), Paths.get(to), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             throw new RuntimeException("Error moving " + from + " to " + to);
@@ -268,7 +272,7 @@ public class BuildUtils {
             dfile = new File(dfile, sfile.getName());
         if (!dfile.exists() || sfile.lastModified() > dfile.lastModified())
             try {
-                println("copying " + source + " -> " + dest);
+                printlnIfVerbose("copying " + source + " -> " + dest);
                 mkdir(dfile.getParentFile());
                 Files.copy(sfile.toPath(), dfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
             } catch (Exception e) {
@@ -292,7 +296,7 @@ public class BuildUtils {
         if (dfile.exists()  &&  dfile.isDirectory())
             dfile = new File(dfile, sfile.getName());
         try {
-            println("copying " + source + " -> " + dest);
+            printlnIfVerbose("copying " + source + " -> " + dest);
             mkdir(dfile.getParentFile());
             Files.copy(sfile.toPath(), dfile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
@@ -335,7 +339,7 @@ public class BuildUtils {
                     File destFile = new File(df, file.getName());
                     if (force || !destFile.exists() || file.lastModified() > destFile.lastModified())
                         try {
-                            println("copying " + file.getAbsolutePath() + " -> " + destFile.getAbsolutePath());
+                            printlnIfVerbose("copying " + file.getAbsolutePath() + " -> " + destFile.getAbsolutePath());
                             Files.copy(file.toPath(), destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                         } catch (IOException e) {
                             throw new RuntimeException("error copying " + file.getAbsolutePath() + " to " + destFile.getAbsolutePath());
@@ -359,7 +363,7 @@ public class BuildUtils {
                 Pattern pat = Pattern.compile(fnameRegex);
                 for (File file : files)
                     if (pat.matcher(file.getName()).matches()) {
-                        println("removing " + file.getAbsolutePath());
+                        printlnIfVerbose("removing " + file.getAbsolutePath());
                         if (!file.delete())
                             throw new RuntimeException("unable to delete " + file.getAbsolutePath());
                     }
@@ -464,7 +468,7 @@ public class BuildUtils {
                             && (force || !d.exists()  ||  d.lastModified() < f.lastModified())) {
                         try {
                             if (exPat == null || !exPat.matcher(f.getName()).matches()) {
-                                println("copying " + f.toString() + " -> " + d.toString());
+                                printlnIfVerbose("copying " + f.toString() + " -> " + d.toString());
                                 (new File(d.getParent())).mkdirs();
                                 Files.copy(f.toPath(), d.toPath(), StandardCopyOption.REPLACE_EXISTING);
                             }
@@ -488,7 +492,7 @@ public class BuildUtils {
         File f = new File(file);
         if (!f.exists())
             return;
-        println("remove " + file);
+        printlnIfVerbose("remove " + file);
         if (!f.delete())
             throw new RuntimeException("rm: error deleting " + file);
     }
@@ -504,7 +508,7 @@ public class BuildUtils {
         File f = new File(file);
         if (!f.exists())
             return;
-        println("remove " + file);
+        printlnIfVerbose("remove " + file);
         if (!f.delete())
             throw new RuntimeException("rmdir: error deleting " + file);
     }
@@ -528,7 +532,7 @@ public class BuildUtils {
         if (files != null)
             for (File file : files)
                 deleteFileOrDirectoryTree(file);
-        println("remove " + fyle.getAbsolutePath());
+        printlnIfVerbose("remove " + fyle.getAbsolutePath());
         if (!fyle.delete())
             throw new RuntimeException("error deleting " + fyle.getAbsolutePath());
     }
@@ -542,7 +546,7 @@ public class BuildUtils {
     public static void writeToFile(String fname, String txt) {
         File f = new File(fname);
         if (!f.exists()) {
-            println("creating file " + fname);
+            printlnIfVerbose("creating file " + fname);
             mkdir(f.getParentFile());
             try {
                 Files.write(Paths.get(fname), txt.getBytes(), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
@@ -575,7 +579,7 @@ public class BuildUtils {
         File f = new File(file);
         if (!f.exists())
             throw new RuntimeException("can't make " + file + " executable; it doesn't exist");
-        println("making " + file + " executable");
+        printlnIfVerbose("making " + file + " executable");
         if (!f.setExecutable(true))
             throw new RuntimeException("can't make " + file + " executable");
     }
@@ -635,7 +639,7 @@ public class BuildUtils {
         File f;
         try {
             f = File.createTempFile("SourceFiles-", ".inp");
-            println("writing source files names to " + f.getAbsolutePath());
+            printlnIfVerbose("writing source files names to " + f.getAbsolutePath());
             try (BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
                 for (File f2 : lst) {
                     bw.write(f2.getPath());
@@ -680,7 +684,7 @@ public class BuildUtils {
         File f;
         try {
             f = File.createTempFile("Dependencies-", ".inp");
-            println("writing dependencies to " + f.getAbsolutePath());
+            printlnIfVerbose("writing dependencies to " + f.getAbsolutePath());
             try (final BufferedWriter bw = new BufferedWriter(new FileWriter(f))) {
                 bw.write("-cp ");
                 if (ldep != null)
