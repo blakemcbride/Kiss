@@ -27,7 +27,12 @@ class Server {
     }
 
     /**
-     *  Removes the user association between the back-end and front-end.
+     * Reloads the top/main page from the server and clears all context.
+     * <br><br>
+     * This is a deep reload, meaning it will bypass any cached page content.
+     * It is a full page reload, so it will also destroy any context information.
+     * It also effectively works as a logout.
+     *
      */
     static logout() {
         Utils.suspendDepth = 0;
