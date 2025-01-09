@@ -377,7 +377,7 @@ public class Tasks {
      */
     public static void javadoc() {
         libs();
-        buildJavadoc("src/main/core", "libs", BUILDDIR + "/javadoc");
+        buildJavadoc("src/main/core", "libs", BUILDDIR + "/javadoc", "JavaDocOverview.html");
     }
 
     /**
