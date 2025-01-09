@@ -11,10 +11,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Author: Blake McBride
- * Date: 4/10/20
- * <br><br>
- * This class is only used for command-line execution of Kiss.  So, if
+ * This class is only used for command-line execution of Kiss.
+ * So, if
  * Kiss is run from the command-line, this is the class that gets executed.
  * This class is not used in any of the web environments (including develop).
  * <br><br>

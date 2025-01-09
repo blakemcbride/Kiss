@@ -8,9 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Author: Blake McBride<br>
- * Date: 11/8/19
- * <br><br>
  * This class provides a variety of features on top of the functionality provided by org.json.
  * In addition to being able to parse a string into a json object, the json object can also be obtained
  * from a file.  Once the json object is obtained, embedded elements may be indexed similar to XPath thus

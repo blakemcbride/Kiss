@@ -1,6 +1,8 @@
 package org.kissweb;
 
 /**
+ * Utility methods to help deal with arrays.
+ *
  * Author: Blake McBride
  * Date: 11/5/23
  */

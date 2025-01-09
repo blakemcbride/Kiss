@@ -13,9 +13,6 @@ import java.util.regex.Pattern;
 import static org.kissweb.StringUtils.drop;
 
 /**
- * Author: Blake McBride<br>
- * Date: 11/9/19
- * <br><br>
  * This class replaces occurrences of ${NAME} with values obtained from a supplied map.
  */
 public class JsonTemplate {

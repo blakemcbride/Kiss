@@ -13,9 +13,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Author: Blake McBride <br>
- * Date: 11/1/23
- * <br><br>
  * This class provides the base functionality for creating non-Kiss REST servers.
  * See <code>org.kissweb.RestServer</code> for an example.
  */

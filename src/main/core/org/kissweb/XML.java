@@ -19,8 +19,7 @@ import java.io.StringWriter;
 import javax.xml.transform.TransformerException;
 
 /**
- * Author: Blake McBride
- * Date: 9/18/22
+ * Utility methods for dealing with XML.
  */
 public class XML {
 

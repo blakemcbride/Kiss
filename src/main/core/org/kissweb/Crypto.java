@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Random;
 
 /**
+ * This class provides the ability to encrypt/decrypt strings and byte arrays with very strong (AES) encryption.
+ *
  * Author: Blake McBride<br>
  * Date: 2/1/22
  * <br><br>

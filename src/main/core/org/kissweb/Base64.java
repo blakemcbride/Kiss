@@ -9,6 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.ByteBuffer;
 
 /**
+ * Utility methods to deal with Base64.
+ *
  * Author: Blake McBride
  * Date: 11/2/23
  */

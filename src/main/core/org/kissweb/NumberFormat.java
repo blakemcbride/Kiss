@@ -33,7 +33,7 @@
 package org.kissweb;
 
 /**
- * @author Blake McBride
+ * Advanced method for formatting numbers.
  *
  */
 public class NumberFormat {
