@@ -21,7 +21,7 @@ man/index.html :  $(TEXFILES)
 
 jsdoc/index.html: ../src/main/frontend/kiss/*.js ../src/main/frontend/kiss/component/components.js
 	rm -rf jsdoc
-	jsdoc -t /usr/local/lib/node_modules/docdash -c conf.json -d jsdoc $^
+	jsdoc -t /usr/local/lib/node_modules/docdash -c conf.json --readme JsDocHead.md -d jsdoc $^
 
 Kiss.pdf : $(TEXFILES)
 	pdftex Kiss.tex
