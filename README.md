@@ -2,16 +2,14 @@
 
 # KISS Web Application Full Stack Framework
 
-
 The KISS Framework is a Java-based, full-stack application development framework for
 developing web-based business applications. KISS can also be used to
 build command-line utilities, and, in conjunction with
 [Electron](https://electronjs.org), desktop applications that are
 portable to Windows, Mac, and Linux.
 
-
 Please see the main web site for a more detailed description at
-[https://kissweb.org](https://kissweb.org)
+[kissweb.org](https://kissweb.org)
 
 This project is in full release status and not a beta.  It is being used in production.  
 
@@ -32,10 +30,6 @@ A 6-part training series on KISS is at:
 * [Part 4 - Front-end](https://youtu.be/zMjrp-ft_Tc)
 * [Part 5 - Data Persistence](https://youtu.be/pS7DezhYpGo)
 * [Part 6 - Deployment](https://youtu.be/fGEzv7uuJCk)
-
-An article about KISS is available at [The KISS Web Development Framework](https://www.linuxjournal.com/content/kiss-web-development-framework)
-
-Another article about KISS is available at [Developing REST Microservices Simply](https://medium.com/codex/developing-rest-microservices-simply-ed934f846ff3)
 
 ## Quick Start
 
@@ -67,11 +61,11 @@ additional compiles or deploys.
 The system comes with (essentially) three manuals as follows:
 
 
-User Manual (HTML):        [manual/man/index.html](https://blakemcbride.github.io/Kiss/manual/man)
+[User Manual (HTML)](https://blakemcbride.github.io/Kiss/manual/man)
 
-User Manual (PDF):  [Kiss.pdf](https://blakemcbride.us/software/kiss/Kiss.pdf)
+[User Manual (PDF)](https://blakemcbride.us/software/kiss/Kiss.pdf)
 
-Front-end API:      [manual/jsdoc/index.html](https://blakemcbride.github.io/Kiss/manual/jsdoc)
+[Front-end API](https://blakemcbride.github.io/Kiss/manual/jsdoc)
 
 The back-end JavaDoc must be built by you.  This can be done by typing:
 
