@@ -387,7 +387,29 @@ public class DateTime {
     public DateTime addDays(int days) {
         zdt = zdt.plusDays(days);
         return this;
-    } 
+    }
+
+    /**
+     * Add hours to a DateTime object.
+     *
+     * @param hours the number of hours to add - can be negative
+     * @return this object
+     */
+    public DateTime addHours(int hours) {
+        zdt = zdt.plusHours(hours);
+        return this;
+    }
+
+    /**
+     * Add minutes to a DateTime object.
+     *
+     * @param minutes the number of minutes to add - can be negative
+     * @return this object
+     */
+    public DateTime addMinutes(int minutes) {
+        zdt = zdt.plusMinutes(minutes);
+        return this;
+    }
 
     public static void main(String [] args) {
         DateTime dt = new DateTime(20201224, 1130);
