@@ -194,7 +194,7 @@ public class DateTime {
     }
 
     /**
-     * Return an integer representation of the date portion.
+     * Return an integer representation of the time portion.
      *
      * @return HHMM
      */
