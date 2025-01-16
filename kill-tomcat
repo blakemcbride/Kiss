@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# kill the tomcat server if it is running
+
+if [ 0 = `ps lax |grep -v grep |grep catalina.startup.Bootstrap |wc -l` ]; then
+	echo tomcat is not running
+else
+	ps lax |grep -v grep |grep catalina.startup.Bootstrap |awk '{print $3}' |xargs kill -9
+	echo tomcat killed
+fi
+
+
