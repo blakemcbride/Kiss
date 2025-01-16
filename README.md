@@ -6,7 +6,7 @@ The KISS Framework is a Java-based, full-stack application development framework
 developing web-based business applications. KISS can also be used to
 build command-line utilities, and, in conjunction with
 [Electron](https://electronjs.org), desktop applications that are
-portable to Windows, Mac, and Linux.
+portable to Windows, macOS, and Linux.
 
 Please see the main web site for a more detailed description at
 [kissweb.org](https://kissweb.org)
@@ -39,7 +39,7 @@ configure, and run Kiss, tomcat, and the required JAR files:
 
 Be sure the JAVA_HOME and JRE_HOME environment variables are set correctly!
 
-### Linux, Mac, BSD, etc.
+### Linux, macOS, BSD, etc.
 
     git clone https://github.com/blakemcbride/Kiss.git
     cd Kiss
@@ -69,7 +69,7 @@ The system comes with (essentially) three manuals as follows:
 
 The back-end JavaDoc must be built by you.  This can be done by typing:
 
-    ./bld javadoc               [Linux, Mac, BSD, etc.]
+    ./bld javadoc               [Linux, macOS, BSD, etc.]
         -or-
     bld javadoc                 [Windows]
 
