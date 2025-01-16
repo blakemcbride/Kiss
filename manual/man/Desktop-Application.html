@@ -19,6 +19,7 @@
 <style type="text/css">
 <!--
 a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
+div.example {margin-left: 3.2em}
 span:hover a.copiable-link {visibility: visible}
 -->
 </style>
@@ -30,7 +31,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Desktop-Application">
 <div class="nav-panel">
 <p>
-Previous: <a href="Split-System.html" accesskey="p" rel="prev">Split System</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (January 7, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Previous: <a href="Split-System.html" accesskey="p" rel="prev">Split System</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (January 16, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -97,29 +98,98 @@ h2, h3, h4 {  /* subsection titles */
 
 <h2 class="chapter" id="Desktop-Applications"><span>9 Desktop Applications<a class="copiable-link" href="#Desktop-Applications"> &para;</a></span></h2>
 
-<p>Although there are no specific instructions, portable desktop
+<p>Portable desktop
 applications can be built utilizing <em class="emph">Kiss</em> in conjunction with
 Electron (<a class="uref" href="https://electronjs.org">https://electronjs.org</a>).  These
-applications would be portable to Linux, Mac, Windows, and other
+applications would be portable to Linux, macOS, Windows, BSD, and other
 platforms with a single codebase.
 </p>
-<p><em class="emph">Kiss</em> would provide the back-end portion of the application as a
-local server and could be written in Java, Groovy, or Lisp.  
+<p>Both the front-end and back-end are built exactly as a browser-based application would be built.
+The only difference is how the system is run.
 </p>
-<p>The front-end portion of <em class="emph">Kiss</em> would be used in conjunction with
-<em class="emph">Electron</em> in <em class="emph">HTML</em>, <em class="emph">CSS</em>, and <em class="emph">JavaScript</em>.
+<ul class="mini-toc">
+<li><a href="#Setup" accesskey="1">Setup</a></li>
+<li><a href="#Building-_0026-Running" accesskey="2">Building &amp; Running</a></li>
+<li><a href="#Debug-Mode" accesskey="3">Debug Mode</a></li>
+</ul>
+<div class="section-level-extent" id="Setup">
+<h3 class="section"><span>9.1 Setup<a class="copiable-link" href="#Setup"> &para;</a></span></h3>
+
+<p>Before a desktop application can be built, the <em class="emph">electron</em> system must be installed.
+This, in turn, is dependent on <em class="emph">nodejs</em> and <em class="emph">npm</em>.
 </p>
-<p>The two halves would communicate locally and operate as a standard
-desktop application.
+<ul class="mini-toc">
+<li><a href="#Installing-Nodejs-_0026-Npm" accesskey="1">Installing Nodejs &amp; Npm</a></li>
+<li><a href="#Installing-Electron" accesskey="2">Installing Electron</a></li>
+</ul>
+<div class="subsection-level-extent" id="Installing-Nodejs-_0026-Npm">
+<h4 class="subsection"><span>9.1.1 Installing Nodejs &amp; Npm<a class="copiable-link" href="#Installing-Nodejs-_0026-Npm"> &para;</a></span></h4>
+
+<p>Full instructions to install <em class="emph">nodejs</em> and <em class="emph">npm</em> can be found at
+<a class="uref" href="https://nodejs.org">https://nodejs.org</a>
 </p>
-<p>If there is interest, please contact this author for assistance.
+<p>Linux systems that use the <em class="emph">apt</em> package manager can install  <em class="emph">nodejs</em> and <em class="emph">npm</em> with the following command: 
+</p>
+<div class="example">
+<pre class="example-preformatted">sudo apt install nodejs npm
+</pre></div>
+
+<p>Linux systems that use the <em class="emph">dnf</em> package manager can install  <em class="emph">nodejs</em> and <em class="emph">npm</em> with the following command: 
+</p>
+<div class="example">
+<pre class="example-preformatted">sudo dnf install nodejs
+</pre></div>
+
+<p>Other systems can install  <em class="emph">nodejs</em> and <em class="emph">npm</em> as instructed at
+<a class="uref" href="https://nodejs.org">https://nodejs.org</a>
+</p>
+</div>
+<div class="subsection-level-extent" id="Installing-Electron">
+<h4 class="subsection"><span>9.1.2 Installing Electron<a class="copiable-link" href="#Installing-Electron"> &para;</a></span></h4>
+
+<p>You can install <em class="emph">electron</em> on any OS from within the <em class="emph">KISS</em> application with the following command:
+</p>
+<div class="example">
+<pre class="example-preformatted">npm install electron --save-dev
+</pre></div>
+
+</div>
+</div>
+<div class="section-level-extent" id="Building-_0026-Running">
+<h3 class="section"><span>9.2 Building &amp; Running<a class="copiable-link" href="#Building-_0026-Running"> &para;</a></span></h3>
+
+<p>The <em class="emph">KISS</em> application is built no differently than if it were a browser application.  You can use the following command:
+</p>
+<p>You can build the system with the following command:
+</p>
+<div class="example">
+<pre class="example-preformatted">./bld build              [all OS except Windows]
+    or
+bld build                [Windows]
+</pre></div>
+
+<p>The system can be run as an application by executing the following command:
+</p>
+<div class="example">
+<pre class="example-preformatted">npm start
+</pre></div>
+
+</div>
+<div class="section-level-extent" id="Debug-Mode">
+<h3 class="section"><span>9.3 Debug Mode<a class="copiable-link" href="#Debug-Mode"> &para;</a></span></h3>
+
+<p>If you are developing and need the front-end developer tools, simply edit the file named <em class="emph">start-electron.js</em>
+Change the value of the variable named <em class="emph">devMode</em> from <em class="emph">false</em> to <em class="emph">true</em>.  Then just start normally.
+</p>
+<p>When you do this, you will get the beloved developer tools window along with the application.
 </p>
 
+</div>
 </div>
 <hr>
 <div class="nav-panel">
 <p>
-Previous: <a href="Split-System.html">Split System</a>, Up: <a href="index.html">Kiss Developer Manual (January 7, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Previous: <a href="Split-System.html">Split System</a>, Up: <a href="index.html">Kiss Developer Manual (January 16, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

@@ -35,19 +35,69 @@
 
 @chapter Desktop Applications
 
-Although there are no specific instructions, portable desktop
+Portable desktop
 applications can be built utilizing @emph{Kiss} in conjunction with
 Electron (@uref{https://electronjs.org}).  These
-applications would be portable to Linux, Mac, Windows, and other
+applications would be portable to Linux, macOS, Windows, BSD, and other
 platforms with a single codebase.
 
-@emph{Kiss} would provide the back-end portion of the application as a
-local server and could be written in Java, Groovy, or Lisp.  
+Both the front-end and back-end are built exactly as a browser-based application would be built.
+The only difference is how the system is run.
 
-The front-end portion of @emph{Kiss} would be used in conjunction with
-@emph{Electron} in @emph{HTML}, @emph{CSS}, and @emph{JavaScript}.
+@section Setup
 
-The two halves would communicate locally and operate as a standard
-desktop application.
+Before a desktop application can be built, the @emph{electron} system must be installed.
+This, in turn, is dependent on @emph{nodejs} and @emph{npm}.
 
-If there is interest, please contact this author for assistance.
+@subsection Installing Nodejs & Npm
+
+Full instructions to install @emph{nodejs} and @emph{npm} can be found at
+@uref{https://nodejs.org}
+
+Linux systems that use the @emph{apt} package manager can install  @emph{nodejs} and @emph{npm} with the following command: 
+
+@example
+sudo apt install nodejs npm
+@end example
+
+Linux systems that use the @emph{dnf} package manager can install  @emph{nodejs} and @emph{npm} with the following command: 
+
+@example
+sudo dnf install nodejs
+@end example
+
+Other systems can install  @emph{nodejs} and @emph{npm} as instructed at
+@uref{https://nodejs.org}
+
+@subsection Installing Electron
+
+You can install @emph{electron} on any OS from within the @emph{KISS} application with the following command:
+
+@example
+npm install electron --save-dev
+@end example
+
+@section Building & Running
+
+The @emph{KISS} application is built no differently than if it were a browser application.  You can use the following command:
+
+You can build the system with the following command:
+
+@example
+./bld build              [all OS except Windows]
+    or
+bld build                [Windows]
+@end example
+
+The system can be run as an application by executing the following command:
+
+@example
+npm start
+@end example
+
+@section Debug Mode
+
+If you are developing and need the front-end developer tools, simply edit the file named @emph{start-electron.js}
+Change the value of the variable named @emph{devMode} from @emph{false} to @emph{true}.  Then just start normally.
+
+When you do this, you will get the beloved developer tools window along with the application.
