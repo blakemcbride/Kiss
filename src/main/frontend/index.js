@@ -7,6 +7,9 @@ Utils.afterComponentsLoaded(function () {
     if (SystemInfo.backendUrl) {
         // explicit backend URL
         Server.setURL(SystemInfo.backendUrl);
+    } else if (window.location.protocol === "file:") {
+        //  electron desktop frontend
+        Server.setURL('http://localhost:8080');
     } else if (window.location.protocol === "http:" && window.location.port >= 8000) {
         //  Development environment
         Server.setURL('http://' + window.location.hostname + ':8080');

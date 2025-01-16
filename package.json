@@ -1,0 +1,8 @@
+{
+    "_comment": "This is used by electron to run a KISS application as a desktop application.",
+    "main": "start-electron.js",
+    "scripts": {
+        "start": "electron ."
+    }
+}
+
