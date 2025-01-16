@@ -120,7 +120,7 @@ h2, h3, h4 {  /* subsection titles */
 
 <p>The <em class="emph">Kiss</em> system comes with its own build system, so it doesn&rsquo;t
 use build systems such as <em class="emph">ant</em>, <em class="emph">maven</em>, or <em class="emph">gradle</em>.
-It works under Linux, Mac, Windows, etc. This included build system
+It works under Linux, macOS, Windows, etc. This included build system
 will make things such as downloading remote libraries, installing and
 configuring a web server, building <em class="emph">Kiss</em>, and running
 <em class="emph">Kiss</em> for development purposes easy, intelligent, and automatic.
@@ -141,7 +141,7 @@ any need for re-compiles or re-builds.
 <p>The program that runs <em class="emph">BLD</em> is &ldquo;<em class="emph">bld</em>&rdquo; under Unix-like
 systems and &ldquo;<em class="emph">bld.cmd</em>&rdquo; under Windows.  In this manual,
 &ldquo;<em class="emph">bld</em>&rdquo; will be shown as &ldquo;<em class="emph">./bld</em>&rdquo;.  The &ldquo;./&rdquo; is
-required under Linux and Mac but not under Windows.  When running on
+required under Linux and macOS but not under Windows.  When running on
 Windows, use &ldquo;bld&rdquo; rather than &ldquo;./bld&rdquo; and the same for all the
 other commands shown.
 </p>
@@ -172,7 +172,7 @@ It is an integration with <em class="emph">ant</em> for IDE integration.
 <p>After doing a <code class="code">git clone</code>, all that is needed is the following:
 </p>
 <div class="example">
-<pre class="example-preformatted">    ./bld  develop                      [Linux, Mac, BSD, etc.]
+<pre class="example-preformatted">    ./bld  develop                      [Linux, macOS, BSD, etc.]
          -or-
     bld  develop                        [Windows]
 </pre></div>
@@ -292,11 +292,11 @@ PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 <p>On Linux, most of these packages may be obtained utilizing the normal
 package manager that comes with your distribution.
 </p>
-<p>The following sub-sections detail how to get those pre-requisites for Windows and Mac.
+<p>The following sub-sections detail how to get those pre-requisites for Windows and macOS.
 </p>
 <ul class="mini-toc">
 <li><a href="#Windows" accesskey="1">Windows</a></li>
-<li><a href="#Mac" accesskey="2">Mac</a></li>
+<li><a href="#macOS" accesskey="2">macOS</a></li>
 </ul>
 <div class="subsection-level-extent" id="Windows">
 <h4 class="subsection"><span>2.5.1 Windows<a class="copiable-link" href="#Windows"> &para;</a></span></h4>
@@ -339,10 +339,10 @@ package manager:
 </p>
 
 </div>
-<div class="subsection-level-extent" id="Mac">
-<h4 class="subsection"><span>2.5.2 Mac<a class="copiable-link" href="#Mac"> &para;</a></span></h4>
+<div class="subsection-level-extent" id="macOS">
+<h4 class="subsection"><span>2.5.2 macOS<a class="copiable-link" href="#macOS"> &para;</a></span></h4>
 
-<p>Mac requirements may be obtained via the <em class="emph">brew</em> package manager available at <br><a class="uref" href="https://brew.sh">https://brew.sh</a>
+<p>macOS requirements may be obtained via the <em class="emph">brew</em> package manager available at <br><a class="uref" href="https://brew.sh">https://brew.sh</a>
 Once <code class="code">brew</code> is installed,you can install the remainder of the requirements with the following commands:
 </p>
 <ul class="itemize mark-bullet">
@@ -506,7 +506,7 @@ system should be used for the initial step which downloads the external
 dependencies (jar files).
 </p>
 <p>The build system included with <em class="emph">Kiss</em> (called <em class="emph">bld</em>) has
-been tested on Linux, Mac, and Windows.  The system also includes an
+been tested on Linux, macOS, and Windows.  The system also includes an
 <em class="emph">Ant</em> build file (named <em class="emph">build.xml</em>) that is only used for
 IDE integration with the included <em class="emph">bld</em> system.
 </p>
@@ -529,7 +529,7 @@ automatically by <em class="emph">bld</em>.
 <p>You can see what operations it can perform by typing:
 </p>
 <div class="example">
-<pre class="example-preformatted">    ./bld list-tasks           [Linux, Mac, BSD, etc.]
+<pre class="example-preformatted">    ./bld list-tasks           [Linux, macOS, BSD, etc.]
         -or-
     bld list-tasks             [Windows]
 </pre></div>

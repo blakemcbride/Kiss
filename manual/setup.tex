@@ -39,7 +39,7 @@
 
 The @emph{Kiss} system comes with its own build system, so it doesn't
 use build systems such as @emph{ant}, @emph{maven}, or @emph{gradle}.
-It works under Linux, Mac, Windows, etc. This included build system
+It works under Linux, macOS, Windows, etc. This included build system
 will make things such as downloading remote libraries, installing and
 configuring a web server, building @emph{Kiss}, and running
 @emph{Kiss} for development purposes easy, intelligent, and automatic.
@@ -60,7 +60,7 @@ any need for re-compiles or re-builds.
 The program that runs @emph{BLD} is ``@emph{bld}'' under Unix-like
 systems and ``@emph{bld.cmd}'' under Windows.  In this manual,
 ``@emph{bld}'' will be shown as ``@emph{./bld}''.  The ``./'' is
-required under Linux and Mac but not under Windows.  When running on
+required under Linux and macOS but not under Windows.  When running on
 Windows, use ``bld'' rather than ``./bld'' and the same for all the
 other commands shown.
 
@@ -92,7 +92,7 @@ you have an Internet connection
 After doing a @code{git clone}, all that is needed is the following:
 
 @example
-    ./bld  develop                      [Linux, Mac, BSD, etc.]
+    ./bld  develop                      [Linux, macOS, BSD, etc.]
          -or-
     bld  develop                        [Windows]
 @end example
@@ -218,7 +218,7 @@ Groff --- @emph{Kiss} utilizes the open-source @emph{groff} typesetting system i
 On Linux, most of these packages may be obtained utilizing the normal
 package manager that comes with your distribution.
 
-The following sub-sections detail how to get those pre-requisites for Windows and Mac.
+The following sub-sections detail how to get those pre-requisites for Windows and macOS.
 
 @subsection Windows
 
@@ -270,9 +270,9 @@ choco install git
 After installing these programs, you must exit and re-start any terminals you have running.
 
 
-@subsection Mac
+@subsection macOS
 
-Mac requirements may be obtained via the @emph{brew} package manager available at @*@uref{https://brew.sh}
+macOS requirements may be obtained via the @emph{brew} package manager available at @*@uref{https://brew.sh}
 Once @code{brew} is installed,you can install the remainder of the requirements with the following commands:
 
 @itemize @bullet
@@ -437,7 +437,7 @@ system should be used for the initial step which downloads the external
 dependencies (jar files).
 
 The build system included with @emph{Kiss} (called @emph{bld}) has
-been tested on Linux, Mac, and Windows.  The system also includes an
+been tested on Linux, macOS, and Windows.  The system also includes an
 @emph{Ant} build file (named @emph{build.xml}) that is only used for
 IDE integration with the included @emph{bld} system.
 
@@ -460,7 +460,7 @@ automatically by @emph{bld}.
 You can see what operations it can perform by typing:
 
 @example
-    ./bld list-tasks           [Linux, Mac, BSD, etc.]
+    ./bld list-tasks           [Linux, macOS, BSD, etc.]
         -or-
     bld list-tasks             [Windows]
 @end example
