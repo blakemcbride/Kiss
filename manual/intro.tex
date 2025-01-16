@@ -118,6 +118,42 @@ system.  The second advantage is that by pushing as much processing to
 the front-end as possible (rendering the display on the front-end),
 the system can better scale.
 
+@section Writing Sophisticated Applications
+
+@emph{Kiss} comes as a very basic running application. Since the
+front-end and back-end can be changed while the system is running, it
+is intended that a developer would start with this basic application
+and build it into the desired application.
+
+The basic application the system comes with does not represent the
+kind of application that can be built with @emph{Kiss}. It is
+intentionally kept basic so that it is easy to see how it works.  In a
+real application, all of the possibilities made available with
+@emph{HTML} and @emph{CSS} are at your disposal without limitation. In
+other words, the only limitations to the sophistication of the
+application are your imagination and the amount of work you're willing
+to put into it.
+
+@emph{Kiss} comes with a complete front-end framework that includes
+most of the things needed for a modern business web application. In
+fact, it is currently being used as the sole framework in some very
+large production systems.  It works well. However, there is nothing in
+@emph{Kiss} that prevents you from using other front-end frameworks such as
+@emph{React}, @emph{Angular}, @emph{Vue}, etc. In fact, except for
+dealing with web services and authentication, you could exclusively
+use your preferred front-end framework.
+
+The @emph{Kiss} back-end is a complete back-end. It is currently
+being used by large web applications involving many hundreds of
+screens and SQL tables and thousands of users. The @emph{Kiss}
+back-end contains many built-in features to efficiently handle many,
+many simultaneous users. Like the front-end, the @emph{Kiss} back-end
+is designed to be as simple as possible to build production-quality
+web applications. For example, web services can be built in a single
+source file with just a handful of lines of code. Everything in
+@emph{Kiss} is designed to be simple to understand, simple to use, and
+yet be fully compiled and run at top speed.
+
 @section @emph{Kiss} Highlights
 
 Some highlights of the @emph{Kiss} system include:
@@ -156,6 +192,7 @@ provide support for heavy loads and high throughput.
 A powerful and convenient class library for dealing with SQL persistence that
 supports PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 @end enumerate
+
 
 @subsection Front-end Highlights
 

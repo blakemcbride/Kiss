@@ -182,17 +182,56 @@ the front-end as possible (rendering the display on the front-end),
 the system can better scale.
 </p>
 <ul class="mini-toc">
-<li><a href="#Kiss-Highlights" accesskey="1"><em class="emph">Kiss</em> Highlights</a></li>
-<li><a href="#Supported-Environments" accesskey="2">Supported Environments</a></li>
-<li><a href="#HTML-component-usage" accesskey="3">HTML component usage</a></li>
-<li><a href="#System-Maturity-And-Stability" accesskey="4">System Maturity And Stability</a></li>
-<li><a href="#Getting-All-Source-Code" accesskey="5">Getting All Source Code</a></li>
-<li><a href="#Support_002c-Contact_002c-And-Links" accesskey="6">Support, Contact, And Links</a></li>
-<li><a href="#License" accesskey="7">License</a></li>
-<li><a href="#Acknowledgments" accesskey="8">Acknowledgments</a></li>
+<li><a href="#Writing-Sophisticated-Applications" accesskey="1">Writing Sophisticated Applications</a></li>
+<li><a href="#Kiss-Highlights" accesskey="2"><em class="emph">Kiss</em> Highlights</a></li>
+<li><a href="#Supported-Environments" accesskey="3">Supported Environments</a></li>
+<li><a href="#HTML-component-usage" accesskey="4">HTML component usage</a></li>
+<li><a href="#System-Maturity-And-Stability" accesskey="5">System Maturity And Stability</a></li>
+<li><a href="#Getting-All-Source-Code" accesskey="6">Getting All Source Code</a></li>
+<li><a href="#Support_002c-Contact_002c-And-Links" accesskey="7">Support, Contact, And Links</a></li>
+<li><a href="#License" accesskey="8">License</a></li>
+<li><a href="#Acknowledgments" accesskey="9">Acknowledgments</a></li>
 </ul>
+<div class="section-level-extent" id="Writing-Sophisticated-Applications">
+<h3 class="section"><span>1.1 Writing Sophisticated Applications<a class="copiable-link" href="#Writing-Sophisticated-Applications"> &para;</a></span></h3>
+
+<p><em class="emph">Kiss</em> comes as a very basic running application. Since the
+front-end and back-end can be changed while the system is running, it
+is intended that a developer would start with this basic application
+and build it into the desired application.
+</p>
+<p>The basic application the system comes with does not represent the
+kind of application that can be built with <em class="emph">Kiss</em>. It is
+intentionally kept basic so that it is easy to see how it works.  In a
+real application, all of the possibilities made available with
+<em class="emph">HTML</em> and <em class="emph">CSS</em> are at your disposal without limitation. In
+other words, the only limitations to the sophistication of the
+application are your imagination and the amount of work you&rsquo;re willing
+to put into it.
+</p>
+<p><em class="emph">Kiss</em> comes with a complete front-end framework that includes
+most of the things needed for a modern business web application. In
+fact, it is currently being used as the sole framework in some very
+large production systems.  It works well. However, there is nothing in
+<em class="emph">Kiss</em> that prevents you from using other front-end frameworks such as
+<em class="emph">React</em>, <em class="emph">Angular</em>, <em class="emph">Vue</em>, etc. In fact, except for
+dealing with web services and authentication, you could exclusively
+use your preferred front-end framework.
+</p>
+<p>The <em class="emph">Kiss</em> back-end is a complete back-end. It is currently
+being used by large web applications involving many hundreds of
+screens and SQL tables and thousands of users. The <em class="emph">Kiss</em>
+back-end contains many built-in features to efficiently handle many,
+many simultaneous users. Like the front-end, the <em class="emph">Kiss</em> back-end
+is designed to be as simple as possible to build production-quality
+web applications. For example, web services can be built in a single
+source file with just a handful of lines of code. Everything in
+<em class="emph">Kiss</em> is designed to be simple to understand, simple to use, and
+yet be fully compiled and run at top speed.
+</p>
+</div>
 <div class="section-level-extent" id="Kiss-Highlights">
-<h3 class="section"><span>1.1 <em class="emph">Kiss</em> Highlights<a class="copiable-link" href="#Kiss-Highlights"> &para;</a></span></h3>
+<h3 class="section"><span>1.2 <em class="emph">Kiss</em> Highlights<a class="copiable-link" href="#Kiss-Highlights"> &para;</a></span></h3>
 
 <p>Some highlights of the <em class="emph">Kiss</em> system include:
 </p>
@@ -203,7 +242,7 @@ the system can better scale.
 <li><a href="#Front_002dend-Web-Service-Usage-Example" accesskey="4">Front-end Web Service Usage Example</a></li>
 </ul>
 <div class="subsection-level-extent" id="Back_002dend-Highlights">
-<h4 class="subsection"><span>1.1.1 Back-end Highlights<a class="copiable-link" href="#Back_002dend-Highlights"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.2.1 Back-end Highlights<a class="copiable-link" href="#Back_002dend-Highlights"> &para;</a></span></h4>
 
 <ol class="enumerate">
 <li> Micro services - add, change, or delete a web service on a running system.
@@ -227,9 +266,10 @@ provide support for heavy loads and high throughput.
 supports PostgreSQL, Microsoft SQL Server, MySQL, Oracle, and SQLite.
 </li></ol>
 
+
 </div>
 <div class="subsection-level-extent" id="Front_002dend-Highlights">
-<h4 class="subsection"><span>1.1.2 Front-end Highlights<a class="copiable-link" href="#Front_002dend-Highlights"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.2.2 Front-end Highlights<a class="copiable-link" href="#Front_002dend-Highlights"> &para;</a></span></h4>
 
 <ol class="enumerate">
 <li> Build your own HTML components, thus encapsulating any amount of code
@@ -248,7 +288,7 @@ systems take up.
 
 </div>
 <div class="subsection-level-extent" id="Back_002dend-Web-Service-Example">
-<h4 class="subsection"><span>1.1.3 Back-end Web Service Example<a class="copiable-link" href="#Back_002dend-Web-Service-Example"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.2.3 Back-end Web Service Example<a class="copiable-link" href="#Back_002dend-Web-Service-Example"> &para;</a></span></h4>
 
 
 <p>The following example depicts a complete back-end web service.  The
@@ -277,7 +317,7 @@ no configuration files or other code that needs to be changed.
 
 </div>
 <div class="subsection-level-extent" id="Front_002dend-Web-Service-Usage-Example">
-<h4 class="subsection"><span>1.1.4 Front-end Web Service Usage Example<a class="copiable-link" href="#Front_002dend-Web-Service-Usage-Example"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.2.4 Front-end Web Service Usage Example<a class="copiable-link" href="#Front_002dend-Web-Service-Usage-Example"> &para;</a></span></h4>
 
 <p>The following front-end example utilizes the web service defined in the
 previous sub-section.
@@ -298,7 +338,7 @@ if (res._Success) {
 </div>
 </div>
 <div class="section-level-extent" id="Supported-Environments">
-<h3 class="section"><span>1.2 Supported Environments<a class="copiable-link" href="#Supported-Environments"> &para;</a></span></h3>
+<h3 class="section"><span>1.3 Supported Environments<a class="copiable-link" href="#Supported-Environments"> &para;</a></span></h3>
 
 <ul class="mini-toc">
 <li><a href="#Development-Environment" accesskey="1">Development Environment</a></li>
@@ -307,7 +347,7 @@ if (res._Success) {
 <li><a href="#Java" accesskey="4">Java</a></li>
 </ul>
 <div class="subsection-level-extent" id="Development-Environment">
-<h4 class="subsection"><span>1.2.1 Development Environment<a class="copiable-link" href="#Development-Environment"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.3.1 Development Environment<a class="copiable-link" href="#Development-Environment"> &para;</a></span></h4>
 
 <p>The following development platforms are supported by the <em class="emph">Kiss</em>
 framework:
@@ -324,7 +364,7 @@ framework:
 
 </div>
 <div class="subsection-level-extent" id="Production-Environment">
-<h4 class="subsection"><span>1.2.2 Production Environment<a class="copiable-link" href="#Production-Environment"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.3.2 Production Environment<a class="copiable-link" href="#Production-Environment"> &para;</a></span></h4>
 
 
 <p>The following production platforms are supported by the <em class="emph">Kiss</em>
@@ -340,7 +380,7 @@ framework:
 
 </div>
 <div class="subsection-level-extent" id="Databases-Supported">
-<h4 class="subsection"><span>1.2.3 Databases Supported<a class="copiable-link" href="#Databases-Supported"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.3.3 Databases Supported<a class="copiable-link" href="#Databases-Supported"> &para;</a></span></h4>
 
 
 <p>The following database servers are supported by the <em class="emph">Kiss</em>
@@ -357,7 +397,7 @@ framework:
 
 </div>
 <div class="subsection-level-extent" id="Java">
-<h4 class="subsection"><span>1.2.4 Java<a class="copiable-link" href="#Java"> &para;</a></span></h4>
+<h4 class="subsection"><span>1.3.4 Java<a class="copiable-link" href="#Java"> &para;</a></span></h4>
 
 <p>The system is tested with Java versions 8, 11, 17, and 21.  Any Java version above 8
 is expected to work.
@@ -367,7 +407,7 @@ is expected to work.
 </div>
 </div>
 <div class="section-level-extent" id="HTML-component-usage">
-<h3 class="section"><span>1.3 HTML component usage<a class="copiable-link" href="#HTML-component-usage"> &para;</a></span></h3>
+<h3 class="section"><span>1.4 HTML component usage<a class="copiable-link" href="#HTML-component-usage"> &para;</a></span></h3>
    
 <p>To use a component, add to HTML:
 </p>
@@ -391,7 +431,7 @@ way to package arbitrary blocks of code (that can have screens too).
 </p>
 </div>
 <div class="section-level-extent" id="System-Maturity-And-Stability">
-<h3 class="section"><span>1.4 System Maturity And Stability<a class="copiable-link" href="#System-Maturity-And-Stability"> &para;</a></span></h3>
+<h3 class="section"><span>1.5 System Maturity And Stability<a class="copiable-link" href="#System-Maturity-And-Stability"> &para;</a></span></h3>
 
 <p>The Kiss system has been used in production environments for several
 years.  Additionally, several commercial applications utilize <em class="emph">Kiss</em>.
@@ -407,7 +447,7 @@ are happy to do so.
 
 </div>
 <div class="section-level-extent" id="Getting-All-Source-Code">
-<h3 class="section"><span>1.5 Getting All Source Code<a class="copiable-link" href="#Getting-All-Source-Code"> &para;</a></span></h3>
+<h3 class="section"><span>1.6 Getting All Source Code<a class="copiable-link" href="#Getting-All-Source-Code"> &para;</a></span></h3>
 
 <p>Source code for all of <em class="emph">Kiss</em> and its dependencies is freely
 available.  The builder program located at
@@ -430,7 +470,7 @@ internal dependencies (those included with <em class="emph">Kiss</em>):
 
 </div>
 <div class="section-level-extent" id="Support_002c-Contact_002c-And-Links">
-<h3 class="section"><span>1.6 Support, Contact, And Links<a class="copiable-link" href="#Support_002c-Contact_002c-And-Links"> &para;</a></span></h3>
+<h3 class="section"><span>1.7 Support, Contact, And Links<a class="copiable-link" href="#Support_002c-Contact_002c-And-Links"> &para;</a></span></h3>
 
 <p>The <em class="emph">Kiss</em> main website is at <a class="uref" href="https://kissweb.org">https://kissweb.org</a>
 </p>
@@ -445,7 +485,7 @@ internal dependencies (those included with <em class="emph">Kiss</em>):
 </p>
 </div>
 <div class="section-level-extent" id="License">
-<h3 class="section"><span>1.7 License<a class="copiable-link" href="#License"> &para;</a></span></h3>
+<h3 class="section"><span>1.8 License<a class="copiable-link" href="#License"> &para;</a></span></h3>
 
 <p>Copyright (c) 2018 Blake McBride (blake@mcbridemail.com)
 </p>
@@ -478,7 +518,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </p>
 </div>
 <div class="section-level-extent" id="Acknowledgments">
-<h3 class="section"><span>1.8 Acknowledgments<a class="copiable-link" href="#Acknowledgments"> &para;</a></span></h3>
+<h3 class="section"><span>1.9 Acknowledgments<a class="copiable-link" href="#Acknowledgments"> &para;</a></span></h3>
 
 <p>The Kiss design, code, documentation, and web site were written by
 Blake McBride.  The author gratefully acknowledges and appreciates,
