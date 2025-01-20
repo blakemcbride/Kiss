@@ -33,9 +33,10 @@ package org.kissweb;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Date;
 
 /**
- * Class dealing with the creation of standard comma delimited or CSV files.
+ * Class dealing with the creation of standard comma-delimited or CSV files.
  * This class implements the AutoCloseable interface.
  *
  */
@@ -253,7 +254,7 @@ public class DelimitedFileWriter implements AutoCloseable {
 	}
 
     /**
-     * Output a numeric date in the default format.
+     * Output a date in the default format.
      *
      * @param x the date as an integer YYYYMMDD
      * @throws Exception
@@ -262,6 +263,18 @@ public class DelimitedFileWriter implements AutoCloseable {
      */
 	public void writeDate(int x) throws Exception {
 		write(DateUtils.format(dateFmt, x));
+	}
+
+    /**
+     * Output a date in the default format.
+     *
+     * @param x the date as a <code>Date</code> instance
+     * @throws Exception
+     *
+     * @see #dateFmt
+     */
+	public void writeDate(Date x) throws Exception {
+		write(DateUtils.format(dateFmt, DateUtils.toInt(x)));
 	}
 
     /**
