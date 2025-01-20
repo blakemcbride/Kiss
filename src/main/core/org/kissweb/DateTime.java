@@ -126,7 +126,8 @@ public class DateTime {
      * @return This DateTime object, now with the new time zone.
      */
     public DateTime changeTimeZone(String timeZoneId) {
-        zdt = zdt.withZoneSameInstant(ZoneId.of(timeZoneId));
+        if (zdt != null)
+            zdt = zdt.withZoneSameInstant(ZoneId.of(timeZoneId));
         return this;
     }
 
@@ -366,7 +367,7 @@ public class DateTime {
      * @return
      */
     public long getMilliseconds() {
-        return zdt.toInstant().toEpochMilli();
+        return zdt == null ? 0L : zdt.toInstant().toEpochMilli();
     }
 
     /**
@@ -375,7 +376,7 @@ public class DateTime {
      * @return
      */
     public long getSeconds() {
-        return zdt.toInstant().toEpochMilli() / 1000;
+        return zdt == null ? 0L : zdt.toInstant().toEpochMilli() / 1000;
     }
     
     /**
@@ -385,7 +386,8 @@ public class DateTime {
      * @return 
      */
     public DateTime addDays(int days) {
-        zdt = zdt.plusDays(days);
+        if (zdt != null)
+            zdt = zdt.plusDays(days);
         return this;
     }
 
@@ -396,7 +398,8 @@ public class DateTime {
      * @return this object
      */
     public DateTime addHours(int hours) {
-        zdt = zdt.plusHours(hours);
+        if (zdt != null)
+            zdt = zdt.plusHours(hours);
         return this;
     }
 
@@ -407,7 +410,8 @@ public class DateTime {
      * @return this object
      */
     public DateTime addMinutes(int minutes) {
-        zdt = zdt.plusMinutes(minutes);
+        if (zdt != null)
+            zdt = zdt.plusMinutes(minutes);
         return this;
     }
 
