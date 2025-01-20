@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.Date;
 
 /**
- * Class dealing with the creation of standard comma-delimited or CSV files.
+ * Class dealing with the creation of standard  (blakemcbride.us)comma-delimited or CSV files.
  * This class implements the AutoCloseable interface.
  *
  */
