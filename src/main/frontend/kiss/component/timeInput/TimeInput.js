@@ -28,10 +28,10 @@
                 // new attributes
 
                 case 'min':
-                    min = Number(Utils.removeQuotes(attr[prop]));
+                    min = TimeUtils.strToInt(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'max':
-                    max = Number(Utils.removeQuotes(attr[prop]));
+                    max = TimeUtils.strToInt(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'required':
                     required = true;
@@ -120,6 +120,10 @@
                 jqObj.val(TimeUtils.format(ival));
         });
 
+        /**
+         * Sets the control value to an empty string.
+         * @return {Component.TimeInput} This object.
+         */
         newElm.clear = function () {
             newElm.setValue('');
             return this;
@@ -127,6 +131,16 @@
 
         newElm.isDirty = function () {
             return originalValue !== newElm.getValue();
+        };
+
+        newElm.setMinValue = function (val) {
+            min = TimeUtils.strToInt(val);
+            return this;
+        };
+
+        newElm.setMaxValue = function (val) {
+            max = TimeUtils.strToInt(val);
+            return this;
         };
 
         //--

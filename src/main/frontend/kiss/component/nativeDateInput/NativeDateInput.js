@@ -31,10 +31,10 @@
                 // new attributes
 
                 case 'min':
-                    min = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    min = DateUtils.toInt(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'max':
-                    max = Number(Utils.removeQuotes(attr[prop]).replace(/-/g, ""));
+                    max = DateUtils.toInt(Utils.removeQuotes(attr[prop]));
                     break;
                 case 'required':
                     required = true;
@@ -116,6 +116,16 @@
         newElm.clear = function () {
             jqObj.val('');
             originalValue = newElm.getIntValue();
+            return this;
+        };
+
+        newElm.setMinValue = function (val) {
+            min = DateUtils.toInt(val);
+            return this;
+        };
+
+        newElm.setMaxValue = function (val) {
+            max = DateUtils.toInt(val);
             return this;
         };
 

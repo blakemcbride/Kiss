@@ -179,6 +179,27 @@ class DateUtils {
     }
 
     /**
+     * Convert a JavaScript Date, a string, an integer date in the form of YYYYMMDD, or the number of milliseconds
+     * since the epoch and returns a date formated as an integer in YYYYMMDD format.
+     *
+     * @param dt number, string, or date
+     * @returns {number} YYYYMMDD or zero
+     */
+    static toInt(dt) {
+        if (!dt)
+            return 0;
+        if (typeof dt === 'string')
+            return DateUtils.strToInt(dt);
+        if (dt instanceof Date)
+            return DateUtils.dateToInt(dt);
+        if (dt instanceof Number)
+            if (dt > 30000101)
+                return DateUtils.millsToInt(dt);
+            else
+                return dt;
+    }
+
+    /**
      * Convert a number of milliseconds since 1970 UTC to an integer date YYYYMMDD.
      * This takes into account the local timezone.
      *

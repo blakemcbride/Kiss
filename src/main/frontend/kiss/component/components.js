@@ -95,8 +95,8 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-     *     <tr><td>    max="20181231"     </td><td>     the maximum date allowed               </td></tr>
-     *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed               </td></tr>
+     *     <tr><td>    max="20181231"     </td><td>     the maximum date allowed  (also accepts "2018-12-31", "2/22/25", etc.)             </td></tr>
+     *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed  (also accepts "2018-12-31", "2/22/25", etc.)             </td></tr>
      *     <tr><td>    no-placeholder     </td><td>     do not display mm/dd/yyyy when field is empty  </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      * </table>
@@ -126,6 +126,8 @@ class components {
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>    set control to read-only (or the reverse if the optional argument is <code>false</code>)  </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>    set control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    setMaxValue(val)     </td><td>     sets the maximum value the control will accept  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
+     *     <tr><td>    setMinValue(val)     </td><td>     sets the minimum value the control will accept  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the control value.  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
@@ -289,8 +291,8 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-     *     <tr><td>    max="20181231"     </td><td>     the maximum date allowed               </td></tr>
-     *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed               </td></tr>
+     *     <tr><td>    max="20181231"     </td><td>     the maximum date allowed (also accepts "2018-12-31", "2/22/25", etc.)              </td></tr>
+     *     <tr><td>    min="20180101"     </td><td>     the minimum date allowed  (also accepts "2018-12-31", "2/22/25", etc.)             </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      * </table>
      * <br>
@@ -319,6 +321,8 @@ class components {
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>    set control to read-only (or the reverse if the optional argument is <code>false</code>)  </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>    set control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    setMaxValue(val)     </td><td>     sets the maximum value the control will accept  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
+     *     <tr><td>    setMinValue(val)     </td><td>     sets the minimum value the control will accept.  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the control value.  <code>val</code> may be a <code>Date</code>, <code>number</code> (20180608), or <code>string</code> ("2018-06-08")              </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
@@ -366,6 +370,8 @@ class components {
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td> set control to read-only (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td> set control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
+     *     <tr><td>    setMaxValue(val)     </td><td>     sets the maximum value the control will accept              </td></tr>
+     *     <tr><td>    setMinValue(val)     </td><td>     sets the minimum value the control will accept             </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the numeric value of the control              </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>
@@ -601,8 +607,8 @@ class components {
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-     *     <tr><td>    min="0800"     </td><td>     the minimum time allowed               </td></tr>
-     *     <tr><td>    min="1800"     </td><td>     the maximum time allowed               </td></tr>
+     *     <tr><td>    min="0800"     </td><td>     the minimum time allowed (also accept times like "3:30 pm", etc.)              </td></tr>
+     *     <tr><td>    min="1800"     </td><td>     the maximum time allowed  (also accept times like "3:30 pm", etc.)               </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
      *     <tr><td>    zero-fill     </td><td>     zero fill the display               </td></tr>
@@ -632,6 +638,8 @@ class components {
      *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>   sets control to read-only (or the reverse if the optional argument is <code>false</code>)   </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>    sets control to read-write (or the reverse if the optional argument is <code>false</code>)      </td></tr>
+     *     <tr><td>    setMaxValue(val)     </td><td>     sets the maximum value the control will accept  (accept times like 1530, "3:30 pm", etc.)           </td></tr>
+     *     <tr><td>    setMinValue(val)     </td><td>     sets the minimum value the control will accept   (accept times like 1530, "3:30 pm", etc.)             </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the value associated with the control              </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>

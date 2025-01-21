@@ -156,6 +156,16 @@
             return this;
         };
 
+        newElm.setMinValue = function (val) {
+            min = val;
+            return this;
+        };
+
+        newElm.setMaxValue = function (val) {
+            max = val;
+            return this;
+        };
+
         //--
 
         newElm.readOnly = function (flg = true) {

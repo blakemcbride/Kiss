@@ -72,12 +72,14 @@ class TimeUtils {
     }
 
     /**
-     * Convert a string time into an integer time.
+     * Convert a string time into an integer time.  If it is already a number, the number is returned.
      *
      * @param sval {string}  "11:30 AM", "1130", "11:30pm", "11.30", accepts military time too, etc.
      * @returns {null|number}   integer formatted as HHMM or null if not a time
      */
     static strToInt(sval) {
+        if (typeof sval === 'number')
+            return sval;
         if (!sval)
             return null;
         sval = sval.trim();
