@@ -3,8 +3,6 @@
 
 'use strict';
 
-var hideIntro;
-
 (async function () {
 
     const screenArea = 'app-screen-area';
@@ -34,13 +32,11 @@ var hideIntro;
         Server.logout();
     });
 
-    if (!hideIntro) {
-        hideIntro = true;
-        Utils.popup_open('intro-popup');
+    // show the startup message
+    Utils.popup_open('intro-popup');
+    $$('close-intro').onclick(function () {
+        Utils.popup_close();
+    });
 
-        $$('close-intro').onclick(function () {
-            Utils.popup_close();
-        });
-    }
 
 })();
