@@ -6,7 +6,7 @@
         .button-left {
             width: 115px;
             margin-bottom: 10px;
-        }
+        </i>
     </style>
 
     <div style="display:inline-block; vertical-align: top; margin-right: 30px; margin-left: 10px;">
@@ -24,6 +24,55 @@
     <div style="display: inline-block; width: 600px;" id="app-screen-area">
         Select one of the buttons on the left.
     </div>
+
+    <popup id="intro-popup" height="520px" width="700px">
+        <popup-title>Writing Sophisticated Applications</popup-title>
+        <popup-body style="margin: 0 30px 0 30px;">
+            <p>
+                <b><i>Kiss</i></b> comes as a very basic running application. Since the
+            front-end and back-end can be changed while the system is running, it
+            is intended that a developer would start with this basic application
+            and build it into the desired application.
+            </p>
+            <p>
+            The basic application the system comes with does not represent the
+            kind of application that can be built with <b><i>Kiss</i></b>. It is
+            intentionally kept basic so that it is easy to see how it works.  In a
+            real application, all the possibilities made available with
+            <i>HTML</i> and <i>CSS</i> are at your disposal without limitation. In
+            other words, the only limitations to the sophistication of the
+            application are your imagination and the amount of work you're willing
+            to put into it.
+            </p>
+            <p>
+            <b><i>Kiss</i></b> comes with a complete front-end framework that includes
+            most of the things needed for a modern business web application. In
+            fact, it is currently being used as the sole framework in some very
+            large production systems.  It works well. However, there is nothing in
+            <b><i>Kiss</i></b> that prevents you from using other front-end frameworks such as
+            <i>React</i>, <i>Angular</i>, <i>Vue</i>, etc. In fact, except for
+            dealing with web services and authentication, you could exclusively
+            use your preferred front-end framework.
+            </p>
+            <p>
+            The <b><i>Kiss</i></b> back-end is a complete back-end. It is currently
+            being used by large web applications involving many hundreds of
+            screens and SQL tables and thousands of users. The <b><i>Kiss</i></b>
+            back-end contains many built-in features to efficiently handle many,
+            many simultaneous users. Like the front-end, the <b><i>Kiss</i></b> back-end
+            is designed to be as simple as possible to build production-quality
+            web applications. For example, a web service can be built with a single
+            source file containing just a handful of lines of code. Everything in
+            <b><i>Kiss</i></b> is designed to be simple to understand, simple to use, and
+            yet be fully compiled and run at top speed.
+            </p>
+            <div style="position: absolute; bottom: 30px; width: 100%;">
+                <div style="text-align: center;">
+                    <push-button id="close-intro">Close</push-button>
+                </div>
+            </div>
+        </popup-body>
+    </popup>
 
 
 </div>
