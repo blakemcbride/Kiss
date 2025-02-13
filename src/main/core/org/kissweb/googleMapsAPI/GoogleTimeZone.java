@@ -5,6 +5,7 @@ import org.kissweb.RestClient;
 import org.kissweb.URLBuilder;
 
 import java.io.IOException;
+import java.util.Hashtable;
 
 /**
  * This class returns the timezone ID associated with a latitude/longitude.
@@ -16,6 +17,8 @@ public class GoogleTimeZone {
 
     private static final String TIMEZONE_URL = "https://maps.googleapis.com/maps/api/timezone/json";
     private static final String GEOCODE_URL  = "https://maps.googleapis.com/maps/api/geocode/json";
+
+    private static final Hashtable<String,String> timeZoneCache = new Hashtable<>();
 
     /**
      * Perform a timezone query.
@@ -30,8 +33,12 @@ public class GoogleTimeZone {
      * @throws IOException
      */
     public static String getTimezone(double latitude, double longitude) throws IOException {
+        String location = latitude + "," + longitude;
+        String tz = timeZoneCache.get(location);
+        if (tz != null)
+            return tz;
         final URLBuilder url = new URLBuilder(TIMEZONE_URL);
-        url.addParameter("location", latitude + "," + longitude);
+        url.addParameter("location", location);
         url.addParameter("timestamp", ""+(System.currentTimeMillis() / 1000));
         url.addParameter("key", GoogleAPIKey.getValidAPIKey());
         final String surl = url.build();
@@ -39,7 +46,9 @@ public class GoogleTimeZone {
         RestClient rc = new RestClient();
         JSONObject result = rc.jsonCall("GET", surl);
         try {
-            return result.getString("timeZoneId");
+            tz = result.getString("timeZoneId");
+            timeZoneCache.put(location, tz);
+            return tz;
         } catch (Throwable ex) {
             return null;
         }
@@ -57,10 +66,15 @@ public class GoogleTimeZone {
      * @throws IOException
      */
     public static String getTimezone(String address) throws IOException {
+        String tz = timeZoneCache.get(address);
+        if (tz != null)
+            return tz;
         double[] latLng = geocode(address);
         if (latLng == null)
             return null;
-        return getTimezone(latLng[0], latLng[1]);
+        tz =  getTimezone(latLng[0], latLng[1]);
+        timeZoneCache.put(address, tz);
+        return tz;
     }
 
     /**
