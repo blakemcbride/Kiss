@@ -1,11 +1,11 @@
 package org.kissweb.googleMapsAPI;
 
 import org.json.JSONObject;
+import org.kissweb.LRUCache;
 import org.kissweb.RestClient;
 import org.kissweb.URLBuilder;
 
 import java.io.IOException;
-import java.util.Hashtable;
 
 /**
  * This class returns the timezone ID associated with a latitude/longitude.
@@ -18,7 +18,7 @@ public class GoogleTimeZone {
     private static final String TIMEZONE_URL = "https://maps.googleapis.com/maps/api/timezone/json";
     private static final String GEOCODE_URL  = "https://maps.googleapis.com/maps/api/geocode/json";
 
-    private static final Hashtable<String,String> timeZoneCache = new Hashtable<>();
+    private static final LRUCache<String,String> timeZoneCache = new LRUCache<>(200);
 
     /**
      * Perform a timezone query.
