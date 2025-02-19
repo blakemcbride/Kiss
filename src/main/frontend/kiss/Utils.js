@@ -148,9 +148,13 @@ class Utils {
             self.makeDraggable(header, $('#msg-modal-content-tab'));
             $('#msg-message').text(message);
             const closeBtn = $('#msg-close-btn');
-            if (title === 'Error')
+            if (title === 'Error') {
                 header.css('background-color', 'red');
-            else
+                Utils.lastError = message;
+                Utils.lastErrorDate = new Date();
+                if (Utils.errorFunction)
+                    Utils.errorFunction();
+            } else
                 header.css('background-color', '#6495ed');
             function endfun() {
                 modal.hide();
@@ -2273,6 +2277,37 @@ class Utils {
             return firstLetter.toUpperCase();
         });
     }
+
+    /**
+     * Gets the last error encountered.
+     *
+     * @returns {Error|string} The last error, or undefined if no errors have been encountered.
+     */
+    static getLastError() {
+        return Utils.lastError;
+    }
+
+    /**
+     * Returns the time of the last error, or undefined if no errors have been encountered.
+     *
+     * @returns {number} The time of the last error, or 0.
+     */
+    static getLastErrorDate() {
+        return Utils.lastErrorDate;
+    }
+
+    static setErrorData(data) {
+        Utils.lastErrorData = data;
+    }
+
+    static getErrorData() {
+        return Utils.lastErrorData;
+    }
+
+    static setErrorFunction(fun) {
+        Utils.errorFunction = fun;
+    }
+
 }
 
 // Class variables
@@ -2283,6 +2318,11 @@ Utils.someControlValueChangedFlag = false;
 Utils.someControlValueChangedFun = null;
 Utils.globalEnterFunction = null;
 Utils.isFullScreen = false;
+
+Utils.lastError = undefined;
+Utils.lastErrorDate = undefined;
+Utils.lastErrorData = undefined;
+Utils.errorFunction = undefined;  // a function that gets executed when an error occurs to gather data about the error
 
 Utils.enterFunction = null;         //  If defined, execute function when enter key hit
 Utils.enterFunctionStack = [];      //  Save stack for enter key to handle popups
