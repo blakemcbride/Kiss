@@ -70,8 +70,8 @@ class DateUtils {
      * @return {string} The detected date format. Possible values are 'MM/DD/YYYY', 'DD/MM/YYYY', or 'Unknown Format'.
      */
     static detectDateFormat(locale = navigator.language) {
-        if (!DateUtils.intFormat || DateUtils.locale !== locale) {
-            DateUtils.locale = locale;
+        if (!this.intFormat || this.locale !== locale) {
+            this.locale = locale;
             const testDate = new Date(2023, 0, 21); // 21st January 2023
             const formattedDate = new Intl.DateTimeFormat(locale, {
                 year: 'numeric',
@@ -82,15 +82,15 @@ class DateUtils {
             const parts = formattedDate.match(/(\d{2})/g);
             if (parts.length > 2) {
                 if (parts[0] === '01') {
-                    DateUtils.intFormat = 'MM/DD/YYYY';
+                    this.intFormat = 'MM/DD/YYYY';
                 } else if (parts[1] === '01') {
-                    DateUtils.intFormat = 'DD/MM/YYYY';
+                    this.intFormat = 'DD/MM/YYYY';
                 }
             }
-            if (!DateUtils.intFormat)
-                DateUtils.intFormat = 'Unknown Format';
+            if (!this.intFormat)
+                this.intFormat = 'Unknown Format';
         }
-        return DateUtils.intFormat;
+        return this.intFormat;
     }
 
     /**
@@ -106,7 +106,7 @@ class DateUtils {
      * @returns {number}
      */
     static strToInt(dateString) {
-        const format = DateUtils.detectDateFormat();
+        const format = this.detectDateFormat();
         dateString = dateString.trim();
         dateString = dateString.replace(/-/g, '/');
         dateString = dateString.replace(/\./g, '/');
@@ -233,23 +233,25 @@ class DateUtils {
         if (!dt)
             return 0;
         if (typeof dt === 'string')
-            return DateUtils.strToInt(dt);
+            return this.strToInt(dt);
+        if (typeof dt === 'number' || dt instanceof Number)
+            return dt > 30000101 ? this.toInt(new Date(dt)) : dt;
         if (dt instanceof Date)
-            return DateUtils.dateToInt(dt);
-        if (dt instanceof Number)
-            if (dt > 30000101)
-                return DateUtils.millsToInt(dt);
-            else
-                return dt;
+            return dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
+        return 0;
     }
 
     /**
+     * @deprecated
+     *
      * Convert a number of milliseconds since 1970 UTC to an integer date YYYYMMDD.
      * This takes into account the local timezone.
+     *
      *
      * @param m {number} number of milliseconds since 1970 UTC
      * @returns {number} YYYYMMDD
      *
+     * @see DateUtils.toInt()
      * @see DateTimeUtils.toMilliseconds()
      * @see TimeUtils.millsToInt()
      */
@@ -257,7 +259,7 @@ class DateUtils {
         if (!m)
             return 0;
         const dt = new Date(m);
-        return DateUtils.dateToInt(dt);
+        return this.toInt(dt);
     }
 
     /**
@@ -267,13 +269,10 @@ class DateUtils {
      * @returns {boolean} true if valid date
      */
     static isValid(dt) {
+        dt = this.toInt(dt);
         if (!dt)
             return false;
-        if (typeof dt === 'string')
-            dt = DateUtils.strToInt(dt);
-        else if (typeof dt === 'object')
-            dt = DateUtils.dateToInt(dt);
-        return dt === DateUtils.calendar(DateUtils.julian(dt)) &amp;&amp; dt >= 19000101 &amp;&amp; dt &lt;= 21000101;
+        return dt === this.calendar(this.julian(dt)) &amp;&amp; dt >= 19000101 &amp;&amp; dt &lt;= 21000101;
     }
 
     /**
@@ -287,38 +286,36 @@ class DateUtils {
             val = $.trim(val);
         if (!val)
             return false;
-        return !!DateUtils.SQLtoInt(val);
+        return !!this.SQLtoInt(val);
     }
 
     /**
-     * Convert numeric YYYYMMDD to string mm/dd/yyyy or whatever format is locally appropriate
+     * Convert numeric date to string mm/dd/yyyy or whatever format is locally appropriate
      *
-     * @param {number} dt
+     * @param {number} dt in YYYYMMDD or milliseconds format
      * @param {string} [locale=navigator.language] - optional locale to use for formatting the date. Defaults to the user's browser language.
      * @returns {string}
      */
     static intToStr4(dt, locale = navigator.language) {
-        if (typeof dt === 'string')
-            dt = Number(dt);
+        dt = this.toInt(dt);
         if (!dt)
             return '';
         const year = parseInt(dt.toString().slice(0, 4), 10);
         const month = parseInt(dt.toString().slice(4, 6), 10) - 1; // Subtract 1 because months are 0-indexed
         const day = parseInt(dt.toString().slice(6, 8), 10);
-
         const date = new Date(year, month, day);
-
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         return new Intl.DateTimeFormat(locale, options).format(date);
     }
 
     /**
-     * Convert numeric YYYYMMDD to string yyyy-mm-dd
+     * Convert a date to string yyyy-mm-dd
      *
-     * @param {number} dt
+     * @param dt YYYYMMDD, Date, milliseconds, or string
      * @returns {string}
      */
     static intToSQL(dt) {
+        dt = this.toInt(dt);
         if (!dt)
             return '';
         const y = Math.floor(dt / 10000);
@@ -329,32 +326,33 @@ class DateUtils {
     }
 
     /**
-     * Convert numeric YYYYMMDD to string mm/dd/yy or whatever format is locally appropriate
+     * Convert date to string mm/dd/yy or whatever format is locally appropriate
      *
-     * @param {number} dt
+     * @param dt YYYYMMDD, Date, milliseconds, or string
      * @param {string} [locale=navigator.language] - optional locale to use for formatting the date. Defaults to the user's browser language.
      * @returns {string}
      */
     static intToStr2(dt, locale = navigator.language) {
-        if (typeof dt === 'string')
-            dt = Number(dt);
+        dt = this.toInt(dt);
         if (!dt)
             return '';
         const year = parseInt(dt.toString().slice(0, 4), 10);
         const month = parseInt(dt.toString().slice(4, 6), 10) - 1; // Subtract 1 because months are 0-indexed
         const day = parseInt(dt.toString().slice(6, 8), 10);
-
         const date = new Date(year, month, day);
-
         const options = { year: '2-digit', month: '2-digit', day: '2-digit' };
         return new Intl.DateTimeFormat(locale, options).format(date);
     }
 
     /**
+     * @deprecated
+     *
      * Convert a Date object to YYYYMMDD int
      *
      * @param {Date} dt
      * @returns {number}
+     *
+     * @see DateUtils.toInt()
      */
     static dateToInt(dt) {
         return dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
@@ -382,7 +380,7 @@ class DateUtils {
      * @returns {Date}
      */
     static dateAddDays(dt, days) {
-        return DateUtils.intToDate(DateUtils.intAddDays(DateUtils.dateToInt(dt), days));
+        return this.intToDate(this.intAddDays(this.toInt(dt), days));
     }
 
     /**
@@ -393,7 +391,7 @@ class DateUtils {
      * @returns {int}
      */
     static intAddDays(dt, days) {
-        return DateUtils.calendar(DateUtils.julian(dt) + days);
+        return this.calendar(this.julian(dt) + days);
     }
 
     /**
@@ -404,8 +402,8 @@ class DateUtils {
      * @returns {number} number of months between the two dates
      */
     static monthsDifference(idt1, idt2) {
-        const dt1 = idt1 instanceof Date ? idt1 : DateUtils.intToDate(idt1);
-        const dt2 = idt2 instanceof Date ? idt2 : DateUtils.intToDate(idt2);
+        const dt1 = idt1 instanceof Date ? idt1 : this.intToDate(idt1);
+        const dt2 = idt2 instanceof Date ? idt2 : this.intToDate(idt2);
         let months = (dt2.getFullYear() - dt1.getFullYear()) * 12;
         months -= dt1.getMonth() + 1;
         months += dt2.getMonth() + 1;
@@ -490,7 +488,7 @@ class DateUtils {
      * @returns {number} an integer indicating the day of the week
      */
     static dayOfWeek(dt) {
-        return DateUtils.julian(dt) % 7;
+        return this.julian(dt) % 7;
     }
 
     /**
@@ -501,7 +499,7 @@ class DateUtils {
      * @returns {number} returns the number of days dt1 - dt2
      */
     static daysDifference(dt1, dt2) {
-        return DateUtils.julian(dt1) - DateUtils.julian(dt2);
+        return this.julian(dt1) - this.julian(dt2);
     }
 
     /**
@@ -513,7 +511,7 @@ class DateUtils {
      * @returns {string} the name of the day of the week
      */
     static dayOfWeekName(dt) {
-        switch (DateUtils.dayOfWeek(dt)) {
+        switch (this.dayOfWeek(dt)) {
             case 0:  return "Sunday";
             case 1:  return "Monday";
             case 2:  return "Tuesday";
@@ -569,8 +567,8 @@ class DateUtils {
         const t = dt - y * 10000;
         const m = Math.floor(t / 100);
         const d = Math.floor(t - m * 100);
-        const dayOfWeek = Utils.take(DateUtils.dayOfWeekName(dt), 3);
-        const monthName = DateUtils.monthName(dt);
+        const dayOfWeek = Utils.take(this.dayOfWeekName(dt), 3);
+        const monthName = this.monthName(dt);
         return dayOfWeek + " " + monthName + " " + d + ", " + y;
     }
 
@@ -580,7 +578,7 @@ class DateUtils {
      * @returns {number}
      */
     static today() {
-        return DateUtils.dateToInt(new Date());
+        return this.toInt(new Date());
     }
 
     /**
