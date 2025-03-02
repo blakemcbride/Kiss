@@ -18,7 +18,7 @@ public class GoogleTimeZone {
     private static final String TIMEZONE_URL = "https://maps.googleapis.com/maps/api/timezone/json";
     private static final String GEOCODE_URL  = "https://maps.googleapis.com/maps/api/geocode/json";
 
-    private static final LRUCache<String,String> timeZoneCache = new LRUCache<>(200);
+    private static final LRUCache<String,String> timeZoneCache = new LRUCache<>(200L, 0L);
 
     /**
      * Perform a timezone query.
@@ -47,7 +47,7 @@ public class GoogleTimeZone {
         JSONObject result = rc.jsonCall("GET", surl);
         try {
             tz = result.getString("timeZoneId");
-            timeZoneCache.put(location, tz);
+            timeZoneCache.add(location, tz);
             return tz;
         } catch (Throwable ex) {
             return null;
@@ -73,7 +73,7 @@ public class GoogleTimeZone {
         if (latLng == null)
             return null;
         tz =  getTimezone(latLng[0], latLng[1]);
-        timeZoneCache.put(address, tz);
+        timeZoneCache.add(address, tz);
         return tz;
     }
 
