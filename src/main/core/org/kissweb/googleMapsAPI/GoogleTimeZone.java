@@ -16,9 +16,8 @@ import java.io.IOException;
 public class GoogleTimeZone {
 
     private static final String TIMEZONE_URL = "https://maps.googleapis.com/maps/api/timezone/json";
-    private static final String GEOCODE_URL  = "https://maps.googleapis.com/maps/api/geocode/json";
 
-    private static final LRUCache<String,String> timeZoneCache = new LRUCache<>(200L, 0L);
+    private static final LRUCache<String,String> timezoneCache = new LRUCache<>(500L, 0L);
 
     /**
      * Perform a timezone query.
@@ -33,21 +32,21 @@ public class GoogleTimeZone {
      * @throws IOException
      */
     public static String getTimezone(double latitude, double longitude) throws IOException {
-        String location = latitude + "," + longitude;
-        String tz = timeZoneCache.get(location);
+        String location = GoogleAPI.roundCoordinates(latitude, longitude);
+        String tz = timezoneCache.get(location);
         if (tz != null)
             return tz;
         final URLBuilder url = new URLBuilder(TIMEZONE_URL);
         url.addParameter("location", location);
         url.addParameter("timestamp", ""+(System.currentTimeMillis() / 1000));
-        url.addParameter("key", GoogleAPIKey.getValidAPIKey());
+        url.addParameter("key", GoogleAPI.getValidAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
         JSONObject result = rc.jsonCall("GET", surl);
         try {
             tz = result.getString("timeZoneId");
-            timeZoneCache.add(location, tz);
+            timezoneCache.add(location, tz);
             return tz;
         } catch (Throwable ex) {
             return null;
@@ -66,15 +65,10 @@ public class GoogleTimeZone {
      * @throws IOException
      */
     public static String getTimezone(String address) throws IOException {
-        String tz = timeZoneCache.get(address);
-        if (tz != null)
-            return tz;
-        double[] latLng = geocode(address);
+        double[] latLng = GoogleGeocode.findGeoLocation(address);
         if (latLng == null)
             return null;
-        tz =  getTimezone(latLng[0], latLng[1]);
-        timeZoneCache.add(address, tz);
-        return tz;
+        return  getTimezone(latLng[0], latLng[1]);
     }
 
     /**
@@ -100,34 +94,6 @@ public class GoogleTimeZone {
         if (zip != null)
             address += " " + zip;
         return getTimezone(address);
-    }
-
-    /**
-     * Helper method that uses the Google Geocoding API to get lat/long from an address.
-     */
-    private static double[] geocode(String address) throws IOException {
-        URLBuilder url = new URLBuilder(GEOCODE_URL);
-        url.addParameter("address", address);
-        url.addParameter("key", GoogleAPIKey.getValidAPIKey());
-
-        RestClient rc = new RestClient();
-        JSONObject response = rc.jsonCall("GET", url.build());
-
-        if (!response.has("results") || response.getJSONArray("results").length() == 0) {
-            // No results or invalid response
-            return null;
-        }
-
-        JSONObject location = response
-                .getJSONArray("results")
-                .getJSONObject(0)
-                .getJSONObject("geometry")
-                .getJSONObject("location");
-
-        double lat = location.getDouble("lat");
-        double lng = location.getDouble("lng");
-
-        return new double[] { lat, lng };
     }
 
 }

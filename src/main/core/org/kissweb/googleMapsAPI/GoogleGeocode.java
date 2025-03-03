@@ -2,6 +2,8 @@ package org.kissweb.googleMapsAPI;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.kissweb.LRUCache;
+import org.kissweb.NumberUtils;
 import org.kissweb.RestClient;
 import org.kissweb.URLBuilder;
 
@@ -13,20 +15,22 @@ import java.io.IOException;
  * Author: Blake McBride<br>
  * Date: 3/5/22
  */
-public class GoogleReverseGeocode {
+public class GoogleGeocode {
 
     private final static String URL = "https://maps.googleapis.com/maps/api/geocode/json";
     private JSONObject result = null;
+
+    private static final LRUCache<String,double[]> addressCache = new LRUCache<>(200L, 0L);
 
     /**
      * Performs the actual query through Google.
      * You must set the API_KEY before creating this object.
      */
-    public GoogleReverseGeocode(double latitude, double longitude) {
+    public GoogleGeocode(double latitude, double longitude) {
         final URLBuilder url = new URLBuilder(URL);
         url.addParameter("latlng", latitude + "," + longitude);
         url.addParameter("sensor", "true");
-        url.addParameter("key", GoogleAPIKey.getValidAPIKey());
+        url.addParameter("key", GoogleAPI.getValidAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
@@ -66,11 +70,48 @@ public class GoogleReverseGeocode {
     }
 
     /**
+     * This method uses the Google Geocoding API to get lat/long from an address.
+     *
+     * @param address
+     * @return
+     * @throws IOException
+     */
+    public static double[] findGeoLocation(String address) throws IOException {
+        double[] res = addressCache.get(address);
+        if (res != null && !NumberUtils.doubleEqual(res[0], -1.0, 0.0001) && !NumberUtils.doubleEqual(res[1], -1.0, 0.0001))
+            return res;
+        URLBuilder url = new URLBuilder(URL);
+        url.addParameter("address", address);
+        url.addParameter("key", GoogleAPI.getValidAPIKey());
+
+        RestClient rc = new RestClient();
+        JSONObject response = rc.jsonCall("GET", url.build());
+
+        if (!response.has("results") || response.getJSONArray("results").length() == 0) {
+            // No results or invalid response
+            addressCache.add(address, new double[]{-1,-1});
+            return null;
+        }
+
+        JSONObject location = response
+                .getJSONArray("results")
+                .getJSONObject(0)
+                .getJSONObject("geometry")
+                .getJSONObject("location");
+
+        double lat = location.getDouble("lat");
+        double lng = location.getDouble("lng");
+        res = new double[]{ lat, lng };
+        addressCache.add(address, res);
+        return res;
+    }
+
+    /**
      * Example use of this class.
      */
     private void example() {
-        GoogleAPIKey.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        GoogleReverseGeocode grg = new GoogleReverseGeocode(27.09876, -83.589023);
+        GoogleAPI.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        GoogleGeocode grg = new GoogleGeocode(27.09876, -83.589023);
         String cs = grg.getCityState();
     }
 

@@ -113,8 +113,8 @@ public class LRUCache<K,V> {
      * @return {@code true} if the key was not already present and has been added;
      *         {@code false} if the key was already present (in which case its last access time is updated)
      */
-    public synchronized boolean add(K key) {
-        return add(key, null);
+    public boolean add(K key) {
+        return addInt(key, null);
     }
 
     /**
@@ -129,7 +129,11 @@ public class LRUCache<K,V> {
      * @return {@code true} if the key was not already present and has been added;
      *         {@code false} if the key was already present (in which case its associated object is updated)
      */
-    public synchronized boolean add(K key, V value) {
+    public boolean add(K key, V value) {
+        return addInt(key, value);
+    }
+
+    private synchronized boolean addInt(K key, V value) {
         boolean rtn;
         purgeExpired();
         long now = System.nanoTime();
