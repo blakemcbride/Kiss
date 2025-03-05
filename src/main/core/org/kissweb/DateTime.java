@@ -415,6 +415,13 @@ public class DateTime {
         return this;
     }
 
+    /**
+     * Return the date and time combined as a long integer YYYYMMDDHHMM
+     */
+    public long getDTLong() {
+        return (long) getIntDate() * 10000L + (long) getIntTime();
+    }
+
     public static void main(String [] args) {
         DateTime dt = new DateTime(20201224, 1130);
         Date d = dt.getDate();
