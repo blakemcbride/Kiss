@@ -1,0 +1,72 @@
+/* -*- mode: groovy ; coding: utf-8 -*-
+    KISS is not meant to be built with gradle.  It is intended that the KISS bld program be used.
+    This is merely a sample starting point should gradle be desired.
+ */
+
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+group = 'org.kissweb'
+version = '1.0'
+description = 'Kiss Web Development Framework'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.mchange:c3p0:0.9.5.5'
+    implementation 'org.apache.groovy:groovy:4.0.24'
+    implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    implementation 'org.apache.logging.log4j:log4j-core:2.22.0'
+    implementation 'org.apache.logging.log4j:log4j-api:2.22.0'
+    implementation 'org.apache.logging.log4j:log4j-1.2-api:2.22.0'
+    implementation 'com.mchange:mchange-commons-java:0.2.20'
+    implementation 'com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre8'
+    // mysql-connector-java is not included because it must be manually downloaded
+    implementation 'org.postgresql:postgresql:42.7.4'
+    implementation 'org.slf4j:slf4j-api:1.7.30'
+    implementation 'org.slf4j:slf4j-simple:1.7.30'
+    implementation 'org.xerial:sqlite-jdbc:3.45.0.0'
+    implementation 'org.dvare:dynamic-loader:3.2'
+    implementation 'org.webjars.bower:jquery:3.6.3'
+    implementation 'cljsjs:ag-grid-community:25.1.0'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.31'
+    implementation 'org.apache.pdfbox:fontbox:2.0.31'
+    implementation 'com.oracle.ojdbc:ojdbc10:19.3.0.0'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.0'
+    testImplementation 'org.junit.platform:junit-platform-console:1.11.0'
+    testImplementation 'org.junit.platform:junit-platform-console-standalone:1.11.0'
+}
+
+sourceSets {
+    main {
+        // Compiled sources from these directories
+        java {
+            srcDirs = ['src/main/core', 'src/main/precompiled']
+        }
+        // Optionally, you can also define resources from the default location
+        // resources { srcDirs = ['src/main/resources'] }
+    }
+}
+
+// Task to copy the backend files (not compiled) to a custom directory
+task copyBackend(type: Copy) {
+    from 'src/main/backend'
+    into "$buildDir/backend"
+}
+
+// Ensure backend files are copied during the processResources phase.
+processResources.dependsOn copyBackend
+
+// Configure IDEA to mark src/main/backend as a resource folder so it shows up in your IDE.
+idea {
+    module {
+        resourceDirs += file("src/main/backend")
+    }
+}

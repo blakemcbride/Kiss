@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <project name="Kiss" basedir="." default="all">
 
-  <!--  For docs on what each of these do, see src/main/core/org/kissweb/builder/Tasks.java    -->
+  <!--  This is an Ant build file.  It is used solely as an integration between the native Kiss build system (bld) and Ant.
+        The value of this is that many IDEs integrate with Ant.  Thus, with this file, they also integrate with bld.
+        For docs on what each of these do, see src/main/core/org/kissweb/builder/Tasks.java    -->
   
   <target name="builder">
     <mkdir dir="work/exploded/WEB-INF/classes"/>

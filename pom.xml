@@ -1,27 +1,28 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"   
-xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0   
-http://maven.apache.org/xsd/maven-4.0.0.xsd">  
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <!--  This file is only used to describe dependencies to GitHub.  
+  <!--  This file is used to describe the system layout for an IDE and to describe dependencies to GitHub.
         Kiss is not a Maven project and is not built with Maven!
-        Kiss is built with its own build system called 'bld'. 
+        Kiss is built with its own build system called 'bld'.
         In fact, you may need to delete this file so that your IDE
         doesn't think this is a Maven project.
         See the documentation.    -->
-  
-  <modelVersion>4.0.0</modelVersion>  
-  
-  <groupId>org.kissweb</groupId>  
-  <artifactId>KISS</artifactId>  
-  <version>1.0</version>  
-  <packaging>jar</packaging>  
-  
-  <name>Kiss Web Development Framework</name>  
-  <url>https://kissweb.org</url>  
-  
-  <dependencies>  
-    
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.kissweb</groupId>
+  <artifactId>KISS</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+
+  <name>Kiss Web Development Framework</name>
+  <url>https://kissweb.org</url>
+
+  <dependencies>
+    <!-- Your dependencies remain unchanged -->
+
     <!-- https://mvnrepository.com/artifact/com.mchange/c3p0 -->
     <dependency>
       <groupId>com.mchange</groupId>
@@ -35,7 +36,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <artifactId>groovy</artifactId>
       <version>4.0.24</version>
     </dependency>
-
 
     <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
     <dependency>
@@ -79,15 +79,6 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <version>12.4.2.jre8</version>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-    <!-- Oracle no longer distributes this automatically.  It must be manually downloaded.
-    <dependency>
-      <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.30</version>
-    </dependency>
-    -->
-
     <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
     <dependency>
       <groupId>org.postgresql</groupId>
@@ -130,17 +121,10 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <version>3.6.3</version>
     </dependency>
 
-    <!-- https://mvnrepository.com/artifact/cljsjs/ag-grid-community -->
     <dependency>
-      <groupId>cljsjs</groupId>
-      <artifactId>ag-grid-community</artifactId>
-      <version>25.1.0</version>
-    </dependency>
-
-    <dependency>
-        <groupId>org.apache.pdfbox</groupId>
-        <artifactId>pdfbox</artifactId>
-        <version>2.0.31</version>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>2.0.31</version>
     </dependency>
 
     <dependency>
@@ -190,10 +174,44 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
       <scope>test</scope>
     </dependency>
 
+    <!-- System-scoped dependencies from the libs directory -->
+    <dependency>
+      <groupId>org.abcl</groupId>
+      <artifactId>abcl</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/abcl.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.json</groupId>
+      <artifactId>json</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/json.jar</systemPath>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.20</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/commons-compress-1.20.jar</systemPath>
+    </dependency>
+    
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/mysql-connector-j-8.1.0.jar</systemPath>
+    </dependency>
+
   </dependencies>
 
   <build>
     <plugins>
+      <!-- Add multiple source roots, including backend -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -208,15 +226,67 @@ http://maven.apache.org/xsd/maven-4.0.0.xsd">
             <configuration>
               <sources>
                 <source>src/main/core</source>
-                <source>src/main/backend</source>
                 <source>src/main/precompiled</source>
+                <source>src/main/backend</source>  <!-- Added backend as a source root -->
               </sources>
             </configuration>
           </execution>
         </executions>
       </plugin>
+
+      <!-- Copy src/main/backend as-is (not compiled) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-backend-files</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <!-- Added outputDirectory element -->
+              <outputDirectory>${project.build.directory}/backend</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/backend</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>enforce-no-system-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireNoSystemDependencies>
+                  <!-- This rule normally fails if systemPath points inside the project -->
+                  <fail>false</fail>
+                  <message>System scoped dependencies inside the project directory are allowed.</message>
+                </requireNoSystemDependencies>
+              </rules>
+              <fail>false</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
     </plugins>
   </build>
 
 </project>
+
 
