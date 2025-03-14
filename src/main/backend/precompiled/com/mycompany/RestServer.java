@@ -17,8 +17,7 @@ import java.io.IOException;
  * <br><br>
  * Sample REST server
  * <br><br>
- * Occasionally, it is necessary to have an external service call into github.com
- * your application. That's what this class handles.
+ * Occasionally, it is necessary to have an external service call into your application. That's what this class handles.
  * Kiss itself uses more advanced methodology with build in authentication.  See <code>org.kissweb.restServer</code>
  * <br><br>
  * This class handles a more straight forward / common methodology that would be expected by an external server calling
