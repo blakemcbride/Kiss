@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     implementation 'com.mchange:c3p0:0.9.5.5'
-    implementation 'org.apache.groovy:groovy:4.0.24'
+    implementation 'org.apache.groovy:groovy:4.0.26'
     implementation 'javax.servlet:javax.servlet-api:4.0.1'
     implementation 'org.apache.logging.log4j:log4j-core:2.22.0'
     implementation 'org.apache.logging.log4j:log4j-api:2.22.0'
@@ -26,7 +26,7 @@ dependencies {
     implementation 'com.mchange:mchange-commons-java:0.2.20'
     implementation 'com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre8'
     // mysql-connector-java is not included because it must be manually downloaded
-    implementation 'org.postgresql:postgresql:42.7.4'
+    implementation 'org.postgresql:postgresql:42.7.5'
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
     implementation 'org.xerial:sqlite-jdbc:3.45.0.0'

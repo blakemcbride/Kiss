@@ -34,7 +34,7 @@
     <dependency>
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy</artifactId>
-      <version>4.0.24</version>
+      <version>4.0.26</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
@@ -83,7 +83,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.4</version>
+      <version>42.7.5</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
