@@ -27,6 +27,10 @@
         Utils.loadPage('screens/FileUpload/FileUpload', screenArea);
     });
 
+    $$('ai').onclick(function () {
+        Utils.cleanup();  //  clean up any context information
+        Utils.loadPage('screens/Ollama/Ollama', screenArea);
+    });
 
     $$('logout').onclick(function () {
         Server.logout();

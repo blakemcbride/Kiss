@@ -144,6 +144,19 @@
             return this;
         };
 
+        newElm.setHtmlValue = function (val) {
+            if (val)
+                val = val.trim();
+            if (!val) {
+                jqObj.val(originalValue='');
+                return this;
+            }
+            let encodedValue = $('<div/>').text(val).html();
+            originalValue = val;
+            jqObj.val(encodedValue);
+            return this;
+        };
+
         newElm.clear = function () {
             newElm.setValue('');
             return this;

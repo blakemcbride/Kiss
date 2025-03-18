@@ -87,6 +87,19 @@ public class RestClient {
     }
 
     /**
+     * Call a REST service sending a JSON object and returning a JSON object.
+     *
+     * @param method
+     * @param urlStr
+     * @param out
+     * @return
+     * @throws IOException
+     */
+    public JSONObject jsonCall(String method, String urlStr, JSONObject out) throws IOException {
+        return jsonCall(method, urlStr, out, null);
+    }
+
+    /**
      * Call a REST service sending a JSON array and returning a JSON object.
      *
      * @param method POST / GET / etc.
@@ -220,7 +233,7 @@ public class RestClient {
                 for (String header : headers.keySet())
                     con.setRequestProperty(header, headers.getString(header));
             con.setDoInput(true);
-            if (outStr != null && outStr.length() > 0) {
+            if (outStr != null && !outStr.isEmpty()) {
                 con.setDoOutput(true);
                 try (OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream())) {
                     out.write(outStr);

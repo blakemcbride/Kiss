@@ -527,6 +527,7 @@ class components {
      *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code>whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
      *     <tr><td>    readOnly([flg])     </td><td>     sets control to read-only (or the reverse if the optional argument is <code>false</code>)       </td></tr>
      *     <tr><td>    readWrite([flg])     </td><td>     sets control to read-write (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    setHtmlValue(val)     </td><td>     sets the string inside the control. The string is interpreted as HTML.             </td></tr>
      *     <tr><td>    setValue(val)     </td><td>     sets the string inside the control              </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
      * </table>

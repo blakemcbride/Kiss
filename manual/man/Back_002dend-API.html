@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.1, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.1.1, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Back-end API (Kiss Manual)</title>
@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (January 16, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (March 18, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -118,7 +118,8 @@ documentation is contained in the JavaDocs.  See <a class="xref" href="Orientati
 <li><a href="#Database-API" accesskey="1">Database API</a></li>
 <li><a href="#Microservices" accesskey="2">Microservices</a></li>
 <li><a href="#JSON" accesskey="3">JSON</a></li>
-<li><a href="#Utilities-1" accesskey="4">Utilities</a></li>
+<li><a href="#Large-Language-Models" accesskey="4">Large Language Models</a></li>
+<li><a href="#Utilities-1" accesskey="5">Utilities</a></li>
 </ul>
 <div class="section-level-extent" id="Database-API">
 <h3 class="section"><span>6.1 Database API<a class="copiable-link" href="#Database-API"> &para;</a></span></h3>
@@ -418,10 +419,22 @@ with the return data.  Useful JSON utilities include the following:
 </li><li>JSONArray.put(Object obj)
 </li></ul>
 
+</div>
+<div class="section-level-extent" id="Large-Language-Models">
+<h3 class="section"><span>6.4 Large Language Models<a class="copiable-link" href="#Large-Language-Models"> &para;</a></span></h3>
+
+<p><em class="emph">Kiss</em> provides a high-level interface to the <em class="emph">Ollama</em> large language model (LLM) server. This makes it easy for you to add LLM features to your application.
+Before this can function, however, you must have access to an <em class="emph">Ollama</em> server, either running on your local machine or a remote machine.
+</p>
+<ul class="itemize mark-bullet">
+<li>See <a class="uref" href="https://ollama.com">https://ollama.com</a> for information about installing the <em class="emph">Ollama</em> server.
+</li><li>The <em class="emph">Kiss</em> class <code class="code">org.kissweb.Ollama</code> implements the interface.
+</li><li><em class="emph">Kiss</em> comes with a complete demo of this functionality.
+</li></ul>
 
 </div>
 <div class="section-level-extent" id="Utilities-1">
-<h3 class="section"><span>6.4 Utilities<a class="copiable-link" href="#Utilities-1"> &para;</a></span></h3>
+<h3 class="section"><span>6.5 Utilities<a class="copiable-link" href="#Utilities-1"> &para;</a></span></h3>
 
 <p><em class="emph">Kiss</em> includes an ever-growing set of utilities to help deal with common tasks.
 These utilities are located under the <code class="code">src/main/core/org/kissweb</code> directory and have names such as
@@ -434,7 +447,7 @@ are documented in the JavaDocs.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (January 16, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (March 18, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

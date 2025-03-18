@@ -1,0 +1,25 @@
+<div>
+
+    <h3 style="margin-top: 0;">AI / LLM / Ollama Interface</h3>
+
+    <div style="margin-top: 40px; margin-bottom: 40px;">
+        Select a model:
+        <drop-down id="models" style="width: 240px;" required></drop-down>
+    </div>
+
+    <textbox-input id="prompt" style="height: 100px; width: 375px;" placeholder="Query?" minlength="10"></textbox-input>
+    <br><br>
+
+    <text-label id="response"></text-label>
+    <br><br>
+
+    <div>
+        <push-button id="send">Send</push-button>
+        <push-button id="new-context" style="margin-left: 20px;">New Context</push-button>
+    </div>
+
+    <div style="width: 500px; margin-top: 30px;">
+        Note: This depends on a locally running ollama server with downloaded models. See <a href="https://ollama.com">https://ollama.com</a>
+    </div>
+
+</div>

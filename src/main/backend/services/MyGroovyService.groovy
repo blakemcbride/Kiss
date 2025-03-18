@@ -1,10 +1,7 @@
 package services
 
 import org.json.JSONObject
-import org.kissweb.database.ArrayListInteger
 import org.kissweb.database.Connection
-import org.kissweb.database.Record
-import org.kissweb.restServer.GroovyService
 import org.kissweb.restServer.ProcessServlet
 import org.kissweb.restServer.MainServlet
 
