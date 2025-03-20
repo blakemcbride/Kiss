@@ -1,5 +1,6 @@
 package org.kissweb;
 
+import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -12,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -24,6 +26,7 @@ import java.util.regex.Pattern;
  */
 public class Ollama {
 
+    private static final Logger logger = Logger.getLogger(Ollama.class);
     private static final Pattern thinkPattern = Pattern.compile("(?s).*<think>(.*?)</think>(.*)"); // for integration with ollama
     private String URL = "http://localhost:11434/api/";
     private String model = null;
@@ -110,6 +113,7 @@ public class Ollama {
                 return null;
             }
         } catch (Exception e) {
+            logger.error(e);
             return null;
         } finally {
             if (connection != null)
@@ -173,7 +177,7 @@ public class Ollama {
             int responseCode = con.getResponseCode();
             InputStream inputStream;
 
-            if (responseCode >= 200  &&  responseCode < 300)
+            if (responseCode >= 200 && responseCode < 300)
                 inputStream = con.getInputStream();
             else
                 inputStream = con.getErrorStream();
@@ -194,6 +198,8 @@ public class Ollama {
                     }
                 }
             }
+        } catch (Exception e) {
+            logger.error(e);
         } finally {
             if (con != null)
                 con.disconnect();
@@ -253,4 +259,81 @@ public class Ollama {
                 .replaceAll("\\*{2}(.*?)\\*{2}", "<b>$1</b>");
     }
 
+    /**
+     * Gets the embeddings for the given text by calling the Ollama REST API.
+     * Embedding are generally model specific.
+     *
+     * @param model The model to use for generating embeddings.
+     * @param text The input text for which embeddings are requested.
+     * @return A double array representing the embeddings, or an empty array if an error occurs.
+     */
+    public double[][] getEmbeddings(String model, String text) {
+        final String urlStr = URL + "embed";
+        HttpURLConnection connection = null;
+        StringBuilder responseBuilder = new StringBuilder();
+
+        try {
+            URL url = new URL(urlStr);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setConnectTimeout(5000); // 5 seconds timeout
+            connection.setReadTimeout(5000);    // 5 seconds timeout
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            // Create the JSON request payload
+            JSONObject requestJson = new JSONObject();
+            requestJson.put("input", text);
+            // Optionally, include the model if needed:
+            requestJson.put("model", model);
+            String requestBody = requestJson.toString();
+
+            // Write the JSON payload to the request body
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] inputBytes = requestBody.getBytes(StandardCharsets.UTF_8);
+                os.write(inputBytes, 0, inputBytes.length);
+            }
+
+            int responseCode = connection.getResponseCode();
+            InputStream inputStream;
+            if (responseCode >= 200 && responseCode < 300)
+                inputStream = connection.getInputStream();
+            else
+                inputStream = connection.getErrorStream();
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                String line;
+                while ((line = reader.readLine()) != null)
+                    responseBuilder.append(line);
+            }
+
+            // Parse the JSON response. We expect a top-level "embeddings" key holding an array of arrays.
+            JSONObject responseJson = new JSONObject(responseBuilder.toString());
+            JSONArray embeddingsOuter = responseJson.getJSONArray("embeddings");
+            if (embeddingsOuter == null) {
+                // "embeddings" not present or not an array
+                return new double[0][];
+            }
+
+            // Convert the 2D JSON array into a 2D double array.
+            double[][] embeddings = new double[embeddingsOuter.length()][];
+            for (int i = 0; i < embeddingsOuter.length(); i++) {
+                JSONArray innerArray = embeddingsOuter.getJSONArray(i);
+                double[] row = new double[innerArray.length()];
+                for (int j = 0; j < innerArray.length(); j++)
+                    row[j] = innerArray.getDouble(j);
+                embeddings[i] = row;
+            }
+
+            return embeddings;
+        } catch (Exception e) {
+            logger.error(e);
+            // Return an empty 2D array if there's any error.
+            return new double[0][];
+
+        } finally {
+            if (connection != null)
+                connection.disconnect();
+        }
+    }
 }
