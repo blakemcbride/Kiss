@@ -135,12 +135,12 @@ public class Ollama {
         HttpURLConnection con = null;
         StringBuilder res = new StringBuilder();
         JSONObject injson = new JSONObject();
+
+        // Add mandatory fields.
         injson.put("model", model);
         injson.put("prompt", prompt);
         String outStr = injson.toString();
 
-        String method = "POST";
-        String responseString = null;
         String proxyServerURL = null;
         int proxyServerPort = 0;
         SSLContext context = null;
@@ -165,7 +165,7 @@ public class Ollama {
             con.setReadTimeout(30000);
             con.setUseCaches(false);
 
-            con.setRequestMethod(method);
+            con.setRequestMethod("POST");
             con.setDoInput(true);
             if (outStr != null && !outStr.isEmpty()) {
                 con.setDoOutput(true);
@@ -181,17 +181,17 @@ public class Ollama {
                 inputStream = con.getInputStream();
             else
                 inputStream = con.getErrorStream();
+
             if (inputStream != null) {
                 try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
                     String line;
                     while ((line = in.readLine()) != null) {
-                        // Optionally, if each line is a valid JSON chunk,
-                        // try to check for the "done" flag.
+                        // Attempt to parse each chunk as JSON and extract the "response" text.
                         try {
                             JSONObject jsonChunk = new JSONObject(line);
                             res.append(jsonChunk.getString("response"));
                             if (jsonChunk.has("done") && jsonChunk.getBoolean("done"))
-                                break;  // We got the final chunk.
+                                break;  // Stop when final chunk is received.
                         } catch (JSONException e) {
                             // If the chunk isn’t valid JSON, ignore and continue.
                         }
@@ -335,5 +335,18 @@ public class Ollama {
             if (connection != null)
                 connection.disconnect();
         }
+    }
+
+    /**
+     * Gets the embeddings for the given text by calling the Ollama REST API using the default model.
+     * Embedding are generally model specific.
+     *
+     * @param prompt The input text for which embeddings are requested.
+     * @return A double array representing the embeddings, or an empty array if an error occurs.
+     */
+    public double [][] getEmbeddings(String prompt) throws Exception {
+        if (model == null || model.isEmpty())
+            throw new Exception("Model not set");
+        return getEmbeddings(model, prompt);
     }
 }

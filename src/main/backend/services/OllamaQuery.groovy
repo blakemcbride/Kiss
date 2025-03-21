@@ -11,12 +11,13 @@ class OllamaQuery {
         String model = injson.getString("model")
         String prompt = injson.getString("prompt")
         Ollama server = new Ollama()
-        JSONObject res = server.send(model, prompt)
+        server.selectModel(model)
+        JSONObject res = server.send(prompt)
         String response = res.getString("response")
         outjson.put("textResponse", response)
         outjson.put("htmlResponse", Ollama.toHtml(response))
 
-        double [][] embeddings = server.getEmbeddings(model, prompt)
+        double [][] embeddings = server.getEmbeddings(prompt)
         int x = 1
     }
 
