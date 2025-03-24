@@ -78,7 +78,7 @@ class AGGrid {
                         setTimeout(function() {
                             if (self.gridElement.offsetParent!= null && self.gridInstantiated)
                                 params.api.sizeColumnsToFit();
-                        });
+                        }, 100);
                     });
                 }
             }/* ,
