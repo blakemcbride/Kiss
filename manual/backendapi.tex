@@ -359,7 +359,10 @@ JSONArray.put(Object obj)
 
 @section Large Language Models
 
-@emph{Kiss} provides a high-level interface to the @emph{Ollama} large language model (LLM) server. This makes it easy for you to add LLM features to your application.
+@emph{Kiss} provides a high-level interface to both the @emph{Ollama} large language model (LLM) and the OpenAI (chatGPT) server. This makes it easy for you to add LLM features to your application.
+
+@subsection Ollama
+
 Before this can function, however, you must have access to an @emph{Ollama} server, either running on your local machine or a remote machine.
 
 @itemize @bullet
@@ -370,6 +373,27 @@ The @emph{Kiss} class @code{org.kissweb.Ollama} implements the interface.
 @item
 @emph{Kiss} comes with a complete demo of this functionality.
 @end itemize
+
+@subsection OpenAI (chatGPT)
+
+Unlike the @emph{Ollama} server, which runs locally, the @emph{chatGPT}
+server runs on the cloud-based @emph{OpenAI} server.  In order to use
+this server, you must have an account with them.  Once you get an
+account, you will need an API Key to interface with their server.
+Once you have this API Key, you may query @emph{chatGPT}.
+
+The single @emph{KISS} class that interfaces with @emph{OpenAI} is
+named @emph{OpenAI}.  
+
+Typical usage would look as follows:
+
+@example
+    String apiKey = "xxxxxxxxxxxxxxx";
+    OpenAI chatGPT = new OpenAI(apiKey, "gpt-3.5-turbo")
+    String result = chatGPT.send("Who is president Bush?")
+@end example
+
+See that class for documentation.
 
 @section Utilities
 
