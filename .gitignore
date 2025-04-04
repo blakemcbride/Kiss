@@ -149,3 +149,4 @@ atlassian-ide-plugin.xml
 src/main/frontend/lib/jquery*
 
 /build/
+manual/asciidoc/
