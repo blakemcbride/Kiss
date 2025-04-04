@@ -11,6 +11,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * This class provides an interface to the OpenAI chat API.
+ */
 public class OpenAI {
 
     private static final Logger logger = Logger.getLogger(OpenAI.class);
@@ -21,17 +24,40 @@ public class OpenAI {
     private float temperature = 0.7f;
     private JSONObject lastResponse;
 
+    /**
+     * Initialize an interface to OpenAI.
+     *
+     * @param apiKey from OpenAI
+     * @param model "gpt-4-turbo" or "gpt-3.5-turbo", "gpt-4o", "o1", etc.
+     */
     public OpenAI(String apiKey, String model) {
-        this.apiKey = apiKey;  // from OpenAI
-        this.model = model;    //  "gpt-4-turbo" r gpt-3.5-turbo, gpt-4o, o1, etc.
+        this.apiKey = apiKey;
+        this.model = model;
     }
 
+    /**
+     * The temperature is a value between 0 and 2 that controls the randomness of the response.<br>
+     * For example:<br>
+     * 0.0	Deterministic: Always picks the most likely next word;	Math, logic, programming, technical writing<br>
+     * 0.5	Balanced: Some variation, still coherent;	General conversation, articles<br>
+     * 0.7	Default: More creative and varied;	Brainstorming, casual writing<br>
+     * 1.0+	Highly creative or random;	Poetry, fiction, jokes, character voices<br>
+     * 1.5–2.0	Often incoherent or silly;	Experimental or absurdist tasks<br>
+     *
+     *
+     * @param temperature
+     */
     public void setTemperature(float temperature) {
         this.temperature = temperature;
     }
 
+    /**
+     * Send a query to OpenAI and receive a response.
+     *
+     * @param query
+     * @return
+     */
     public String send(String query) {
-
         JSONObject request = new JSONObject();
         request.put("model", model);
         request.put("temperature", temperature);
@@ -79,6 +105,11 @@ public class OpenAI {
         }
     }
 
+    /**
+     * Get the full JSON response from the last OpenAI request.
+     *
+     * @return
+     */
     public JSONObject getLastFullResponse() {
         return lastResponse;
     }
