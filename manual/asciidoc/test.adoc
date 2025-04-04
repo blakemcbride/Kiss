@@ -1,0 +1,34 @@
+:doctype: book
+:title-page:
+
+// This preamble will appear on the title page.
+This is The Title page text
+
+// Now, we introduce the TOC.
+:toc: macro
+toc::[]
+
+
+
+= Part 1
+Sample content.
+
+== Section 1-1
+
+
+== Section Section 2
+
+More content.
+
+
+= Part 2
+Sample content.
+
+== Section 2-1
+
+
+== Section Section 2
+
+More content.
+
+

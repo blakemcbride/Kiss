@@ -320,12 +320,15 @@ the entire @emph{Kiss} system and unit tests.
 
 All tests can be run by executing the following command:
 @example
-java -jar work/KissUnitTest.jar -cp work/KissUnitTest.jar 
-                                                  --scan-class-path
+java -jar work/KissUnitTest.jar  execute \
+  --class-path work/KissUnitTest.jar  --scan-class-path
 @end example
 Alternatively, a single test can be run as follows:
 @example
-java -jar work/KissUnitTest.jar --select-class org.kissweb.IniFileTest
+java -jar work/KissUnitTest.jar \
+  execute \
+  --class-path work/KissUnitTest.jar \
+  --select-class org.kissweb.IniFileTest
 @end example
 where @code{org.kissweb.IniFileTest} is the full path to the desired test.
 

@@ -1,0 +1,28 @@
+= My Document Title
+:doctype: book
+:title-page:
+
+// This preamble will appear on the title page.
+Your Title Page Content Goes Here
+
+= Back of Title Page Content
+Content or information for the back of the title page goes here.
+
+// Table of Contents
+:toc: macro
+toc::[]
+
+// Blank Page
+ifdef::backend-pdf[]
+[role="page-break"]
+--
+--
+endif::[]
+
+// Part 1 and subsequent content
+== Part 1
+Sample content for part 1.
+
+== Part 2
+Sample content for part 2.
+

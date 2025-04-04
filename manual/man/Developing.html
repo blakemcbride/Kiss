@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Developing">
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (March 18, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 4, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -414,12 +414,15 @@ the entire <em class="emph">Kiss</em> system and unit tests.
 
 <p>All tests can be run by executing the following command:
 </p><div class="example">
-<pre class="example-preformatted">java -jar work/KissUnitTest.jar -cp work/KissUnitTest.jar 
-                                                  --scan-class-path
+<pre class="example-preformatted">java -jar work/KissUnitTest.jar  execute \
+  --class-path work/KissUnitTest.jar  --scan-class-path
 </pre></div>
 <p>Alternatively, a single test can be run as follows:
 </p><div class="example">
-<pre class="example-preformatted">java -jar work/KissUnitTest.jar --select-class org.kissweb.IniFileTest
+<pre class="example-preformatted">java -jar work/KissUnitTest.jar \
+  execute \
+  --class-path work/KissUnitTest.jar \
+  --select-class org.kissweb.IniFileTest
 </pre></div>
 <p>where <code class="code">org.kissweb.IniFileTest</code> is the full path to the desired test.
 </p>
@@ -543,7 +546,7 @@ See that file for more details.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (March 18, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (April 4, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

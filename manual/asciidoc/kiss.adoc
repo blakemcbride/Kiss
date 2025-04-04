@@ -1,0 +1,10 @@
+
+= Kiss Developer Manual
+
+:doctype: book
+
+:toc: macro
+toc::[]
+
+include::intro.adoc[]
+
