@@ -542,8 +542,24 @@ IDE.  Instructions for setting up some of the IDEs are located under the
 
 @anchor{updates} @section Kiss Framework Updates
 
-The @emph{Kiss} framework is continually enhanced.  @emph{Kiss}
-includes a mechanism to upgrade your application. 
+The @emph{Kiss} framework is continually enhanced.  
+@emph{Kiss} includes a mechanism to upgrade your application that will work well if you follow certain rules.
+
+Certain portions of the @emph{Kiss} directory hierarchy are intended to be core parts of @emph{Kiss} and untouched by the developer.
+(Of course, you can change anything you like; it is just that your ability to perform an update to the @emph{Kiss} system will be hampered.)
+If you have changes needed to the core of the system, my suggestion is to send me the changes so I can incorporate that additional functionality into the system for everyone.
+Otherwise, it will be increasingly difficult for you to receive additions made to the core of the system.
+
+The following directories (along with their sub-directories) are not intended to be changed:
+
+@itemize @bullet
+@item
+src/main/core (except src/main/core/builder/Tasks.java)
+@item
+src/main/frontend/kiss
+@item
+the scripts located in the root of the @emph{Kiss} system
+@end itemize
 
 The process of upgrading your application is as follows:
 

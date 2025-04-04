@@ -624,9 +624,22 @@ IDE.  Instructions for setting up some of the IDEs are located under the
 <div class="section-level-extent" id="Kiss-Framework-Updates">
 <h3 class="section"><span>2.12 Kiss Framework Updates<a class="copiable-link" href="#Kiss-Framework-Updates"> &para;</a></span></h3>
 
-<p>The <em class="emph">Kiss</em> framework is continually enhanced.  <em class="emph">Kiss</em>
-includes a mechanism to upgrade your application. 
+<p>The <em class="emph">Kiss</em> framework is continually enhanced.  
+<em class="emph">Kiss</em> includes a mechanism to upgrade your application that will work well if you follow certain rules.
 </p>
+<p>Certain portions of the <em class="emph">Kiss</em> directory hierarchy are intended to be core parts of <em class="emph">Kiss</em> and untouched by the developer.
+(Of course, you can change anything you like; it is just that your ability to perform an update to the <em class="emph">Kiss</em> system will be hampered.)
+If you have changes needed to the core of the system, my suggestion is to send me the changes so I can incorporate that additional functionality into the system for everyone.
+Otherwise, it will be increasingly difficult for you to receive additions made to the core of the system.
+</p>
+<p>The following directories (along with their sub-directories) are not intended to be changed:
+</p>
+<ul class="itemize mark-bullet">
+<li>src/main/core (except src/main/core/builder/Tasks.java)
+</li><li>src/main/frontend/kiss
+</li><li>the scripts located in the root of the <em class="emph">Kiss</em> system
+</li></ul>
+
 <p>The process of upgrading your application is as follows:
 </p>
 <ol class="enumerate">
