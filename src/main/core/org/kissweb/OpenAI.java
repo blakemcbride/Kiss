@@ -4,13 +4,6 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-
 /**
  * This class provides an interface to the OpenAI chat API.
  */
@@ -57,7 +50,10 @@ public class OpenAI {
      * @param query
      * @return
      */
-    public String send(String query) {
+    public String send(String query) throws Exception {
+        if (model == null || model.isEmpty())
+            throw new Exception("Model not set");
+        RestClient rc = new RestClient();
         JSONObject request = new JSONObject();
         request.put("model", model);
         request.put("temperature", temperature);
@@ -75,34 +71,11 @@ public class OpenAI {
 
         request.put("messages", messages);
 
-        try {
-            URL url = new URL(OpenAIURL);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
-            conn.setRequestMethod("POST");
-            conn.setDoOutput(true);
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + apiKey);
-
-            try (OutputStream os = conn.getOutputStream()) {
-                os.write(request.toString().getBytes(StandardCharsets.UTF_8));
-            }
-
-            //int responseCode = conn.getResponseCode();
-
-            StringBuilder response = new StringBuilder();
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                String inputLine;
-                while ((inputLine = in.readLine()) != null)
-                    response.append(inputLine).append("\n");
-            }
-            lastResponse = new JSONObject(response.toString());
-            return lastResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
-        } catch (Exception e) {
-            logger.error(e);
-            lastResponse = null;
-            return null;
-        }
+        JSONObject headers = new JSONObject();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer " + apiKey);
+        lastResponse = rc.jsonCall("POST", OpenAIURL, request.toString(), headers);
+        return lastResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
     }
 
     /**
