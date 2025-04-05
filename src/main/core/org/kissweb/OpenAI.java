@@ -16,6 +16,7 @@ public class OpenAI {
     private final String model;
     private float temperature = 0.7f;
     private JSONObject lastResponse;
+    private RestClient restClient;
 
     /**
      * Initialize an interface to OpenAI.
@@ -53,7 +54,7 @@ public class OpenAI {
     public String send(String query) throws Exception {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
-        RestClient rc = new RestClient();
+        restClient = new RestClient();
         JSONObject request = new JSONObject();
         request.put("model", model);
         request.put("temperature", temperature);
@@ -74,8 +75,33 @@ public class OpenAI {
         JSONObject headers = new JSONObject();
         headers.put("Content-Type", "application/json");
         headers.put("Authorization", "Bearer " + apiKey);
-        lastResponse = rc.jsonCall("POST", OpenAIURL, request.toString(), headers);
+        lastResponse = restClient.jsonCall("POST", OpenAIURL, request.toString(), headers);
         return lastResponse.getJSONArray("choices").getJSONObject(0).getJSONObject("message").getString("content");
+    }
+
+    /**
+     * Get the embeddings for the given text by calling the OpenAI REST API.
+     * Embedding are generally model specific.
+     *
+     * @param text The input text for which embeddings are requested.
+     * @return A vector representing the embeddings, or an empty vector if an error occurs.
+     */
+    public double [] getEmbeddings(String text) throws Exception {
+        if (model == null || model.isEmpty())
+            throw new Exception("Model not set");
+        restClient = new RestClient();
+        JSONObject request = new JSONObject();
+        request.put("input", text);
+        request.put("model", model);
+        JSONObject headers = new JSONObject();
+        headers.put("Content-Type", "application/json");
+        headers.put("Authorization", "Bearer " + apiKey);
+        lastResponse = restClient.jsonCall("POST", "https://api.openai.com/v1/embeddings", request.toString(), headers);
+        JSONArray arry = lastResponse.getJSONArray("data").getJSONObject(0).getJSONArray("embedding");
+        double [] result = new double[arry.length()];
+        for (int i = 0; i < arry.length(); i++)
+            result[i] = arry.getDouble(i);
+        return result;
     }
 
     /**
@@ -87,4 +113,21 @@ public class OpenAI {
         return lastResponse;
     }
 
+    /**
+     * The HTTP response code for the last call
+     *
+     * @return
+     */
+    public int getResponseCode() {
+        return restClient == null ? 0 : restClient.getResponseCode();
+    }
+
+    /**
+     * Returns the response string for the last call.
+     *
+     * @return
+     */
+    public String getResponseString() {
+        return restClient == null ? null : restClient.getResponseString();
+    }
 }

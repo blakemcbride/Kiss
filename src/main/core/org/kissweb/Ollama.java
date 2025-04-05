@@ -20,6 +20,7 @@ public class Ollama {
     private static final Pattern thinkPattern = Pattern.compile("(?s).*<think>(.*?)</think>(.*)"); // for integration with ollama
     private String URL = "http://localhost:11434/api/";
     private String model = null;
+    private RestClient restClient;
 
     /**
      * Create a new Ollama client using the default local server.
@@ -56,9 +57,9 @@ public class Ollama {
      */
     public boolean isOllamaUp() {
         try {
-            RestClient rc = new RestClient();
-            rc.strCall("GET", URL + "version");
-            if (rc.getResponseCode() == 200)
+            restClient = new RestClient();
+            restClient.strCall("GET", URL + "version");
+            if (restClient.getResponseCode() == 200)
                 return true;
         } catch (Exception e) {
             // ignore
@@ -73,8 +74,8 @@ public class Ollama {
      */
     public List<String> getAvailableModels() throws IOException {
         List<String> models = new ArrayList<>();
-        RestClient rc = new RestClient();
-        JSONObject json = rc.jsonCall("GET", URL + "tags");
+        restClient = new RestClient();
+        JSONObject json = restClient.jsonCall("GET", URL + "tags");
         JSONArray jsonModels = json.getJSONArray("models");
         for (int i=0 ; i < jsonModels.length() ; i++)
             models.add(jsonModels.getJSONObject(i).getString("model"));
@@ -91,8 +92,8 @@ public class Ollama {
     public String send(String prompt) throws Exception {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
-        RestClient rc = new RestClient();
-        String str = rc.strCall("POST", URL + "generate", new JSONObject().put("model", model).put("prompt", prompt).toString());
+        restClient = new RestClient();
+        String str = restClient.strCall("POST", URL + "generate", new JSONObject().put("model", model).put("prompt", prompt).toString());
         str = str.replaceAll("\\}\\{", "},{");
         JSONArray ja = new JSONArray("[" + str + "]");
         StringBuilder sb = new StringBuilder();
@@ -137,8 +138,8 @@ public class Ollama {
     public double[] getEmbeddings(String model, String text) throws Exception {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
-        RestClient rc = new RestClient();
-        String str = rc.strCall("POST", URL + "embed", new JSONObject().put("model", model).put("input", text).toString());
+        restClient = new RestClient();
+        String str = restClient.strCall("POST", URL + "embed", new JSONObject().put("model", model).put("input", text).toString());
         JSONObject responseJson = new JSONObject(str);
         JSONArray embeddingsOuter = responseJson.getJSONArray("embeddings");
         if (embeddingsOuter == null) {
@@ -169,5 +170,23 @@ public class Ollama {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
         return getEmbeddings(model, prompt);
+    }
+
+    /**
+     * The HTTP response code for the last call
+     *
+     * @return
+     */
+    public int getResponseCode() {
+        return restClient == null ? 0 : restClient.getResponseCode();
+    }
+
+    /**
+     * Returns the response string for the last call.
+     *
+     * @return
+     */
+    public String getResponseString() {
+        return restClient == null ? null : restClient.getResponseString();
     }
 }
