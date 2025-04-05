@@ -130,8 +130,8 @@ public class RestClient {
      *
      * @param method POST / GET / etc.
      * @param urlStr URL endpoint
-     * @param outStr what is sent to the service
-     * @param headers representing all of the headers
+     * @param outStr what is sent to the service or null
+     * @param headers representing all the headers or null
      * @return what is returned from the service
      * @throws IOException if error
      * @throws ParserConfigurationException if error
@@ -162,6 +162,60 @@ public class RestClient {
     }
 
     /**
+     * Call a REST service sending a String and returning a String.
+     * <br><br>
+     * 'headers' is a JSON object.  Each element is a header / value combination.  These are sent as the header of
+     *  the REST call.
+     *
+     * @param method POST / GET / etc.
+     * @param urlStr URL endpoint
+     * @param outStr what is sent to the service or null
+     * @param headers representing all the headers or null
+     * @return the String return from the call
+     * @throws IOException if the communication fail, an exception is thrown
+     */
+    public String strCall(String method, String urlStr, String outStr, JSONObject headers) throws IOException {
+        if (debugFileName != null)
+            Files.write(Paths.get("S-" + debugFileName), outStr == null ? "".getBytes() : outStr.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
+        int ires = performService(method, urlStr, outStr, headers);
+        if (ires >= 200  &&  ires < 300) {
+            if (debugFileName != null)
+                Files.write(Paths.get("R-" + debugFileName), responseString.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
+            try {
+                return responseString;
+            } catch (JSONException e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Call a REST service sending a String and returning a String.
+     *
+     * @param method POST / GET / etc.
+     * @param urlStr URL endpoint
+     * @param outStr what is sent to the service or null
+     * @return the String return from the call
+     * @throws IOException if the communication fail, an exception is thrown
+     */
+    public String strCall(String method, String urlStr, String outStr) throws IOException {
+        return strCall(method, urlStr, outStr, null);
+    }
+
+    /**
+     * Call a REST service returning a String.
+     *
+     * @param method POST / GET / etc.
+     * @param urlStr URL endpoint
+     * @return the String return from the call
+     * @throws IOException if the communication fail, an exception is thrown
+     */
+    public String strCall(String method, String urlStr) throws IOException {
+        return strCall(method, urlStr, null, null);
+    }
+
+    /**
      * Call a REST service sending a string and returning a JSON object.
      * <br><br>
      * 'headers' is a JSON object.  Each element is a header / value combination.  These are sent as the header of
@@ -169,8 +223,8 @@ public class RestClient {
      *
      * @param method POST / GET / etc.
      * @param urlStr URL endpoint
-     * @param outStr what is sent to the service
-     * @param headers representing all of the headers
+     * @param outStr what is sent to the service or null
+     * @param headers representing all the headers or null
      * @return the JSON return from the call
      * @throws IOException if the communication fail, an exception is thrown
      */
@@ -191,6 +245,22 @@ public class RestClient {
     }
 
     /**
+     * Call a REST service sending a string and returning a JSON object.
+     * <br><br>
+     * 'headers' is a JSON object.  Each element is a header / value combination.  These are sent as the header of
+     *  the REST call.
+     *
+     * @param method POST / GET / etc.
+     * @param urlStr URL endpoint
+     * @param outStr what is sent to the service
+     * @return the JSON return from the call
+     * @throws IOException if the communication fail, an exception is thrown
+     */
+    public JSONObject jsonCall(String method, String urlStr, String outStr) throws IOException {
+        return jsonCall(method, urlStr, outStr, null);
+    }
+
+    /**
      * Performs the web service call.  Sends and returns raw strings.
      * <br><br>
      * 'headers' is a JSON object.  Each element is a header / value combination.  These are sent as the header of
@@ -198,8 +268,8 @@ public class RestClient {
      *
      * @param method POST / GET / etc.
      * @param urlStr the URL endpoint
-     * @param outStr what is sent to the service
-     * @param headers representing all of the headers
+     * @param outStr what is sent to the service or null
+     * @param headers representing all the headers or null
      * @return the HTTP return code
      * @throws IOException if the communication fail, an exception is thrown
      */
