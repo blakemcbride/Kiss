@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="System-Setup">
 <div class="nav-panel">
 <p>
-Next: <a href="Orientation.html" accesskey="n" rel="next">Orientation</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 8, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Orientation.html" accesskey="n" rel="next">Orientation</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 9, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -506,9 +506,10 @@ system should be used for the initial step which downloads the external
 dependencies (jar files).
 </p>
 <p>The build system included with <em class="emph">Kiss</em> (called <em class="emph">bld</em>) has
-been tested on Linux, macOS, and Windows.  The system also includes an
-<em class="emph">Ant</em> build file (named <em class="emph">build.xml</em>) that is only used for
-IDE integration with the included <em class="emph">bld</em> system.
+been tested on Linux, macOS, Windows, and several other OSs.  The
+system also includes an <em class="emph">Ant</em> build file (named <em class="emph">build.xml</em>)
+that is only used for IDE integration with the included <em class="emph">bld</em>
+system.
 </p>
 <p>The build system included with Kiss is written in Java and is located
 under the <em class="emph">src/main/core/org/kissweb/builder/</em> directory.  This
@@ -541,17 +542,44 @@ are unneeded.
 <p>The main tasks that will be of interest to you are as follows:
 </p>
 <dl class="table">
+<dt><code class="code">help</code></dt>
+<dd><p>This will display a help message.
+</p></dd>
+<dt><code class="code">list-tasks</code></dt>
+<dd><p>This will list all of the available tasks in <em class="emph">bld</em>.
+</p></dd>
 <dt><code class="code">libs</code></dt>
 <dd><p>This task is only required if you intend to use your IDE to build the
 remainder of the system.  It installs the required dependencies.
 </p></dd>
 <dt><code class="code">develop</code></dt>
 <dd><p>This will cause the entire system to build (not repeating unnecessary
-steps) and start up a Tomcat instance to run the system in a
-development mode.  The system will be available from your local
-browser at <code class="code">http://localhost:8000</code>.  You may debug the
-application by attaching to the running <em class="emph">Tomcat</em> server at port
-9000.
+steps) and start up the back-end (Tomcat) and front-end servers used
+in development mode.  The system will be started in the foreground,
+meaning <em class="emph">bld</em> will not exit until you are done with the entire
+system.  The system will be available from your local browser at
+<code class="code">http://localhost:8000</code>.  You may debug the application by
+attaching to the running <em class="emph">Tomcat</em> server at port 9000.
+</p>
+<p>This only works from the command line and not from within an IDE.
+If you want to run the system from within the IDE, see the following targets.
+</p></dd>
+<dt><code class="code">run-backend</code></dt>
+<dd><p>This will build and run the development back-end server.  The back-end will
+be started and run in the background.
+</p></dd>
+<dt><code class="code">stop-backend</code></dt>
+<dd><p>This will stop the background back-end development server.
+</p></dd>
+<dt><code class="code">run-frontend</code></dt>
+<dd><p>This will run the development front-end server in the background.
+</p></dd>
+<dt><code class="code">stop-frontend</code></dt>
+<dd><p>This will stop the background back-end development server.
+</p></dd>
+<dt><code class="code">build</code></dt>
+<dd><p>This performs all of the steps necessary to set up and build the system but
+doesn&rsquo;t start up the Tomcat server.
 </p></dd>
 <dt><code class="code">war</code></dt>
 <dd><p>This will cause the system to generate the single file needed by a
@@ -564,18 +592,18 @@ production system.  It will end up in <em class="emph">work/Kiss.war</em>
 <dl class="table">
 <dt><code class="code">clean</code></dt>
 <dd><p>This task removes all files built but retains files that were downloaded from
-repositories (although <em class="emph">bld</em> caches those files anyway.)
+repositories (although <em class="emph">bld</em> caches those files anyway).
 </p></dd>
 <dt><code class="code">realclean</code></dt>
 <dd><p>This removes all built and downloaded files so the system should be everything
 you need to build it without any extraneous files.
 </p></dd>
-<dt><code class="code">all</code></dt>
-<dd><p>This performs all of the steps necessary to setup and build the system but
-doesn&rsquo;t start up the Tomcat server.
-</p></dd>
 <dt><code class="code">javadoc</code></dt>
 <dd><p>This task creates the Javadoc files that end up in <code class="code">work/javadoc</code>
+</p></dd>
+<dt><code class="code">jar</code></dt>
+<dd><p>This creates a jar file named <code class="code">work/Kiss.jar</code> This is useful when you want to use
+the <em class="emph">Kiss</em> system as a library in another system.
 </p></dd>
 <dt><code class="code">kisscmd</code></dt>
 <dd><p>This task creates a command-line JAR that can be used in a non-web, command-line application.
@@ -609,7 +637,7 @@ that, the IDE can be used to debug it by <em class="emph">attaching</em> to port
 9000.
 </p>
 <p><em class="emph">Kiss</em> also comes with an <em class="emph">ant</em> build that simply calls the
-native <em class="emph">bld</em> program.  This is useful as an intermediary between
+native <em class="emph">bld</em> program.  This is useful as an bridge between
 <em class="emph">bld</em> and the IDE since many IDEs support <em class="emph">ant</em>.
 </p>
 <p>Using your IDE to run the entire process is a bit tedious to initially
@@ -707,7 +735,7 @@ front-end API reference located in the <em class="emph">manual/jsdoc</em> direct
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Orientation.html">Orientation</a>, Previous: <a href="Introduction.html">Introduction</a>, Up: <a href="index.html">Kiss Developer Manual (April 8, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Orientation.html">Orientation</a>, Previous: <a href="Introduction.html">Introduction</a>, Up: <a href="index.html">Kiss Developer Manual (April 9, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

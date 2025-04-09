@@ -76,8 +76,11 @@ public class Tasks {
      */
     public static void listTasks() {
         println("");
-        println("develop                  build and run the entire system");
-        println("develop-backend          build and run backend only");
+        println("develop                  build and run the entire system in the foreground");
+        println("run-backend              build and run backend in the background");
+        println("run-frontend             build and run frontend in the background");
+        println("stop-backend             stop the background backend");
+        println("stop-frontend            stop the background frontend");
         println("build                    build the entire system but don't run it");
         println("war                      create deployable war file");
 
@@ -307,14 +310,14 @@ public class Tasks {
     }
 
     /**
-     * Build and run both the front-end and back-end
+     * Build and run both the front-end and back-end synchronously
      * <br><br>
      * 1. download needed jar files<br>
      * 2. build the system into a deployable war file<br>
      * 3. set up a local tomcat server<br>
      * 4. deploy the war file to the local tomcat<br>
-     * 5. build JavaDocs<br>
-     * 6. run the local tomcat<br>
+     * 5. run the local tomcat backend<br>
+     * 6. run the local tomcat frontend<br>
      */
     public static void develop() {
         Process proc;
@@ -341,17 +344,15 @@ public class Tasks {
     }
 
     /**
-     * Build and run the back-end only
+     * Build and run the back-end asynchronously
      * <br><br>
      * 1. download needed jar files<br>
      * 2. build the system into a deployable war file<br>
      * 3. set up a local tomcat server<br>
      * 4. deploy the war file to the local tomcat<br>
-     * 5. build JavaDocs<br>
-     * 6. run the local tomcat<br>
+     * 5. run the local tomcat backend<br>
      */
-    public static void developBackend() {
-        Process proc;
+    public static void startBackend() {
         buildSystem();
         setupTomcat();
         copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
@@ -359,17 +360,37 @@ public class Tasks {
             runWait(true, "tomcat\\bin\\debug.cmd");
         else
             runWait(true, "tomcat/bin/debug");
-        println("***** BACKEND IS RUNNING *****");
+        println("***** SERVER IS RUNNING *****");
         println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out or via the view-log command");
-        println("You'll need to start the front-end server independently.");
+        println("You can browse to http://localhost:8000   (do not use port 8080)");
         println("The app can also be debugged at port " + debugPort);
-        println("hit any key to stop the backend server");
-        readChar();
+        println("To stop the backend, type 'bld stop-backend'");
+    }
+
+    /**
+     * Stop the backend development server
+     */
+    public static void stopBackend() {
         println("shutting down tomcat");
         if (isWindows)
             runWait(true, "tomcat\\bin\\stopdebug.cmd");
         else
             runWait(true, "tomcat/bin/shutdown.sh");
+    }
+
+    /**
+     * Start the frontend development server.
+     */
+    public static void startFrontend() {
+        runBackground("java -jar SimpleWebServer.jar -d src/main/frontend");
+        println("To stop the frontend, type 'bld stop-frontend'");
+    }
+
+    /**
+     * Stop the front-end development server.
+     */
+    public static void stopFrontend() {
+        stopFrontendServer();
     }
 
     /**

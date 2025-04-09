@@ -437,9 +437,10 @@ system should be used for the initial step which downloads the external
 dependencies (jar files).
 
 The build system included with @emph{Kiss} (called @emph{bld}) has
-been tested on Linux, macOS, and Windows.  The system also includes an
-@emph{Ant} build file (named @emph{build.xml}) that is only used for
-IDE integration with the included @emph{bld} system.
+been tested on Linux, macOS, Windows, and several other OSs.  The
+system also includes an @emph{Ant} build file (named @emph{build.xml})
+that is only used for IDE integration with the included @emph{bld}
+system.
 
 The build system included with Kiss is written in Java and is located
 under the @emph{src/main/core/org/kissweb/builder/} directory.  This
@@ -472,16 +473,36 @@ are unneeded.
 The main tasks that will be of interest to you are as follows:
 
 @table @code
+@item help
+This will display a help message.
+@item list-tasks
+This will list all of the available tasks in @emph{bld}.
 @item libs
 This task is only required if you intend to use your IDE to build the
 remainder of the system.  It installs the required dependencies.
 @item develop
 This will cause the entire system to build (not repeating unnecessary
-steps) and start up a Tomcat instance to run the system in a
-development mode.  The system will be available from your local
-browser at @code{http://localhost:8000}.  You may debug the
-application by attaching to the running @emph{Tomcat} server at port
-9000.
+steps) and start up the back-end (Tomcat) and front-end servers used
+in development mode.  The system will be started in the foreground,
+meaning @emph{bld} will not exit until you are done with the entire
+system.  The system will be available from your local browser at
+@code{http://localhost:8000}.  You may debug the application by
+attaching to the running @emph{Tomcat} server at port 9000.
+
+This only works from the command line and not from within an IDE.
+If you want to run the system from within the IDE, see the following targets.
+@item run-backend
+This will build and run the development back-end server.  The back-end will
+be started and run in the background.
+@item stop-backend
+This will stop the background back-end development server.
+@item run-frontend
+This will run the development front-end server in the background.
+@item stop-frontend
+This will stop the background back-end development server.
+@item build
+This performs all of the steps necessary to set up and build the system but
+doesn't start up the Tomcat server.
 @item war
 This will cause the system to generate the single file needed by a
 production system.  It will end up in @emph{work/Kiss.war}
@@ -492,15 +513,15 @@ Other tasks which may be useful are as follows:
 @table @code
 @item clean
 This task removes all files built but retains files that were downloaded from
-repositories (although @emph{bld} caches those files anyway.)
+repositories (although @emph{bld} caches those files anyway).
 @item realclean
 This removes all built and downloaded files so the system should be everything
 you need to build it without any extraneous files.
-@item all
-This performs all of the steps necessary to setup and build the system but
-doesn't start up the Tomcat server.
 @item javadoc
 This task creates the Javadoc files that end up in @code{work/javadoc}
+@item jar
+This creates a jar file named @code{work/Kiss.jar} This is useful when you want to use
+the @emph{Kiss} system as a library in another system.
 @item kisscmd
 This task creates a command-line JAR that can be used in a non-web, command-line application.
 This is useful when creating applications that perform various utility functions.  This
@@ -530,7 +551,7 @@ that, the IDE can be used to debug it by @emph{attaching} to port
 9000.
 
 @emph{Kiss} also comes with an @emph{ant} build that simply calls the
-native @emph{bld} program.  This is useful as an intermediary between
+native @emph{bld} program.  This is useful as an bridge between
 @emph{bld} and the IDE since many IDEs support @emph{ant}.
 
 Using your IDE to run the entire process is a bit tedious to initially

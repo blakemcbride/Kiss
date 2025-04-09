@@ -32,6 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -1247,5 +1248,20 @@ public class BuildUtils {
         }
 
         return result.toString();
+    }
+
+    /**
+     * Send a request to stop the development frontend server.
+     */
+    public static void stopFrontendServer() {
+        try {
+            URL url = new URL("http://localhost:8000/stop-server");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.getInputStream().close();
+            connection.disconnect();
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
     }
 }
