@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [ -z "$1" ]; then
+  echo "Usage: ./mvn-build <target>"
+  exit 1
+fi
+
+mvn antrun:run@"$1"
+

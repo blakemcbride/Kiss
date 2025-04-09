@@ -1,14 +1,21 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-  <!--  This file is used to describe the system layout for an IDE and to describe dependencies to GitHub.
-        Kiss is not a Maven project and is not built with Maven!
-        Kiss is built with its own build system called 'bld'.
-        In fact, you may need to delete this file so that your IDE
-        doesn't think this is a Maven project.
-        See the documentation.    -->
+  <!-- 
+      This file is used to describe the system layout for an IDE and 
+      to describe dependencies to GitHub. 
+      Kiss is built with its own build system called 'bld', but with
+      the maven-antrun-plugin below, you can replicate the old Ant tasks
+      directly in Maven (no build.xml or external Ant needed).
+      
+      To run this, use:  mvn antrun:run@TASK
+      Replacing TASK with the task you wish to run.
+      
+      The only caviet is that you must build the builder before any of
+      this will work.  This is done by running:  mvn antrun:run@builder
+  -->
 
   <modelVersion>4.0.0</modelVersion>
 
@@ -21,7 +28,7 @@
   <url>https://kissweb.org</url>
 
   <dependencies>
-    <!-- Your dependencies remain unchanged -->
+    <!-- Your existing dependencies remain unchanged -->
 
     <!-- https://mvnrepository.com/artifact/com.mchange/c3p0 -->
     <dependency>
@@ -139,34 +146,31 @@
       <version>19.3.0.0</version>
     </dependency>
 
+    <!-- JUnit for your tests -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
       <version>5.11.0</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>5.11.0</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-params</artifactId>
       <version>5.11.0</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-console</artifactId>
       <version>1.11.0</version>
       <scope>test</scope>
     </dependency>
-
     <dependency>
       <groupId>org.junit.platform</groupId>
       <artifactId>junit-platform-console-standalone</artifactId>
@@ -174,7 +178,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- System-scoped dependencies from the libs directory -->
+    <!-- System-scoped dependencies (your local libs) -->
     <dependency>
       <groupId>org.abcl</groupId>
       <artifactId>abcl</artifactId>
@@ -182,7 +186,6 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/libs/abcl.jar</systemPath>
     </dependency>
-
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
@@ -190,7 +193,6 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/libs/json.jar</systemPath>
     </dependency>
-
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
@@ -198,7 +200,6 @@
       <scope>system</scope>
       <systemPath>${project.basedir}/libs/commons-compress-1.20.jar</systemPath>
     </dependency>
-    
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
@@ -209,9 +210,11 @@
 
   </dependencies>
 
+
   <build>
     <plugins>
-      <!-- Add multiple source roots, including backend -->
+
+      <!-- 1) Add multiple source roots (core, precompiled, backend) -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -227,14 +230,14 @@
               <sources>
                 <source>src/main/core</source>
                 <source>src/main/precompiled</source>
-                <source>src/main/backend</source>  <!-- Added backend as a source root -->
+                <source>src/main/backend</source>
               </sources>
             </configuration>
           </execution>
         </executions>
       </plugin>
 
-      <!-- Copy src/main/backend as-is (not compiled) -->
+      <!-- 2) Copy src/main/backend files as-is (not compiled) into target/backend -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-resources-plugin</artifactId>
@@ -247,7 +250,6 @@
               <goal>copy-resources</goal>
             </goals>
             <configuration>
-              <!-- Added outputDirectory element -->
               <outputDirectory>${project.build.directory}/backend</outputDirectory>
               <resources>
                 <resource>
@@ -260,6 +262,7 @@
         </executions>
       </plugin>
 
+      <!-- 3) Enforce system dependencies are not normally allowed, but we allow them. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
@@ -273,7 +276,6 @@
             <configuration>
               <rules>
                 <requireNoSystemDependencies>
-                  <!-- This rule normally fails if systemPath points inside the project -->
                   <fail>false</fail>
                   <message>System scoped dependencies inside the project directory are allowed.</message>
                 </requireNoSystemDependencies>
@@ -283,10 +285,371 @@
           </execution>
         </executions>
       </plugin>
-      
+
+
+      <!-- 
+          4) Replicate your old Ant tasks with maven-antrun-plugin.
+             - "builder" runs at generate-sources to compile org/kissweb/builder/Tasks.java 
+               and org/kissweb/builder/BuildUtils.java.
+             - All other tasks ("start-backend", "stop-backend", etc.) 
+               are bound to <phase>none</phase>, so you explicitly run them with:
+                 mvn antrun:run@start-backend
+                 mvn antrun:run@stop-backend
+                 ... etc.
+       -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+
+          <!-- ========== builder ========== -->
+          <execution>
+            <id>builder</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- Replicate Ant: mkdir -->
+                <mkdir dir="work/exploded/WEB-INF/classes"/>
+                <!-- Replicate Ant: javac -->
+                <javac includeantruntime="false"
+                       srcdir="src/main/core"
+                       destdir="work/exploded/WEB-INF/classes"
+                       includes="org/kissweb/builder/Tasks.java,org/kissweb/builder/BuildUtils.java"
+                       classpath="libs/commons-compress-1.20.jar"/>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== start-backend ========== -->
+          <execution>
+            <id>start-backend</id>
+            <!-- set phase to 'none' so it doesn't auto-run -->
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <!-- The second arg is the "target name." -->
+                  <arg value="start-backend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== stop-backend ========== -->
+          <execution>
+            <id>stop-backend</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="stop-backend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== start-frontend ========== -->
+          <execution>
+            <id>start-frontend</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="start-frontend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== stop-frontend ========== -->
+          <execution>
+            <id>stop-frontend</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="stop-frontend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== build ========== -->
+          <execution>
+            <id>build</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="build"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== war ========== -->
+          <execution>
+            <id>war</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="war"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== clean ========== -->
+          <execution>
+            <id>clean</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="clean"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== realclean ========== -->
+          <execution>
+            <id>realclean</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="realclean"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== ideclean ========== -->
+          <execution>
+            <id>ideclean</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="ideclean"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== jar ========== -->
+          <execution>
+            <id>jar</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="jar"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== javadoc ========== -->
+          <execution>
+            <id>javadoc</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="javadoc"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== kisscmd ========== -->
+          <execution>
+            <id>kisscmd</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="kisscmd"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== KissGP ========== -->
+          <execution>
+            <id>KissGP</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="KissGP"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== libs ========== -->
+          <execution>
+            <id>libs</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="libs"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== setup-tomcat ========== -->
+          <execution>
+            <id>setup-tomcat</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="setup-tomcat"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== unit-tests ========== -->
+          <execution>
+            <id>unit-tests</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                  </classpath>
+                  <arg value="unit-tests"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+
     </plugins>
   </build>
-
 </project>
-
 
