@@ -12,8 +12,7 @@ class OllamaQuery {
         String prompt = injson.getString("prompt")
         Ollama server = new Ollama()
         server.selectModel(model)
-        JSONObject res = server.send(prompt)
-        String response = res.getString("response")
+        String response = server.send(prompt)
         outjson.put("textResponse", response)
         outjson.put("htmlResponse", Ollama.toHtml(response))
 

@@ -140,6 +140,8 @@ public class Ollama {
             throw new Exception("Model not set");
         restClient = new RestClient();
         String str = restClient.strCall("POST", URL + "embed", new JSONObject().put("model", model).put("input", text).toString());
+        if (str == null)
+            return new double[0];
         JSONObject responseJson = new JSONObject(str);
         JSONArray embeddingsOuter = responseJson.getJSONArray("embeddings");
         if (embeddingsOuter == null) {
