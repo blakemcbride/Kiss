@@ -1,8 +1,9 @@
-package org.kissweb;
+package org.kissweb.llm;
 
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.kissweb.RestClient;
 
 /**
  * This class provides an interface to the OpenAI chat API.

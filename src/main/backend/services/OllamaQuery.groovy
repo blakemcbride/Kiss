@@ -1,7 +1,7 @@
 package services
 
 import org.json.JSONObject
-import org.kissweb.Ollama
+import org.kissweb.llm.Ollama
 import org.kissweb.database.*
 import org.kissweb.restServer.ProcessServlet
 
