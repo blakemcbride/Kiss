@@ -32,6 +32,8 @@
 
 package org.kissweb;
 
+import java.util.Collections;
+
 /**
  * Advanced method for formatting numbers.
  *
@@ -288,6 +290,27 @@ public class NumberFormat {
      */
     public static String Format(double num, String msk, int wth, int dp) {
         return Formatb(num, 10, msk, wth, dp);
+    }
+
+    /**
+     *  Numeric	formatter.  Takes a double and converts it to a nicely formatted String (for a number in base 10).
+     *  <br><br>
+     *  This method is specifically designed to support right justified number formatting when variable width fonts are used.
+     *  It assumes that all numbers have the same width and that spaces and commas are half that width.
+     *
+     *  @see #Format(double, String, int, int)
+     */
+    public static String FormatVWF(double n, String fmt, int wth, int dec) {
+        String s = NumberFormat.Format(n, fmt, wth, dec);
+        if (fmt != null && !fmt.contains("L") && wth > 0) {
+            s = s.replaceAll(" ", "  ");
+            long commaCount = s.chars()
+                    .filter(ch -> ch == ',')
+                    .count();
+            String spaces = String.join("", Collections.nCopies((int) commaCount, " "));
+            return spaces + s;
+        } else
+            return s;
     }
 
     private static void print(double num, String msk, int wth, int dp) {
