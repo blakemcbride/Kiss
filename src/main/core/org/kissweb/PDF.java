@@ -44,6 +44,7 @@ public class PDF {
     private final String outputFilename;
     private PDRectangle pageSize = PDRectangle.LETTER;
     private boolean inText = false;
+    private float defaultLineThickness = 1f;
 
     /**
      * Begin a new PDF file
@@ -91,6 +92,18 @@ public class PDF {
 
     public void portrait() {
         landscape = false;
+    }
+
+    /**
+     * Set the default line thickness.  The default is 1.
+     *
+     * @param thickness
+     * @return the old line thickness
+     */
+    public float setDefaultLineThickness(float thickness) {
+        final float old = defaultLineThickness;
+        defaultLineThickness = thickness;
+        return old;
     }
 
     public PDRectangle setPageSize(PDRectangle ps) {
@@ -273,6 +286,28 @@ public class PDF {
     }
 
     /**
+     * Draw a horizontal line using the default line thinkness.
+     *
+     * @param y the line
+     * @param xa starting row
+     * @param xb ending row
+     */
+    public void drawHLine(float y, float xa, float xb) {
+        drawLine(y, xa, y, xb, defaultLineThickness);
+    }
+
+    /**
+     * Draw a vertical line using the default line thinkness.
+     *
+     * @param x the line
+     * @param ya starting column
+     * @param yb ending column
+     */
+    public void drawVLine(float x, float ya, float yb) {
+        drawLine(ya, x, yb, x, defaultLineThickness);
+    }
+
+    /**
      * Draw a rectangle
      *
      * @param ya upper left y point
@@ -280,24 +315,23 @@ public class PDF {
      * @param yb lower right y point
      * @param xb lower right x point
      * @param thickness line thickness (-1 == no outside line)
-     * @param fill fill percent, -1=no fill, otherwise 0-255 where 0 is black and 255 is white
+     * @param color fill color, hex RGB value
      */
-    public void drawRect(float ya, float xa, float yb, float xb, float thickness, int fill) {
+    public void drawRect(float ya, float xa, float yb, float xb, float thickness, int color) {
         try {
             endText();
             contentStream.addRect(xa, pageHeight-ya, xb-xa, ya-yb);
 
-            if (fill > -1) {
-                final Color fillColor = new Color(fill); // Assuming fill is an RGB value
-                if (thickness > .01) {
-                    contentStream.setLineWidth(thickness);
-                    contentStream.setNonStrokingColor(fillColor);
-                    contentStream.fillAndStroke();
-                } else {
-                    contentStream.setNonStrokingColor(fillColor);
-                    contentStream.fill();
-                }
-            } if (thickness > .01) {
+            final Color fillColor = new Color(color);
+            if (thickness > .01) {
+                contentStream.setLineWidth(thickness);
+                contentStream.setNonStrokingColor(fillColor);
+                contentStream.fillAndStroke();
+            } else {
+                contentStream.setNonStrokingColor(fillColor);
+                contentStream.fill();
+            }
+            if (thickness > .01) {
                 contentStream.setLineWidth(thickness);
                 contentStream.stroke();
             }
