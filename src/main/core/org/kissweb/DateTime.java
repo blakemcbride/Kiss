@@ -80,6 +80,32 @@ public class DateTime {
     }
 
     /**
+     * Create a DateTime from a Date object in the provided zone.
+     *
+     * @param dt
+     * @param zone
+     */
+    public DateTime(Date dt, ZoneId zone) {
+        if (dt == null)
+            zdt = null;
+        else
+            zdt = ZonedDateTime.ofInstant(dt.toInstant(), zone);
+    }
+
+    /**
+     * Create a DateTime from a Date object in the provided time zone.
+     *
+     * @param dt
+     * @param timeZoneId
+     */
+    public DateTime(Date dt, String timeZoneId) {
+        if (dt == null)
+            zdt = null;
+        else
+            zdt = ZonedDateTime.ofInstant(dt.toInstant(), ZoneId.of(timeZoneId));
+    }
+
+    /**
      * Initialize a new DateTime from a GregorianCalendar
      *
      * @param dt
