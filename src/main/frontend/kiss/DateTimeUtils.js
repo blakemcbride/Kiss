@@ -103,43 +103,63 @@ class DateTimeUtils {
     }
 
     /**
-     * Format a Date or number of milliseconds since 1970 UTC to a string representation
-     * looking like mm/dd/yyyy hh:mm AM/PM or dd/mm/yyyy hh:mm AM/PM (if locally appropriate)
+     * Format a Date or milliseconds-since-epoch value to a string
+     * "mm/dd/yyyy hh:mm AM/PM"  or  "dd/mm/yyyy hh:mm AM/PM"
      *
-     * @param {Date|string|number} dt
+     * @param {Date|string|number} dt        – Date object, millis, or numeric string
+     * @param {string}             [tz]      – IANA zone (e.g. "America/New_York");
+     *                                         omit or pass falsy to use the local zone
      * @returns {string}
      */
-    static formatDate(dt) {
+    static formatDate(dt, tz) {
+        // ----- normalise the first argument -----
         if (typeof dt === 'string') {
             dt = dt.trim();
             if (!dt || dt === '0')
                 return '';
-        } else if (!dt)
-            return '';
-        if (typeof dt === 'string')
             dt = Number(dt);
-        if (typeof dt === 'number')
+        }
+        if (typeof dt === 'number') {            // millis
+            if (!dt)
+                return '';
             dt = new Date(dt);
-        let hours = dt.getHours();
-        let sf;
-        if (hours >= 12)
-            sf = ' PM';
-        else
-            sf = ' AM';
-        if (hours > 12)
-            hours -= 12;
-        if (!hours)
-            hours = 12;
-        let min = dt.getMinutes();
-        if (min < 10)
-            min = '0' + min.toString();
-        else
-            min = min.toString();
-        if (DateUtils.detectDateFormat() === "MM/DD/YYYY")
-            return (dt.getMonth() + 1).toString() + '/' + dt.getDate().toString() + '/' + dt.getFullYear().toString() + ' ' + hours.toString() + ':' + min + sf;
-        else
-            return dt.getDate().toString() + '/' + (dt.getMonth() + 1).toString() + '/' + dt.getFullYear().toString() + ' ' + hours.toString() + ':' + min + sf;
+        }
+        if (!(dt instanceof Date) || isNaN(dt))
+            return '';
+
+        // ----- build the parts for the requested (or local) time-zone -----
+        const parts = new Intl.DateTimeFormat(
+            undefined,                           // keep user’s locale
+            {
+                timeZone : tz || undefined,      // undefined → local zone
+                year     : 'numeric',
+                month    : 'numeric',
+                day      : 'numeric',
+                hour     : 'numeric',            // already 1-12 in hour12 mode
+                minute   : '2-digit',
+                hour12   : true
+            }
+        ).formatToParts(dt);
+
+        // quick helper to pull the values we need
+        const pick = type => parts.find(p => p.type === type)?.value;
+
+        const month   = pick('month');   // "1" … "12"
+        const day     = pick('day');
+        const year    = pick('year');
+        const hour    = pick('hour');    // "1" … "12"
+        const minute  = pick('minute');  // always 2-digit because of '2-digit'
+        const ampm    = pick('dayPeriod'); // "AM" / "PM"
+
+        // ----- honour your existing MM/DD vs DD/MM preference -----
+        const mdy = DateUtils.detectDateFormat() === 'MM/DD/YYYY';
+        const dateStr = mdy
+            ? `${month}/${day}/${year}`
+            : `${day}/${month}/${year}`;
+
+        return `${dateStr} ${hour}:${minute} ${ampm}`;
     }
+
 
     /**
      * Format a date and time into a single string.

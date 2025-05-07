@@ -39,36 +39,49 @@ class TimeUtils {
     }
 
     /**
-     * Format time.
+     * Format a time value.
      *
-     * @param  {Date|number} val integer HHMM or Date object
-     * @param {boolean} zero_fill
-     * @returns {string} hh:mm XM
+     * @param {Date|number|string} val   – Date object, HHMM integer, or HHMM string
+     * @param {boolean}            zeroFill=false
+     * @param {string}             [tz]  – IANA zone name (e.g. "America/New_York").
+     *                                     Omit or pass falsy to stay in the host’s local zone.
+     * @returns {string} "hh:mm AM/PM"
      */
-    static format(val, zero_fill=false) {
-        if (typeof val === 'string')
-            val = Number(val);
-        if (val === null || val === undefined || isNaN(val)  ||  val < 0)
+    static format(val, zeroFill = false, tz) {
+
+        /* ---------- normalise the first argument ---------- */
+        if (typeof val === 'string') val = Number(val);
+
+        if (val === null || val === undefined || isNaN(val) || val < 0)
             return '';
-        if (typeof val === 'object')
-            val = DateTimeUtils.dateToIntTime(val);
-        const hours = Math.floor(val / 100);
-        const minutes = val % 100;
-        let width;
-        let msk;
-        if (zero_fill) {
-            width = 2;
-            msk = 'Z';
-        } else {
-            width = 0;
-            msk = '';
+
+        // ----- CASE 1: user gave a Date (or something Date-like) -----
+        if (val instanceof Date || Object.prototype.toString.call(val) === '[object Date]') {
+
+            const opts = {
+                timeZone: tz || undefined,          // undefined → keep local zone
+                hour12 : true,
+                hour   : zeroFill ? '2-digit' : 'numeric',
+                minute : '2-digit',
+            };
+
+            // examples: "2:07 PM", "02:07 PM"
+            return new Intl.DateTimeFormat(undefined, opts).format(val);
         }
-        if (hours === 0)
-            return Utils.format(hours + 12, msk, width, 0) + ':' + Utils.format(minutes, 'Z', 2, 0) + ' AM';
-        if (hours >= 13)
-            return Utils.format(hours - 12, msk, width, 0) + ':' + Utils.format(minutes, 'Z', 2, 0) + ' PM';
-        else
-            return Utils.format(hours, msk, width, 0) + ':' + Utils.format(minutes, 'Z', 2, 0) + (hours === 12 ? ' PM' : ' AM');
+
+        // ----- CASE 2: user gave HHMM as a number -----
+        // HHMM is treated as a *plain clock reading*; the tz argument is ignored
+        const hours   = Math.floor(val / 100);
+        const minutes = val % 100;
+
+        if (minutes > 59 || hours > 23) return '';   // basic sanity check
+
+        const hh = zeroFill ? String((hours % 12) || 12).padStart(2, '0')
+            : String((hours % 12) || 12);
+        const mm = String(minutes).padStart(2, '0');
+        const ampm = hours < 12 ? ' AM' : ' PM';
+
+        return `${hh}:${mm}${ampm}`;
     }
 
     /**

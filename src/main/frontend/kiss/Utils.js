@@ -2307,7 +2307,17 @@ class Utils {
     static setErrorFunction(fun) {
         Utils.errorFunction = fun;
     }
-
+    
+    /**
+     * When debugging JavaScript, you sometimes create variables for no purpose other than to view when debugging.
+     * The JavaScript system is smart enough to see you're not using it and just eliminates the code, thus you can't look at the variable value.
+     * This method can be called to do nothing with the variable, but it is enough to make the compiler happy.
+     *
+     * @param x
+     */
+    static keep(x) {
+        globalThis.__lastDebug = x;
+    }
 }
 
 // Class variables
