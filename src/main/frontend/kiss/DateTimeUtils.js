@@ -14,47 +14,102 @@
 class DateTimeUtils {
 
     /**
-     * Format a Date in a full format.  For example:  Wed Jan 4, 2022 12:31 PM CST
-     * <br><br>
-     * <code>dt</code> can be a <code>Date</code> object or the number of milliseconds since 1970.
+     * Format a moment as "Wed Jan 4, 2022 12:31 PM CST".
      *
-     * @param dt {Date|number}
+     * @param {Date|number|string} dt – Date object, epoch-millis, or numeric string
+     * @param {string}            [tz] – IANA zone name (e.g. "America/Chicago");
+     *                                   omit/falsy → host’s local zone
      * @returns {string}
      */
-    static formatDateLong(dt) {
-        if (!dt)
-            return '';
-        if (typeof dt === 'string')
+    static formatDateLong(dt, tz) {
+        /* ---------- normalise input ---------- */
+        if (typeof dt === 'string') {
+            dt = dt.trim();
+            if (!dt)
+                return '';
             dt = Number(dt);
+        }
         if (typeof dt === 'number')
             dt = new Date(dt);
-        if (typeof dt !== 'object')
+        if (!(dt instanceof Date) || isNaN(dt))
             return '';
-        const idt = DateUtils.dateToInt(dt);
-        return Utils.take(DateUtils.dayOfWeekName(idt), 3) + ' ' +
-            Utils.take(DateUtils.monthName(idt), 3) + ' ' +
-            DateUtils.day(idt) + ', ' +
-            DateUtils.year(idt) + ' ' +
-            TimeUtils.formatLong(dt);
+
+        /* ---------- obtain the pieces we need ---------- */
+        const opts = {
+            timeZone     : tz || undefined,   // undefined ⇒ keep local zone
+            weekday      : 'short',           // Wed
+            month        : 'short',           // Jan
+            day          : 'numeric',         // 4
+            year         : 'numeric',         // 2022
+            hour         : 'numeric',         // 12  (no leading zero)
+            minute       : '2-digit',         // 31
+            hour12       : true,              // AM/PM
+            timeZoneName : 'short'            // CST
+        };
+
+        const parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(dt);
+        const get   = type => parts.find(p => p.type === type)?.value || '';
+
+        /* ---------- assemble in the desired order ---------- */
+        return `${get('weekday')} ${get('month')} ${get('day')}, ${get('year')} `
+            + `${get('hour')}:${get('minute')} ${get('dayPeriod')} ${get('timeZoneName')}`;
     }
 
     /**
-     * Format a Date into a standard format useful for data interchange.
-     * For example:  2022-06-08 03:27:44 360
-     * The 360 is minutes offset from GMT - the timezone
+     * Convert a Date into the canonical interchange string
+     *   yyyy-MM-dd HH:mm:ss <offset-in-minutes>
      *
-     * @param dt {Date}
+     * @param {Date|number|string} dt   – Date object, millis, or numeric string
+     * @param {string}            [tz]  – IANA zone name (e.g. "America/New_York");
+     *                                    omit/falsy ⇒ use the host’s local zone
      * @returns {string}
      */
-    static dateToStd(dt) {
-        if (typeof dt !== 'object')
-            return '';
-        const idt = DateUtils.dateToInt(dt);
-        const itm = DateTimeUtils.dateToIntTime(dt);
-        const fmt2 = n => Utils.format(n, "Z", 2, 0);
-        return DateUtils.year(idt) + '-' + fmt2(DateUtils.month(idt)) + '-' + fmt2(DateUtils.day(idt)) + ' ' +
-            fmt2(TimeUtils.hours(itm)) + ':' + fmt2(TimeUtils.minutes(itm)) + ':' + fmt2(dt.getSeconds()) + ' ' +
-            dt.getTimezoneOffset();
+    static dateToStd(dt, tz) {
+        /* ---------- normalise input ---------- */
+        if (typeof dt === 'string') {
+            dt = dt.trim();
+            if (!dt) return '';
+            dt = Number(dt);
+        }
+        if (typeof dt === 'number') dt = new Date(dt);
+        if (!(dt instanceof Date) || isNaN(dt)) return '';
+
+        /* ---------- Y-M-D H:m:s parts in the target zone ---------- */
+        const fmt = new Intl.DateTimeFormat('en-CA', {
+            timeZone : tz || undefined,   // undefined ⇒ local zone
+            year     : 'numeric',
+            month    : '2-digit',
+            day      : '2-digit',
+            hour     : '2-digit',
+            minute   : '2-digit',
+            second   : '2-digit',
+            hour12   : false
+        }).formatToParts(dt);
+
+        const pick = t => fmt.find(p => p.type === t).value;
+        const YYYY = pick('year'),
+            MM   = pick('month'),
+            DD   = pick('day'),
+            HH   = pick('hour'),
+            mm   = pick('minute'),
+            ss   = pick('second');
+
+        /* ---------- offset in **integer** minutes ---------- */
+        let offsetMinutes;
+
+        if (!tz) {
+            offsetMinutes = dt.getTimezoneOffset();           // already an int
+        } else {
+            const fakeUTC = Date.UTC(
+                Number(YYYY), Number(MM) - 1, Number(DD),
+                Number(HH),  Number(mm),     Number(ss)
+            );
+            // Round to ensure we never emit a fraction like 240.0000001
+            offsetMinutes = Math.round((dt.getTime() - fakeUTC) / 60000);
+        }
+
+        /* ---------- final string ---------- */
+        return `${YYYY}-${MM}-${DD} ${HH}:${mm}:${ss} ${offsetMinutes}`;
     }
 
     /**
@@ -71,16 +126,16 @@ class DateTimeUtils {
             return null;
         if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} -?\d{1,3}$/.test(sdt))
             return null;
-        const y = Number(sdt.substr(0, 4));
-        const month = Number(sdt.substr(5, 2));
-        const d = Number(sdt.substr(8, 2));
-        const h = Number(sdt.substr(11, 2));
-        const minutes = Number(sdt.substr(14, 2));
-        const s = Number(sdt.substr(17, 2));
-        const tz1 = Number(Utils.drop(sdt, 20));
-        const dt = new Date(y, month-1, d, h, minutes, s);
+        const y = Number(sdt.slice(0, 4));
+        const month = Number(sdt.slice(5, 7));
+        const d = Number(sdt.slice(8, 10));
+        const h = Number(sdt.slice(11, 13));
+        const minutes = Number(sdt.slice(14, 16));
+        const s = Number(sdt.slice(17, 19));
+        const tz1 = Number(sdt.slice(20)); // replaces Utils.drop(sdt, 20)
+        const dt = new Date(y, month - 1, d, h, minutes, s);
         const tz2 = dt.getTimezoneOffset();
-        return new Date(dt.valueOf() - tz2 * 1000 * 60 + tz1 * 1000 * 60);
+        return new Date(dt.valueOf() - tz2 * 60000 + tz1 * 60000);
     }
 
     /**
@@ -160,36 +215,139 @@ class DateTimeUtils {
         return `${dateStr} ${hour}:${minute} ${ampm}`;
     }
 
-
     /**
-     * Format a date and time into a single string.
+     * Format a date (YYYYMMDD) and a time (HHMM) as
+     *   "mm/dd/yyyy hh:mm AM/PM"  or  "dd/mm/yyyy hh:mm AM/PM"
      *
-     * @param {number} dt    YYYYMMDD
-     * @param {number} time  HHMM
-     * @returns {string}  mm/dd/yyyy hh:mm AM/PM
+     * @param {number|string} dt     – calendar date, e.g. 20250508
+     * @param {number|string} time   – clock time,   e.g. 1145
+     * @param {string}        [tz]   – IANA zone name; omit/falsy ⇒ host’s zone
+     * @returns {string}
      */
-    static formatDateTime(dt, time) {
+    static formatDateTime(dt, time, tz) {
+
+        /* ---------- trivial short-circuit ---------- */
         if (!dt && (time === undefined || time === null || time === ''))
             return '';
-        const res = DateUtils.intToStr4(dt);
-        const tf = TimeUtils.format(time);
-        if (res && tf)
-            return res + ' ' + tf;
-        else
-            return res + tf;
+
+        /* ---------- normalise inputs ---------- */
+        if (typeof dt   === 'string') dt   = Number(dt);
+        if (typeof time === 'string') time = Number(time);
+
+        if (isNaN(dt)  || dt <= 0)   return '';
+        if (isNaN(time) || time < 0) time = 0;
+
+        /* split YYYYMMDD */
+        const y  = Math.floor(dt / 10000);
+        const m  = Math.floor((dt % 10000) / 100) - 1;   // JS month 0–11
+        const d  = dt % 100;
+
+        /* split HHMM */
+        const h  = Math.floor(time / 100);
+        const mi = time % 100;
+
+        /* ---------- build Date in the **local** zone ---------- */
+        const date = new Date(y, m, d, h, mi);
+
+        /* ---------- format in the target (or local) zone ---------- */
+        const parts = new Intl.DateTimeFormat(undefined, {
+            timeZone : tz || undefined,   // undefined ⇒ keep host’s zone
+            year     : 'numeric',
+            month    : 'numeric',
+            day      : 'numeric',
+            hour     : 'numeric',
+            minute   : '2-digit',
+            hour12   : true
+        }).formatToParts(date);
+
+        const get = t => parts.find(p => p.type === t)?.value;
+        const MM  = get('month');
+        const DD  = get('day');
+        const YYYY= get('year');
+        const HH  = get('hour');
+        const MMm = get('minute');
+        const AP  = get('dayPeriod');
+
+        /* honour the user’s MM/DD vs DD/MM preference */
+        const mdy  = DateUtils.detectDateFormat?.() === 'MM/DD/YYYY';
+        const dateStr = mdy ? `${MM}/${DD}/${YYYY}` : `${DD}/${MM}/${YYYY}`;
+
+        return `${dateStr} ${HH}:${MMm} ${AP}`;
     }
 
     /**
-     * Convert a Date object into in integer time.
-     * Ignores / removes the date component.
+     * Convert a moment in time to an integer clock value (HHMM).
+     * The date portion is ignored.
      *
-     * @param {Date} dt
-     * @returns {number} HHMM
+     * @param {Date|number} dt          – Date instance **or** milliseconds-since-epoch
+     * @param {string}      [zoneId]    – optional IANA time-zone (e.g. "America/New_York");
+     *                                    omit or falsy → use the host’s local zone
+     * @returns {number}                – integer HHMM, or NaN on bad input
      */
-    static dateToIntTime(dt) {
-        const hours = dt.getHours();
-        const minutes = dt.getMinutes();
-        return hours * 100 + minutes;
+    static toIntTime(dt, zoneId) {
+        // ---------- normalise the input ----------
+        if (typeof dt === 'number') dt = new Date(dt);
+        if (!(dt instanceof Date) || isNaN(dt)) return NaN;
+
+        let hours, minutes;
+
+        if (zoneId) {
+            // Use Intl to obtain the clock reading in the requested zone
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone : zoneId,
+                hour     : '2-digit',
+                minute   : '2-digit',
+                hour12   : false          // 00-23
+            }).formatToParts(dt);
+
+            hours   = Number(parts.find(p => p.type === 'hour').value);
+            minutes = Number(parts.find(p => p.type === 'minute').value);
+        } else {
+            // Original behaviour: host computer’s local zone
+            hours   = dt.getHours();
+            minutes = dt.getMinutes();
+        }
+
+        return hours * 100 + minutes;     // e.g. 14 h 07 m → 1407
+    }
+
+    /**
+     * Extract the calendar date as an integer (YYYYMMDD).
+     *
+     * @param {Date|number} dt        – Date object *or* milliseconds since epoch.
+     * @param {string}      [zoneId]  – optional IANA time-zone, e.g. "America/New_York".
+     *                                  Omit/falsy ⇒ use the host’s local zone.
+     * @returns {number}              – YYYYMMDD, or NaN on invalid input.
+     */
+    static toIntDate(dt, zoneId) {
+        // ---- normalise the first argument ----
+        if (typeof dt === 'number') dt = new Date(dt);
+        if (!(dt instanceof Date) || isNaN(dt)) return NaN;
+
+        let year, month, day;
+
+        if (zoneId) {
+            // Use Intl to get y-m-d as seen in the requested zone
+            const parts = new Intl.DateTimeFormat('en-CA', { // fixed ISO-like order
+                timeZone : zoneId,
+                year  : 'numeric',
+                month : '2-digit',
+                day   : '2-digit'
+            }).formatToParts(dt);
+
+            const pick = t => parts.find(p => p.type === t).value;
+            year  = Number(pick('year'));
+            month = Number(pick('month'));
+            day   = Number(pick('day'));
+        } else {
+            // Original behaviour: local zone
+            year  = dt.getFullYear();
+            month = dt.getMonth() + 1;   // JS months are 0-based
+            day   = dt.getDate();
+        }
+
+        // Convert to YYYYMMDD integer
+        return year * 10000 + month * 100 + day;
     }
 
     /**

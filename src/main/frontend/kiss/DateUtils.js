@@ -200,6 +200,8 @@ class DateUtils {
     /**
      * @deprecated
      *
+     * Use DateUtils.toInt()
+     *
      * Convert a number of milliseconds since 1970 UTC to an integer date YYYYMMDD.
      * This takes into account the local timezone.
      *
@@ -209,7 +211,6 @@ class DateUtils {
      *
      * @see DateUtils.toInt()
      * @see DateTimeUtils.toMilliseconds()
-     * @see TimeUtils.millsToInt()
      */
     static millsToInt(m) {
         if (!m)
@@ -246,22 +247,41 @@ class DateUtils {
     }
 
     /**
-     * Convert numeric date to string mm/dd/yyyy or whatever format is locally appropriate
+     * Convert a numeric date to a locale-appropriate string
+     * (e.g. "05/07/2025" or "07/05/2025" depending on the user’s locale).
      *
-     * @param {number} dt in YYYYMMDD or milliseconds format
-     * @param {string} [locale=navigator.language] - optional locale to use for formatting the date. Defaults to the user's browser language.
+     * @param {number|string|Date} dt   – value in YYYYMMDD form *or* milliseconds
+     * @param {string}            [tz]  – IANA zone name; omit/falsy ⇒ host’s zone
      * @returns {string}
      */
-    static intToStr4(dt, locale = navigator.language) {
-        dt = this.toInt(dt);
+    static intToStr4(dt, tz) {
+        dt = this.toInt?.(dt) ?? dt;         // keeps existing helper logic
         if (!dt)
             return '';
-        const year = parseInt(dt.toString().slice(0, 4), 10);
-        const month = parseInt(dt.toString().slice(4, 6), 10) - 1; // Subtract 1 because months are 0-indexed
-        const day = parseInt(dt.toString().slice(6, 8), 10);
-        const date = new Date(year, month, day);
-        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        return new Intl.DateTimeFormat(locale, options).format(date);
+
+        // If dt is YYYYMMDD (≥ 18000101 and ≤ 99991231) build a Date at local midnight
+        // Otherwise assume it’s epoch millis and construct directly
+        let date;
+        if (typeof dt === 'number' && dt >= 18000101 && dt <= 99991231) {
+            const year  = Math.floor(dt / 10000);
+            const month = Math.floor((dt % 10000) / 100) - 1;   // 0-based
+            const day   = dt % 100;
+            date = new Date(year, month, day);
+        } else {
+            date = new Date(dt);                // handles millis or Date instance
+        }
+        if (isNaN(date))
+            return '';
+
+        const options = {
+            year  : 'numeric',
+            month : '2-digit',
+            day   : '2-digit',
+            timeZone : tz || undefined          // undefined → keep local zone
+        };
+
+        // `undefined` as the first argument tells Intl to use the browser’s default locale
+        return new Intl.DateTimeFormat(undefined, options).format(date);
     }
 
     /**
@@ -282,26 +302,50 @@ class DateUtils {
     }
 
     /**
-     * Convert date to string mm/dd/yy or whatever format is locally appropriate
+     * Convert a date to a locale-appropriate string
+     * using 2-digit year: "mm/dd/yy", "dd/mm/yy", etc.
      *
-     * @param dt YYYYMMDD, Date, milliseconds, or string
-     * @param {string} [locale=navigator.language] - optional locale to use for formatting the date. Defaults to the user's browser language.
+     * @param {number|string|Date} dt  – YYYYMMDD, Date, millis, or numeric string
+     * @param {string}            [tz] – IANA zone (e.g. "America/New_York");
+     *                                   omit/falsy ⇒ use the host’s zone
      * @returns {string}
      */
-    static intToStr2(dt, locale = navigator.language) {
-        dt = this.toInt(dt);
-        if (!dt)
-            return '';
-        const year = parseInt(dt.toString().slice(0, 4), 10);
-        const month = parseInt(dt.toString().slice(4, 6), 10) - 1; // Subtract 1 because months are 0-indexed
-        const day = parseInt(dt.toString().slice(6, 8), 10);
-        const date = new Date(year, month, day);
-        const options = { year: '2-digit', month: '2-digit', day: '2-digit' };
-        return new Intl.DateTimeFormat(locale, options).format(date);
+    static intToStr2(dt, tz) {
+        // Preserve any existing helper behaviour
+        dt = this.toInt?.(dt) ?? dt;
+        if (!dt) return '';
+
+        /* ---------- build a Date object ---------- */
+        let date;
+
+        // If dt is a “YYYYMMDD” integer, turn it into a Date at local midnight
+        if (typeof dt === 'number' && dt >= 18000101 && dt <= 99991231) {
+            const year  = Math.floor(dt / 10000);
+            const month = Math.floor((dt % 10000) / 100) - 1;  // 0-based
+            const day   = dt % 100;
+            date = new Date(year, month, day);
+        } else {
+            // Otherwise treat dt as epoch-milliseconds or an actual Date
+            date = new Date(dt);
+        }
+        if (isNaN(date)) return '';
+
+        /* ---------- format in the requested (or local) zone ---------- */
+        const options = {
+            year     : '2-digit',
+            month    : '2-digit',
+            day      : '2-digit',
+            timeZone : tz || undefined      // undefined ⇒ stay in local zone
+        };
+
+        // First arg undefined → browser’s default locale
+        return new Intl.DateTimeFormat(undefined, options).format(date);
     }
 
     /**
      * @deprecated
+     *
+     * Use DateUtils.toInt()
      *
      * Convert a Date object to YYYYMMDD int
      *
