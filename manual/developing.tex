@@ -435,3 +435,57 @@ That file must have two methods: @code{login} and @code{checkLogin}.
 See that file for more details.
 
 @xref{cached_user_data,,Cached User Data}
+
+@section The Build System
+
+As discussed previously, @emph{Kiss} does not use any of the popular
+build systems such as @emph{Ant}, @emph{Maven}, or @emph{Gradle}.  The
+reason for this is that traditional build systems employ a convention
+over configuration philosophy.  This works extremely well if you're
+building a very standard system.  You follow a set of conventions, and
+the build system does the rest automatically.
+
+The problem with this approach is that if you are trying to do
+something new, the build system fights you every step of the way.  To
+accomplish something unique, you either have to go through all kinds of
+crazy and complex gyrations, or sometimes the build system just can't
+do it.
+
+@emph{Kiss} uses a new microservice architecture.  While the core of
+@emph{Kiss} gets compiled ahead of time in a traditional way, the
+application code gets compiled at runtime.  For this reason, when
+building the system, the core needs to be compiled normally, but the
+application code needs to be copied rather than compiled.  Getting
+typical build systems to understand this turned out to be inordinately
+complex.
+
+The build system that comes with @emph{Kiss} (called @emph{bld}) is
+extremely simple and makes it trivial and easy to do whatever you
+like.  It is also smart and capable.  It can download and cache
+@emph{jar} and other files from remote locations, and it only does what
+needs to be done.
+
+Additionally, it is easy to create an @emph{Ant} driver that just calls 
+@emph{bld}.  This is done so that IDEs that have @emph{Ant} interfaces
+can now work with @emph{bld}!
+
+@emph{bld} is made up of only two Java files (and a few standard
+@emph{jars}) located at @code{src/main/core/org/kissweb/builder}.
+@code{BuildUtils.java} is the build system utilities.  You should
+never need to change this.  The other file, @code{Tasks.java}
+represents all of the tasks to build your system.  If you need to
+change something about the build process, this is where your changes
+will go.
+
+The methods (tasks) in @code{Tasks.java} call the methods in
+@code{BuildUtils.java} to perform the build tasks such as copying
+files, compiling Java files, creating jar files, etc.  The thing about
+these methods is that you tell the system what to do.  Those utilities
+first check to see if it has already been done, and if so, it doesn't
+repeat it.  Thus, only what needs to be done occurs.
+
+When upgrading the system (@xref{updates,Kiss Framework Updates}),
+@code{Tasks.java} is never updated so that changes you make to that
+file will not be wiped out.  It is up to you to reconcile the
+differences between the updated @code{Tasks.java} file and what you
+want done.

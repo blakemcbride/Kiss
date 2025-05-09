@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Developing">
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 9, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (May 8, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -122,6 +122,7 @@ there too.
 <li><a href="#Front_002dend-Development-1" accesskey="3">Front-end Development</a></li>
 <li><a href="#Reports-And-Exports" accesskey="4">Reports And Exports</a></li>
 <li><a href="#Authentication" accesskey="5">Authentication</a></li>
+<li><a href="#The-Build-System" accesskey="6">The Build System</a></li>
 </ul>
 <div class="section-level-extent" id="Overview">
 <h3 class="section"><span>4.1 Overview<a class="copiable-link" href="#Overview"> &para;</a></span></h3>
@@ -540,13 +541,69 @@ See that file for more details.
 </p>
 <p>See <a class="xref" href="#cached_005fuser_005fdata">Cached User Data</a>
 </p>
+</div>
+<div class="section-level-extent" id="The-Build-System">
+<h3 class="section"><span>4.6 The Build System<a class="copiable-link" href="#The-Build-System"> &para;</a></span></h3>
+
+<p>As discussed previously, <em class="emph">Kiss</em> does not use any of the popular
+build systems such as <em class="emph">Ant</em>, <em class="emph">Maven</em>, or <em class="emph">Gradle</em>.  The
+reason for this is that traditional build systems employ a convention
+over configuration philosophy.  This works extremely well if you&rsquo;re
+building a very standard system.  You follow a set of conventions, and
+the build system does the rest automatically.
+</p>
+<p>The problem with this approach is that if you are trying to do
+something new, the build system fights you every step of the way.  To
+accomplish something unique, you either have to go through all kinds of
+crazy and complex gyrations, or sometimes the build system just can&rsquo;t
+do it.
+</p>
+<p><em class="emph">Kiss</em> uses a new microservice architecture.  While the core of
+<em class="emph">Kiss</em> gets compiled ahead of time in a traditional way, the
+application code gets compiled at runtime.  For this reason, when
+building the system, the core needs to be compiled normally, but the
+application code needs to be copied rather than compiled.  Getting
+typical build systems to understand this turned out to be inordinately
+complex.
+</p>
+<p>The build system that comes with <em class="emph">Kiss</em> (called <em class="emph">bld</em>) is
+extremely simple and makes it trivial and easy to do whatever you
+like.  It is also smart and capable.  It can download and cache
+<em class="emph">jar</em> and other files from remote locations, and it only does what
+needs to be done.
+</p>
+<p>Additionally, it is easy to create an <em class="emph">Ant</em> driver that just calls 
+<em class="emph">bld</em>.  This is done so that IDEs that have <em class="emph">Ant</em> interfaces
+can now work with <em class="emph">bld</em>!
+</p>
+<p><em class="emph">bld</em> is made up of only two Java files (and a few standard
+<em class="emph">jars</em>) located at <code class="code">src/main/core/org/kissweb/builder</code>.
+<code class="code">BuildUtils.java</code> is the build system utilities.  You should
+never need to change this.  The other file, <code class="code">Tasks.java</code>
+represents all of the tasks to build your system.  If you need to
+change something about the build process, this is where your changes
+will go.
+</p>
+<p>The methods (tasks) in <code class="code">Tasks.java</code> call the methods in
+<code class="code">BuildUtils.java</code> to perform the build tasks such as copying
+files, compiling Java files, creating jar files, etc.  The thing about
+these methods is that you tell the system what to do.  Those utilities
+first check to see if it has already been done, and if so, it doesn&rsquo;t
+repeat it.  Thus, only what needs to be done occurs.
+</p>
+<p>When upgrading the system (See <a class="xref" href="System-Setup.html#updates">Kiss Framework Updates</a>),
+<code class="code">Tasks.java</code> is never updated so that changes you make to that
+file will not be wiped out.  It is up to you to reconcile the
+differences between the updated <code class="code">Tasks.java</code> file and what you
+want done.
+</p>
 
 </div>
 </div>
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (April 9, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (May 8, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 
