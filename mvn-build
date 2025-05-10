@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# KISS is not meant to be built with Maven.  It is intended that the KISS bld program be used.
+
 if [ -z "$1" ]; then
   echo "Usage: ./mvn-build <target>"
   exit 1

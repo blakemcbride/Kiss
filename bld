@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-if [ src/main/core/org/kissweb/builder/Tasks.java -nt work/exploded/WEB-INF/classes/org/kissweb/builder/Tasks.class ] || [ src/main/core/org/kissweb/builder/BuildUtils.java -nt work/exploded/WEB-INF/classes/org/kissweb/builder/BuildUtils.class ]; then
+if [ src/main/precompiled/Tasks.java -nt work/exploded/WEB-INF/classes/Tasks.class ] || [ src/main/core/org/kissweb/BuildUtils.java -nt work/exploded/WEB-INF/classes/org/kissweb/BuildUtils.class ]; then
   echo building the builder
   mkdir -p work/exploded/WEB-INF/classes
-	javac -cp libs/commons-compress-1.20.jar src/main/core/org/kissweb/builder/Tasks.java src/main/core/org/kissweb/builder/BuildUtils.java -d work/exploded/WEB-INF/classes
+	javac -cp libs/commons-compress-1.20.jar src/main/precompiled/Tasks.java src/main/core/org/kissweb/BuildUtils.java -d work/exploded/WEB-INF/classes
 fi
-java -cp "work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar" -Dsun.security.pkcs11.enable-solaris=false org.kissweb.builder.Tasks "$@"
+java -cp "work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar" -Dsun.security.pkcs11.enable-solaris=false Tasks "$@"

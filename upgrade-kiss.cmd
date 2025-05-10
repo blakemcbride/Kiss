@@ -1,38 +1,40 @@
 @echo off
-if "%~1"=="" (
+REM Upgrade a Kiss-based application with the latest version of Kiss.
+
+IF NOT "%~1"=="" (
+    SET "TARGET=%~1"
+) ELSE (
     echo.
     echo * * * This is to be run from the virgin Kiss clone and not your application project directory. * * *
     echo.
-    echo src/main/core/org/kissweb/Tasks.java will have to be updated manually.
+    echo Usage: %~nx0 path-to-kiss-based-application
     echo.
-    echo Usage: %0 path-to-kiss-based-application
-    echo.
-    exit /b
+    echo You should back up your system before running this.
+    exit /b 1
 )
 
-if not exist "%~1\" (
-    echo Directory %1 does not exist.
-    exit /b
+IF NOT EXIST "%TARGET%\" (
+    echo Directory "%TARGET%" does not exist.
+    exit /b 1
 )
 
-call bld clean
-pushd "%~1"
-call bld clean
+call bld realclean
+pushd "%TARGET%"
+call bld realclean
 popd
 
-xcopy /E /Y libs\ "%~1\libs\"
-xcopy /E /Y /EXCLUDE:builder\Tasks.java src\main\core\org\kissweb\ "%~1\src\main\core\org\kissweb\"
-xcopy /E /Y src\main\frontend\kiss\ "%~1\src\main\frontend\kiss\"
-xcopy /E /Y src\main\core\WEB-INF\ "%~1\src\main\core\WEB-INF\"
-xcopy /E /Y src\main\core\META-INF\ "%~1\src\main\core\META-INF\"
-rmdir /s /q "%~1\src\main\frontend\META-INF\"
-rmdir /s /q "%~1\src\main\frontend\WEB-INF\"
-xcopy /E /Y src\main\frontend\lib\ "%~1\src\main\frontend\lib\"
-xcopy /E /Y bld "%~1"
-xcopy /E /Y bld.cmd "%~1"
-xcopy /E /Y build-builder.cmd "%~1"
-xcopy /E /Y SimpleWebServer.jar "%~1"
-xcopy /E /Y serve "%~1"
-xcopy /E /Y serve.cmd "%~1"
-xcopy /E /Y view-log "%~1"
+robocopy libs "%TARGET%\libs" /E /NFL /NDL /NJH /NJS /NC /NS
+robocopy src\main\core "%TARGET%\src\main\core" /MIR /NFL /NDL /NJH /NJS /NC /NS
+robocopy src\main\frontend\kiss "%TARGET%\src\main\frontend\kiss" /MIR /NFL /NDL /NJH /NJS /NC /NS
 
+rd /s /q "%TARGET%\src\main\frontend\WEB-INF"
+rd /s /q "%TARGET%\src\main\frontend\META-INF"
+
+robocopy src\main\frontend\lib "%TARGET%\src\main\frontend\lib" /E /NFL /NDL /NJH /NJS /NC /NS
+
+copy /Y bld "%TARGET%\bld" >nul
+copy /Y bld.cmd "%TARGET%\bld.cmd" >nul
+copy /Y SimpleWebServer.jar "%TARGET%\SimpleWebServer.jar" >nul
+copy /Y serve "%TARGET%\serve" >nul
+copy /Y serve.cmd "%TARGET%\serve.cmd" >nul
+copy /Y view-log "%TARGET%\view-log" >nul

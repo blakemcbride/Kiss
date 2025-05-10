@@ -470,18 +470,20 @@ Additionally, it is easy to create an @emph{Ant} driver that just calls
 can now work with @emph{bld}!
 
 @emph{bld} is made up of only two Java files (and a few standard
-@emph{jars}) located at @code{src/main/core/org/kissweb/builder}.
-@code{BuildUtils.java} is the build system utilities.  You should
-never need to change this.  The other file, @code{Tasks.java}
-represents all of the tasks to build your system.  If you need to
-change something about the build process, this is where your changes
-will go.
+@emph{jars}). One file is located at @code{src/main/core/org/kissweb/BuildUtils.java}.
+This file is part of the core of @emph{Kiss} and shouldn't be changed.
+The other file is located at @code{src/main/precompiled/Tasks.java}.
+This file contains all of your application-specific build procedures.
+In general, this file need not be touched unless your application requires
+special build processes.  @code{Tasks.java} is never updated by the
+@emph{Kiss} upgrade process, so it will have to be manually checked whenever an
+update to @code{Kiss} is performed.
 
 The methods (tasks) in @code{Tasks.java} call the methods in
 @code{BuildUtils.java} to perform the build tasks such as copying
 files, compiling Java files, creating jar files, etc.  The thing about
 these methods is that you tell the system what to do.  Those utilities
-first check to see if it has already been done, and if so, it doesn't
+first check to see if it has already been done, and if so, they don't
 repeat it.  Thus, only what needs to be done occurs.
 
 When upgrading the system (@xref{updates,Kiss Framework Updates}),

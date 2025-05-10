@@ -20,7 +20,7 @@
  *     Tasks      -  the application-specific build procedures (or tasks)
  */
 
-package org.kissweb.builder;
+package org.kissweb;
 
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -30,8 +30,6 @@ import org.apache.commons.compress.utils.IOUtils;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.*;
@@ -197,12 +195,12 @@ public class BuildUtils {
         return Paths.get(".").toAbsolutePath().normalize().toString();
     }
 
-    static void downloadAll(ForeignDependencies deps) {
+    public static void downloadAll(ForeignDependencies deps) {
         for (ForeignDependency dep : deps.getDependencies())
             download(dep.filename, dep.targetPath, dep.source);
     }
 
-    static void delete(ForeignDependencies deps) {
+    public static void delete(ForeignDependencies deps) {
         for (ForeignDependency dep : deps.getDependencies())
             rm(dep.targetPath + File.separator + dep.filename);
     }
@@ -874,7 +872,7 @@ public class BuildUtils {
     /**
      * Run a command in the underlying OS shell in the foreground.
      * Wait till it is done.
-     * This command supports all of the shell processing such as &gt; and &lt; etc.
+     * This command supports all the shell processing such as &gt; and &lt; etc.
      *
      * @param startDir starting directory or null
      * @param cmd the command to execute
@@ -1138,14 +1136,14 @@ public class BuildUtils {
         }
     }
 
-    static class ForeignDependencies {
+    public static class ForeignDependencies {
         private final ArrayList<ForeignDependency> deps = new ArrayList<>();
 
-        void add(String filename, String targetPath, String source) {
+        public void add(String filename, String targetPath, String source) {
             deps.add(new ForeignDependency(filename, targetPath, source));
         }
 
-        void add(String targetPath, String source) {
+        public void add(String targetPath, String source) {
             final String filename = source.substring(source.lastIndexOf('/') + 1);
             deps.add(new ForeignDependency(filename, targetPath, source));
         }

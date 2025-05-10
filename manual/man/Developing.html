@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Developing">
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (May 8, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (May 10, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -577,18 +577,20 @@ needs to be done.
 can now work with <em class="emph">bld</em>!
 </p>
 <p><em class="emph">bld</em> is made up of only two Java files (and a few standard
-<em class="emph">jars</em>) located at <code class="code">src/main/core/org/kissweb/builder</code>.
-<code class="code">BuildUtils.java</code> is the build system utilities.  You should
-never need to change this.  The other file, <code class="code">Tasks.java</code>
-represents all of the tasks to build your system.  If you need to
-change something about the build process, this is where your changes
-will go.
+<em class="emph">jars</em>). One file is located at <code class="code">src/main/core/org/kissweb/BuildUtils.java</code>.
+This file is part of the core of <em class="emph">Kiss</em> and shouldn&rsquo;t be changed.
+The other file is located at <code class="code">src/main/precompiled/Tasks.java</code>.
+This file contains all of your application-specific build procedures.
+In general, this file need not be touched unless your application requires
+special build processes.  <code class="code">Tasks.java</code> is never updated by the
+<em class="emph">Kiss</em> upgrade process, so it will have to be manually checked whenever an
+update to <code class="code">Kiss</code> is performed.
 </p>
 <p>The methods (tasks) in <code class="code">Tasks.java</code> call the methods in
 <code class="code">BuildUtils.java</code> to perform the build tasks such as copying
 files, compiling Java files, creating jar files, etc.  The thing about
 these methods is that you tell the system what to do.  Those utilities
-first check to see if it has already been done, and if so, it doesn&rsquo;t
+first check to see if it has already been done, and if so, they don&rsquo;t
 repeat it.  Thus, only what needs to be done occurs.
 </p>
 <p>When upgrading the system (See <a class="xref" href="System-Setup.html#updates">Kiss Framework Updates</a>),
@@ -603,7 +605,7 @@ want done.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (May 8, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (May 10, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

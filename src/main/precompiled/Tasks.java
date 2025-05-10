@@ -22,10 +22,9 @@
  *    Non-private instance methods with no parameters are considered tasks.
  */
 
+import org.kissweb.BuildUtils;
 
-package org.kissweb.builder;
-
-import static org.kissweb.builder.BuildUtils.*;
+import static org.kissweb.BuildUtils.*;
 
 /**
  * This class contains the tasks that are executed by the build system.
