@@ -48,10 +48,10 @@ class JavaService {
         try {
             ci = loadJavaClass(_className, fileName);
         } catch (ClassNotFoundException e) {
-            ms.errorReturn(response, "Class not found: " + e.getMessage(), e);
+            ms.errorReturn(response, "Class not found: " + _className, e);
             return ProcessServlet.ExecutionReturn.Error;
         } catch (Throwable e) {
-            ms.errorReturn(response, e.getMessage(), e);
+            ms.errorReturn(response, "Error loading class: " + _className + ".java", e);
             return ProcessServlet.ExecutionReturn.Error;
         }
         if (ci != null && ci.jclass != null) {

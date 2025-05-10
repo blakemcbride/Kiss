@@ -438,7 +438,7 @@ public class ProcessServlet implements Runnable {
             response.setStatus(200);
             JSONObject outjson = new JSONObject();
             outjson.put("_Success", false);
-            outjson.put("_ErrorMessage", e != null ? e.getMessage() : msg);
+            outjson.put("_ErrorMessage", msg != null ? msg :(e != null ? e.getMessage() : "unspecified"));
             outjson.put("_ErrorCode", 1);  // general error
             log_error(msg, e);
             out.print(outjson.toString());

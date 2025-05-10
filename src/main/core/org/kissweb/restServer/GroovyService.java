@@ -300,6 +300,8 @@ public class GroovyService {
                     logger.info("Evoking method " + _method);
                     meth.invoke(instance, injson, outjson, ms.DB, ms);
                 } catch (Exception e) {
+                    Throwable root = (e.getCause() != null) ? e.getCause() : e;
+                    logger.error(root);
                     ms.errorReturn(response, fileName + " " + _method + "()", e.getCause());
                     return ProcessServlet.ExecutionReturn.Error;
                 }
@@ -308,6 +310,9 @@ public class GroovyService {
             } finally {
                 ci.executing--;
             }
+        } else if (new File(fileName).exists()) {
+            ms.errorReturn(response, "Error loading: " + _className + ".groovy", null);
+            return ProcessServlet.ExecutionReturn.Error;
         }
         return ProcessServlet.ExecutionReturn.NotFound;
     }
