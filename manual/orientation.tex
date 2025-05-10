@@ -37,21 +37,90 @@
 
 
 The entire source code comes with the system and is convenient when
-debugging; however, only a few areas in the system would normally be
-of concern when building an application, as follows.
+debugging.  @emph{Kiss} has been designed to segregate @emph{Kiss}
+framework code from your application code for two reasons:
 
+@enumerate
+@item
+It makes it easy to differentiate framework code from your application code minimizing
+the code you have to look at when developing your application.
+@item
+It makes upgrading the @emph{Kiss} framework simple and accurate.
+@end enumerate
+
+Naturally, in order for this to work, it is important that you not change framework code
+and put all of your application code in the correct areas.
 
 @section Back-end Application Files
 
+Some back-end code is normal code that gets pre-compiled at build time,
+as most systems do --- as the @emph{Kiss} core framework code is.
+However, some @emph{Kiss} code (the majority of the application code)
+is @emph{hot-loaded} at runtime.  What this means is that code that is
+hot-loaded can be added, changed, or deleted on a running system.  
+There is no need to bring the system down or rebuild anything. In a development
+environment, development and debugging occur while the system is
+running continuously.  There is no need to bring the system down or rebuild
+anything.  A production system can be updated while the system is
+running without the need to reboot the server or upset normal user use
+of the system.
+
+All back-end code resides in the following directories:
+
+
 @table @code
-@item src/main/backend/KissInit.groovy
-This file is used to configure the system. @xref{Setup and Configuration}
 @item src/main/backend
-All other files under this directory represent the application
-back-end.  All the files are used and distributed in source form.  The
-Kiss system compiles them at runtime but does not save the compiled form.
-Updates to files under this directory take effect
-immediately on a running system.
+The vast majority of your application-specific code goes in this directory tree. 
+All files in this directory tree (except @code{KissInit.groovy}) are hot-loaded. 
+
+This directory contains the following:
+@table @code
+@item services
+This is where all of your web services will be located.  You can structure sub-directories to it as needed.
+Web services can call any core @emph{Kiss} code, @emph{jar} files, or @code{precompiled} code directly.
+However, although web services can call other hot-loaded files located in the @code{backend} tree,
+a special syntax is required.  There is an example of this in @code{services/MyGroovyService.groovy}.
+
+Unlike other coding philosophies that prefer thin web services that
+call core code, @emph{Kiss} strongly prefers thick web services that
+contain the bulk of your application code.  This maximizes the use and
+value of the hot-load facility.
+@item scripts
+This directory contains code that is not web services but common
+application code that is to be hot-loaded.  However, there is a big
+negative associated with this code.  While hot-loaded web services can
+directly call @emph{Kiss} core code, @emph{jar} files, and
+@code{precompiled} code, they can't call methods in the scripts
+directory directly.  They must use a convoluted syntax enabling the
+hot-loading of those methods. An example of this exists in the
+@code{services/MyGroovyService.groovy}.
+
+
+@item KissInit.groovy
+This file is used to configure the system. It is read once upon system
+startup and is not hot-loaded.  @xref{Setup and Configuration}
+
+@item Login.groovy
+This is the code that validates a user's login.  It is kept here because it is common for application 
+customization of the login process.
+
+@item CronTasks
+Files in this directory support the ability to auto-start processes at
+scheduled and recurring dates and times ala Unix @emph{cron}.  See the
+files in that directory for documentation.
+
+
+@end table
+
+@item src/main/precompiled
+
+Code in this directory tree is compiled at build time and not hot-loaded.  This directory tree is used to
+store common application-specific code that doesn't change particularly often.
+
+@item src/main/core
+@emph{Kiss} core back-end framework code resides in this directory tree. Nothing in this directory tree should be 
+modified by you because it will be overwritten when @emph{Kiss} is upgraded.  (@xref{updates})
+
 @end table
 
 
@@ -61,13 +130,42 @@ Files under the @code{src/main/frontend} directory represent the
 front-end of the application.
 
 All files under the @code{src/main/frontend/kiss} directory are part of
-the @emph{Kiss} system and would normally not need to be touched.
+the @emph{Kiss} system and should not be modified.
 
 @code{index.html} and @code{index.js} are also part of the @emph{Kiss}
-system and aren't normally modified.
+system and aren't normally modified.  They contain code that ensures
+that browsers load updated code.
+
+@code{index.html} contains three important variables that assure that users correctly load 
+front-end code that has been changed rather than using their cached version.  These variables are as follows:
+
+@table @code
+@item SystemInfo.softwareVersion
+This can be set to any unique string.  When the system is in production use, if this string changes,
+the browser will load new copies of all front-end files (which it will cache for future use).
+If any front-end files are changed, this variable should be changed.  The users will get the new screens 
+after they log out and back into the system.
+
+@item SystemInfo.controlCache
+
+Setting this variable to @code{true} tells the system to observe the value in @code{SystemInfo.softwareVersion}
+and re-load the front-end screens if its value changes.
+
+The value of this variable is often set to @code{false} during the development process to avoid double-loading
+of certain files.   When debugging the front-end, be sure to disable the browser cache.
+
+@item SystemInfo.releaseDate 
+This variable is used to track the release date of a given front-end.  It is used for display purposes only.
+
+@end table
+
+In addition to differentiating between development and production environments, @code{index.js}
+is also used to detect the user's device type (e.g., desktop, tablet, mobile) and, if desired, 
+load different application screens.
+
 
 @code{login.html} and @code{login.js} represent the user login page
-and would be modified to suit your needs.
+and should be modified to suit your needs.
 
 Other directories such as @code{page1} represent other user pages and
 would be the application-specific screens you create.  The included
@@ -105,8 +203,8 @@ is loaded.
 
 @section Controlling Browser Cache
 
-The user's browser cache can be controlled from the file
-@code{src/main/frontend/index.html} In that file, you will see two lines
+As discussed previously, the user's browser cache can be controlled from the file
+@code{src/main/frontend/index.html}. In that file, you will see two lines
 that look as follows:
 
 @example
@@ -116,10 +214,17 @@ SystemInfo.controlCache = false;   // normally true but use false during
 @end example
 
 If @code{SystemInfo.controlCache} is set to @code{true}, each time @code{SystemInfo.softwareVersion}
-is incremented all users starting the application will be forced to
+is incremented, all users starting the application will be forced to
 load new code from the server and not use their browser's cache.  Once
 they download the new version, normal browser cache activity will
 occur.
+
+Users using the system when front-end files are changed will not get
+the updated files until they log out and back into the system.  In a
+development environment with browser cache disabled, the developer
+will see all screen changes upon reload, regardless of the variable settings.
+In fact, it is better to set @code{SystemInfo.controlCache} to @code{false}
+in a development environment to avoid a needless duplicate load of @code{index.html}.
 
 
 @anchor{javadoc} @section Creating JavaDocs

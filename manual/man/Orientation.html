@@ -101,10 +101,18 @@ h2, h3, h4 {  /* subsection titles */
 
 
 <p>The entire source code comes with the system and is convenient when
-debugging; however, only a few areas in the system would normally be
-of concern when building an application, as follows.
+debugging.  <em class="emph">Kiss</em> has been designed to segregate <em class="emph">Kiss</em>
+framework code from your application code for two reasons:
 </p>
+<ol class="enumerate">
+<li> It makes it easy to differentiate framework code from your application code minimizing
+the code you have to look at when developing your application.
+</li><li> It makes upgrading the <em class="emph">Kiss</em> framework simple and accurate.
+</li></ol>
 
+<p>Naturally, in order for this to work, it is important that you not change framework code
+and put all of your application code in the correct areas.
+</p>
 <ul class="mini-toc">
 <li><a href="#Back_002dend-Application-Files" accesskey="1">Back-end Application Files</a></li>
 <li><a href="#Front_002dend-Application-Files" accesskey="2">Front-end Application Files</a></li>
@@ -118,17 +126,82 @@ of concern when building an application, as follows.
 <div class="section-level-extent" id="Back_002dend-Application-Files">
 <h3 class="section"><span>3.1 Back-end Application Files<a class="copiable-link" href="#Back_002dend-Application-Files"> &para;</a></span></h3>
 
+<p>Some back-end code is normal code that gets pre-compiled at build time,
+as most systems do &mdash; as the <em class="emph">Kiss</em> core framework code is.
+However, some <em class="emph">Kiss</em> code (the majority of the application code)
+is <em class="emph">hot-loaded</em> at runtime.  What this means is that code that is
+hot-loaded can be added, changed, or deleted on a running system.  
+There is no need to bring the system down or rebuild anything. In a development
+environment, development and debugging occur while the system is
+running continuously.  There is no need to bring the system down or rebuild
+anything.  A production system can be updated while the system is
+running without the need to reboot the server or upset normal user use
+of the system.
+</p>
+<p>All back-end code resides in the following directories:
+</p>
+
 <dl class="table">
-<dt><code class="code">src/main/backend/KissInit.groovy</code></dt>
-<dd><p>This file is used to configure the system. See <a class="xref" href="System-Setup.html#Setup-and-Configuration">Setup and Configuration</a>
-</p></dd>
 <dt><code class="code">src/main/backend</code></dt>
-<dd><p>All other files under this directory represent the application
-back-end.  All the files are used and distributed in source form.  The
-Kiss system compiles them at runtime but does not save the compiled form.
-Updates to files under this directory take effect
-immediately on a running system.
+<dd><p>The vast majority of your application-specific code goes in this directory tree. 
+All files in this directory tree (except <code class="code">KissInit.groovy</code>) are hot-loaded. 
+</p>
+<p>This directory contains the following:
+</p><dl class="table">
+<dt><code class="code">services</code></dt>
+<dd><p>This is where all of your web services will be located.  You can structure sub-directories to it as needed.
+Web services can call any core <em class="emph">Kiss</em> code, <em class="emph">jar</em> files, or <code class="code">precompiled</code> code directly.
+However, although web services can call other hot-loaded files located in the <code class="code">backend</code> tree,
+a special syntax is required.  There is an example of this in <code class="code">services/MyGroovyService.groovy</code>.
+</p>
+<p>Unlike other coding philosophies that prefer thin web services that
+call core code, <em class="emph">Kiss</em> strongly prefers thick web services that
+contain the bulk of your application code.  This maximizes the use and
+value of the hot-load facility.
 </p></dd>
+<dt><code class="code">scripts</code></dt>
+<dd><p>This directory contains code that is not web services but common
+application code that is to be hot-loaded.  However, there is a big
+negative associated with this code.  While hot-loaded web services can
+directly call <em class="emph">Kiss</em> core code, <em class="emph">jar</em> files, and
+<code class="code">precompiled</code> code, they can&rsquo;t call methods in the scripts
+directory directly.  They must use a convoluted syntax enabling the
+hot-loading of those methods. An example of this exists in the
+<code class="code">services/MyGroovyService.groovy</code>.
+</p>
+
+</dd>
+<dt><code class="code">KissInit.groovy</code></dt>
+<dd><p>This file is used to configure the system. It is read once upon system
+startup and is not hot-loaded.  See <a class="xref" href="System-Setup.html#Setup-and-Configuration">Setup and Configuration</a>
+</p>
+</dd>
+<dt><code class="code">Login.groovy</code></dt>
+<dd><p>This is the code that validates a user&rsquo;s login.  It is kept here because it is common for application 
+customization of the login process.
+</p>
+</dd>
+<dt><code class="code">CronTasks</code></dt>
+<dd><p>Files in this directory support the ability to auto-start processes at
+scheduled and recurring dates and times ala Unix <em class="emph">cron</em>.  See the
+files in that directory for documentation.
+</p>
+
+</dd>
+</dl>
+
+</dd>
+<dt><code class="code">src/main/precompiled</code></dt>
+<dd>
+<p>Code in this directory tree is compiled at build time and not hot-loaded.  This directory tree is used to
+store common application-specific code that doesn&rsquo;t change particularly often.
+</p>
+</dd>
+<dt><code class="code">src/main/core</code></dt>
+<dd><p><em class="emph">Kiss</em> core back-end framework code resides in this directory tree. Nothing in this directory tree should be 
+modified by you because it will be overwritten when <em class="emph">Kiss</em> is upgraded.  (See <a class="xref" href="System-Setup.html#updates">updates</a>)
+</p>
+</dd>
 </dl>
 
 
@@ -140,13 +213,45 @@ immediately on a running system.
 front-end of the application.
 </p>
 <p>All files under the <code class="code">src/main/frontend/kiss</code> directory are part of
-the <em class="emph">Kiss</em> system and would normally not need to be touched.
+the <em class="emph">Kiss</em> system and should not be modified.
 </p>
 <p><code class="code">index.html</code> and <code class="code">index.js</code> are also part of the <em class="emph">Kiss</em>
-system and aren&rsquo;t normally modified.
+system and aren&rsquo;t normally modified.  They contain code that ensures
+that browsers load updated code.
 </p>
+<p><code class="code">index.html</code> contains three important variables that assure that users correctly load 
+front-end code that has been changed rather than using their cached version.  These variables are as follows:
+</p>
+<dl class="table">
+<dt><code class="code">SystemInfo.softwareVersion</code></dt>
+<dd><p>This can be set to any unique string.  When the system is in production use, if this string changes,
+the browser will load new copies of all front-end files (which it will cache for future use).
+If any front-end files are changed, this variable should be changed.  The users will get the new screens 
+after they log out and back into the system.
+</p>
+</dd>
+<dt><code class="code">SystemInfo.controlCache</code></dt>
+<dd>
+<p>Setting this variable to <code class="code">true</code> tells the system to observe the value in <code class="code">SystemInfo.softwareVersion</code>
+and re-load the front-end screens if its value changes.
+</p>
+<p>The value of this variable is often set to <code class="code">false</code> during the development process to avoid double-loading
+of certain files.   When debugging the front-end, be sure to disable the browser cache.
+</p>
+</dd>
+<dt><code class="code">SystemInfo.releaseDate</code></dt>
+<dd><p>This variable is used to track the release date of a given front-end.  It is used for display purposes only.
+</p>
+</dd>
+</dl>
+
+<p>In addition to differentiating between development and production environments, <code class="code">index.js</code>
+is also used to detect the user&rsquo;s device type (e.g., desktop, tablet, mobile) and, if desired, 
+load different application screens.
+</p>
+
 <p><code class="code">login.html</code> and <code class="code">login.js</code> represent the user login page
-and would be modified to suit your needs.
+and should be modified to suit your needs.
 </p>
 <p>Other directories such as <code class="code">page1</code> represent other user pages and
 would be the application-specific screens you create.  The included
@@ -190,8 +295,8 @@ is loaded.
 <div class="section-level-extent" id="Controlling-Browser-Cache">
 <h3 class="section"><span>3.5 Controlling Browser Cache<a class="copiable-link" href="#Controlling-Browser-Cache"> &para;</a></span></h3>
 
-<p>The user&rsquo;s browser cache can be controlled from the file
-<code class="code">src/main/frontend/index.html</code> In that file, you will see two lines
+<p>As discussed previously, the user&rsquo;s browser cache can be controlled from the file
+<code class="code">src/main/frontend/index.html</code>. In that file, you will see two lines
 that look as follows:
 </p>
 <div class="example">
@@ -201,10 +306,17 @@ SystemInfo.controlCache = false;   // normally true but use false during
 </pre></div>
 
 <p>If <code class="code">SystemInfo.controlCache</code> is set to <code class="code">true</code>, each time <code class="code">SystemInfo.softwareVersion</code>
-is incremented all users starting the application will be forced to
+is incremented, all users starting the application will be forced to
 load new code from the server and not use their browser&rsquo;s cache.  Once
 they download the new version, normal browser cache activity will
 occur.
+</p>
+<p>Users using the system when front-end files are changed will not get
+the updated files until they log out and back into the system.  In a
+development environment with browser cache disabled, the developer
+will see all screen changes upon reload, regardless of the variable settings.
+In fact, it is better to set <code class="code">SystemInfo.controlCache</code> to <code class="code">false</code>
+in a development environment to avoid a needless duplicate load of <code class="code">index.html</code>.
 </p>
 
 <a class="anchor" id="javadoc"></a></div>
