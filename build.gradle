@@ -30,7 +30,6 @@ dependencies {
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
     implementation 'org.xerial:sqlite-jdbc:3.45.0.0'
-    implementation 'org.dvare:dynamic-loader:3.2'
     implementation 'org.webjars.bower:jquery:3.6.3'
     implementation 'cljsjs:ag-grid-community:25.1.0'
     implementation 'org.apache.pdfbox:pdfbox:2.0.31'
