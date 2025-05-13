@@ -47,7 +47,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 @title Groovy Overview
 @subtitle Part of the Kiss Web Development Framework
 @c @subtitle @today{}
-@subtitle April 4, 2023
+@subtitle May 12, 2025
 @author by Blake McBride
 @page
 @vskip 0pt plus 1filll
@@ -94,6 +94,23 @@ Donald Knuth utilizing the Texinfo format.
 @c @summarycontents
 @contents
 
+@chapter What is Groovy?
+
+
+Groovy is 80+% the same as Java.  If you are a Java programmer, you can
+trivially pick up Groovy.
+
+Like Java, Groovy compiles into JVM code.  Groovy code runs as fast as
+Java.  Groovy can call any Java class, method, jar, package, etc., just
+as if it were straight Java.
+
+Groovy code is sort of an enhanced Java.  It made a lot more sense
+when competing with older versions of Java.  Groovy has several
+hassles compared to Java but also has many conveniences.  On Kiss,
+Groovy code loads a little bit faster.  Once loaded, however, it runs
+at the same speed as compiled Java.
+
+
 @chapter Why Groovy?
 Groovy is used for several reasons:
 
@@ -102,7 +119,7 @@ Groovy is used for several reasons:
 Groovy is only a little different from Java.  For the most part, if
 you know Java, you know Groovy.
 @item
-Groovy has several language features that make it significantly
+Groovy has several language features that make it
 more convenient in many situations.  (Although it also has a few
 annoyances that you need to be mindful of!)
 @item
@@ -111,24 +128,24 @@ speed, and interacts with Java <-> Groovy as if all code were Java or
 Groovy.
 @item
 Although Groovy can be compiled ahead-of-time just like Java, the
-way I am using it is to compile it at runtime.  This makes loading
-it take longer (although certainly sub-second) but once loaded, it
+way Kiss uses it is to compile it at runtime.  This makes loading
+it take longer (although certainly sub-second), but once loaded, it
 runs at the same speed as compiled Java code.  Doing it this way
 has the following advantages:
 @enumerate a
 @item
 I can modify the code while the system is running!  The way I
 load files is to check the file date/time.  If it changes, I
-re-compile and load it.
+recompile and load it.
 @item
 It is always clear to me what is dynamic (can be changed on a
 running system) and what is static (compiled ahead of time).
-All Java files are compiled ahead-of-time.  All Groovy files
+This way, all Java files are compiled ahead-of-time.  All Groovy files
 are compiled when loaded at runtime.  Note that this is just a
 convention I use and not a limitation of either Java or Groovy.
 @item
 Interestingly, and for reasons unclear to me, dynamically
-compiling and loading Groovy seems to be very significantly
+compiling and loading Groovy seems to be
 faster than doing the same thing in Java.
 @end enumerate
 @end enumerate
@@ -147,7 +164,7 @@ from other code.  This is because the system has to find the code,
 compile it, and load it if necessary before execution.
 @item
 Groovy has several types of strings.  One of the best features of
-Groovy is strings constants that are delineated with triple quotes
+Groovy is string constants that are delineated with triple quotes
 (""").  These strings support embedded newlines.  This means you
 can have multi-line strings.  This comes in especially handy when
 representing SQL.  For example:
@@ -157,6 +174,9 @@ representing SQL.  For example:
                        where field = 'abc'
                        order by some_field"""
 @end example
+Although newer versions of Java now support triple quotes, Java
+annoyingly requires the opening triple quotes to be followed by a
+newline.  Groovy does not.
 @item
 In Java, to compare two strings you have to use:
 @example
@@ -166,6 +186,8 @@ In Java, to compare two strings you have to use:
 @example
       str1 == str2
 @end example
+Groovy compares the string contents rather than tests if they are the same object.
+
 In Groovy, if you wish to see if they are the same object, use:
 @example   
       str1.is(str2)
@@ -184,7 +206,7 @@ you can write a method as follows:
    @}
 @end example
 @item
-Lambdas and closures.  In most situations lambdas and closures in
+Lambdas and closures.  In most situations, lambdas and closures in
 Java are extremely clunky to use.  The net effect is that they are
 rarely used.  On the other hand, lambdas and closures in JavaScript
 are easy to define and use.  The net effect is that lambdas and
@@ -308,7 +330,7 @@ Groovy has many more significant conveniences
 @end enumerate
 
 @chapter Groovy -- The Bad
-Unfortunately, Groovy does have, what this author believes to be, some
+Unfortunately, Groovy does have what this author believes to be some
 bad features.  In the end, however, it is believed that the good
 features outweigh the bad ones.  The following list enumerates them.
 @enumerate
@@ -329,7 +351,7 @@ functions without parentheses.  For example, instead of writing:
 @example   
       mymeth(arg1, arg2);
 @end example
-   In Groovy you can use:
+   In Groovy, you can use:
 @example
       mymeth arg1, arg2
 @end example
@@ -353,13 +375,6 @@ they're a @code{BigDecimal}!
 @end example
 This and the prior item have caused countless problems due to this unexpected
 behavior.  Beware!
-@item
-Groovy does not make `private' elements private.  This is something
-many have complained about, but they refuse to correct.  It is major
-because when trying to understand a large system, one needs to look no
-further than a single file for truly private elements.  If there is no
-private, one must look throughout the entire system to determine if a
-given element is used.  This is a significant issue!
 @end enumerate    
 
 @chapter Calling Groovy in KISS
@@ -388,7 +403,7 @@ perform them.  There are no special considerations.
 
 However type 3 calls require a special procedure.  This is to give @emph{KISS}
 an opportunity to compile and load the microservice before it is executed.
-See the manual for more details.
+See the manual for more details.  This fact is true with Java microservices as well.
 
     
 

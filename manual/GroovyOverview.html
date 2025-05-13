@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.1, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.1.1, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Groovy Overview</title>
@@ -91,42 +91,61 @@ h2, h3, h4 {  /* subsection titles */
 
 
 
+<div class="chapter-level-extent" id="What-is-Groovy_003f">
+<h2 class="chapter"><span>1 What is Groovy?<a class="copiable-link" href="#What-is-Groovy_003f"> &para;</a></span></h2>
+
+
+<p>Groovy is 80+% the same as Java.  If you are a Java programmer, you can
+trivially pick up Groovy.
+</p>
+<p>Like Java, Groovy compiles into JVM code.  Groovy code runs as fast as
+Java.  Groovy can call any Java class, method, jar, package, etc., just
+as if it were straight Java.
+</p>
+<p>Groovy code is sort of an enhanced Java.  It made a lot more sense
+when competing with older versions of Java.  Groovy has several
+hassles compared to Java but also has many conveniences.  On Kiss,
+Groovy code loads a little bit faster.  Once loaded, however, it runs
+at the same speed as compiled Java.
+</p>
+
+</div>
 <div class="chapter-level-extent" id="Why-Groovy_003f">
-<h2 class="chapter"><span>1 Why Groovy?<a class="copiable-link" href="#Why-Groovy_003f"> &para;</a></span></h2>
+<h2 class="chapter"><span>2 Why Groovy?<a class="copiable-link" href="#Why-Groovy_003f"> &para;</a></span></h2>
 <p>Groovy is used for several reasons:
 </p>
 <ol class="enumerate">
 <li> Groovy is only a little different from Java.  For the most part, if
 you know Java, you know Groovy.
-</li><li> Groovy has several language features that make it significantly
+</li><li> Groovy has several language features that make it
 more convenient in many situations.  (Although it also has a few
 annoyances that you need to be mindful of!)
 </li><li> Groovy normally compiles to regular Java class files, runs at full
 speed, and interacts with Java &lt;-&gt; Groovy as if all code were Java or
 Groovy.
 </li><li> Although Groovy can be compiled ahead-of-time just like Java, the
-way I am using it is to compile it at runtime.  This makes loading
-it take longer (although certainly sub-second) but once loaded, it
+way Kiss uses it is to compile it at runtime.  This makes loading
+it take longer (although certainly sub-second), but once loaded, it
 runs at the same speed as compiled Java code.  Doing it this way
 has the following advantages:
 <ol class="enumerate" type="a" start="1">
 <li> I can modify the code while the system is running!  The way I
 load files is to check the file date/time.  If it changes, I
-re-compile and load it.
+recompile and load it.
 </li><li> It is always clear to me what is dynamic (can be changed on a
 running system) and what is static (compiled ahead of time).
-All Java files are compiled ahead-of-time.  All Groovy files
+This way, all Java files are compiled ahead-of-time.  All Groovy files
 are compiled when loaded at runtime.  Note that this is just a
 convention I use and not a limitation of either Java or Groovy.
 </li><li> Interestingly, and for reasons unclear to me, dynamically
-compiling and loading Groovy seems to be very significantly
+compiling and loading Groovy seems to be
 faster than doing the same thing in Java.
 </li></ol>
 </li></ol>
 
 </div>
 <div class="chapter-level-extent" id="Groovy-_002d_002d-The-Good">
-<h2 class="chapter"><span>2 Groovy &ndash; The Good<a class="copiable-link" href="#Groovy-_002d_002d-The-Good"> &para;</a></span></h2>
+<h2 class="chapter"><span>3 Groovy &ndash; The Good<a class="copiable-link" href="#Groovy-_002d_002d-The-Good"> &para;</a></span></h2>
 <ol class="enumerate">
 <li> Groovy integrates with Java seamlessly.  Groovy can call Java just
 as if everything were written in Groovy.  Java can call Groovy just
@@ -138,7 +157,7 @@ there are special steps required to call code loaded at runtime
 from other code.  This is because the system has to find the code,
 compile it, and load it if necessary before execution.
 </p></li><li> Groovy has several types of strings.  One of the best features of
-Groovy is strings constants that are delineated with triple quotes
+Groovy is string constants that are delineated with triple quotes
 (&quot;&quot;&quot;).  These strings support embedded newlines.  This means you
 can have multi-line strings.  This comes in especially handy when
 representing SQL.  For example:
@@ -148,7 +167,10 @@ representing SQL.  For example:
                        where field = 'abc'
                        order by some_field&quot;&quot;&quot;
 </pre></div>
-</li><li> In Java, to compare two strings you have to use:
+<p>Although newer versions of Java now support triple quotes, Java
+annoyingly requires the opening triple quotes to be followed by a
+newline.  Groovy does not.
+</p></li><li> In Java, to compare two strings you have to use:
 <div class="example">
 <pre class="example-preformatted">      str1 != null &amp;&amp; str1.equals(str2)
 </pre></div>
@@ -156,6 +178,8 @@ representing SQL.  For example:
 </p><div class="example">
 <pre class="example-preformatted">      str1 == str2
 </pre></div>
+<p>Groovy compares the string contents rather than tests if they are the same object.
+</p>
 <p>In Groovy, if you wish to see if they are the same object, use:
 </p><div class="example">
 <pre class="example-preformatted">      str1.is(str2)
@@ -171,7 +195,7 @@ you can write a method as follows:
        a + b
    }
 </pre></div>
-</li><li> Lambdas and closures.  In most situations lambdas and closures in
+</li><li> Lambdas and closures.  In most situations, lambdas and closures in
 Java are extremely clunky to use.  The net effect is that they are
 rarely used.  On the other hand, lambdas and closures in JavaScript
 are easy to define and use.  The net effect is that lambdas and
@@ -284,8 +308,8 @@ Object x = &quot;hello&quot;)
 
 </div>
 <div class="chapter-level-extent" id="Groovy-_002d_002d-The-Bad">
-<h2 class="chapter"><span>3 Groovy &ndash; The Bad<a class="copiable-link" href="#Groovy-_002d_002d-The-Bad"> &para;</a></span></h2>
-<p>Unfortunately, Groovy does have, what this author believes to be, some
+<h2 class="chapter"><span>4 Groovy &ndash; The Bad<a class="copiable-link" href="#Groovy-_002d_002d-The-Bad"> &para;</a></span></h2>
+<p>Unfortunately, Groovy does have what this author believes to be some
 bad features.  In the end, however, it is believed that the good
 features outweigh the bad ones.  The following list enumerates them.
 </p><ol class="enumerate">
@@ -304,7 +328,7 @@ functions without parentheses.  For example, instead of writing:
 <div class="example">
 <pre class="example-preformatted">      mymeth(arg1, arg2);
 </pre></div>
-<p>In Groovy you can use:
+<p>In Groovy, you can use:
 </p><div class="example">
 <pre class="example-preformatted">      mymeth arg1, arg2
 </pre></div>
@@ -326,17 +350,11 @@ they&rsquo;re a <code class="code">BigDecimal</code>!
 </pre></div>
 <p>This and the prior item have caused countless problems due to this unexpected
 behavior.  Beware!
-</p></li><li> Groovy does not make &lsquo;private&rsquo; elements private.  This is something
-many have complained about, but they refuse to correct.  It is major
-because when trying to understand a large system, one needs to look no
-further than a single file for truly private elements.  If there is no
-private, one must look throughout the entire system to determine if a
-given element is used.  This is a significant issue!
-</li></ol>
+</p></li></ol>
 
 </div>
 <div class="chapter-level-extent" id="Calling-Groovy-in-KISS">
-<h2 class="chapter"><span>4 Calling Groovy in KISS<a class="copiable-link" href="#Calling-Groovy-in-KISS"> &para;</a></span></h2>
+<h2 class="chapter"><span>5 Calling Groovy in KISS<a class="copiable-link" href="#Calling-Groovy-in-KISS"> &para;</a></span></h2>
 
 <p>Groovy, like Java, may call compiled Java and Groovy code in the
 normal way.  This is always the case.  However, in <em class="emph">KISS</em>, Groovy
@@ -359,7 +377,7 @@ perform them.  There are no special considerations.
 </p>
 <p>However type 3 calls require a special procedure.  This is to give <em class="emph">KISS</em>
 an opportunity to compile and load the microservice before it is executed.
-See the manual for more details.
+See the manual for more details.  This fact is true with Java microservices as well.
 </p>
     
 
