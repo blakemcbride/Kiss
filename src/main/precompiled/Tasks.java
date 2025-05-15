@@ -62,7 +62,7 @@ public class Tasks {
      * @throws InstantiationException if the class cannot be instantiated
      */
     public static void main(String[] args) throws Exception {
-        BuildUtils.build(args, Tasks.class);
+        BuildUtils.build(args, Tasks.class, LIBS);
     }
 
     /**

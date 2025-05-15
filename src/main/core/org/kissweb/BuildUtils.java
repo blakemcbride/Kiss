@@ -48,8 +48,10 @@ public class BuildUtils {
     public static boolean isSunOS;  // includes OpenIndiana (only tested on OpenIndiana)
     public static boolean isHaiku;
     public static boolean isFreeBSD;
+    private static String [] args;
+    private static String libsDir;
 
-    public static void build(String [] args, Class<?> tasksClass) throws Exception {
+    public static void build(String [] args, Class<?> tasksClass, String libsDir) throws Exception {
         String osName = System.getProperty("os.name");
         isLinux = osName.startsWith("Linux");
         isMacOS = osName.startsWith("Mac OS X");
@@ -57,10 +59,13 @@ public class BuildUtils {
         isSunOS = osName.startsWith("SunOS");  // includes OpenIndiana and Solaris
         isHaiku = osName.startsWith("Haiku");
         isFreeBSD = osName.startsWith("FreeBSD");
+        BuildUtils.args = args;
+        BuildUtils.libsDir = libsDir;
         if (args.length < 1)
             args = new String[]{ "help" };
-        for (String arg : args)
-            switch (arg) {
+        boolean cont = true;
+        for (int i = 0; i < args.length && cont; i++)
+            switch (args[i]) {
                 case "list-tasks":
                     /*
                     Method [] meths = Tasks.class.getDeclaredMethods();
@@ -99,14 +104,13 @@ public class BuildUtils {
                     verbose = true;
                     break;
                 default:
+                    cont = false;
                     printlnIfVerbose("running on " + osName);
                     Method meth;
                     try {
-                        arg = convertToCamelCase(arg);
-
-                        meth = tasksClass.getMethod(arg);
+                        meth = tasksClass.getMethod(convertToCamelCase(args[i]));
                     } catch (NoSuchMethodException e) {
-                        printError("can't find task " + arg);
+                        printError("can't find task " + convertToCamelCase(args[i]));
                         return;
                     }
 
@@ -117,7 +121,7 @@ public class BuildUtils {
                             printError(e.getMessage());
                         else
                             printError(e.getCause().getMessage());
-                        printError("error executing task " + arg);
+                        printError("error executing task " + convertToCamelCase(args[i]));
                         return;
                     }
                     break;
@@ -866,7 +870,7 @@ public class BuildUtils {
      * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
     public static void runWait(boolean showOutput, String startDir, String cmd) {
-        run(false, true, true, showOutput, startDir, cmd);
+        run(false, true, verbose, showOutput, startDir, cmd);
     }
 
     /**
@@ -879,7 +883,7 @@ public class BuildUtils {
      * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
     public static void runShell(String startDir, String cmd) {
-        run(true, true, true, false, startDir, cmd);
+        run(true, true, verbose, false, startDir, cmd);
     }
 
     /**
@@ -913,7 +917,27 @@ public class BuildUtils {
      * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
     public static Process runBackground(String cmd) {
-        return run(false, false, true, false, null, cmd);
+        return run(false, false, verbose, false, null, cmd);
+    }
+
+    /**
+     * Run the Java application including any arguments passed.
+     */
+    public static void runJava() {
+        if (args.length < 2 || args.length < 3 && args[0].equals("-v")) {
+            println("Usage:  bld [-v] run <class-to-run>  [argument]...");
+            println("Example:  bld run org.example.Main");
+            return;
+        }
+        boolean verb = args[0].equals("-v");
+
+        StringBuilder cmd = new StringBuilder(args[verb ? 2 : 1]);
+        for (int i = verb ? 3 : 2; i < args.length; i++)
+            cmd.append(" \"").append(args[i]).append("\"");
+
+        String cp = "\"target/classes" + (isWindows ? ';' : ':') + libsDir + File.separator + "*.jar\"";
+
+        run(true, true, verbose, true, null, "java -cp " + cp + " " + cmd);
     }
 
     public static void killProcess(Process proc) {
@@ -1015,7 +1039,7 @@ public class BuildUtils {
             cmd = "javac -g @" + argsFile + " -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
         } else
             cmd = "javac -g -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
-        runWait(true, cmd);
+        runWait(verbose, cmd);
         rm(argsFile);
     }
 
@@ -1159,6 +1183,15 @@ public class BuildUtils {
         void print() {
             for (ForeignDependency dep : deps)
                 println(dep.filename + " -> " + dep.targetPath + " (" + dep.source + ")");
+        }
+
+        public int size() {
+            return deps.size();
+        }
+
+        public String get(int i) {
+            ForeignDependency fd = deps.get(i);
+            return fd.targetPath + File.separator + fd.filename;
         }
     }
 

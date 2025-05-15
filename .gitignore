@@ -15,7 +15,6 @@ libs/ojdbc*.jar
 libs/postgresql-*.jar
 libs/slf4j-*.jar
 libs/sqlite-jdbc-*.jar
-libs/dynamic-loader-*.jar
 libs/fontbox-*.jar
 libs/pdfbox-*.jar
 libs/junit-*.jar
