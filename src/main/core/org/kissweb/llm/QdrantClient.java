@@ -3,6 +3,8 @@ package org.kissweb.llm;
 import java.net.*;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
+
 import org.json.*;
 
 /**
@@ -78,25 +80,31 @@ public class QdrantClient {
     /**
      * Insert a new record or update an existing record.
      *
-     * @param id The unique identifier for the record. If the ID already exists in the collection, this call will update (overwrite) the existing point.
+     * @param documentId The ID of the document to which the record belongs.
+     * @param sequenceNumber The sequence number of the text within the document.
      * @param vector The embedding vector to be stored. Its length must exactly match the vector size defined when the collection was created (e.g., 384, 768, etc.).
      * @param text A piece of associated plain text to be stored in the record's payload under the key "text". This can be used for display or filtering purposes.
      * @param otherInfo Optional additional metadata (key-value pairs) to store with the record in the payload object. This can contain fields like "author", "title", "timestamp", etc. It may be null.
+     * @returnn The ID of the inserted or updated record
      * @throws Exception
      */
-    public void insertRecord(int id, double[] vector, String text, JSONObject otherInfo) throws Exception {
+    public String insertOrUpdate(int documentId, int sequenceNumber, double[] vector, String text, JSONObject otherInfo) throws Exception {
         JSONObject body = new JSONObject();
         JSONArray points = new JSONArray();
         JSONObject point = new JSONObject();
 
-        point.put("id", id);
+        String uuid = UUID.randomUUID().toString();
+        point.put("id", uuid);
 
         JSONArray vectorArray = new JSONArray();
-        for (double v : vector) vectorArray.put(v);
+        for (double v : vector)
+            vectorArray.put(v);
         point.put("vector", vectorArray);
 
         JSONObject payload = new JSONObject();
         payload.put("text", text);
+        payload.put("document_id", documentId);
+        payload.put("sequence_number", sequenceNumber);
         if (otherInfo != null)
             for (String key : JSONObject.getNames(otherInfo))
                 payload.put(key, otherInfo.get(key));
@@ -106,6 +114,7 @@ public class QdrantClient {
         body.put("points", points);
 
         sendRequest("PUT", "/collections/" + collection + "/points", body.toString());
+        return uuid;
     }
 
     /**
@@ -134,7 +143,7 @@ public class QdrantClient {
      * @param id
      * @throws Exception
      */
-    public JSONObject getRecord(int id) throws Exception {
+    public JSONObject getRecord(String id) throws Exception {
         String response = sendRequest("GET", "/collections/" + collection + "/points/" + id, null);
         JSONObject obj = new JSONObject(response);
         return obj.getJSONObject("result");
@@ -146,7 +155,7 @@ public class QdrantClient {
      * @param id
      * @throws Exception
      */
-    public void deleteRecord(int id) throws Exception {
+    public void deleteRecord(String id) throws Exception {
         JSONObject body = new JSONObject();
         JSONArray ids = new JSONArray();
         ids.put(id);
