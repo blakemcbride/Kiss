@@ -922,8 +922,18 @@ public class BuildUtils {
 
     /**
      * Run the Java application including any arguments passed.
+     * The root of the class files is assumed to be "target/classes".
      */
     public static void runJava() {
+        runJava("target/classes");
+    }
+
+    /**
+     * Run the Java application including any arguments passed.
+     *
+     * @parem classRoot the root directory of the class files
+     */
+    public static void runJava(String classRoot) {
         if (args.length < 2 || args.length < 3 && args[0].equals("-v")) {
             println("Usage:  bld [-v] run <class-to-run>  [argument]...");
             println("Example:  bld run org.example.Main");
@@ -935,7 +945,7 @@ public class BuildUtils {
         for (int i = verb ? 3 : 2; i < args.length; i++)
             cmd.append(" \"").append(args[i]).append("\"");
 
-        String cp = "\"target/classes" + (isWindows ? ';' : ':') + libsDir + File.separator + "*.jar\"";
+        String cp = "\"" + classRoot + (isWindows ? ';' : ':') + libsDir + File.separator + "*.jar\"";
 
         run(true, true, verbose, true, null, "java -cp " + cp + " " + cmd);
     }
