@@ -85,7 +85,7 @@ public class QdrantClient {
      * @param vector The embedding vector to be stored. Its length must exactly match the vector size defined when the collection was created (e.g., 384, 768, etc.).
      * @param text A piece of associated plain text to be stored in the record's payload under the key "text". This can be used for display or filtering purposes.
      * @param otherInfo Optional additional metadata (key-value pairs) to store with the record in the payload object. This can contain fields like "author", "title", "timestamp", etc. It may be null.
-     * @returnn The ID of the inserted or updated record
+     * @return The ID of the inserted or updated record
      * @throws Exception
      */
     public String insertOrUpdate(int documentId, int sequenceNumber, double[] vector, String text, JSONObject otherInfo) throws Exception {
