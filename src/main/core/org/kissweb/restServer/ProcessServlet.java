@@ -543,8 +543,8 @@ public class ProcessServlet implements Runnable {
      *
      * @return the current connection
      */
-    public Connection getConnection() {
-        return DB;
+    public static Connection getConnection() {
+        return instance.get().DB;
     }
 
     /**
@@ -552,8 +552,8 @@ public class ProcessServlet implements Runnable {
      *
      * @return the JSON object
      */
-    public JSONObject getInjson() {
-        return injson;
+    public static JSONObject getInjson() {
+        return instance.get().injson;
     }
 
     /**
@@ -562,8 +562,8 @@ public class ProcessServlet implements Runnable {
      *
      * @return the JSON object
      */
-    public JSONObject getOutjson() {
-        return outjson;
+    public static JSONObject getOutjson() {
+        return instance.get().outjson;
     }
 
     private void log_error(final String str, final Throwable e) {
