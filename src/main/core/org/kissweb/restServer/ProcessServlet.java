@@ -39,6 +39,9 @@ public class ProcessServlet implements Runnable {
     protected Connection DB;
     private byte [] binaryData;
     private boolean isBinaryReturn = false;
+    private static final ThreadLocal<ProcessServlet> instance = new ThreadLocal<>();
+    private JSONObject injson;
+    private JSONObject outjson;
 
     ProcessServlet(org.kissweb.restServer.QueueManager.Packet packet) {
         request = (HttpServletRequest) packet.asyncContext.getRequest();
@@ -265,11 +268,11 @@ public class ProcessServlet implements Runnable {
     }
 
     private void run2() throws IOException {
+        instance.set(this);
         servletContext = request.getServletContext();
         String _className;
         String _method;
-        JSONObject injson;
-        JSONObject outjson = new JSONObject();
+        outjson = new JSONObject();
         ProcessServlet.ExecutionReturn res;
 
         try {
@@ -524,6 +527,45 @@ public class ProcessServlet implements Runnable {
         return remoteAddr;
     }
 
+    /**
+     * Get the current instance of the ProcessServlet.
+     * This allows us a global way of getting the ProcessServlet instance associated with a particular thread / request.
+     *
+     * @return  the current instance
+     */
+    public static ProcessServlet getInstance() {
+        return instance.get();
+    }
+
+    /**
+     * Get the current connection to the database associated with this request.
+     * This may be null if the database is not available.
+     *
+     * @return the current connection
+     */
+    public Connection getConnection() {
+        return DB;
+    }
+
+    /**
+     * Returns the input JSON object associated with this request.
+     *
+     * @return the JSON object
+     */
+    public JSONObject getInjson() {
+        return injson;
+    }
+
+    /**
+     * Returns the output JSON object associated with this request.
+     * This is the object where the web service should place any data it wants to send back to the front-end.
+     *
+     * @return the JSON object
+     */
+    public JSONObject getOutjson() {
+        return outjson;
+    }
+
     private void log_error(final String str, final Throwable e) {
         if (e instanceof FrontendException)
             return;  //  no log
@@ -571,6 +613,7 @@ public class ProcessServlet implements Runnable {
     }
 
     private void closeSession() {
+        instance.remove();
         java.sql.Connection sconn = null;
         try {
             if (DB != null) {
@@ -578,7 +621,7 @@ public class ProcessServlet implements Runnable {
                 DB.close();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error(e);
         } finally {
             DB = null;
         }
@@ -586,7 +629,7 @@ public class ProcessServlet implements Runnable {
             if (sconn != null)
                 sconn.close();
         } catch (SQLException e) {
-            logger.error("", e);
+            logger.error(e);
         }
     }
 

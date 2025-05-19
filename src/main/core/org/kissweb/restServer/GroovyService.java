@@ -83,7 +83,7 @@ public class GroovyService {
                 ca[i] = Object.class;
             else if (args[i] instanceof Class) {
                 // The user is passing a class indicating the class of a null argument
-                ca[i] = (Class) args[i];
+                ca[i] = (Class<?>) args[i];
                 args[i] = null;
             } else
                 ca[i] = args[i].getClass();
