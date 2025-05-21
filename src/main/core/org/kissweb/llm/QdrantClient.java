@@ -88,7 +88,7 @@ public class QdrantClient {
      * @return The ID of the inserted or updated record
      * @throws Exception
      */
-    public String insertOrUpdate(int documentId, int sequenceNumber, double[] vector, String text, JSONObject otherInfo) throws Exception {
+    public String insertOrUpdate(String documentId, int sequenceNumber, double[] vector, String text, JSONObject otherInfo) throws Exception {
         JSONObject body = new JSONObject();
         JSONArray points = new JSONArray();
         JSONObject point = new JSONObject();
