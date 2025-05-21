@@ -80,21 +80,23 @@ public class QdrantClient {
     /**
      * Insert a new record or update an existing record.
      *
-     * @param documentId The ID of the document to which the record belongs.
+     * @param chunkId The ID of the chunk to which the record belongs or null if you want it auto-generated for a new record.
+     * @param documentId The ID of the document to which the chunk is associated.
      * @param sequenceNumber The sequence number of the text within the document.
      * @param vector The embedding vector to be stored. Its length must exactly match the vector size defined when the collection was created (e.g., 384, 768, etc.).
      * @param text A piece of associated plain text to be stored in the record's payload under the key "text". This can be used for display or filtering purposes.
      * @param otherInfo Optional additional metadata (key-value pairs) to store with the record in the payload object. This can contain fields like "author", "title", "timestamp", etc. It may be null.
-     * @return The ID of the inserted or updated record
+     * @return The chunkId of the inserted or updated record
      * @throws Exception
      */
-    public String insertOrUpdate(String documentId, int sequenceNumber, double[] vector, String text, JSONObject otherInfo) throws Exception {
+    public String insertOrUpdate(String chunkId, String documentId, int sequenceNumber, double[] vector, String text, JSONObject otherInfo) throws Exception {
         JSONObject body = new JSONObject();
         JSONArray points = new JSONArray();
         JSONObject point = new JSONObject();
 
-        String uuid = UUID.randomUUID().toString();
-        point.put("id", uuid);
+        if (chunkId == null)
+            chunkId = UUID.randomUUID().toString();
+        point.put("id", chunkId);
 
         JSONArray vectorArray = new JSONArray();
         for (double v : vector)
@@ -114,7 +116,7 @@ public class QdrantClient {
         body.put("points", points);
 
         sendRequest("PUT", "/collections/" + collection + "/points", body.toString());
-        return uuid;
+        return chunkId;
     }
 
     /**
