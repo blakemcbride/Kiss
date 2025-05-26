@@ -27,8 +27,8 @@ public class XML {
     /**
      * Format an XML Document into a pretty formatted String.
      *
-     * @param document
-     * @return
+     * @param document the XML document to format
+     * @return the formatted XML string
      */
     public static String format(final Document document) {
         try {
@@ -47,8 +47,8 @@ public class XML {
     /**
      * Format an XML String into a pretty formatted String.
      *
-     * @param unformattedXml
-     * @return
+     * @param unformattedXml the unformatted XML string
+     * @return the formatted XML string
      */
     public static String format(String unformattedXml) {
         return format(parse(unformattedXml));
@@ -57,8 +57,8 @@ public class XML {
     /**
      * Parse an XML string into an XML Document.
      *
-     * @param in
-     * @return
+     * @param in the XML string to parse
+     * @return the parsed XML document
      */
     public static Document parse(String in) {
         try {

@@ -84,7 +84,7 @@ public class GoogleAPI {
     /**
      * Returns the default distance in feet to round to.
      *
-     * @return
+     * @return the default distance in feet
      */
     public static int getDefaultDistanceFeet() {
         return DEFAULT_DISTANCE_FEET;

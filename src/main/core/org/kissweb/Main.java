@@ -26,6 +26,12 @@ import java.util.Objects;
  */
 public class Main {
 
+    /**
+     * Main entry point for the Kiss command line utility.
+     *
+     * @param argv command line arguments
+     * @throws Exception if database operations fail
+     */
     public static void main(String [] argv) throws Exception {
         Connection db = new Connection(ConnectionType.PostgreSQL, "localhost", null, "waytogo", "postgres", "postgres");
         Command cmd = db.newCommand();

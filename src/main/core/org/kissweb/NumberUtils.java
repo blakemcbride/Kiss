@@ -11,9 +11,9 @@ public class NumberUtils {
     /**
      * Correctly compare two doubles.
      *
-     * @param d1
-     * @param d2
-     * @param maxdiff
+     * @param d1 the first double value
+     * @param d2 the second double value
+     * @param maxdiff the maximum allowed difference
      * @return true if the two doubles are different by less than maxdiff
      */
     public static boolean doubleEqual(double d1, double d2, double maxdiff) {
@@ -65,8 +65,8 @@ public class NumberUtils {
     /**
      * Truncate the decimal part of a number.
      *
-     * @param v
-     * @return
+     * @param v the value to truncate
+     * @return the truncated value
      */
     public static double trunk(double v) {
         return Math.floor(v);
@@ -75,8 +75,8 @@ public class NumberUtils {
     /**
      * Parse a String into a double.
      *
-     * @param s
-     * @return
+     * @param s the string to parse
+     * @return the parsed double value or 0 if parsing fails
      */
     public static double parseDouble(String s) {
         try {
@@ -95,8 +95,8 @@ public class NumberUtils {
     /**
      * Parse a String into a long.
      *
-     * @param s
-     * @return
+     * @param s the string to parse
+     * @return the parsed long value or 0 if parsing fails
      */
     public static long parseLong(String s) {
         try {
@@ -115,8 +115,8 @@ public class NumberUtils {
     /**
      * Is string a valid number?
      *
-     * @param s
-     * @return
+     * @param s the string to check
+     * @return true if the string represents a valid number
      */
     public static boolean isValidNumber(String s) {
         if (s == null)
@@ -136,13 +136,18 @@ public class NumberUtils {
     /**
      * Parse a String into an int.
      *
-     * @param s
-     * @return
+     * @param s the string to parse
+     * @return the parsed int value or 0 if parsing fails
      */
     public static int parseInt(String s) {
         return (int) parseLong(s);
     }
 
+    /**
+     * Test method for NumberUtils functionality.
+     *
+     * @param args command line arguments
+     */
     public static void main(String [] args) {
 
         System.out.println(isValidNumber("38") ? "true" : "false");

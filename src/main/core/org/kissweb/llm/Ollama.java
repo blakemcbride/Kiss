@@ -72,6 +72,7 @@ public class Ollama {
      * Returns a list of available Ollama models.
      *
      * @return List of model names (as Strings). If the server is unreachable or an error occurs, an empty list is returned.
+     * @throws IOException if connection to Ollama server fails
      */
     public List<String> getAvailableModels() throws IOException {
         List<String> models = new ArrayList<>();
@@ -86,9 +87,9 @@ public class Ollama {
     /**
      * Send a prompt to the Ollama server and receive a response using the previously selected model.
      *
-     * @param prompt
-     * @return
-     * @throws Exception
+     * @param prompt the text prompt to send
+     * @return the response from the model
+     * @throws Exception if model is not set or communication fails
      */
     public String send(String prompt) throws Exception {
         if (model == null || model.isEmpty())
@@ -107,7 +108,7 @@ public class Ollama {
     /**
      * Set the model to use for generating text.
      *
-     * @param model
+     * @param model the model name to use
      */
     public void selectModel(String model) {
         this.model = model;
@@ -116,8 +117,8 @@ public class Ollama {
     /**
      * Convert a string returned from a model to HTML.
      *
-     * @param a
-     * @return
+     * @param a the string to convert
+     * @return the HTML formatted string
      */
     public static String toHtml(String a) {
         if (a == null)
@@ -135,6 +136,7 @@ public class Ollama {
      * @param model The model to use for generating embeddings.
      * @param text The input text for which embeddings are requested.
      * @return A vector representing the embeddings, or an empty vector if an error occurs.
+     * @throws Exception if model is not set or communication fails
      */
     public double[] getEmbeddings(String model, String text) throws Exception {
         if (model == null || model.isEmpty())
@@ -168,6 +170,7 @@ public class Ollama {
      *
      * @param prompt The input text for which embeddings are requested.
      * @return A vector representing the embeddings, or an empty vector if an error occurs.
+     * @throws Exception if model is not set or communication fails
      */
     public double [] getEmbeddings(String prompt) throws Exception {
         if (model == null || model.isEmpty())
@@ -178,7 +181,7 @@ public class Ollama {
     /**
      * The HTTP response code for the last call
      *
-     * @return
+     * @return the HTTP response code
      */
     public int getResponseCode() {
         return restClient == null ? 0 : restClient.getResponseCode();
@@ -187,7 +190,7 @@ public class Ollama {
     /**
      * Returns the response string for the last call.
      *
-     * @return
+     * @return the response string for the last call
      */
     public String getResponseString() {
         return restClient == null ? null : restClient.getResponseString();

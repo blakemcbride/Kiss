@@ -24,8 +24,8 @@ public class JsonTemplate {
      *
      * @param jstr the json string or file name
      * @param map a map mapping variable name to replacement text.
-     * @return
-     * @throws IOException
+     * @return the JSONObject with variables replaced
+     * @throws IOException if file reading fails
      *
      * @see #fill(JSONObject, Map)
      */
@@ -53,8 +53,8 @@ public class JsonTemplate {
      *
      * @param jobj the json object
      * @param map a map mapping variable name to replacement text.
-     * @return
-     * @throws IOException
+     * @return the JSONObject with variables replaced
+     * @throws IOException if processing fails
      *
      * @see #fill(String, Map)
      */
@@ -62,6 +62,12 @@ public class JsonTemplate {
         return fill(jobj.toString(), map);
     }
 
+    /**
+     * Test method for JsonTemplate functionality.
+     *
+     * @param argv command line arguments
+     * @throws IOException if file operations fail
+     */
     public static void main(String [] argv) throws IOException {
         Map<String,String> map = new HashMap<>();
         map.put("appId", "the actual id");

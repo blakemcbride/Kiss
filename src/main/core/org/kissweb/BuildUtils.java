@@ -37,18 +37,34 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
+/**
+ * Utility class for building Java applications with minimal external dependencies.
+ * Provides functionality for compiling, packaging, and running Java applications
+ * with automatic dependency management and cross-platform support.
+ */
 public class BuildUtils {
 
+    /** The version of the BuildUtils system. */
     private static final String Version = "1.0";
+    /** The cache directory for downloaded files. */
     private static String CACHE_DIR;
+    /** Flag indicating if verbose output is enabled. */
     private static boolean verbose = false;
+    /** Flag indicating if the current operating system is Windows. */
     public static boolean isWindows;
+    /** Flag indicating if the current operating system is Linux. */
     public static boolean isLinux;
+    /** Flag indicating if the current operating system is macOS. */
     public static boolean isMacOS;
+    /** Flag indicating if the current operating system is SunOS (includes OpenIndiana). */
     public static boolean isSunOS;  // includes OpenIndiana (only tested on OpenIndiana)
+    /** Flag indicating if the current operating system is Haiku. */
     public static boolean isHaiku;
+    /** Flag indicating if the current operating system is FreeBSD. */
     public static boolean isFreeBSD;
+    /** Command line arguments passed to the build system. */
     private static String [] args;
+    /** Directory containing library files. */
     private static String libsDir;
 
     /**
@@ -163,6 +179,12 @@ public class BuildUtils {
         return null;  // not found
     }
 
+    /**
+     * Gets the Java installation path on Windows systems.
+     * Checks JAVA_HOME environment variable first, then searches common installation directories.
+     *
+     * @return the Java installation path or null if not found
+     */
     public static String getJavaPathOnWindows() {
         String path = System.getenv("JAVA_HOME");
         if (path != null)
@@ -178,14 +200,33 @@ public class BuildUtils {
         return null;
     }
 
+    /**
+     * Gets the absolute path to the local Tomcat installation directory.
+     *
+     * @return the absolute path to the tomcat directory
+     */
     public static String getTomcatPath() {
         return (new File("tomcat")).getAbsolutePath();
     }
 
+    /**
+     * Checks if a file or directory exists.
+     *
+     * @param fname the file or directory path to check
+     * @return true if the file or directory exists, false otherwise
+     */
     public static boolean exists(String fname) {
         return (new File(fname)).exists();
     }
 
+    /**
+     * Downloads a file from a remote URL to a local directory.
+     * Uses local cache to avoid re-downloading files that already exist.
+     *
+     * @param fname the filename to save as
+     * @param targetDir the local directory to save the file
+     * @param sourcePath the remote URL to download from
+     */
     public static void download(String fname, String targetDir, String sourcePath) {
         mkdir(targetDir);
         String target = targetDir + File.separator + fname;
@@ -213,29 +254,59 @@ public class BuildUtils {
         }
     }
 
+    /**
+     * Gets the current working directory.
+     *
+     * @return the absolute path of the current working directory
+     */
     public static String getcwd() {
         return Paths.get(".").toAbsolutePath().normalize().toString();
     }
 
+    /**
+     * Downloads all foreign dependencies specified in the dependency collection.
+     *
+     * @param deps the foreign dependencies to download
+     */
     public static void downloadAll(ForeignDependencies deps) {
         for (ForeignDependency dep : deps.getDependencies())
             download(dep.filename, dep.targetPath, dep.source);
     }
 
+    /**
+     * Deletes all files associated with the specified foreign dependencies.
+     *
+     * @param deps the foreign dependencies whose files should be deleted
+     */
     public static void delete(ForeignDependencies deps) {
         for (ForeignDependency dep : deps.getDependencies())
             rm(dep.targetPath + File.separator + dep.filename);
     }
 
+    /**
+     * Prints a line to stdout only if verbose mode is enabled.
+     *
+     * @param str the string to print, or null for empty line
+     */
     public static void printlnIfVerbose(String str) {
         if (verbose)
             System.out.println(str == null ? "" : str);
     }
 
+    /**
+     * Prints a line to stdout.
+     *
+     * @param str the string to print, or null for empty line
+     */
     public static void println(String str) {
         System.out.println(str == null ? "" : str);
     }
 
+    /**
+     * Prints an error message to stderr.
+     *
+     * @param str the error message to print, or null for empty line
+     */
     public static void printError(String str) {
         System.err.println(str == null ? "" : str);
     }
@@ -273,7 +344,7 @@ public class BuildUtils {
     /**
      * Creates a directory including any missing parent directories.
      *
-     * @param dname
+     * @param dname the directory name to create
      */
     public static void mkdir(String dname) {
         if (dname == null  ||  dname.isEmpty()  ||  dname.equals("."))
@@ -335,8 +406,8 @@ public class BuildUtils {
      * <br><br>
      * Normally only copies files that have a later date unless <code>force</code> is <code>true</code>
      *
-     * @param srcDir
-     * @param targetDir
+     * @param srcDir the source directory
+     * @param targetDir the target directory
      * @param includeRegex or null if all
      * @param excludeRegex or null of no exclusions
      * @param force if true ignore file dates
@@ -378,8 +449,8 @@ public class BuildUtils {
     /**
      * Delete all files in a directory that match a (Java!) regex.
      *
-     * @param dirName
-     * @param fnameRegex
+     * @param dirName the directory name
+     * @param fnameRegex the regex pattern for filenames to delete
      */
     public static void rmRegex(String dirName, String fnameRegex) {
         File dir = new File(dirName);
@@ -400,8 +471,8 @@ public class BuildUtils {
     /**
      * Copy one directory tree to another
      *
-     * @param source
-     * @param dest
+     * @param source the source directory tree
+     * @param dest the destination directory
      */
     public static void copyTree(String source, String dest) {
         copyTreeRegex(source, dest, null, null, false);
@@ -411,8 +482,8 @@ public class BuildUtils {
      * Copy one directory tree to another.
      * Force copy regardless of file dates.
      *
-     * @param source
-     * @param dest
+     * @param source the source directory tree
+     * @param dest the destination directory
      */
     public static void copyTreeForce(String source, String dest) {
         copyTreeRegex(source, dest, null, null, true);
@@ -424,8 +495,8 @@ public class BuildUtils {
      * The regular expression applies to file names and not directory names.
      * If includeRegex is null, all files are included.
      *
-     * @param source
-     * @param dest
+     * @param source the source directory tree
+     * @param dest the destination directory
      * @param includeRegex regular expression for files to include or null
      */
     public static void copyTreeRegex(String source, String dest, String includeRegex) {
@@ -439,8 +510,8 @@ public class BuildUtils {
      * If includeRegex is null, all files are included.
      * If excludeRegex is null, no files are excluded.
      *
-     * @param source
-     * @param dest
+     * @param source the source directory tree
+     * @param dest the destination directory
      * @param includeRegex regular expression for files to include or null
      * @param excludeRegex regular expression for files to exclude or null
      */
@@ -455,8 +526,8 @@ public class BuildUtils {
      * If includeRegex is null, all files are included.
      * If excludeRegex is null, no files are excluded.
      *
-     * @param source
-     * @param dest
+     * @param source the source directory tree
+     * @param dest the destination directory
      * @param includeRegex regular expression for files to include or null
      * @param excludeRegex regular expression for files to exclude or null
      * @param force force copy regardless of date
@@ -510,7 +581,7 @@ public class BuildUtils {
     /**
      * Remove a file or empty directory
      *
-     * @param file
+     * @param file the file or directory path to remove
      */
     public static void rm(String file) {
         if (file == null  ||  file.isEmpty())
@@ -526,7 +597,7 @@ public class BuildUtils {
     /**
      * Remove a file or empty directory
      *
-     * @param file
+     * @param file the file or directory path to remove
      */
     public static void rmdir(String file) {
         if (file == null  ||  file.isEmpty())
@@ -542,7 +613,7 @@ public class BuildUtils {
     /**
      * Remove a file or entire directory tree
      *
-     * @param name
+     * @param name the file or directory path to remove
      */
     public static void rmTree(String name) {
         if (name == null  ||  name.isEmpty())
@@ -566,8 +637,8 @@ public class BuildUtils {
     /**
      * Writes a string to file if it doesn't already exist.
      *
-     * @param fname
-     * @param txt
+     * @param fname the filename to write to
+     * @param txt the text content to write
      */
     public static void writeToFile(String fname, String txt) {
         File f = new File(fname);
@@ -585,8 +656,8 @@ public class BuildUtils {
     /**
      * Create a Java manifest file
      *
-     * @param manifest
-     * @param mainClass
+     * @param manifest the path to the manifest file to create
+     * @param mainClass the main class to specify in the manifest
      */
     public static void createManifest(String manifest, String mainClass) {
         writeToFile(manifest, "Manifest-Version: 1.0\n" +
@@ -599,7 +670,7 @@ public class BuildUtils {
     /**
      * Set a file to executable
      *
-     * @param file
+     * @param file the file path to make executable
      */
     public static void makeExecutable(String file) {
         File f = new File(file);
@@ -658,8 +729,8 @@ public class BuildUtils {
     /**
      * Create a command line input file (used in Windows)
      *
-     * @param lst
-     * @return
+     * @param lst the list of files to write to the input file
+     * @return the path to the created input file
      */
     public static String writeArgsToFile(final ArrayList<File> lst) {
         File f;
@@ -678,6 +749,13 @@ public class BuildUtils {
         return f.getAbsolutePath();
     }
 
+    /**
+     * Create a command line input file for javadoc with library classpath and source files.
+     *
+     * @param libs the list of library JAR files for classpath
+     * @param lst the list of source files to document
+     * @return the path to the created input file
+     */
     public static String writeDocArgsToFile(final ArrayList<File> libs, final ArrayList<File> lst) {
         File f;
         try {
@@ -706,6 +784,14 @@ public class BuildUtils {
         return f.getAbsolutePath();
     }
 
+    /**
+     * Create a command line input file with classpath dependencies.
+     *
+     * @param sourceRoot the source root directory for classpath
+     * @param ldep local dependencies for classpath
+     * @param fdep foreign dependencies for classpath
+     * @return the path to the created input file
+     */
     private static String writeDependencyArgsToFile(String sourceRoot, LocalDependencies ldep, ForeignDependencies fdep) {
         File f;
         try {
@@ -760,6 +846,16 @@ public class BuildUtils {
         }
     }
 
+    /**
+     * Compiles Java source files from a source directory to a destination directory.
+     * Only compiles files that are newer than their corresponding class files.
+     *
+     * @param srcPath the source directory containing Java files
+     * @param destDir the destination directory for compiled class files
+     * @param localLibs local dependencies for compilation classpath
+     * @param foreignLibs foreign dependencies for compilation classpath
+     * @param additionalSourceRoot additional source root for classpath
+     */
     public static void buildJava(String srcPath, String destDir, LocalDependencies localLibs, ForeignDependencies foreignLibs, String additionalSourceRoot) {
         File sf = new File(srcPath);
         if (!sf.exists())
@@ -779,9 +875,10 @@ public class BuildUtils {
     /**
      * Build JavaDocs
      *
-     * @param srcPath
-     * @param libPath
-     * @param destDir
+     * @param srcPath the source directory containing Java files
+     * @param libPath the library path for dependencies
+     * @param destDir the destination directory for generated JavaDocs
+     * @param overviewFile the overview file for JavaDoc generation or null
      */
     public static void buildJavadoc(String srcPath, String libPath, String destDir, String overviewFile) {
         final boolean showOutput = true;  // good for debugging
@@ -803,6 +900,12 @@ public class BuildUtils {
         }
     }
 
+    /**
+     * Reads a single character from standard input.
+     *
+     * @return the character read as an integer
+     * @throws RuntimeException if an I/O error occurs
+     */
     public static int readChar() {
         try {
             return System.in.read();
@@ -831,12 +934,12 @@ public class BuildUtils {
      * <code>cmd</code> represents the command (with arguments) to be executed.  If <code>useShell</code> is true,
      * then <code>cmd</code> can also use the shell syntax.
      *
-     * @param useShell
-     * @param wait
-     * @param echoCmd
-     * @param showOutput
-     * @param startDir
-     * @param cmd
+     * @param useShell whether to use shell processing
+     * @param wait whether to wait for process completion
+     * @param echoCmd whether to echo the command to stdout
+     * @param showOutput whether to show process output
+     * @param startDir the starting directory for the process or null
+     * @param cmd the command with arguments to execute
      * @return the process either running or completed (depending on wait)
      */
     public static Process run(boolean useShell, boolean wait, boolean echoCmd, boolean showOutput, String startDir, String cmd) {
@@ -887,10 +990,29 @@ public class BuildUtils {
      * @param cmd the command to execute
      * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
+    /**
+     * Run a command in the underlying OS in the foreground.
+     * Wait till it is done.
+     * This command does not support shell processing such as &gt; and &lt; etc.
+     *
+     * @param showOutput true if output should be shown
+     * @param startDir starting directory or null
+     * @param cmd the command to execute
+     * @see #run(boolean, boolean, boolean, boolean, String, String)
+     */
     public static void runWait(boolean showOutput, String startDir, String cmd) {
         run(false, true, verbose, showOutput, startDir, cmd);
     }
 
+    /**
+     * Run a command in the underlying OS shell in the foreground.
+     * Wait till it is done.
+     * This command supports all the shell processing such as &gt; and &lt; etc.
+     *
+     * @param startDir starting directory or null
+     * @param cmd the command to execute
+     * @see #run(boolean, boolean, boolean, boolean, String, String)
+     */
     /**
      * Run a command in the underlying OS shell in the foreground.
      * Wait till it is done.
@@ -907,8 +1029,8 @@ public class BuildUtils {
     /**
      * Run a command in the underlying OS in the foreground.
      *
-     * @param showOutput
-     * @param cmd
+     * @param showOutput whether to show process output
+     * @param cmd the command to execute
      * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
     public static void runWait(boolean showOutput, String cmd) {
@@ -918,7 +1040,7 @@ public class BuildUtils {
     /**
      * Run a command in the underlying OS shell in the foreground.
      *
-     * @param cmd
+     * @param cmd the command to execute
      * @see #run(boolean, boolean, boolean, boolean, String, String)
      */
     public static void runShell(String cmd) {
@@ -941,6 +1063,9 @@ public class BuildUtils {
     /**
      * Run the Java application including any arguments passed.
      * The root of the class files is assumed to be "target/classes".
+     * 
+     * @param ldep local dependencies or null
+     * @param fdep foreign dependencies or null
      */
     public static void runJava(LocalDependencies ldep, ForeignDependencies fdep) {
         runJava("target/classes", ldep, fdep);
@@ -950,6 +1075,8 @@ public class BuildUtils {
      * Run the Java application including any arguments passed.
      *
      * @param classRoot the root directory of the class files
+     * @param ldep local dependencies or null
+     * @param fdep foreign dependencies or null
      */
     public static void runJava(String classRoot, LocalDependencies ldep, ForeignDependencies fdep) {
         runJava(classRoot, null, ldep, fdep);
@@ -959,7 +1086,9 @@ public class BuildUtils {
      * Run the Java application including any arguments passed.
      *
      * @param classRoot the root directory of the class files
-     * @param classToRun the class to run or null of specified on command line
+     * @param classToRun the class to run or null if specified on command line
+     * @param ldep local dependencies or null
+     * @param fdep foreign dependencies or null
      */
     public static void runJava(String classRoot, String classToRun, LocalDependencies ldep, ForeignDependencies fdep) {
         if (args.length < 1 || args.length < 2 && args[0].equals("-v")) {
@@ -981,6 +1110,11 @@ public class BuildUtils {
         run(true, true, verbose, true, null, "java @" + cp_file + " " + cmd);
     }
 
+    /**
+     * Forcibly terminates a running process.
+     *
+     * @param proc the process to terminate
+     */
     public static void killProcess(Process proc) {
         proc.destroyForcibly();
     }
@@ -1044,6 +1178,12 @@ public class BuildUtils {
         touch(tagf.getAbsolutePath());
     }
 
+    /**
+     * Creates an empty file or updates the last modified time of an existing file.
+     *
+     * @param fname the file path to touch
+     * @param millisecs the time to set in milliseconds since epoch
+     */
     public static void touch(String fname, long millisecs) {
         File f = new File(fname);
         if (!f.exists()) {
@@ -1057,10 +1197,22 @@ public class BuildUtils {
         f.setLastModified(millisecs);
     }
 
+    /**
+     * Creates an empty file or updates the last modified time to current time.
+     *
+     * @param fname the file path to touch
+     */
     public static void touch(String fname) {
         touch(fname, System.currentTimeMillis());
     }
 
+    /**
+     * Extracts all JAR files from local and foreign dependencies into a root directory.
+     *
+     * @param rootDir the directory to extract JAR contents into
+     * @param ld local dependencies containing JAR files
+     * @param fd foreign dependencies containing JAR files
+     */
     public static void unJarAllLibs(final String rootDir, LocalDependencies ld, ForeignDependencies fd) {
         if (ld != null)
             ld.forEach(dep -> unJar(rootDir, dep));
@@ -1070,6 +1222,16 @@ public class BuildUtils {
                     unJar(rootDir, dep.targetPath + "/" + dep.filename);
     }
 
+    /**
+     * Compiles Java source files using the javac compiler with specified dependencies.
+     *
+     * @param ldep local dependencies for classpath
+     * @param fdep foreign dependencies for classpath
+     * @param sourcePath the source directory path
+     * @param destPath the destination directory for compiled classes
+     * @param filelist the file containing list of source files to compile
+     * @param additionalSourceRoot additional source root for classpath
+     */
     public static void javac(LocalDependencies ldep, ForeignDependencies fdep, String sourcePath, String destPath, String filelist, String additionalSourceRoot) {
         if (!new File(sourcePath).exists())
             throw new RuntimeException("javac: \"" + sourcePath + "\" does not exist");
@@ -1084,7 +1246,16 @@ public class BuildUtils {
         rm(argsFile);
     }
 
-    // Unfinished code to create WSDL's (I don't think they're needed anymore)
+    /**
+     * Builds web services by generating WSDL files.
+     * Note: This is unfinished code and may not be needed anymore.
+     *
+     * @param ldep local dependencies for classpath
+     * @param fdep foreign dependencies for classpath
+     * @param dest destination directory for generated files
+     * @param sdir source directory for service files
+     * @param service the service class name to generate WSDL for
+     */
     public static void buildWS(LocalDependencies ldep, ForeignDependencies fdep, String dest, String sdir, String service) {
         String javaHome = java.lang.System.getProperty("java.home");  // to find tools.jar
         String deps = writeDependencyArgsToFile(null, ldep, fdep);
@@ -1097,8 +1268,8 @@ public class BuildUtils {
     /**
      * gunzip and untar a .gz file into the specified directory
      *
-     * @param fname
-     * @param dir
+     * @param fname the .gz file to extract
+     * @param dir the directory to extract files into
      * @param nPathsElementsToDelete number of leading path elements in tar file to eliminate
      */
     public static void gunzip(String fname, String dir, int nPathsElementsToDelete) {
@@ -1118,8 +1289,8 @@ public class BuildUtils {
     /**
      * Untar an input file into an output directory.
      *
-     * @param inputFile
-     * @param outputDir
+     * @param inputFile the tar file to extract
+     * @param outputDir the directory to extract files into
      * @param nPathsToEliminate number of leading path element in tar file to eliminate
      */
     private static void unTar(final File inputFile, final File outputDir, int nPathsToEliminate) {
@@ -1162,6 +1333,13 @@ public class BuildUtils {
         }
     }
 
+    /**
+     * Removes leading path elements from a file path.
+     *
+     * @param nPathsToEliminate number of leading path elements to remove
+     * @param entryName the original path
+     * @return the path with leading elements removed
+     */
     private static String removePathElements(int nPathsToEliminate, String entryName) {
         while (nPathsToEliminate-- > 0)
             entryName = entryName.substring(entryName.indexOf('/'));
@@ -1174,6 +1352,10 @@ public class BuildUtils {
      * The output file is created in the output folder, having the same name
      * as the input file, minus the '.gz' extension.
      *
+     * @param infname the input gzip file path
+     * @param outputFile the output file to create
+     * @return the output file
+     * @throws IOException if an I/O error occurs
      */
     private static File unGzip(final String infname, final File outputFile) throws IOException {
 
@@ -1189,11 +1371,24 @@ public class BuildUtils {
         return outputFile;
     }
 
+    /**
+     * Represents a foreign dependency with filename, target path, and source URL.
+     */
     private static class ForeignDependency {
+        /** The filename of the dependency. */
         String filename;
+        /** The target directory path where the dependency should be stored. */
         String targetPath;
+        /** The source URL where the dependency can be downloaded from. */
         String source;
 
+        /**
+         * Creates a new foreign dependency.
+         *
+         * @param filename the filename of the dependency
+         * @param targetPath the target directory path
+         * @param source the source URL
+         */
         public ForeignDependency(String filename, String targetPath, String source) {
             this.filename = filename;
             this.targetPath = targetPath;
@@ -1201,44 +1396,100 @@ public class BuildUtils {
         }
     }
 
+    /**
+     * Collection class for managing foreign dependencies.
+     * Stores dependencies that need to be downloaded from external sources.
+     */
     public static class ForeignDependencies {
+        /** List of foreign dependencies. */
         private final ArrayList<ForeignDependency> deps = new ArrayList<>();
 
+        /**
+         * Adds a foreign dependency with explicit filename.
+         *
+         * @param filename the filename for the dependency
+         * @param targetPath the target directory path
+         * @param source the source URL
+         */
         public void add(String filename, String targetPath, String source) {
             deps.add(new ForeignDependency(filename, targetPath, source));
         }
 
+        /**
+         * Adds a foreign dependency with filename extracted from source URL.
+         *
+         * @param targetPath the target directory path
+         * @param source the source URL
+         */
         public void add(String targetPath, String source) {
             final String filename = source.substring(source.lastIndexOf('/') + 1);
             deps.add(new ForeignDependency(filename, targetPath, source));
         }
 
+        /**
+         * Checks if this foreign dependencies collection is empty.
+         *
+         * @return true if no dependencies are present, false otherwise
+         */
         boolean isEmpty() {
             return deps.isEmpty();
         }
 
+        /**
+         * Gets the list of all foreign dependencies.
+         *
+         * @return the list of foreign dependencies
+         */
+        /**
+         * Gets the list of all foreign dependencies.
+         *
+         * @return the list of foreign dependencies
+         */
         ArrayList<ForeignDependency> getDependencies() {
             return deps;
         }
 
+        /**
+         * Prints all foreign dependencies to stdout for debugging purposes.
+         */
         void print() {
             for (ForeignDependency dep : deps)
                 println(dep.filename + " -> " + dep.targetPath + " (" + dep.source + ")");
         }
 
+        /**
+         * Returns the number of foreign dependencies in this collection.
+         *
+         * @return the number of dependencies
+         */
         public int size() {
             return deps.size();
         }
 
+        /**
+         * Gets the full path of the dependency at the specified index.
+         *
+         * @param i the index of the dependency
+         * @return the full path (target directory + filename) of the dependency
+         */
         public String get(int i) {
             ForeignDependency fd = deps.get(i);
             return fd.targetPath + File.separator + fd.filename;
         }
     }
 
+    /**
+     * Collection class for managing local dependencies (JAR files).
+     * Extends ArrayList to store local dependency paths as strings.
+     */
     public static class LocalDependencies extends ArrayList<String> {
     }
 
+    /**
+     * Gets the current working directory.
+     *
+     * @return the current working directory path
+     */
     public static String cwd() {
         return System.getProperty("user.dir");
     }
@@ -1253,6 +1504,11 @@ public class BuildUtils {
         return CACHE_DIR;
     }
 
+    /**
+     * Removes a file from the build cache directory.
+     *
+     * @param fname the filename to remove from cache
+     */
     public static void removeFromCache(String fname) {
         rm(cacheDir() + fname);
     }
@@ -1261,8 +1517,8 @@ public class BuildUtils {
      * Works like Unix "tail -F" command.  It never exits.
      * Useful for continuous display of a log file that may rotate.
      * 
-     * @param fileName
-     * @throws Exception 
+     * @param fileName the file to tail
+     * @throws Exception if there is an error reading the file
      */
     public static void tail(String fileName) throws Exception {
         long lastKnownPosition = 0;

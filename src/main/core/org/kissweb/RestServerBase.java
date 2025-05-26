@@ -27,11 +27,11 @@ public abstract class RestServerBase extends HttpServlet {
      * <code>https://[username]:[password]@[full-URL]</code><br>
      * The <code>username</code> and <code>password</code> are validated against what is passed in.
      *
-     * @param request
-     * @param response
+     * @param request the HTTP servlet request
+     * @param response the HTTP servlet response
      * @param relm        whatever the client may require or null
-     * @param userName
-     * @param password
+     * @param userName the expected username for authentication
+     * @param password the expected password for authentication
      * @return <code>true</code> means they passed authentication and <code>false</code> if they didn't
      */
     protected static boolean basicAuthenticate(HttpServletRequest request, HttpServletResponse response, String relm, String userName, String password) {
@@ -76,9 +76,9 @@ public abstract class RestServerBase extends HttpServlet {
     /**
      * Get the body of the request as a string.
      *
-     * @param request
-     * @return
-     * @throws IOException
+     * @param request the HTTP servlet request
+     * @return the request body as a string
+     * @throws IOException if an I/O error occurs
      */
     protected static String getBodyString(HttpServletRequest request) throws IOException {
         final StringBuilder sb = new StringBuilder();
@@ -97,9 +97,9 @@ public abstract class RestServerBase extends HttpServlet {
     /**
      * Get the body of the request as a JSON object.  If it's not JSON, return NULL.
      *
-     * @param request
-     * @return
-     * @throws IOException
+     * @param request the HTTP servlet request
+     * @return the request body as a JSONObject, or null if not JSON
+     * @throws IOException if an I/O error occurs
      */
     protected static JSONObject getBodyJson(HttpServletRequest request) throws IOException {
         if ("application/json".equals(request.getContentType()))
@@ -110,9 +110,9 @@ public abstract class RestServerBase extends HttpServlet {
     /**
      *  Get the body of the request as a binary array.
      *
-     * @param request
-     * @return
-     * @throws IOException
+     * @param request the HTTP servlet request
+     * @return the request body as a byte array
+     * @throws IOException if an I/O error occurs
      */
     protected static byte[] getBodyBinary(HttpServletRequest request) throws IOException {
         try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
@@ -130,9 +130,9 @@ public abstract class RestServerBase extends HttpServlet {
     /**
      * Set the response to a JSON object.
      *
-     * @param response
-     * @param json
-     * @throws IOException
+     * @param response the HTTP servlet response
+     * @param json the JSON object to send as response
+     * @throws IOException if an I/O error occurs
      */
     protected static void setResponse(HttpServletResponse response, JSONObject json) throws IOException {
         response.setContentType("application/json");
@@ -145,10 +145,10 @@ public abstract class RestServerBase extends HttpServlet {
     /**
      * Set the response to a string.
      *
-     * @param response
+     * @param response the HTTP servlet response
      * @param responseType like "text/plain", "text/html", "application/xml", etc.
-     * @param resp
-     * @throws IOException
+     * @param resp the string response content
+     * @throws IOException if an I/O error occurs
      */
     protected static void setResponse(HttpServletResponse response, String responseType, String resp) throws IOException {
         response.setContentType(responseType);
@@ -158,13 +158,13 @@ public abstract class RestServerBase extends HttpServlet {
         out.flush();
     }
 
-        /**
-     * Set the response to a string.
+    /**
+     * Set the response to a binary array.
      *
-     * @param response
+     * @param response the HTTP servlet response
      * @param responseType like "application/octet-stream", "image/jpeg", "audio/mpeg", "video/mp4", etc.
-     * @param resp
-     * @throws IOException
+     * @param resp the binary response content
+     * @throws IOException if an I/O error occurs
      */
     protected static void setResponse(HttpServletResponse response, String responseType, byte [] resp) throws IOException {
         response.setContentType(responseType);

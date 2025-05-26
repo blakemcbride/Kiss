@@ -84,7 +84,7 @@ public class Command implements AutoCloseable {
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
      * @return false is a normal result
-     * @throws SQLException
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchOne(String, Object...)
      * @see #fetchAll(String, Object...)
@@ -138,8 +138,9 @@ public class Command implements AutoCloseable {
      * <br><br>
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a Cursor for iterating through query results
+     * @throws SQLException if database access error occurs
+     * @throws IOException if I/O error occurs during cursor operations
      *
      * @see Cursor
      * @see #fetchAll(String, Object...)
@@ -168,11 +169,12 @@ public class Command implements AutoCloseable {
      * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
-     * @param max
+     * @param max maximum number of records to return
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a Cursor for iterating through query results
+     * @throws SQLException if database access error occurs
+     * @throws IOException if I/O error occurs during cursor operations
      *
      * @see Cursor
      * @see #fetchAll(String, Object...)
@@ -206,11 +208,12 @@ public class Command implements AutoCloseable {
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * @param page starting at zero
-     * @param max
+     * @param max maximum number of records to return
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a Cursor for iterating through query results
+     * @throws SQLException if database access error occurs
+     * @throws IOException if I/O error occurs during cursor operations
      *
      * @see Cursor
      * @see #fetchAll(String, Object...)
@@ -291,7 +294,7 @@ public class Command implements AutoCloseable {
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
      * @return the Record or null if none
-     * @throws SQLException
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchAll(String, Object...)
      * @see #execute(String, Object...)
@@ -305,10 +308,10 @@ public class Command implements AutoCloseable {
     /**
      * This method is the same as <code>fetchOne</code> except that it returns a JSON object.
      *
-     * @param sql
-     * @param args
+     * @param sql SQL statement with ? parameters
+     * @param args the parameter values
      * @return the JSON object or null if no record
-     * @throws SQLException
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchOne(String, Object...)
      */
@@ -323,10 +326,10 @@ public class Command implements AutoCloseable {
      * This method is the same as <code>fetchOne</code> except that it adds the columns to en existing JSON object.
      *
      * @param obj the JSON object that is to be added to
-     * @param sql
-     * @param args
+     * @param sql SQL statement with ? parameters
+     * @param args the parameter values
      * @return the JSON object passed in
-     * @throws SQLException
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchOne(String, Object...)
      */
@@ -355,8 +358,8 @@ public class Command implements AutoCloseable {
      * <br><br>
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a list of Record objects
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchAll(int, String, Object...)
      * @see #fetchAll(int, int, String, Object...)
@@ -371,10 +374,10 @@ public class Command implements AutoCloseable {
      * This method is the same as <code>fetchAll</code> except that it returns the list of records as a JSON array
      * of JSON objects where each object represents a column.
      *
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param sql SQL statement with ? parameters
+     * @param args the parameter values
+     * @return a JSON array of JSON objects representing the records
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchAll(String, Object...)
      */
@@ -398,11 +401,11 @@ public class Command implements AutoCloseable {
      * <br><br>
      * If no records are found, an empty list is returned.
      * <br><br>
-     * @param max
+     * @param max maximum number of records to return
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a list of Record objects
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchAll(String, Object...)
      * @see #fetchAll(int, int, String, Object...)
@@ -434,11 +437,11 @@ public class Command implements AutoCloseable {
      * If no records are found, an empty list is returned.
      * <br><br>
      * @param page starting at zero
-     * @param max
+     * @param max maximum number of records to return
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a list of Record objects
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchAll(String, Object...)
      * @see #fetchAll(int, String, Object...)
@@ -452,11 +455,11 @@ public class Command implements AutoCloseable {
     /**
      * This method is the same as <code>fetchAll</code> except that it returns a JSON array of the records.
      *
-     * @param max
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param max maximum number of records to return
+     * @param sql SQL statement with ? parameters
+     * @param args the parameter values
+     * @return a JSON array of JSON objects representing the records
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchAll(int, String, Object...)
      */
@@ -467,11 +470,12 @@ public class Command implements AutoCloseable {
     /**
      * This method is the same as <code>fetchAll</code> except that it returns a JSON array of the records.
      *
-     * @param max
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param page starting at zero
+     * @param max maximum number of records to return
+     * @param sql SQL statement with ? parameters
+     * @param args the parameter values
+     * @return a JSON array of JSON objects representing the records
+     * @throws SQLException if database access error occurs
      *
      * @see #fetchAll(int, int, String, Object...)
      */
@@ -482,10 +486,10 @@ public class Command implements AutoCloseable {
     /**
      * Returns <code>true</code> if there are any records matching the given SQL statement and <code>false</code> otherwise.
      *
-     * @param sql
-     * @param args
-     * @return
-     * @throws Exception
+     * @param sql SQL statement with ? parameters
+     * @param args the parameter values
+     * @return true if records exist, false otherwise
+     * @throws Exception if database access error occurs
      */
     public boolean exists(String sql, Object... args) throws Exception {
         Record r = fetchOne("select exists (" + sql + ")", args);

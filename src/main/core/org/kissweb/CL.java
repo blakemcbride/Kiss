@@ -19,12 +19,18 @@ import java.util.function.Supplier;
  */
 public class CL {
 
+    /** Constant for moving to the next question. */
     public static final int NEXT = 1;
+    /** Constant for moving to the previous question. */
     public static final int PREVIOUS = -1;
 
+    /** Constant returned when user enters "end". */
     public static final int END = -1000;
+    /** Constant returned when user enters "help". */
     public static final int HELP = -1001;
+    /** Constant returned when user enters nothing or empty string. */
     public static final int NOTHING = -1002;
+    /** Constant returned when user enters a valid value. */
     public static final int VALUE = -1003;
 
     private static BufferedReader reader;
@@ -63,7 +69,7 @@ public class CL {
      * Prompt user for a character input.
      *
      * @param choices a string of all valid single character responses
-     * @param prompt
+     * @param prompt the prompt to display to the user
      * @return the single character that was entered
      */
     public static String inputCharacter(String choices, String prompt) {
@@ -157,7 +163,7 @@ public class CL {
      * Prompt user for a string input among a list of choices.
      *
      * @param options a comma-separated string of all valid responses
-     * @param prompt
+     * @param prompt the prompt to display to the user
      * @return the selected string
      */
     public static String inputList(String options, String prompt) {
@@ -199,7 +205,7 @@ public class CL {
      *
      * @param min minimum acceptable date int the YYYYMMDD format
      * @param max maximum acceptable date in the YYYYMMDD format
-     * @param prompt
+     * @param prompt the prompt to display to the user
      * @return EHN string or date as a string in the YYYYMMDD format
      */
     public static String inputDate(int min, int max, String prompt) {
@@ -278,22 +284,30 @@ public class CL {
     /**
      * Print a line of output terminating with a new line.
      *
-     * @param s
+     * @param s the string to print
      */
     public static void println(String s) {
         System.out.println(s);
     }
 
+    /** Inner class representing a question entry with a label and function. */
     public static class Entry {
         int label;
         Supplier<Integer> fun;
 
+        /**
+         * Constructor for creating a new Entry.
+         *
+         * @param label the unique label for this entry
+         * @param fun the function to execute for this entry
+         */
         public Entry(int label, Supplier<Integer> fun) {
             this.label = label;
             this.fun = fun;
         }
     }
 
+    /** Inner class for managing a sequence of questions. */
     public static class Questions {
         private static final ArrayList<Entry> questions = new ArrayList<>();
         private static final int start = 1000;
@@ -308,7 +322,8 @@ public class CL {
          * And <code>-1</code> means the question defined before the current question.
          * Alternatively, the function could return the label (the return value of the add method) of the next question.
          *
-         * @param fun
+         * @param fun the function to execute for this question
+         * @return the label assigned to this question
          */
         public static int add(Supplier<Integer> fun) {
             int label = current++;
@@ -319,7 +334,7 @@ public class CL {
         /**
          * Run through the list of questions.
          *
-         * @return
+         * @return true if all questions were completed successfully, false otherwise
          */
         public static boolean run() {
             int len = questions.size();

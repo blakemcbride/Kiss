@@ -22,11 +22,11 @@ public class FTP implements AutoCloseable {
     /**
      * Form a new FTP connection.  This actually logs into the system.
      * 
-     * @param url
-     * @param user
-     * @param pw
-     * @throws IOException
-     * @throws Exception 
+     * @param url the FTP server URL or IP address
+     * @param user the username for authentication
+     * @param pw the password for authentication
+     * @throws IOException if an I/O error occurs
+     * @throws Exception if the connection or authentication fails 
      */
     public FTP(String url, String user, String pw) throws IOException, Exception {
         this(url, 21, user, pw);
@@ -35,12 +35,12 @@ public class FTP implements AutoCloseable {
     /**
      * Form a new FTP connection.  This actually logs into the system.
      * 
-     * @param url
-     * @param port
-     * @param user
-     * @param pw
-     * @throws IOException
-     * @throws Exception 
+     * @param url the FTP server URL or IP address
+     * @param port the port number to connect to
+     * @param user the username for authentication
+     * @param pw the password for authentication
+     * @throws IOException if an I/O error occurs
+     * @throws Exception if the connection or authentication fails 
      */    
     public FTP(String url, int port, String user, String pw) throws IOException, Exception {
         try {
@@ -151,8 +151,8 @@ public class FTP implements AutoCloseable {
     /**
      * Change directory on remote system.
      * 
-     * @param dir
-     * @throws Exception 
+     * @param dir the directory path to change to
+     * @throws Exception if the directory change fails 
      */
     public void cd(String dir) throws Exception {
         cmd("cd " + dir, "250 ");
@@ -161,9 +161,9 @@ public class FTP implements AutoCloseable {
     /**
      * Transfer a local file to the remote system.
      * 
-     * @param localFileName
-     * @param remoteFileName
-     * @throws Exception 
+     * @param localFileName the path to the local file to transfer
+     * @param remoteFileName the name to give the file on the remote system
+     * @throws Exception if the file transfer fails 
      */
     public void put(String localFileName, String remoteFileName) throws Exception {
         String ip2;
@@ -209,7 +209,7 @@ public class FTP implements AutoCloseable {
      * Transfer a file to a remote system.
      * 
      * @param fileName same file name on both systems
-     * @throws Exception 
+     * @throws Exception if the file transfer fails 
      */
     public void put(String fileName) throws Exception {
         put(fileName, fileName);
@@ -218,9 +218,9 @@ public class FTP implements AutoCloseable {
     /**
      * Transfer a file from the remote server to the local machine.
      * 
-     * @param remoteFileName
-     * @param localFileName
-     * @throws Exception 
+     * @param remoteFileName the name of the file on the remote server
+     * @param localFileName the path where the file should be saved locally
+     * @throws Exception if the file transfer fails 
      */
     public void get(String remoteFileName, String localFileName) throws Exception {
         String ip2;
@@ -267,7 +267,7 @@ public class FTP implements AutoCloseable {
     /**
      * Close the connection.
      * 
-     * @throws Exception 
+     * @throws Exception if closing the connection fails 
      */
     @Override
     public void close() throws Exception {
@@ -293,6 +293,12 @@ public class FTP implements AutoCloseable {
             }
     }
 
+    /**
+     * Test method that demonstrates FTP functionality.
+     *
+     * @param args command line arguments
+     * @throws Exception if FTP operations fail
+     */
     public static void main(String args[]) throws Exception {
         FTP ftp;
 

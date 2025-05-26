@@ -65,10 +65,10 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Open an existing CSV file with the specified delimiter and quote character.
      *
-     * @param f
-     * @param delimiter
-     * @param quote
-     * @throws FileNotFoundException
+     * @param f the file to open
+     * @param delimiter the delimiter character to use for separating fields
+     * @param quote the quote character to use for quoted fields
+     * @throws FileNotFoundException if the file does not exist
      */
     public DelimitedFileReader(File f, char delimiter, char quote) throws FileNotFoundException {
         fyle = f;
@@ -81,8 +81,8 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Open an existing CSV file with the default delimiter (,) and quote (") characters,
      *
-     * @param f
-     * @throws FileNotFoundException
+     * @param f the file to open
+     * @throws FileNotFoundException if the file does not exist
      */
     public DelimitedFileReader(File f) throws FileNotFoundException {
         this(f, ',', '"');
@@ -91,8 +91,8 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Open an existing CSV file with the default delimiter (,) and quote (") characters,
      *
-     * @param name
-     * @throws FileNotFoundException
+     * @param name the name/path of the file to open
+     * @throws FileNotFoundException if the file does not exist
      */
     public DelimitedFileReader(String name) throws FileNotFoundException {
         this(new File(name), ',', '"');
@@ -101,10 +101,10 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Open an existing CSV file with the specified delimiter and quote character.
      *
-     * @param name
-     * @param delimiter
-     * @param quote
-     * @throws FileNotFoundException
+     * @param name the name/path of the file to open
+     * @param delimiter the delimiter character to use for separating fields
+     * @param quote the quote character to use for quoted fields
+     * @throws FileNotFoundException if the file does not exist
      */
     public DelimitedFileReader(String name, char delimiter, char quote) throws FileNotFoundException {
         this(new File(name), delimiter, quote);
@@ -130,7 +130,7 @@ public class DelimitedFileReader implements AutoCloseable {
      * Gets the double value of field number i.
      *
      * @param i field number, index origin 0
-     * @return
+     * @return the double value of the field, or 0.0 if parsing fails
      */
     public double getDouble(int i) {
         return Double.parseDouble(getString(i));
@@ -139,8 +139,8 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Get the double value of the field indicated by fld.
      *
-     * @param fld
-     * @return
+     * @param fld the field name to retrieve
+     * @return the double value of the field, or 0.0 if field not found or parsing fails
      */
     public double getDouble(String fld) {
         if (nameMap == null)
@@ -172,8 +172,8 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Skip the next line in the CSV file.
      *
-     * @throws IOException
-     * @throws Exception
+     * @throws IOException if an I/O error occurs
+     * @throws Exception if an error occurs during line processing
      */
     public void skipLine() throws IOException, Exception {
         fr.readLine();
@@ -234,7 +234,7 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Return the original row / line last read.
      *
-     * @return
+     * @return the original unparsed line as a string
      */
     public String getRow() {
         return originalRow;
@@ -250,9 +250,9 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Read and parse the next row in the CSV file.
      *
-     * @return true if another line was found, false of end-of-file
-     * @throws IOException
-     * @throws Exception
+     * @return true if another line was found, false if end-of-file
+     * @throws IOException if an I/O error occurs
+     * @throws Exception if field count validation fails or other parsing errors occur
      */
     public boolean nextLine() throws IOException, Exception {
         State state = State.NORMAL;
@@ -350,7 +350,7 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Returns the number of columns / fields in the current row / record.
      *
-     * @return
+     * @return the number of fields in the current record
      */
     public int size() {
         return lineValues.size();
@@ -360,7 +360,7 @@ public class DelimitedFileReader implements AutoCloseable {
      * Returns the next String field.
      * This method is useful when reading the fields in sequence rather than by index.
      *
-     * @return
+     * @return the next string field value
      */
     public String nextString() {
         return getString(fieldPos++);
@@ -370,7 +370,7 @@ public class DelimitedFileReader implements AutoCloseable {
      * Return the String at the indicated field number.
      *
      * @param item field number, index origin 0
-     * @return
+     * @return the string value at the specified field index, or empty string if index is out of bounds
      */
     public String getString(int item) {
         if (item >= lineValues.size())
@@ -384,8 +384,8 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Return the String at the field with the indicated label.
      *
-     * @param fld
-     * @return
+     * @param fld the field name to retrieve
+     * @return the string value at the specified field name, or empty string if field not found
      *
      * @see #readHeader()
      */
@@ -405,7 +405,7 @@ public class DelimitedFileReader implements AutoCloseable {
      * Returns the next int field.
      * This method is useful when reading the fields in sequence rather than by index.
      *
-     * @return
+     * @return the next integer field value, or 0 if parsing fails
      */
     public int nextInt() {
         try {
@@ -416,10 +416,10 @@ public class DelimitedFileReader implements AutoCloseable {
     }
 
     /**
-     * Returns the next String field.
+     * Returns the next double field.
      * This method is useful when reading the fields in sequence rather than by index.
      *
-     * @return
+     * @return the next double field value, or 0.0 if parsing fails
      */
     public double nextDouble() {
         try {
@@ -433,7 +433,7 @@ public class DelimitedFileReader implements AutoCloseable {
      * Return the int at the indicated field number.
      *
      * @param item field number, index origin 0
-     * @return
+     * @return the integer value at the specified field index, or 0 if parsing fails
      */
     public int getInt(int item) {
         try {
@@ -446,8 +446,8 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Return the int at the field with the indicated label.
      *
-     * @param fld
-     * @return
+     * @param fld the field name to retrieve
+     * @return the integer value at the specified field name, or 0 if field not found or parsing fails
      *
      * @see #readHeader()
      */
@@ -486,7 +486,7 @@ public class DelimitedFileReader implements AutoCloseable {
     /**
      * Return the date as an int at the indicated field label.
      *
-     * @param fld
+     * @param fld the field name to retrieve
      * @return date as int YYYYMMDD
      *
      * @see #readHeader()
@@ -499,12 +499,18 @@ public class DelimitedFileReader implements AutoCloseable {
      * Optional method used to set the expected number of fields in each row.
      * If this is set and the number of columns is not what is expected, nextLine() will throw an exception.
      *
-     * @param check
+     * @param check the expected number of fields per row
      */
     public void setFieldCountCheck(int check) {
         fieldCountCheck = check;
     }
 
+    /**
+     * Test method that reads a CSV file and outputs it in quoted format.
+     *
+     * @param args command line arguments
+     * @throws Exception if file cannot be read
+     */
     public static void main(String [] args) throws Exception {
         DelimitedFileReader dfr = new DelimitedFileReader("test.csv");
         while (dfr.nextLine()) {

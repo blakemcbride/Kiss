@@ -62,19 +62,39 @@ import java.util.function.BiConsumer;
  */
 public class Connection implements AutoCloseable {
 
-    public enum ConnectionType {PostgreSQL, MicrosoftServer, MySQL, Oracle, SQLite}
+    /** Enumeration of supported database types */
+    public enum ConnectionType {
+        /** PostgreSQL database */
+        PostgreSQL, 
+        /** Microsoft SQL Server database */
+        MicrosoftServer, 
+        /** MySQL database */
+        MySQL, 
+        /** Oracle database */
+        Oracle, 
+        /** SQLite database */
+        SQLite
+    }
 
-    private final ConcurrentHashMap<String, String> primaryColName = new ConcurrentHashMap<>();  // table name, auto-inc primary key column name
-    private final ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();  // table name, primary key column names
+    /** Cache of table names to auto-increment primary key column names */
+    private final ConcurrentHashMap<String, String> primaryColName = new ConcurrentHashMap<>();
+    /** Cache of table names to primary key column names */
+    private final ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();
+    /** Cache of table existence status */
     private final HashMap<String, Boolean> TableExistenceCache = new HashMap<>();
+    /** Flag indicating if this connection was created externally */
     private boolean externalConnection = false;
 
-    /* A function that gets called whenever a record is deleted  */
+    /** A function that gets called whenever a record is deleted */
     BiConsumer<String,Object> deleteCallback = null;
 
+    /** The underlying JDBC connection */
     java.sql.Connection conn;
+    /** Database metadata from the connection */
     DatabaseMetaData dmd;
+    /** The type of database connection */
     private ConnectionType ctype;
+    /** Cache of table and column information */
     private final HashMap<String,HashMap<String,ColumnInfo>> columnInfo = new HashMap<>();
 
     /**
@@ -83,7 +103,7 @@ public class Connection implements AutoCloseable {
      * If a new instance of this class is created with this method, the JDBC connection passed in will not be closed
      * when this instance is closed.  Thus, if the connection was externally formed, it must be externally released.
      *
-     * @param db
+     * @param db the pre-opened JDBC connection to wrap
      *
      * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
@@ -116,13 +136,13 @@ public class Connection implements AutoCloseable {
     /**
      * Create a connection string appropriate for the indicated database type.  This method is only used in special situations.
      *
-     * @param type
+     * @param type the database type
      * @param host (can use null for localhost)
      * @param port (use null for default)
-     * @param dbname
+     * @param dbname the database name
      * @param user (use null for integrated security)
-     * @param pw
-     * @return
+     * @param pw the password
+     * @return the formatted connection string
      *
      * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
@@ -163,8 +183,8 @@ public class Connection implements AutoCloseable {
     /**
      * Return the name of the driver used for the specified database type.  This method is only used in special circumstances.
      *
-     * @param type
-     * @return
+     * @param type the database type
+     * @return the JDBC driver class name for the specified database type
      *
      * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
@@ -191,10 +211,10 @@ public class Connection implements AutoCloseable {
      * Auto commits are turned off thus always requiring commit() to complete a transaction.
      * However, KISS explicitly calls commit at the end of each web service (if it succeeds, and a rollback otherwise).
      *
-     * @param type
-     * @param connectionString
-     * @throws ClassNotFoundException
-     * @throws SQLException
+     * @param type the database type
+     * @param connectionString the JDBC connection string
+     * @throws ClassNotFoundException if the JDBC driver class cannot be found
+     * @throws SQLException if a database access error occurs
      *
      * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
@@ -210,14 +230,14 @@ public class Connection implements AutoCloseable {
     /**
      * This is the main method of forming a new database connection.
      *
-     * @param type
+     * @param type the database type
      * @param host (null for localhost)
      * @param port (null for default)
-     * @param dbname
-     * @param user
-     * @param pw
-     * @throws SQLException
-     * @throws ClassNotFoundException
+     * @param dbname the database name
+     * @param user the username
+     * @param pw the password
+     * @throws SQLException if a database access error occurs
+     * @throws ClassNotFoundException if the JDBC driver class cannot be found
      *
      * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
@@ -230,12 +250,12 @@ public class Connection implements AutoCloseable {
     /**
      * This is the main method of forming a new database connection when Windows authentication is used.
      *
-     * @param type
+     * @param type the database type
      * @param host (null for localhost)
      * @param port (null for default)
-     * @param dbname
-     * @throws SQLException
-     * @throws ClassNotFoundException
+     * @param dbname the database name
+     * @throws SQLException if a database access error occurs
+     * @throws ClassNotFoundException if the JDBC driver class cannot be found
      *
      * @see Connection(ConnectionType, String, Integer, String, String, String)
      */
@@ -249,7 +269,7 @@ public class Connection implements AutoCloseable {
      * This method closes a connection.  It rarely needs to be called explicitly because it gets called
      * automatically when using the Java try-with-resource statement.
      *
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void close() throws SQLException {
@@ -270,7 +290,7 @@ public class Connection implements AutoCloseable {
      * Note that the KISS system does a commit at the end of each web service if the service completes.  However, if the
      * service fails (throws an exception) KISS does a rollback instead.
      *
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      *
      * @see #rollback
      */
@@ -281,7 +301,7 @@ public class Connection implements AutoCloseable {
     /**
      * Rollback, erase, or forget all the operations since the last commit.
      *
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      *
      * @see #commit
      */
@@ -305,8 +325,8 @@ public class Connection implements AutoCloseable {
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * @param sql the SQL statement to execute
-     * @param args
-     * @throws SQLException
+     * @param args the parameter values for the SQL statement
+     * @throws SQLException if a database access error occurs
      *
      * @see Command#execute(String, Object...)
      */
@@ -333,7 +353,7 @@ public class Connection implements AutoCloseable {
     /**
      * This is the main way of creating a new Command instance.
      *
-     * @return
+     * @return a new Command instance for this connection
      */
     public Command newCommand() {
         try {
@@ -361,10 +381,10 @@ public class Connection implements AutoCloseable {
      * However, this method also accepts a single argument (which must be an <code>Array</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
-     * @param sql
-     * @param args
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
      * @return the Record or null if none
-     * @throws SQLException
+     * @throws Exception if a database access error occurs
      *
      * @see Command#fetchOne(String, Object...)
      */
@@ -377,10 +397,10 @@ public class Connection implements AutoCloseable {
     /**
      * Same as <code>fetchOne</code> except returns a JSON object.
      *
-     * @param sql
-     * @param args
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
      * @return the JSON object or <code>null</code> if none
-     * @throws SQLException
+     * @throws Exception if a database access error occurs
      *
      * @see #fetchOne(String, Object...)
      */
@@ -392,11 +412,11 @@ public class Connection implements AutoCloseable {
     /**
      * Same as <code>fetchOne</code> except adds the columns to an existing JSON object passed in.
      *
-     * @param obj
-     * @param sql
-     * @param args
+     * @param obj the JSON object to add columns to
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
      * @return the JSON object passed in
-     * @throws SQLException
+     * @throws Exception if a database access error occurs
      *
      * @see #fetchOne(String, Object...)
      */
@@ -424,10 +444,10 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * If no records are found, an empty list is returned.
      * <br><br>
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
+     * @return a list of records matching the query
+     * @throws Exception if a database access error occurs
      *
      * @see Command#fetchAll(String, Object...)
      * @see #fetchAll(int, String, Object...)
@@ -442,10 +462,10 @@ public class Connection implements AutoCloseable {
     /**
      * Same as <code>fetchAll</code> except returns a JSON array.
      *
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
+     * @return a JSON array of records
+     * @throws Exception if a database access error occurs
      *
      * @see #fetchAll(String, Object...)
      */
@@ -472,11 +492,11 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * If no records are found, an empty list is returned.
      * <br><br>
-     * @param max
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param max the maximum number of records to return
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
+     * @return a list of records matching the query
+     * @throws Exception if a database access error occurs
      *
      * @see Command#fetchAll(String, Object...)
      * @see #fetchAll(int, int, String, Object...)
@@ -491,11 +511,11 @@ public class Connection implements AutoCloseable {
     /**
      * Same as <code>fetchAll</code> except returns a JSON array.
      *
-     * @param max
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param max the maximum number of records to return
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
+     * @return a JSON array of records
+     * @throws Exception if a database access error occurs
      *
      * @see #fetchAll(int, String, Object...)
      */
@@ -524,11 +544,11 @@ public class Connection implements AutoCloseable {
      * If no records are found, an empty list is returned.
      * <br><br>
      * @param page starts at zero
-     * @param max
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param max the maximum number of records per page
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
+     * @return a list of records for the specified page
+     * @throws Exception if a database access error occurs
      *
      * @see Command#fetchAll(int, int, String, Object...)
      * @see #fetchAll(int, String, Object...)
@@ -544,11 +564,11 @@ public class Connection implements AutoCloseable {
      * Same as <code>fetchAll</code> except returns a JSON array.
      *
      * @param page starts at zero
-     * @param max
-     * @param sql
-     * @param args
-     * @return
-     * @throws SQLException
+     * @param max the maximum number of records per page
+     * @param sql the SQL query to execute
+     * @param args the parameter values for the SQL statement
+     * @return a JSON array of records for the specified page
+     * @throws Exception if a database access error occurs
      *
      * @see #fetchAll(int, int, String, Object...)
      */
@@ -559,10 +579,10 @@ public class Connection implements AutoCloseable {
     /**
      * Returns <code>true</code> if there are any records matching the given SQL statement and <code>false</code> otherwise.
      *
-     * @param sql
-     * @param args
-     * @return
-     * @throws Exception
+     * @param sql the SQL query to test for existence
+     * @param args the parameter values for the SQL statement
+     * @return true if any records exist, false otherwise
+     * @throws Exception if a database access error occurs
      */
     public boolean exists(String sql, Object... args) throws Exception {
         Record r = fetchOne("select exists (" + sql + ")", args);
@@ -576,9 +596,10 @@ public class Connection implements AutoCloseable {
      * On the other hand, this method executes a costly SQL query so should be used only when necessary.
      * This would mainly be in conjunction with paging.
      * 
-     * @param sql
-     * @return
-     * @throws Exception
+     * @param sql the SQL query to count
+     * @param args the parameter values for the SQL statement
+     * @return the total number of records that would be returned
+     * @throws Exception if a database access error occurs
      * @see #fetchAll(int, int, String, Object...) 
      */
     public long fetchCount(String sql, Object ... args) throws Exception {
@@ -612,8 +633,9 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a Cursor for iterating through the results
+     * @throws SQLException if a database access error occurs
+     * @throws IOException if an I/O error occurs
      *
      * @see Cursor
      * @see #fetchAll(String, Object...)
@@ -644,11 +666,12 @@ public class Connection implements AutoCloseable {
      * However, this method also accepts a single argument (which must be an <code>ArrayList</code>) that
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
-     * @param max
+     * @param max the maximum number of records to return
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a Cursor for iterating through the results
+     * @throws SQLException if a database access error occurs
+     * @throws IOException if an I/O error occurs
      *
      * @see Cursor
      * @see #fetchAll(String, Object...)
@@ -684,11 +707,12 @@ public class Connection implements AutoCloseable {
      * represents the parameters rather than an in-line list of parameters.
      * <br><br>
      * @param page starting at zero
-     * @param max
+     * @param max the maximum number of records per page
      * @param sql the sql statement with ? parameters
      * @param args the parameter values
-     * @return
-     * @throws SQLException
+     * @return a Cursor for iterating through the results
+     * @throws SQLException if a database access error occurs
+     * @throws IOException if an I/O error occurs
      *
      * @see Cursor
      * @see #fetchAll(String, Object...)
@@ -705,9 +729,9 @@ public class Connection implements AutoCloseable {
      * Return the name of the column that is the table's primary key.  Throws an exception of
      * the table has a composite primary key.
      *
-     * @param table
-     * @return
-     * @throws SQLException
+     * @param table the table name
+     * @return the primary key column name
+     * @throws SQLException if a database access error occurs or table has a composite primary key
      *
      * @see #getPrimaryColumns(String table)
      */
@@ -729,9 +753,9 @@ public class Connection implements AutoCloseable {
     /**
      * Returns a list of column names that make up the primary key.
      *
-     * @param table
-     * @return
-     * @throws SQLException
+     * @param table the table name
+     * @return a list of primary key column names
+     * @throws SQLException if a database access error occurs
      *
      * @see #getPrimaryColumnName(String)
      */
@@ -756,8 +780,8 @@ public class Connection implements AutoCloseable {
      * Then the columns would be filled with the methods in the Record class.  Finally, the addRecord() method would be called
      * to perform the operation.
      *
-     * @param table
-     * @return
+     * @param table the table name
+     * @return a new Record instance for the specified table
      *
      * @see Record#set(String, Object)
      * @see Record#addRecord()
@@ -771,8 +795,8 @@ public class Connection implements AutoCloseable {
      * Tests to see if a specified table exists.
      * Returns true if it does and false otherwise.
      *
-     * @param table
-     * @return
+     * @param table the table name to test
+     * @return true if the table exists, false otherwise
      */
     public boolean tableExists(String table) {
         String schema = null;
@@ -807,10 +831,10 @@ public class Connection implements AutoCloseable {
     /**
      * Manly useful in CHAR or VARCHAR columns, this method returns the maximum size of the column.
      *
-     * @param table
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param table the table name
+     * @param cname the column name
+     * @return the maximum size of the column
+     * @throws SQLException if a database access error occurs
      */
     public int getColumnSize(String table, String cname) throws SQLException {
         int size;
@@ -827,7 +851,7 @@ public class Connection implements AutoCloseable {
     /**
      * Return the underlying java.sql.Connection associated with this Connection.
      *
-     * @return
+     * @return the underlying JDBC Connection object
      */
     public java.sql.Connection getSQLConnection() {
         return conn;
@@ -867,8 +891,8 @@ public class Connection implements AutoCloseable {
      *
      * @param pageNumber starting at zero
      * @param maxRecords number of records in each page
-     * @param sql
-     * @return
+     * @param sql the SQL statement to modify
+     * @return the modified SQL statement with paging
      */
     String page(int pageNumber, int maxRecords, String sql) {
         if (pageNumber == 0)
@@ -891,7 +915,7 @@ public class Connection implements AutoCloseable {
     /**
      * Returns the database type.
      *
-     * @return
+     * @return the ConnectionType enum value for this connection
      */
     public ConnectionType getDBType() {
         return ctype;
@@ -900,8 +924,8 @@ public class Connection implements AutoCloseable {
     /**
      * Utility method to convert a Java Date into an SQL Timestamp.
      *
-     * @param dt
-     * @return
+     * @param dt the Java Date to convert
+     * @return the SQL Timestamp or null if input is null
      */
     public static java.sql.Timestamp toTimestamp(Date dt) {
         return dt == null ? null : new java.sql.Timestamp(dt.getTime());
@@ -911,7 +935,7 @@ public class Connection implements AutoCloseable {
      * Utility method to convert an integer date into an SQL Timestamp.
      *
      * @param dt YYYYMMDD
-     * @return
+     * @return the SQL Timestamp or null if input is 0
      */
     public static java.sql.Timestamp toTimestamp(int dt) {
         return dt == 0 ? null : new java.sql.Timestamp(DateUtils.toDate(dt).getTime());
@@ -920,18 +944,18 @@ public class Connection implements AutoCloseable {
     /**
      * Utility method to convert a Java Date into an SQL Date.
      *
-     * @param dt
-     * @return
+     * @param dt the Java Date to convert
+     * @return the SQL Date or null if input is null
      */
     public static java.sql.Date toDate(Date dt) {
         return dt == null ? null : new java.sql.Date(dt.getTime());
     }
 
     /**
-     * Utility method to convert an integer date into an SQL Timestamp.
+     * Utility method to convert an integer date into an SQL Date.
      *
      * @param dt YYYYMMDD
-     * @return
+     * @return the SQL Date or null if input is 0
      */
     public static java.sql.Date toDate(int dt) {
         return dt == 0 ? null : new java.sql.Date(DateUtils.toDate(dt).getTime());
@@ -954,8 +978,8 @@ public class Connection implements AutoCloseable {
      * Local method used to assure Dates of any type are of the SQL type.
      * If the object is not a date type, it is simply returned.
      *
-     * @param dt
-     * @return
+     * @param dt the object to convert
+     * @return the SQL-compatible date object or the original object if not a date
      */
     static Object fixDate(Object dt) {
         if (dt != null) {
@@ -982,6 +1006,13 @@ public class Connection implements AutoCloseable {
         return dt;
     }
 
+    /**
+     * Gets column information for the specified table.
+     *
+     * @param table the table name
+     * @return a map of column names to ColumnInfo objects, or null if table is null or empty
+     * @throws SQLException if a database access error occurs
+     */
     HashMap<String, ColumnInfo> getColumnInfo(String table) throws SQLException {
         if (table == null || table.isEmpty())
             return null;

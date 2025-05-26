@@ -27,7 +27,7 @@ public class QdrantClient {
     /**
      * Change the default (local) URL for the Qdrant server.
      *
-     * @param url
+     * @param url the URL of the Qdrant server
      */
     public static void setUrl(String url) {
         QDRANT_URL = url;
@@ -38,7 +38,7 @@ public class QdrantClient {
      *
      * @param collection the name of the collection
      * @param vectorSize the size of the embedding vector
-     * @throws Exception
+     * @throws Exception if an error occurs during collection creation
      */
     public static void createCollection(String collection, int vectorSize) throws Exception {
         JSONObject body = new JSONObject();
@@ -53,8 +53,8 @@ public class QdrantClient {
     /**
      * List the names of existing collections.
      *
-     * @return
-     * @throws Exception
+     * @return an array of collection names
+     * @throws Exception if an error occurs during the request
      */
     public static String[] listCollections() throws Exception {
         String response = sendRequest("GET", "/collections", null);
@@ -70,8 +70,8 @@ public class QdrantClient {
     /**
      * Delete the named collection.
      *
-     * @param collection
-     * @throws Exception
+     * @param collection the name of the collection to delete
+     * @throws Exception if an error occurs during collection deletion
      */
     public static void deleteCollection(String collection) throws Exception {
         sendRequest("DELETE", "/collections/" + collection, null);
@@ -87,7 +87,7 @@ public class QdrantClient {
      * @param text A piece of associated plain text to be stored in the record's payload under the key "text". This can be used for display or filtering purposes.
      * @param otherInfo Optional additional metadata (key-value pairs) to store with the record in the payload object. This can contain fields like "author", "title", "timestamp", etc. It may be null.
      * @return The chunkId of the inserted or updated record
-     * @throws Exception
+     * @throws Exception if an error occurs during the insert/update operation
      */
     public String insertOrUpdate(String chunkId, String documentId, int sequenceNumber, double[] vector, String text, JSONObject otherInfo) throws Exception {
         JSONObject body = new JSONObject();
@@ -122,10 +122,10 @@ public class QdrantClient {
     /**
      * Search for the <code>limit</code> closest vectors to the provided <code>vector</code>.
      *
-     * @param vector
-     * @param limit
-     * @return
-     * @throws Exception
+     * @param vector the query vector to search for
+     * @param limit the maximum number of results to return
+     * @return a JSONArray of search results
+     * @throws Exception if an error occurs during the search
      */
     public JSONArray search(double[] vector, int limit) throws Exception {
         JSONObject body = new JSONObject();
@@ -142,8 +142,9 @@ public class QdrantClient {
     /**
      * Get a specific record along with all the data associated with it.
      *
-     * @param id
-     * @throws Exception
+     * @param id the ID of the record to retrieve
+     * @return the record data as a JSONObject
+     * @throws Exception if an error occurs during the retrieval
      */
     public JSONObject getRecord(String id) throws Exception {
         String response = sendRequest("GET", "/collections/" + collection + "/points/" + id, null);
@@ -154,8 +155,8 @@ public class QdrantClient {
     /**
      * Delete a specified record.
      *
-     * @param id
-     * @throws Exception
+     * @param id the ID of the record to delete
+     * @throws Exception if an error occurs during the deletion
      */
     public void deleteRecord(String id) throws Exception {
         JSONObject body = new JSONObject();

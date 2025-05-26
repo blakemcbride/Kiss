@@ -61,7 +61,7 @@ public class PDF {
      *
      * @param infile the name of the input PDF template file
      * @param outfile the file name to be saved to (include the .pdf)
-     * @throws IOException
+     * @throws IOException if an error occurs loading the input file
      */
     public PDF(String infile, String outfile) throws IOException {
         outputFilename = outfile;
@@ -86,10 +86,16 @@ public class PDF {
         }
     }
 
+    /**
+     * Set the page orientation to landscape.
+     */
     public void landscape() {
         landscape = true;
     }
 
+    /**
+     * Set the page orientation to portrait.
+     */
     public void portrait() {
         landscape = false;
     }
@@ -97,7 +103,7 @@ public class PDF {
     /**
      * Set the default line thickness.  The default is 1.
      *
-     * @param thickness
+     * @param thickness the line thickness in points
      * @return the old line thickness
      */
     public float setDefaultLineThickness(float thickness) {
@@ -106,6 +112,12 @@ public class PDF {
         return old;
     }
 
+    /**
+     * Set the page size.
+     *
+     * @param ps the page size rectangle
+     * @return the previous page size
+     */
     public PDRectangle setPageSize(PDRectangle ps) {
         PDRectangle old = pageSize;
         pageSize = ps;
@@ -502,18 +514,36 @@ public class PDF {
         }
     }
 
+    /**
+     * Get the underlying PDDocument.
+     *
+     * @return the PDDocument instance
+     */
     public PDDocument getDoc() {
         return doc;
     }
 
+    /**
+     * Get the current page.
+     *
+     * @return the current PDPage instance
+     */
     public PDPage getPage() {
         return page;
     }
 
+    /**
+     * Get the content stream for the current page.
+     *
+     * @return the PDPageContentStream instance
+     */
     public PDPageContentStream getContentStream() {
         return contentStream;
     }
 
+    /**
+     * Draw a grid on the current page for layout assistance.
+     */
     public void grid() {
         float y, x;
         float yo = 16, xo = 16;  // page offsets
@@ -561,6 +591,12 @@ public class PDF {
                 drawLine(pageHeight-yo-10, x, pageHeight-yo, x, .5f);
     }
 
+    /**
+     * Test method for the PDF class.
+     *
+     * @param args command line arguments (not used)
+     * @throws IOException if an error occurs during PDF operations
+     */
     public static void main(String[] args) throws IOException {
         test4();
     }

@@ -25,8 +25,8 @@ public class JsonPath {
      * If in a string, the string must start with "{" or space character
      *
      * @param str the json string or file name containing a json string
-     * @return
-     * @throws IOException
+     * @return the JSONObject parsed from the string or file
+     * @throws IOException if file reading fails
      */
     public static JSONObject toJson(String str) throws IOException {
         if (str == null  ||  str.isEmpty())
@@ -228,6 +228,12 @@ public class JsonPath {
         }
     }
 
+    /**
+     * Test method for JsonPath functionality.
+     *
+     * @param argv command line arguments
+     * @throws IOException if file operations fail
+     */
     public static void main(String [] argv) throws IOException {
         JSONObject jobj = toJson("input.json");
         JSONObject jobj2 = getObject(jobj, "context.System.application");

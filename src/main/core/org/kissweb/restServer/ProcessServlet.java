@@ -36,6 +36,7 @@ public class ProcessServlet implements Runnable {
     private final AsyncContext asyncContext;
     private final ServletOutputStream out;
     private UserData ud;
+    /** Database connection for the current request. */
     protected Connection DB;
     private byte [] binaryData;
     private boolean isBinaryReturn = false;
@@ -67,6 +68,8 @@ public class ProcessServlet implements Runnable {
 
     /**
      * Get the absolute path of the root of the back-end application.
+     *
+     * @return the absolute path of the back-end application root
      */
     public String getRealPath() {
         return servletContext.getRealPath("/");
@@ -74,6 +77,8 @@ public class ProcessServlet implements Runnable {
 
     /**
      * Returns the ServletContext.
+     *
+     * @return the ServletContext instance
      */
     public ServletContext getServletContext() {
         return servletContext;
@@ -81,6 +86,8 @@ public class ProcessServlet implements Runnable {
 
     /**
      * Returns the HttpServletRequest.
+     *
+     * @return the HttpServletRequest instance
      */
     public HttpServletRequest getRequest() {
         return request;
@@ -89,6 +96,7 @@ public class ProcessServlet implements Runnable {
     /**
      * Return the number of files being uploaded.
      *
+     * @return the number of files being uploaded
      * @see #getUploadFileName(int)
      * @see #getUploadBufferedInputStream(int)
      * @see #saveUploadFile(int)
@@ -122,7 +130,7 @@ public class ProcessServlet implements Runnable {
      * Returns the name of the file being uploaded.
      *
      * @param i beginning at 0
-     *
+     * @return the name of the uploaded file, or null if not found
      * @see #getUploadFileCount()
      * @see #getUploadBufferedInputStream(int)
      * @see #saveUploadFile(int)
@@ -139,8 +147,8 @@ public class ProcessServlet implements Runnable {
     /**
      * Returns the file extension of a given file upload.
      *
-     * @param i
-     * @return
+     * @param i the file index starting from 0
+     * @return the file extension, or null if not found
      */
     public String getUploadFileType(int i) {
         try {
@@ -159,7 +167,7 @@ public class ProcessServlet implements Runnable {
      * closed by the application.
      *
      * @param i starting from 0
-     *
+     * @return a BufferedInputStream for the uploaded file, or null if not found
      * @see BufferedInputStream#close()
      * @see #getUploadFileCount()
      * @see #getUploadFileName(int)
@@ -178,8 +186,8 @@ public class ProcessServlet implements Runnable {
      * In a file upload scenario, this method returns a byte array of the data that was uploaded.
      *
      * @param i starting from 0
-     * @return
-     * @throws IOException
+     * @return the uploaded file data as a byte array
+     * @throws IOException if an error occurs reading the file
      */
     public byte [] getUploadBytes(int i) throws IOException {
         BufferedInputStream bis = getUploadBufferedInputStream(i);
@@ -194,8 +202,8 @@ public class ProcessServlet implements Runnable {
      * Reads upload file "n", saves it to a temporary file, and returns the path to that file.
      *
      * @param n file number
-     * @return
-     * @throws IOException
+     * @return the absolute path to the saved temporary file
+     * @throws IOException if an error occurs during file operations
      *
      * @see #getUploadFileName(int)
      * @see #getUploadBufferedInputStream(int)
@@ -219,7 +227,7 @@ public class ProcessServlet implements Runnable {
      * @param n file number
      * @param fileName the name of the file to save the upload to
      * @return the fileName passed in
-     * @throws IOException
+     * @throws IOException if an error occurs during file operations
      *
      * @see #getUploadFileName(int)
      * @see #getUploadBufferedInputStream(int)
@@ -394,7 +402,7 @@ public class ProcessServlet implements Runnable {
     /**
      * Return binary data to the front-end.
      *
-     * @param data
+     * @param data the binary data to return
      */
     public void returnBinary(byte [] data) {
         isBinaryReturn = true;
@@ -495,7 +503,7 @@ public class ProcessServlet implements Runnable {
     /**
      * Get all user data.
      *
-     * @return
+     * @return the UserData instance for the current user
      */
     public UserData getUserData() {
         return ud;
@@ -504,8 +512,8 @@ public class ProcessServlet implements Runnable {
     /**
      * Get a specific user data element.
      *
-     * @param key
-     * @return
+     * @param key the key for the user data element
+     * @return the user data element, or null if not found
      */
     public Object getUserData(String key) {
         return ud.getUserData(key);
@@ -514,7 +522,7 @@ public class ProcessServlet implements Runnable {
     /**
      * Returns the IP address of the client.
      *
-     * @return
+     * @return the client's IP address
      */
     public String getRemoteAddr() {
         String remoteAddr = "";

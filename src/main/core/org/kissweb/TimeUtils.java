@@ -15,6 +15,8 @@ public class TimeUtils {
 
     /**
      * Returns the current time of day in the format HHMM since midnight.
+     *
+     * @return the current time as an int formatted as HHMM
      */
     public static int now() {
         final Calendar cal = Calendar.getInstance();
@@ -40,7 +42,7 @@ public class TimeUtils {
      * Format time as hh:mm (hours to 23)
      *
      * @param tm HHMM
-     * @return
+     * @return the formatted time string
      */
     public static String formatMilitary(int tm) {
         final int min = tm % 100;
@@ -52,7 +54,7 @@ public class TimeUtils {
      * Format time as hh:mm AM/PM
      *
      * @param tm HHMM
-     * @return
+     * @return the formatted time string with AM/PM
      */
     public static String formatAMPM(int tm) {
         final int min = tm % 100;
@@ -97,7 +99,7 @@ public class TimeUtils {
      * "230 pm" -&gt; 1430<br>
      * "14:30" -&gt; 1430<br>
      *
-     * @param time
+     * @param time the time string to parse
      * @return time as HHMM or -1 on error
      */
     public static int parse(String time) {
@@ -166,6 +168,11 @@ public class TimeUtils {
         System.out.println("\"" + s + "\"  " + parse(s));
     }
 
+    /**
+     * Main method for testing time utilities.
+     *
+     * @param argv command line arguments
+     */
     public static void main(String [] argv) {
         int tm = TimeUtils.now();
         System.out.println(tm);

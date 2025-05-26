@@ -30,8 +30,8 @@ public class GoogleDistance {
      * Each address may be a normal address such as:  "735 Spring Street, Atlanta, GA 33456"<br>
      * Or, they may be latitude longitude such as:  "38.234567 -85.003456"
      *
-     * @param add1
-     * @param add2
+     * @param add1 the first address or coordinates
+     * @param add2 the second address or coordinates
      */
     public GoogleDistance(String add1, String add2) {
         final String bothAddresses = add1 + "|" + add2;
@@ -57,6 +57,8 @@ public class GoogleDistance {
      * Returns the distance in miles between two addresses.
      * <br><br>
      * Returns -1 on error.
+     *
+     * @return the distance in miles, or -1 on error
      */
     public int miles() {
         if (elm0 == NO_RETURN)
@@ -69,6 +71,8 @@ public class GoogleDistance {
      * Return the estimated travel distance in meters.
      * <br><br>
      * Returns -1 on error.
+     *
+     * @return the distance in meters, or -1 on error
      */
     public int meters() {
         if (elm0 == NO_RETURN)
@@ -80,6 +84,8 @@ public class GoogleDistance {
     /**
      * Return the estimated travel time in minutes.<br>
      * -1 is returned on error.
+     *
+     * @return the travel time in minutes, or -1 on error
      */
     public int minutes() {
         if (elm0 == NO_RETURN)

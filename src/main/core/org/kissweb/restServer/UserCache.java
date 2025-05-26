@@ -17,6 +17,14 @@ public class UserCache {
     private static LocalDateTime lastPurge = LocalDateTime.now();
     private static int inactiveUserMaxSeconds;
 
+    /**
+     * Create a new user and add it to the cache.
+     *
+     * @param user the username
+     * @param pw the password
+     * @param userId the user ID object
+     * @return the created UserData object
+     */
     static public UserData newUser(String user, String pw, Object userId) {
         UserData ud = new UserData(user, pw, userId);
         uuidTable.put(ud.getUuid(), ud);
@@ -52,6 +60,11 @@ public class UserCache {
         lastPurge = LocalDateTime.now();
     }
 
+    /**
+     * Set the maximum seconds a user can be inactive before being purged.
+     *
+     * @param inactiveUserMaxSeconds the maximum inactive time in seconds
+     */
     public static void setInactiveUserMaxSeconds(int inactiveUserMaxSeconds) {
         UserCache.inactiveUserMaxSeconds = inactiveUserMaxSeconds;
     }

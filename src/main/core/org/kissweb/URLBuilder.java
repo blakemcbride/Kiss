@@ -18,7 +18,7 @@ public class URLBuilder {
     /**
      * Create a URLBuilder passing it the full URL minus any URL parameters.
      *
-     * @param url
+     * @param url the base URL without parameters
      */
     public URLBuilder(String url) {
         this.url = url.replaceAll(" ", "%20");
@@ -28,9 +28,9 @@ public class URLBuilder {
     /**
      * Add a parameter to the URL.  This method correctly escapes the arguments.
      *
-     * @param param
-     * @param value
-     * @return
+     * @param param the parameter name
+     * @param value the parameter value
+     * @return this URLBuilder instance for method chaining
      */
     public URLBuilder addParameter(String param, String value) {
         if (parameters.isEmpty())
@@ -43,7 +43,7 @@ public class URLBuilder {
     /**
      * Return the final usable URL.
      *
-     * @return
+     * @return the complete URL with parameters
      */
     public String build() {
         return url + parameters;
@@ -52,8 +52,8 @@ public class URLBuilder {
     /**
      * URL encode a string.
      *
-     * @param s
-     * @return
+     * @param s the string to encode
+     * @return the URL-encoded string
      */
     public static String encodeURLString(String s) {
         try {

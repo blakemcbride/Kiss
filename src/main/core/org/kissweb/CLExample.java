@@ -25,6 +25,11 @@ public class CLExample {
     private static char sex;
     private static String color;
 
+    /**
+     * Main entry point demonstrating command line question functionality.
+     * 
+     * @param args command line arguments
+     */
     public static void main(String [] args) {
         boolean r = CL.Questions.run();
         if (r)

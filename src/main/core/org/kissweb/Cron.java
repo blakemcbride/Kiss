@@ -35,7 +35,7 @@ public class Cron {
      * @param getParameter method that returns the parameter passed to the Groovy cron job
      * @param success method that performs the cleanup action after a successful run of the cron job
      * @param failure method that performs the cleanup action after a failed run of the cron job
-     * @throws IOException
+     * @throws IOException if there is an error reading the crontab file
      */
     public Cron(String crontabFileName, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) throws IOException {
         //logger.setLevel(Level.INFO);

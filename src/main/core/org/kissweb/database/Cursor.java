@@ -87,7 +87,7 @@ public class Cursor implements AutoCloseable {
      * @param useMemoryCache
      * @param max
      * @param cmd
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      * @throws IOException
      */
     Cursor(boolean useMemoryCache, int max, Command cmd) throws SQLException, IOException {
@@ -103,7 +103,7 @@ public class Cursor implements AutoCloseable {
     /**
      * Returns the name of the table associated with the select associated with this cursor.
      *
-     * @return
+     * @return the table name
      */
     public String getTableName() {
         return tname;
@@ -112,7 +112,7 @@ public class Cursor implements AutoCloseable {
     /**
      * Returns the <code>Record</code> instance representing the current row.  This method does not advance the row pointer.
      *
-     * @return
+     * @return the current record
      *
      * @see #next()
      * @see #isNext()
@@ -123,8 +123,8 @@ public class Cursor implements AutoCloseable {
 
     /**
      * This method advances the row pointer and returns <code>true</code> if there is a next record.
-     * @return
-     * @throws SQLException
+     * @return true if there is a next record
+     * @throws SQLException if a database access error occurs if a database access error occurs
      *
      * @see #getRecord()
      * @see #next()
@@ -138,8 +138,8 @@ public class Cursor implements AutoCloseable {
      * instance representing the next row.  If there are no more records, <code>null</code>
      * is returned and the cursor is closed.
      *
-     * @return
-     * @throws SQLException
+     * @return the next record or null if no more records
+     * @throws SQLException if a database access error occurs if a database access error occurs
      *
      * @see #getRecord()
      * @see #isNext()
@@ -422,7 +422,7 @@ public class Cursor implements AutoCloseable {
      * there is no record.
      *
      * @return the Record or null if none
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      */
     public Record fetchOne() throws Exception {
         lastRec = next();
@@ -434,7 +434,7 @@ public class Cursor implements AutoCloseable {
      * <code>null</code> is returned if there is no record.
      *
      * @return the JSON object or <code>null</code> if none
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      *
      * @see #fetchOne()
      */
@@ -447,9 +447,9 @@ public class Cursor implements AutoCloseable {
      * This method works like <code>fetchOne</code> except that it adds the record columns to an existing JSON object
      * passed in.
      *
-     * @param obj
+     * @param obj the JSON object to add columns to
      * @return the JSON object passed in
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      */
     public JSONObject fetchOneJSON(JSONObject obj) throws Exception {
         Record rec = fetchOne();
@@ -464,8 +464,8 @@ public class Cursor implements AutoCloseable {
      *
      * If no records are found, an empty list is returned.
      *
-     * @return
-     * @throws SQLException
+     * @return a list of all records
+     * @throws SQLException if a database access error occurs
      */
     public List<Record> fetchAll() throws Exception {
         if (memoryCache != null) {
@@ -487,8 +487,8 @@ public class Cursor implements AutoCloseable {
      * This method does the same thing as <code>fetchAll</code> except that it return a
      * JSON array representing all of the records.
      *
-     * @return
-     * @throws SQLException
+     * @return a JSON array of all records
+     * @throws SQLException if a database access error occurs
      *
      * @see #fetchAll()
      */
@@ -500,7 +500,7 @@ public class Cursor implements AutoCloseable {
      * Close the entire cursor.  No more read, edit, or deletes.
      * Since this class implement AutoCloseable, this method is rarely needed.
      *
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      */
     @Override
     public void close() throws SQLException {
@@ -519,7 +519,7 @@ public class Cursor implements AutoCloseable {
      *
      * @param name the column name
      * @param val the value to set.  Can be any type.
-     * @return
+     * @return this cursor for method chaining
      *
      * @see Record#set(String, Object)
      * @see #setDateOnly(String, java.util.Date)
@@ -535,7 +535,7 @@ public class Cursor implements AutoCloseable {
      *
      * @param name the column name
      * @param val the value to set.
-     * @return
+     * @return this cursor for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #set(String, Object)
@@ -553,7 +553,7 @@ public class Cursor implements AutoCloseable {
      *
      * @param name the column name
      * @param dat the value to set in milliseconds
-     * @return
+     * @return this cursor for method chaining
      *
      * @see #setDateOnly(String, java.util.Date)
      * @see Cursor#set(String, Object)
@@ -575,7 +575,7 @@ public class Cursor implements AutoCloseable {
      *
      * @param name the column name
      * @param dat the value to set. Format is YYYYMMDD
-     * @return
+     * @return this cursor for method chaining
      *
      * @see #setDateOnly(String, java.util.Date)
      * @see Cursor#set(String, Object)
@@ -601,7 +601,7 @@ public class Cursor implements AutoCloseable {
      *
      * @param name the column name
      * @param val the value to set.
-     * @return
+     * @return this cursor for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #setDateOnly(String, java.util.Date)
@@ -618,7 +618,7 @@ public class Cursor implements AutoCloseable {
      *
      * @param name the column name
      * @param val the number of milliseconds since 1970 UTC
-     * @return
+     * @return this cursor for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #setDateOnly(String, java.util.Date)
@@ -634,9 +634,9 @@ public class Cursor implements AutoCloseable {
      * Get the value of a column as an <code>Object</code>.  Other methods that get
      * expected types are typically used over this method.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as an Object
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#get(String)
      * @see #getShort(String)
@@ -656,9 +656,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>Short</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a Short
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#getShort(String)
      */
@@ -680,9 +680,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>Integer</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as an Integer
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#getInt(String)
      */
@@ -701,9 +701,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>Long</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a Long
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#getLong(String)
      */
@@ -724,9 +724,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>Float</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a Float
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#getFloat(String)
      */
@@ -751,9 +751,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>Double</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a Double
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#getDouble(String)
      */
@@ -779,9 +779,9 @@ public class Cursor implements AutoCloseable {
      * That is a date without a time.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a java.util.Date
+     * @throws SQLException if a database access error occurs
      *
      * @see #getDateAsInt(String)
      * @see Record#getDateOnly(String)
@@ -811,9 +811,9 @@ public class Cursor implements AutoCloseable {
      * Return the date in an int formatted as YYYYMMDD for the named column.
      * A <code>0</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
+     * @param cname the column name
      * @return date format YYYYMMDD
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      *
      * @see #getDateOnly(String)
      * @see Cursor#getDateOnly(String)
@@ -842,9 +842,9 @@ public class Cursor implements AutoCloseable {
      * Date and time information.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a java.util.Date with time information
+     * @throws SQLException if a database access error occurs
      *
      * @see #getDateOnly(String)
      * @see #getTime(String)
@@ -862,9 +862,9 @@ public class Cursor implements AutoCloseable {
      *
      * A <code>0</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the date/time value in milliseconds since 1970 UTC
+     * @throws SQLException if a database access error occurs
      *
      * @see #getDateOnly(String)
      * @see #getTime(String)
@@ -882,9 +882,9 @@ public class Cursor implements AutoCloseable {
      * Only time information is returned.
      * A <code>0</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
+     * @param cname the column name
      * @return time in milliseconds
-     * @throws SQLException
+     * @throws SQLException if a database access error occurs
      *
      * @see #getDateOnly(String)
      */
@@ -899,9 +899,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>String</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a String
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#getString(String)
      */
@@ -913,9 +913,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>Character</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a Character
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#getChar(String)
      */
@@ -932,9 +932,9 @@ public class Cursor implements AutoCloseable {
      * Return the <code>byte[]</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as a byte array
+     * @throws SQLException if a database access error occurs
      *
      * @see Record#get(String)
      */
@@ -948,7 +948,7 @@ public class Cursor implements AutoCloseable {
     /**
      * Returns the number of records in the cursor.
      *
-     * @return
+     * @return the number of records
      */
     public long size() {
         return size;

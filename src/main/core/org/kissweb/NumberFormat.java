@@ -293,12 +293,13 @@ public class NumberFormat {
     }
 
     /**
-     *  Numeric	formatter.  Takes a double and converts it to a nicely formatted String (for a number in base 10).
-     *  <br><br>
-     *  This method is specifically designed to support right justified number formatting when variable width fonts are used.
-     *  It assumes that all numbers have the same width and that spaces and commas are half that width.
+     * Variable width format - formats a number with extra spaces for comma alignment.
      *
-     *  @see #Format(double, String, int, int)
+     * @param n the number to format
+     * @param fmt the format string
+     * @param wth the width of the field
+     * @param dec the number of decimal places
+     * @return the formatted string
      */
     public static String FormatVWF(double n, String fmt, int wth, int dec) {
         String s = NumberFormat.Format(n, fmt, wth, dec);
@@ -320,7 +321,7 @@ public class NumberFormat {
     /**
      * Test function.
      *
-     * @param argv
+     * @param argv command line arguments
      */
     public static void main(String[] argv) {
         print(12345.146, "CD", 10, 2);

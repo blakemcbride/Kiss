@@ -48,17 +48,26 @@ public class MainServlet extends HttpServlet {
     private static Cron cron;
     private static final Set<String> allowedWithoutAuthentication = new HashSet<>();
     private static final Hashtable<String,Object> environment = new Hashtable<>();  // general application-specific values
+    /** True if running on Linux. */
     public static boolean isLinux = false;
+    /** True if running on macOS. */
     public static boolean isMacOS = false;
+    /** True if running on Windows. */
     public static boolean isWindows = false;
-    public static boolean isSunOS = false; // also includes Solaris & OpenIndiana
+    /** True if running on SunOS (also includes Solaris and OpenIndiana). */
+    public static boolean isSunOS = false;
+    /** True if running on Haiku OS. */
     public static boolean isHaiku = false;
+    /** True if running on FreeBSD. */
     public static boolean isFreeBSD;
 
+    /** The queue manager for handling asynchronous operations. */
     private QueueManager queueManager;
 
     /**
      * Returns <code>true</code> if in development mode.  Returns <code>false</code> if in production.
+     *
+     * @return true if in development mode, false if in production
      */
     public static boolean isUnderIDE() {
         return underIDE;
@@ -78,6 +87,8 @@ public class MainServlet extends HttpServlet {
     /**
      * Return the root of the application back-end source code.
      * This takes into account where the source code is.
+     *
+     * @return the application path
      */
     public static String getApplicationPath() {
         return applicationPath;
@@ -85,6 +96,8 @@ public class MainServlet extends HttpServlet {
 
     /**
      * Get the root path of the entire application.
+     *
+     * @return the root path
      */
     public static String getRootPath() {
         return rootPath;
@@ -95,7 +108,7 @@ public class MainServlet extends HttpServlet {
      * This is needed when Kiss is not used to process the REST services.
      * This rootPath is used by the reporting facility.
      *
-     * @param path
+     * @param path the root path to set
      */
     public static void setRootPath(String path) {
         rootPath = path;
@@ -105,7 +118,7 @@ public class MainServlet extends HttpServlet {
      * Set the application path when it is determined outside of Kiss.
      * This is needed when an application is using the Kiss library but not its REST server.
      *
-     * @param path
+     * @param path the application path to set
      */
     public static void setApplicationPath(String path) {
         applicationPath = path;
@@ -120,7 +133,7 @@ public class MainServlet extends HttpServlet {
      * This method sets the <code>rootPath</code> and <code>applicationPath</code>.  <code>rootPath</code> is the root
      * of the application.  <code>applicationPath</code> is the root of the application files.
      *
-     * @param _rootPath
+     * @param _rootPath the root path to set
      */
     static void setApplicationPathInternal(String _rootPath) {
         Level level = logger.getLevel();
@@ -304,58 +317,128 @@ public class MainServlet extends HttpServlet {
         return "";
     }
 
+    /**
+     * Sets the database connection type.
+     *
+     * @param connectionType the connection type to set
+     */
     public static void setConnectionType(Connection.ConnectionType connectionType) {
         MainServlet.connectionType = connectionType;
     }
 
+    /**
+     * Gets the database connection type.
+     *
+     * @return the connection type
+     */
     public static Connection.ConnectionType getConnectionType() {
         return connectionType;
     }
 
+    /**
+     * Sets the database host.
+     *
+     * @param hostp the host to set
+     */
     public static void setHost(String hostp) {
         host = hostp;
     }
 
+    /**
+     * Sets the database port.
+     *
+     * @param portp the port to set
+     */
     public static void setPort(int portp) {
         port = portp;
     }
 
+    /**
+     * Gets the database host.
+     *
+     * @return the host
+     */
     public static String getHost() {
         return host;
     }
 
+    /**
+     * Gets the database port.
+     *
+     * @return the port
+     */
     public static Integer getPort() {
         return port;
     }
 
+    /**
+     * Gets the database user.
+     *
+     * @return the user
+     */
     public static String getUser() {
         return user;
     }
 
+    /**
+     * Sets the database user.
+     *
+     * @param userp the user to set
+     */
     public static void setUser(String userp) {
         user = userp;
     }
 
+    /**
+     * Gets the database password.
+     *
+     * @return the password
+     */
     public static String getPassword() {
         return password;
     }
 
+    /**
+     * Sets the database password.
+     *
+     * @param passwordp the password to set
+     */
     public static void setPassword(String passwordp) {
         password = passwordp;
     }
 
+    /**
+     * Gets the database name.
+     *
+     * @return the database name
+     */
     public static String getDatabase() {
         return database;
     }
 
+    /**
+     * Sets the database name.
+     *
+     * @param databasep the database name to set
+     */
     public static void setDatabase(String databasep) {
         database = databasep;
     }
 
+    /**
+     * Sets the maximum number of worker threads.
+     *
+     * @param maxThreads the maximum number of threads
+     */
     public static void setMaxWorkerThreads(int maxThreads) {
         maxWorkerThreads = maxThreads;
     }
 
+    /**
+     * Checks if a database is configured.
+     *
+     * @return true if database is configured
+     */
     public static boolean hasDatabase() {
         return hasDatabase;
     }
@@ -369,8 +452,8 @@ public class MainServlet extends HttpServlet {
      * This method is used to declare specific rest service methods that should not be authenticated.
      * This allows specific web service methods to be executed prior to logging in.
      *
-     * @param className
-     * @param methodName
+     * @param className the class name of the service
+     * @param methodName the method name to allow without authentication
      */
     public static void allowWithoutAuthentication(String className, String methodName) {
         className = className.replaceAll("\\.", "/");
@@ -384,8 +467,8 @@ public class MainServlet extends HttpServlet {
     /**
      * Add an application-specific key / value pair.
      *
-     * @param key
-     * @param value
+     * @param key the key for the environment variable
+     * @param value the value to associate with the key
      *
      * @see #getEnvironment(String)
      */
@@ -396,8 +479,8 @@ public class MainServlet extends HttpServlet {
     /**
      * Retrieve an application-specific value previously set with <code>putEnvironment</code>
      *
-     * @param key
-     * @return
+     * @param key the key to retrieve
+     * @return the value associated with the key
      *
      * @see #putEnvironment(String, Object)
      */

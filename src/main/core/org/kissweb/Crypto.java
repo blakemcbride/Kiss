@@ -39,10 +39,10 @@ public final class Crypto {
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param password the password to use for encryption
+     * @param valueToEnc the string value to encrypt
+     * @return the encrypted string encoded in Base64
+     * @throws Exception if encryption fails
      */
     public static String encrypt(String salt, String password, String valueToEnc) throws Exception {
         final Key key = generateKey(salt, password);
@@ -55,9 +55,9 @@ public final class Crypto {
      * Encrypt a string utilizing the passed in salt and the default password.
      *
      * @param salt the salt or null
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param valueToEnc the string value to encrypt
+     * @return the encrypted string encoded in Base64
+     * @throws Exception if encryption fails
      */
     public static String encrypt(String salt, String valueToEnc) throws Exception {
         return encrypt(salt, defaultPassword, valueToEnc);
@@ -66,9 +66,9 @@ public final class Crypto {
     /**
      * Encrypt using the default password and no salt.
      *
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param valueToEnc the string value to encrypt
+     * @return the encrypted string encoded in Base64
+     * @throws Exception if encryption fails
      */
     public static String encrypt(String valueToEnc) throws Exception {
         return encrypt(null, defaultPassword, valueToEnc);
@@ -77,10 +77,10 @@ public final class Crypto {
     /**
      * Encrypt with a given password and random salt.
      *
-     * @param password
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param password the password to use for encryption
+     * @param valueToEnc the string value to encrypt
+     * @return the salt prepended to the encrypted string encoded in Base64
+     * @throws Exception if encryption fails
      */
     public static String encryptWithRandomSalt(String password, String valueToEnc) throws Exception {
         final String salt = createSalt();
@@ -90,9 +90,9 @@ public final class Crypto {
     /**
      * Encrypt using the default password and random salt.
      *
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param valueToEnc the string value to encrypt
+     * @return the salt prepended to the encrypted string encoded in Base64
+     * @throws Exception if encryption fails
      */
     public static String encryptWithRandomSalt(String valueToEnc) throws Exception {
         final String salt = createSalt();
@@ -106,10 +106,10 @@ public final class Crypto {
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param password the password to use for encryption
+     * @param valueToEnc the byte array to encrypt
+     * @return the encrypted byte array
+     * @throws Exception if encryption fails
      */
     public static byte [] encrypt(String salt, String password, byte [] valueToEnc) throws Exception {
         final Key key = generateKey(salt, password);
@@ -121,9 +121,9 @@ public final class Crypto {
      * Encrypt a byte array utilizing a salt and the default password.
      *
      * @param salt the salt or null
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param valueToEnc the byte array to encrypt
+     * @return the encrypted byte array
+     * @throws Exception if encryption fails
      */
     public static byte [] encrypt(String salt, byte [] valueToEnc) throws Exception {
         return encrypt(salt, defaultPassword, valueToEnc);
@@ -132,9 +132,9 @@ public final class Crypto {
     /**
      * Encrypt with the default password and no salt.
      *
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param valueToEnc the byte array to encrypt
+     * @return the encrypted byte array
+     * @throws Exception if encryption fails
      */
     public static byte [] encrypt(byte [] valueToEnc) throws Exception {
         return encrypt(null, defaultPassword, valueToEnc);
@@ -143,10 +143,10 @@ public final class Crypto {
     /**
      * Encrypt with the given password and random salt.
      *
-     * @param password
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param password the password to use for encryption
+     * @param valueToEnc the byte array to encrypt
+     * @return the salt prepended to the encrypted byte array
+     * @throws Exception if encryption fails
      */
     public static byte [] encryptWithRandomSalt(String password, byte [] valueToEnc) throws Exception {
         final String salt = createSalt();
@@ -160,9 +160,9 @@ public final class Crypto {
     /**
      * Encrypt with the default password and random salt.
      *
-     * @param valueToEnc
-     * @return
-     * @throws Exception
+     * @param valueToEnc the byte array to encrypt
+     * @return the salt prepended to the encrypted byte array
+     * @throws Exception if encryption fails
      */
     public static byte [] encryptWithRandomSalt(byte [] valueToEnc) throws Exception {
         return encryptWithRandomSalt(defaultPassword, valueToEnc);
@@ -175,10 +175,10 @@ public final class Crypto {
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password
-     * @param encryptedValue
-     * @return
-     * @throws Exception
+     * @param password the password to use for decryption
+     * @param encryptedValue the Base64 encoded encrypted string
+     * @return the decrypted string
+     * @throws Exception if decryption fails
      */
     public static String decrypt(String salt, String password, String encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
@@ -192,9 +192,9 @@ public final class Crypto {
      * Decrypt a string utilizing the passed in salt and the default password.
      *
      * @param salt the salt or null
-     * @param encryptedValue
-     * @return
-     * @throws Exception
+     * @param encryptedValue the Base64 encoded encrypted string
+     * @return the decrypted string
+     * @throws Exception if decryption fails
      */
     public static String decrypt(String salt, String encryptedValue) throws Exception {
         return decrypt(salt, defaultPassword, encryptedValue);
@@ -203,10 +203,10 @@ public final class Crypto {
     /**
      * Decrypt a string that was encrypted with random salt using the provided password.
      *
-     * @param password
-     * @param encryptedValue
-     * @return
-     * @throws Exception
+     * @param password the password to use for decryption
+     * @param encryptedValue the salt prepended encrypted string
+     * @return the decrypted string
+     * @throws Exception if decryption fails
      */
     public static String decryptWithRandomSalt(String password, String encryptedValue) throws Exception {
         final String salt = encryptedValue.substring(0, 11);
@@ -217,9 +217,9 @@ public final class Crypto {
     /**
      * Decrypt a string that was encrypted with random salt using the default password.
      *
-     * @param encryptedValue
-     * @return
-     * @throws Exception
+     * @param encryptedValue the salt prepended encrypted string
+     * @return the decrypted string
+     * @throws Exception if decryption fails
      */
     public static String decryptWithRandomSalt(String encryptedValue) throws Exception {
         return decryptWithRandomSalt(defaultPassword, encryptedValue);
@@ -232,10 +232,10 @@ public final class Crypto {
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password
-     * @param encryptedValue
-     * @return
-     * @throws Exception
+     * @param password the password to use for decryption
+     * @param encryptedValue the encrypted byte array
+     * @return the decrypted byte array
+     * @throws Exception if decryption fails
      */
     public static byte [] decrypt(String salt, String password, byte [] encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
@@ -247,20 +247,35 @@ public final class Crypto {
      * Decrypt a byte array utilizing a slat and the default password.
      *
      * @param salt the salt or null
-     * @param encryptedValue
-     * @return
-     * @throws Exception
+     * @param encryptedValue the encrypted byte array
+     * @return the decrypted byte array
+     * @throws Exception if decryption fails
      */
     public static byte [] decrypt(String salt, byte [] encryptedValue) throws Exception {
         return decrypt(salt, defaultPassword, encryptedValue);
     }
 
+    /**
+     * Decrypt a byte array that was encrypted with random salt using the provided password.
+     *
+     * @param password the password to use for decryption
+     * @param encryptedValue the salt prepended encrypted byte array
+     * @return the decrypted byte array
+     * @throws Exception if decryption fails
+     */
     public static byte [] decryptWithRandomSalt(String password, byte [] encryptedValue) throws Exception {
         final String salt = new String(Arrays.copyOfRange(encryptedValue, 0, 11));
         encryptedValue = Arrays.copyOfRange(encryptedValue, 11, encryptedValue.length);
         return decrypt(salt, password, encryptedValue);
     }
 
+    /**
+     * Decrypt a byte array that was encrypted with random salt using the default password.
+     *
+     * @param encryptedValue the salt prepended encrypted byte array
+     * @return the decrypted byte array
+     * @throws Exception if decryption fails
+     */
     public static byte [] decryptWithRandomSalt(byte [] encryptedValue) throws Exception {
         return decryptWithRandomSalt(defaultPassword, encryptedValue);
     }
@@ -284,8 +299,7 @@ public final class Crypto {
      *
      * @param salt null or something unique to the item being encrypted
      * @param password the password (can be any length but max of the first 32 characters are used)
-     * @return
-     * @throws Exception
+     * @return the encryption key
      */
     private static Key generateKey(String salt, String password) {
         int i = 0;
@@ -314,6 +328,12 @@ public final class Crypto {
         return new SecretKeySpec(bytes, ALGORITHM);
     }
 
+    /**
+     * Convert a long value to byte array.
+     *
+     * @param data the long value to convert
+     * @return the byte array representation
+     */
     private static byte[] longtoBytes(long data) {
         return new byte[]{
                 (byte) ((data >> 56) & 0xff),
@@ -330,6 +350,8 @@ public final class Crypto {
     /**
      * Create a random salt.
      * It is always 11 bytes long.
+     *
+     * @return a random salt string
      */
     private static String createSalt() {
         final long rl = random.nextLong();
@@ -337,6 +359,12 @@ public final class Crypto {
         return Base64.encode(ba);
     }
 
+    /**
+     * Test method demonstrating encryption and decryption.
+     *
+     * @param args command line arguments
+     * @throws Exception if encryption/decryption fails
+     */
     public static void main(String [] args) throws Exception {
         final String unencrypted = "Now is the time for all good men to come to the aid of their party.";
         final String password = "ThisIsASecretKey";

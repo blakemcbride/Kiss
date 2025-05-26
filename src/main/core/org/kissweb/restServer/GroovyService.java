@@ -46,11 +46,11 @@ public class GroovyService {
      *
      * @param ignoreMissing if <code>true</code> ignore missing classes or methods and return null
      * @param filePath relative to the "backend" directory unless it is an absolute path
-     * @param className
-     * @param methodName
+     * @param className the name of the Groovy class to load
+     * @param methodName the name of the method to retrieve
      * @param args  the actual arguments or the argument types (classes)
-     * @return
-     * @throws Exception
+     * @return the Method object or null if ignoreMissing is true and method not found
+     * @throws Exception if the method cannot be found and ignoreMissing is false
      *
      * @see #run(Method, Object, Object...)
      * @see #run(String, String, String, Object, Object...)
@@ -112,11 +112,11 @@ public class GroovyService {
      * must also return a boxed object.
      *
      * @param filePath relative to the "backend" directory unless it is an absolute path
-     * @param className
-     * @param methodName
+     * @param className the name of the Groovy class to load
+     * @param methodName the name of the method to retrieve
      * @param args  the actual arguments or the argument types (classes)
-     * @return
-     * @throws Exception
+     * @return the Method object
+     * @throws Exception if the method cannot be found or compiled
      *
      * @see #run(Method, Object, Object...)
      * @see #run(String, String, String, Object, Object...)
@@ -139,7 +139,7 @@ public class GroovyService {
      * @param inst instance or null if a class method
      * @param args boxed or unboxed
      * @return boxed
-     * @throws Exception
+     * @throws Exception if method execution fails
      *
      * @see #getMethod(String, String, String, Object...)
      */
@@ -173,14 +173,14 @@ public class GroovyService {
      * <p>
      * <code>filePath</code> is relative to the <code>backend</code> directory unless it is an absolute path.
      *
-     * @param ignoreMissing
+     * @param ignoreMissing if true, return null for missing files/classes/methods instead of throwing exception
      * @param filePath relative to the "backend" directory unless it is an absolute path
-     * @param className
-     * @param methodName
+     * @param className the name of the Groovy class to load
+     * @param methodName the name of the method to invoke
      * @param inst  the instance the method is evoked against or null if static method
      * @param args boxed or unboxed arguments (variable number)
      * @return The boxed value returned by the Groovy method call
-     * @throws Exception
+     * @throws Exception if method execution fails and ignoreMissing is false
      * @see #run(String, String, String, Object, Object...)
      */
     public static Object run(boolean ignoreMissing, String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
@@ -204,12 +204,12 @@ public class GroovyService {
      * <code>filePath</code> is relative to the <code>backend</code> directory unless it is an absolute path.
      *
      * @param filePath relative to the "backend" directory unless it is an absolute path
-     * @param className
-     * @param methodName
+     * @param className the name of the Groovy class to load
+     * @param methodName the name of the method to invoke
      * @param inst the instance the method is evoked against or null if static method
      * @param args boxed or unboxed arguments (variable number)
      * @return The boxed value returned by the Groovy method call
-     * @throws Exception
+     * @throws Exception if method execution fails
      * @see #run(boolean, String, String, String, Object, Object...)
      */
     public static Object run(String filePath, String className, String methodName, Object inst, Object... args) throws Exception {
@@ -219,11 +219,11 @@ public class GroovyService {
     /**
      * Execute a Groovy constructor.
      *
-     * @param relativePath
-     * @param className
-     * @param args
-     * @return
-     * @throws Exception
+     * @param relativePath the relative path to the Groovy file
+     * @param className the name of the Groovy class
+     * @param args the constructor arguments
+     * @return the new instance created by the constructor
+     * @throws Exception if constructor execution fails
      */
     public static Object constructor(String relativePath, String className, Object... args) throws Exception {
         String rootPath = MainServlet.getApplicationPath();

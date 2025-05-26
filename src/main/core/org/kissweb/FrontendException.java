@@ -6,6 +6,11 @@ package org.kissweb;
  */
 public class FrontendException extends Exception {
 
+    /**
+     * Creates a new FrontendException with the specified message.
+     *
+     * @param msg the exception message
+     */
     public FrontendException(String msg) {
         super(msg);
     }

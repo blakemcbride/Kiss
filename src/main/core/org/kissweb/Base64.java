@@ -34,7 +34,7 @@ public class Base64 {
      *
      * @param s the base64 encoded string
      * @return the decoded byte array
-     * @throws IOException
+     * @throws IOException if an error occurs during decoding
      */
     public static byte [] decode(String s) throws IOException {
         return base64Decoder.decode(s);

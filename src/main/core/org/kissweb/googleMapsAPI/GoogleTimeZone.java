@@ -29,7 +29,7 @@ public class GoogleTimeZone {
      * @param latitude  latitude
      * @param longitude  longitude
      * @return timeZoneId
-     * @throws IOException
+     * @throws IOException if the API call fails
      */
     public static String getTimezone(double latitude, double longitude) throws IOException {
         String location = GoogleAPI.roundCoordinates(latitude, longitude);
@@ -62,7 +62,7 @@ public class GoogleTimeZone {
      * </pre>
      * @param address  address
      * @return timeZoneId
-     * @throws IOException
+     * @throws IOException if the API call fails
      */
     public static String getTimezone(String address) throws IOException {
         double[] latLng = GoogleGeocode.findGeoLocation(address);
@@ -84,7 +84,7 @@ public class GoogleTimeZone {
      * @param state    state
      * @param zip      zip code (optional)
      * @return timeZoneId
-     * @throws IOException
+     * @throws IOException if the API call fails
      */
     public static String getTimezone(String street1, String street2, String city, String state, String zip) throws IOException {
         String address = street1;

@@ -25,6 +25,9 @@ public class GoogleGeocode {
     /**
      * Performs the actual query through Google.
      * You must set the API_KEY before creating this object.
+     *
+     * @param latitude the latitude coordinate
+     * @param longitude the longitude coordinate
      */
     public GoogleGeocode(double latitude, double longitude) {
         final URLBuilder url = new URLBuilder(URL);
@@ -40,6 +43,11 @@ public class GoogleGeocode {
         }
     }
 
+    /**
+     * Extracts city and state from the geocoding result.
+     *
+     * @return the city and state in "city, state" format, or null if not found
+     */
     public String getCityState() {
         try {
             String city = null;
@@ -72,9 +80,9 @@ public class GoogleGeocode {
     /**
      * This method uses the Google Geocoding API to get lat/long from an address.
      *
-     * @param address
-     * @return
-     * @throws IOException
+     * @param address the address to geocode
+     * @return an array containing [latitude, longitude] or null if not found
+     * @throws IOException if the API call fails
      */
     public static double[] findGeoLocation(String address) throws IOException {
         double[] res = addressCache.get(address);

@@ -25,7 +25,7 @@ public class DateTime {
     /**
      * Create a DateTime object from a ZonedDateTime object
      *
-     * @param dt
+     * @param dt the ZonedDateTime object
      */
     public DateTime(ZonedDateTime dt) {
         zdt = dt;
@@ -34,7 +34,7 @@ public class DateTime {
     /**
      * Create a DateTime object from the number of milliseconds since 1970 (Epoch).
      *
-     * @param millisecs
+     * @param millisecs the number of milliseconds since epoch
      */
     public DateTime(long millisecs) {
         zdt = ZonedDateTime.ofInstant(Instant.ofEpochMilli(millisecs), ZoneId.systemDefault());
@@ -58,7 +58,7 @@ public class DateTime {
      *
      * @param dt YYYYMMDD
      * @param time HHMM
-     * @param timeZoneId
+     * @param timeZoneId the time zone identifier
      */
     public DateTime(int dt, int time, String timeZoneId) {
         if (dt == 0 && time == 0)
@@ -70,7 +70,7 @@ public class DateTime {
     /**
      * Create a DateTime from a Date object.
      *
-     * @param dt
+     * @param dt the Date object
      */
     public DateTime(Date dt) {
         if (dt == null)
@@ -82,8 +82,8 @@ public class DateTime {
     /**
      * Create a DateTime from a Date object in the provided zone.
      *
-     * @param dt
-     * @param zone
+     * @param dt the Date object
+     * @param zone the ZoneId
      */
     public DateTime(Date dt, ZoneId zone) {
         if (dt == null)
@@ -95,8 +95,8 @@ public class DateTime {
     /**
      * Create a DateTime from a Date object in the provided time zone.
      *
-     * @param dt
-     * @param timeZoneId
+     * @param dt the Date object
+     * @param timeZoneId the time zone identifier
      */
     public DateTime(Date dt, String timeZoneId) {
         if (dt == null)
@@ -108,7 +108,7 @@ public class DateTime {
     /**
      * Initialize a new DateTime from a GregorianCalendar
      *
-     * @param dt
+     * @param dt the GregorianCalendar object
      */
     public DateTime(GregorianCalendar dt) {
         if (dt == null)
@@ -120,7 +120,7 @@ public class DateTime {
     /**
      * Create a new DateTime object that represents the current date/time.
      *
-     * @return
+     * @return a new DateTime object representing the current date/time
      */
     public static DateTime now() {
         return new DateTime(ZonedDateTime.now());
@@ -133,7 +133,7 @@ public class DateTime {
      * @param timeZoneId
      *            The time zone ID to use.  Examples include "America/New_York",
      *            "America/Chicago", "Europe/London", etc.
-     * @return
+     * @return a new DateTime object representing the current date/time in the specified time zone
      */
     public static DateTime now(String timeZoneId) {
         return new DateTime(ZonedDateTime.now(ZoneId.of(timeZoneId)));
@@ -205,7 +205,7 @@ public class DateTime {
     /**
      * Get a Date representation of the DateTime object.
      *
-     * @return
+     * @return a Date object representing this DateTime
      */
     public Date getDate() {
         return zdt == null ? null : Date.from(zdt.toInstant());
@@ -214,7 +214,7 @@ public class DateTime {
     /**
      * Get date in an int format YYYYMMDD
      *
-     * @return
+     * @return the date as an integer in YYYYMMDD format
      */
     public int getIntDate() {
         return getYear() * 10000 + getMonth() * 100 + getDay();
@@ -232,7 +232,7 @@ public class DateTime {
     /**
      * Return the ZoneDateTime object
      *
-     * @return
+     * @return the ZonedDateTime object
      */
     public ZonedDateTime getZonedDateTime() {
         return zdt;
@@ -241,7 +241,7 @@ public class DateTime {
     /**
      * Return the current date formatted as mm/dd/yyyy hh:mm AM/PM
      *
-     * @return
+     * @return the formatted date/time string
      */
     public String format() {
         return DateTime.format(zdt);
@@ -250,7 +250,7 @@ public class DateTime {
     /**
      * Return the current date and time as a string mm/dd/yyyy hh:mm AM/PM
      *
-     * @return
+     * @return the formatted current date/time string
      */
     public static String currentDateTimeFormatted() {
         return DateTime.format(new Date());
@@ -259,7 +259,7 @@ public class DateTime {
     /**
      * Return the current date and time as a string mm/dd/yyyy hh:mm AM/PM cST
      *
-     * @return
+     * @return the formatted current date/time string with time zone
      */
     public static String currentDateTimeFormattedTZ() {
         return DateTime.formatTZ(new Date());
@@ -268,8 +268,8 @@ public class DateTime {
     /**
      * Format a date passed into a string mm/dd/yyyy hh:mm AM/PM
      * 
-     * @param date
-     * @return
+     * @param date the date to format
+     * @return the formatted date string
      */
     public static String format(Date date) {
         return format(date, "MM/dd/yyyy h:mm a", null);
@@ -340,9 +340,9 @@ public class DateTime {
     /**
      * Format a date passed into a string formatted as determined by <code>fmt</code>
      *
-     * @param date
-     * @param fmt
-     * @return
+     * @param date the date to format
+     * @param fmt the format string
+     * @return the formatted date string
      *
      * @see java.text.SimpleDateFormat for information about fmt
      */
@@ -353,8 +353,8 @@ public class DateTime {
     /**
      * Format a date passed into a string mm/dd/yyyy hh:mm AM/PM xST
      *
-     * @param date
-     * @return
+     * @param date the date to format
+     * @return the formatted date string with time zone
      */
     public static String formatTZ(Date date) {
         return format(date, "MM/dd/yyyy h:mm a zzz", null);
@@ -364,9 +364,9 @@ public class DateTime {
      * Returns a string representing the current date and/or time with a specified format
      * and within a specified timezone.
      *
-     * @param dateFormat
-     * @param timeZone
-     * @return
+     * @param dateFormat the date format string
+     * @param timeZone the time zone
+     * @return the formatted current date/time string
      *
      * @see java.text.SimpleDateFormat for information about dateFormat
      *
@@ -378,8 +378,8 @@ public class DateTime {
     /**
      * Returns a string representing the current date and/or time with a specified format.
      *
-     * @param dateFormat
-     * @return
+     * @param dateFormat the date format string
+     * @return the formatted current date/time string
      *
      * @see java.text.SimpleDateFormat for information about dateFormat
      */
@@ -390,7 +390,7 @@ public class DateTime {
     /**
      * Returns number of milliseconds since 1970 UTC.
      *
-     * @return
+     * @return the number of milliseconds since epoch
      */
     public long getMilliseconds() {
         return zdt == null ? 0L : zdt.toInstant().toEpochMilli();
@@ -399,7 +399,7 @@ public class DateTime {
     /**
      * Returns number of seconds since 1970 UTC.
      *
-     * @return
+     * @return the number of seconds since epoch
      */
     public long getSeconds() {
         return zdt == null ? 0L : zdt.toInstant().toEpochMilli() / 1000;
@@ -409,7 +409,7 @@ public class DateTime {
      * Add days to a DateTime object.
      * 
      * @param days the number of days to add - can be negative
-     * @return 
+     * @return this DateTime object for method chaining 
      */
     public DateTime addDays(int days) {
         if (zdt != null)
@@ -443,11 +443,18 @@ public class DateTime {
 
     /**
      * Return the date and time combined as a long integer YYYYMMDDHHMM
+     * 
+     * @return the date and time as a long integer in YYYYMMDDHHMM format
      */
     public long getDTLong() {
         return (long) getIntDate() * 10000L + (long) getIntTime();
     }
 
+    /**
+     * Test main method.
+     * 
+     * @param args command line arguments
+     */
     public static void main(String [] args) {
         DateTime dt = new DateTime(20201224, 1130);
         Date d = dt.getDate();

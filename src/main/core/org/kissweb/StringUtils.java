@@ -70,9 +70,9 @@ public class StringUtils {
      * If <code>n</code> is negative, the same thing occurs but it starts at the back of the string.
      * Thus padding or cutting of the string occur at the start of the string.
      *
-     * @param s
-     * @param n
-     * @return
+     * @param s the string to take characters from
+     * @param n the number of characters to take
+     * @return the resulting string
      *
      * @see #drop(String, int)
      */
@@ -101,6 +101,13 @@ public class StringUtils {
         }
     }
 	
+	/**
+	 * Take n characters from a char array.
+	 *
+	 * @param s the char array to take characters from
+	 * @param n the number of characters to take
+	 * @return the resulting char array
+	 */
 	public static char [] take(char [] s, int n) {
 		int i, si=0, l;
 		boolean flg = false;
@@ -128,6 +135,12 @@ public class StringUtils {
 		return s;
 	}
 	
+	/**
+	 * Calculate the length of a null-terminated char array.
+	 *
+	 * @param v the char array to measure
+	 * @return the length of the array up to the null terminator
+	 */
 	public static int strLength(char [] v) {
 		int i=0;
 		while (i < v.length  &&  v[i] != '\0')
@@ -172,9 +185,9 @@ public class StringUtils {
      * <br><br>
      * If <code>n</code> is greater than the length of the string, "" is returned.
      *
-     * @param s
-     * @param n
-     * @return
+     * @param s the string to drop characters from
+     * @param n the number of characters to drop
+     * @return the resulting string
      *
      * @see #take(String, int)
      */
@@ -192,8 +205,8 @@ public class StringUtils {
     /**
      * Strip the spaces of the end of a string.
      *
-     * @param s
-     * @return
+     * @param s the string to strip
+     * @return the string with trailing spaces removed
      */
     public static String rightStrip(String s) {
 		if (s == null)
@@ -204,8 +217,8 @@ public class StringUtils {
 	/**
 	 * Strip the spaces at the beginning of a string.
 	 *
-	 * @param s
-	 * @return
+	 * @param s the string to strip
+	 * @return the string with leading spaces removed
 	 */
 	public static String leftStrip(String s) {
 		if (s == null)
@@ -216,8 +229,8 @@ public class StringUtils {
 	/**
 	 * Strip the spaces on both ends of a string.
 	 *
-	 * @param s
-	 * @return
+	 * @param s the string to strip
+	 * @return the string with leading and trailing spaces removed
 	 */
 	public static String centerStrip(String s) {
 		if (s == null)
@@ -231,7 +244,7 @@ public class StringUtils {
      *
 	 * @param fmt format string
 	 * @param arg1 consecutive values used by the format string
-	 * @return
+	 * @return the formatted string
      *
      * @see Formatter
 	 */
@@ -247,9 +260,9 @@ public class StringUtils {
     /**
      * Join rows or a String array into a String separated by a delimiter.
      *
-     * @param strings
-     * @param separator
-     * @return
+     * @param strings the array of strings to join
+     * @param separator the separator to use between strings
+     * @return the joined string
      */
     public static String join(String[] strings, String separator) {
         StringBuilder sb = new StringBuilder();
@@ -264,8 +277,8 @@ public class StringUtils {
     /**
      * String null or empty test.  Returns true if string is null or empty.
      *
-     * @param str
-     * @return
+     * @param str the string to test
+     * @return true if the string is null or empty
      */
 	public static boolean isEmpty(final String str) {
 		return str == null || str.isEmpty();
@@ -274,8 +287,8 @@ public class StringUtils {
 	/**
 	 * Convert <code>String</code> to <code>Character</code> correctly handling nulls and zero length strings.
 	 *
-	 * @param s
-	 * @return
+	 * @param s the string to convert
+	 * @return the first character of the string, or null if the string is null or empty
 	 */
 	public static Character stringToCharacter(String s) {
 		return s == null || s.isEmpty() ? null : s.charAt(0);
@@ -284,8 +297,8 @@ public class StringUtils {
 	/**
 	 * Convert <code>Character</code> to <code>String</code> correctly handling nulls.
 	 *
-	 * @param c
-	 * @return
+	 * @param c the character to convert
+	 * @return the string representation of the character, or null if the character is null
 	 */
 	public static String characterToString(Character c) {
 		return c == null ? null : c.toString();

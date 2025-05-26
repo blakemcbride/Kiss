@@ -30,8 +30,8 @@ public class FileUtils {
      * to download a report or data file.
      *
      * @param prefix at least 3 characters long
-     * @param suffix
-     * @return
+     * @param suffix file extension or suffix for the temporary file
+     * @return newly created temporary file or null if creation failed
      */
     public static File createReportFile(final String prefix, final String suffix)
     {
@@ -75,6 +75,9 @@ public class FileUtils {
 
     /**
      * Takes a previously obtained File and returns what path the front-end should use to access the file.
+     *
+     * @param f the file to get the HTTP path for
+     * @return the relative HTTP path to access the file
      */
     public static String getHTTPPath(File f) {
         String name1 = f.getName();
@@ -87,6 +90,9 @@ public class FileUtils {
 
     /**
      * Takes a path to a file and returns what path the front-end should use to access the file.
+     *
+     * @param fn the file path to get the HTTP path for
+     * @return the relative HTTP path to access the file
      */
     public static String getHTTPPath(String fn) {
         return getHTTPPath(new File(fn));
@@ -95,9 +101,9 @@ public class FileUtils {
     /**
      * Write String to file fileName.  File is created if it doesn't exist and truncated otherwise.
      *
-     * @param fileName
-     * @param str
-     * @throws IOException
+     * @param fileName the name of the file to write to
+     * @param str the string to write to the file
+     * @throws IOException if an I/O error occurs
      */
     public static void write(String fileName, String str) throws IOException {
         Files.write(Paths.get(fileName), str.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -106,9 +112,9 @@ public class FileUtils {
     /**
      * Write byte array to file fileName.  File is created if it doesn't exist and truncated otherwise.
      *
-     * @param fileName
-     * @param vec
-     * @throws IOException
+     * @param fileName the name of the file to write to
+     * @param vec the byte array to write to the file
+     * @throws IOException if an I/O error occurs
      */
     public static void write(String fileName, byte [] vec) throws IOException {
         Files.write(Paths.get(fileName), vec, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -117,9 +123,9 @@ public class FileUtils {
         /**
      * Write byte array to file fileName.  File is created if it doesn't exist and truncated otherwise.
      *
-     * @param fileName
-     * @param vec
-     * @throws IOException
+     * @param fileName the name of the file to write to
+     * @param vec the Byte array to write to the file
+     * @throws IOException if an I/O error occurs
      */
     public static void write(String fileName, Byte [] vec) throws IOException {
         Files.write(Paths.get(fileName), ArrayUtils.toPrimitiveByteArray(vec), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
@@ -128,9 +134,9 @@ public class FileUtils {
     /**
      * Append String to file fileName.  File is created if it doesn't exist and appended otherwise.
      *
-     * @param fileName
-     * @param str
-     * @throws IOException
+     * @param fileName the name of the file to append to
+     * @param str the string to append to the file
+     * @throws IOException if an I/O error occurs
      */
     public static void append(String fileName, String str) throws IOException {
         Files.write(Paths.get(fileName), str.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
@@ -139,9 +145,9 @@ public class FileUtils {
     /**
      * Append byte array to file fileName.  File is created if it doesn't exist and appended otherwise.
      *
-     * @param fileName
-     * @param vec
-     * @throws IOException
+     * @param fileName the name of the file to append to
+     * @param vec the byte array to append to the file
+     * @throws IOException if an I/O error occurs
      */
     public static void append(String fileName, byte [] vec) throws IOException {
         Files.write(Paths.get(fileName), vec, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
@@ -150,9 +156,9 @@ public class FileUtils {
     /**
      * Append byte array to file fileName.  File is created if it doesn't exist and appended otherwise.
      *
-     * @param fileName
-     * @param vec
-     * @throws IOException
+     * @param fileName the name of the file to append to
+     * @param vec the Byte array to append to the file
+     * @throws IOException if an I/O error occurs
      */
     public static void append(String fileName, Byte [] vec) throws IOException {
         Files.write(Paths.get(fileName), ArrayUtils.toPrimitiveByteArray(vec), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.APPEND);
@@ -161,9 +167,9 @@ public class FileUtils {
     /**
      * Read the entire contents of a file into a String.
      *
-     * @param fileName
-     * @return
-     * @throws IOException
+     * @param fileName the name of the file to read
+     * @return the contents of the file as a String
+     * @throws IOException if an I/O error occurs
      */
     public static String readFile(String fileName) throws IOException {
         return new String(readFileBytes(fileName), StandardCharsets.UTF_8);
@@ -172,9 +178,9 @@ public class FileUtils {
     /**
      * Read the entire contents of a file into a byte array.
      *
-     * @param fileName
-     * @return
-     * @throws IOException
+     * @param fileName the name of the file to read
+     * @return the contents of the file as a byte array
+     * @throws IOException if an I/O error occurs
      */
     public static byte [] readFileBytes(String fileName) throws IOException {
         return Files.readAllBytes(Paths.get(fileName));
@@ -184,9 +190,9 @@ public class FileUtils {
      * Read all bytes from a <code>BufferedInputStream</code> and return a byte array with the data.
      * This is useful when processing an uploaded file.
      *
-     * @param bis
-     * @return
-     * @throws IOException
+     * @param bis the BufferedInputStream to read from
+     * @return the data from the stream as a byte array
+     * @throws IOException if an I/O error occurs
      */
     public static byte [] readAllBytes(BufferedInputStream bis) throws IOException {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -201,9 +207,9 @@ public class FileUtils {
     /**
      * Copy file
      *
-     * @param source file
-     * @param dest  file or directory
-     * @throws IOException
+     * @param source source file path
+     * @param dest destination file or directory path
+     * @throws IOException if an I/O error occurs
      */
     public static void copy(String source, String dest) throws IOException {
         File sfile = new File(source);

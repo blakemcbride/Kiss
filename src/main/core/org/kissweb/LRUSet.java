@@ -25,7 +25,7 @@ public class LRUSet<K> extends LRUCache<K, Object> {
      *
      * @param key     the key to add
      * @param value the arbitrary object to associate with the key
-     * @return
+     * @return unsupported operation
      */
     public boolean add(K key, Object value) {
         throw new UnsupportedOperationException("Unsupported method");
@@ -35,7 +35,7 @@ public class LRUSet<K> extends LRUCache<K, Object> {
      * Unsupported.
      *
      * @param key the key whose associated object is to be returned.
-     * @return
+     * @return unsupported operation
      */
     public Object get(K key) {
         throw new UnsupportedOperationException("Unsupported method");

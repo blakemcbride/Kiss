@@ -31,7 +31,7 @@ public class IniFile {
     /**
      * Create a new ini file in memory that will be saved to the specified file.
      *
-     * @param fname
+     * @param fname the filename where the ini file will be saved
      */
     public IniFile(String fname) {
         filename = fname;
@@ -40,9 +40,9 @@ public class IniFile {
     /**
      * Load an ini file from a disk file.
      *
-     * @param fname
-     * @return
-     * @throws IOException
+     * @param fname the filename to load from
+     * @return the loaded IniFile object or null if file doesn't exist
+     * @throws IOException if an I/O error occurs while reading the file
      */
     public static IniFile load(String fname) throws IOException {
         if (!(new java.io.File(fname)).exists()) {
@@ -107,6 +107,8 @@ public class IniFile {
 
     /**
      * Returns the filename of the ini file.
+     *
+     * @return the filename of the ini file
      */
     public String getFilename() {
         return filename;
@@ -295,8 +297,8 @@ public class IniFile {
     /**
      * Save the in-memory ini file to the specified file.
      *
-     * @param fname
-     * @throws IOException
+     * @param fname the filename to save to
+     * @throws IOException if an I/O error occurs while writing the file
      */
     public synchronized void save(String fname) throws IOException {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(fname))) {
@@ -316,7 +318,7 @@ public class IniFile {
     /**
      * Save the in-memory ini file to file it was read from.
      *
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while writing the file
      */
     public void save() throws IOException {
         save(filename);
@@ -509,8 +511,8 @@ public class IniFile {
     /**
      * This test program can be run from the command-line as follows:<br><br>
      *      <code>java -cp work/Kiss.jar org.kissweb.IniFile</code>
-     * @param args
-     * @throws IOException
+     * @param args command line arguments
+     * @throws IOException if an I/O error occurs
      */
     public static void main(String[] args) throws IOException {
         if (args.length != 1) {

@@ -91,7 +91,7 @@ public class Record implements AutoCloseable {
      *
      * @param name the column name
      * @param val the value to set.  Can be any type.
-     * @return
+     * @return this Record instance for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #setDateOnly(String, java.util.Date)
@@ -107,7 +107,7 @@ public class Record implements AutoCloseable {
      *
      * @param name the column name
      * @param val the value to set.
-     * @return
+     * @return this Record instance for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #set(String, Object)
@@ -125,7 +125,7 @@ public class Record implements AutoCloseable {
      *
      * @param name the column name
      * @param dat the value to set. Format is YYYYMMDD
-     * @return
+     * @return this Record instance for method chaining
      *
      * @see #setDateOnly(String, java.util.Date)
      * @see #setTime(String, long)
@@ -151,7 +151,7 @@ public class Record implements AutoCloseable {
      *
      * @param name the column name
      * @param dat the value to set in milliseconds
-     * @return
+     * @return this Record instance for method chaining
      *
      * @see #setDateOnly(String, java.util.Date)
      * @see Cursor#set(String, Object)
@@ -173,7 +173,7 @@ public class Record implements AutoCloseable {
      *
      * @param name the column name
      * @param val the value to set.
-     * @return
+     * @return this Record instance for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #setDateOnly(String, java.util.Date)
@@ -194,7 +194,7 @@ public class Record implements AutoCloseable {
      *
      * @param name the column name
      * @param val the value to set.
-     * @return
+     * @return this Record instance for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #setDateOnly(String, java.util.Date)
@@ -210,8 +210,8 @@ public class Record implements AutoCloseable {
      * Set the date and time value of a column in the record.
      *
      * @param name the column name
-     * @param val number ov milliseconds since 1970 UTC
-     * @return
+     * @param val number of milliseconds since 1970 UTC
+     * @return this Record instance for method chaining
      *
      * @see Cursor#set(String, Object)
      * @see #setDateOnly(String, java.util.Date)
@@ -227,9 +227,9 @@ public class Record implements AutoCloseable {
      * Get the value of a column as an <code>Object</code>.  Other methods that get
      * expected types are typically used over this method.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the column value as an Object
+     * @throws SQLException if the column is not found
      *
      * @see Cursor#get(String)
      * @see #getShort(String)
@@ -248,7 +248,9 @@ public class Record implements AutoCloseable {
     /**
      * Return the <code>Boolean</code> value of the named column.
      *
-     * @param cname
+     * @param cname the column name
+     * @return the Boolean value of the column
+     * @throws SQLException if the column is not found or cannot be converted to Boolean
      */
     public Boolean getBoolean(String cname) throws SQLException {
         return (Boolean) get(cname);
@@ -256,11 +258,11 @@ public class Record implements AutoCloseable {
 
     /**
      * Tests if a given column exists.
-     * Returns <code>true</code> of the column exists, and <code>false</code> if it does not.
+     * Returns <code>true</code> if the column exists, and <code>false</code> if it does not.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return true if the column exists, false otherwise
+     * @throws SQLException if an error occurs while checking
      */
     public boolean columnExists(String cname) throws SQLException {
         return cols.containsKey(cname.toLowerCase());
@@ -270,9 +272,9 @@ public class Record implements AutoCloseable {
      * Return the <code>Short</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Short value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to Short
      *
      * @see Cursor#getShort(String)
      */
@@ -294,9 +296,9 @@ public class Record implements AutoCloseable {
      * Return the <code>Integer</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Integer value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to Integer
      *
      * @see Cursor#getInt(String)
      */
@@ -315,9 +317,9 @@ public class Record implements AutoCloseable {
      * Return the <code>Long</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Long value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to Long
      *
      * @see Cursor#getLong(String)
      */
@@ -338,9 +340,9 @@ public class Record implements AutoCloseable {
      * Return the <code>Float</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Float value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to Float
      *
      * @see Cursor#getFloat(String)
      */
@@ -365,9 +367,9 @@ public class Record implements AutoCloseable {
      * Return the <code>Double</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Double value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to Double
      *
      * @see Cursor#getDouble(String)
      */
@@ -393,9 +395,9 @@ public class Record implements AutoCloseable {
      * Just a date and no time.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Date value of the column (date only, no time), or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to Date
      *
      * @see #getDateAsInt(String)
      * @see Cursor#getDateOnly(String)
@@ -425,9 +427,9 @@ public class Record implements AutoCloseable {
      * Return the date in an int formatted as YYYYMMDD for the named column.
      * A <code>0</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return date format YYYYMMDD
-     * @throws SQLException
+     * @param cname the column name
+     * @return date formatted as YYYYMMDD, or 0 if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to date
      *
      * @see #getDateOnly(String)
      * @see Cursor#getDateOnly(String)
@@ -456,9 +458,9 @@ public class Record implements AutoCloseable {
      * If the column had timezone information, it is stripped off.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Date value of the column (with timezone stripped), or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to Date
      *
      * @see #getZonedDateTime(String) 
      * @see Cursor#getDateOnly(String)
@@ -486,9 +488,9 @@ public class Record implements AutoCloseable {
      * If the underlying database does not actually store a timezone (like PostgreSQL) then this method will
      * fail.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the ZonedDateTime value of the column (with timezone preserved), or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to ZonedDateTime
      *
      * @see #getDateTime(String)
      * @see #getDateTimeMS(String)
@@ -506,9 +508,9 @@ public class Record implements AutoCloseable {
      *
      * A <code>0</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the date/time value as milliseconds since 1970 UTC, or 0 if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to timestamp
      *
      * @see #getDateOnly(String)
      * @see #getTime(String)
@@ -526,9 +528,9 @@ public class Record implements AutoCloseable {
      * Only time information is returned.
      * A <code>0</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return time in milliseconds
-     * @throws SQLException
+     * @param cname the column name
+     * @return time in milliseconds, or 0 if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to time
      *
      * @see #getDateOnly(String)
      */
@@ -543,9 +545,9 @@ public class Record implements AutoCloseable {
      * Return the <code>String</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the String value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found
      *
      * @see Cursor#getString(String)
      */
@@ -557,9 +559,9 @@ public class Record implements AutoCloseable {
      * Return the <code>Character</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the Character value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found or is not a single character
      *
      * @see Cursor#getChar(String)
      */
@@ -576,9 +578,9 @@ public class Record implements AutoCloseable {
      * Return the <code>byte[]</code> value of the named column.
      * A <code>null</code> is returned on <code>null</code> valued columns.
      *
-     * @param cname
-     * @return
-     * @throws SQLException
+     * @param cname the column name
+     * @return the byte array value of the column, or null if the column value is null
+     * @throws SQLException if the column is not found or cannot be converted to byte array
      *
      * @see Cursor#get(String)
      */
@@ -608,7 +610,7 @@ public class Record implements AutoCloseable {
      * <br><br>
      * This method is smart.  It only updates the fields that have changed, and if none have, it does nothing.
      *
-     * @throws SQLException
+     * @throws SQLException if an error occurs during the update operation
      * @see Connection#commit()
      */
     public void update() throws SQLException {
@@ -696,10 +698,10 @@ public class Record implements AutoCloseable {
     }
 
     /**
-     * Performs an SQL delete on the record.  This is done by creating an actual update statement and
+     * Performs an SQL delete on the record.  This is done by creating an actual delete statement and
      * executing it against the database.  It does not affect any cursors.
      *
-     * @throws SQLException
+     * @throws SQLException if an error occurs during the delete operation
      * @see Connection#commit()
      */
     public void delete() throws SQLException {
@@ -776,7 +778,7 @@ public class Record implements AutoCloseable {
      * that the database used for the new record.
      *
      * @return an Object - should be cast to (short), (int), or (long) depending on the serial type
-     * @throws SQLException
+     * @throws SQLException if an error occurs during the insert operation
      *
      * @see #addRecord()
      * @see Connection#commit()
@@ -846,11 +848,11 @@ public class Record implements AutoCloseable {
     }
 
     /**
-     * Inserts a new row into the database by creating an executing an SQL statement.
+     * Inserts a new row into the database by creating and executing an SQL statement.
      * It does not affect any cursors.
      *
-     * @return
-     * @throws SQLException
+     * @return true if the first result is a ResultSet, false if it is an update count or there are no results
+     * @throws SQLException if an error occurs during the insert operation
      *
      * @see #addRecordAutoInc()
      * @see Connection#commit()
@@ -913,9 +915,10 @@ public class Record implements AutoCloseable {
      *      <code>where col &lt;&gt; ANY(?)</code><br>
      *  the list must have at least one element.
      *
-     * @param a
-     * @return
-     * @throws SQLException
+     * @param conn the database connection
+     * @param a the object to convert to an SQL array
+     * @return an SQL Array if the object is a supported collection type, null otherwise
+     * @throws SQLException if an error occurs during array creation
      * @see ArrayListInteger
      * @see ArrayListLong
      * @see ArrayListShort
@@ -1002,6 +1005,7 @@ public class Record implements AutoCloseable {
      * Copy all columns from <code>fromRec</code> to <code>this</code> that have the same column names and types
      *
      * @param fromRec the record to be copied from
+     * @throws SQLException if an error occurs during the copy operation
      */
     public void copyCorresponding(Record fromRec) throws SQLException {
         final Record toRec = this;
@@ -1057,7 +1061,7 @@ public class Record implements AutoCloseable {
     /**
      * Returns the <code>Connection</code> instance associated to this <code>Record</code> instance.
      *
-     * @return
+     * @return the Connection instance associated with this Record
      */
     public Connection getConnection() {
         return conn;
@@ -1066,7 +1070,7 @@ public class Record implements AutoCloseable {
     /**
      * Returns the name of the table associated to this <code>Record</code> instance.
      *
-     * @return
+     * @return the table name associated with this Record
      */
     public String getTableName() {
         return table;
@@ -1075,7 +1079,7 @@ public class Record implements AutoCloseable {
     /**
      * Returns a map of all the columns in the record.
      *
-     * @return
+     * @return a map containing all column names and their values
      */
     public AbstractMap<String,Object> getAllColumns() {
         return cols;
@@ -1084,7 +1088,7 @@ public class Record implements AutoCloseable {
     /**
      * Convert a record into a JSON object.
      *
-     * @return
+     * @return a JSONObject representation of this record
      */
     public JSONObject toJSON() {
         JSONObject obj = new JSONObject();
@@ -1100,7 +1104,8 @@ public class Record implements AutoCloseable {
     /**
      * Add columns of a Record to an existing JSON object.
      *
-     * @return
+     * @param obj the JSONObject to add the record columns to
+     * @return the modified JSONObject with the record columns added
      */
     public JSONObject addToJSON(JSONObject obj) {
         cols.forEach(obj::put);
@@ -1110,8 +1115,8 @@ public class Record implements AutoCloseable {
     /**
      * Utility method to convert a list of Record's into a JSON array of JSON objects.
      *
-     * @param recs
-     * @return
+     * @param recs the list of records to convert
+     * @return a JSONArray containing JSONObjects for each record
      */
     public static JSONArray toJSONArray(List<Record> recs) {
         JSONArray ary = new JSONArray();

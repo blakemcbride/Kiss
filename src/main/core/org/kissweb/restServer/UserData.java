@@ -27,30 +27,66 @@ public class UserData {
         lastAccessDate = LocalDateTime.now();
     }
 
+    /**
+     * Get the username.
+     *
+     * @return the username
+     */
     public String getUsername() {
         return username;
     }
 
+    /**
+     * Get the password.
+     *
+     * @return the password
+     */
     public String getPassword() {
         return password;
     }
 
+    /**
+     * Get the user ID.
+     *
+     * @return the user ID object
+     */
     public Object getUserId() {
         return userId;
     }
 
+    /**
+     * Get the UUID.
+     *
+     * @return the UUID string
+     */
     public String getUuid() {
         return uuid;
     }
 
+    /**
+     * Get the last access date.
+     *
+     * @return the last access date
+     */
     public LocalDateTime getLastAccessDate() {
         return lastAccessDate;
     }
 
+    /**
+     * Set the last access date.
+     *
+     * @param lastAccessDate the last access date
+     */
     public void setLastAccessDate(LocalDateTime lastAccessDate) {
         this.lastAccessDate = lastAccessDate;
     }
 
+    /**
+     * Store user data by key.
+     *
+     * @param key the key
+     * @param value the value (null removes the key)
+     */
     public void putUserData(String key, Object value) {
         if (value == null)
             data.remove(key);
@@ -58,6 +94,12 @@ public class UserData {
             data.put(key, value);
     }
 
+    /**
+     * Get user data by key.
+     *
+     * @param key the key
+     * @return the value or null if not found
+     */
     public Object getUserData(String key) {
         return data.get(key);
     }

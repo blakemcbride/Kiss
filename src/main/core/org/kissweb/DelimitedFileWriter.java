@@ -50,11 +50,11 @@ public class DelimitedFileWriter implements AutoCloseable {
 	private String dateFmt = "MM/dd/yyyy";
 
     /**
-     * Create a new CSV file us ing the specified delimiter character and the default quote character (").
+     * Create a new CSV file using the specified delimiter character and the default quote character (").
      *
-     * @param name
-     * @param delim
-     * @throws IOException
+     * @param name the name of the file to create
+     * @param delim the delimiter character to use
+     * @throws IOException if an I/O error occurs while creating the file
      */
 	public DelimitedFileWriter(String name, char delim) throws IOException {
 		this(name, false, -1, delim, '"');
@@ -63,12 +63,12 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Create a new or append to an existing CSV file.
      *
-     * @param name
-     * @param append
+     * @param name the name of the file to create or append to
+     * @param append true to append to existing file, false to create new file
      * @param itemsPerRow create a standard number of columns-per-row or specify -1 to indicate that you will explicitly output what is needed
-     * @param delimiter
-     * @param quote
-     * @throws IOException
+     * @param delimiter the delimiter character to use
+     * @param quote the quote character to use
+     * @throws IOException if an I/O error occurs while creating or opening the file
      */
 	public DelimitedFileWriter(String name, boolean append, int itemsPerRow, char delimiter, char quote) throws IOException {
 		fw = new FileWriter(name, append);
@@ -80,10 +80,10 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Create or append to a standard CSV file using the standard delimiter (,) and quote (") characters.
      *
-     * @param name
-     * @param append
+     * @param name the name of the file to create or append to
+     * @param append true to append to existing file, false to create new file
      * @param itemsPerRow create a standard number of columns-per-row or specify -1 to indicate that you will explicitly output what is needed
-     * @throws IOException
+     * @throws IOException if an I/O error occurs while creating or opening the file
      */
 	public DelimitedFileWriter(String name, boolean append, int itemsPerRow) throws IOException {
 		this(name, append, itemsPerRow, ',', '"');
@@ -92,9 +92,9 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Create or append to a standard CSV file using the standard delimiter (,) and quote (") characters.
      *
-     * @param name
-     * @param append
-     * @throws IOException
+     * @param name the name of the file to create or append to
+     * @param append true to append to existing file, false to create new file
+     * @throws IOException if an I/O error occurs while creating or opening the file
      */
 	public DelimitedFileWriter(String name, boolean append) throws IOException {
 		this(name, append, -1, ',', '"');
@@ -103,8 +103,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Create a standard CSV file using the standard delimiter (,) and quote (") characters.
      *
-     * @param name
-     * @throws IOException
+     * @param name the name of the file to create
+     * @throws IOException if an I/O error occurs while creating the file
      */
 	public DelimitedFileWriter(String name) throws IOException {
 		this(name, false, -1, ',', '"');
@@ -113,7 +113,7 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Set the format of date output.  Default is mm/dd/yyyy
      *
-     * @param fmt
+     * @param fmt the date format string to use for date output
      *
      * @see DateUtils#format(String, int)
      */
@@ -175,8 +175,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Write a String field correctly dealing with embedded quotes and delimiters
      *
-     * @param x
-     * @throws Exception
+     * @param x the string value to write
+     * @throws Exception if an error occurs while writing the field
      */
 	public void writeField(String x) throws Exception {
 		write(x);
@@ -187,8 +187,8 @@ public class DelimitedFileWriter implements AutoCloseable {
      * Deals correctly with embedded quotes and delimiters.
      *
      * @param charLimit max size of the string
-     * @param x the string
-     * @throws Exception
+     * @param x the string value to write
+     * @throws Exception if an error occurs while writing the field
      */
 	public void writeField(int charLimit, String x) throws Exception {
 		if (x == null)
@@ -203,8 +203,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Write a String field forcing the string to uppercase and a quoted output.
      *
-     * @param x
-     * @throws Exception
+     * @param x the string value to write in uppercase
+     * @throws Exception if an error occurs while writing the field
      */
 	public void writeFieldUpperCase(String x) throws Exception {
 		writeWithQuoteUpperCase(x);
@@ -213,8 +213,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Output a floating point number with a maximum of two decimal places.
      *
-     * @param x
-     * @throws Exception
+     * @param x the double value to write
+     * @throws Exception if an error occurs while writing the field
      */
 	public void writeField(double x) throws Exception {
 		x *= 100;
@@ -226,8 +226,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Output an integer column.
      *
-     * @param x
-     * @throws Exception
+     * @param x the integer value to write
+     * @throws Exception if an error occurs while writing the field
      */
 	public void writeField(int x) throws Exception {
 		write(x + "");
@@ -236,8 +236,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Output an integer field using an empty field if the number is zero.
      *
-     * @param x
-     * @throws Exception
+     * @param x the integer value to write (writes empty string if zero)
+     * @throws Exception if an error occurs while writing the field
      */
 	public void writeNoZero(int x) throws Exception {
 		write(x == 0 ? "" : x + "");
@@ -246,8 +246,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Output a single character field.  Quotes and delimiters are correctly handled.
      *
-     * @param x
-     * @throws Exception
+     * @param x the character value to write
+     * @throws Exception if an error occurs while writing the field
      */
 	public void writeField(char x) throws Exception {
 		write(x + "");
@@ -257,7 +257,7 @@ public class DelimitedFileWriter implements AutoCloseable {
      * Output a date in the default format.
      *
      * @param x the date as an integer YYYYMMDD
-     * @throws Exception
+     * @throws Exception if an error occurs while writing the field
      *
      * @see #dateFmt
      */
@@ -269,7 +269,7 @@ public class DelimitedFileWriter implements AutoCloseable {
      * Output a date in the default format.
      *
      * @param x the date as a <code>Date</code> instance
-     * @throws Exception
+     * @throws Exception if an error occurs while writing the field
      *
      * @see #dateFmt
      */
@@ -280,8 +280,8 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * End the current row.  Throws an exception if all of the columns weren't specified.
      *
-     * @throws IOException
-     * @throws Exception
+     * @throws IOException if an I/O error occurs while writing the row terminator
+     * @throws Exception if the field count doesn't match the expected items per row
      */
 	public void endRecord() throws IOException, Exception {
 		fw.write("\r\n");
@@ -293,7 +293,7 @@ public class DelimitedFileWriter implements AutoCloseable {
     /**
      * Returns the number of columns output already on the current row.
      *
-     * @return
+     * @return the number of fields written to the current row
      */
 	public int getFieldCount() {
 		return fcount;

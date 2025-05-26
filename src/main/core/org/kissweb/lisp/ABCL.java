@@ -24,6 +24,9 @@ public class ABCL {
     private static String UtilsSource;
     private static String appPath = null;
 
+    /**
+     * Initializes the ABCL Lisp interpreter and loads required utility packages.
+     */
     public static void init() {
 		interpreter = Interpreter.createInstance();
 		invertCase();
@@ -56,6 +59,11 @@ public class ABCL {
 		invertCase = true;
 	}
 
+	/**
+	 * Fixes the case of a Lisp symbol based on the current readtable case settings.
+	 * @param symbol the symbol to fix
+	 * @return the symbol with appropriate case conversion
+	 */
 	public static String fixCase(String symbol) {
 		if (invertCase) {
 			int ucl = 0, lcl = 0;
@@ -76,6 +84,10 @@ public class ABCL {
 			return symbol.toUpperCase();
 	}
 
+	/**
+	 * Deletes a Lisp package if it exists.
+	 * @param pkg the name of the package to delete
+	 */
 	public static void deletePackage(String pkg) {
         if (interpreter == null)
             return;
@@ -85,6 +97,9 @@ public class ABCL {
         }
     }
 
+	/**
+	 * Resets the Lisp environment by deleting utility packages and reloading them.
+	 */
 	public static void reset() {
 		if (interpreter == null)
 			return;
@@ -118,14 +133,30 @@ public class ABCL {
         makeRestServiceArgs = ABCL.findLispFunction("MAPPINGS", "make-rest-service-args");
 	}
 
+	/**
+	 * Loads a Lisp file.
+	 * @param fileName the name of the file to load
+	 * @return the result of the load operation
+	 */
 	public static LispObject load(String fileName) {
 	    return eval("(load \"" + getAppPath() + fileName + "\")");
 	}
 
+	/**
+	 * Compiles a Lisp file.
+	 * @param fileName the name of the file to compile
+	 * @return the result of the compile operation
+	 */
 	public static LispObject compileFile(String fileName) {
 		return eval("(compile-file \"" + getAppPath() + fileName + "\")");
 	}
 
+	/**
+	 * Loads a Lisp package from a file using the package-lru system.
+	 * @param lispPackage the name of the Lisp package
+	 * @param fileName the file to load the package from
+	 * @throws Exception if the package fails to load
+	 */
 	public static void loadPackage(String lispPackage, String fileName) throws Exception {
 		try {
 			eval("(package-lru:load-package \"" + lispPackage + "\" \"" + getAppPath() + fileName + "\")");
@@ -135,6 +166,10 @@ public class ABCL {
 		}
 	}
 
+	/**
+	 * Marks a package as done loading and optionally unloads it based on IDE mode.
+	 * @param lispPackage the name of the Lisp package
+	 */
 	public static void packageDone(String lispPackage) {
 		if (MainServlet.isUnderIDE())
 			eval("(package-lru:package-done-unload \"" + lispPackage + "\")");
@@ -142,14 +177,30 @@ public class ABCL {
 			eval("(package-lru:package-done \"" + lispPackage + "\")");
 	}
 
+    /**
+     * Unloads a Lisp package.
+     * @param lispPackage the name of the Lisp package to unload
+     */
     public static void packageUnload(String lispPackage) {
 	    eval("(package-lru:package-done-unload \"" + lispPackage + "\")");
     }
 
+    /**
+     * Evaluates a Lisp expression from a string.
+     * @param str the Lisp expression to evaluate
+     * @return the result of the evaluation
+     */
     public static LispObject eval(String str) {
         return interpreter.eval(str);
     }
 
+    /**
+     * Finds a Lisp function in the specified package.
+     * @param packageName the name of the package containing the function
+     * @param funName the name of the function to find
+     * @return the Function object
+     * @throws RuntimeException if the package or function is not found
+     */
     public static Function findLispFunction(String packageName, String funName) {
         if (packageName == null  ||  packageName.isEmpty())
             packageName = "CL-USER";
@@ -165,6 +216,12 @@ public class ABCL {
         return fun;
     }
 
+    /**
+     * Executes a Lisp function with the given arguments.
+     * @param fun the Lisp function to execute
+     * @param args the arguments to pass to the function
+     * @return the result of the function execution
+     */
     public static LispObject executeLispFunction(Function fun, Object ... args) {
         LispObject[] jargs;
         jargs = new LispObject[args.length];
@@ -173,6 +230,13 @@ public class ABCL {
         return fun.execute(jargs);
     }
 
+    /**
+     * Finds and executes a Lisp function with the given arguments.
+     * @param packageName the name of the package containing the function
+     * @param funName the name of the function to execute
+     * @param args the arguments to pass to the function
+     * @return the result of the function execution, or null if function not found
+     */
     public static LispObject executeLisp(String packageName, String funName, Object ... args) {
         Function fun = findLispFunction(packageName, funName);
 		if (fun == null)
@@ -184,6 +248,13 @@ public class ABCL {
         return fun.execute(jargs);
     }
 
+    /**
+     * Finds and executes a Lisp function with arguments provided as an array.
+     * @param packageName the name of the package containing the function
+     * @param funName the name of the function to execute
+     * @param args the array of arguments to pass to the function
+     * @return the result of the function execution, or null if function not found
+     */
     public static LispObject executeLispArray(String packageName, String funName, Object [] args) {
         Function fun = findLispFunction(packageName, funName);
 		if (fun == null)
@@ -195,15 +266,28 @@ public class ABCL {
         return fun.execute(jargs);
     }
 
+	/**
+	 * Gets the cached make-web-service-args function.
+	 * @return the Function object for making web service arguments
+	 */
 	public static Function getMakeWebServiceArgs() {
 		return makeWebServiceArgs;
 	}
 
+    /**
+     * Gets the cached make-rest-service-args function.
+     * @return the Function object for making REST service arguments
+     */
     public static Function getMakeRestServiceArgs() {
         return makeRestServiceArgs;
     }
 
-@SuppressWarnings("unchecked")
+	/**
+	 * Converts a LispObject to a corresponding Java object.
+	 * @param obj the LispObject to convert
+	 * @return the corresponding Java object representation
+	 */
+	@SuppressWarnings("unchecked")
 	public static Object LispObjectToJavaObject(LispObject obj) {
 		if (obj.atom())
 			if (obj.characterp())
@@ -237,6 +321,11 @@ public class ABCL {
 			return null;
 	}
 
+	/**
+	 * Converts a Java object to a corresponding LispObject.
+	 * @param jobj the Java object to convert
+	 * @return the corresponding LispObject representation, or null if conversion not supported
+	 */
 	public static LispObject JavaObjectToLispObject(Object jobj) {
 		if (jobj instanceof Boolean)
 			return ((Boolean)jobj) ? Lisp.T : Lisp.NIL;
@@ -279,6 +368,10 @@ public class ABCL {
 		return null;
 	}
 
+	/**
+	 * Prints a stack trace including both Java and Lisp stack information.
+	 * @param e the Throwable to print stack trace for
+	 */
 	public static void printStackTrace(Throwable e) {
 		try {
 			Function fun = findLispFunction("UTILS", "print-stack-trace");
@@ -312,11 +405,19 @@ public class ABCL {
 						: c.princToString());
 	}
 
+	/**
+	 * Gets the current Lisp release number.
+	 * @return the Lisp release number
+	 */
 	//  DO NOT REMOVE THIS METHOD
 	public static int getLispRelease() {
 		return lispRelease;
 	}
 
+	/**
+	 * Sets the Lisp release number.
+	 * @param lispRelease the Lisp release number to set
+	 */
 	//  DO NOT REMOVE THIS METHOD
 	public static void setLispRelease(int lispRelease) {
 		ABCL.lispRelease = lispRelease;

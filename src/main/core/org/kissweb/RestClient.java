@@ -39,6 +39,13 @@ public class RestClient {
     private String responseString;
     private String debugFileName;
 
+    /**
+     * Set proxy server configuration for HTTP requests.
+     *
+     * @param proxyServerURL the URL of the proxy server
+     * @param proxyServerPort the port number of the proxy server
+     * @return this RestClient instance for method chaining
+     */
     public RestClient setProxy(String proxyServerURL, int proxyServerPort) {
         this.proxyServerURL = proxyServerURL;
         this.proxyServerPort = proxyServerPort;
@@ -48,16 +55,16 @@ public class RestClient {
     /**
      * Set a TLS key.
      *
-     * @param clientKeystoreType
-     * @param clientKeystorePath
-     * @param clientKeystorePassword
-     * @return
-     * @throws KeyStoreException
-     * @throws IOException
-     * @throws CertificateException
-     * @throws NoSuchAlgorithmException
-     * @throws UnrecoverableKeyException
-     * @throws KeyManagementException
+     * @param clientKeystoreType the type of the keystore (e.g., "JKS", "PKCS12")
+     * @param clientKeystorePath the file path to the keystore
+     * @param clientKeystorePassword the password for the keystore
+     * @return this RestClient instance for method chaining
+     * @throws KeyStoreException if there is an error with the keystore
+     * @throws IOException if there is an I/O error reading the keystore
+     * @throws CertificateException if there is an error with certificates
+     * @throws NoSuchAlgorithmException if the specified algorithm is not available
+     * @throws UnrecoverableKeyException if the key cannot be recovered
+     * @throws KeyManagementException if there is an error managing keys
      */
     public RestClient setTLSKey(String clientKeystoreType, String clientKeystorePath, String clientKeystorePassword) throws KeyStoreException, IOException, CertificateException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyManagementException {
         File pKeyFile = new File(clientKeystorePath);
@@ -89,11 +96,11 @@ public class RestClient {
     /**
      * Call a REST service sending a JSON object and returning a JSON object.
      *
-     * @param method
-     * @param urlStr
-     * @param out
-     * @return
-     * @throws IOException
+     * @param method the HTTP method (POST, GET, etc.)
+     * @param urlStr the URL endpoint
+     * @param out the JSON object to send to the service
+     * @return the JSON object returned from the service
+     * @throws IOException if an I/O error occurs
      */
     public JSONObject jsonCall(String method, String urlStr, JSONObject out) throws IOException {
         return jsonCall(method, urlStr, out, null);
@@ -116,10 +123,10 @@ public class RestClient {
     /**
      * Call a REST service sending nothing and returning a JSON object.
      *
-     * @param method
-     * @param urlStr
-     * @return
-     * @throws IOException
+     * @param method the HTTP method (POST, GET, etc.)
+     * @param urlStr the URL endpoint
+     * @return the JSON object returned from the service
+     * @throws IOException if an I/O error occurs
      */
     public JSONObject jsonCall(String method, String urlStr) throws IOException {
         return jsonCall(method, urlStr, (String) null, null);
@@ -150,12 +157,12 @@ public class RestClient {
     /**
      * Call a REST service sending nothing and returning an XML document.
      *
-     * @param method
-     * @param urlStr
-     * @return
-     * @throws IOException
-     * @throws ParserConfigurationException
-     * @throws SAXException
+     * @param method the HTTP method (POST, GET, etc.)
+     * @param urlStr the URL endpoint
+     * @return the XML document returned from the service
+     * @throws IOException if an I/O error occurs
+     * @throws ParserConfigurationException if there is a parser configuration error
+     * @throws SAXException if there is a SAX parsing error
      */
     public Document xmlCall(String method, String urlStr) throws IOException, ParserConfigurationException, SAXException {
         return xmlCall(method, urlStr, null, null);
@@ -336,8 +343,8 @@ public class RestClient {
      * The following builds a JSON header that implements HTTP basic authentication.
      * Additional items may be added to the returned header object.
      *
-     * @param user
-     * @param pw
+     * @param user the username for authentication
+     * @param pw the password for authentication
      * @return a new JSON header object containing the basic authentication
      */
     public static JSONObject basicAuthenticationHeader(String user, String pw) {
@@ -350,7 +357,7 @@ public class RestClient {
     /**
      * The HTTP response code
      *
-     * @return
+     * @return the HTTP response code from the last request
      */
     public int getResponseCode() {
         return responseCode;
@@ -359,7 +366,7 @@ public class RestClient {
     /**
      * Returns the response string.
      *
-     * @return
+     * @return the response string from the last request
      */
     public String getResponseString() {
         return responseString;
@@ -368,8 +375,8 @@ public class RestClient {
     /**
      * Set a file for debug output.
      *
-     * @param fname
-     * @return
+     * @param fname the filename for debug output
+     * @return the previous debug filename
      */
     public String setDebugFileName(String fname) {
         String pn = debugFileName;

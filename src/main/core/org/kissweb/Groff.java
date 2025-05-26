@@ -64,7 +64,7 @@ public class Groff {
      * @param fnamePrefix final PDF file name prefix
      * @param title     report title or null
      * @param landscape true if landscape format, portrait otherwise
-     * @throws IOException
+     * @throws IOException if file creation fails
      */
     public Groff(String fnamePrefix, String title, boolean landscape) throws IOException {
         this.landscape = landscape;
@@ -81,8 +81,8 @@ public class Groff {
      * @param fnamePrefix final PDF file name prefix
      * @param mmTemplateFileName path to the MM template
      * @param landscape true if landscape format, portrait otherwise
-     * @return
-     * @throws IOException
+     * @return new Groff instance configured for template processing
+     * @throws IOException if file creation fails
      * @see #setVariable(String, String)
      * @see #process()
      */
@@ -125,7 +125,7 @@ public class Groff {
      * <br><br>
      * <code>colFmt</code> is a string specifying the layout for each column as specified by tbl.
      *
-     * @param colFmt
+     * @param colFmt the column format string for the table
      */
     public void startTable(String colFmt) {
         grayEveryOtherLineFlg = true;  //  default
@@ -148,7 +148,7 @@ public class Groff {
     /**
      * Manually set the run date string.  An empty string (but not null) will cause no run date to be printed.
      *
-     * @param rt
+     * @param rt the runtime string to display on the report
      */
     public void setRuntime(String rt) {
         runDate = rt;
@@ -167,7 +167,7 @@ public class Groff {
     /**
      * Output a column (title or body of table)
      *
-     * @param col
+     * @param col the column content to output
      */
     public void column(String col) {
         flush();
@@ -202,7 +202,7 @@ public class Groff {
     /**
      * Output a column that may wrap vertically.
      *
-     * @param col
+     * @param col the column content that may wrap
      */
     public void columnWrap(String col) {
         /*  Automatic graying of every other row in a table is incompatible with wrapped columns.
@@ -294,7 +294,7 @@ public class Groff {
     /**
      * Output a Date date column.  Formats date as MM/DD/YYYY
      *
-     * @param date
+     * @param date the date to format and output as a column
      */
     public void dateColumn(Date date) {
         String col = DateUtils.format4(DateUtils.toInt(date));
@@ -347,7 +347,7 @@ public class Groff {
     /**
      * Output a line in bold text.
      *
-     * @param txt
+     * @param txt the text to output in bold
      */
     public void outBold(String txt) {
         out(".B \"" + txt + "\"");
@@ -356,7 +356,7 @@ public class Groff {
     /**
      * Add an additional line to the page title.
      *
-     * @param line
+     * @param line the line to add to the page title
      */
     public void addPageTitleLine(String line) {
         pageTitleLines.add(line);
@@ -406,7 +406,7 @@ public class Groff {
     /**
      * Write a line to the groff input file.
      *
-     * @param str
+     * @param str the string to write to the groff input file
      */
     public void out(String str) {
         if (atTop) {
@@ -440,9 +440,9 @@ public class Groff {
      * The file name returned is suitable for a web server and not the absolute file path.
      *
      * @param sideMargin size of the margin on the left side of the page in inches
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
+     * @return the relative path to the generated PDF file
+     * @throws IOException if file I/O operations fail
+     * @throws InterruptedException if the process is interrupted
      * @see #getRealFileName()
      * @see #process()
      */
@@ -520,9 +520,9 @@ public class Groff {
      * Process the groff/tbl/mm input, produce the PDF output file, and return the path to the PDF file.
      * Defaults to a 1-inch side margin.
      *
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
+     * @return the relative path to the generated PDF file
+     * @throws IOException if file I/O operations fail
+     * @throws InterruptedException if the process is interrupted
      * @see #process(float)
      */
     public String process() throws IOException, InterruptedException {
@@ -543,6 +543,8 @@ public class Groff {
     /**
      * The file name returned elsewhere is one convenient for web applications.
      * This method returns the real file name - not relative to a web server.
+     *
+     * @return the absolute path to the PDF file
      */
     public String getRealFileName() {
         return pdfname;
@@ -561,7 +563,7 @@ public class Groff {
     /**
      * Set the number of minutes to wait for groff to finish.  The default is 1 minute.
      *
-     * @param m
+     * @param m the number of minutes to wait
      */
     public void setWaitMinutes(long m) {
         waitMinutes = m;

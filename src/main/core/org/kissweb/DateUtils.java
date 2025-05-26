@@ -27,7 +27,7 @@ public class DateUtils {
     /**
      * Returns the current date as an integer formatted as YYYYMMDD.
      *
-     * @return
+     * @return the current date as an integer in YYYYMMDD format
      */
     public static int today() {
         Calendar c = Calendar.getInstance();
@@ -55,7 +55,7 @@ public class DateUtils {
     /**
      * Return today's date as a <code>Date</code> instance.
      *
-     * @return
+     * @return today's date as a Date object
      */
     public static Date todayDate() {
         return new Date();
@@ -65,7 +65,7 @@ public class DateUtils {
     /**
      * Return today's date as a <code>Calendar</code> instance.
      *
-     * @return
+     * @return today's date as a Calendar object
      */
     public static Calendar todayCalendar() {
         return Calendar.getInstance();
@@ -74,7 +74,7 @@ public class DateUtils {
     /**
      * Return today's date as a <code>LocalDate</code> instance.
      *
-     * @return
+     * @return today's date as a LocalDate object
      */
     public static LocalDate todayLocalDate() {
         return LocalDate.now();
@@ -93,10 +93,10 @@ public class DateUtils {
     /**
      * Create an <code>int</code> date from a year, month, and day.
      *
-     * @param y
-     * @param m
-     * @param d
-     * @return
+     * @param y the year (2 or 4 digit)
+     * @param m the month (1-12)
+     * @param d the day (1-31)
+     * @return the date formatted as YYYYMMDD, or 0 if month is 0
      */
     public static int toInt(int y, int m, int d) {
         if (m == 0)
@@ -108,8 +108,8 @@ public class DateUtils {
     /**
      * convert from a <code>Date</code> instance to an <code>int</code> date.
      *
-     * @param dat
-     * @return
+     * @param dat the Date object to convert
+     * @return the date formatted as YYYYMMDD, or 0 if dat is null
      */
     public static int toInt(Date dat) {
         if (dat == null)
@@ -122,8 +122,8 @@ public class DateUtils {
     /**
      * convert from a <code>Calendar</code> instance to an <code>int</code> date.
      *
-     * @param date
-     * @return
+     * @param date the Calendar object to convert
+     * @return the date formatted as YYYYMMDD, or 0 if date is null
      */
     public static int toInt(Calendar date) {
         if (date == null)
@@ -134,8 +134,8 @@ public class DateUtils {
     /**
      * convert from a <code>LocalDate</code> instance to an <code>int</code> date.
      *
-     * @param dt
-     * @return
+     * @param dt the LocalDate object to convert
+     * @return the date formatted as YYYYMMDD, or 0 if dt is null
      */
     public static int toInt(LocalDate dt) {
         if (dt == null)
@@ -146,10 +146,10 @@ public class DateUtils {
     /**
      * Create a <code>Date</code> from a year, month, and day.
      *
-     * @param y
-     * @param m
-     * @param d
-     * @return
+     * @param y the year (2 or 4 digit)
+     * @param m the month (1-12)
+     * @param d the day (1-31)
+     * @return the Date object, or null if month is 0
      */
     public static Date toDate(int y, int m, int d) {
         if (m == 0)
@@ -162,7 +162,7 @@ public class DateUtils {
      * convert from an <code>int</code> date to a <code>Date</code> date.
      *
      * @param dat a date formatted as YYYYMMDD
-     * @return
+     * @return the Date object, or null if dat is 0
      */
     public static Date toDate(int dat) {
         if (dat == 0)
@@ -176,8 +176,8 @@ public class DateUtils {
     /**
      * convert from an <code>Calendar</code> date to a <code>Date</code> date.
      *
-     * @param cal
-     * @return
+     * @param cal the Calendar object to convert
+     * @return the Date object, or null if cal is null
      */
     public static Date toDate(Calendar cal) {
         return cal == null ? null : cal.getTime();
@@ -186,8 +186,8 @@ public class DateUtils {
     /**
      * convert from an <code>LocalDate</code> date to a <code>Date</code> date.
      *
-     * @param dt
-     * @return
+     * @param dt the LocalDate object to convert
+     * @return the Date object, or null if dt is null
      */    
     public static Date toDate(LocalDate dt) {
         return dt == null ? null : Date.from(dt.atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -196,10 +196,10 @@ public class DateUtils {
     /**
      * Create a <code>Calendar</code> from a year, month, and day.
      *
-     * @param y
-     * @param m
-     * @param d
-     * @return
+     * @param y the year (2 or 4 digit)
+     * @param m the month (1-12)
+     * @param d the day (1-31)
+     * @return the Calendar object, or null if month is 0
      */
     public static Calendar toCalendar(int y, int m, int d) {
         if (m == 0)
@@ -211,8 +211,8 @@ public class DateUtils {
     /**
      * convert from an <code>int</code> date to a <code>Calendar</code> date.
      *
-     * @param dat
-     * @return
+     * @param dat a date formatted as YYYYMMDD
+     * @return the Calendar object, or null if dat is 0
      */
     public static Calendar toCalendar(int dat) {
         return dat == 0 ? null : new GregorianCalendar(year(dat), month(dat)-1, day(dat), 0, 0);
@@ -221,8 +221,8 @@ public class DateUtils {
     /**
      * Convert from a <code>Date</code> date to a <code>Calendar</code> date.
      *
-     * @param date
-     * @return
+     * @param date the Date object to convert
+     * @return the Calendar object, or null if date is null
      */
     public static Calendar toCalendar(Date date) {
         if (date == null)
@@ -235,8 +235,8 @@ public class DateUtils {
     /**
      * Convert from a <code>LocalDate</code> date to a <code>Calendar</code> date.
      *
-     * @param dt
-     * @return
+     * @param dt the LocalDate object to convert
+     * @return the Calendar object, or null if dt is null
      */
     public static Calendar toCalendar(LocalDate dt) {
         if (dt == null)
@@ -247,10 +247,10 @@ public class DateUtils {
     /**
      * Create a <code>LocalDate</code> from a year, month, and day.
      *
-     * @param y
-     * @param m
-     * @param d
-     * @return
+     * @param y the year (2 or 4 digit)
+     * @param m the month (1-12)
+     * @param d the day (1-31)
+     * @return the LocalDate object, or null if month is 0
      */
     public static LocalDate toLocalDate(int y, int m, int d) {
         if (m == 0)
@@ -263,7 +263,7 @@ public class DateUtils {
      * convert from an <code>int</code> date to a <code>LocalDate</code> date.
      *
      * @param dt a date formatted as YYYYMMDD
-     * @return
+     * @return the LocalDate object, or null if dt is 0
      */
     public static LocalDate toLocalDate(int dt) {
         if (dt == 0)
@@ -275,8 +275,8 @@ public class DateUtils {
     /**
      * Convert from a <code>Date</code> date to a <code>LocalDate</code> date.
      *
-     * @param date
-     * @return
+     * @param date the Date object to convert
+     * @return the LocalDate object, or null if date is null
      */
     public static LocalDate toLocalDate(Date date) {
         return date == null ? null : date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
@@ -286,8 +286,7 @@ public class DateUtils {
      * Convert from a <code>Calendar</code> date to a <code>LocalDate</code>
      *
      * @param dt a Calendar object
-     * @return
-     *
+     * @return the LocalDate object, or null if dt is null
      */
     public static LocalDate toLocalDate(Calendar dt) {
         return dt == null ? null : toLocalDate(toDate(dt));
@@ -328,7 +327,7 @@ public class DateUtils {
      *
      * @param dt a date formatted as YYYYMMDD
      * @param n the number of days to add, may be negative
-     * @return
+     * @return the new date formatted as YYYYMMDD, or 0 if dt is 0
      *
      * @see #addMonths(int, int)
      * @see #addYears(int, int)
@@ -345,8 +344,8 @@ public class DateUtils {
      * Add N months to a date.
      *
      * @param dt a date formatted as YYYYMMDD
-     * @param n
-     * @return
+     * @param n the number of months to add, may be negative
+     * @return the new date formatted as YYYYMMDD, or 0 if dt is 0
      *
      * @see #addDays(int, int)
      * @see #addYears(int, int)
@@ -363,8 +362,8 @@ public class DateUtils {
      * Add N years to a date.
      *
      * @param dt a date formatted as YYYYMMDD
-     * @param n
-     * @return
+     * @param n the number of years to add, may be negative
+     * @return the new date formatted as YYYYMMDD
      *
      * @see #addDays(int, int)
      * @see #addMonths(int, int)
@@ -381,7 +380,7 @@ public class DateUtils {
      *
      * @param fmt format specification
      * @param dt a date formatted as YYYYMMDD
-     * @return
+     * @return the formatted date string, or empty string if dt is 0
      *
      * @see java.text.SimpleDateFormat
      * @see #format2(int)
@@ -401,7 +400,7 @@ public class DateUtils {
      * Format a date with a two digit year as "m/d/yy"
      *
      * @param dt a date formatted as YYYYMMDD
-     * @return
+     * @return the formatted date string as "m/d/yy"
      */
     public static String format2(int dt) {
         return format("M/d/yy", dt);
@@ -411,7 +410,7 @@ public class DateUtils {
      * Format a date with a four digit year as "m/d/yyyy"
      *
      * @param dt a date formatted as YYYYMMDD
-     * @return
+     * @return the formatted date string as "m/d/yyyy"
      */
     public static String format4(int dt) {
         return format("M/d/yyyy", dt);
@@ -421,7 +420,7 @@ public class DateUtils {
      * Format a date as "YYYY-MM-DD"
      *
      * @param dt a date formatted as YYYYMMDD
-     * @return
+     * @return the formatted date string as "YYYY-MM-DD"
      */
     public static String formatSQL(int dt) {
         return format("yyyy-MM-dd", dt);
@@ -431,7 +430,7 @@ public class DateUtils {
      * Format date as "Jan 3, 2018"
      *
      * @param dt a date formatted as YYYYMMDD
-     * @return
+     * @return the formatted date string as "MMM d, yyyy"
      *
      * @see #format2(int)
      * @see #format4(int)
@@ -444,7 +443,7 @@ public class DateUtils {
      * Format date as "Wed, Jan 3, 2018"
      *
      * @param dt a date formatted as YYYYMMDD
-     * @return
+     * @return the formatted date string as "DDD, MMM d, yyyy"
      */
     public static String formatLongWithWeekDay(int dt) {
         return StringUtils.take(dayOfWeekName(dt), 3) + ", " + format("MMM d, yyyy", dt);
@@ -454,9 +453,9 @@ public class DateUtils {
      * Return the number of days between two dates.
      * (dat1 - dat2)
      *
-     * @param dat1
-     * @param dat2
-     * @return
+     * @param dat1 the first date formatted as YYYYMMDD
+     * @param dat2 the second date formatted as YYYYMMDD
+     * @return the number of days between the two dates (dat1 - dat2)
      */
     public static long daysBetween(int dat1, int dat2) {
         long dif = toDate(dat1).getTime() - toDate(dat2).getTime();
@@ -508,7 +507,7 @@ public class DateUtils {
      * Convert a date into the number of days since a certain date (julian date)
      *
      * @param dt YYYYMMDD
-     * @return number of days since some early start date
+     * @return number of days since some early start date, or dt if dt &lt;= 0
      */
     public static long julian(int dt) {
         /* This can't be done some of the more obvious ways because of changes in daylight savings time.  */
@@ -534,8 +533,8 @@ public class DateUtils {
     /**
      * Convert a julian date back into a standard date.
      *
-     * @param d
-     * @return YYYYMMDD
+     * @param d the julian date (number of days since epoch)
+     * @return YYYYMMDD formatted date, or 0 if d &lt;= 0
      */
     public static int calendar(long d)
     {
@@ -577,7 +576,7 @@ public class DateUtils {
      * -1 = Invalid date
      *
      * @param dt YYYYMMDD
-     * @return
+     * @return the day of week number (0-6), or -1 for invalid date
      */
     public static int dayOfWeek(int dt) {
         if (dt <= 0)
@@ -590,7 +589,7 @@ public class DateUtils {
      * Returns the full name of the week day.
      *
      * @param dt YYYYMMDD
-     * @return
+     * @return the full name of the week day, or empty string for invalid date
      */
     public static String dayOfWeekName(int dt) {
         if (dt <= 0)
@@ -610,8 +609,8 @@ public class DateUtils {
     /**
      * Returns the full name of the week day.
      *
-     * @param dt
-     * @return
+     * @param dt the Date object
+     * @return the full name of the week day, or empty string for invalid date
      */
     public static String dayOfWeekName(Date dt) {
         return dayOfWeekName(toInt(dt));
@@ -621,7 +620,7 @@ public class DateUtils {
      * Returns the full name of the month of the year.
      *
      * @param dt YYYYMMDD
-     * @return
+     * @return the full name of the month, or empty string for invalid date
      */
     public static String monthOfYearName(int dt) {
         if (dt <= 0)
@@ -643,6 +642,11 @@ public class DateUtils {
         }
     }
 
+    /**
+     * Main method for testing date utilities.
+     *
+     * @param argv command line arguments (not used)
+     */
     public static void main(String [] argv) {
         int dt = 20230220;
         long jdt = julian(dt);

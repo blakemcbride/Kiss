@@ -40,7 +40,7 @@ public class OpenAI {
      * 1.5–2.0	Often incoherent or silly;	Experimental or absurdist tasks<br>
      *
      *
-     * @param temperature
+     * @param temperature the temperature value (0.0 to 2.0) that controls randomness in the response
      */
     public void setTemperature(float temperature) {
         this.temperature = temperature;
@@ -49,8 +49,9 @@ public class OpenAI {
     /**
      * Send a query to OpenAI and receive a response.
      *
-     * @param query
-     * @return
+     * @param query the user query to send to OpenAI
+     * @return the response content from OpenAI
+     * @throws Exception if model is not set or communication fails
      */
     public String send(String query) throws Exception {
         if (model == null || model.isEmpty())
@@ -86,6 +87,7 @@ public class OpenAI {
      *
      * @param text The input text for which embeddings are requested.
      * @return A vector representing the embeddings, or an empty vector if an error occurs.
+     * @throws Exception if model is not set or communication fails
      */
     public double [] getEmbeddings(String text) throws Exception {
         if (model == null || model.isEmpty())
@@ -108,7 +110,7 @@ public class OpenAI {
     /**
      * Get the full JSON response from the last OpenAI request.
      *
-     * @return
+     * @return the full JSON response from the last request
      */
     public JSONObject getLastFullResponse() {
         return lastResponse;
@@ -117,7 +119,7 @@ public class OpenAI {
     /**
      * The HTTP response code for the last call
      *
-     * @return
+     * @return the HTTP response code
      */
     public int getResponseCode() {
         return restClient == null ? 0 : restClient.getResponseCode();
@@ -126,7 +128,7 @@ public class OpenAI {
     /**
      * Returns the response string for the last call.
      *
-     * @return
+     * @return the response string for the last call
      */
     public String getResponseString() {
         return restClient == null ? null : restClient.getResponseString();
