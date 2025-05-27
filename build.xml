@@ -1,9 +1,12 @@
 <?xml version="1.0"?>
-<project name="Kiss" basedir="." default="all">
+<project name="Kiss" basedir="." default="build">
 
   <!--  This is an Ant build file.  It is used solely as an integration between the native Kiss build system (bld) and Ant.
         The value of this is that many IDEs integrate with Ant.  Thus, with this file, they also integrate with bld.
-        For docs on what each of these do, see src/main/core/org/kissweb/builder/Tasks.java    -->
+        For docs on what each of these do, see src/main/precompiled/Tasks.java
+
+        Ant sometimes has problems if JAVA_HOME is not set or not set correctly.
+        -->
   
   <target name="builder">
     <mkdir dir="work/exploded/WEB-INF/classes"/>
@@ -11,25 +14,40 @@
            includeantruntime="false"
            srcdir="src/main/core"
            destdir="work/exploded/WEB-INF/classes"
-           includes="org/kissweb/builder/Tasks.java,org/kissweb/builder/BuildUtils.java">
+           includes="org/kissweb/BuildUtils.java">
     </javac>
+    <javac classpath="libs/commons-compress-1.20.jar"
+           includeantruntime="false"
+           srcdir="src/main/precompiled"
+           destdir="work/exploded/WEB-INF/classes"
+           includes="Tasks.java">
+    </javac>
+  </target>
+
+  <property name="ant.project.invoked-targets" value=""/>
+  <target name="list-tasks" depends="builder">
+    <exec executable="java">
+      <arg value="-cp"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
+      <arg value="Tasks"/>
+      <arg value="${ant.project.invoked-targets}"/>
+    </exec>
   </target>
 
   <target name="start-backend" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
-
 
   <target name="stop-backend" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -38,7 +56,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -47,7 +65,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -56,7 +74,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -65,7 +83,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -74,7 +92,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -83,7 +101,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -92,7 +110,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -101,7 +119,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -110,7 +128,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -119,7 +137,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -128,7 +146,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -137,7 +155,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -146,7 +164,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>
@@ -155,7 +173,7 @@
     <exec executable="java">
       <arg value="-cp"/>
       <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.20.jar"/>
-      <arg value="org.kissweb.builder.Tasks"/>
+      <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
   </target>

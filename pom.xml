@@ -196,9 +196,9 @@
     <dependency>
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
-      <version>8.1.0</version>
+      <version>8.0.30</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/libs/mysql-connector-j-8.1.0.jar</systemPath>
+      <systemPath>${project.basedir}/libs/mysql-connector-java-8.0.30.jar</systemPath>
     </dependency>
 
   </dependencies>
@@ -282,8 +282,8 @@
 
       <!-- 
           4) Replicate your old Ant tasks with maven-antrun-plugin.
-             - "builder" runs at generate-sources to compile org/kissweb/builder/Tasks.java 
-               and org/kissweb/builder/BuildUtils.java.
+             - "builder" runs at generate-sources to compile Tasks.java 
+               and org/kissweb/BuildUtils.java.
              - All other tasks ("start-backend", "stop-backend", etc.) 
                are bound to <phase>none</phase>, so you explicitly run them with:
                  mvn antrun:run@start-backend
@@ -311,7 +311,12 @@
                 <javac includeantruntime="false"
                        srcdir="src/main/core"
                        destdir="work/exploded/WEB-INF/classes"
-                       includes="org/kissweb/builder/Tasks.java,org/kissweb/builder/BuildUtils.java"
+                       includes="org/kissweb/BuildUtils.java"
+                       classpath="libs/commons-compress-1.20.jar"/>
+                <javac includeantruntime="false"
+                       srcdir="src/main/precompiled"
+                       destdir="work/exploded/WEB-INF/classes"
+                       includes="Tasks.java"
                        classpath="libs/commons-compress-1.20.jar"/>
               </target>
             </configuration>
@@ -327,7 +332,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -348,7 +353,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -368,7 +373,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -388,7 +393,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -408,7 +413,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -428,7 +433,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -448,7 +453,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -468,7 +473,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -488,7 +493,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -508,7 +513,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -528,7 +533,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -548,7 +553,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -568,7 +573,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -588,7 +593,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -608,7 +613,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
@@ -628,7 +633,7 @@
             </goals>
             <configuration>
               <target>
-                <java classname="org.kissweb.builder.Tasks" fork="true" dir=".">
+                <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.20.jar"/>
