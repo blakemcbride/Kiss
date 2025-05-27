@@ -194,11 +194,12 @@
       <systemPath>${project.basedir}/libs/commons-compress-1.20.jar</systemPath>
     </dependency>
     <dependency>
+      <!-- Oracle removes mysql drivers from public downloads -->
       <groupId>mysql</groupId>
       <artifactId>mysql-connector-java</artifactId>
-      <version>8.0.30</version>
+      <version>9.2.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/libs/mysql-connector-java-8.0.30.jar</systemPath>
+      <systemPath>${project.basedir}/libs/mysql-connector-java-9.2.0.jar</systemPath>
     </dependency>
 
   </dependencies>
