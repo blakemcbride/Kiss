@@ -7,6 +7,11 @@ package org.kissweb.database;
 public class Test {
 
 
+    /**
+     * Main method for testing database connectivity.
+     *
+     * @param argv command line arguments
+     */
     public static void main(String [] argv) {
         Connection DB;
         Command cmd = null;

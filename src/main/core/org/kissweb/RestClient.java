@@ -1,7 +1,7 @@
 package org.kissweb;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.kissweb.json.JSONArray;
+import org.kissweb.json.JSONObject;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -21,7 +21,7 @@ import java.nio.file.StandardOpenOption;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Base64;
-import org.json.JSONException;
+import org.kissweb.json.JSONException;
 
 /**
  * Provides the ability to act as a client to an external REST server.

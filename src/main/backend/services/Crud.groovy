@@ -1,7 +1,7 @@
 package services
 
-import org.json.JSONArray
-import org.json.JSONObject
+import org.kissweb.json.JSONArray
+import org.kissweb.json.JSONObject
 import org.kissweb.DelimitedFileWriter
 import org.kissweb.FileUtils
 import org.kissweb.Groff

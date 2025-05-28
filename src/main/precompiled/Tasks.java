@@ -183,7 +183,6 @@ public class Tasks {
         rm(jarName);
         unJar(workDir, BUILDDIR + "/Kiss.jar");
         unJar(workDir, "libs/" + postgresqlJar);
-        unJar(workDir, "libs/json.jar");
         rm(workDir + "/META-INF/MANIFEST.MF");
         unJar(workDir, "libs/" + groovyJar);
         createJar(workDir, jarName);
@@ -202,7 +201,6 @@ public class Tasks {
         rm(jarName);
         unJar(workDir, BUILDDIR + "/Kiss.jar");
         unJar(workDir, "libs/" + postgresqlJar);
-        unJar(workDir, "libs/json.jar");
 
         // jUnit stuff
         unJar(workDir, "libs/junit-jupiter-engine-5.11.0.jar");
@@ -482,7 +480,7 @@ public class Tasks {
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.2.20/mchange-commons-java-0.2.20.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre8/mssql-jdbc-12.4.2.jre8.jar");
         // Oracle has removed these files from their public repository
-        dep.add(LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/8.0.30/mysql-connector-java-8.0.30.jar");
+        //dep.add(LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/9.2.0/mysql-connector-java-9.2.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/" + postgresqlVer + "/" + postgresqlJar);
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
@@ -516,7 +514,6 @@ public class Tasks {
     private static LocalDependencies buildLocalDependencies() {
         final LocalDependencies dep = new LocalDependencies();
         dep.add("libs/abcl.jar");
-        dep.add("libs/json.jar");
         return dep;
     }
 

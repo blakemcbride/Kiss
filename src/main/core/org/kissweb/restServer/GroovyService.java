@@ -3,7 +3,7 @@ package org.kissweb.restServer;
 import org.kissweb.StringUtils;
 import org.kissweb.database.Connection;
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
+import org.kissweb.json.JSONObject;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;

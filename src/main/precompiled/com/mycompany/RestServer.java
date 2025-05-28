@@ -1,7 +1,7 @@
 package com.mycompany;
 
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
+import org.kissweb.json.JSONObject;
 import org.kissweb.RestServerBase;
 
 import javax.servlet.annotation.MultipartConfig;

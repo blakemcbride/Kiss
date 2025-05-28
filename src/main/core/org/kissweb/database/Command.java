@@ -32,8 +32,8 @@
 
 package org.kissweb.database;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.kissweb.json.JSONArray;
+import org.kissweb.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.Array;

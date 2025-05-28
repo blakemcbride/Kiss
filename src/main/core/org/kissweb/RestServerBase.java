@@ -1,7 +1,7 @@
 package org.kissweb;
 
 import org.apache.log4j.Logger;
-import org.json.JSONObject;
+import org.kissweb.json.JSONObject;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;

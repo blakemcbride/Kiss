@@ -1,6 +1,6 @@
 package org.kissweb;
 
-import org.json.JSONObject;
+import org.kissweb.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.file.Files;

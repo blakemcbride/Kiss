@@ -73,8 +73,8 @@
 ;(map-java-class DataObjectList "com.arahant.utils.dynamicwebservices.DataObjectList")
 ;(map-java-class DataObjectMap  "com.arahant.utils.dynamicwebservices.DataObjectMap")
 
-(map-java-class JSONObject     "org.json.JSONObject")
-(map-java-class JSONArray      "org.json.JSONArray")
+(map-java-class JSONObject     "org.kissweb.json.JSONObject")
+(map-java-class JSONArray      "org.kissweb.json.JSONArray")
 
 (map-java-class DateUtils "org.kissweb.DateUtils")
 ;(map-java-class-method getDateFormatted DateUtils "getDateFormatted" "int")

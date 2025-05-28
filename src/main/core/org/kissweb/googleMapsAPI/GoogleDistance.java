@@ -1,7 +1,7 @@
 package org.kissweb.googleMapsAPI;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.kissweb.json.JSONArray;
+import org.kissweb.json.JSONObject;
 import org.kissweb.LRUCache;
 import org.kissweb.RestClient;
 import org.kissweb.URLBuilder;

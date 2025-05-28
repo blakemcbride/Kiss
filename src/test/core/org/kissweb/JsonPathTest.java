@@ -1,7 +1,7 @@
 package org.kissweb;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.kissweb.json.JSONArray;
+import org.kissweb.json.JSONObject;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

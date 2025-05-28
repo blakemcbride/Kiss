@@ -1,7 +1,7 @@
 package org.kissweb.restServer;
 
 import org.kissweb.database.Connection;
-import org.json.JSONObject;
+import org.kissweb.json.JSONObject;
 
 import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;

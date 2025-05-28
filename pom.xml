@@ -180,13 +180,6 @@
       <systemPath>${project.basedir}/libs/abcl.jar</systemPath>
     </dependency>
     <dependency>
-      <groupId>org.json</groupId>
-      <artifactId>json</artifactId>
-      <version>1.0</version>
-      <scope>system</scope>
-      <systemPath>${project.basedir}/libs/json.jar</systemPath>
-    </dependency>
-    <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
       <version>1.20</version>

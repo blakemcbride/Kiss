@@ -3,7 +3,7 @@ package org.kissweb.restServer;
 import org.kissweb.lisp.ABCL;
 import org.apache.log4j.Logger;
 import org.armedbear.lisp.LispObject;
-import org.json.JSONObject;
+import org.kissweb.json.JSONObject;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;

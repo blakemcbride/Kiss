@@ -1,8 +1,8 @@
 package org.kissweb.llm;
 
 import org.apache.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.kissweb.json.JSONArray;
+import org.kissweb.json.JSONObject;
 import org.kissweb.RestClient;
 
 import java.io.*;

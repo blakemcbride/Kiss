@@ -5,7 +5,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-import org.json.*;
+import org.kissweb.json.*;
 
 /**
  * Interface to the Qdrant vector database used to store embeddings for RAG.

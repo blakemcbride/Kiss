@@ -1,14 +1,14 @@
 package org.kissweb;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.kissweb.json.JSONArray;
+import org.kissweb.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * This class provides a variety of features on top of the functionality provided by org.json.
+ * This class provides a variety of features on top of the functionality provided by org.kissweb.json.
  * In addition to being able to parse a string into a json object, the json object can also be obtained
  * from a file.  Once the json object is obtained, embedded elements may be indexed similar to XPath thus
  * providing an easy method of destructuring a complex json object.  Lastly, rather than throw an exception
