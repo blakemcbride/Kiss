@@ -5,7 +5,7 @@ import org.kissweb.database.Connection;
 import org.apache.log4j.Logger;
 import org.kissweb.json.JSONObject;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.*;

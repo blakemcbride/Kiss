@@ -5,7 +5,7 @@ import org.apache.log4j.Logger;
 import org.armedbear.lisp.LispObject;
 import org.kissweb.json.JSONObject;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.util.*;
 

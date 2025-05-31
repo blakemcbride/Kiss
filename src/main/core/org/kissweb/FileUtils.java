@@ -39,7 +39,7 @@ public class FileUtils {
 
         try {
             // Needed when Kiss is not used as a server
-            Class.forName("javax.servlet.http.HttpServlet");
+            Class.forName("jakarta.servlet.http.HttpServlet");
             dir = new File(MainServlet.getRootPath(), TempDir);
             dir.mkdir();
         } catch (ClassNotFoundException e) {

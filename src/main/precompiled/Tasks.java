@@ -40,7 +40,7 @@ public class Tasks {
     // Things that change semi-often
     final static String groovyVer = "4.0.26";
     final static String postgresqlVer = "42.7.5";
-    final static String tomcatVer = "9.0.85";
+    final static String tomcatVer = "11.0.7";
 
 
     final static String LIBS = "libs";
@@ -151,7 +151,7 @@ public class Tasks {
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
         if (unitTest)
             buildJava("src/test/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
-        rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
+        rm(explodedDir + "/WEB-INF/lib/jakarta.servlet-api-4.0.1.jar");
         createJar(explodedDir + "/WEB-INF/classes", BUILDDIR + "/Kiss.jar");
         //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
     }
@@ -228,7 +228,7 @@ public class Tasks {
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
         buildJava("src/test/core", explodedDir + "/WEB-INF/test-classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
         buildJava("src/main/precompiled", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
-        rm(explodedDir + "/WEB-INF/lib/javax.servlet-api-4.0.1.jar");
+        rm(explodedDir + "/WEB-INF/lib/jakarta.servlet-api-4.0.1.jar");
         copyRegex("src/main/core/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
         copy("src/main/core/log4j2.xml", explodedDir + "/WEB-INF/classes");
         copyForce("src/main/core/WEB-INF/web-unsafe.xml", explodedDir + "/WEB-INF/web.xml");
@@ -251,10 +251,11 @@ public class Tasks {
 
     /**
      * Unpack and install tomcat
+     * https://dlcdn.apache.org/tomcat/tomcat-11/v11.0.7/bin/apache-tomcat-11.0.7.tar.gz
      */
     public static void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-9/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
+            download(tomcatTarFile, ".", "https://dlcdn.apache.org/tomcat/tomcat-11/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
             gunzip(tomcatTarFile, "tomcat", 1);
             rmTree("tomcat/webapps/ROOT");
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
@@ -428,6 +429,9 @@ public class Tasks {
         rm(tomcatTarFile);
         rm("manual/Kiss.pdf");
 
+        // remove old stuff
+        rm ("libs/json.jar");
+
         /* libraries that don't have their version number in the file name
            must be removed from cache.
            Now we must include them with Kiss because they are no longer available through a CDN.
@@ -473,7 +477,7 @@ public class Tasks {
         final ForeignDependencies dep = new ForeignDependencies();
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.9.5.5/c3p0-0.9.5.5.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/" + groovyVer + "/" + groovyJar);
-        dep.add(LIBS, "https://repo1.maven.org/maven2/javax/servlet/javax.servlet-api/4.0.1/javax.servlet-api-4.0.1.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/jakarta/servlet/jakarta.servlet-api/6.1.0/jakarta.servlet-api-6.1.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.22.0/log4j-core-2.22.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.22.0/log4j-api-2.22.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-1.2-api/2.22.0/log4j-1.2-api-2.22.0.jar");

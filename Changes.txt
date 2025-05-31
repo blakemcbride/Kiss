@@ -1,0 +1,14 @@
+
+
+
+Kiss change log
+
+5/30/2025
+
+- Due to the changing servlet specs, and in an effort to keep the code up-to-date,I have decided to:
+
+    - Move to servlet spec 6.1
+    - Move to tomcat 11.0.x
+    - Make Java 17 the minimum Java version
+    - Move to Jakarta 6.1 (EE 11)
+

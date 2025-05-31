@@ -3,8 +3,8 @@ package org.kissweb.restServer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 /**
  * Author: Blake McBride
