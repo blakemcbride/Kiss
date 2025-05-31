@@ -24,9 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import org.kissweb.json.JSONException;
-import org.kissweb.json.JSONTokener;
-import org.kissweb.json.XML;
 
 /**
  * The XMLTokener extends the JSONTokener to provide additional methods
@@ -53,7 +50,7 @@ public class XMLTokener extends JSONTokener {
 
     /**
      * Construct an XMLTokener from a string.
-     * @param s A source string.
+     * @param s A source string to tokenize
      */
     public XMLTokener(String s) {
         super(s);
@@ -89,7 +86,7 @@ public class XMLTokener extends JSONTokener {
      *
      * @return  A string, or a '&lt;' Character, or null if there is no more
      * source text.
-     * @throws JSONException
+     * @throws JSONException If there is an error reading the source.
      */
     public Object nextContent() throws JSONException {
         char         c;
@@ -125,8 +122,8 @@ public class XMLTokener extends JSONTokener {
     /**
      * Return the next entity. These entities are translated to Characters:
      *     <code>&amp;  '  &gt;  &lt;  &quot;</code>.
-     * @param ampersand An ampersand character.
-     * @return  A Character or an entity String if the entity is not recognized.
+     * @param ampersand An ampersand character that starts the entity.
+     * @return A Character or an entity String if the entity is not recognized.
      * @throws JSONException If missing ';' in XML entity.
      */
     public Object nextEntity(char ampersand) throws JSONException {
@@ -146,9 +143,9 @@ public class XMLTokener extends JSONTokener {
     }
     
     /**
-     * Unescapes an XML entity encoding;
-     * @param e entity (only the actual entity value, not the preceding & or ending ;
-     * @return
+     * Unescapes an XML entity encoding.
+     * @param e entity (only the actual entity value, not the preceding & or ending ;)
+     * @return The unescaped string representation of the entity.
      */
     static String unescapeEntity(String e) {
         // validate

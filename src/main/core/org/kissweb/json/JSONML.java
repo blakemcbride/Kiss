@@ -24,12 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import org.kissweb.json.*;
-import org.kissweb.json.JSONArray;
-import org.kissweb.json.JSONException;
-import org.kissweb.json.JSONObject;
-import org.kissweb.json.XML;
-import org.kissweb.json.XMLTokener;
 
 /**
  * This provides static methods to convert an XML text into a JSONArray or
@@ -42,13 +36,13 @@ import org.kissweb.json.XMLTokener;
 public class JSONML {
     /**
      * Parse XML values and store them in a JSONArray.
-     * @param x       The XMLTokener containing the source string.
+     * @param x The XMLTokener containing the source string.
      * @param arrayForm true if array form, false if object form.
-     * @param ja      The JSONArray that is containing the current tag or null
+     * @param ja The JSONArray that is containing the current tag or null
      *     if we are at the outermost level.
-     * @param keepStrings	Don't type-convert text nodes and attribute values
+     * @param keepStrings Don't type-convert text nodes and attribute values
      * @return A JSONArray if the value is the outermost tag, otherwise null.
-     * @throws JSONException
+     * @throws JSONException if parsing fails
      */
     private static Object parse(
         XMLTokener x,
@@ -246,8 +240,8 @@ public class JSONML {
      * name/value pairs. If the tag contains children, then strings and
      * JSONArrays will represent the child tags.
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param string The source string.
-     * @return A JSONArray containing the structured data from the XML string.
+     * @param string The source XML string to parse
+     * @return A JSONArray containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONArray
      */
     public static JSONArray toJSONArray(String string) throws JSONException {
@@ -266,10 +260,10 @@ public class JSONML {
      * any text node or attribute value to any type 
      * but just leaves it as a string.
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param string The source string.
+     * @param string The source XML string to parse
      * @param keepStrings If true, then values will not be coerced into boolean
      *  or numeric values and will instead be left as strings
-     * @return A JSONArray containing the structured data from the XML string.
+     * @return A JSONArray containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONArray
      */
     public static JSONArray toJSONArray(String string, boolean keepStrings) throws JSONException {
@@ -288,10 +282,10 @@ public class JSONML {
      * any text node or attribute value to any type 
      * but just leaves it as a string.
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param x An XMLTokener.
+     * @param x An XMLTokener containing the XML source
      * @param keepStrings If true, then values will not be coerced into boolean
      *  or numeric values and will instead be left as strings
-     * @return A JSONArray containing the structured data from the XML string.
+     * @return A JSONArray containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONArray
      */
     public static JSONArray toJSONArray(XMLTokener x, boolean keepStrings) throws JSONException {
@@ -307,8 +301,8 @@ public class JSONML {
      * name/value pairs. If the tag contains children, then strings and
      * JSONArrays will represent the child content and tags.
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param x An XMLTokener.
-     * @return A JSONArray containing the structured data from the XML string.
+     * @param x An XMLTokener containing the XML source
+     * @return A JSONArray containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONArray
      */
     public static JSONArray toJSONArray(XMLTokener x) throws JSONException {
@@ -325,8 +319,8 @@ public class JSONML {
      * will be an array of strings and JsonML JSONObjects.
 
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param string The XML source text.
-     * @return A JSONObject containing the structured data from the XML string.
+     * @param string The XML source text to parse
+     * @return A JSONObject containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONObject
      */
     public static org.kissweb.json.JSONObject toJSONObject(String string) throws JSONException {
@@ -343,10 +337,10 @@ public class JSONML {
      * will be an array of strings and JsonML JSONObjects.
 
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param string The XML source text.
+     * @param string The XML source text to parse
      * @param keepStrings If true, then values will not be coerced into boolean
      *  or numeric values and will instead be left as strings
-     * @return A JSONObject containing the structured data from the XML string.
+     * @return A JSONObject containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONObject
      */
     public static org.kissweb.json.JSONObject toJSONObject(String string, boolean keepStrings) throws JSONException {
@@ -363,8 +357,8 @@ public class JSONML {
      * will be an array of strings and JsonML JSONObjects.
 
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param x An XMLTokener of the XML source text.
-     * @return A JSONObject containing the structured data from the XML string.
+     * @param x An XMLTokener of the XML source text
+     * @return A JSONObject containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONObject
      */
     public static org.kissweb.json.JSONObject toJSONObject(XMLTokener x) throws JSONException {
@@ -381,10 +375,10 @@ public class JSONML {
      * will be an array of strings and JsonML JSONObjects.
 
      * Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code> are ignored.
-     * @param x An XMLTokener of the XML source text.
+     * @param x An XMLTokener of the XML source text
      * @param keepStrings If true, then values will not be coerced into boolean
      *  or numeric values and will instead be left as strings
-     * @return A JSONObject containing the structured data from the XML string.
+     * @return A JSONObject containing the structured data from the XML string
      * @throws JSONException Thrown on error converting to a JSONObject
      */
     public static org.kissweb.json.JSONObject toJSONObject(XMLTokener x, boolean keepStrings) throws JSONException {
@@ -394,8 +388,8 @@ public class JSONML {
 
     /**
      * Reverse the JSONML transformation, making an XML text from a JSONArray.
-     * @param ja A JSONArray.
-     * @return An XML string.
+     * @param ja A JSONArray to convert
+     * @return An XML string representation
      * @throws JSONException Thrown on error converting to a string
      */
     public static String toString(JSONArray ja) throws JSONException {
@@ -474,8 +468,8 @@ public class JSONML {
      * The JSONObject must contain a "tagName" property. If it has children,
      * then it must have a "childNodes" property containing an array of objects.
      * The other properties are attributes with string values.
-     * @param jo A JSONObject.
-     * @return An XML string.
+     * @param jo A JSONObject to convert
+     * @return An XML string representation
      * @throws JSONException Thrown on error converting to a string
      */
     public static String toString(org.kissweb.json.JSONObject jo) throws JSONException {

@@ -88,6 +88,7 @@ public class JSONTokener {
      * Construct a JSONTokener from a String.
      * Removes a leading U+FEFF BOM if present so the parser
      * starts with the real first character ('{' or '[').
+     * @param s The source string.
      */
     public JSONTokener(String s) {
         s = org.kissweb.json.JSONObject.fixString(s);
@@ -154,7 +155,7 @@ public class JSONTokener {
     /**
      * Checks if the end of the input has been reached.
      *  
-     * @return true if at the end of the file and we didn't step back
+     * @return true if at the end of the file and we didn't step back.
      */
     public boolean end() {
         return this.eof && !this.usePrevious;

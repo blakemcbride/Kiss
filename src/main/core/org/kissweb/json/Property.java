@@ -24,8 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import org.kissweb.json.JSONException;
-import org.kissweb.json.JSONObject;
 
 import java.util.Enumeration;
 import java.util.Properties;
@@ -38,9 +36,9 @@ import java.util.Properties;
 public class Property {
     /**
      * Converts a property file object into a JSONObject. The property file object is a table of name value pairs.
-     * @param properties java.util.Properties
-     * @return JSONObject
-     * @throws JSONException
+     * @param properties java.util.Properties object to convert
+     * @return JSONObject containing the property data
+     * @throws JSONException if conversion fails
      */
     public static org.kissweb.json.JSONObject toJSONObject(Properties properties) throws JSONException {
         // can't use the new constructor for Android support
@@ -58,9 +56,9 @@ public class Property {
 
     /**
      * Converts the JSONObject into a property file object.
-     * @param jo JSONObject
-     * @return java.util.Properties
-     * @throws JSONException
+     * @param jo JSONObject to convert
+     * @return java.util.Properties object containing the JSON data
+     * @throws JSONException if conversion fails
      */
     public static Properties toProperties(JSONObject jo)  throws JSONException {
         Properties  properties = new Properties();

@@ -73,6 +73,7 @@ public class JSONPointer {
         /**
          * Creates a {@code JSONPointer} instance using the tokens previously set using the
          * {@link #append(String)} method calls.
+         * @return A new JSONPointer instance.
          */
         public JSONPointer build() {
             return new JSONPointer(this.refTokens);
@@ -102,8 +103,8 @@ public class JSONPointer {
          * Adds an integer to the reference token list. Although not necessarily, mostly this token will
          * denote an array index. 
          * 
-         * @param arrayIndex the array index to be added to the token list
-         * @return {@code this}
+         * @param arrayIndex the array index to be added to the token list.
+         * @return {@code this}.
          */
         public Builder append(int arrayIndex) {
             this.refTokens.add(String.valueOf(arrayIndex));
@@ -168,6 +169,11 @@ public class JSONPointer {
         }
     }
 
+    /**
+     * Pre-parses and initializes a new {@code JSONPointer} instance using a list of reference tokens.
+     * 
+     * @param refTokens the list of reference tokens that make up the JSON pointer path
+     */
     public JSONPointer(List<String> refTokens) {
         this.refTokens = new ArrayList<String>(refTokens);
     }
@@ -208,11 +214,11 @@ public class JSONPointer {
     }
 
     /**
-     * Matches a JSONArray element by ordinal position
-     * @param current the JSONArray to be evaluated
-     * @param indexToken the array index in string form
-     * @return the matched object. If no matching item is found a
-     * @throws org.kissweb.json.JSONPointerException is thrown if the index is out of bounds
+     * Matches a JSONArray element by ordinal position.
+     * @param current the JSONArray to be evaluated.
+     * @param indexToken the array index in string form.
+     * @return the matched object.
+     * @throws org.kissweb.json.JSONPointerException is thrown if the index is out of bounds.
      */
     private Object readByIndexToken(Object current, String indexToken) throws org.kissweb.json.JSONPointerException {
         try {
@@ -234,7 +240,8 @@ public class JSONPointer {
 
     /**
      * Returns a string representing the JSONPointer path value using string
-     * representation
+     * representation.
+     * @return A string representation of this JSONPointer.
      */
     @Override
     public String toString() {
@@ -250,8 +257,8 @@ public class JSONPointer {
      * The escape char to be inserted is '~'. The chars to be escaped 
      * are ~, which maps to ~0, and /, which maps to ~1. Backslashes
      * and double quote chars are also escaped.
-     * @param token the JSONPointer segment value to be escaped
-     * @return the escaped value for the token
+     * @param token the JSONPointer segment value to be escaped.
+     * @return the escaped value for the token.
      */
     private String escape(String token) {
         return token.replace("~", "~0")
@@ -262,7 +269,8 @@ public class JSONPointer {
 
     /**
      * Returns a string representing the JSONPointer path value using URI
-     * fragment identifier representation
+     * fragment identifier representation.
+     * @return A URI fragment representation of this JSONPointer.
      */
     public String toURIFragment() {
         try {

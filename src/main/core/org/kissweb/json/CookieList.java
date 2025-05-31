@@ -24,10 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-import org.kissweb.json.Cookie;
-import org.kissweb.json.JSONException;
-import org.kissweb.json.JSONObject;
-import org.kissweb.json.JSONTokener;
 
 /**
  * Convert a web browser cookie list string to a JSONObject and back.
@@ -45,9 +41,9 @@ public class CookieList {
      * To add a cookie to a cookie list,
      * cookielistJSONObject.put(cookieJSONObject.getString("name"),
      *     cookieJSONObject.getString("value"));
-     * @param string  A cookie list string
-     * @return A JSONObject
-     * @throws JSONException
+     * @param string A cookie list string to parse
+     * @return A JSONObject containing the cookie data
+     * @throws JSONException if parsing fails
      */
     public static JSONObject toJSONObject(String string) throws JSONException {
         JSONObject jo = new JSONObject();
@@ -66,9 +62,9 @@ public class CookieList {
      * of name/value pairs. The names are separated from the values by '='.
      * The pairs are separated by ';'. The characters '%', '+', '=', and ';'
      * in the names and values are replaced by "%hh".
-     * @param jo A JSONObject
-     * @return A cookie list string
-     * @throws JSONException
+     * @param jo A JSONObject to convert
+     * @return A cookie list string representation
+     * @throws JSONException if conversion fails
      */
     public static String toString(JSONObject jo) throws JSONException {
         boolean             b = false;

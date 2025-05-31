@@ -69,8 +69,8 @@ public class HTTP {
      * It does not do '%' transforms on URLs.
      * @param string An HTTP header string.
      * @return A JSONObject containing the elements and attributes
-     * of the XML string.
-     * @throws JSONException
+     * of the HTTP header string.
+     * @throws JSONException if there is an error parsing the HTTP header string
      */
     public static org.kissweb.json.JSONObject toJSONObject(String string) throws JSONException {
         org.kissweb.json.JSONObject jo = new org.kissweb.json.JSONObject();

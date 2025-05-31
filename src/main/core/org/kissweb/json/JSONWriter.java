@@ -1,9 +1,5 @@
 package org.kissweb.json;
 
-import org.kissweb.json.JSONArray;
-import org.kissweb.json.JSONException;
-import org.kissweb.json.JSONObject;
-import org.kissweb.json.JSONString;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -99,6 +95,7 @@ public class JSONWriter {
 
     /**
      * Make a fresh JSONWriter. It can be used to build one JSON text.
+     * @param w An appendable object to which the JSON text will be written.
      */
     public JSONWriter(Appendable w) {
         this.comma = false;
@@ -160,9 +157,9 @@ public class JSONWriter {
 
     /**
      * End something.
-     * @param m Mode
-     * @param c Closing character
-     * @return this
+     * @param m Mode.
+     * @param c Closing character.
+     * @return this.
      * @throws JSONException If unbalanced.
      */
     private JSONWriter end(char m, char c) throws JSONException {
@@ -382,8 +379,8 @@ public class JSONWriter {
      * Append either the value <code>true</code> or the value
      * <code>false</code>.
      * @param b A boolean.
-     * @return this
-     * @throws JSONException
+     * @return this.
+     * @throws JSONException If the value is out of sequence.
      */
     public JSONWriter value(boolean b) throws JSONException {
         return this.append(b ? "true" : "false");
@@ -396,14 +393,14 @@ public class JSONWriter {
      * @throws JSONException If the number is not finite.
      */
     public JSONWriter value(double d) throws JSONException {
-        return this.value(d);
+        return this.append(JSONObject.numberToString(d));
     }
 
     /**
      * Append a long value.
      * @param l A long.
-     * @return this
-     * @throws JSONException
+     * @return this.
+     * @throws JSONException If the value is out of sequence.
      */
     public JSONWriter value(long l) throws JSONException {
         return this.append(Long.toString(l));

@@ -24,10 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import org.kissweb.json.JSONArray;
-import org.kissweb.json.JSONException;
-import org.kissweb.json.JSONObject;
-import org.kissweb.json.XMLTokener;
 
 import java.util.Iterator;
 
@@ -118,9 +114,8 @@ public class XML {
      * ' <code>(single quote / apostrophe)</code> is replaced by &amp;apos;
      * </pre>
      * 
-     * @param string
-     *            The string to be escaped.
-     * @return The escaped string.
+     * @param string The string to be escaped
+     * @return The escaped string
      */
     public static String escape(String string) {
         StringBuilder sb = new StringBuilder(string.length());
@@ -183,8 +178,7 @@ public class XML {
     /**
      * Removes XML escapes from the string.
      * 
-     * @param string
-     *            string to remove escapes from
+     * @param string string to remove escapes from
      * @return string with converted entities
      */
     public static String unescape(String string) {
@@ -215,9 +209,8 @@ public class XML {
      * Throw an exception if the string contains whitespace. Whitespace is not
      * allowed in tagNames and attributes.
      * 
-     * @param string
-     *            A string.
-     * @throws JSONException Thrown if the string contains whitespace or is empty.
+     * @param string A string to validate
+     * @throws JSONException Thrown if the string contains whitespace or is empty
      */
     public static void noSpace(String string) throws JSONException {
         int i, length = string.length();
@@ -466,10 +459,9 @@ public class XML {
      * "content" member. Comments, prologs, DTDs, and <code>&lt;[ [ ]]&gt;</code>
      * are ignored.
      * 
-     * @param string
-     *            The source string.
-     * @return A JSONObject containing the structured data from the XML string.
-     * @throws JSONException Thrown if there is an errors while parsing the string
+     * @param string The source XML string to parse
+     * @return A JSONObject containing the structured data from the XML string
+     * @throws JSONException Thrown if there is an error while parsing the string
      */
     public static org.kissweb.json.JSONObject toJSONObject(String string) throws JSONException {
         return toJSONObject(string, false);
@@ -490,12 +482,11 @@ public class XML {
      * All values are converted as strings, for 1, 01, 29.0 will not be coerced to
      * numbers but will instead be the exact value as seen in the XML document.
      * 
-     * @param string
-     *            The source string.
+     * @param string The source XML string to parse
      * @param keepStrings If true, then values will not be coerced into boolean
      *  or numeric values and will instead be left as strings
-     * @return A JSONObject containing the structured data from the XML string.
-     * @throws JSONException Thrown if there is an errors while parsing the string
+     * @return A JSONObject containing the structured data from the XML string
+     * @throws JSONException Thrown if there is an error while parsing the string
      */
     public static org.kissweb.json.JSONObject toJSONObject(String string, boolean keepStrings) throws JSONException {
         org.kissweb.json.JSONObject jo = new org.kissweb.json.JSONObject();
@@ -511,10 +502,9 @@ public class XML {
     /**
      * Convert a JSONObject into a well-formed, element-normal XML string.
      * 
-     * @param object
-     *            A JSONObject.
-     * @return A string.
-     * @throws JSONException Thrown if there is an error parsing the string
+     * @param object A JSONObject to convert
+     * @return An XML string representation
+     * @throws JSONException Thrown if there is an error during conversion
      */
     public static String toString(Object object) throws JSONException {
         return toString(object, null);
@@ -523,12 +513,10 @@ public class XML {
     /**
      * Convert a JSONObject into a well-formed, element-normal XML string.
      * 
-     * @param object
-     *            A JSONObject.
-     * @param tagName
-     *            The optional name of the enclosing tag.
-     * @return A string.
-     * @throws JSONException Thrown if there is an error parsing the string
+     * @param object A JSONObject to convert
+     * @param tagName The optional name of the enclosing tag
+     * @return An XML string representation
+     * @throws JSONException Thrown if there is an error during conversion
      */
     public static String toString(final Object object, final String tagName)
             throws JSONException {

@@ -80,7 +80,7 @@ public class Cookie {
      * @param string The cookie specification string.
      * @return A JSONObject containing "name", "value", and possibly other
      *  members.
-     * @throws JSONException
+     * @throws JSONException If there is a syntax error in the cookie specification.
      */
     public static org.kissweb.json.JSONObject toJSONObject(String string) throws JSONException {
         String         name;
@@ -115,9 +115,9 @@ public class Cookie {
      * If the JSONObject contains "expires", "domain", "path", or "secure"
      * members, they will be appended to the cookie specification string.
      * All other members are ignored.
-     * @param jo A JSONObject
-     * @return A cookie specification string
-     * @throws JSONException
+     * @param jo A JSONObject.
+     * @return A cookie specification string.
+     * @throws JSONException If there is a problem with the JSONObject.
      */
     public static String toString(JSONObject jo) throws JSONException {
         StringBuilder sb = new StringBuilder();

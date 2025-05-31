@@ -24,8 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-import org.kissweb.json.JSONException;
-import org.kissweb.json.JSONPointer;
 
 /**
  * The JSONPointerException is thrown by {@link JSONPointer} if an error occurs
@@ -37,10 +35,19 @@ import org.kissweb.json.JSONPointer;
 public class JSONPointerException extends JSONException {
     private static final long serialVersionUID = 8872944667561856751L;
 
+    /**
+     * Constructs a new JSONPointerException with the specified detail message.
+     * @param message the detail message
+     */
     public JSONPointerException(String message) {
         super(message);
     }
 
+    /**
+     * Constructs a new JSONPointerException with the specified detail message and cause.
+     * @param message the detail message
+     * @param cause the cause of this exception
+     */
     public JSONPointerException(String message, Throwable cause) {
         super(message, cause);
     }
