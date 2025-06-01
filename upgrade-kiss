@@ -33,5 +33,6 @@ rsync -av view-log $1
 if [ ! -e $1/src/main/precompiled/Tasks.java ]; then
     cp src/main/precompiled/Tasks.java $1/src/main/precompiled/Tasks.java
 fi
-
+echo You will need to manually verify src/main/precompiled/Tasks.java
+echo by comparing the one in your git clone to the one in your application.
 

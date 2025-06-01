@@ -39,3 +39,6 @@ robocopy . "%~1" view-log
 if not exist "%~1\src\main\precompiled\Tasks.java" (
     copy src\main\precompiled\Tasks.java "%~1\src\main\precompiled\Tasks.java"
 )
+echo You will need to manually verify src\main\precompiled\Tasks.java
+echo by comparing the one in your git clone to the one in your application.
+

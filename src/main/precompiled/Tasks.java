@@ -43,7 +43,7 @@ public class Tasks {
     final static String tomcatVer = "11.0.7";
 
 
-    final static String LIBS = "libs";
+    final static String LIBS = "libs";  // compile time location
     final static ForeignDependencies foreignLibs = buildForeignDependencies();
     final static LocalDependencies localLibs = buildLocalDependencies();
     final static String tomcatTarFile = "apache-tomcat-" + tomcatVer + ".tar.gz";
@@ -517,7 +517,7 @@ public class Tasks {
      */
     private static LocalDependencies buildLocalDependencies() {
         final LocalDependencies dep = new LocalDependencies();
-        dep.add("libs/abcl.jar");
+        dep.add(LIBS, "abcl.jar");
         return dep;
     }
 
