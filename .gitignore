@@ -19,6 +19,7 @@ libs/fontbox-*.jar
 libs/pdfbox-*.jar
 libs/junit-*.jar
 libs/apiguardian*.jar
+libs/jakarta.*.jar
 
 
 # Gradle

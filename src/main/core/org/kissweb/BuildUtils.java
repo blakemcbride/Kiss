@@ -1504,8 +1504,8 @@ public class BuildUtils {
          * @param fileName the jar file name
          */
         public void add(String compileTimeDir, String fileName) {
-            compileTimeDir = compileTimeDir.endsWith("/") || compileTimeDir.endsWith("\\") ? compileTimeDir : compileTimeDir + "/";
-            Dependency dep = new Dependency();
+            compileTimeDir = compileTimeDir == null ? null : compileTimeDir.endsWith("/") || compileTimeDir.endsWith("\\") ? compileTimeDir : compileTimeDir + "/";
+            final Dependency dep = new Dependency();
             dep.compileTimeDir = compileTimeDir;
             dep.fileName = fileName;
             dep.runtimeDir = compileTimeDir;
@@ -1519,10 +1519,10 @@ public class BuildUtils {
          * @param fileName the jar file name
          */
         public void add(String compileTimeDir, String runtimeDir, String fileName) {
-            Dependency dep = new Dependency();
-            dep.compileTimeDir = compileTimeDir.endsWith("/") || compileTimeDir.endsWith("\\") ? compileTimeDir : compileTimeDir + "/";;
+            final Dependency dep = new Dependency();
+            dep.compileTimeDir = compileTimeDir == null ? null : compileTimeDir.endsWith("/") || compileTimeDir.endsWith("\\") ? compileTimeDir : compileTimeDir + "/";;
             dep.fileName = fileName;
-            dep.runtimeDir = runtimeDir.endsWith("/") || runtimeDir.endsWith("\\") ? runtimeDir : runtimeDir + "/";
+            dep.runtimeDir = runtimeDir == null ? null : runtimeDir.endsWith("/") || runtimeDir.endsWith("\\") ? runtimeDir : runtimeDir + "/";
             deps.add(dep);
         }
 
