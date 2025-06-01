@@ -806,7 +806,8 @@ public class BuildUtils {
                     for (Dependency dep : ldep.deps)
                         try {
                             String d = compileTime ? dep.compileTimeDir : dep.runtimeDir;
-                            bw.write(d + dep.fileName + (isWindows ? ";" : ":"));
+                            if (d != null)
+                                bw.write(d + dep.fileName + (isWindows ? ";" : ":"));
                         } catch (IOException e) {
                             printError("error writing to " + f.getAbsolutePath());
                         }
@@ -1496,19 +1497,31 @@ public class BuildUtils {
     public static class LocalDependencies {
         private final ArrayList<Dependency> deps = new ArrayList<>();
 
-        public void add(String compileTimeDir, String name) {
+        /**
+         * Add a new local dependency where the compile time and runtime dependencies are the same.
+         *
+         * @param compileTimeDir the relative path to the jar files needed at compile and runtime
+         * @param fileName the jar file name
+         */
+        public void add(String compileTimeDir, String fileName) {
             compileTimeDir = compileTimeDir.endsWith("/") || compileTimeDir.endsWith("\\") ? compileTimeDir : compileTimeDir + "/";
             Dependency dep = new Dependency();
             dep.compileTimeDir = compileTimeDir;
-            dep.fileName = name;
+            dep.fileName = fileName;
             dep.runtimeDir = compileTimeDir;
             deps.add(dep);
         }
 
-        public void add(String compileTimeDir, String runtimeDir, String name) {
+        /**
+         * Add a new local dependency where the compile time and runtime dependencies are different.
+         * @param compileTimeDir the relative path to the jar files needed at compile
+         * @param runtimeDir the relative path to the jar files needed at runtime
+         * @param fileName the jar file name
+         */
+        public void add(String compileTimeDir, String runtimeDir, String fileName) {
             Dependency dep = new Dependency();
             dep.compileTimeDir = compileTimeDir.endsWith("/") || compileTimeDir.endsWith("\\") ? compileTimeDir : compileTimeDir + "/";;
-            dep.fileName = name;
+            dep.fileName = fileName;
             dep.runtimeDir = runtimeDir.endsWith("/") || runtimeDir.endsWith("\\") ? runtimeDir : runtimeDir + "/";
             deps.add(dep);
         }
