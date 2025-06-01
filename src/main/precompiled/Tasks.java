@@ -224,7 +224,7 @@ public class Tasks {
         copyTree("src/main/frontend", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
         copyTree("src/main/backend", explodedDir + "/WEB-INF/backend");
-        copyTree("libs", explodedDir + "/WEB-INF/lib");
+        copyTree(LIBS, explodedDir + "/WEB-INF/lib");
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
         buildJava("src/test/core", explodedDir + "/WEB-INF/test-classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
         buildJava("src/main/precompiled", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
@@ -396,7 +396,7 @@ public class Tasks {
      */
     public static void javadoc() {
         libs();
-        buildJavadoc("src/main/core", "libs", BUILDDIR + "/javadoc", "JavaDocOverview.html");
+        buildJavadoc("src/main/core", LIBS, BUILDDIR + "/javadoc", "JavaDocOverview.html");
     }
 
     /**
@@ -430,7 +430,11 @@ public class Tasks {
         rm("manual/Kiss.pdf");
 
         // remove old stuff
-        rm ("libs/json.jar");
+        rm("libs/json.jar");
+        rmRegex(LIBS, "dynamic-loader-.*\\.jar");
+        rmRegex(LIBS, "groovy-.*\\.jar");
+        rmRegex(LIBS, "postgresql-.*\\.jar");
+        rmRegex(LIBS, "sqlite-jdbc-.*\\.jar");
 
         /* libraries that don't have their version number in the file name
            must be removed from cache.
