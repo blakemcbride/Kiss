@@ -34,7 +34,7 @@
     <dependency>
       <groupId>com.mchange</groupId>
       <artifactId>c3p0</artifactId>
-      <version>0.9.5.5</version>
+      <version>0.9.11.1</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.apache.groovy/groovy-all -->
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>com.mchange</groupId>
       <artifactId>mchange-commons-java</artifactId>
-      <version>0.2.20</version>
+      <version>0.3.2</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
