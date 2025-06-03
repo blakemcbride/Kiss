@@ -975,6 +975,19 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * Set the default schema for the connection.  This is the schema that
+     * will be used if no schema is specified in a query.
+     *
+     * @param  schema  the schema to set
+     * @return         the modified connection
+     * @throws SQLException if an error occurs setting the schema
+     */
+    public Connection setSchema(String schema) throws SQLException {
+        conn.setSchema(schema);
+        return this;
+    }
+
+    /**
      * Local method used to assure Dates of any type are of the SQL type.
      * If the object is not a date type, it is simply returned.
      *
