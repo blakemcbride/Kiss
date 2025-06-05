@@ -12,6 +12,8 @@
  */
 class Server {
 
+    static #numberOfRetries = 1;
+
     /**
      * Set the URL of the back-end.
      *
@@ -78,7 +80,7 @@ class Server {
                     }
                 });
             } catch (err) {
-                if (pass < 3)
+                if (pass < Server.#numberOfRetries)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (1): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
@@ -97,7 +99,7 @@ class Server {
                         await Utils.showMessage('Error', res._ErrorMessage);
                 resolve(res);
             } catch (err) {
-                if (pass < 3)
+                if (pass < Server.#numberOfRetries)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (2): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
@@ -150,7 +152,7 @@ class Server {
                     }
                 });
             } catch (err) {
-                if (pass < 3)
+                if (pass < Server.#numberOfRetries)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 console.log("Server communication error (3): " + cls + "." + meth + "(): " + err.message);
                 Server.decCount();
@@ -186,7 +188,7 @@ class Server {
                 ret._data = bytes.slice(i, bytes.length);
                 resolve(ret);
             } catch (err) {
-                if (pass < 3)
+                if (pass < Server.#numberOfRetries)
                     return doCall(cls, meth, injson, pass + 1, resolve, reject);
                 Server.decCount();
                 await Utils.showMessage('Error', Server.errorMessage);

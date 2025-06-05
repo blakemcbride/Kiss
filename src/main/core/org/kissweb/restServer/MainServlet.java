@@ -78,8 +78,6 @@ public class MainServlet extends HttpServlet {
         if (queueManager == null)
             queueManager = new org.kissweb.restServer.QueueManager(maxWorkerThreads);
         ServletOutputStream out = response.getOutputStream();
-        response.setStatus(202);  // async accept
-        out.flush();  //  this causes the first response
 
         queueManager.add(request, response, out);
     }
