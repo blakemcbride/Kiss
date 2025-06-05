@@ -16,6 +16,7 @@ public class OpenAI {
     private final String apiKey;  // your API key
     private final String model;
     private float temperature = 0.7f;
+    private float top_p = 0.7f;
     private JSONObject lastResponse;
     private RestClient restClient;
 
@@ -47,6 +48,23 @@ public class OpenAI {
     }
 
     /**
+     * Controls the sampling algorithm used by the model to generate text.<br>
+     * The algorithm is as follows:<br>
+     * 0.0	Selects the most likely next token;	Math, logic, programming, technical writing<br>
+     * 0.5	Sampling from the top k tokens;	General conversation, articles<br>
+     * 0.7	Default: Samples from the top k tokens;	Brainstorming, casual writing<br>
+     * 1.0+	Selects from all tokens;	Poetry, fiction, jokes, character voices<br>
+     * <p>
+     * This value is used to compute the number of tokens to sample from when generating text.<br>
+     * The number of tokens to sample is {@code top_p * tokens.length()}.
+     *
+     * @param top_p the fraction of tokens to sample from
+     */
+    public void setSampling(float top_p) {
+        this.top_p = top_p;
+    }
+
+    /**
      * Send a query to OpenAI and receive a response.
      *
      * @param query the user query to send to OpenAI
@@ -60,6 +78,7 @@ public class OpenAI {
         JSONObject request = new JSONObject();
         request.put("model", model);
         request.put("temperature", temperature);
+        request.put("top_p", top_p);
         JSONArray messages = new JSONArray();
 
         JSONObject message = new JSONObject();
