@@ -80,12 +80,12 @@ public class QdrantClient {
     /**
      * Insert a new record or update an existing record.
      *
-     * @param chunkId The ID of the chunk to which the record belongs or null if you want it auto-generated for a new record.
-     * @param documentId The ID of the document to which the chunk is associated.
+     * @param chunkId        The ID of the chunk to which the record belongs or null if you want it auto-generated for a new record.
+     * @param documentId     The ID of the document to which the chunk is associated.
      * @param sequenceNumber The sequence number of the text within the document.
-     * @param vector The embedding vector to be stored. Its length must exactly match the vector size defined when the collection was created (e.g., 384, 768, etc.).
-     * @param text A piece of associated plain text to be stored in the record's payload under the key "text". This can be used for display or filtering purposes.
-     * @param otherInfo Optional additional metadata (key-value pairs) to store with the record in the payload object. This can contain fields like "author", "title", "timestamp", etc. It may be null.
+     * @param vector         The embedding vector to be stored. Its length must exactly match the vector size defined when the collection was created (e.g., 384, 768, etc.).
+     * @param text           A piece of associated plain text to be stored in the record's payload under the key "text". This can be used for display or filtering purposes.
+     * @param otherInfo      Optional additional metadata (key-value pairs) to store with the record in the payload object. This can contain fields like "author", "title", "timestamp", etc. It may be null.
      * @return The chunkId of the inserted or updated record
      * @throws Exception if an error occurs during the insert/update operation
      */
@@ -123,7 +123,7 @@ public class QdrantClient {
      * Search for the <code>limit</code> closest vectors to the provided <code>vector</code>.
      *
      * @param vector the query vector to search for
-     * @param limit the maximum number of results to return
+     * @param limit  the maximum number of results to return
      * @return a JSONArray of search results
      * @throws Exception if an error occurs during the search
      */
@@ -199,6 +199,61 @@ public class QdrantClient {
             response.append(line);
         reader.close();
         return response.toString();
+    }
+
+    /**
+     * Creates a field index for the named field in the specified collection.
+     *
+     * @param fieldName   the name of the field to index.  Must not be null or empty.
+     * @param fieldSchema the schema of the field to index, or null if the default
+     *                    schema should be used.
+     * @throws Exception if the request fails for any reason.
+     */
+    public void createFieldIndex(String fieldName, String fieldSchema) throws Exception {
+        if (fieldName == null || fieldName.isEmpty())
+            throw new IllegalArgumentException("fieldName must not be null or empty");
+
+        JSONObject body = new JSONObject();
+        body.put("field_name", fieldName);
+
+        // If the caller supplied an explicit schema, include it.
+        if (fieldSchema != null && !fieldSchema.isEmpty())
+            body.put("field_schema", fieldSchema);
+
+        // PUT /collections/{collection}/index
+        sendRequest("PUT", "/collections/" + collection + "/index", body.toString());
+    }
+
+    /**
+     * Convenience method that creates a field index for the named field in the
+     * specified collection using the default schema.
+     *
+     * @param fieldName the name of the field to index.  Must not be null or empty.
+     * @throws Exception if the request fails for any reason.
+     */
+    public void createFieldIndex(String fieldName) throws Exception {
+        createFieldIndex(fieldName, null);
+    }
+
+    /**
+     * Search for points in the collection.
+     *
+     * @param vector the query vector to search for
+     * @param limit  the maximum number of results to return
+     * @param filter the filter to apply to the search
+     * @return a JSONArray of search results
+     */
+    public JSONArray search(double[] vector, int limit, JSONObject filter) throws Exception {
+        JSONObject body = new JSONObject();
+        JSONArray vectorArray = new JSONArray();
+        for (double v : vector) vectorArray.put(v);
+        body.put("vector", vectorArray);
+        body.put("limit", limit);
+        if (filter != null)
+            body.put("filter", filter);
+        String response = sendRequest("POST", "/collections/" + collection + "/points/search", body.toString());
+        JSONObject obj = new JSONObject(response);
+        return obj.getJSONArray("result");
     }
 
 }
