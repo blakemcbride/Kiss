@@ -242,6 +242,7 @@ public class QdrantClient {
      * @param limit  the maximum number of results to return
      * @param filter the filter to apply to the search
      * @return a JSONArray of search results
+     * @throws Exception if the request fails for any reason.
      */
     public JSONArray search(double[] vector, int limit, JSONObject filter) throws Exception {
         JSONObject body = new JSONObject();

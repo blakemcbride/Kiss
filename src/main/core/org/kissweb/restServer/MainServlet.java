@@ -191,7 +191,7 @@ public class MainServlet extends HttpServlet {
                 try {
                     makeDatabaseConnection();
                 } catch (PropertyVetoException | SQLException | ClassNotFoundException e) {
-                    logger.error("", e);
+                    logger.error(e);
                     System.exit(-1);
                 }
                 logger.info("* * * Database " + database + " opened successfully");
@@ -203,7 +203,7 @@ public class MainServlet extends HttpServlet {
 
         try {
             cron = new Cron(MainServlet.getApplicationPath() + "CronTasks/crontab",
-                    MainServlet::getConnection,
+                    MainServlet::openNewConnection,
                     MainServlet::success,
                     MainServlet::failure);
         } catch (IOException e) {
@@ -213,7 +213,13 @@ public class MainServlet extends HttpServlet {
         logger.setLevel(level);
     }
 
-    private static Connection getConnection() {
+    /**
+     * Returns a new connection to the database if one is configured.
+     * If you explicitly open a new connection with this method you must explicitly close it via
+     *
+     * @return a new connection to the database if one is configured, otherwise null.
+     */
+    public static Connection openNewConnection() {
         if (!hasDatabase)
             return null;
         Connection db = null;
@@ -222,60 +228,54 @@ public class MainServlet extends HttpServlet {
             c.setAutoCommit(false);
             db = new Connection(c);
         } catch (SQLException e) {
-            logger.error("", e);
+            logger.error(e);
         }
         return db;
     }
 
-    private static void success(Object p) {
-        Connection db = (Connection) p;
+    /**
+     * Closes a connection to the database opened with openNewConnection.
+     * Commits or rolls back the transaction according to the success parameter.
+     * @param db the Connection instance to close
+     * @param success if true, any changes made to the database are committed; otherwise, the transaction is rolled back
+     */
+    public static void closeConnection(Connection db, boolean success) {
         try {
-            db.commit();
+            if (success)
+                db.commit();
+            else
+                db.rollback();
             java.sql.Connection sconn = null;
             try {
                 sconn = db.getSQLConnection();
                 db.close();
             } catch (SQLException e) {
-                logger.error("", e);
+                logger.error(e);
             }
             try {
                 if (sconn != null)
                     sconn.close();
             } catch (SQLException e) {
-                logger.error("", e);
+                logger.error(e);
             }
         } catch (SQLException e) {
-            logger.error("", e);
+            logger.error(e);
         }
     }
 
+    private static void success(Object p) {
+        closeConnection((Connection) p, true);
+    }
+
     private static void failure(Object p) {
-        Connection db = (Connection) p;
-        try {
-            db.rollback();
-            java.sql.Connection sconn = null;
-            try {
-                sconn = db.getSQLConnection();
-                db.close();
-            } catch (SQLException e) {
-                logger.error("", e);
-            }
-            try {
-                if (sconn != null)
-                    sconn.close();
-            } catch (SQLException e) {
-                logger.error("", e);
-            }
-        } catch (SQLException e) {
-            logger.error("", e);
-        }
+        closeConnection((Connection) p, false);
     }
 
     static void stopCron() {
         cron.cancel();
     }
 
-    static void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
+    private static void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
         Level level = logger.getLevel();
         logger.setLevel(Level.ALL);
         if (!hasDatabase) {
