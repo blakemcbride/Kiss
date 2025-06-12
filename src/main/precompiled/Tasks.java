@@ -39,7 +39,7 @@ public class Tasks {
 
     // Things that change semi-often
     final static String groovyVer = "4.0.26";
-    final static String postgresqlVer = "42.7.5";
+    final static String postgresqlVer = "42.7.7";
     final static String tomcatVer = "11.0.7";
 
 
