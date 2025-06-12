@@ -215,9 +215,16 @@ public class MainServlet extends HttpServlet {
 
     /**
      * Returns a new connection to the database if one is configured.
-     * If you explicitly open a new connection with this method you must explicitly close it via
+     * If you explicitly open a new connection with this method you must explicitly close it via the closeConnection method.
+     * <br><br>
+     * Each thread (e.g., web service, cron job) must open its own connection to the database. Otherwise, the SQL operations in
+     * one thread will interfere with the SQL operations in another thread. Kiss automatically handles this for web services and cron jobs.
+     * However, if you start additional threads that need to access the database, you must open a new connection for each thread.
+     * <br><br>
+     * It is critical that any thread that opens a new connection must be sure to explicitly close that connection upon exit.
      *
      * @return a new connection to the database if one is configured, otherwise null.
+     * @see #closeConnection(Connection db, boolean success)
      */
     public static Connection openNewConnection() {
         if (!hasDatabase)
@@ -238,6 +245,7 @@ public class MainServlet extends HttpServlet {
      * Commits or rolls back the transaction according to the success parameter.
      * @param db the Connection instance to close
      * @param success if true, any changes made to the database are committed; otherwise, the transaction is rolled back
+     * @see #openNewConnection()
      */
     public static void closeConnection(Connection db, boolean success) {
         try {
@@ -271,6 +279,14 @@ public class MainServlet extends HttpServlet {
         closeConnection((Connection) p, false);
     }
 
+
+    /**
+     * Cancels the cron daemon.
+     * <br><br>
+     * Cron jobs scheduled after this call will not run.
+     * <br><br>
+     * Has no effect if cron daemon is not running.
+     */
     static void stopCron() {
         cron.cancel();
     }
