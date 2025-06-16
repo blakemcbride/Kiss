@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.stream.Collectors;
+import java.io.OutputStreamWriter;
 
 /**
  * This class processes the incoming REST event queue.
@@ -77,7 +78,10 @@ public class ProcessServlet implements Runnable {
         } catch (Throwable e) {
             logger.error(e);
         } finally {
-            closeSession();
+            // Defer cleanup if SSE streaming is ongoing – endSSEStream() will handle it.
+            if (!sseStreamingMode) {
+                closeSession();
+            }
         }
     }
 
@@ -461,14 +465,17 @@ public class ProcessServlet implements Runnable {
         response.setHeader("Connection", "keep-alive");
 
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+
+        // Wrap the raw ServletOutputStream in a PrintWriter *with* auto-flush enabled – this
+        // ensures each println / flush propagates immediately to the socket.
         if (streamWriter == null) {
-            streamWriter = response.getWriter();
-            streamWriter.print(": connected\n\n");
-            streamWriter.flush();
+            streamWriter = new PrintWriter(
+                    new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8),
+                    true /* autoFlush */);
+            streamWriter.println(": connected");
+            streamWriter.println();   // blank line required by SSE spec
         }
 
-        // Disable response buffering to enable real-time streaming
-        response.setBufferSize(0);
         response.flushBuffer();
     }
 
@@ -541,10 +548,13 @@ public class ProcessServlet implements Runnable {
      * @throws IOException if an I/O error occurs while closing
      */
     public void endSSEStream() throws IOException {
-        if (!sseStreamingMode) {
-            return; // Nothing to complete
-        }
-        
+        // ensure this block runs only once
+        if (!sseStreamingMode)
+            return;
+
+        // mark streaming finished early to avoid recursion / double-close
+        sseStreamingMode = false;
+
         try {
             if (streamWriter != null) {
                 streamWriter.print("data: [DONE]\n\n");
@@ -556,9 +566,11 @@ public class ProcessServlet implements Runnable {
         } finally {
             try {
                 asyncContext.complete();
-            } catch (IllegalStateException ignore) {
-                // Already completed
+            } catch (Exception e) {
+                // ignore
             }
+            // perform full cleanup (DB, thread-locals, etc.)
+            closeSession();
         }
     }
 

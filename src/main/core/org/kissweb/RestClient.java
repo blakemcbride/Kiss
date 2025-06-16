@@ -347,7 +347,8 @@ public class RestClient {
                 boolean retriable =
                         e instanceof ConnectException ||
                                 e instanceof java.net.SocketTimeoutException ||
-                                e instanceof HttpTimeoutException;
+                                e instanceof HttpTimeoutException ||
+                                (e instanceof IOException && e.getMessage() != null && e.getMessage().contains("GOAWAY"));
 
                 if (!retriable || attempts >= maxRetries) {
                     if (e instanceof InterruptedException) {

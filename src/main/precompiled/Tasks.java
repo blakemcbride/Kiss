@@ -40,9 +40,7 @@ public class Tasks {
     // Things that change semi-often
     final static String groovyVer = "4.0.26";
     final static String postgresqlVer = "42.7.7";
-    final static String tomcatVer = "11.0.7";
-
-
+    final static String tomcatVer = "11.0.8";
     final static String LIBS = "libs";  // compile time location
     final static ForeignDependencies foreignLibs = buildForeignDependencies();
     final static LocalDependencies localLibs = buildLocalDependencies();
@@ -251,7 +249,6 @@ public class Tasks {
 
     /**
      * Unpack and install tomcat
-     * https://dlcdn.apache.org/tomcat/tomcat-11/v11.0.7/bin/apache-tomcat-11.0.7.tar.gz
      */
     public static void setupTomcat() {
         if (!exists("tomcat/bin/startup.sh")) {

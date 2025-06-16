@@ -108,6 +108,7 @@ public class OpenAI {
 
         RestClient client = new RestClient();
         client.setTimeouts(Duration.ofSeconds(60), Duration.ofMinutes(5));
+        client.setRetryPolicy(3, 500);
 
         HttpResponse<Stream<String>> resp = client.streamCall(req, HttpResponse.BodyHandlers.ofLines());
 
