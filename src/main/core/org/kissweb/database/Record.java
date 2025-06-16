@@ -69,8 +69,13 @@ public class Record implements AutoCloseable {
     private final String table;
     private PreparedStatement pstmt;
 
-    // Intended to be used internally only.
-    Record(Connection c, String tbl) {
+
+    /**
+     * Create a new record for the specified table.
+     * @param c the database connection
+     * @param tbl the table name
+     */
+    public Record(Connection c, String tbl) {
         conn = c;
         table = tbl.toLowerCase();
         cols = new LinkedHashMap<>();
@@ -80,7 +85,7 @@ public class Record implements AutoCloseable {
     Record(Connection c, Cursor cursor, HashMap<String,Object> ocols, LinkedHashMap<String,Object> cols) {
         conn = c;
         this.cursor = cursor;
-        table = cursor.getTableName();
+        table = (cursor != null) ? cursor.getTableName() : null;
         this.ocols = ocols;
         this.cols = cols;
     }
@@ -675,11 +680,15 @@ public class Record implements AutoCloseable {
             int i = 1;
             for (AbstractMap.SimpleEntry<String,Object> fld : cf) {
                 Object val = fld.getValue();
-                Array a = makeSQLArray(conn, val);
-                if (a == null)
-                    pstmt.setObject(i++, Connection.fixDate(val));
-                else
-                    pstmt.setArray(i++, a);
+                if (val instanceof Binder) {
+                    ((Binder) val).bind(pstmt, i++);
+                } else {
+                    Array a = makeSQLArray(conn, val);
+                    if (a == null)
+                        pstmt.setObject(i++, Connection.fixDate(val));
+                    else
+                        pstmt.setArray(i++, a);
+                }
             }
             List<String> pcols;
             if (cursor == null)
@@ -848,6 +857,21 @@ public class Record implements AutoCloseable {
     }
 
     /**
+     * A simple interface for binding values to a PreparedStatement.
+     */
+    @FunctionalInterface
+    public interface Binder {
+        /**
+         * Binds a value to the PreparedStatement.
+         *
+         * @param ps the PreparedStatement
+         * @param index the index of the parameter
+         * @throws SQLException if a database access error occurs
+         */
+        void bind(PreparedStatement ps, int index) throws SQLException;
+    }
+
+    /**
      * Inserts a new row into the database by creating and executing an SQL statement.
      * It does not affect any cursors.
      *
@@ -887,10 +911,12 @@ public class Record implements AutoCloseable {
         for (Object val : cols.values()) {
             if (val != null) {
                 Array a = makeSQLArray(conn, val);
-                if (a == null)
-                    pstmt.setObject(i++, Connection.fixDate(val));
-                else
+                if (a != null)
                     pstmt.setArray(i++, a);
+                else if (val instanceof Binder)
+                    ((Binder) val).bind(pstmt, i++);
+                else
+                    pstmt.setObject(i++, Connection.fixDate(val));
             }
         }
         boolean ret = pstmt.execute();
@@ -1008,7 +1034,6 @@ public class Record implements AutoCloseable {
      * @throws SQLException if an error occurs during the copy operation
      */
     public void copyCorresponding(Record fromRec) throws SQLException {
-        final Record toRec = this;
         final String fromTable = fromRec.table;
         if (fromTable == null)
             throw new SQLException("Missing from table name");
@@ -1029,7 +1054,7 @@ public class Record implements AutoCloseable {
             ColumnInfo fromCol = fromCols.get(fromFieldName);
             if (fromCol.getDataType() != toColInfo.getDataType())
                 continue;
-            toRec.cols.put(fromFieldName, e.getValue());
+            cols.put(fromFieldName, e.getValue());
         }
     }
 
