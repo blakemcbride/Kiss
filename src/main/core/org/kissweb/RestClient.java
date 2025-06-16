@@ -28,6 +28,8 @@ import java.net.http.HttpTimeoutException;
 import java.time.Duration;
 import java.net.ProxySelector;
 import java.net.ConnectException;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.CompletionException;
 
@@ -286,6 +288,9 @@ public class RestClient {
         return jsonCall(method, urlStr, outStr, null);
     }
 
+    private static final Set<String> RESTRICTED_HEADERS =
+            Set.of("connection", "content-length", "expect", "host", "upgrade");
+
     /**
      * Performs the web service call.  Sends and returns raw strings.
      * <br><br>
@@ -299,52 +304,68 @@ public class RestClient {
      * @return the HTTP return code
      * @throws IOException if the communication fail, an exception is thrown
      */
-    public int performService(String method, String urlStr, String outStr, JSONObject headers) throws IOException {
+    public int performService(String method,
+                              String urlStr,
+                              String outStr,
+                              JSONObject headers) throws IOException {
+
         // Reset previous response state
         responseString = null;
 
-        int attempts = 0;
-        long delay = retryBackoffMillis;
+        int  attempts = 0;
+        long delay    = retryBackoffMillis;   // initial back-off
 
         while (true) {
             attempts++;
             try {
-                HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
+                HttpRequest.Builder builder = HttpRequest.newBuilder()
                         .uri(URI.create(urlStr))
                         .timeout(requestTimeout)
-                        .method(method.toUpperCase(),
+                        .method(method.toUpperCase(Locale.ROOT),
                                 (outStr == null || outStr.isEmpty())
                                         ? HttpRequest.BodyPublishers.noBody()
                                         : HttpRequest.BodyPublishers.ofString(outStr));
 
-                if (headers != null)
-                    for (String header : headers.keySet())
-                        reqBuilder.header(header, headers.getString(header));
+                // Add caller-supplied headers, skipping the forbidden ones
+                if (headers != null) {
+                    for (String name : headers.keySet()) {
+                        if (!RESTRICTED_HEADERS.contains(name.toLowerCase(Locale.ROOT))) {
+                            builder.header(name, headers.getString(name));
+                        }
+                    }
+                }
 
-                HttpResponse<String> resp = ensureHttpClient().send(reqBuilder.build(), HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> resp =
+                        ensureHttpClient().send(builder.build(),
+                                HttpResponse.BodyHandlers.ofString());
 
-                responseCode = resp.statusCode();
+                responseCode   = resp.statusCode();
                 responseString = resp.body() == null ? "" : resp.body();
-                return responseCode;
+                return responseCode;                 // success ─> leave the loop
+
             } catch (IOException | InterruptedException e) {
                 boolean retriable =
                         e instanceof ConnectException ||
-                        e instanceof java.net.SocketTimeoutException ||
-                        e instanceof HttpTimeoutException;
+                                e instanceof java.net.SocketTimeoutException ||
+                                e instanceof HttpTimeoutException;
 
                 if (!retriable || attempts >= maxRetries) {
-                    if (e instanceof InterruptedException)
+                    if (e instanceof InterruptedException) {
                         Thread.currentThread().interrupt();
-                    throw new IOException("HTTP request failed after " + attempts + " attempt(s): " + e.getMessage(), e);
+                    }
+                    throw new IOException(
+                            "HTTP request failed after " + attempts + " attempt(s): "
+                                    + e.getMessage(), e);
                 }
 
+                // Exponential back-off before the next retry
                 try {
                     TimeUnit.MILLISECONDS.sleep(delay);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     throw new IOException("Retry interrupted", ie);
                 }
-                delay *= 2; // Exponential back‑off
+                delay *= 2;   // double the wait for the next loop
             }
         }
     }
