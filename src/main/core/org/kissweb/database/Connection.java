@@ -206,6 +206,17 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * Set the connection to be read-only.  This may be useful to prevent operations
+     * from being committed to the database, but it is not a substitute for proper
+     * database permissions.
+     *
+     * @throws SQLException if a database error occurs
+     */
+    public void setReadOnly() throws SQLException {
+        conn.setReadOnly(true);
+    }
+
+    /**
      * Form a new connection to an SQL database.  This method is only used in special situations.
      * <br><br>
      * Auto commits are turned off thus always requiring commit() to complete a transaction.
