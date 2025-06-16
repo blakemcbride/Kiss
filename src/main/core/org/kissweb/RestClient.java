@@ -6,10 +6,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,6 +20,16 @@ import java.security.*;
 import java.security.cert.CertificateException;
 import java.util.Base64;
 import org.kissweb.json.JSONException;
+
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpTimeoutException;
+import java.time.Duration;
+import java.net.ProxySelector;
+import java.net.ConnectException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletionException;
 
 /**
  * Provides the ability to act as a client to an external REST server.
@@ -39,6 +47,15 @@ public class RestClient {
     private String responseString;
     private String debugFileName;
 
+    // --- New HTTP/2‑capable client and retry policy configuration ---
+    private volatile HttpClient httpClient = null;
+    private int maxRetries = 1;
+    private long retryBackoffMillis = 500;
+
+    // --- Configurable timeouts (defaults are 60 s) ---
+    private Duration connectTimeout = Duration.ofSeconds(60);
+    private Duration requestTimeout = Duration.ofSeconds(60);
+
     /**
      * Set proxy server configuration for HTTP requests.
      *
@@ -49,6 +66,7 @@ public class RestClient {
     public RestClient setProxy(String proxyServerURL, int proxyServerPort) {
         this.proxyServerURL = proxyServerURL;
         this.proxyServerPort = proxyServerPort;
+        this.httpClient = null;
         return this;
     }
 
@@ -76,6 +94,7 @@ public class RestClient {
         keyManagerFactory.init(keyStore, clientKeystorePassword.toCharArray());
         context = SSLContext.getInstance("TLS");
         context.init(keyManagerFactory.getKeyManagers(), null, new SecureRandom());
+        this.httpClient = null;
         return this;
     }
 
@@ -281,62 +300,106 @@ public class RestClient {
      * @throws IOException if the communication fail, an exception is thrown
      */
     public int performService(String method, String urlStr, String outStr, JSONObject headers) throws IOException {
-        HttpURLConnection con = null;
-        StringBuilder res = new StringBuilder();
-
+        // Reset previous response state
         responseString = null;
-        try {
-            URL url = new URL(urlStr);
 
-            // Proxy server support
-            if (proxyServerURL != null && !proxyServerURL.isEmpty()) {
-                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyServerURL, proxyServerPort));
-                con = (HttpURLConnection) url.openConnection(proxy);
-            } else
-                con = (HttpURLConnection) url.openConnection();
+        int attempts = 0;
+        long delay = retryBackoffMillis;
 
-            //  SSL support
-            if (context != null) {
-                SSLSocketFactory sockFact = context.getSocketFactory();
-                ((HttpsURLConnection) con).setSSLSocketFactory(sockFact);
-            }
+        while (true) {
+            attempts++;
+            try {
+                HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
+                        .uri(URI.create(urlStr))
+                        .timeout(requestTimeout)
+                        .method(method.toUpperCase(),
+                                (outStr == null || outStr.isEmpty())
+                                        ? HttpRequest.BodyPublishers.noBody()
+                                        : HttpRequest.BodyPublishers.ofString(outStr));
 
-            con.setConnectTimeout(30000);
-            con.setReadTimeout(30000);
-            con.setUseCaches(false);
+                if (headers != null)
+                    for (String header : headers.keySet())
+                        reqBuilder.header(header, headers.getString(header));
 
-            con.setRequestMethod(method);
-            if (headers != null)
-                for (String header : headers.keySet())
-                    con.setRequestProperty(header, headers.getString(header));
-            con.setDoInput(true);
-            if (outStr != null && !outStr.isEmpty()) {
-                con.setDoOutput(true);
-                try (OutputStreamWriter out = new OutputStreamWriter(con.getOutputStream())) {
-                    out.write(outStr);
+                HttpResponse<String> resp = ensureHttpClient().send(reqBuilder.build(), HttpResponse.BodyHandlers.ofString());
+
+                responseCode = resp.statusCode();
+                responseString = resp.body() == null ? "" : resp.body();
+                return responseCode;
+            } catch (IOException | InterruptedException e) {
+                boolean retriable =
+                        e instanceof ConnectException ||
+                        e instanceof java.net.SocketTimeoutException ||
+                        e instanceof HttpTimeoutException;
+
+                if (!retriable || attempts >= maxRetries) {
+                    if (e instanceof InterruptedException)
+                        Thread.currentThread().interrupt();
+                    throw new IOException("HTTP request failed after " + attempts + " attempt(s): " + e.getMessage(), e);
                 }
-            }
 
-            responseCode = con.getResponseCode();
-            InputStream inputStream;
-
-            if (responseCode >= 200  &&  responseCode < 300)
-                inputStream = con.getInputStream();
-            else
-                inputStream = con.getErrorStream();
-            if (inputStream != null) {
-                try (BufferedReader in = new BufferedReader(new InputStreamReader(inputStream))) {
-                    String line;
-                    while ((line = in.readLine()) != null)
-                        res.append(line);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(delay);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Retry interrupted", ie);
                 }
+                delay *= 2; // Exponential back‑off
             }
-        } finally {
-            if (con != null)
-                con.disconnect();
         }
-        responseString = res.toString();
-        return responseCode;
+    }
+
+    /**
+     * Lazily build or rebuild the underlying HttpClient, taking into account
+     * proxy and TLS context settings for this RestClient instance.
+     */
+    private HttpClient ensureHttpClient() {
+        if (httpClient == null) {
+            synchronized (this) {
+                if (httpClient == null) {
+                    HttpClient.Builder b = HttpClient.newBuilder()
+                            .version(HttpClient.Version.HTTP_2)
+                            .connectTimeout(connectTimeout);
+                    if (context != null)
+                        b.sslContext(context);
+                    if (proxyServerURL != null && !proxyServerURL.isEmpty())
+                        b.proxy(ProxySelector.of(new InetSocketAddress(proxyServerURL, proxyServerPort)));
+                    httpClient = b.build();
+                }
+            }
+        }
+        return httpClient;
+    }
+
+    /**
+     * Optional: customise simple retry behaviour.
+     *
+     * @param retries       maximum number of attempts (≥1)
+     * @param backoffMillis initial back‑off in milliseconds
+     * @return this RestClient instance
+     */
+    public RestClient setRetryPolicy(int retries, long backoffMillis) {
+        if (retries < 1)
+            throw new IllegalArgumentException("retries must be ≥ 1");
+        this.maxRetries = retries;
+        this.retryBackoffMillis = backoffMillis;
+        return this;
+    }
+
+    /**
+     * Configure connection and request (read) timeouts.
+     *
+     * @param connect the maximum time allowed for establishing a TCP/TLS connection
+     * @param request the maximum time allowed from sending the request until the response body is fully received
+     * @return this RestClient instance for method chaining
+     */
+    public RestClient setTimeouts(Duration connect, Duration request) {
+        if (connect != null)
+            this.connectTimeout = connect;
+        if (request != null)
+            this.requestTimeout = request;
+        this.httpClient = null;   // force rebuild with new connect timeout
+        return this;
     }
 
     /**
@@ -391,6 +454,24 @@ public class RestClient {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         return builder.parse(new InputSource(new StringReader(str)));
+    }
+
+    /**
+     * Call a REST service with streaming response support.
+     * This method is specifically designed for handling Server-Sent Events (SSE) streams.
+     *
+     * @param <T> the type of the response
+     * @param req the HTTP request to send
+     * @param h the handler for the response body
+     * @return the response body handler
+     * @throws IOException if the communication fails
+     */
+    public <T> HttpResponse<T> streamCall(HttpRequest req, HttpResponse.BodyHandler<T> h) throws IOException {
+        try {
+            return ensureHttpClient().sendAsync(req, h).join();
+        } catch (CompletionException ce) {
+            throw (ce.getCause() instanceof IOException io) ? io : new IOException("Async stream failed", ce.getCause());
+        }
     }
 
 }
