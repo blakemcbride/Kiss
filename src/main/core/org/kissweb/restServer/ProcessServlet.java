@@ -14,12 +14,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
 import java.util.stream.Collectors;
 
 /**
+ * This class processes the incoming REST event queue.
+ *
  * Author: Blake McBride
  * Date: 11/26/19
  */
@@ -40,10 +43,19 @@ public class ProcessServlet implements Runnable {
     protected Connection DB;
     private byte [] binaryData;
     private boolean isBinaryReturn = false;
+    /** True when streaming mode is active for this request. */
+    private volatile boolean sseStreamingMode = false;
+    /** The PrintWriter for streaming text content. */
+    private PrintWriter streamWriter = null;
     private static final ThreadLocal<ProcessServlet> instance = new ThreadLocal<>();
     private JSONObject injson;
     private JSONObject outjson;
 
+    /**
+     * Creates a new ProcessServlet.
+     *
+     * @param packet the packet
+     */
     ProcessServlet(org.kissweb.restServer.QueueManager.Packet packet) {
         request = (HttpServletRequest) packet.asyncContext.getRequest();
         response = (HttpServletResponse) packet.asyncContext.getResponse();
@@ -51,12 +63,21 @@ public class ProcessServlet implements Runnable {
         out = packet.out;
     }
 
+    /**
+     * Called by the executor when a new request is received.
+     * This method is called in a separate thread.
+     * It catches any exceptions that occur and logs them.
+     * It then calls {@link #closeSession()} to release the database connection and
+     * any other resources.
+     */
     @Override
     public void run() {
         try {
             run2();
         } catch (Throwable e) {
-            logger.error("", e);
+            logger.error(e);
+        } finally {
+            closeSession();
         }
     }
 
@@ -275,7 +296,10 @@ public class ProcessServlet implements Runnable {
             return null;
     }
 
-    private void run2() throws IOException {
+    /**
+     * This is where the login gets validated and the web service gets processed.
+     */
+    private void run2() {
         instance.set(this);
         servletContext = request.getServletContext();
         String _className;
@@ -409,7 +433,189 @@ public class ProcessServlet implements Runnable {
         binaryData = data;
     }
 
+    /**
+     * Initiates streaming mode for this request. Once streaming mode is enabled,
+     * the service can send data incrementally to the front-end without buffering
+     * the entire response.
+     * <br><br>
+     * This method must be called before any data is written using the streaming methods.
+     * After calling this method, the normal JSON response mechanism is disabled.
+     *
+     * @param timeoutMs the timeout in milliseconds for the SSE stream
+     * @throws IOException if an I/O error occurs while setting up the stream
+     */
+    public void initializeSSEStream(long timeoutMs) throws IOException {
+        if (sseStreamingMode)
+            throw new IllegalStateException("SSE Streaming mode is already initialized");
+
+        if (timeoutMs <= 0)
+            timeoutMs = 600_000L; // 10-minute default
+        asyncContext.setTimeout(timeoutMs);
+        
+        sseStreamingMode = true;
+
+        // Set the response headers
+        response.setStatus(200);
+        response.setContentType("text/event-stream");
+        response.setHeader("Cache-Control", "no-cache");
+        response.setHeader("Connection", "keep-alive");
+
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        if (streamWriter == null) {
+            streamWriter = response.getWriter();
+            streamWriter.print(": connected\n\n");
+            streamWriter.flush();
+        }
+
+        // Disable response buffering to enable real-time streaming
+        response.setBufferSize(0);
+        response.flushBuffer();
+    }
+
+    /**
+     * Streams text content to the front-end. This method can be called multiple times
+     * to send data incrementally.
+     * <br><br>
+     * Streaming mode must be initialized first using {@link #initializeSSEStream(long)}.
+     * 
+     * @param content the text content to stream
+     * @throws IOException if an I/O error occurs while writing
+     * @throws IllegalStateException if streaming mode is not initialized
+     */
+    public void streamSSEText(String content) throws IOException {
+        if (!sseStreamingMode)
+            throw new IllegalStateException("Streaming mode must be initialized first");
+        if (streamWriter == null)
+            throw new IllegalStateException("Text streaming not available for this content type");
+        if (content == null)
+            return;
+        for (String line : content.split("\\n", -1))
+            streamWriter.print("data: " + line + '\n');
+        streamWriter.print('\n');
+        streamWriter.flush();
+    }
+
+    /**
+     * Streams error content to the front-end. This method can be called multiple times
+     * to send data incrementally.
+     * <br><br>
+     * Streaming mode must be initialized first using {@link #initializeSSEStream(long)}.
+     *
+     * @param content the error content to stream
+     * @throws IOException if an I/O error occurs while writing
+     * @throws IllegalStateException if streaming mode is not initialized
+     */
+    public void streamSSEError(String content) throws IOException {
+        if (!sseStreamingMode)
+            throw new IllegalStateException("Streaming mode must be initialized first");
+        if (streamWriter == null)
+            throw new IllegalStateException("Text streaming not available for this content type");
+        if (content == null)
+            return;
+        for (String line : content.split("\\n", -1))
+            streamWriter.print("error: " + line + '\n');
+        streamWriter.print('\n');
+        streamWriter.flush();
+    }
+
+    /**
+     * Streams a JSON object as a string to the front-end. This is useful for
+     * sending structured data in streaming scenarios.
+     * <br><br>
+     * Streaming mode must be initialized first using {@link #initializeSSEStream(long)}.
+     * 
+     * @param jsonObject the JSON object to stream
+     * @throws IOException if an I/O error occurs while writing  
+     * @throws IllegalStateException if streaming mode is not initialized
+     */
+    public void streamSSEJSON(JSONObject jsonObject) throws IOException {
+        streamSSEText(jsonObject.toString());
+    }
+
+    /**
+     * Completes the streaming response and closes the connection.
+     * This method should be called when all streaming data has been sent.
+     * <br><br>
+     * After calling this method, no more data can be streamed for this request.
+     * 
+     * @throws IOException if an I/O error occurs while closing
+     */
+    public void endSSEStream() throws IOException {
+        if (!sseStreamingMode) {
+            return; // Nothing to complete
+        }
+        
+        try {
+            if (streamWriter != null) {
+                streamWriter.print("data: [DONE]\n\n");
+                streamWriter.flush();
+                streamWriter.close();
+            } else {
+                out.flush();
+            }
+        } finally {
+            try {
+                asyncContext.complete();
+            } catch (IllegalStateException ignore) {
+                // Already completed
+            }
+        }
+    }
+
+    /**
+     * Checks if streaming mode is currently active for this request.
+     * 
+     * @return true if streaming mode is active, false otherwise
+     */
+    public boolean isSseStreamingMode() {
+        return sseStreamingMode;
+    }
+
+    /**
+     * Close the database connection for the current web service request.
+     * This does not do a commit or rollback.
+     * <br><br>
+     * Kiss normally automatically closes the database connection when a web service request ends.
+     * This method allows the early closing of the database connection for times when the web service is long-running and the database connection is not needed.
+     */
+    public void closeConnection() {
+        if (DB != null) {
+            MainServlet.closeConnection(DB);
+            DB = null;
+        }
+    }
+
+    /**
+     * Close the database connection for the current web service request.
+     * Any uncommitted database operations will be rolled back if success is false.
+     * <br><br>
+     * Kiss normally automatically closes the database connection when a web service request ends.
+     * This method allows the early closing of the database connection for times when the web service is long-running and the database connection is not needed.
+     *
+     * @param success if true, any uncommitted database operations will be committed; otherwise they will be rolled back
+     */
+    public void closeConnection(boolean success) {
+        if (DB != null) {
+            MainServlet.closeConnection(DB, success);
+            DB = null;
+        }
+    }
+
+    /**
+     * Returns a successful response to the front-end.
+     *
+     * If the response has already been generated elsewhere, this does nothing.
+     * If the database is open, it is committed.
+     * The response is marked as successful and the error message is removed.
+     * The response code is set to 200, which is the same as a successful response.
+     * If a binary response was requested, the binary data is sent.  Otherwise, the JSON data is sent.
+     * @param response the HTTP response to send the success back on
+     * @param outjson the JSON data to send
+     */
     private void successReturn(HttpServletResponse response, JSONObject outjson) {
+        if (sseStreamingMode) {
+            return;          // streaming mode active, response handled elsewhere
+        }
         try {
             if (DB != null)
                 DB.commit();
@@ -432,12 +638,29 @@ public class ProcessServlet implements Runnable {
             out.close();     // this causes the second response
         } catch (SQLException | IOException ignored) {
         } finally {
-            asyncContext.complete();
-            closeSession();
+            try {
+                asyncContext.complete();
+            } catch (IllegalStateException ignore) {
+                // The request may have already been completed by a streaming method.
+            }
+            // Note: closeSession() is now handled in the outer run() finally block
         }
     }
 
+    /**
+     * Returns an error response to the front-end.
+     * If the response has already been generated elsewhere, this does nothing.
+     * If the database is open, it is rolled back.
+     * The response is marked as unsuccessful and the error message is sent.
+     * The response code is set to 200, which is the same as a successful response.
+     * @param response the HTTP response to send the error back on
+     * @param msg the error message to send
+     * @param e the exception that caused the error, or null if none
+     */
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
+        if (sseStreamingMode) {
+            return;          // streaming mode active, response handled elsewhere
+        }
         try {
             if (DB != null) {
                 try {
@@ -457,8 +680,12 @@ public class ProcessServlet implements Runnable {
             out.close();  //  this causes the second response
         } catch (Exception ignored) {
         } finally {
-            asyncContext.complete();
-            closeSession();
+            try {
+                asyncContext.complete();
+            } catch (IllegalStateException ignore) {
+                // The request may have already been completed by a streaming method.
+            }
+            // Note: closeSession() is now handled in the outer run() finally block
         }
     }
 
@@ -480,7 +707,7 @@ public class ProcessServlet implements Runnable {
             } catch (SQLException ignored) {
             }
         }
-        closeSession();
+        // Note: closeSession() is now handled in the outer run() finally block
         response.setContentType("application/json");
         response.setStatus(200);
         JSONObject outjson = new JSONObject();
@@ -493,11 +720,21 @@ public class ProcessServlet implements Runnable {
             out.close();  //  this causes the second response
         } catch (IOException ignore) {
         }
-        asyncContext.complete();
+        try {
+            asyncContext.complete();
+        } catch (IllegalStateException ignore) {
+            // The request may have already been completed by a streaming method.
+        }
     }
 
+    /**
+     * Determine if a string is empty.
+     *
+     * @param str the string to check
+     * @return true if the string is empty, false otherwise
+     */
     boolean isEmpty(final String str) {
-        return (str == null || str.equals(""));
+        return str == null || str.isEmpty();
     }
 
     /**
@@ -613,15 +850,30 @@ public class ProcessServlet implements Runnable {
     private void newDatabaseConnection() throws SQLException {
         if (!MainServlet.hasDatabase())
             return;
-        logger.info("Previous open database connections = " + MainServlet.getCpds().getNumBusyConnections());
+        logger.info("Pool status - busy: " + MainServlet.getCpds().getNumBusyConnections() + 
+                   ", idle: " + MainServlet.getCpds().getNumIdleConnections());
         final java.sql.Connection conn = MainServlet.getCpds().getConnection();
         conn.setAutoCommit(false);  //  all SQL operations require a commit but Kiss does a commit at the end of each service
         DB = new Connection(conn);
-        logger.info("New database connection obtained");
+        logger.info("New database connection obtained - pool now busy: " + 
+                   MainServlet.getCpds().getNumBusyConnections());
     }
 
     private void closeSession() {
         instance.remove();
+        
+        // Clean up streaming resources
+        if (sseStreamingMode && streamWriter != null) {
+            try {
+                streamWriter.close();
+            } catch (Exception e) {
+                logger.warn("Error closing stream writer", e);
+            }
+            streamWriter = null;
+        }
+        sseStreamingMode = false;
+        
+        // Clean up database connection
         java.sql.Connection sconn = null;
         try {
             if (DB != null) {

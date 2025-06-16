@@ -244,8 +244,32 @@ public class MainServlet extends HttpServlet {
      * Closes a connection to the database opened with openNewConnection.
      * Commits or rolls back the transaction according to the success parameter.
      * @param db the Connection instance to close
+     * @see #openNewConnection()
+     * @see #closeConnection(Connection db, boolean success)
+     */
+    public static void closeConnection(Connection db) {
+        java.sql.Connection sconn = null;
+        try {
+            sconn = db.getSQLConnection();
+            db.close();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+        try {
+            if (sconn != null)
+                sconn.close();
+        } catch (SQLException e) {
+            logger.error(e);
+        }
+    }
+
+    /**
+     * Closes a connection to the database opened with openNewConnection.
+     * Commits or rolls back the transaction according to the success parameter.
+     * @param db the Connection instance to close
      * @param success if true, any changes made to the database are committed; otherwise, the transaction is rolled back
      * @see #openNewConnection()
+     * @see #closeConnection(Connection db)
      */
     public static void closeConnection(Connection db, boolean success) {
         try {
@@ -253,19 +277,7 @@ public class MainServlet extends HttpServlet {
                 db.commit();
             else
                 db.rollback();
-            java.sql.Connection sconn = null;
-            try {
-                sconn = db.getSQLConnection();
-                db.close();
-            } catch (SQLException e) {
-                logger.error(e);
-            }
-            try {
-                if (sconn != null)
-                    sconn.close();
-            } catch (SQLException e) {
-                logger.error(e);
-            }
+            closeConnection(db);
         } catch (SQLException e) {
             logger.error(e);
         }
