@@ -9,6 +9,9 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.stream.Stream;
 import java.util.function.Consumer;
+import java.util.Base64;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 /**
  * This class provides an interface to the OpenAI chat API.
@@ -17,7 +20,7 @@ public class OpenAI {
 
     private static final String OpenAIURL = "https://api.openai.com/v1/chat/completions";
 
-    private final String apiKey;  // your API key
+    private final String apiKey; // your API key
     private final String model;
     private final boolean isReasoning;
     private float temperature = 0.7f;
@@ -42,11 +45,11 @@ public class OpenAI {
     /**
      * The temperature is a value between 0 and 2 that controls the randomness of the response.<br>
      * For example:<br>
-     * 0.0	Deterministic: Always picks the most likely next word;	Math, logic, programming, technical writing<br>
-     * 0.5	Balanced: Some variation, still coherent;	General conversation, articles<br>
-     * 0.7	Default: More creative and varied;	Brainstorming, casual writing<br>
-     * 1.0+	Highly creative or random;	Poetry, fiction, jokes, character voices<br>
-     * 1.5–2.0	Often incoherent or silly;	Experimental or absurdist tasks<br>
+     * 0.0 Deterministic: Always picks the most likely next word; Math, logic, programming, technical writing<br>
+     * 0.5 Balanced: Some variation, still coherent; General conversation, articles<br>
+     * 0.7 Default: More creative and varied; Brainstorming, casual writing<br>
+     * 1.0+ Highly creative or random; Poetry, fiction, jokes, character voices<br>
+     * 1.5–2.0 Often incoherent or silly; Experimental or absurdist tasks<br>
      *
      *
      * @param temperature the temperature value (0.0 to 2.0) that controls randomness in the response
@@ -58,10 +61,10 @@ public class OpenAI {
     /**
      * Controls the sampling algorithm used by the model to generate text.<br>
      * The algorithm is as follows:<br>
-     * 0.0	Selects the most likely next token;	Math, logic, programming, technical writing<br>
-     * 0.5	Sampling from the top k tokens;	General conversation, articles<br>
-     * 0.7	Default: Samples from the top k tokens;	Brainstorming, casual writing<br>
-     * 1.0+	Selects from all tokens;	Poetry, fiction, jokes, character voices<br>
+     * 0.0 Selects the most likely next token; Math, logic, programming, technical writing<br>
+     * 0.5 Sampling from the top k tokens; General conversation, articles<br>
+     * 0.7 Default: Samples from the top k tokens; Brainstorming, casual writing<br>
+     * 1.0+ Selects from all tokens; Poetry, fiction, jokes, character voices<br>
      * <p>
      * This value is used to compute the number of tokens to sample from when generating text.<br>
      * The number of tokens to sample is {@code top_p * tokens.length()}.
@@ -89,10 +92,10 @@ public class OpenAI {
     /**
      * Stream a response from the OpenAI model.
      *
-     * @param query   the user query
+     * @param query the user query
      * @param onToken callback invoked for every partial token
-     * @param onDone  callback invoked when the stream ends
-     * @throws Exception   if the model is not set or if communication fails
+     * @param onDone callback invoked when the stream ends
+     * @throws Exception if the model is not set or if communication fails
      */
     public void stream(String query,
                        Consumer<String> onToken,
@@ -113,18 +116,18 @@ public class OpenAI {
         HttpResponse<Stream<String>> resp = client.streamCall(req, HttpResponse.BodyHandlers.ofLines());
 
         resp.body()
-            .filter(l -> l.startsWith("data: "))
-            .map(l -> l.substring(6).trim())
-            .forEach(payload -> {
-                if ("[DONE]".equals(payload)) { onDone.run(); return; }
-                if (payload.startsWith("{")) {
-                    JSONObject delta = new JSONObject(payload)
-                            .getJSONArray("choices").getJSONObject(0)
-                            .getJSONObject("delta");
-                    if (delta.has("content"))
-                        onToken.accept(delta.getString("content"));
-                }
-            });
+                .filter(l -> l.startsWith("data: "))
+                .map(l -> l.substring(6).trim())
+                .forEach(payload -> {
+                    if ("[DONE]".equals(payload)) { onDone.run(); return; }
+                    if (payload.startsWith("{")) {
+                        JSONObject delta = new JSONObject(payload)
+                                .getJSONArray("choices").getJSONObject(0)
+                                .getJSONObject("delta");
+                        if (delta.has("content"))
+                            onToken.accept(delta.getString("content"));
+                    }
+                });
     }
 
     /**
@@ -137,9 +140,9 @@ public class OpenAI {
     public String send(String query) throws Exception {
         StringBuilder answer = new StringBuilder();
         stream(query, answer::append, () -> {});
-        // No single "full" JSON in streaming mode
+// No single "full" JSON in streaming mode
         lastResponse = null;
-        restClient   = null;
+        restClient = null;
         return answer.toString();
     }
 
@@ -197,10 +200,86 @@ public class OpenAI {
     /**
      * Builds the common request body for chat completions used by both {@link #send} and {@link #stream}.
      *
-     * @param query       the user prompt
+     * @param query the user prompt
      * @return a fully populated {@link JSONObject} ready for the HTTP request
      */
     private JSONObject buildChatBody(String query) {
+        try {
+            return buildChatBodyWithImage(null, query);
+        } catch (Exception e) {
+// This should never happen since we're not reading a file
+            throw new RuntimeException("Unexpected error building chat body", e);
+        }
+    }
+
+    /**
+     * Send a query with an image to OpenAI and receive a response.
+     *
+     * @param imagePath the path to the image file to analyze
+     * @param query the text query to send along with the image
+     * @return the response content from OpenAI
+     * @throws Exception if model is not set, file cannot be read, or communication fails
+     */
+    public String sendWithImage(String imagePath, String query) throws Exception {
+        StringBuilder answer = new StringBuilder();
+        streamWithImage(imagePath, query, answer::append, () -> {});
+// No single "full" JSON in streaming mode
+        lastResponse = null;
+        restClient = null;
+        return answer.toString();
+    }
+
+    /**
+     * Stream a response from the OpenAI model with an image.
+     *
+     * @param imagePath the path to the image file to analyze
+     * @param query the user query
+     * @param onToken callback invoked for every partial token
+     * @param onDone callback invoked when the stream ends
+     * @throws Exception if the model is not set, file cannot be read, or if communication fails
+     */
+    public void streamWithImage(String imagePath, String query,
+                                Consumer<String> onToken,
+                                Runnable onDone) throws Exception {
+        JSONObject body = buildChatBodyWithImage(imagePath, query);
+
+        HttpRequest req = HttpRequest.newBuilder(URI.create(OpenAIURL))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofMinutes(10))
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .build();
+
+        RestClient client = new RestClient();
+        client.setTimeouts(Duration.ofSeconds(60), Duration.ofMinutes(5));
+        client.setRetryPolicy(3, 500);
+
+        HttpResponse<Stream<String>> resp = client.streamCall(req, HttpResponse.BodyHandlers.ofLines());
+
+        resp.body()
+                .filter(l -> l.startsWith("data: "))
+                .map(l -> l.substring(6).trim())
+                .forEach(payload -> {
+                    if ("[DONE]".equals(payload)) { onDone.run(); return; }
+                    if (payload.startsWith("{")) {
+                        JSONObject delta = new JSONObject(payload)
+                                .getJSONArray("choices").getJSONObject(0)
+                                .getJSONObject("delta");
+                        if (delta.has("content"))
+                            onToken.accept(delta.getString("content"));
+                    }
+                });
+    }
+
+    /**
+     * Builds the request body for chat completions with optional image content.
+     *
+     * @param imagePath the path to the image file (null for text-only queries)
+     * @param query the user prompt
+     * @return a fully populated {@link JSONObject} ready for the HTTP request
+     * @throws Exception if the image file cannot be read
+     */
+    private JSONObject buildChatBodyWithImage(String imagePath, String query) throws Exception {
         JSONObject body = new JSONObject();
         body.put("model", model);
         body.put("stream", true);
@@ -215,10 +294,29 @@ public class OpenAI {
         JSONArray messages = new JSONArray()
                 .put(new JSONObject()
                         .put("role", "system")
-                        .put("content", "You are a helpful assistant."))
+                        .put("content", "You are a helpful assistant."));
+
+// Create content array with text
+        JSONArray contentArray = new JSONArray()
                 .put(new JSONObject()
-                        .put("role", "user")
-                        .put("content", query));
+                        .put("type", "text")
+                        .put("text", query));
+
+        if (imagePath != null) {
+// Encode image inline
+            byte[] imageBytes = Files.readAllBytes(Paths.get(imagePath));
+            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+            String imageDataUrl = "data:image/jpeg;base64," + base64Image;
+
+            contentArray.put(new JSONObject()
+                    .put("type", "image_url")
+                    .put("image_url", new JSONObject()
+                            .put("url", imageDataUrl)));
+        }
+
+        messages.put(new JSONObject()
+                .put("role", "user")
+                .put("content", contentArray));
 
         body.put("messages", messages);
         return body;
