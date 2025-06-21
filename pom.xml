@@ -182,9 +182,23 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.20</version>
+      <version>1.27.1</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/libs/commons-compress-1.20.jar</systemPath>
+      <systemPath>${project.basedir}/libs/commons-compress-1.27.1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.16.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/commons-io-2.16.1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.14.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/commons-lang3-3.14.0.jar</systemPath>
     </dependency>
     <dependency>
       <!-- Oracle removes mysql drivers from public downloads -->
@@ -306,12 +320,12 @@
                        srcdir="src/main/core"
                        destdir="work/exploded/WEB-INF/classes"
                        includes="org/kissweb/BuildUtils.java"
-                       classpath="libs/commons-compress-1.20.jar"/>
+                       classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar"/>
                 <javac includeantruntime="false"
                        srcdir="src/main/precompiled"
                        destdir="work/exploded/WEB-INF/classes"
                        includes="Tasks.java"
-                       classpath="libs/commons-compress-1.20.jar"/>
+                       classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar"/>
               </target>
             </configuration>
           </execution>
@@ -329,7 +343,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <!-- The second arg is the "target name." -->
                   <arg value="start-backend"/>
@@ -350,7 +366,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="stop-backend"/>
                 </java>
@@ -370,7 +388,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="start-frontend"/>
                 </java>
@@ -390,7 +410,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="stop-frontend"/>
                 </java>
@@ -410,7 +432,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="build"/>
                 </java>
@@ -430,7 +454,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="war"/>
                 </java>
@@ -450,7 +476,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="clean"/>
                 </java>
@@ -470,7 +498,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="realclean"/>
                 </java>
@@ -490,7 +520,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="ideclean"/>
                 </java>
@@ -510,7 +542,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="jar"/>
                 </java>
@@ -530,7 +564,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="javadoc"/>
                 </java>
@@ -550,7 +586,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="kisscmd"/>
                 </java>
@@ -570,7 +608,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="KissGP"/>
                 </java>
@@ -590,7 +630,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="libs"/>
                 </java>
@@ -610,7 +652,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="setup-tomcat"/>
                 </java>
@@ -630,7 +674,9 @@
                 <java classname="Tasks" fork="true" dir=".">
                   <classpath>
                     <pathelement location="work/exploded/WEB-INF/classes"/>
-                    <pathelement location="libs/commons-compress-1.20.jar"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
                   </classpath>
                   <arg value="unit-tests"/>
                 </java>

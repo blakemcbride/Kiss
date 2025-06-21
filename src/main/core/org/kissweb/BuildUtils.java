@@ -22,10 +22,8 @@
 
 package org.kissweb;
 
-import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
@@ -1302,7 +1300,7 @@ public class BuildUtils {
 
         try {
             try (final InputStream is = new FileInputStream(inputFile)) {
-                final TarArchiveInputStream debInputStream = (TarArchiveInputStream) new ArchiveStreamFactory().createArchiveInputStream("tar", is);
+                final TarArchiveInputStream debInputStream = new TarArchiveInputStream(is);
                 TarArchiveEntry entry;
                 while ((entry = (TarArchiveEntry) debInputStream.getNextEntry()) != null) {
                     String entryName = entry.getName();
@@ -1319,7 +1317,11 @@ public class BuildUtils {
                     } else {
                         //println(String.format("Creating output file %s.", outputFile.getAbsolutePath()));
                         try (final OutputStream outputFileStream = new FileOutputStream(outputFile)) {
-                            IOUtils.copy(debInputStream, outputFileStream);
+                            byte[] buffer = new byte[8192];
+                            int bytesRead;
+                            while ((bytesRead = debInputStream.read(buffer)) != -1) {
+                                outputFileStream.write(buffer, 0, bytesRead);
+                            }
                             int mode = entry.getMode();
                             String oct = Integer.toOctalString(mode);
                             if (oct.length() >= 3) {
@@ -1368,7 +1370,11 @@ public class BuildUtils {
 
         try (GZIPInputStream in = new GZIPInputStream(new FileInputStream(inputFile));
              FileOutputStream out = new FileOutputStream(outputFile)) {
-            IOUtils.copy(in, out);
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                out.write(buffer, 0, bytesRead);
+            }
         }
 
         return outputFile;
