@@ -185,15 +185,22 @@ public class Cron {
         private void runLine(String sfname) {
             logger.info("Running " + sfname);
             Object parameter = null;
+            boolean ok = false;
             try {
                 parameter = getParameter.get();
                 GroovyClass groovyClass = new GroovyClass(false, sfname);
                 Method methp = groovyClass.getMethod("start", argTypes);
                 methp.invoke(null, parameter);
-                success.accept(parameter);
+                ok = true;
             } catch (Exception e) {
-                failure.accept(parameter);
                 logger.error("cron error", e);
+            } finally {
+                if (parameter != null) {
+                    if (ok)
+                        success.accept(parameter);
+                    else
+                        failure.accept(parameter);
+                }
             }
         }
 
