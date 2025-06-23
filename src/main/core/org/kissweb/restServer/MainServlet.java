@@ -36,6 +36,7 @@ public class MainServlet extends HttpServlet {
     private static Connection.ConnectionType connectionType;
     private static String host;                      // set by KissInit.groovy
     private static Integer port;                     // optionally set by KissInit.groovy
+    private static String connectionParameters;      // optional string to append to the database connection string
     private static String database;                  // set by KissInit.groovy
     private static String user;                      // database username, set by KissInit.groovy
     private static String password;                  // database password, set by KissInit.groovy
@@ -318,6 +319,8 @@ public class MainServlet extends HttpServlet {
             if (connectionType == Connection.ConnectionType.SQLite  &&  database != null  &&  !database.isEmpty() &&  database.charAt(0) != '/')
                 database = applicationPath + database;
             String cstr = Connection.makeConnectionString(connectionType, host, port, database, user, password);
+            if (connectionParameters != null)
+                cstr += connectionParameters;
             Connection con;
             try {
                 con = new Connection(connectionType, cstr);
@@ -462,6 +465,16 @@ public class MainServlet extends HttpServlet {
      */
     public static void setDatabase(String databasep) {
         database = databasep;
+    }
+
+    /**
+     * Sets a string to be appended to the calculated database connection string.
+     * If the database requires an '&' or ';' before any connection parameters you must include it.
+     *
+     * @param cp additional database connection parameters
+     */
+    public static void setConnectionParameters(String cp) {
+        connectionParameters = cp;
     }
 
     /**

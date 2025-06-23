@@ -15,6 +15,7 @@ class KissInit {
         MainServlet.setUser ""                    // database user (not application user login)
         MainServlet.setPassword ""                // database password (not application user password)
         MainServlet.setMaxWorkerThreads 30        // max number of simultaneous REST services (any additional are put on a queue)
+        //MainServlet.setConnectionParameters("")   // used to set additional database connection parameters to the connection string
 
         UserCache.setInactiveUserMaxSeconds 900   // seconds user is allowed to be idle before auto-logoff
 
