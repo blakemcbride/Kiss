@@ -196,10 +196,13 @@ public class Cron {
                 logger.error("cron error", e);
             } finally {
                 if (parameter != null) {
-                    if (ok)
-                        success.accept(parameter);
-                    else
-                        failure.accept(parameter);
+                    if (ok) {
+                        if (success != null)
+                            success.accept(parameter);
+                    } else {
+                        if (failure != null)
+                            failure.accept(parameter);
+                    }
                 }
             }
         }
