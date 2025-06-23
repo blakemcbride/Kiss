@@ -334,9 +334,22 @@ public class MainServlet extends HttpServlet {
 
             cpds.setDriverClass(Connection.getDriverName(connectionType));
 
+            cpds.setMinPoolSize(5);
+            cpds.setInitialPoolSize(5);
+            cpds.setAcquireIncrement(5);
+            cpds.setCheckoutTimeout(10_000);
             cpds.setMaxStatements(180);
+            cpds.setUnreturnedConnectionTimeout(60);
+            cpds.setDebugUnreturnedConnectionStackTraces(isUnderIDE());
+            cpds.setMaxPoolSize(defaultMaxPoolSize()); // see below
         }
         logger.setLevel(level);
+    }
+
+    private static int defaultMaxPoolSize() {
+        return Integer.parseInt(
+                System.getProperty("db.maxPoolSize",
+                        String.valueOf(Runtime.getRuntime().availableProcessors() * 2)));
     }
 
     static String getDynamicClassPath() {

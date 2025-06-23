@@ -159,7 +159,7 @@ public class Connection implements AutoCloseable {
             if (port == null)
                 port = 1433;
             connectionString = "jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + dbname + ";";
-            if (user != null && !"".equals(user))
+            if (user != null && !user.isEmpty())
                 connectionString += "user=" + user + ";password=" + pw + ";";
             else
                 connectionString += "integratedSecurity=true;";
