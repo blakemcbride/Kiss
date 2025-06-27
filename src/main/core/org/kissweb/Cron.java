@@ -127,9 +127,13 @@ public class Cron {
         private String months;
         private String daysOfWeek;
         private String command;
-        private Class<?>[] argTypes;
         private Supplier<Object> getParameter;
         private Consumer<Object> success, failure;
+
+        private volatile GroovyClass cachedGroovy;
+        private volatile long cachedTimestamp = -1;
+
+        private static final Object COMPILE_LOCK = new Object();  
 
         static CronLine newCronLine(String line, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) {
             if (line == null)
@@ -144,8 +148,6 @@ public class Cron {
             cl.getParameter = getParameter;
             cl.success = success;
             cl.failure = failure;
-            cl.argTypes = new Class[1];
-            cl.argTypes[0] = Object.class;  //   Object.class;
 
             cl.line = line;
             cl.len = line.length();
@@ -182,28 +184,43 @@ public class Cron {
             }).start();
         }
 
-        private void runLine(String sfname) {
-            logger.info("Running " + sfname);
-            Object parameter = null;
-            boolean ok = false;
+        private void runLine(String sourceFile) {
+            logger.info("Running " + sourceFile);
             try {
-                parameter = getParameter.get();
-                GroovyClass groovyClass = new GroovyClass(false, sfname);
-                Method methp = groovyClass.getMethod("start", argTypes);
-                methp.invoke(null, parameter);
-                ok = true;
-            } catch (Exception e) {
-                logger.error("cron error", e);
-            } finally {
-                if (parameter != null) {
-                    if (ok) {
-                        if (success != null)
-                            success.accept(parameter);
-                    } else {
-                        if (failure != null)
-                            failure.accept(parameter);
-                    }
+                GroovyClass gc = getOrCompile(sourceFile);
+                Method methp   = gc.getMethod("start", Object.class);
+                Object param   = getParameter.get();
+        
+                boolean ok = false;
+                try {
+                    methp.invoke(null, param); // run job
+                    ok = true;
+                } finally {
+                    if (ok)
+                        success.accept(param);
+                    else
+                        failure.accept(param);
                 }
+            } catch (Throwable t) {
+                logger.error("cron error", t);
+            }
+        }
+
+        private GroovyClass getOrCompile(String fname) throws IOException, Exception {
+            File file = new File(fname);
+            long ts   = file.lastModified();
+        
+            GroovyClass gc = cachedGroovy;                 // fast path
+            if (gc != null && ts == cachedTimestamp)
+                return gc;
+        
+            /* slow path: recompile only when timestamp changed */
+            synchronized (COMPILE_LOCK) {
+                if (cachedGroovy == null || ts != cachedTimestamp) {
+                    cachedGroovy = new GroovyClass(false, fname);
+                    cachedTimestamp = ts;
+                }
+                return cachedGroovy;
             }
         }
 
@@ -387,7 +404,7 @@ public class Cron {
                     sb.append(c);
                 }
             }
-            return sb.length() == 0 ? null : sb.toString();
+            return sb.isEmpty() ? null : sb.toString();
         }
 
         private String getCommand() {
@@ -400,7 +417,7 @@ public class Cron {
                 atBeginning = false;
                 sb.append(c);
             }
-            return sb.length() == 0 ? null : sb.toString();
+            return sb.isEmpty() ? null : sb.toString();
         }
 
     }
