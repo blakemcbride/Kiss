@@ -292,6 +292,19 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * Test to see if the database is open.
+     *
+     * @return true if connection is open and false otherwise
+     */
+    public boolean isOpen() {
+        try {
+            return conn != null  &&  !conn.isClosed();
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    /**
      * Commit all the operations to the database since the last commit().
      * <br><br>
      * Updates to a database do not take effect until they are committed.  This method performs the commit.

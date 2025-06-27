@@ -249,18 +249,20 @@ public class MainServlet extends HttpServlet {
      * @see #closeConnection(Connection db, boolean success)
      */
     public static void closeConnection(Connection db) {
-        java.sql.Connection sconn = null;
-        try {
-            sconn = db.getSQLConnection();
-            db.close();
-        } catch (SQLException e) {
-            logger.error(e);
-        }
-        try {
-            if (sconn != null)
-                sconn.close();
-        } catch (SQLException e) {
-            logger.error(e);
+        if (db != null &&  db.isOpen()) {
+            java.sql.Connection sconn = null;
+            try {
+                sconn = db.getSQLConnection();
+                db.close();
+            } catch (SQLException e) {
+                logger.error(e);
+            }
+            try {
+                if (sconn != null)
+                    sconn.close();
+            } catch (SQLException e) {
+                logger.error(e);
+            }
         }
     }
 
@@ -273,14 +275,20 @@ public class MainServlet extends HttpServlet {
      * @see #closeConnection(Connection db)
      */
     public static void closeConnection(Connection db, boolean success) {
+        boolean doClose = true;
         try {
-            if (success)
-                db.commit();
-            else
-                db.rollback();
-            closeConnection(db);
-        } catch (SQLException e) {
-            logger.error(e);
+            if (db != null && db.isOpen()) {
+                if (success)
+                    db.commit();
+                else
+                    db.rollback();
+            } else
+                doClose = false;
+        } catch (SQLException ex) {
+            logger.error("Commit/rollback failed – continuing to close.", ex);
+        } finally {
+            if (doClose)
+                closeConnection(db);
         }
     }
 
@@ -469,7 +477,7 @@ public class MainServlet extends HttpServlet {
 
     /**
      * Sets a string to be appended to the calculated database connection string.
-     * If the database requires an '&' or ';' before any connection parameters you must include it.
+     * If the database requires an '&amp;' or ';' before any connection parameters you must include it.
      *
      * @param cp additional database connection parameters
      */
