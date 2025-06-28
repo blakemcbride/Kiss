@@ -331,12 +331,18 @@ public class ProcessServlet implements Runnable {
                 injson.put(name, value);
             }
         } else {
-            String instr;
-            try {
-                instr = request.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            try (BufferedReader br = request.getReader()) {
+                String instr = br.lines().collect(Collectors.joining(System.lineSeparator()));
                 injson = new JSONObject(instr);
-            } catch (Exception e) {
-                errorReturn(response, "Unable to parse request json", e);
+            } catch (UncheckedIOException | IOException ioe) {   // one block ok now
+                if (isTomcatClientAbort(ioe)) {
+                    logger.debug("Client closed connection – ignoring", ioe);
+                    return;
+                }
+                errorReturn(response, "I/O error reading request body", ioe);
+                return;
+            } catch (Exception e) {                             // JSON etc.
+                errorReturn(response, "Unable to parse request JSON", e);
                 return;
             }
             _className = injson.getString("_class");
@@ -903,6 +909,21 @@ public class ProcessServlet implements Runnable {
         } catch (SQLException e) {
             logger.error(e);
         }
+    }
+
+    /**
+     * I want to ignore client disconnects that were caused by the client having a bad Internet connection.
+     *
+     * @param t
+     * @return
+     */
+    private static boolean isTomcatClientAbort(Throwable t) {
+        while (t != null) {
+            if ("org.apache.catalina.connector.ClientAbortException".equals(t.getClass().getName()))
+                return true;
+            t = t.getCause();
+        }
+        return false;
     }
 
 }
