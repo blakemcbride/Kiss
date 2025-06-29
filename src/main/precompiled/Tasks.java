@@ -476,7 +476,7 @@ public class Tasks {
      */
     private static ForeignDependencies buildForeignDependencies() {
         final ForeignDependencies dep = new ForeignDependencies();
-        dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.11.1/c3p0-0.11.1.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.11.2/c3p0-0.11.2.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/" + groovyVer + "/" + groovyJar);
         dep.add(LIBS, "https://repo1.maven.org/maven2/jakarta/servlet/jakarta.servlet-api/6.1.0/jakarta.servlet-api-6.1.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.22.0/log4j-core-2.22.0.jar");
