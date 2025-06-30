@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# This script removes things you likely do not want as part of
+# your new application.  It also disconnects from GitHub so
+# that your application can be associated with your own SCMS.
+# 
+# KISS comes with a script to update your application with new
+# KISS releases.  (See the manual.)
+
+rm -rf .git .github manual notes upgrade-kiss* CONTRIBUTING.md README.md LICENSE.txt Changes.txt
+
