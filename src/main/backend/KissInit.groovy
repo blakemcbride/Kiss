@@ -4,6 +4,9 @@ import org.kissweb.restServer.UserCache
 
 class KissInit {
 
+    /**
+     * Configure the system.
+     */
     static void init() {
         MainServlet.setConnectionType Connection.ConnectionType.SQLite
         MainServlet.setHost "localhost"
@@ -22,5 +25,12 @@ class KissInit {
         // Example of how to specify a method that is allowed without authentication
     //    MainServlet.allowWithoutAuthentication("services.MyGroovyService", "addNumbers")
 
+    }
+
+    /**
+     * Code to run once the database is open but before the app is running.
+     */
+    static void init2(Connection db) {
+        // If you use db, make sure you commit.
     }
 }

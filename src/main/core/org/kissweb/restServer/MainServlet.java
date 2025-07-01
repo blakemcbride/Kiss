@@ -185,7 +185,7 @@ public class MainServlet extends HttpServlet {
         isHaiku = osName.startsWith("Haiku");
         isFreeBSD = osName.startsWith("FreeBSD");
         setApplicationPathInternal(path);
-        org.kissweb.restServer.ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, null, null, "KissInit", "init");
+        ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, "KissInit", "init");
         if (res == ProcessServlet.ExecutionReturn.Success) {
             hasDatabase = database != null  &&  !database.isEmpty();
             if (hasDatabase) {
@@ -201,6 +201,10 @@ public class MainServlet extends HttpServlet {
                 logger.info("* * * No database configured; bypassing login requirements");
         } else
             logger.error("* * * Error executing KissInit.groovy");
+
+        Connection db = MainServlet.openNewConnection();
+        (new GroovyService()).internalGroovy(null, "KissInit", "init2", db);
+        MainServlet.closeConnection(db);
 
         try {
             cron = new Cron(MainServlet.getApplicationPath() + "CronTasks/crontab",

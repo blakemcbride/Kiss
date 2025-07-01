@@ -238,31 +238,46 @@ public class GroovyService {
         return ci.gclass.invokeConstructor(args);
     }
 
-    ProcessServlet.ExecutionReturn internalGroovy(ProcessServlet ms, HttpServletResponse response, String _package, String _className, String _method) {
+    /**
+     * Execute some Groovy code unrelated to a web service.
+     * Assumes the method take no arguments.
+     *
+     * @param _package the package name
+     * @param _className the class name
+     * @param _method the static method name
+     * @param args boxed or unboxed arguments (variable number)
+     * @return
+     */
+    ProcessServlet.ExecutionReturn internalGroovy(String _package, String _className, String _method, Object ... args) {
         final String _fullClassPath = _package != null ? _package + "." + _className : _className;
         final String fileName = MainServlet.getApplicationPath() + "/" + _fullClassPath.replace(".", "/") + ".groovy";
         final GroovyClassInfo ci = loadGroovyClass(fileName);
         if (ci != null) {
-            Class<?>[] ca = {
-            };
+            Class<?>[] ca = new Class<?>[args.length];
+            for (int i=0 ; i < args.length ; i++) {
+                if (args[i] == null)
+                    ca[i] = Object.class;
+                else if (args[i] instanceof Class) {
+                    // The user is passing a class indicating the class of a null argument
+                    ca[i] = (Class<?>) args[i];
+                    args[i] = null;
+                } else
+                    ca[i] = args[i].getClass();
+            }
 
             try {
                 Method methp = ci.gclass.getMethod(_method, ca);
                 if (methp == null) {
-                    if (ms != null)
-                        ms.errorReturn(response, "Method " + _method + " not found in class " + this.getClass().getName(), null);
                     return ProcessServlet.ExecutionReturn.Error;
                 }
                 try {
                     ci.executing++;
-                    methp.invoke(null);
+                    methp.invoke(null, args);
                 } finally {
                     ci.executing--;
                 }
                 return ProcessServlet.ExecutionReturn.Success;
             } catch (Exception e) {
-                if (ms != null)
-                    ms.errorReturn(response, "Error running method " + _method + " in class " + this.getClass().getName(), e);
                 return ProcessServlet.ExecutionReturn.Error;
             }
         }
@@ -317,6 +332,14 @@ public class GroovyService {
         return ProcessServlet.ExecutionReturn.NotFound;
     }
 
+    /**
+     * Returns the Groovy class defined in the specified file.
+     * If the file has not been loaded before or has changed on disk, it is re-loaded and compiled.
+     * If it has been loaded before and hasn't changed on disk, the cached version is returned.
+     *
+     * @param fileName the Groovy file containing the class to be loaded
+     * @return a Groovy class object
+     */
     private synchronized static GroovyClassInfo loadGroovyClass(String fileName) {
         GroovyClass gclass;
         GroovyClassInfo ci;
