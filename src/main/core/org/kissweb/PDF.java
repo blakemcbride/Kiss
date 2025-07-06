@@ -2,6 +2,7 @@ package org.kissweb;
 
 
 import org.apache.log4j.Logger;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -9,6 +10,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream.AppendMode;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.util.Matrix;
@@ -33,11 +35,13 @@ import java.io.IOException;
 public class PDF {
     private final static Logger logger = Logger.getLogger(PDF.class);
 
+    private static final PDType1Font COURIER_FONT = new PDType1Font(Standard14Fonts.FontName.COURIER);
+
     private PDDocument doc;
     private PDPageContentStream contentStream = null;
     private float posx=0, posy=0;
     private float fontSize = 11f;
-    private PDFont font = PDType1Font.COURIER;
+    private PDFont font = COURIER_FONT;
     private PDPage page;
     private boolean landscape = false;
     private float pageHeight, pageWidth;
@@ -65,7 +69,7 @@ public class PDF {
      */
     public PDF(String infile, String outfile) throws IOException {
         outputFilename = outfile;
-        doc = PDDocument.load(new File(infile));
+        doc = Loader.loadPDF(new File(infile));
     }
 
     /**
@@ -548,7 +552,7 @@ public class PDF {
         float y, x;
         float yo = 16, xo = 16;  // page offsets
 
-        setFont(PDType1Font.COURIER, 7);
+        setFont(COURIER_FONT, 7);
         // left side marks
         for (y=0 ; y <= pageHeight ; y += 10)
             if (0 == y%100) {
@@ -653,7 +657,7 @@ public class PDF {
         PDF pdf = new PDF("/home/blake/Desktop/20200320 Vendor Letter KNH.pdf", "/home/blake/Desktop/res.pdf");
         pdf.getPage(0);
         //       pdf.grid();
-        pdf.setFont(PDType1Font.COURIER, 12);
+        pdf.setFont(COURIER_FONT, 12);
         pdf.textOutpx(230, 250, "Blake McBride");
         pdf.endDocument();
     }
