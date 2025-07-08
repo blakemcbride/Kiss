@@ -93,6 +93,18 @@
             });
         }
 
+        /**
+         * Load several script files in parallel.  Returns a promise that resolves when *every* script finished loading;
+         * rejects as soon as the first one fails.
+         *
+         * @param {string[]} urls – one or more absolute/relative URLs.
+         * @return {Promise<void>} – resolves when *every* script finished loading;
+         *                           rejects as soon as the first one fails.
+         */
+        function getScripts(urls) {
+            return Promise.all(urls.map(getScript));
+        }
+
         function getURLParameter(sParam) {
             const urlArgs = window.location.search.substring(1);
             const argArray = urlArgs.split('&');
@@ -106,37 +118,19 @@
 
         function startup() {
 
-            const afterLoad = function () {
-                loadScript("index.js", function () {
-                    // do nothing
-                });
-            };
-
-            let numLoaded = 0;
-
-            const loadScript = function (script, fun) {
-                if (fun)
-                    getScript(script).then(fun);
-                else {
-                    numLoaded++;
-                    getScript(script).then(function () {
-                        if (!--numLoaded)
-                            afterLoad();
-                    });
-                }
-            };
-
-            const loadUtils = function () {
-                loadScript("kiss/Utils.js");
-                loadScript("kiss/DateUtils.js");
-                loadScript("kiss/DateTimeUtils.js");
-                loadScript("kiss/TimeUtils.js");
-                loadScript("kiss/NumberUtils.js");
-                loadScript("kiss/Server.js");
-                loadScript("kiss/AGGrid.js");
-                loadScript("kiss/Editor.js");
-                loadScript("kiss/MutableString.js")
-            };
+            async function loadUtils() {
+                await getScripts(["kiss/Utils.js",
+                    "kiss/DateUtils.js",
+                    "kiss/DateTimeUtils.js",
+                    "kiss/TimeUtils.js",
+                    "kiss/NumberUtils.js",
+                    "kiss/Server.js",
+                    "kiss/AGGrid.js",
+                    "kiss/Editor.js",
+                    "kiss/MutableString.js"
+                ]);
+                getScript("index.js");
+            }
 
             $.ajaxSetup({ cache: SystemInfo.controlCache });  // utilize browser cache to the fullest when version hasn't changed
 
