@@ -72,7 +72,7 @@ public class RestServer extends RestServerBase {
              or
         setResponse(response, "text/html", htmlText);
              or
-        setResponse(response, "image/jpeg", jpehBinary);
+        setResponse(response, "image/jpeg", jpegBinary);
          */
         // ************************************************************************************************
 

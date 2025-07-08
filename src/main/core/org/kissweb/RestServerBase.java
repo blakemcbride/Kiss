@@ -14,7 +14,7 @@ import java.util.Set;
 
 /**
  * This class provides the base functionality for creating non-Kiss REST servers.
- * See <code>org.kissweb.RestServer</code> for an example.
+ * See <code>com.mycompany.RestServer</code> in the precompiled directory for an example.
  */
 public abstract class RestServerBase extends HttpServlet {
 
