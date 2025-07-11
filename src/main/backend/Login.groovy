@@ -6,8 +6,7 @@ import org.kissweb.restServer.UserCache
 import org.kissweb.restServer.UserData
 
 /**
- * Author: Blake McBride
- * Date: 12/8/21
+ * This module handles user authentication.  Passwords can be stored as plain text or as SHA256 hashes.
  */
 class Login {
 
