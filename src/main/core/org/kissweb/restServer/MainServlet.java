@@ -4,6 +4,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.kissweb.Cron;
+import org.kissweb.IniFile;
 import org.kissweb.database.Connection;
 
 import jakarta.servlet.ServletContextEvent;
@@ -17,6 +18,7 @@ import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
@@ -33,19 +35,12 @@ import java.util.Set;
 public class MainServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(MainServlet.class);
-    private static Connection.ConnectionType connectionType;
-    private static String host;                      // set by KissInit.groovy
-    private static Integer port;                     // optionally set by KissInit.groovy
-    private static String connectionParameters;      // optional string to append to the database connection string
-    private static String database;                  // set by KissInit.groovy
-    private static String user;                      // database username, set by KissInit.groovy
-    private static String password;                  // database password, set by KissInit.groovy
+    private static String databaseName;              // database name, set by application.ini
     private static String applicationPath;           // where the application files are
     private static String rootPath;                  // the root of the entire application
     private static boolean underIDE = false;
     private static ComboPooledDataSource cpds;
-    private static boolean hasDatabase;              // determined by KissInit.groovy
-    private static int maxWorkerThreads;
+    private static boolean hasDatabase;              // determined by application.ini
     private static Cron cron;
     private static final Set<String> allowedWithoutAuthentication = new HashSet<>();
     private static final Hashtable<String,Object> environment = new Hashtable<>();  // general application-specific values
@@ -76,8 +71,10 @@ public class MainServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (queueManager == null)
+        if (queueManager == null) {
+            Integer maxWorkerThreads = getEnvironmentInt("MaxWorkerThreads");
             queueManager = new org.kissweb.restServer.QueueManager(maxWorkerThreads);
+        }
         ServletOutputStream out = response.getOutputStream();
 
         queueManager.add(request, response, out);
@@ -184,10 +181,15 @@ public class MainServlet extends HttpServlet {
         isSunOS = osName.startsWith("SunOS");  // includes OpenIndiana and Solaris
         isHaiku = osName.startsWith("Haiku");
         isFreeBSD = osName.startsWith("FreeBSD");
+        Integer userInactiveSeconds = getEnvironmentInt("UserInactiveSeconds");
+        if (userInactiveSeconds != null)
+            UserCache.setInactiveUserMaxSeconds(userInactiveSeconds);
         setApplicationPathInternal(path);
         ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, "KissInit", "init");
+        String databaseType = (String) environment.get("DatabaseType");
+        databaseName = (String) environment.get("DatabaseName");
         if (res == ProcessServlet.ExecutionReturn.Success) {
-            hasDatabase = database != null  &&  !database.isEmpty();
+            hasDatabase = databaseType != null  &&  !databaseType.isEmpty()  &&  databaseName != null  &&  !databaseName.isEmpty();
             if (hasDatabase) {
                 try {
                     makeDatabaseConnection();
@@ -195,7 +197,7 @@ public class MainServlet extends HttpServlet {
                     logger.error(e);
                     System.exit(-1);
                 }
-                logger.info("* * * Database " + database + " opened successfully");
+                logger.info("* * * Database " + databaseName + " opened successfully");
             }
             else
                 logger.info("* * * No database configured; bypassing login requirements");
@@ -296,6 +298,23 @@ public class MainServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Reads an INI file and loads values from a specified section into the environment.
+     *
+     * @param file   the name of the file to read
+     * @param section the section of the INI file to read
+     * @throws IOException if an I/O error occurs while reading the file
+     */
+    public static void readIniFile(String file, String section) throws IOException {
+        IniFile ini = IniFile.load(file);
+        if (ini == null)
+            return;
+        HashMap<String,String> map = ini.getSection(section);
+        if (map != null)
+            for (String key : map.keySet())
+                environment.put(key, map.get(key));
+    }
+
     private static void success(Object p) {
         closeConnection((Connection) p, true);
     }
@@ -316,6 +335,22 @@ public class MainServlet extends HttpServlet {
         cron.cancel();
     }
 
+    /**
+     * Retrieves an environment variable by its key and converts it to an Integer.
+     * <br><br>
+     * If the environment variable is not found or is empty, returns null.
+     *
+     * @param s the key of the environment variable to retrieve
+     * @return the Integer value of the environment variable, or null if the variable
+     *         is not found or is empty
+     */
+    public static Integer getEnvironmentInt(String s) {
+        String val = (String) environment.get(s);
+        if (val == null || val.trim().isEmpty())
+            return null;
+        return Integer.valueOf(val.trim());
+    }
+
     private static void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
         Level level = logger.getLevel();
         logger.setLevel(Level.ALL);
@@ -324,13 +359,43 @@ public class MainServlet extends HttpServlet {
             return;
         }
         if (cpds == null) {
+            String host = (String) environment.get("DatabaseHost");
+            Integer port = getEnvironmentInt("DatabasePort");
+            String user = (String) environment.get("DatabaseUser");
+            String password = (String) environment.get("DatabasePassword");
             if (port == null)
-                logger.info("* * * Attempting to connect to database " + host + ":" + database + ":" + user);
+                logger.info("* * * Attempting to connect to database " + host + ":" + databaseName + ":" + user);
             else
-                logger.info("* * * Attempting to connect to database " + host + ":" + port + ":" + database + ":" + user);
-            if (connectionType == Connection.ConnectionType.SQLite  &&  database != null  &&  !database.isEmpty() &&  database.charAt(0) != '/')
-                database = applicationPath + database;
-            String cstr = Connection.makeConnectionString(connectionType, host, port, database, user, password);
+                logger.info("* * * Attempting to connect to database " + host + ":" + port + ":" + databaseName + ":" + user);
+
+            Connection.ConnectionType connectionType = null;
+            String val = (String) environment.get("DatabaseType");
+            if (val != null)
+                switch (val.toLowerCase()) {
+                    case "mysql":
+                        connectionType = Connection.ConnectionType.MySQL;
+                        break;
+                    case "sqlite":
+                        connectionType = Connection.ConnectionType.SQLite;
+                        break;
+                    case "postgresql":
+                        connectionType = Connection.ConnectionType.PostgreSQL;
+                        break;
+                    case "mssql":
+                        connectionType = Connection.ConnectionType.MicrosoftServer;
+                        break;
+                    case "oracle":
+                        connectionType = Connection.ConnectionType.Oracle;
+                        break;
+                }
+
+            if ((isSunOS || isHaiku) &&  connectionType == Connection.ConnectionType.SQLite)
+                connectionType = null;  // not supported on these platforms
+
+            if (connectionType == Connection.ConnectionType.SQLite  &&  databaseName != null  &&  !databaseName.isEmpty() &&  databaseName.charAt(0) != '/')
+                databaseName = applicationPath + databaseName;
+            String cstr = Connection.makeConnectionString(connectionType, host, port, databaseName, user, password);
+            String connectionParameters = (String) environment.get("DatabaseConnectionParameters");
             if (connectionParameters != null)
                 cstr += connectionParameters;
             Connection con;
@@ -369,133 +434,6 @@ public class MainServlet extends HttpServlet {
 
     static String getDynamicClassPath() {
         return "";
-    }
-
-    /**
-     * Sets the database connection type.
-     *
-     * @param connectionType the connection type to set
-     */
-    public static void setConnectionType(Connection.ConnectionType connectionType) {
-        MainServlet.connectionType = connectionType;
-    }
-
-    /**
-     * Gets the database connection type.
-     *
-     * @return the connection type
-     */
-    public static Connection.ConnectionType getConnectionType() {
-        return connectionType;
-    }
-
-    /**
-     * Sets the database host.
-     *
-     * @param hostp the host to set
-     */
-    public static void setHost(String hostp) {
-        host = hostp;
-    }
-
-    /**
-     * Sets the database port.
-     *
-     * @param portp the port to set
-     */
-    public static void setPort(int portp) {
-        port = portp;
-    }
-
-    /**
-     * Gets the database host.
-     *
-     * @return the host
-     */
-    public static String getHost() {
-        return host;
-    }
-
-    /**
-     * Gets the database port.
-     *
-     * @return the port
-     */
-    public static Integer getPort() {
-        return port;
-    }
-
-    /**
-     * Gets the database user.
-     *
-     * @return the user
-     */
-    public static String getUser() {
-        return user;
-    }
-
-    /**
-     * Sets the database user.
-     *
-     * @param userp the user to set
-     */
-    public static void setUser(String userp) {
-        user = userp;
-    }
-
-    /**
-     * Gets the database password.
-     *
-     * @return the password
-     */
-    public static String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets the database password.
-     *
-     * @param passwordp the password to set
-     */
-    public static void setPassword(String passwordp) {
-        password = passwordp;
-    }
-
-    /**
-     * Gets the database name.
-     *
-     * @return the database name
-     */
-    public static String getDatabase() {
-        return database;
-    }
-
-    /**
-     * Sets the database name.
-     *
-     * @param databasep the database name to set
-     */
-    public static void setDatabase(String databasep) {
-        database = databasep;
-    }
-
-    /**
-     * Sets a string to be appended to the calculated database connection string.
-     * If the database requires an '&amp;' or ';' before any connection parameters you must include it.
-     *
-     * @param cp additional database connection parameters
-     */
-    public static void setConnectionParameters(String cp) {
-        connectionParameters = cp;
-    }
-
-    /**
-     * Sets the maximum number of worker threads.
-     *
-     * @param maxThreads the maximum number of threads
-     */
-    public static void setMaxWorkerThreads(int maxThreads) {
-        maxWorkerThreads = maxThreads;
     }
 
     /**

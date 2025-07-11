@@ -350,8 +350,13 @@ file:///my/home/path/kiss/manual/jsdoc/index.html
 @anchor{Setup and Configuration}@section Setup and Configuration
 
 The system is configured by the contents of a single file:
-@*@code{src/main/backend/KissInit.groovy} A reboot of the web server
+@*@code{src/main/backend/application.ini} A reboot of the web server
 is required if any of the parameters in this file are changed.
+
+When the system starts up, the file
+@*@code{src/main/backend/KissInit.groovy} is run.  System startup code can be added here.
+A reboot of the web server
+is required if this file is changed.
 
 Given that @emph{Kiss} is for business applications, it authenticates its
 users.  In order for this to work, there is usually a database of valid

@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Orientation">
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (May 30, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (July 11, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -144,7 +144,7 @@ of the system.
 <dl class="table">
 <dt><code class="code">src/main/backend</code></dt>
 <dd><p>The vast majority of your application-specific code goes in this directory tree. 
-All files in this directory tree (except <code class="code">KissInit.groovy</code>) are hot-loaded. 
+All files in this directory tree (except <code class="code">KissInit.groovy</code> and <code class="code">application.ini</code>) are hot-loaded. 
 </p>
 <p>This directory contains the following:
 </p><dl class="table">
@@ -169,11 +169,17 @@ directory directly.  They must use a convoluted syntax enabling the
 hot-loading of those methods. An example of this exists in the
 <code class="code">services/MyGroovyService.groovy</code>.
 </p>
-
+</dd>
+<dt><code class="code">application.ini</code></dt>
+<dd><p>This file configures the system parameters.  It sets various system
+parameters such as database configuration, threads, and other system
+parameters. See <a class="xref" href="System-Setup.html#Setup-and-Configuration">Setup and Configuration</a>
+</p>
 </dd>
 <dt><code class="code">KissInit.groovy</code></dt>
-<dd><p>This file is used to configure the system. It is read once upon system
-startup and is not hot-loaded.  See <a class="xref" href="System-Setup.html#Setup-and-Configuration">Setup and Configuration</a>
+<dd><p>This file is read once upon system
+startup and is not hot-loaded.  It loads <code class="code">application.ini</code> and can be used to perform other startup tasks.
+See <a class="xref" href="System-Setup.html#Setup-and-Configuration">Setup and Configuration</a>
 </p>
 </dd>
 <dt><code class="code">Login.groovy</code></dt>
@@ -374,7 +380,7 @@ example shows the same code in all of the supported languages.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Developer Manual (May 30, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Developer Manual (July 11, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

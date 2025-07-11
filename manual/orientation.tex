@@ -71,7 +71,7 @@ All back-end code resides in the following directories:
 @table @code
 @item src/main/backend
 The vast majority of your application-specific code goes in this directory tree. 
-All files in this directory tree (except @code{KissInit.groovy}) are hot-loaded. 
+All files in this directory tree (except @code{KissInit.groovy} and @code{application.ini}) are hot-loaded. 
 
 This directory contains the following:
 @table @code
@@ -95,10 +95,15 @@ directory directly.  They must use a convoluted syntax enabling the
 hot-loading of those methods. An example of this exists in the
 @code{services/MyGroovyService.groovy}.
 
+@item application.ini
+This file configures the system parameters.  It sets various system
+parameters such as database configuration, threads, and other system
+parameters. @xref{Setup and Configuration}
 
 @item KissInit.groovy
-This file is used to configure the system. It is read once upon system
-startup and is not hot-loaded.  @xref{Setup and Configuration}
+This file is read once upon system
+startup and is not hot-loaded.  It loads @code{application.ini} and can be used to perform other startup tasks.
+@xref{Setup and Configuration}
 
 @item Login.groovy
 This is the code that validates a user's login.  It is kept here because it is common for application 

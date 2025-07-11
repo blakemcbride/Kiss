@@ -1,5 +1,7 @@
 package org.kissweb;
 
+import org.kissweb.restServer.MainServlet;
+
 import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,13 +47,23 @@ public class IniFile {
      * @throws IOException if an I/O error occurs while reading the file
      */
     public static IniFile load(String fname) throws IOException {
-        if (!(new java.io.File(fname)).exists()) {
+        fname = MainServlet.getApplicationPath() + fname;
+        if (!(new java.io.File(fname)).exists())
             return null;
-        }
         IniFile ini = new IniFile();
         ini.filename = fname;
         ini.parse(fname);
         return ini;
+    }
+
+    /**
+     * Retrieve the section of the ini file as a map.
+     *
+     * @param section the section to retrieve
+     * @return the section as a map, or null if the section doesn't exist
+     */
+    public HashMap<String,String> getSection(String section) {
+        return sections.get(section);
     }
 
     /**
