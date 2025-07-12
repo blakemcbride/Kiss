@@ -35,6 +35,11 @@ robocopy . "%~1" SimpleWebServer.jar
 robocopy . "%~1" serve
 robocopy . "%~1" serve.cmd
 robocopy . "%~1" view-log
+robocopy . "%~1" KissChangeLog.txt
+
+pushd "%~1"
+del /f /q upgrade-* 2>nul
+popd
 
 if not exist "%~1\src\main\precompiled\Tasks.java" (
     copy src\main\precompiled\Tasks.java "%~1\src\main\precompiled\Tasks.java"

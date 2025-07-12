@@ -1,0 +1,39 @@
+
+Kiss Framework Change Log
+
+This file is designed to serve two purposes:
+
+1. Provide a more detailed description of changes to the system than
+just the git log.
+
+2. Provide details you may need to upgrade the system beyond what is documented in the manual under
+Kiss Framework Updates (2.12).
+
+----------------------------------------------------------------------
+
+2025-07-11
+
+	Changed how you configure the system.  In the past,
+	configuration was done in the file named
+	src/main/backend/KissInit.groovy.  That process has been moved
+	to a file named src/main/backend/application.ini.  When
+	upgrading the system, you will need to manually reconcile
+	those two files between the virgin clone and your application.
+	
+	Added the ability to support one-way hash Sha256 encrypted
+	passwords.  The system is backward compatible with
+	non-encrypted passwords.  Both are supported simultaniously.
+	However, you must extend the length of the password column in
+	the database to 64 characters.
+	
+	Since there is no code in Kiss to add users, you will need to
+	encrypt the passwords before you write it to the SQL column.
+	You can do this from Groovy with password.sha256().
+	
+	Updated ag-grid library.  No user changes should be required.
+	
+
+2025-07-12
+
+	Updated the upgrade procedure and associated docs to make the
+	upgrade process easier.

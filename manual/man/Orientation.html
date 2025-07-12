@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Orientation">
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (July 11, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (July 12, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -200,7 +200,8 @@ files in that directory for documentation.
 <dt><code class="code">src/main/precompiled</code></dt>
 <dd>
 <p>Code in this directory tree is compiled at build time and not hot-loaded.  This directory tree is used to
-store common application-specific code that doesn&rsquo;t change particularly often.
+store common application-specific code that gets compiled into the system.  Whenever code in this directory tree
+is changed, the application must be rebuilt.
 </p>
 </dd>
 <dt><code class="code">src/main/core</code></dt>
@@ -219,7 +220,8 @@ modified by you because it will be overwritten when <em class="emph">Kiss</em> i
 front-end of the application.
 </p>
 <p>All files under the <code class="code">src/main/frontend/kiss</code> directory are part of
-the <em class="emph">Kiss</em> system and should not be modified.
+the <em class="emph">Kiss</em> system.  Nothing in this directory tree should be 
+modified by you because it will be overwritten when <em class="emph">Kiss</em> is upgraded.  (See <a class="xref" href="System-Setup.html#updates">updates</a>)
 </p>
 <p><code class="code">index.html</code> and <code class="code">index.js</code> are also part of the <em class="emph">Kiss</em>
 system and aren&rsquo;t normally modified.  They contain code that ensures
@@ -380,7 +382,7 @@ example shows the same code in all of the supported languages.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Developer Manual (July 11, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Developer Manual (July 12, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

@@ -120,7 +120,8 @@ files in that directory for documentation.
 @item src/main/precompiled
 
 Code in this directory tree is compiled at build time and not hot-loaded.  This directory tree is used to
-store common application-specific code that doesn't change particularly often.
+store common application-specific code that gets compiled into the system.  Whenever code in this directory tree
+is changed, the application must be rebuilt.
 
 @item src/main/core
 @emph{Kiss} core back-end framework code resides in this directory tree. Nothing in this directory tree should be 
@@ -135,7 +136,8 @@ Files under the @code{src/main/frontend} directory represent the
 front-end of the application.
 
 All files under the @code{src/main/frontend/kiss} directory are part of
-the @emph{Kiss} system and should not be modified.
+the @emph{Kiss} system.  Nothing in this directory tree should be 
+modified by you because it will be overwritten when @emph{Kiss} is upgraded.  (@xref{updates})
 
 @code{index.html} and @code{index.js} are also part of the @emph{Kiss}
 system and aren't normally modified.  They contain code that ensures

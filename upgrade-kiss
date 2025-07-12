@@ -11,27 +11,30 @@ if [ $# -ne 1 ]; then
 	echo You should back up your system before running this.
 	exit
 fi
-if [ ! -d $1 ]; then
-	echo Directory $1 does not exist.
+shopt -s nullglob
+if [ ! -d "$1" ]; then
+	echo Directory "$1" does not exist.
 	exit
 fi
 ./bld realclean
-pushd $1
+pushd "$1"
 ./bld realclean
 popd
-rsync -av libs/ $1/libs
-rsync -av --delete src/main/core/ $1/src/main/core
-rsync -av --delete src/main/frontend/kiss/ $1/src/main/frontend/kiss
-rm -rf $1/src/main/frontend/WEB-INF $1/src/main/frontend/META-INF
-rsync -av src/main/frontend/lib/ $1/src/main/frontend/lib
-rsync -av bld $1
-rsync -av bld.cmd $1
-rsync -av SimpleWebServer.jar $1
-rsync -av serve $1
-rsync -av serve.cmd $1
-rsync -av view-log $1
-if [ ! -e $1/src/main/precompiled/Tasks.java ]; then
-    cp src/main/precompiled/Tasks.java $1/src/main/precompiled/Tasks.java
+rsync -av libs/ "$1"/libs
+rsync -av --delete src/main/core/ "$1"/src/main/core
+rsync -av --delete src/main/frontend/kiss/ "$1"/src/main/frontend/kiss
+rm -rf "$1"/src/main/frontend/WEB-INF "$1"/src/main/frontend/META-INF
+rsync -av src/main/frontend/lib/ "$1"/src/main/frontend/lib
+rsync -av bld "$1"
+rsync -av bld.cmd "$1"
+rsync -av SimpleWebServer.jar "$1"
+rsync -av serve "$1"
+rsync -av serve.cmd "$1"
+rsync -av view-log "$1"
+rsync -av KissChangeLog.txt "$1"
+rm -f "$1"/upgrade-*
+if [ ! -e "$1"/src/main/precompiled/Tasks.java ]; then
+    cp src/main/precompiled/Tasks.java "$1"/src/main/precompiled/Tasks.java
 fi
 echo You will need to manually verify src/main/precompiled/Tasks.java
 echo by comparing the one in your git clone to the one in your application.

@@ -591,18 +591,27 @@ The process of upgrading your application is as follows:
 
 @enumerate
 @item
-Go to the directory containing a virgin clone of the @emph{Kiss} framework (not your application).
+Back up your existing application.
 @item
-Update your clone via: @code{git pull}
+In your application, make a note of the last entry in the file named @code{KissChangeLog.txt}.
+@item
+Create or update an untouched, virgin clone of the @emph{Kiss} system in another directory using 
+@code{git clone} or @code{git pull}.
 @item
 While remaining in the virgin @emph{Kiss} clone directory (and not your application directory),
 run the following command:  
 
 @example
-@code{./upgrade-kiss <path-to-your-application>} (Linux & macOS)
+@code{./upgrade-kiss <path-to-your-application>}     (Linux & macOS)
 
-@code{upgrade-kiss <path-to-your-application>} (Windows)
+@code{upgrade-kiss <path-to-your-application>}       (Windows)
 @end example
+
+@item
+Look at the file named @code{KissChangeLog.txt} in your application
+directory noting the new entries.  These new entries will describe
+what has changed in the system and what, if any, additional steps may
+be required to upgrade your system.
 
 @end enumerate
 
@@ -629,14 +638,6 @@ application-specific JAR files.  After the upgrade, be sure to manually delete a
 outdated JAR files that come with @emph{Kiss} that have been upgraded
 by this process.
 @end itemize
-
-After an update has been performed, you will want to run the following command to assure you get a clean build:
-
-@example
-./bld realclean           (Linux or macos)
-     or
-bld realclean             (Windows)
-@end example
 
 
 @section What Do I Do With It Now?
