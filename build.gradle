@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.slf4j:slf4j-simple:1.7.30'
     implementation 'org.xerial:sqlite-jdbc:3.45.0.0'
     implementation 'org.webjars.bower:jquery:3.6.3'
-    implementation 'cljsjs:ag-grid-community:25.1.0'
+    implementation 'cljsjs:ag-grid-community:34.0.1'
     implementation 'org.apache.pdfbox:pdfbox:2.0.31'
     implementation 'org.apache.pdfbox:fontbox:2.0.31'
     implementation 'com.oracle.ojdbc:ojdbc10:19.3.0.0'

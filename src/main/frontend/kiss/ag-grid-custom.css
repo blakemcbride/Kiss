@@ -1,0 +1,115 @@
+/* Custom AG-Grid styling to mimic Balham theme */
+
+/* Apply to all ag-grid instances with Quartz theme */
+.ag-theme-quartz {
+    /* Colors similar to Balham theme */
+    --ag-foreground-color: #000;
+    --ag-background-color: #fff;
+    --ag-header-background-color: #f5f7f7;
+    --ag-header-foreground-color: #000;
+    --ag-border-color: #bdc3c7;
+    --ag-row-border-color: #d9dcde;
+    
+    /* Row colors */
+    --ag-odd-row-background-color: #fcfdfe;
+    --ag-row-hover-color: #ecf0f1;
+    
+    /* Selection colors */
+    --ag-selected-row-background-color: rgba(0, 145, 234, 0.28);
+    --ag-range-selection-background-color: rgba(0, 145, 234, 0.2);
+    
+    /* Grid sizing */
+    --ag-grid-size: 4px;
+    --ag-row-height: 28px;
+    --ag-header-height: 32px;
+    --ag-cell-horizontal-padding: 12px;
+    
+    /* Font settings */
+    --ag-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    --ag-font-size: 12px;
+    
+    /* Borders and spacing */
+    --ag-borders: solid 1px var(--ag-border-color);
+    --ag-border-radius: 0;
+    
+    /* Input styling */
+    --ag-input-border-color: #95a5a6;
+    --ag-input-focus-border-color: #719ECE;
+    --ag-checkbox-checked-color: #0091ea;
+}
+
+/* Header styling */
+.ag-theme-quartz .ag-header {
+    font-weight: 600;
+    border-bottom: 1px solid var(--ag-border-color);
+}
+
+.ag-theme-quartz .ag-header-cell {
+    border-right: 1px solid rgba(189, 195, 199, 0.5);
+}
+
+.ag-theme-quartz .ag-header-cell:last-child {
+    border-right: none;
+}
+
+/* Row styling */
+.ag-theme-quartz .ag-row {
+    border-bottom: 1px solid var(--ag-row-border-color);
+}
+
+.ag-theme-quartz .ag-row:hover {
+    background-color: var(--ag-row-hover-color) !important;
+}
+
+/* Cell styling */
+.ag-theme-quartz .ag-cell {
+    border-right: 1px solid transparent;
+    line-height: var(--ag-row-height);
+}
+
+/* Remove cell borders for cleaner look */
+.ag-theme-quartz .ag-cell-focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove cell focus indicator completely */
+.ag-theme-quartz .ag-cell-focus:focus {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Center align column headers */
+.ag-theme-quartz .ag-header-cell-label {
+    justify-content: center;
+}
+
+/* Style scrollbars */
+.ag-theme-quartz .ag-body-horizontal-scroll::-webkit-scrollbar,
+.ag-theme-quartz .ag-body-vertical-scroll::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.ag-theme-quartz .ag-body-horizontal-scroll::-webkit-scrollbar-track,
+.ag-theme-quartz .ag-body-vertical-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.ag-theme-quartz .ag-body-horizontal-scroll::-webkit-scrollbar-thumb,
+.ag-theme-quartz .ag-body-vertical-scroll::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+.ag-theme-quartz .ag-body-horizontal-scroll::-webkit-scrollbar-thumb:hover,
+.ag-theme-quartz .ag-body-vertical-scroll::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Remove ag-grid watermark if present */
+.ag-theme-quartz .ag-watermark {
+    display: none !important;
+}

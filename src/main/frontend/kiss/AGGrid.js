@@ -42,6 +42,8 @@ class AGGrid {
         this.suppressHorizontalScroll = true;
         this.rowStyleFun = null;
         this.disableCtl = false;
+        this.rowDoubleClickHandler = null;
+        this.selectionChangedHandler = null;
     }
 
     /**
@@ -55,13 +57,18 @@ class AGGrid {
         const self = this;
         this.gridOptions = {
             columnDefs: this.columns,
-            rowData: this.data,
-            rowSelection: this.rowSelection,
-            suppressRowDeselection: this.rowSelection === AGGrid.MULTI_SELECTION,
+            rowData: this.data || [],
+            rowSelection: {
+                mode: this.rowSelection,
+                enableDeselection: this.rowSelection !== AGGrid.MULTI_SELECTION,
+                enableClickSelection: !this.suppressRowClickSelection,
+                checkboxes: false,
+                headerCheckbox: false
+            },
             suppressHorizontalScroll: this.suppressHorizontalScroll,
             components: this.components,
-            suppressRowClickSelection: this.suppressRowClickSelection,
             suppressRowHoverHighlight: this.suppressRowClickSelection,
+            suppressCellFocus: true,
             onRowDragEnd: function (e) {
                 if (self.dragFunction)
                     self.dragFunction(e.node.data, e.overNode.data);
@@ -71,8 +78,18 @@ class AGGrid {
             },
             getRowStyle: this.rowStyleFun,
             onGridReady: function (params) {
-                if (this.suppressHorizontalScroll) {
-                    //                   params.api.sizeColumnsToFit();
+                // Store the api reference
+                self.gridOptions.api = params.api;
+                
+                // Set any data that was added before the grid was ready
+                if (self.data && self.data.length > 0) {
+                    params.api.setGridOption('rowData', self.data);
+                    self.data = [];  // Clear internal data after setting to grid
+                }
+                
+                if (self.suppressHorizontalScroll) {
+                    if (self.gridElement.offsetParent != null)
+                        params.api.sizeColumnsToFit();
 
                     window.addEventListener('resize', function() {
                         setTimeout(function() {
@@ -80,6 +97,14 @@ class AGGrid {
                                 params.api.sizeColumnsToFit();
                         }, 100);
                     });
+                }
+                
+                // Re-apply event handlers if they were set after show() was called
+                if (self.rowDoubleClickHandler && !self.gridOptions.onRowDoubleClicked) {
+                    self.setOnRowDoubleClicked(self.rowDoubleClickHandler);
+                }
+                if (self.selectionChangedHandler && !self.gridOptions.onSelectionChanged) {
+                    self.setOnSelectionChanged(self.selectionChangedHandler);
                 }
             }/* ,
             getRowNodeId: function (data) {
@@ -89,23 +114,42 @@ class AGGrid {
             // Disable all warnings
             // suppressPropertyNamesCheck: true
         };
+        
+        // Add stored event handlers
+        if (this.rowDoubleClickHandler) {
+            this.gridOptions.onRowDoubleClicked = () => {
+                if (!Utils.suspendDepth && !self.disableCtl)
+                    self.rowDoubleClickHandler();
+            };
+        }
+        
+        if (this.selectionChangedHandler) {
+            this.gridOptions.onSelectionChanged = () => {
+                if (!self.disableCtl && self.gridOptions.api)
+                    self.selectionChangedHandler(self.gridOptions.api.getSelectedRows());
+            };
+        }
 
         if (self.keyColumn)
-            this.gridOptions.getRowId = data => data.data[self.keyColumn];
+            this.gridOptions.getRowId = data => String(data.data[self.keyColumn]);
 
         let eGridDiv = document.querySelector('#' + this.id);
         if (!eGridDiv)
             console.log("grid id " + this.id + " does not exist");
         else {
-            eGridDiv.classList.add('ag-theme-balham');
-            new agGrid.Grid(eGridDiv, this.gridOptions);
+            // Check if container has height set via CSS or inline styles
+            const computedStyle = window.getComputedStyle(eGridDiv);
+            if (computedStyle.height === '0px' || computedStyle.height === 'auto') {
+                eGridDiv.style.minHeight = '400px';
+            }
+            // Add theme class for styling
+            eGridDiv.classList.add('ag-theme-quartz');
+            agGrid.createGrid(eGridDiv, this.gridOptions);
             this.gridInstantiated = true;
         }
         if (!AGGrid.gridContext.length)
             AGGrid.newGridContext();
         AGGrid.addGrid(this);
-        if (this.gridElement.offsetParent != null)
-            this.gridOptions.api.sizeColumnsToFit();
         return this;
     }
 
@@ -167,15 +211,20 @@ class AGGrid {
      * @returns {AGGrid}
      */
     clear() {
-        this.gridOptions.api.setRowData([]);
+        if (this.gridOptions && this.gridOptions.api)
+            this.gridOptions.api.setGridOption('rowData', []);
+        else
+            this.data = [];
         return this;
     }
 
     setRowData(data) {
-        if (!this.gridOptions)
+        if (!this.gridOptions || !this.gridOptions.api)
             this.data = data;
-        else
-            this.gridOptions.api.setRowData(data);
+        else {
+            this.gridOptions.api.setGridOption('rowData', data);
+            this.data = [];  // Clear internal data after setting to grid
+        }
         return this;
     }
 
@@ -186,7 +235,7 @@ class AGGrid {
      * @returns {AGGrid}
      */
     deleteRow(id) {
-        const node = this.gridOptions.api.getRowNode(id);
+        const node = this.gridOptions.api.getRowNode(String(id));
         if (node  &&  node.data)
             this.gridOptions.api.applyTransaction({remove: [node.data]});
         return this;
@@ -232,7 +281,7 @@ class AGGrid {
      * @returns {AGGrid}
      */
     selectId(id) {
-        const node = this.gridOptions.api.getRowNode(id);
+        const node = this.gridOptions.api.getRowNode(String(id));
         if (node  &&  node.data)
             node.setSelected(true, true);
         return this;
@@ -258,10 +307,11 @@ class AGGrid {
      */
     addRecords(data) {
         data = Utils.assureArray(data);
-        if (!this.gridOptions)
+        if (!this.gridOptions || !this.gridOptions.api)
             this.data = this.data.concat(data);
         else {
             this.gridOptions.api.applyTransaction({add: data});
+            this.data = [];  // Clear internal data after adding to grid
             if (this.suppressHorizontalScroll)
                 this.resizeColumns();  // when vert scrollbar gets auto-added must resize columns
         }
@@ -277,10 +327,12 @@ class AGGrid {
      * @returns {AGGrid}
      */
     addRecord(data) {
-        if (!this.gridOptions)
+        if (!this.gridOptions || !this.gridOptions.api)
             this.data.push(data);
-        else
+        else {
             this.gridOptions.api.applyTransaction({add: [data]});
+            this.data = [];  // Clear internal data after adding to grid
+        }
         return this;
     }
 
@@ -290,7 +342,7 @@ class AGGrid {
      * @returns {AGGrid}
      */
     clearSelection() {
-        if (this.gridOptions)
+        if (this.gridOptions && this.gridOptions.api)
             this.gridOptions.api.deselectAll();
         return this;
     }
@@ -343,7 +395,7 @@ class AGGrid {
      * @returns {number}
      */
     getNumberOfRows() {
-        return this.gridOptions.api.rowModel.getRowCount();
+        return this.gridOptions.api.getModel().getRowCount();
     }
 
     /**
@@ -450,7 +502,7 @@ class AGGrid {
 
     getDataItems() {
         const dataItems = [];
-        this.gridOptions.api.rowModel.forEachNode(node => {
+        this.gridOptions.api.forEachNode(node => {
             dataItems.push(node.data);
         });
         return dataItems;
@@ -465,10 +517,15 @@ class AGGrid {
      */
     setOnSelectionChanged(fn) {
         const self = this;
-        this.gridOptions.onSelectionChanged = function () {
-            if (fn && !self.disableCtl)
-                fn(self.gridOptions.api.getSelectedRows());
-        };
+        this.selectionChangedHandler = fn;
+        
+        if (this.gridOptions && this.gridOptions.api) {
+            // Grid already created, use setGridOption to update the event handler
+            this.gridOptions.api.setGridOption('onSelectionChanged', fn ? (() => {
+                if (!self.disableCtl)
+                    fn(self.gridOptions.api.getSelectedRows());
+            }) : null);
+        }
         return this;
     }
 
@@ -480,13 +537,15 @@ class AGGrid {
      */
     setOnRowDoubleClicked(fn) {
         const self = this;
-        if (fn)
-            this.gridOptions.onRowDoubleClicked = () => {
+        this.rowDoubleClickHandler = fn;
+        
+        if (this.gridOptions && this.gridOptions.api) {
+            // Grid already created, use setGridOption to update the event handler
+            this.gridOptions.api.setGridOption('onRowDoubleClicked', fn ? (() => {
                 if (!Utils.suspendDepth && !self.disableCtl)
                     fn();
-            };
-        else
-            this.gridOptions.onRowDoubleClicked = fn;
+            }) : null);
+        }
         return this;
     }
 
@@ -496,7 +555,7 @@ class AGGrid {
      * @returns {boolean}
      */
     isEmpty() {
-        return this.gridOptions.api.rowModel.getRowCount() === 0;
+        return this.gridOptions.api.getModel().getRowCount() === 0;
     }
 
     sizeColumnsToFit() {
@@ -547,7 +606,7 @@ class AGGrid {
                 }
             ]
         };
-        const priorState = this.gridOptions.columnApi.getColumnState();
+        const priorState = this.gridOptions.api.getColumnState();
         for (let prop in priorState) {
             let val = priorState[prop];
             if (val.colId === colId) {
@@ -555,7 +614,7 @@ class AGGrid {
                 break;
             }
         }
-        this.gridOptions.columnApi.applyColumnState(state);
+        this.gridOptions.api.applyColumnState(state);
         return !hide;
     }
 
@@ -671,8 +730,8 @@ class AGGrid {
 }
 
 // class variables
-AGGrid.SINGLE_SELECTION = 'single';
-AGGrid.MULTI_SELECTION = 'multiple';
+AGGrid.SINGLE_SELECTION = 'singleRow';
+AGGrid.MULTI_SELECTION = 'multiRow';
 
 AGGrid.gridContext = [];        //  An array of arrays.  The outer array represents a stack of contexts.
                                 //  The inner array is an array of grids that'll need to be disposed.
