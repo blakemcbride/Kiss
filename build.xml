@@ -10,13 +10,13 @@
   
   <target name="builder">
     <mkdir dir="work/exploded/WEB-INF/classes"/>
-    <javac classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"
+    <javac classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"
            includeantruntime="false"
            srcdir="src/main/core"
            destdir="work/exploded/WEB-INF/classes"
            includes="org/kissweb/BuildUtils.java">
     </javac>
-    <javac classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"
+    <javac classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"
            includeantruntime="false"
            srcdir="src/main/precompiled"
            destdir="work/exploded/WEB-INF/classes"
@@ -28,7 +28,7 @@
   <target name="list-tasks" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -37,7 +37,7 @@
   <target name="start-backend" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -46,7 +46,7 @@
   <target name="stop-backend" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -55,7 +55,7 @@
   <target name="start-frontend" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -64,7 +64,7 @@
   <target name="stop-frontend" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -73,7 +73,7 @@
   <target name="build" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -82,7 +82,7 @@
   <target name="war" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -91,7 +91,7 @@
   <target name="clean" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -100,7 +100,7 @@
   <target name="realclean" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -109,7 +109,7 @@
   <target name="ideclean" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -118,7 +118,7 @@
   <target name="jar" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -127,7 +127,7 @@
   <target name="javadoc" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -136,7 +136,7 @@
   <target name="kisscmd" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -145,7 +145,7 @@
   <target name="KissGP" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -154,7 +154,7 @@
   <target name="libs" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -163,7 +163,7 @@
   <target name="setup-tomcat" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>
@@ -172,7 +172,7 @@
   <target name="unit-tests" depends="builder">
     <exec executable="java">
       <arg value="-cp"/>
-      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.14.0.jar"/>
+      <arg value="work/exploded/WEB-INF/classes:libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar:libs/commons-lang3-3.18.0.jar"/>
       <arg value="Tasks"/>
       <arg value="${ant.project.invoked-targets}"/>
     </exec>

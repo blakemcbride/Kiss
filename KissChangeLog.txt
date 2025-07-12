@@ -37,3 +37,6 @@ Kiss Framework Updates (2.12).
 
 	Updated the upgrade procedure and associated docs to make the
 	upgrade process easier.
+
+	Upgraded to commons-lang3-3.18.0.jar
+	

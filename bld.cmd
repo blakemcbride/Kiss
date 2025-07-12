@@ -21,7 +21,7 @@ if "%BUILD%"=="true" (
     if not exist work\exploded\WEB-INF\classes (
         mkdir work\exploded\WEB-INF\classes
     )
-    javac -cp "libs\commons-compress-1.27.1.jar;libs\commons-io-2.16.1.jar;libs\commons-lang3-3.14.0.jar" %SRC1% %SRC2% -d work\exploded\WEB-INF\classes
+    javac -cp "libs\commons-compress-1.27.1.jar;libs\commons-io-2.16.1.jar;libs\commons-lang3-3.18.0.jar" %SRC1% %SRC2% -d work\exploded\WEB-INF\classes
 )
 
-java -cp "work\exploded\WEB-INF\classes;libs\commons-compress-1.27.1.jar;libs\commons-io-2.16.1.jar;libs\commons-lang3-3.14.0.jar" -Dsun.security.pkcs11.enable-solaris=false Tasks %*
+java -cp "work\exploded\WEB-INF\classes;libs\commons-compress-1.27.1.jar;libs\commons-io-2.16.1.jar;libs\commons-lang3-3.18.0.jar" -Dsun.security.pkcs11.enable-solaris=false Tasks %*

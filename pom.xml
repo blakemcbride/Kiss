@@ -204,7 +204,7 @@
       <artifactId>commons-lang3</artifactId>
       <version>3.14.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/libs/commons-lang3-3.14.0.jar</systemPath>
+      <systemPath>${project.basedir}/libs/commons-lang3-3.18.0.jar</systemPath>
     </dependency>
     <dependency>
       <!-- Oracle removes mysql drivers from public downloads -->
@@ -351,7 +351,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <!-- The second arg is the "target name." -->
                   <arg value="start-backend"/>
@@ -374,7 +374,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="stop-backend"/>
                 </java>
@@ -396,7 +396,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="start-frontend"/>
                 </java>
@@ -418,7 +418,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="stop-frontend"/>
                 </java>
@@ -440,7 +440,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="build"/>
                 </java>
@@ -462,7 +462,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="war"/>
                 </java>
@@ -484,7 +484,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="clean"/>
                 </java>
@@ -506,7 +506,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="realclean"/>
                 </java>
@@ -528,7 +528,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="ideclean"/>
                 </java>
@@ -550,7 +550,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="jar"/>
                 </java>
@@ -572,7 +572,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="javadoc"/>
                 </java>
@@ -594,7 +594,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="kisscmd"/>
                 </java>
@@ -616,7 +616,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="KissGP"/>
                 </java>
@@ -638,7 +638,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="libs"/>
                 </java>
@@ -660,7 +660,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="setup-tomcat"/>
                 </java>
@@ -682,7 +682,7 @@
                     <pathelement location="work/exploded/WEB-INF/classes"/>
                     <pathelement location="libs/commons-compress-1.27.1.jar"/>
                     <pathelement location="libs/commons-io-2.16.1.jar"/>
-                    <pathelement location="libs/commons-lang3-3.14.0.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
                   </classpath>
                   <arg value="unit-tests"/>
                 </java>
