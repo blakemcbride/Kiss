@@ -202,7 +202,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.14.0</version>
+      <version>3.18.0</version>
       <scope>system</scope>
       <systemPath>${project.basedir}/libs/commons-lang3-3.18.0.jar</systemPath>
     </dependency>
