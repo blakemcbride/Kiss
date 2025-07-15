@@ -96,6 +96,7 @@ public class Connection implements AutoCloseable {
     private ConnectionType ctype;
     /** Cache of table and column information */
     private final HashMap<String,HashMap<String,ColumnInfo>> columnInfo = new HashMap<>();
+    private String schema = "public";
 
     /**
      * Create a Connection out of a pre-opened JDBC connection.
@@ -1003,12 +1004,22 @@ public class Connection implements AutoCloseable {
      * will be used if no schema is specified in a query.
      *
      * @param  schema  the schema to set
-     * @return         the modified connection
+     * @return         the previous schema
      * @throws SQLException if an error occurs setting the schema
      */
-    public Connection setSchema(String schema) throws SQLException {
-        conn.setSchema(schema);
-        return this;
+    public String setSchema(String schema) throws SQLException {
+        String oldSchema = this.schema;
+        conn.setSchema(this.schema = schema);
+        return oldSchema;
+    }
+
+    /**
+     * Retrieves the current schema set for this connection.
+     *
+     * @return the name of the schema currently in use
+     */
+    public String getSchema() {
+        return schema;
     }
 
     /**
