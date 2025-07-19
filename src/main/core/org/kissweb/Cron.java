@@ -11,6 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -46,6 +47,24 @@ public class Cron {
     }
 
     /**
+     * Start the cron process.
+     *
+     * @param crontabFileName the path to the crontab file
+     * @param getParameterWithArg method that returns the parameter passed to the Groovy cron job taking an argument
+     * @param argument the argument passed to getParameterWithArg
+     * @param success method that performs the cleanup action after a successful run of the cron job
+     * @param failure method that performs the cleanup action after a failed run of the cron job
+     * @throws IOException if there is an error reading the crontab file
+     */
+    public Cron(String crontabFileName, Function<Object,Object> getParameterWithArg, Object argument, Consumer<Object> success, Consumer<Object> failure) throws IOException {
+        //logger.setLevel(Level.INFO);
+        CronFile cronFile = new CronFile(crontabFileName, getParameterWithArg, argument, success, failure);
+        TheTimerTask ttt = new TheTimerTask(cronFile);
+        timer = new Timer();
+        timer.scheduleAtFixedRate(ttt, 0L, 60000L);
+    }
+
+    /**
      * Stop further evocation of all cron jobs.
      */
     public void cancel() {
@@ -75,7 +94,9 @@ public class Cron {
         private FileTime lastModifiedTime;
         private final String cronFileName;
         private List<CronLine> lines;
-        private final Supplier<Object> getParameter;
+        private Supplier<Object> getParameter;
+        private Function<Object,Object> getParameterWithArg;
+        private Object argument;
         private final Consumer<Object> success, failure;
 
         CronFile(String cronFileName, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) {
@@ -83,6 +104,14 @@ public class Cron {
             this.getParameter = getParameter;
             this.success = success;
             this.failure = failure;
+        }
+
+        CronFile(String cronFileName, Function<Object,Object> getParameterWithArg, Object argument, Consumer<Object> success, Consumer<Object> failure) {
+            this.cronFileName = cronFileName;
+            this.getParameterWithArg = getParameterWithArg;
+            this.success = success;
+            this.failure = failure;
+            this.argument = argument;
         }
 
         void process() throws IOException {
@@ -109,7 +138,7 @@ public class Cron {
                 line = br.readLine();
                 if (line == null)
                     break;
-                CronLine cl = CronLine.newCronLine(line, getParameter, success, failure);
+                CronLine cl = CronLine.newCronLine(line, getParameter, getParameterWithArg, argument, success, failure);
                 if (cl != null)
                     lines.add(cl);
             }
@@ -128,6 +157,8 @@ public class Cron {
         private String daysOfWeek;
         private String command;
         private Supplier<Object> getParameter;
+        private Function<Object,Object> getParameterWithArg;
+        private Object argument;
         private Consumer<Object> success, failure;
 
         private volatile GroovyClass cachedGroovy;
@@ -135,7 +166,7 @@ public class Cron {
 
         private static final Object COMPILE_LOCK = new Object();  
 
-        static CronLine newCronLine(String line, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) {
+        static CronLine newCronLine(String line, Supplier<Object> getParameter, Function<Object,Object> getParameterWithArg, Object argument, Consumer<Object> success, Consumer<Object> failure) {
             if (line == null)
                 return null;
             line = line.trim();
@@ -146,6 +177,8 @@ public class Cron {
             CronLine cl = new CronLine();
 
             cl.getParameter = getParameter;
+            cl.getParameterWithArg = getParameterWithArg;
+            cl.argument = argument;
             cl.success = success;
             cl.failure = failure;
 
@@ -189,8 +222,13 @@ public class Cron {
             try {
                 GroovyClass gc = getOrCompile(sourceFile);
                 Method methp   = gc.getMethod("start", Object.class);
-                Object param   = getParameter.get();
-        
+                Object param;
+                if (getParameterWithArg != null)
+                    param = getParameterWithArg.apply(argument);
+                else if (getParameter != null)
+                    param = getParameter.get();
+                else
+                    param = null;
                 boolean ok = false;
                 try {
                     methp.invoke(null, param); // run job
