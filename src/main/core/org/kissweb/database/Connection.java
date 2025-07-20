@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
-
 /**
  *  This class represents a connection to an SQL database.
  * <br><br>
@@ -96,7 +95,6 @@ public class Connection implements AutoCloseable {
     private ConnectionType ctype;
     /** Cache of table and column information */
     private final HashMap<String,HashMap<String,ColumnInfo>> columnInfo = new HashMap<>();
-    private String schema = "public";
 
     /**
      * Create a Connection out of a pre-opened JDBC connection.
@@ -1008,8 +1006,8 @@ public class Connection implements AutoCloseable {
      * @throws SQLException if an error occurs setting the schema
      */
     public String setSchema(String schema) throws SQLException {
-        String oldSchema = this.schema;
-        conn.setSchema(this.schema = schema);
+        String oldSchema = conn.getSchema();
+        conn.setSchema(schema);
         return oldSchema;
     }
 
@@ -1017,9 +1015,10 @@ public class Connection implements AutoCloseable {
      * Retrieves the current schema set for this connection.
      *
      * @return the name of the schema currently in use
+     * @throws SQLException if a database access error occurs
      */
-    public String getSchema() {
-        return schema;
+    public String getSchema() throws SQLException {
+        return conn.getSchema();
     }
 
     /**
