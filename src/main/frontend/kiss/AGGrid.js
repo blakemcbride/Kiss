@@ -218,6 +218,12 @@ class AGGrid {
         return this;
     }
 
+    /**
+     * Erase all existing rows and set the new rows.
+     *
+     * @param data {array} the data to display in the grid
+     * @returns {AGGrid}
+     */
     setRowData(data) {
         if (!this.gridOptions || !this.gridOptions.api)
             this.data = data;
