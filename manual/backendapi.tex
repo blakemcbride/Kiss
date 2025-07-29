@@ -283,6 +283,19 @@ GroovyService.getMethod
 
 See the @emph{Javadoc}.
 
+@subsection Exceptions
+
+@emph{Kiss} defines two exception classes named @code{KissException}
+and @code{KissWarning}.  These exceptions are designed to be thrown
+from within your web services.
+
+@code{KissWarning} is used to abort the web service due to some sort of likely user error.  An error message and possible error code are returned to the front-end.
+The front-end displays the error message in a popup and tells the web front-end that the web service failed by returning @code{_Success = false}.
+Nothing is logged on the back-end.  This was not a code error.  It is good for notices to the user that something was wrong with their data.
+
+@code{KissException} is like @code{KissWarning} except that it additionally leaves a message and stack trace on the back-end log.  This is useful
+for debugging purposes.
+
 @anchor{json}@section JSON
 
 The first two arguments to all REST methods are @code{injson} and

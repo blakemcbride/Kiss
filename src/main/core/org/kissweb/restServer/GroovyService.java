@@ -1,5 +1,7 @@
 package org.kissweb.restServer;
 
+import org.kissweb.KissException;
+import org.kissweb.KissWarning;
 import org.kissweb.StringUtils;
 import org.kissweb.database.Connection;
 import org.apache.log4j.Logger;
@@ -7,6 +9,7 @@ import org.kissweb.json.JSONObject;
 
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -314,7 +317,19 @@ public class GroovyService {
                 try {
                     logger.info("Evoking method " + _method);
                     meth.invoke(instance, injson, outjson, ms.DB, ms);
-                } catch (Exception e) {
+                } catch (InvocationTargetException e) {
+                    Throwable te = e.getTargetException();
+                    if (te instanceof KissWarning) {
+                        ms.errorReturn(response, te.getMessage(), te);
+                        return ProcessServlet.ExecutionReturn.Error;
+                    } else if (te instanceof KissException) {
+                        logger.error(te);
+                        ms.errorReturn(response, te.getMessage(), te);
+                        return ProcessServlet.ExecutionReturn.Error;
+                    }
+                    ms.errorReturn(response, te.getMessage(), te);
+                    return ProcessServlet.ExecutionReturn.Error;
+                } catch (Exception e) {  // Same as KissException
                     Throwable root = (e.getCause() != null) ? e.getCause() : e;
                     logger.error(root);
                     ms.errorReturn(response, fileName + " " + _method + "()", e.getCause());

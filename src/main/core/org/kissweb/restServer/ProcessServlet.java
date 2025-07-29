@@ -1,10 +1,8 @@
 package org.kissweb.restServer;
 
 import org.apache.log4j.Logger;
+import org.kissweb.*;
 import org.kissweb.json.JSONObject;
-import org.kissweb.FileUtils;
-import org.kissweb.FrontendException;
-import org.kissweb.LogException;
 import org.kissweb.database.Connection;
 
 import jakarta.servlet.AsyncContext;
@@ -18,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.Enumeration;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.io.OutputStreamWriter;
 
@@ -665,6 +664,8 @@ public class ProcessServlet implements Runnable {
         }
     }
 
+    private static final AtomicInteger errorNumber = new AtomicInteger(0);
+
     /**
      * Returns an error response to the front-end.
      * If the response has already been generated elsewhere, this does nothing.
@@ -676,6 +677,11 @@ public class ProcessServlet implements Runnable {
      * @param e the exception that caused the error, or null if none
      */
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
+        int errorCode = -1;
+        if (!(e instanceof KissException))
+            msg += " (" + errorNumber.incrementAndGet() + ")";
+        else
+            errorCode = ((KissException) e).getErrorCode();
         if (sseStreamingMode) {
             return;          // streaming mode active, response handled elsewhere
         }
@@ -691,8 +697,9 @@ public class ProcessServlet implements Runnable {
             JSONObject outjson = new JSONObject();
             outjson.put("_Success", false);
             outjson.put("_ErrorMessage", msg != null ? msg :(e != null ? e.getMessage() : "unspecified"));
-            outjson.put("_ErrorCode", 1);  // general error
-            log_error(msg, e);
+            outjson.put("_ErrorCode", errorCode);
+            if (!(e instanceof KissWarning))
+                log_error(msg, e);
             out.print(outjson.toString());
             out.flush();
             out.close();  //  this causes the second response

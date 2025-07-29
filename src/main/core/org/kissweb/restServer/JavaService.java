@@ -1,5 +1,7 @@
 package org.kissweb.restServer;
 
+import org.kissweb.KissException;
+import org.kissweb.KissWarning;
 import org.kissweb.database.Connection;
 import org.apache.log4j.Logger;
 import org.kissweb.json.JSONObject;
@@ -10,6 +12,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URL;
@@ -81,6 +84,18 @@ class JavaService {
             try {
                 logger.info("Evoking method " + _method);
                 meth.invoke(instance, injson, outjson, ms.DB, ms);
+            } catch (InvocationTargetException e) {
+                Throwable te = e.getTargetException();
+                if (te instanceof KissWarning) {
+                    ms.errorReturn(response, te.getMessage(), te);
+                    return ProcessServlet.ExecutionReturn.Error;
+                } else if (te instanceof KissException) {
+                    logger.error(te);
+                    ms.errorReturn(response, te.getMessage(), te);
+                    return ProcessServlet.ExecutionReturn.Error;
+                }
+                ms.errorReturn(response, te.getMessage(), te);
+                return ProcessServlet.ExecutionReturn.Error;
             } catch (Exception e) {
                 ms.errorReturn(response, fileName + " " + _method + "()", e.getCause());
                 return ProcessServlet.ExecutionReturn.Error;
