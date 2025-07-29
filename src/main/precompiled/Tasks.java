@@ -251,8 +251,8 @@ public class Tasks {
      * Unpack and install tomcat
      */
     public static void setupTomcat() {
-        if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "https://dlcdn.apache.org/tomcat/tomcat-11/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
+        if (!exists("tomcat/bin/startup.sh")) { 
+            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-11/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
             gunzip(tomcatTarFile, "tomcat", 1);
             rmTree("tomcat/webapps/ROOT");
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
