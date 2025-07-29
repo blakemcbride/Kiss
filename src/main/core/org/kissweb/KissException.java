@@ -25,6 +25,9 @@ public class KissException extends RuntimeException {
     @Serial
     private static final long serialVersionUID = -4001989355482535022L;
 
+    /**
+     * error code returned to the front-end as _ErrorCode
+     */
     private int errorCode = -1;
 
     /**
