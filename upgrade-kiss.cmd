@@ -22,7 +22,9 @@ call bld realclean
 popd
 
 robocopy libs "%~1\libs" /E
+robocopy manual "%~1\manual" /E /MIR
 robocopy src\main\core "%~1\src\main\core" /E /MIR
+robocopy src\test "%~1\src\test" /E /MIR
 robocopy src\main\frontend\kiss "%~1\src\main\frontend\kiss" /E /MIR
 
 rmdir /S /Q "%~1\src\main\frontend\WEB-INF"
@@ -31,6 +33,15 @@ rmdir /S /Q "%~1\src\main\frontend\META-INF"
 robocopy src\main\frontend\lib "%~1\src\main\frontend\lib" /E
 robocopy . "%~1" bld
 robocopy . "%~1" bld.cmd
+robocopy . "%~1" build.xml
+robocopy . "%~1" make-frontend
+robocopy . "%~1" make-frontend.cmd
+robocopy . "%~1" new-app
+robocopy . "%~1" new-app.cmd
+robocopy . "%~1" remove-backend
+robocopy . "%~1" remove-backend.cmd
+robocopy . "%~1" remove-frontend
+robocopy . "%~1" remove-frontend.cmd
 robocopy . "%~1" SimpleWebServer.jar
 robocopy . "%~1" serve
 robocopy . "%~1" serve.cmd

@@ -21,12 +21,23 @@ pushd "$1"
 ./bld realclean
 popd
 rsync -av libs/ "$1"/libs
+rsync -av --delete manual/ "$1"/manual
 rsync -av --delete src/main/core/ "$1"/src/main/core
+rsync -av --delete src/test/ "$1"/src/test
 rsync -av --delete src/main/frontend/kiss/ "$1"/src/main/frontend/kiss
 rm -rf "$1"/src/main/frontend/WEB-INF "$1"/src/main/frontend/META-INF
 rsync -av src/main/frontend/lib/ "$1"/src/main/frontend/lib
 rsync -av bld "$1"
 rsync -av bld.cmd "$1"
+rsync -av build.xml "$1"
+rsync -av make-frontend "$1"
+rsync -av make-frontend.cmd "$1"
+rsync -av new-app "$1"
+rsync -av new-app.cmd "$1"
+rsync -av remove-backend "$1"
+rsync -av remove-backend.cmd "$1"
+rsync -av remove-frontend "$1"
+rsync -av remove-frontend.cmd "$1"
 rsync -av SimpleWebServer.jar "$1"
 rsync -av serve "$1"
 rsync -av serve.cmd "$1"
