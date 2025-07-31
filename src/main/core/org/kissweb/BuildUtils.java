@@ -955,19 +955,23 @@ public class BuildUtils {
                 throw new RuntimeException("run: " + startDir + " is a file");
         }
         try {
-            String[] mscmd = new String[3];
+            ProcessBuilder pb;
             if (isWindows) {
-                mscmd[0] = "cmd.exe";
-                mscmd[1] = "/C";
-                mscmd[2] = cmd;
-                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
+                pb = new ProcessBuilder("cmd.exe", "/C", cmd);
             } else if (useShell) {
-                mscmd[0] = "bash";
-                mscmd[1] = "-c";
-                mscmd[2] = cmd;
-                proc = Runtime.getRuntime().exec(mscmd, null, sdir);
-            } else
-                proc = Runtime.getRuntime().exec(cmd, null, sdir);
+                pb = new ProcessBuilder("bash", "-c", cmd);
+            } else {
+                // Split command string into arguments for ProcessBuilder
+                String[] cmdArray = cmd.split("\\s+");
+                pb = new ProcessBuilder(cmdArray);
+            }
+            
+            if (sdir != null) {
+                pb.directory(sdir);
+            }
+            
+            proc = pb.start();
+            
             if (showOutput) {
                 (new StreamGobbler(proc.getErrorStream())).start();
                 (new StreamGobbler(proc.getInputStream())).start();
