@@ -24,6 +24,7 @@
            destdir="work/exploded/WEB-INF/classes"
            includes="org/kissweb/BuildUtils.java"
            deprecation="true">
+      <compilerarg value="-Xlint:deprecation"/>
     </javac>
     <javac classpathref="compile.classpath"
            includeantruntime="false"

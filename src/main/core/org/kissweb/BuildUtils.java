@@ -29,6 +29,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -241,7 +242,7 @@ public class BuildUtils {
             }
             try {
                 printlnIfVerbose("downloading " + target + " from " + sourcePath);
-                try (BufferedInputStream in = new BufferedInputStream(new URL(sourcePath).openStream())) {
+                try (BufferedInputStream in = new BufferedInputStream(URI.create(sourcePath).toURL().openStream())) {
                     Path cpath = Paths.get(cache);
                     Files.copy(in, cpath, StandardCopyOption.REPLACE_EXISTING);
                     Files.copy(cpath, Paths.get(target), StandardCopyOption.REPLACE_EXISTING);
@@ -1636,7 +1637,7 @@ public class BuildUtils {
      */
     public static void stopFrontendServer() {
         try {
-            URL url = new URL("http://localhost:8000/stop-server");
+            URL url = URI.create("http://localhost:8000/stop-server").toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
             connection.getInputStream().close();
