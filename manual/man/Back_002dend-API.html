@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (July 28, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 1, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -370,15 +370,23 @@ in a different class/microservice via the following methods.
 <div class="subsection-level-extent" id="Exceptions">
 <h4 class="subsection"><span>6.2.6 Exceptions<a class="copiable-link" href="#Exceptions"> &para;</a></span></h4>
 
-<p><em class="emph">Kiss</em> defines two exception classes named <code class="code">KissException</code>
-and <code class="code">KissWarning</code>.  These exceptions are designed to be thrown
-from within your web services.
+<p><em class="emph">Kiss</em> defines three exception classes named
+<code class="code">UserException</code>, <code class="code">LogException</code> and <code class="code">ServerException</code>.
+These exceptions are designed to be thrown from within your web
+services.
 </p>
-<p><code class="code">KissWarning</code> is used to abort the web service due to some sort of likely user error.  An error message and possible error code are returned to the front-end.
-The front-end displays the error message in a popup and tells the web front-end that the web service failed by returning <code class="code">_Success = false</code>.
-Nothing is logged on the back-end.  This was not a code error.  It is good for notices to the user that something was wrong with their data.
+<p><code class="code">UserException</code> is used to abort the web service due to some sort
+of user error.  An error message and possible error code are
+returned to the front-end.  The front-end displays the error message
+in a popup and tells the web front-end that the web service failed by
+returning <code class="code">_Success = false</code>.  Nothing is logged on the back-end.
+This was not an error in the back-end.  It is good for notices to the user that
+something was wrong with their data.
 </p>
-<p><code class="code">KissException</code> is like <code class="code">KissWarning</code> except that it additionally leaves a message and stack trace on the back-end log.  This is useful
+<p><code class="code">LogException</code> is like <code class="code">UserException</code> except that it additionally leaves the message on the back-end log.  This is useful
+for debugging purposes.
+</p>
+<p><code class="code">ServerException</code> is like <code class="code">UserException</code> except that it additionally leaves a message and stack trace on the back-end log.  This is useful
 for debugging purposes.
 </p>
 <a class="anchor" id="json"></a></div>
@@ -495,7 +503,7 @@ are documented in the JavaDocs.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (July 28, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (August 1, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

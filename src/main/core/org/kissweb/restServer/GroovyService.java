@@ -1,7 +1,7 @@
 package org.kissweb.restServer;
 
-import org.kissweb.KissException;
-import org.kissweb.KissWarning;
+import org.kissweb.UserException;
+import org.kissweb.ServerException;
 import org.kissweb.StringUtils;
 import org.kissweb.database.Connection;
 import org.apache.log4j.Logger;
@@ -323,10 +323,10 @@ public class GroovyService {
                     meth.invoke(instance, injson, outjson, ms.DB, ms);
                 } catch (InvocationTargetException e) {
                     Throwable te = e.getTargetException();
-                    if (te instanceof KissWarning) {
+                    if (te instanceof UserException) {
                         ms.errorReturn(response, te.getMessage(), te);
                         return ProcessServlet.ExecutionReturn.Error;
-                    } else if (te instanceof KissException) {
+                    } else if (te instanceof ServerException) {
                         logger.error(te);
                         ms.errorReturn(response, te.getMessage(), te);
                         return ProcessServlet.ExecutionReturn.Error;

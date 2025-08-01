@@ -1,9 +1,5 @@
 package org.kissweb;
 
-import java.io.PrintWriter;
-import java.io.Serial;
-import java.io.StringWriter;
-
 /**
  * Throwing a KissExceptions cause two things:
  * <p>
@@ -20,10 +16,7 @@ import java.io.StringWriter;
  * by displaying the error to the user in a popup and returning _Success = false.  The front-end also receives
  * the error message and error code from the back-end via _ErrorMessage and _ErrorCode.
  */
-public class KissException extends RuntimeException {
-
-    @Serial
-    private static final long serialVersionUID = -4001989355482535022L;
+public class ServerException extends RuntimeException {
 
     /**
      * error code returned to the front-end as _ErrorCode
@@ -37,7 +30,7 @@ public class KissException extends RuntimeException {
      * @param errorCode error code returned to the front-end as _ErrorCode
      * @param msg error message returned to the front-end as _ErrorMessage
      */
-    public KissException(int errorCode, final String msg) {
+    public ServerException(int errorCode, final String msg) {
         super(msg);
         this.errorCode = errorCode;
         try {
@@ -55,7 +48,7 @@ public class KissException extends RuntimeException {
      *
      * @param msg error message returned to the front-end as _ErrorMessage
      */
-    public KissException(final String msg) {
+    public ServerException(final String msg) {
         this(-1, msg);
     }
 

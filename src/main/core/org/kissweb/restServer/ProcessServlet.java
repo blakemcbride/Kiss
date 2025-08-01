@@ -678,10 +678,10 @@ public class ProcessServlet implements Runnable {
      */
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
         int errorCode = -1;
-        if (!(e instanceof KissException))
+        if (!(e instanceof ServerException))
             msg += " (" + errorNumber.incrementAndGet() + ")";
         else
-            errorCode = ((KissException) e).getErrorCode();
+            errorCode = ((ServerException) e).getErrorCode();
         if (sseStreamingMode) {
             return;          // streaming mode active, response handled elsewhere
         }
@@ -698,7 +698,7 @@ public class ProcessServlet implements Runnable {
             outjson.put("_Success", false);
             outjson.put("_ErrorMessage", msg != null ? msg :(e != null ? e.getMessage() : "unspecified"));
             outjson.put("_ErrorCode", errorCode);
-            if (!(e instanceof KissWarning))
+            if (!(e instanceof UserException))
                 log_error(msg, e);
             out.print(outjson.toString());
             out.flush();
@@ -837,7 +837,7 @@ public class ProcessServlet implements Runnable {
     }
 
     private void log_error(final String str, final Throwable e) {
-        if (e instanceof FrontendException)
+        if (e instanceof UserException)
             return;  //  no log
         if (e instanceof LogException)
             logger.warn(str + " " + e.getMessage());
@@ -863,7 +863,7 @@ public class ProcessServlet implements Runnable {
 
     private void checkLogin(UserData ud) throws Exception {
         if (ud == null)
-            throw new FrontendException("You have been logged out due to inactivity. Please log in again.");
+            throw new UserException("You have been logged out due to inactivity. Please log in again.");
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime timeout = ud.getLastAccessDate().plusSeconds(120);  // cache user data for 120 seconds
         if (MainServlet.hasDatabase() && now.isAfter(timeout)) {

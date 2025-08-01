@@ -285,15 +285,23 @@ See the @emph{Javadoc}.
 
 @subsection Exceptions
 
-@emph{Kiss} defines two exception classes named @code{KissException}
-and @code{KissWarning}.  These exceptions are designed to be thrown
-from within your web services.
+@emph{Kiss} defines three exception classes named
+@code{UserException}, @code{LogException} and @code{ServerException}.
+These exceptions are designed to be thrown from within your web
+services.
 
-@code{KissWarning} is used to abort the web service due to some sort of likely user error.  An error message and possible error code are returned to the front-end.
-The front-end displays the error message in a popup and tells the web front-end that the web service failed by returning @code{_Success = false}.
-Nothing is logged on the back-end.  This was not a code error.  It is good for notices to the user that something was wrong with their data.
+@code{UserException} is used to abort the web service due to some sort
+of user error.  An error message and possible error code are
+returned to the front-end.  The front-end displays the error message
+in a popup and tells the web front-end that the web service failed by
+returning @code{_Success = false}.  Nothing is logged on the back-end.
+This was not an error in the back-end.  It is good for notices to the user that
+something was wrong with their data.
 
-@code{KissException} is like @code{KissWarning} except that it additionally leaves a message and stack trace on the back-end log.  This is useful
+@code{LogException} is like @code{UserException} except that it additionally leaves the message on the back-end log.  This is useful
+for debugging purposes.
+
+@code{ServerException} is like @code{UserException} except that it additionally leaves a message and stack trace on the back-end log.  This is useful
 for debugging purposes.
 
 @anchor{json}@section JSON
