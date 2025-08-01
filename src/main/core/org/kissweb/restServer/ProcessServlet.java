@@ -847,9 +847,13 @@ public class ProcessServlet implements Runnable {
     }
 
     private String login(String user, String password, JSONObject outjson) throws Exception {
-        UserData ud;
+        UserData ud = null;
         if (MainServlet.hasDatabase()) {
-            ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password, outjson, this);
+            try {
+                ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password, outjson, this);
+            } catch (Exception e) {
+                logger.error(e);
+            }
             if (ud == null)
                 throw new LogException("Invalid login.");
         } else

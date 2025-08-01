@@ -276,6 +276,10 @@ public class GroovyService {
                 try {
                     ci.executing++;
                     methp.invoke(null, args);
+                } catch (InvocationTargetException e) {
+                    Throwable te = e.getTargetException();
+                    logger.error(te);
+                    return ProcessServlet.ExecutionReturn.Error;
                 } finally {
                     ci.executing--;
                 }

@@ -437,6 +437,86 @@ public class MainServlet extends HttpServlet {
     }
 
     /**
+     * Set the database type.
+     * This has been replaced with the application.ini file.
+     * @param connectionType
+     */
+    @Deprecated
+    public static void setConnectionType(Connection.ConnectionType connectionType) {
+        if (connectionType == Connection.ConnectionType.MySQL)
+            environment.put("DatabaseType", "mysql");
+        else if (connectionType == Connection.ConnectionType.SQLite)
+            environment.put("DatabaseType", "sqlite");
+        else if (connectionType == Connection.ConnectionType.PostgreSQL)
+            environment.put("DatabaseType", "postgresql");
+        else if (connectionType == Connection.ConnectionType.MicrosoftServer)
+            environment.put("DatabaseType", "mssql");
+        else if (connectionType == Connection.ConnectionType.Oracle)
+            environment.put("DatabaseType", "oracle");
+    }
+
+    /**
+     * Set the database host.
+     * This has been replaced with the application.ini file.
+     * @param hostp
+     */
+    @Deprecated
+    public static void setHost(String hostp) {
+        environment.put("DatabaseHost", hostp);
+    }
+
+    /**
+     * Set the database port.
+     * This has been replaced with the application.ini file.
+     * @param portp
+     */
+    @Deprecated
+    public static void setPort(int portp) {
+        environment.put("DatabasePort", String.valueOf(portp));
+    }
+
+    /**
+     * Set the database user.
+     * This has been replaced with the application.ini file.
+     * @param userp
+     */
+    @Deprecated
+    public static void setUser(String userp) {
+        environment.put("DatabaseUser", userp);
+    }
+
+    /**
+     * Set the database password.
+     * This has been replaced with the application.ini file.
+     * @param passwordp
+     */
+    @Deprecated
+    public static void setPassword(String passwordp) {
+        environment.put("DatabasePassword", passwordp);
+    }
+
+    /**
+     * Set the database name.
+     * This has been replaced with the application.ini file.
+     * @param databasep
+     * @deprecated
+     */
+    @Deprecated
+    public static void setDatabase(String databasep) {
+        environment.put("DatabaseName", databasep);
+    }
+
+    /**
+     * Set the maximum number of worker threads.
+     * This has been replaced with the application.ini file.
+     * @param maxThreads
+     */
+    @Deprecated
+    public static void setMaxWorkerThreads(int maxThreads) {
+        environment.put("MaxWorkerThreads", String.valueOf(maxThreads));
+    }
+
+    /**
      * Checks if a database is configured.
      *
      * @return true if database is configured
