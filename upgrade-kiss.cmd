@@ -53,6 +53,7 @@ del /f /q upgrade-* 2>nul
 popd
 
 if not exist "%~1\src\main\precompiled\Tasks.java" (
+    mkdir "%~1\src\main\precompiled"
     copy src\main\precompiled\Tasks.java "%~1\src\main\precompiled\Tasks.java"
 )
 echo You will need to manually verify src\main\precompiled\Tasks.java

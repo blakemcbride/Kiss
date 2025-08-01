@@ -45,6 +45,7 @@ rsync -av view-log "$1"
 rsync -av KissChangeLog.txt "$1"
 rm -f "$1"/upgrade-*
 if [ ! -e "$1"/src/main/precompiled/Tasks.java ]; then
+    mkdir -p "$1"/src/main/precompiled
     cp src/main/precompiled/Tasks.java "$1"/src/main/precompiled/Tasks.java
 fi
 echo You will need to manually verify src/main/precompiled/Tasks.java
