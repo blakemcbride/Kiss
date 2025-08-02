@@ -1,8 +1,15 @@
 <div>
 
     <style>
-        .button-left {
-            width: 115px;
+        .prompt {
+            text-align: right;
+            width: 80px;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .col1 {
+            width: 80px;
             margin-bottom: 10px;
         }
     </style>
@@ -10,13 +17,13 @@
     <h3 style="margin-top: 0;">REST Services</h3>
 
 
-    <numeric-input id="input-1" decimal-places="0" class="col1">Number 1</numeric-input>
+    <div class="prompt">Input:</div> <numeric-input id="input-1" decimal-places="0" class="col1">Number 1</numeric-input>
     <br><br>
 
-    <numeric-input id="input-2" decimal-places="0" class="col1">Number 2</numeric-input>
+    <div class="prompt">Input:</div> <numeric-input id="input-2" decimal-places="0" class="col1">Number 2</numeric-input>
     <br><br>
 
-    <numeric-input id="input-3" decimal-places="0" class="col1" disabled></numeric-input>
+    <div class="prompt">Output:</div> <numeric-input id="input-3" decimal-places="0" class="col1" disabled>result</numeric-input>
     <br><br>
 
     <push-button id="groovy-button">Call Groovy</push-button>
