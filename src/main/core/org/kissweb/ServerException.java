@@ -25,6 +25,7 @@ public class ServerException extends RuntimeException {
 
     /**
      * This method causes the error string and error code to be returned to the front-end and logged on the back-end.
+     * This also prints a backtrace on the backend log.
      * The message and return code are sent to the front-end as _ErrorMessage and _ErrorCode.
      *
      * @param errorCode error code returned to the front-end as _ErrorCode
@@ -44,6 +45,7 @@ public class ServerException extends RuntimeException {
 
     /**
      * This method causes the error string and error code to be returned to the front-end and logged on the back-end.
+     * This also prints a backtrace on the backend log.
      * The message sent to the front-end arrives as _ErrorMessage.   _ErrorCode defaults to -1.
      *
      * @param msg error message returned to the front-end as _ErrorMessage

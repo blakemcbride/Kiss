@@ -439,7 +439,7 @@ public class MainServlet extends HttpServlet {
     /**
      * Set the database type.
      * This has been replaced with the application.ini file.
-     * @param connectionType
+     * @param connectionType the database type
      */
     @Deprecated
     public static void setConnectionType(Connection.ConnectionType connectionType) {
@@ -458,7 +458,7 @@ public class MainServlet extends HttpServlet {
     /**
      * Set the database host.
      * This has been replaced with the application.ini file.
-     * @param hostp
+     * @param hostp the database host
      */
     @Deprecated
     public static void setHost(String hostp) {
@@ -468,7 +468,7 @@ public class MainServlet extends HttpServlet {
     /**
      * Set the database port.
      * This has been replaced with the application.ini file.
-     * @param portp
+     * @param portp the database port
      */
     @Deprecated
     public static void setPort(int portp) {
@@ -478,7 +478,7 @@ public class MainServlet extends HttpServlet {
     /**
      * Set the database user.
      * This has been replaced with the application.ini file.
-     * @param userp
+     * @param userp the database user
      */
     @Deprecated
     public static void setUser(String userp) {
@@ -488,7 +488,7 @@ public class MainServlet extends HttpServlet {
     /**
      * Set the database password.
      * This has been replaced with the application.ini file.
-     * @param passwordp
+     * @param passwordp the database password
      */
     @Deprecated
     public static void setPassword(String passwordp) {
@@ -498,7 +498,7 @@ public class MainServlet extends HttpServlet {
     /**
      * Set the database name.
      * This has been replaced with the application.ini file.
-     * @param databasep
+     * @param databasep the database name
      * @deprecated
      */
     @Deprecated
@@ -509,7 +509,7 @@ public class MainServlet extends HttpServlet {
     /**
      * Set the maximum number of worker threads.
      * This has been replaced with the application.ini file.
-     * @param maxThreads
+     * @param maxThreads the maximum number of worker threads
      */
     @Deprecated
     public static void setMaxWorkerThreads(int maxThreads) {

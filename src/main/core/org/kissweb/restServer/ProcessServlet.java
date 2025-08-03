@@ -678,7 +678,7 @@ public class ProcessServlet implements Runnable {
      */
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
         int errorCode = -1;
-        if (!(e instanceof ServerException))
+        if (!(e instanceof ServerException || e instanceof UserException  || e instanceof LogException))
             msg += " (" + errorNumber.incrementAndGet() + ")";
         else
             errorCode = ((ServerException) e).getErrorCode();
@@ -841,9 +841,8 @@ public class ProcessServlet implements Runnable {
             return;  //  no log
         if (e instanceof LogException)
             logger.warn(str + " " + e.getMessage());
-        else {
+        else
             logger.error(str, e);
-        }
     }
 
     private String login(String user, String password, JSONObject outjson) throws Exception {
