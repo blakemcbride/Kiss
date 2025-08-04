@@ -3,29 +3,18 @@ package org.kissweb.googleMapsAPI;
 /**
  * Class used to store the global key for Google API.
  */
-public class GoogleAPI {
+public abstract class GoogleAPI {
 
-    private static String apiKey;
     private final static int DEFAULT_DISTANCE_FEET = 100;
 
-    /**
-     * Sets the global key for Google API.
-     *
-     * @param key The key to use for the Google API.
-     */
-    public static void setAPIKey(String key) {
-        apiKey = key;
-    }
+    private final String apiKey;
 
     /**
-     * Retrieves the global key for Google API.
-     * <br><br>
-     * This will return null if the key has not been set yet.
-     *
-     * @return the global key for Google API.
+     * Create a new instance providing the Google API key for this instance.
+     * @param apiKey  Google API key
      */
-    public static String getAPIKey() {
-        return apiKey;
+    GoogleAPI(String apiKey) {
+        this.apiKey = apiKey;
     }
 
     /**
@@ -35,7 +24,7 @@ public class GoogleAPI {
      * @return the global key for Google API.
      * @throws RuntimeException if the key has not been set yet
      */
-    public static String getValidAPIKey() {
+    String getValidAPIKey() {
         if (apiKey == null || apiKey.isEmpty())
             throw new RuntimeException("Google API key is null");
         return apiKey;

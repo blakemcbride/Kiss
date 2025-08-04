@@ -15,7 +15,7 @@ import java.io.IOException;
  * Author: Blake McBride<br>
  * Date: 3/5/22
  */
-public class GoogleGeocode {
+public class GoogleGeocode extends GoogleAPI {
 
     private final static String URL = "https://maps.googleapis.com/maps/api/geocode/json";
     private JSONObject result = null;
@@ -23,17 +23,26 @@ public class GoogleGeocode {
     private static final LRUCache<String,double[]> addressCache = new LRUCache<>(200L, 0L);
 
     /**
+     * Create a new instance providing the Google API key for this instance.
+     * @param apiKey  Google API key
+     */
+    public GoogleGeocode(String apiKey) {
+        super(apiKey);
+    }
+
+    /**
      * Performs the actual query through Google.
      * You must set the API_KEY before creating this object.
      *
      * @param latitude the latitude coordinate
      * @param longitude the longitude coordinate
+     * @return this
      */
-    public GoogleGeocode(double latitude, double longitude) {
+    public GoogleGeocode get(double latitude, double longitude) {
         final URLBuilder url = new URLBuilder(URL);
         url.addParameter("latlng", latitude + "," + longitude);
         url.addParameter("sensor", "true");
-        url.addParameter("key", GoogleAPI.getValidAPIKey());
+        url.addParameter("key", getValidAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
@@ -41,6 +50,7 @@ public class GoogleGeocode {
             result = rc.jsonCall("GET", surl);
         } catch (IOException ignore) {
         }
+        return this;
     }
 
     /**
@@ -84,13 +94,13 @@ public class GoogleGeocode {
      * @return an array containing [latitude, longitude] or null if not found
      * @throws IOException if the API call fails
      */
-    public static double[] findGeoLocation(String address) throws IOException {
+    public double[] findGeoLocation(String address) throws IOException {
         double[] res = addressCache.get(address);
         if (res != null && !NumberUtils.doubleEqual(res[0], -1.0, 0.0001) && !NumberUtils.doubleEqual(res[1], -1.0, 0.0001))
             return res;
         URLBuilder url = new URLBuilder(URL);
         url.addParameter("address", address);
-        url.addParameter("key", GoogleAPI.getValidAPIKey());
+        url.addParameter("key", getValidAPIKey());
 
         RestClient rc = new RestClient();
         JSONObject response = rc.jsonCall("GET", url.build());
@@ -117,9 +127,8 @@ public class GoogleGeocode {
     /**
      * Example use of this class.
      */
-    private void example() {
-        GoogleAPI.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        GoogleGeocode grg = new GoogleGeocode(27.09876, -83.589023);
+    private static void example() {
+        GoogleGeocode grg = new GoogleGeocode("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx").get(27.09876, -83.589023);
         String cs = grg.getCityState();
     }
 

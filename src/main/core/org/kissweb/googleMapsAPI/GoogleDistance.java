@@ -16,12 +16,20 @@ import java.io.IOException;
  * Author: Blake McBride
  * Date: 3/4/22
  */
-public class GoogleDistance {
+public class GoogleDistance extends GoogleAPI {
 
     private final static String URL = "https://maps.googleapis.com/maps/api/distancematrix/json";
     private static final LRUCache<String,JSONObject> distanceCache = new LRUCache<>(200L, 0L);
     private static final JSONObject NO_RETURN = new JSONObject();
     private JSONObject elm0;
+
+    /**
+     * Create a new instance providing the Google API key for this instance.
+     * @param apiKey  Google API key
+     */
+    public GoogleDistance(String apiKey) {
+        super(apiKey);
+    }
 
     /**
      * Performs the actual query through Google.
@@ -32,17 +40,18 @@ public class GoogleDistance {
      *
      * @param add1 the first address or coordinates
      * @param add2 the second address or coordinates
+     * @return this
      */
-    public GoogleDistance(String add1, String add2) {
+    public GoogleDistance get(String add1, String add2) {
         final String bothAddresses = add1 + "|" + add2;
         elm0 = distanceCache.get(bothAddresses);
         if (elm0 != null)
-            return;
+            return this;
         final URLBuilder url = new URLBuilder(URL);
         url.addParameter("origins", add1);
         url.addParameter("destinations", add2);
         url.addParameter("units", "imperial");
-        url.addParameter("key", GoogleAPI.getValidAPIKey());
+        url.addParameter("key", getValidAPIKey());
         final String surl = url.build();
 
         RestClient rc = new RestClient();
@@ -51,6 +60,7 @@ public class GoogleDistance {
             distanceCache.add(bothAddresses, elm0=getElm0(result));
         } catch (IOException ignore) {
         }
+        return this;
     }
 
     /**
@@ -112,9 +122,8 @@ public class GoogleDistance {
     /**
      * Example use of this class.
      */
-    private void example() {
-        GoogleAPI.setAPIKey("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        GoogleDistance gm = new GoogleDistance("995 Meridian Blvd, Franklin, TN 37067", "7270 Gary Ave, Miami Beach, FL");
+    private static void example() {
+        GoogleDistance gm = new GoogleDistance("XXXXXXXXXXX").get("995 Meridian Blvd, Franklin, TN 37067", "7270 Gary Ave, Miami Beach, FL");
         int miles = gm.miles();
         int minutes = gm.minutes();
     }
