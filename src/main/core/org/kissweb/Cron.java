@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import org.kissweb.restServer.GroovyClass;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -221,7 +222,7 @@ public class Cron {
             logger.info("Running " + sourceFile);
             try {
                 GroovyClass gc = getOrCompile(sourceFile);
-                Method methp   = gc.getMethod("start", Object.class);
+                Method methp = gc.getMethod("start", Object.class);
                 Object param;
                 if (getParameterWithArg != null)
                     param = getParameterWithArg.apply(argument);
@@ -239,12 +240,15 @@ public class Cron {
                     else
                         failure.accept(param);
                 }
+            } catch (InvocationTargetException e) {
+                logger.error("Cron error: " + sourceFile, e.getTargetException());
             } catch (Throwable t) {
-                logger.error("cron error", t);
+                logger.error("Cron error: " + sourceFile, t);
             }
         }
 
         private GroovyClass getOrCompile(String fname) throws IOException, Exception {
+            fname += ".groovy";
             File file = new File(fname);
             long ts   = file.lastModified();
         
