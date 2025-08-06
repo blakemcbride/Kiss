@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.Part;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -850,6 +851,8 @@ public class ProcessServlet implements Runnable {
         if (MainServlet.hasDatabase()) {
             try {
                 ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password, outjson, this);
+            } catch (InvocationTargetException e) {
+                logger.error("Login error", e.getTargetException());
             } catch (Exception e) {
                 logger.error(e);
             }
