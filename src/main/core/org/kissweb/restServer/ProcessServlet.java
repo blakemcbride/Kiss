@@ -886,6 +886,9 @@ public class ProcessServlet implements Runnable {
         final java.sql.Connection conn = MainServlet.getCpds().getConnection();
         conn.setAutoCommit(false);  //  all SQL operations require a commit but Kiss does a commit at the end of each service
         DB = new Connection(conn);
+        String databaseSchema = (String) MainServlet.getEnvironment("DatabaseSchema");
+        if (databaseSchema != null  &&  !databaseSchema.isEmpty())
+            DB.setSchema(databaseSchema);
         logger.info("New database connection obtained - pool now busy: " + 
                    MainServlet.getCpds().getNumBusyConnections());
     }

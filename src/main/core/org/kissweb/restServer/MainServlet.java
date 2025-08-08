@@ -36,6 +36,7 @@ public class MainServlet extends HttpServlet {
 
     private static final Logger logger = Logger.getLogger(MainServlet.class);
     private static String databaseName;              // database name, set by application.ini
+    private static String databaseSchema;            // database schema, set by application.ini
     private static String applicationPath;           // where the application files are
     private static String rootPath;                  // the root of the entire application
     private static boolean underIDE = false;
@@ -188,6 +189,7 @@ public class MainServlet extends HttpServlet {
         ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, "KissInit", "init");
         String databaseType = (String) environment.get("DatabaseType");
         databaseName = (String) environment.get("DatabaseName");
+        databaseSchema = (String) environment.get("DatabaseSchema");
         if (res == ProcessServlet.ExecutionReturn.Success) {
             hasDatabase = databaseType != null  &&  !databaseType.isEmpty()  &&  databaseName != null  &&  !databaseName.isEmpty();
             if (hasDatabase) {
@@ -195,7 +197,8 @@ public class MainServlet extends HttpServlet {
                     makeDatabaseConnection();
                 } catch (PropertyVetoException | SQLException | ClassNotFoundException e) {
                     logger.error(e);
-                    System.exit(-1);
+                    //System.exit(-1);  // This kills tomcat which you do not want to do on a production system
+                    throw new RuntimeException("Initialization failed", e);
                 }
                 logger.info("* * * Database " + databaseName + " opened successfully");
             }
@@ -241,6 +244,8 @@ public class MainServlet extends HttpServlet {
             java.sql.Connection c = MainServlet.getCpds().getConnection();
             c.setAutoCommit(false);
             db = new Connection(c);
+            if (databaseSchema != null  &&  !databaseSchema.isEmpty())
+                db.setSchema(databaseSchema);
         } catch (SQLException e) {
             logger.error(e);
         }

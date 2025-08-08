@@ -30,8 +30,7 @@ public class StartupListener implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        logger.info("* * * APPLICATION STOPPED * * *");
         MainServlet.stopCron();
-        System.exit(0);
+        logger.info("* * * APPLICATION STOPPED * * *");
     }
 }
