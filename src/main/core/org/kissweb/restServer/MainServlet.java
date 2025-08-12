@@ -583,8 +583,21 @@ public class MainServlet extends HttpServlet {
         // Close C3P0 connection pool
         if (cpds != null) {
             try {
+                // First, soft reset the pool to start cleanup
+                cpds.softResetAllUsers();
+                
+                // Close the pool
                 cpds.close();
                 logger.info("C3P0 connection pool closed successfully");
+                
+                // Give C3P0 time to clean up its threads
+                // The "Resource Destroyer" thread needs time to complete
+                try {
+                    Thread.sleep(500);  // Wait 500ms for cleanup threads
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+                
             } catch (Exception e) {
                 logger.error("Error closing C3P0 connection pool", e);
             }
@@ -607,6 +620,13 @@ public class MainServlet extends HttpServlet {
             }
         } catch (Exception e) {
             logger.error("Error deregistering JDBC drivers", e);
+        }
+        
+        // Final cleanup delay to ensure all threads complete
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
         }
     }
 
