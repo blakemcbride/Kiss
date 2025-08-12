@@ -678,11 +678,15 @@ public class ProcessServlet implements Runnable {
      * @param e the exception that caused the error, or null if none
      */
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
-        int errorCode = -1;
-        if (!(e instanceof ServerException || e instanceof UserException  || e instanceof LogException))
-            msg += " (" + errorNumber.incrementAndGet() + ")";
-        else
+        int errorCode;
+        if (e instanceof ServerException)
             errorCode = ((ServerException) e).getErrorCode();
+        else if (e instanceof UserException)
+            errorCode = ((UserException) e).getErrorCode();
+        else if (e instanceof LogException)
+            errorCode = ((LogException) e).getErrorCode();
+        else
+            errorCode = -1;
         if (sseStreamingMode) {
             return;          // streaming mode active, response handled elsewhere
         }
