@@ -419,22 +419,67 @@ public class MainServlet extends HttpServlet {
 
             cpds.setDriverClass(Connection.getDriverName(connectionType));
 
-            cpds.setMinPoolSize(5);
-            cpds.setInitialPoolSize(5);
-            cpds.setAcquireIncrement(5);
-            cpds.setCheckoutTimeout(10_000);
-            cpds.setMaxStatements(180);
-            cpds.setUnreturnedConnectionTimeout(60);
-            cpds.setDebugUnreturnedConnectionStackTraces(isUnderIDE());
-            cpds.setMaxPoolSize(defaultMaxPoolSize()); // see below
+            // Configure connection pool sizes - can be overridden in application.ini
+            int minPoolSize = getEnvironmentInt("DatabaseMinPoolSize", 5);
+            int initialPoolSize = getEnvironmentInt("DatabaseInitialPoolSize", minPoolSize);
+            int maxPoolSize = getEnvironmentInt("DatabaseMaxPoolSize", defaultMaxPoolSize());
+            int acquireIncrement = getEnvironmentInt("DatabaseAcquireIncrement", 5);
+            
+            cpds.setMinPoolSize(minPoolSize);
+            cpds.setInitialPoolSize(initialPoolSize);
+            cpds.setMaxPoolSize(maxPoolSize);
+            cpds.setAcquireIncrement(acquireIncrement);
+            
+            // Performance tuning settings
+            cpds.setCheckoutTimeout(getEnvironmentInt("DatabaseCheckoutTimeout", 10_000));
+            cpds.setMaxStatements(getEnvironmentInt("DatabaseMaxStatements", 360)); // Increased for better performance
+            cpds.setMaxStatementsPerConnection(getEnvironmentInt("DatabaseMaxStatementsPerConnection", 20));
+            
+            // Connection validation settings
+            cpds.setIdleConnectionTestPeriod(getEnvironmentInt("DatabaseIdleTestPeriod", 300)); // Test idle connections every 5 minutes
+            cpds.setMaxIdleTime(getEnvironmentInt("DatabaseMaxIdleTime", 1800)); // Remove idle connections after 30 minutes
+            cpds.setTestConnectionOnCheckout(getEnvironmentBoolean("DatabaseTestOnCheckout", false));
+            cpds.setTestConnectionOnCheckin(getEnvironmentBoolean("DatabaseTestOnCheckin", true));
+            
+            // Helper threads for pool management
+            cpds.setNumHelperThreads(getEnvironmentInt("DatabaseHelperThreads", Math.min(10, Runtime.getRuntime().availableProcessors())));
+            
+            // Debug settings - disabled in production for performance
+            cpds.setUnreturnedConnectionTimeout(getEnvironmentInt("DatabaseUnreturnedTimeout", 60));
+            cpds.setDebugUnreturnedConnectionStackTraces(getEnvironmentBoolean("DatabaseDebugStackTraces", isUnderIDE()));
+            
+            logger.info("C3P0 pool configured: min=" + minPoolSize + ", initial=" + initialPoolSize + ", max=" + maxPoolSize);
         }
         logger.setLevel(level);
     }
 
     private static int defaultMaxPoolSize() {
+        // For large applications: cores * 4 is a good starting point
+        // Can be overridden with DatabaseMaxPoolSize in application.ini
+        int cores = Runtime.getRuntime().availableProcessors();
         return Integer.parseInt(
                 System.getProperty("db.maxPoolSize",
-                        String.valueOf(Runtime.getRuntime().availableProcessors() * 2)));
+                        String.valueOf(Math.max(20, cores * 4))));
+    }
+    
+    private static int getEnvironmentInt(String key, int defaultValue) {
+        Object val = environment.get(key);
+        if (val == null)
+            return defaultValue;
+        try {
+            return Integer.parseInt(val.toString());
+        } catch (NumberFormatException e) {
+            logger.warn("Invalid integer value for " + key + ": " + val);
+            return defaultValue;
+        }
+    }
+    
+    private static boolean getEnvironmentBoolean(String key, boolean defaultValue) {
+        Object val = environment.get(key);
+        if (val == null)
+            return defaultValue;
+        String str = val.toString().toLowerCase();
+        return "true".equals(str) || "yes".equals(str) || "1".equals(str);
     }
 
     static String getDynamicClassPath() {
