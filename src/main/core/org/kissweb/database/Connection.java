@@ -1013,6 +1013,8 @@ public class Connection implements AutoCloseable {
 
     /**
      * Retrieves the current schema set for this connection.
+     * If you set the schema and this method return null that means
+     * the schema was not found.
      *
      * @return the name of the schema currently in use
      * @throws SQLException if a database access error occurs
