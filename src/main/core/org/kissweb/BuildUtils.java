@@ -43,6 +43,14 @@ import java.util.zip.GZIPInputStream;
  */
 public class BuildUtils {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private BuildUtils() {
+        // Utility class - not meant to be instantiated
+    }
+
     /** The version of the BuildUtils system. */
     private static final String Version = "1.0";
     /** The cache directory for downloaded files. */
@@ -1419,6 +1427,12 @@ public class BuildUtils {
         private final ArrayList<ForeignDependency> deps = new ArrayList<>();
 
         /**
+         * Creates a new ForeignDependencies collection.
+         */
+        public ForeignDependencies() {
+        }
+
+        /**
          * Adds a foreign dependency with explicit filename.
          *
          * @param filename the filename for the dependency
@@ -1507,6 +1521,12 @@ public class BuildUtils {
      */
     public static class LocalDependencies {
         private final ArrayList<Dependency> deps = new ArrayList<>();
+
+        /**
+         * Creates a new LocalDependencies collection.
+         */
+        public LocalDependencies() {
+        }
 
         /**
          * Add a new local dependency where the compile time and runtime dependencies are the same.

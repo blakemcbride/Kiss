@@ -34,6 +34,14 @@ import java.util.Set;
 @MultipartConfig
 public class MainServlet extends HttpServlet {
 
+    /**
+     * Creates a new MainServlet instance.
+     * This servlet handles asynchronous REST requests for the Kiss framework.
+     */
+    public MainServlet() {
+        super();
+    }
+
     private static final Logger logger = Logger.getLogger(MainServlet.class);
     private static String databaseName;              // database name, set by application.ini
     private static String databaseSchema;            // database schema, set by application.ini

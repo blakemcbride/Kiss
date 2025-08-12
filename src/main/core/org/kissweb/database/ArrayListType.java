@@ -15,10 +15,19 @@ import java.util.ArrayList;
  *  <br><br>
  *  In these cases, subclasses of this abstract class must be used rather than the generic.
  *
+ * @param <T> the type of elements in this list
  * @see ArrayListInteger
  * @see ArrayListLong
  * @see ArrayListShort
  * @see ArrayListString
  */
 public abstract class ArrayListType<T> extends ArrayList<T> {
+    
+    /**
+     * Protected constructor for subclasses.
+     * This abstract class should only be instantiated through its concrete subclasses.
+     */
+    protected ArrayListType() {
+        super();
+    }
 }

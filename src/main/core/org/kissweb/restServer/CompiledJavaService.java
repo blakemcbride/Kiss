@@ -13,6 +13,13 @@ import java.lang.reflect.Method;
  */
 public class CompiledJavaService {
 
+    /**
+     * Public constructor for CompiledJavaService.
+     * Creates a new instance of the CompiledJavaService class.
+     */
+    public CompiledJavaService() {
+        // Default constructor
+    }
 
     ProcessServlet.ExecutionReturn tryCompiledJava(ProcessServlet ms, HttpServletResponse response, String _className, String _method, JSONObject injson, JSONObject outjson) {
 

@@ -25,6 +25,14 @@ import static java.time.LocalDate.of;
 public class DateUtils {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private DateUtils() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Returns the current date as an integer formatted as YYYYMMDD.
      *
      * @return the current date as an integer in YYYYMMDD format

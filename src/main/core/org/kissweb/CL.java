@@ -19,6 +19,14 @@ import java.util.function.Supplier;
  */
 public class CL {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private CL() {
+        // Utility class - not meant to be instantiated
+    }
+
     /** Constant for moving to the next question. */
     public static final int NEXT = 1;
     /** Constant for moving to the previous question. */
@@ -310,6 +318,14 @@ public class CL {
     /** Inner class for managing a sequence of questions. */
     public static class Questions {
         private static final ArrayList<Entry> questions = new ArrayList<>();
+
+        /**
+         * Private constructor to prevent instantiation of this utility class.
+         * All methods in this class are static and should be called directly.
+         */
+        private Questions() {
+            // Utility class - not meant to be instantiated
+        }
         private static final int start = 1000;
         private static int current = start;
 

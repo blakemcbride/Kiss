@@ -51,6 +51,14 @@ import org.kissweb.json.JSONTokener;
 public class CDL {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private CDL() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Get the next value. The value can be wrapped in quotes. The value can
      * be empty.
      * @param x A JSONTokener of the source text.

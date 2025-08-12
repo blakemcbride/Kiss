@@ -18,6 +18,14 @@ import static org.kissweb.StringUtils.drop;
 public class JsonTemplate {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private JsonTemplate() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Fill all occurrences of variables in the form ${VAR} with the values given in the map.
      * <br><br>
      * If <code>jstr</code> is a file name, the json will be taken from the file.

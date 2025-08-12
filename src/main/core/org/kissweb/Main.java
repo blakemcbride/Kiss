@@ -27,6 +27,14 @@ import java.util.Objects;
 public class Main {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * This class contains only the main method for command-line execution.
+     */
+    private Main() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Main entry point for the Kiss command line utility.
      *
      * @param argv command line arguments

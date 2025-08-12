@@ -12,6 +12,14 @@ import java.util.Map;
 public class GroovyUtils {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private GroovyUtils() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Executes the given Groovy code with the specified arguments and returns the result.
      *
      * <p>This method allows dynamic execution of Groovy code provided as a string.

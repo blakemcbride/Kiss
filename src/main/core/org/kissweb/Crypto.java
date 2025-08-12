@@ -18,6 +18,14 @@ import java.util.Random;
  */
 public final class Crypto {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private Crypto() {
+        // Utility class - not meant to be instantiated
+    }
+
     private static final String ALGORITHM = "AES";
     private static String defaultPassword;
     private static final Cipher cipher;

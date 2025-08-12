@@ -9,4 +9,11 @@ package org.kissweb.database;
  * @see ArrayListType
  */
 public class ArrayListShort extends ArrayListType<Short> {
+    
+    /**
+     * Constructs an empty list with an initial capacity of ten.
+     */
+    public ArrayListShort() {
+        super();
+    }
 }

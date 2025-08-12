@@ -20,6 +20,14 @@ import java.nio.file.StandardOpenOption;
  */
 public class FileUtils {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private FileUtils() {
+        // Utility class - not meant to be instantiated
+    }
+
     private final static String TempDir = "temporary";
     private final static int DaysOld = 1;
 

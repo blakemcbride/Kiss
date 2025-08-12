@@ -37,6 +37,14 @@ import java.util.Locale;
  */
 public class HTTP {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private HTTP() {
+        // Utility class - not meant to be instantiated
+    }
+
     /** Carriage return/line feed. */
     private static final String CRLF = "\r\n";
 

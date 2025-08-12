@@ -48,6 +48,12 @@ import java.text.Normalizer;
 public class StringUtils {
     
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private StringUtils() {
+    }
+    
+    /**
      * This method provides the ability to get a substring of a string by 
      * providing a starting location and a length.
      * 

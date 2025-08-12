@@ -9,6 +9,14 @@ import java.text.NumberFormat;
 public class NumberUtils {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private NumberUtils() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Correctly compare two doubles.
      *
      * @param d1 the first double value

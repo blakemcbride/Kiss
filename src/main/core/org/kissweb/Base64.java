@@ -15,6 +15,14 @@ import java.nio.ByteBuffer;
  * Date: 11/2/23
  */
 public class Base64 {
+    
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods are static and should be accessed directly through the class.
+     */
+    private Base64() {
+        // Utility class - prevent instantiation
+    }
 
     private static final java.util.Base64.Decoder base64Decoder = java.util.Base64.getDecoder();
     private static final java.util.Base64.Encoder base64Encoder = java.util.Base64.getEncoder();

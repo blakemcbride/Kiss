@@ -18,6 +18,13 @@ import java.util.Set;
  */
 public abstract class RestServerBase extends HttpServlet {
 
+    /**
+     * Protected constructor for RestServerBase.
+     * This constructor is intended to be called by subclasses.
+     */
+    protected RestServerBase() {
+    }
+
     private static final Logger logger = Logger.getLogger(RestServerBase.class);
 
     /**

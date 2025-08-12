@@ -42,6 +42,12 @@ import java.util.concurrent.CompletionException;
  */
 public class RestClient {
 
+    /**
+     * Constructs a new RestClient instance.
+     */
+    public RestClient() {
+    }
+
     private String proxyServerURL = null;
     private int proxyServerPort;
     private SSLContext context = null;

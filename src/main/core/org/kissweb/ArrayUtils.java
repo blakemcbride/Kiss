@@ -7,6 +7,14 @@ package org.kissweb;
  * Date: 11/5/23
  */
 public class ArrayUtils {
+    
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods are static and should be accessed directly through the class.
+     */
+    private ArrayUtils() {
+        // Utility class - prevent instantiation
+    }
 
     /**
      * Converts a Byte array to a byte array.

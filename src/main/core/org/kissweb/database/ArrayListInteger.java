@@ -8,4 +8,11 @@ package org.kissweb.database;
  * @see ArrayListType
  */
 public class ArrayListInteger extends ArrayListType<Integer> {
+    
+    /**
+     * Constructs an empty list with an initial capacity of ten.
+     */
+    public ArrayListInteger() {
+        super();
+    }
 }

@@ -16,6 +16,14 @@ import java.nio.file.Paths;
  */
 public class JsonPath {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private JsonPath() {
+        // Utility class - not meant to be instantiated
+    }
+
     private static final String DefaultDelimiter = "\\.";
 
     /**

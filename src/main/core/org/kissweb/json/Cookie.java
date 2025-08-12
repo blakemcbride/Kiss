@@ -37,6 +37,14 @@ import org.kissweb.json.JSONTokener;
 public class Cookie {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private Cookie() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Produce a copy of a string in which the characters '+', '%', '=', ';'
      * and control characters are replaced with "%hh". This is a gentle form
      * of URL encoding, attempting to cause as little distortion to the

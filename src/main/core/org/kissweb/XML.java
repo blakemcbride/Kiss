@@ -23,6 +23,13 @@ import javax.xml.transform.TransformerException;
  */
 public class XML {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods are static and should be accessed directly through the class.
+     */
+    private XML() {
+        // Utility class - prevent instantiation
+    }
 
     /**
      * Format an XML Document into a pretty formatted String.

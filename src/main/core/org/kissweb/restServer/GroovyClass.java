@@ -13,6 +13,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 /**
+ * Handles dynamic loading and execution of Groovy source files.
  *
  * @author Blake McBride
  *  <br><br>

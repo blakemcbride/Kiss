@@ -34,6 +34,15 @@ import java.util.Properties;
  * @version 2015-05-05
  */
 public class Property {
+
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private Property() {
+        // Utility class - not meant to be instantiated
+    }
+
     /**
      * Converts a property file object into a JSONObject. The property file object is a table of name value pairs.
      * @param properties java.util.Properties object to convert

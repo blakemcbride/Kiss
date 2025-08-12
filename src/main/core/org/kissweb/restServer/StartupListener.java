@@ -12,6 +12,12 @@ import jakarta.servlet.ServletContextListener;
  */
 public class StartupListener implements ServletContextListener {
 
+    /**
+     * Constructs a new StartupListener instance.
+     */
+    public StartupListener() {
+    }
+
     private static final Logger logger = Logger.getLogger(StartupListener.class);
 
     /**

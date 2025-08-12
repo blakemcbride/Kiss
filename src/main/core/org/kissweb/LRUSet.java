@@ -7,6 +7,8 @@ package org.kissweb;
  * <br><br>
  * Author: Blake McBride<br>
  * Date: 3/5/22
+ *
+ * @param <K> the type of keys maintained by this set
  */
 public class LRUSet<K> extends LRUCache<K, Object> {
     /**

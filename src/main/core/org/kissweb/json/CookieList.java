@@ -33,6 +33,14 @@ SOFTWARE.
 public class CookieList {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private CookieList() {
+        // Utility class - not meant to be instantiated
+    }
+
+    /**
      * Convert a cookie list into a JSONObject. A cookie list is a sequence
      * of name/value pairs. The names are separated from the values by '='.
      * The pairs are separated by ';'. The names and the values

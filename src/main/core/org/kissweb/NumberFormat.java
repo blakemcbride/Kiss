@@ -40,6 +40,14 @@ import java.util.Collections;
  */
 public class NumberFormat {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private NumberFormat() {
+        // Utility class - not meant to be instantiated
+    }
+
     private static final char[] alpha = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
     /**

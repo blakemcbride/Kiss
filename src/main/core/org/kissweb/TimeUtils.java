@@ -14,6 +14,12 @@ import java.util.TimeZone;
 public class TimeUtils {
 
     /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private TimeUtils() {
+    }
+
+    /**
      * Returns the current time of day in the format HHMM since midnight.
      *
      * @return the current time as an int formatted as HHMM

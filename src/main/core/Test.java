@@ -16,6 +16,12 @@ import java.util.HashMap;
 public class Test {
 
     /**
+     * Constructs a new Test instance.
+     */
+    public Test() {
+    }
+
+    /**
      * Main method for testing database operations.
      *
      * @param args command line arguments

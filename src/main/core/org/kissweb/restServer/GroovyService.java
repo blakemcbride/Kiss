@@ -19,6 +19,14 @@ import java.util.*;
  */
 public class GroovyService {
 
+    /**
+     * Public constructor for GroovyService.
+     * Creates a new instance of the GroovyService class.
+     */
+    public GroovyService() {
+        // Default constructor
+    }
+
     private static final Logger logger = Logger.getLogger(GroovyService.class);
 
     private static final HashMap<String, GroovyClassInfo> groovyClassCache = new HashMap<>();

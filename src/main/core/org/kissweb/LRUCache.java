@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
  * <br><br>
  * Author: Blake McBride<br>
  * Date: 3/5/22
+ *
+ * @param <K> the type of keys maintained by this cache
+ * @param <V> the type of mapped values
  */
 public class LRUCache<K,V> {
 

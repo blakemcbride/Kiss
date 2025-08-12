@@ -13,6 +13,12 @@ import java.util.Hashtable;
  */
 public class UserCache {
 
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     */
+    private UserCache() {
+    }
+
     private static final Hashtable<String, UserData> uuidTable = new Hashtable<>();
     private static LocalDateTime lastPurge = LocalDateTime.now();
     private static int inactiveUserMaxSeconds;

@@ -36,6 +36,15 @@ import java.util.Iterator;
  */
 @SuppressWarnings("boxing")
 public class XML {
+    
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods are static and should be accessed directly through the class.
+     */
+    private XML() {
+        // Utility class - prevent instantiation
+    }
+    
     /** The Character '&amp;'. */
     public static final Character AMP = '&';
 

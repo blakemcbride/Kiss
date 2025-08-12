@@ -34,6 +34,15 @@ SOFTWARE.
  * @version 2016-01-30
  */
 public class JSONML {
+
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods in this class are static and should be called directly.
+     */
+    private JSONML() {
+        // Utility class - not meant to be instantiated
+    }
+
     /**
      * Parse XML values and store them in a JSONArray.
      * @param x The XMLTokener containing the source string.

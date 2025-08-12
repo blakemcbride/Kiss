@@ -13,6 +13,14 @@ import static org.kissweb.CL.*;
  */
 public class CLExample {
 
+    /**
+     * Private constructor to prevent instantiation of this example class.
+     * This class contains only static methods and serves as a demonstration.
+     */
+    private CLExample() {
+        // Example class - not meant to be instantiated
+    }
+
     private static int NAME = CL.Questions.add(CLExample::getName);
     private static int AGE = CL.Questions.add(CLExample::getAge);
     private static int YEAR = CL.Questions.add(CLExample::getDate);

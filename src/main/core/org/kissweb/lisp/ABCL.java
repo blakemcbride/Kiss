@@ -16,6 +16,15 @@ import java.util.Set;
  * @author Blake McBride
  */
 public class ABCL {
+    
+    /**
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods are static and should be accessed directly through the class.
+     */
+    private ABCL() {
+        // Utility class - prevent instantiation
+    }
+    
     private static Interpreter interpreter;
     private static boolean invertCase = false;
     private static Function makeWebServiceArgs;
