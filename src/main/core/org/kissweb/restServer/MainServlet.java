@@ -575,4 +575,39 @@ public class MainServlet extends HttpServlet {
         return environment.get(key);
     }
 
+    /**
+     * Properly cleanup database resources on shutdown.
+     * This method closes the C3P0 connection pool and deregisters JDBC drivers.
+     */
+    static void cleanupDatabaseResources() {
+        // Close C3P0 connection pool
+        if (cpds != null) {
+            try {
+                cpds.close();
+                logger.info("C3P0 connection pool closed successfully");
+            } catch (Exception e) {
+                logger.error("Error closing C3P0 connection pool", e);
+            }
+            cpds = null;
+        }
+
+        // Deregister JDBC drivers to prevent memory leaks
+        try {
+            java.util.Enumeration<java.sql.Driver> drivers = java.sql.DriverManager.getDrivers();
+            while (drivers.hasMoreElements()) {
+                java.sql.Driver driver = drivers.nextElement();
+                if (driver.getClass().getClassLoader() == MainServlet.class.getClassLoader()) {
+                    try {
+                        java.sql.DriverManager.deregisterDriver(driver);
+                        logger.info("Deregistered JDBC driver: " + driver.getClass().getName());
+                    } catch (java.sql.SQLException e) {
+                        logger.error("Error deregistering driver " + driver.getClass().getName(), e);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error deregistering JDBC drivers", e);
+        }
+    }
+
 }

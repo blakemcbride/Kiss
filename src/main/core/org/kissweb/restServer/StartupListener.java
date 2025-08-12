@@ -31,6 +31,7 @@ public class StartupListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         MainServlet.stopCron();
+        MainServlet.cleanupDatabaseResources();
         logger.info("* * * APPLICATION STOPPED * * *");
     }
 }
