@@ -687,4 +687,25 @@ public class MainServlet extends HttpServlet {
         }
     }
 
+    /**
+     * Called by the servlet container when the servlet is being taken out of service.
+     * This method properly shuts down the QueueManager thread pool to prevent memory leaks.
+     */
+    @Override
+    public void destroy() {
+        logger.info("MainServlet destroy() called - shutting down resources...");
+        
+        // Shutdown the QueueManager thread pool
+        if (queueManager != null) {
+            queueManager.shutdown();
+            queueManager = null;
+        }
+        
+        // Cleanup database resources
+        cleanupDatabaseResources();
+        
+        logger.info("MainServlet destroy() completed");
+        super.destroy();
+    }
+
 }
