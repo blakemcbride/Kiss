@@ -427,11 +427,12 @@ public class MainServlet extends HttpServlet {
 
             cpds.setDriverClass(Connection.getDriverName(connectionType));
 
-            // Configure connection pool sizes - can be overridden in application.ini
-            int minPoolSize = getEnvironmentInt("DatabaseMinPoolSize", 5);
-            int initialPoolSize = getEnvironmentInt("DatabaseInitialPoolSize", minPoolSize);
+            // Configure connection pool sizes based on CPU count - can be overridden in application.ini
+            int cores = Runtime.getRuntime().availableProcessors();
+            int minPoolSize = getEnvironmentInt("DatabaseMinPoolSize", Math.max(2, cores));
+            int initialPoolSize = getEnvironmentInt("DatabaseInitialPoolSize", Math.max(minPoolSize, cores * 2));
             int maxPoolSize = getEnvironmentInt("DatabaseMaxPoolSize", defaultMaxPoolSize());
-            int acquireIncrement = getEnvironmentInt("DatabaseAcquireIncrement", 5);
+            int acquireIncrement = getEnvironmentInt("DatabaseAcquireIncrement", Math.max(2, cores / 2));
             
             cpds.setMinPoolSize(minPoolSize);
             cpds.setInitialPoolSize(initialPoolSize);
@@ -456,18 +457,21 @@ public class MainServlet extends HttpServlet {
             cpds.setUnreturnedConnectionTimeout(getEnvironmentInt("DatabaseUnreturnedTimeout", 60));
             cpds.setDebugUnreturnedConnectionStackTraces(getEnvironmentBoolean("DatabaseDebugStackTraces", isUnderIDE()));
             
-            logger.info("C3P0 pool configured: min=" + minPoolSize + ", initial=" + initialPoolSize + ", max=" + maxPoolSize);
+            logger.info("C3P0 pool configured (CPU cores=" + cores + "): min=" + minPoolSize + ", initial=" + initialPoolSize + ", max=" + maxPoolSize + ", increment=" + acquireIncrement);
         }
         logger.setLevel(level);
     }
 
     private static int defaultMaxPoolSize() {
-        // For large applications: cores * 4 is a good starting point
+        // Default max pool size based on CPU cores
+        // Formula: cores * 4 with a minimum of 20 connections
+        // This provides good throughput for most database workloads
         // Can be overridden with DatabaseMaxPoolSize in application.ini
         int cores = Runtime.getRuntime().availableProcessors();
+        int calculated = cores * 4;
         return Integer.parseInt(
                 System.getProperty("db.maxPoolSize",
-                        String.valueOf(Math.max(20, cores * 4))));
+                        String.valueOf(Math.max(20, calculated))));
     }
     
     private static int getEnvironmentInt(String key, int defaultValue) {
