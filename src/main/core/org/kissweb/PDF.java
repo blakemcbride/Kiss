@@ -372,7 +372,7 @@ public class PDF {
             PDImageXObject pdImage = PDImageXObject.createFromFile(filename, doc);
             contentStream.drawImage(pdImage, xpos, pageHeight-ypos, pdImage.getWidth()*scale, pdImage.getHeight()*scale);
         } catch (IOException e) {
-            logger.error("Error", e);
+            logger.error("Error processing " + filename, e);
         }
     }
 
@@ -415,7 +415,7 @@ public class PDF {
             float height = width * aspectRatio;
             contentStream.drawImage(pdImage, xpos, pageHeight - ypos, width, height);
         } catch (IOException e) {
-            logger.error("Error", e);
+            logger.error("Error processing " + filename, e);
         }
     }
 
@@ -435,7 +435,7 @@ public class PDF {
             float width = height * aspectRatio;
             contentStream.drawImage(pdImage, xpos, pageHeight - ypos, width, height);
         } catch (IOException e) {
-            logger.error("Error", e);
+            logger.error("Error processing " + filename, e);
         }
     }
 
