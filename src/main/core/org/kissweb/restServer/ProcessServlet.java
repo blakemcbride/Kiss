@@ -334,9 +334,18 @@ public class ProcessServlet implements Runnable {
             try (BufferedReader br = request.getReader()) {
                 String instr = br.lines().collect(Collectors.joining(System.lineSeparator()));
                 injson = new JSONObject(instr);
-            } catch (UncheckedIOException | IOException ioe) {   // one block ok now
+            } catch (UncheckedIOException uioe) {
+                // Handle client abort wrapped in UncheckedIOException
+                if (isTomcatClientAbort(uioe)) {
+                    logger.debug("Client closed connection - ignoring", uioe);
+                    return;
+                }
+                errorReturn(response, "I/O error reading request body", uioe);
+                return;
+            } catch (IOException ioe) {
+                // Handle direct IOException client aborts
                 if (isTomcatClientAbort(ioe)) {
-                    logger.debug("Client closed connection – ignoring", ioe);
+                    logger.debug("Client closed connection - ignoring", ioe);
                     return;
                 }
                 errorReturn(response, "I/O error reading request body", ioe);
