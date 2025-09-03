@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Introduction">
 <div class="nav-panel">
 <p>
-Next: <a href="System-Setup.html" accesskey="n" rel="next">System Setup</a>, Previous: <a href="index.html" accesskey="p" rel="prev">Kiss Developer Manual (August 6, 2025)</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (August 6, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="System-Setup.html" accesskey="n" rel="next">System Setup</a>, Previous: <a href="index.html" accesskey="p" rel="prev">Kiss Developer Manual (September 3, 2025)</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (September 3, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -185,12 +185,13 @@ the system can better scale.
 <li><a href="#Writing-Sophisticated-Applications" accesskey="1">Writing Sophisticated Applications</a></li>
 <li><a href="#Kiss-Highlights" accesskey="2"><em class="emph">Kiss</em> Highlights</a></li>
 <li><a href="#Supported-Environments" accesskey="3">Supported Environments</a></li>
-<li><a href="#HTML-component-usage" accesskey="4">HTML component usage</a></li>
-<li><a href="#System-Maturity-And-Stability" accesskey="5">System Maturity And Stability</a></li>
-<li><a href="#Getting-All-Source-Code" accesskey="6">Getting All Source Code</a></li>
-<li><a href="#Support_002c-Contact_002c-And-Links" accesskey="7">Support, Contact, And Links</a></li>
-<li><a href="#License" accesskey="8">License</a></li>
-<li><a href="#Acknowledgments" accesskey="9">Acknowledgments</a></li>
+<li><a href="#REST-vs_002e-JSON_002dRPC" accesskey="4">REST vs. JSON-RPC</a></li>
+<li><a href="#HTML-component-usage" accesskey="5">HTML component usage</a></li>
+<li><a href="#System-Maturity-And-Stability" accesskey="6">System Maturity And Stability</a></li>
+<li><a href="#Getting-All-Source-Code" accesskey="7">Getting All Source Code</a></li>
+<li><a href="#Support_002c-Contact_002c-And-Links" accesskey="8">Support, Contact, And Links</a></li>
+<li><a href="#License" accesskey="9">License</a></li>
+<li><a href="#Acknowledgments">Acknowledgments</a></li>
 </ul>
 <div class="section-level-extent" id="Writing-Sophisticated-Applications">
 <h3 class="section"><span>1.1 Writing Sophisticated Applications<a class="copiable-link" href="#Writing-Sophisticated-Applications"> &para;</a></span></h3>
@@ -403,12 +404,63 @@ framework:
 <p>The system is tested with Java versions 17, and 21.  Any Java version above 17 
 is expected to work.
 </p>
-
-
 </div>
+</div>
+<div class="section-level-extent" id="REST-vs_002e-JSON_002dRPC">
+<h3 class="section"><span>1.4 REST vs. JSON-RPC<a class="copiable-link" href="#REST-vs_002e-JSON_002dRPC"> &para;</a></span></h3>
+
+<p>Throughout this manual and the entire <em class="emph">Kiss</em> system, the
+communications mechanism between the front-end and back-end is referred to as
+<em class="emph">REST</em>.  In fact, this is not true.  The truth is that all of the
+communications between the back-end and front-end are more correctly
+termed <em class="emph">JSON-RPC</em>. <a class="footnote" id="DOCF3" href="#FOOT3"><sup>3</sup></a>
+The reasons for this misnomer are as follows:
+</p>
+<ul class="itemize mark-bullet">
+<li>The term <em class="emph">REST</em> is far better understood in the industry.
+</li><li>The difference between the two is small.  
+</li><li>They both send and receive data over standard <em class="emph">HTTP</em> calls.
+</li><li><em class="emph">JSON-RPC</em> is built on a subset of <code class="code">REST</code>.
+</li></ul>
+
+<p>The following describes the differences between <em class="emph">REST</em> and <em class="emph">JSON-RPC</em>:
+</p>
+<ol class="enumerate">
+<li> <em class="emph">REST</em> is more <em class="emph">CRUD</em> oriented; <em class="emph">JSON-RPC</em> is more like a generic remote function call.
+</li><li> There are two types of errors that can occur when the front-end calls a back-end service as follows:
+<dl class="table">
+<dt><code class="code">Internet communications error</code></dt>
+<dd><p>Were the front-end and back-end able to communicate, or was there some sort of Internet issue?
+</p></dd>
+<dt><code class="code">Operation failure</code></dt>
+<dd><p>The front-end and back-end were able to communicate, but the requested operation (like updating an employee record) failed for some application-specific reason.
+</p></dd>
+</dl>
+<p><em class="emph">REST</em> utilizes standard <em class="emph">HTTP</em> return codes to indicate all success or failure operations.  <em class="emph">JSON-RPC</em> utilizes standard <code class="code">HTTP</code> return codes to indicate the success or failure of the Internet communications, but
+error codes for the operations are returned as part of the returned value rather than an <code class="code">HTTP</code> error code.  
+</p>
+<p>An operation may fail for nearly an infinite number of operation-specific reasons.  Trying to map these reasons into a fixed set of standard <em class="emph">HTTP</em> error codes is not possible.  Therefore, in essence, the <em class="emph">JSON-RPC</em> call
+uses the <em class="emph">HTTP</em> error codes to indicate communications failures but uses internal operation-specific error codes to indicate operation failures.
+</p>
+<p>Therefore, if the communication between the front-end and back-end succeeded but the operation failed, <em class="emph">JSON-RPC</em> would return an <em class="emph">HTTP</em> success code.  The operation error would be returned as part of the return value.
+</p></li><li> <em class="emph">REST</em> utilizes standard <em class="emph">HTTP</em> operations such as
+<em class="emph">GET</em>, <em class="emph">PUT</em>, <em class="emph">DELETE</em>, <em class="emph">POST</em>, etc.  The problem
+with this is that if you issue a <em class="emph">GET</em> operation to get some data
+and the data subsequently changes because of some other user, and then
+you issue another <em class="emph">GET</em> operation, the <em class="emph">REST</em> call will return the old, cached data.
+
+<p><em class="emph">JSON-RPC</em> always uses the <em class="emph">POST</em> call for all operations so that no data is cached on the front-end.  This means a call to get the same data will return the latest data rather than the old, cached data.
+</p>
+</li><li> <em class="emph">REST</em> is limited to the operations predefined by the <em class="emph">HTTP</em> standards.  <code class="code">JSON-RPC</code> can use arbitrary, application-defined operations.
+</li></ol>
+
+
+
+
+
 </div>
 <div class="section-level-extent" id="HTML-component-usage">
-<h3 class="section"><span>1.4 HTML component usage<a class="copiable-link" href="#HTML-component-usage"> &para;</a></span></h3>
+<h3 class="section"><span>1.5 HTML component usage<a class="copiable-link" href="#HTML-component-usage"> &para;</a></span></h3>
    
 <p>To use a component, add to HTML:
 </p>
@@ -432,7 +484,7 @@ way to package arbitrary blocks of code (that can have screens too).
 </p>
 </div>
 <div class="section-level-extent" id="System-Maturity-And-Stability">
-<h3 class="section"><span>1.5 System Maturity And Stability<a class="copiable-link" href="#System-Maturity-And-Stability"> &para;</a></span></h3>
+<h3 class="section"><span>1.6 System Maturity And Stability<a class="copiable-link" href="#System-Maturity-And-Stability"> &para;</a></span></h3>
 
 <p>The Kiss system has been used in production environments for several
 years.  Additionally, several commercial applications utilize <em class="emph">Kiss</em>.
@@ -448,7 +500,7 @@ are happy to do so.
 
 </div>
 <div class="section-level-extent" id="Getting-All-Source-Code">
-<h3 class="section"><span>1.6 Getting All Source Code<a class="copiable-link" href="#Getting-All-Source-Code"> &para;</a></span></h3>
+<h3 class="section"><span>1.7 Getting All Source Code<a class="copiable-link" href="#Getting-All-Source-Code"> &para;</a></span></h3>
 
 <p>Source code for all of <em class="emph">Kiss</em> and its dependencies is freely
 available.  The builder program located at
@@ -468,7 +520,7 @@ internal dependencies (those included with <em class="emph">Kiss</em>):
 
 </div>
 <div class="section-level-extent" id="Support_002c-Contact_002c-And-Links">
-<h3 class="section"><span>1.7 Support, Contact, And Links<a class="copiable-link" href="#Support_002c-Contact_002c-And-Links"> &para;</a></span></h3>
+<h3 class="section"><span>1.8 Support, Contact, And Links<a class="copiable-link" href="#Support_002c-Contact_002c-And-Links"> &para;</a></span></h3>
 
 <p>The <em class="emph">Kiss</em> main website is at <a class="uref" href="https://kissweb.org">https://kissweb.org</a>
 </p>
@@ -483,7 +535,7 @@ internal dependencies (those included with <em class="emph">Kiss</em>):
 </p>
 </div>
 <div class="section-level-extent" id="License">
-<h3 class="section"><span>1.8 License<a class="copiable-link" href="#License"> &para;</a></span></h3>
+<h3 class="section"><span>1.9 License<a class="copiable-link" href="#License"> &para;</a></span></h3>
 
 <p>Copyright (c) 2018 Blake McBride (blake@mcbridemail.com)
 </p>
@@ -516,7 +568,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 </p>
 </div>
 <div class="section-level-extent" id="Acknowledgments">
-<h3 class="section"><span>1.9 Acknowledgments<a class="copiable-link" href="#Acknowledgments"> &para;</a></span></h3>
+<h3 class="section"><span>1.10 Acknowledgments<a class="copiable-link" href="#Acknowledgments"> &para;</a></span></h3>
 
 <p>The Kiss design, code, documentation, and web site were written by
 Blake McBride.  The author gratefully acknowledges and appreciates,
@@ -553,11 +605,13 @@ run completely on OpenIndiana because it depends on SQLite.  Once another databa
 <p>The SQLite interface does not work on Haiku due to reasons unrelated to Haiku.
 However, <em class="emph">Kiss</em> works fine with the other supported databases on Haiku.  Also, the demo that <em class="emph">Kiss</em> comes with will not
 run completely on Haiku because it depends on SQLite.  Once another database is configured, all is well.</p>
+<h5 class="footnote-body-heading"><a id="FOOT3" href="#DOCF3">(3)</a></h5>
+<p><em class="emph">RPC</em> stands for <em class="emph">Remote Procedure Call</em>.</p>
 </div>
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="System-Setup.html">System Setup</a>, Previous: <a href="index.html">Kiss Developer Manual (August 6, 2025)</a>, Up: <a href="index.html">Kiss Developer Manual (August 6, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="System-Setup.html">System Setup</a>, Previous: <a href="index.html">Kiss Developer Manual (September 3, 2025)</a>, Up: <a href="index.html">Kiss Developer Manual (September 3, 2025)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

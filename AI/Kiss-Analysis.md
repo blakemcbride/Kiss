@@ -36,7 +36,7 @@ Stack360Management/
 ## Key Components
 
 ### Backend Structure
-- **MainServlet.java**: Main REST server entry point at `/rest` with async request handling
+- **MainServlet.java**: Main JSON-RPC server entry point at `/rest` with async request handling
 - **Service Layer**: Multi-language support (Java/Groovy/Lisp)
 - **Database Layer**: Custom ORM-like abstraction (Connection, Command, Cursor, Record)
 - **Queue Manager**: Asynchronous request handling with configurable worker threads
@@ -187,9 +187,14 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
   - `newRecord()` - Create new record
   - `fetchOne()` - Get single record
   - `fetchAll()` - Get multiple records
+  - `fetchAllJSON()` - Get multiple records as JSON array
   - `addRecord()` - Insert new record
   - `update()` - Update existing record
   - `delete()` - Delete record
+- **Connection Methods**:
+  - `execute(String sql, Object... args)` - Execute parameterized SQL statements (INSERT, UPDATE, DELETE)
+  - `exists(String sql, Object... args)` - Check if records exist
+  - `fetchAllJSON(String sql, Object... args)` - Fetch results directly as JSON array
 - **Field Access Methods**:
   - `getString()` - Get string value
   - `getInt()` - Get integer value
@@ -244,7 +249,7 @@ The framework provides custom HTML components that should be used:
 - `<file-upload>` - File upload control
 
 ### Frontend Utilities
-- **Server.call()** - Make REST calls to backend services
+- **Server.call()** - Make JSON-RPC calls to backend services
 - **Utils.popup_open()** - Open popup dialogs
 - **Utils.popup_close()** - Close popup dialogs
 - **Utils.showMessage()** - Show message dialogs
@@ -279,15 +284,16 @@ The Kiss Framework emphasizes:
   - `src/main/precompiled/` - Shared utility classes
 
 ### Communication Architecture
-- Backend and frontend communicate **only through JSON web services**
+- Backend and frontend communicate **only through JSON-RPC** (not REST, despite the `/rest` endpoint)
 - Backend never generates HTML or JavaScript
 - Frontend handles all UI rendering
 - Clean separation between backend logic and frontend presentation
+- Services are JSON-RPC methods, not REST endpoints
 
 ### Service Development Best Practices
 - Services require minimal code - just a class with methods
 - No configuration files needed for services
-- Methods automatically become REST endpoints
+- Methods automatically become JSON-RPC endpoints
 - Authentication handled automatically by framework
 - Don't set database columns that have defaults (e.g., CURRENT_TIMESTAMP)
 - Use appropriate data type methods (getString, getInt, getDateTime, etc.)

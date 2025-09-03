@@ -336,6 +336,61 @@ SQLite
 The system is tested with Java versions 17, and 21.  Any Java version above 17 
 is expected to work.
 
+@section REST vs. JSON-RPC
+
+Throughout this manual and the entire @emph{Kiss} system, the
+communications mechanism between the front-end and back-end is referred to as
+@emph{REST}.  In fact, this is not true.  The truth is that all of the
+communications between the back-end and front-end are more correctly
+termed @emph{JSON-RPC}. @footnote{@emph{RPC} stands for @emph{Remote Procedure Call}.}
+The reasons for this misnomer are as follows:
+
+@itemize @bullet
+@item
+The term @emph{REST} is far better understood in the industry.
+@item
+The difference between the two is small.  
+@item
+They both send and receive data over standard @emph{HTTP} calls.
+@item
+@emph{JSON-RPC} is built on a subset of @code{REST}.
+@end itemize
+
+The following describes the differences between @emph{REST} and @emph{JSON-RPC}:
+
+@enumerate
+@item 
+@emph{REST} is more @emph{CRUD} oriented; @emph{JSON-RPC} is more like a generic remote function call.
+@item
+There are two types of errors that can occur when the front-end calls a back-end service as follows:
+@table @code
+@item Internet communications error
+Were the front-end and back-end able to communicate, or was there some sort of Internet issue?
+@item Operation failure
+The front-end and back-end were able to communicate, but the requested operation (like updating an employee record) failed for some application-specific reason.
+@end table
+@emph{REST} utilizes standard @emph{HTTP} return codes to indicate all success or failure operations.  @emph{JSON-RPC} utilizes standard @code{HTTP} return codes to indicate the success or failure of the Internet communications, but
+error codes for the operations are returned as part of the returned value rather than an @code{HTTP} error code.  
+
+An operation may fail for nearly an infinite number of operation-specific reasons.  Trying to map these reasons into a fixed set of standard @emph{HTTP} error codes is not possible.  Therefore, in essence, the @emph{JSON-RPC} call
+uses the @emph{HTTP} error codes to indicate communications failures but uses internal operation-specific error codes to indicate operation failures.
+
+Therefore, if the communication between the front-end and back-end succeeded but the operation failed, @emph{JSON-RPC} would return an @emph{HTTP} success code.  The operation error would be returned as part of the return value.
+@item
+@emph{REST} utilizes standard @emph{HTTP} operations such as
+@emph{GET}, @emph{PUT}, @emph{DELETE}, @emph{POST}, etc.  The problem
+with this is that if you issue a @emph{GET} operation to get some data
+and the data subsequently changes because of some other user, and then
+you issue another @emph{GET} operation, the @emph{REST} call will return the old, cached data.
+
+@emph{JSON-RPC} always uses the @emph{POST} call for all operations so that no data is cached on the front-end.  This means a call to get the same data will return the latest data rather than the old, cached data.
+
+@item
+@emph{REST} is limited to the operations predefined by the @emph{HTTP} standards.  @code{JSON-RPC} can use arbitrary, application-defined operations.
+@end enumerate
+
+
+
 
 
 @section HTML component usage
