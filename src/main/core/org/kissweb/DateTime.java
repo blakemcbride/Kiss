@@ -23,6 +23,13 @@ public class DateTime {
     private ZonedDateTime zdt;
 
     /**
+     * Create a DateTime object from the current date and time.
+     */
+    public DateTime() {
+        zdt = ZonedDateTime.now();
+    }
+
+    /**
      * Create a DateTime object from a ZonedDateTime object
      *
      * @param dt the ZonedDateTime object
@@ -448,6 +455,29 @@ public class DateTime {
      */
     public long getDTLong() {
         return (long) getIntDate() * 10000L + (long) getIntTime();
+    }
+
+    /**
+     * Returns the ZoneId object associated with this DateTime object.
+     *
+     * @return the ZoneId object associated with this DateTime object
+     */
+    public ZoneId getZoneId() {
+        return zdt == null ? null : zdt.getZone();
+    }
+
+    /**
+     * Get the time zone ID as a string representation.
+     * <p>
+     * This method returns the string representation of the time zone ID
+     * associated with this DateTime object. Common examples include
+     * "America/New_York", "America/Chicago", "Europe/London", "UTC", etc.
+     * </p>
+     *
+     * @return the time zone ID as a string, or null if this DateTime is null
+     */
+    public String getZoneIdString() {
+        return zdt == null ? null : zdt.getZone().toString();
     }
 
     /**
