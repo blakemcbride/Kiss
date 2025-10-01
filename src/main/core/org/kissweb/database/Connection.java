@@ -1030,7 +1030,7 @@ public class Connection implements AutoCloseable {
      * @param dt the object to convert
      * @return the converted object
      */
-    public static Object fixDate(Object dt) {
+    static Object fixDate(Object dt) {
         if (dt == null)
             return null;
 
