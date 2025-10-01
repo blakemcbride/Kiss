@@ -38,11 +38,9 @@ import org.kissweb.DateUtils;
 
 import java.io.IOException;
 import java.sql.*;
-import java.time.ZoneId;
-import java.util.ArrayList;
+import java.time.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
@@ -1024,34 +1022,53 @@ public class Connection implements AutoCloseable {
     }
 
     /**
-     * Local method used to assure Dates of any type are of the SQL type.
-     * If the object is not a date type, it is simply returned.
+     * Normalize various date/time representations to JDBC-friendly types.
+     * - Returns java.sql.Timestamp for instant-like values.
+     * - Returns java.sql.Time for LocalTime.
+     * - Leaves non-date values untouched.
      *
      * @param dt the object to convert
-     * @return the SQL-compatible date object or the original object if not a date
+     * @return the converted object
      */
-    static Object fixDate(Object dt) {
-        if (dt != null) {
-            Class<?> cls = dt.getClass();
-            if (cls == java.util.Date.class)
-                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
-            else if (dt instanceof java.util.Calendar)
-                dt = new java.sql.Timestamp(((java.util.Calendar) dt).getTime().getTime());
-            else if (cls == java.time.LocalDateTime.class) {
-                java.time.LocalDateTime ldt = (java.time.LocalDateTime) dt;
-                dt = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
-            } else if (cls == java.time.ZonedDateTime.class) {
-                java.time.ZonedDateTime zdt = (java.time.ZonedDateTime) dt;
-                dt = Date.from(zdt.toInstant());
-                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
-            } else if (cls == java.time.LocalDate.class) {
-                java.time.LocalDate ld = (java.time.LocalDate) dt;
-                java.time.ZonedDateTime zonedDateTime = ld.atStartOfDay(ZoneId.systemDefault());
-                dt = Date.from(zonedDateTime.toInstant());
-                dt = new java.sql.Timestamp(((java.util.Date) dt).getTime());
-            }
-        }
+    public static Object fixDate(Object dt) {
+        if (dt == null)
+            return null;
+
+        // Already JDBC types — return as-is
+        if (dt instanceof Timestamp)
+            return dt;
+        if (dt instanceof java.sql.Date)
+            return new Timestamp(((java.sql.Date) dt).getTime());
+        if (dt instanceof java.sql.Time)
+            return dt; // time-of-day only; caller can decide how to use it
+
+        // Legacy util types
+        if (dt instanceof java.util.Date d)
+            return new Timestamp(d.getTime());
+        if (dt instanceof Calendar c)
+            return new Timestamp(c.getTimeInMillis());
+
+        // Modern java.time types (preferred)
+        if (dt instanceof Instant i)
+            return Timestamp.from(i);
+        if (dt instanceof OffsetDateTime odt)
+            return Timestamp.from(odt.toInstant());
+        if (dt instanceof ZonedDateTime zdt)
+            return Timestamp.from(zdt.toInstant());
+
+        if (dt instanceof LocalDateTime ldt)
+            // Interpret zone-less LDT via local zone → exact Instant → Timestamp
+            return Timestamp.from(((LocalDateTime) dt).atZone(ZoneId.systemDefault()).toInstant());
+
+        if (dt instanceof LocalDate ld)
+            // Midnight at local zone
+            return Timestamp.from(((LocalDate) dt).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        if (dt instanceof LocalTime lt)
+            // Not a timestamp (no date). Preserve as SQL Time to avoid inventing a date.
+            return java.sql.Time.valueOf((LocalTime) dt);
+
+        // Unknown type — leave untouched
         return dt;
     }
 

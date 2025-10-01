@@ -186,8 +186,7 @@ public class Record implements AutoCloseable {
      * @see #set(String, Object)
      */
     public Record setDateTime(String name, java.util.Date val) {
-        cols.put(name.toLowerCase(), val == null ? null : new java.sql.Timestamp(val.getTime()));
-        return this;
+        return set(name, val);
     }
 
     /**
@@ -207,8 +206,7 @@ public class Record implements AutoCloseable {
      * @see #set(String, Object)
      */
     public Record setDateTime(String name, ZonedDateTime val) {
-        cols.put(name.toLowerCase(), val);
-        return this;
+        return set(name, val);
     }
 
     /**
