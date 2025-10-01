@@ -92,7 +92,6 @@ public class Record implements AutoCloseable {
 
     /**
      * Set the value of a column in the record.
-     * This method should not be used with dates or times.
      *
      * @param name the column name
      * @param val the value to set.  Can be any type.
