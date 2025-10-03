@@ -348,6 +348,13 @@ public class ProcessServlet implements Runnable {
                     logger.debug("Client closed connection - ignoring", ioe);
                     return;
                 }
+                final String msg = ioe.getMessage();
+                if (msg != null && (
+                        msg.contains("Stream reset") ||
+                                msg.contains("Broken pipe") ||
+                                msg.contains("Connection reset"))) {
+                    return; // ignore
+                }
                 errorReturn(response, "I/O error reading request body", ioe);
                 return;
             } catch (Exception e) {                             // JSON etc.
