@@ -206,6 +206,21 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
 - **Transaction Support**: Built-in transaction management
 - **Schema Support**: Can specify schema in table names (e.g., "admin.users")
 
+## Database Record Insertion Pattern
+
+Rather than using SQL INSERT commands to insert records, always use the Kiss pattern:
+
+```java
+Connection db = ...;
+Record rec = db.newRecord("table_name");
+rec.set("column1", val1);
+rec.set("column2", val2);
+...
+rec.addRecord();
+```
+
+This pattern provides a cleaner, more maintainable approach to database record insertion compared to raw SQL INSERT statements.
+
 ## Report & Export Capabilities
 
 - **PDF Reports**: Full-featured reports with Groff
