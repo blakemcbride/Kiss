@@ -38,7 +38,7 @@ import static org.kissweb.BuildUtils.*;
 public class Tasks {
 
     // Things that change semi-often
-    final static String groovyVer = "4.0.26";
+    final static String groovyVer = "4.0.28";
     final static String postgresqlVer = "42.7.7";
     final static String tomcatVer = "11.0.8";
     final static String LIBS = "libs";  // compile time location
