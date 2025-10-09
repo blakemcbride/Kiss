@@ -45,8 +45,10 @@ Stack360Management/
 
 ### Frontend Structure
 - **Component System**: Custom UI components (TextInput, DateInput, DropDown, CheckBox, etc.)
-- **Utility Libraries**: 
-  - DateUtils, TimeUtils, DateTimeUtils - Date/time manipulation
+- **Utility Libraries**:
+  - DateUtils - Date manipulation (dates as YYYYMMDD integers)
+  - TimeUtils - Time manipulation (times as HHMM integers)
+  - DateTime - Combined date/time operations (wrapper around ZonedDateTime)
   - NumberUtils - Number formatting and validation
   - Server - AJAX communication with backend
   - Utils - General utilities and UI helpers
@@ -199,6 +201,10 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
   - `getString()` - Get string value
   - `getInt()` - Get integer value
   - `getDateTime()` - Get timestamp/datetime value
+    - **Important**: Returns `java.util.Date` object, NOT `Timestamp`
+    - This is a common misconception that can lead to incorrect type casting
+    - Always use: `Date date = record.getDateTime("column_name")`
+    - Never cast to `Timestamp` or assume `Timestamp` type
   - `setDateTime()` - Set timestamp/datetime value
   - Similar getters/setters for all data types
 - **Connection Management**: Automatic connection pooling via C3P0
@@ -401,6 +407,49 @@ The `src/main/precompiled/` directory is for shared Java utility classes that ne
 - Size appropriately for content - avoid excess whitespace
 - Test different screen sizes for responsive behavior
 
+### Date and Time Utilities
+
+Kiss provides three main utility classes for date and time manipulation:
+
+#### DateUtils (org.kissweb.DateUtils)
+Handles dates represented as integers in YYYYMMDD format:
+- `DateUtils.toInt(Date)` - Convert Date object to YYYYMMDD integer
+- `DateUtils.toDate(int)` - Convert YYYYMMDD integer to Date object
+- `DateUtils.today()` - Get current date as YYYYMMDD integer
+- `DateUtils.format(String fmt, int dt)` - Format date with custom pattern
+- `DateUtils.addDays(int dt, int n)` - Add/subtract days from date
+- `DateUtils.year(int)`, `month(int)`, `day(int)` - Extract date components
+
+#### TimeUtils (org.kissweb.TimeUtils)
+Handles times represented as integers in HHMM format:
+- `TimeUtils.now()` - Get current time as HHMM integer
+- `TimeUtils.formatMilitary(int)` - Format as "HH:MM" (24-hour)
+- `TimeUtils.formatAMPM(int)` - Format as "H:MM AM/PM"
+- `TimeUtils.parse(String)` - Parse time string to HHMM integer
+- `TimeUtils.hour(int)`, `minutes(int)` - Extract time components
+
+#### DateTime (org.kissweb.DateTime)
+Wrapper around Java's ZonedDateTime for combined date/time operations:
+- `new DateTime(Date)` - Create from Date object
+- `getIntDate()` - Get date portion as YYYYMMDD integer
+- `getIntTime()` - Get time portion as HHMM integer
+- `getDate()` - Convert back to Date object
+- `format()` - Format as "MM/dd/yyyy h:mm a"
+- `addDays(int)`, `addHours(int)`, `addMinutes(int)` - Date/time arithmetic
+
+**Common Pattern for Date to Time Conversion:**
+```java
+// Convert a Date object to HHMM integer format
+Date myDate = ...;
+DateTime dt = new DateTime(myDate);
+int timeHHMM = dt.getIntTime();  // Returns time as HHMM integer
+
+// Alternative using Calendar directly (if DateTime is not suitable)
+Calendar cal = Calendar.getInstance();
+cal.setTime(myDate);
+int timeHHMM = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
+```
+
 ---
 
-*Updated: 2025-08-06*
+*Updated: 2025-10-08*
