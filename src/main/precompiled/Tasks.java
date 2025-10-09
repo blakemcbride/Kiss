@@ -39,8 +39,8 @@ public class Tasks {
 
     // Things that change semi-often
     final static String groovyVer = "4.0.28";
-    final static String postgresqlVer = "42.7.7";
-    final static String tomcatVer = "11.0.8";
+    final static String postgresqlVer = "42.7.8";
+    final static String tomcatVer = "11.0.12";
     final static String LIBS = "libs";  // compile time location
     final static ForeignDependencies foreignLibs = buildForeignDependencies();
     final static LocalDependencies localLibs = buildLocalDependencies();
