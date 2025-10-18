@@ -310,7 +310,7 @@ public class ProcessServlet implements Runnable {
         String _method;
         outjson = new JSONObject();
         ProcessServlet.ExecutionReturn res;
-        ThreadLevelCache.clearThreadCaches();  // done in case a thread is re-used
+        ThreadLevelCache.releaseThreadCaches();  // done in case a thread is re-used (as tomcat does)
 
         try {
             newDatabaseConnection();

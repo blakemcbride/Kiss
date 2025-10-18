@@ -13,6 +13,7 @@ import java.util.IdentityHashMap;
  *   <li>Multiple ThreadLevelCache instances can coexist per thread</li>
  *   <li>Values persist for the lifetime of the thread (unless explicitly cleared)</li>
  *   <li>{@link #clearThreadCaches()} clears ALL instances in the current thread</li>
+ *   <li>{@link #releaseThreadCaches()} releases ALL instances in the current thread (removes ThreadLocal references)</li>
  *   <li>{@link #releaseThreadLocal()} removes per-thread maps/registrations for this instance</li>
  * </ul>
  *
@@ -142,6 +143,31 @@ public final class ThreadLevelCache<V> {
             // Safe: each instance has its own ThreadLocal map
             cache.local.get().clear();
         }
+    }
+
+    /**
+     * Releases ALL ThreadLevelCache instances for the CURRENT thread.
+     * This is a static utility method that completely removes ThreadLocal
+     * references for all cache instances that have been used in the current thread.
+     * Unlike {@link #clearThreadCaches()}, this method removes the ThreadLocal
+     * references entirely, which is better for preventing memory leaks in
+     * long-lived threads.
+     */
+    public static void releaseThreadCaches() {
+        IdentityHashMap<ThreadLevelCache<?>, Boolean> reg = REGISTRY.get();
+        if (reg.isEmpty()) {
+            REGISTRY.remove();
+            return;
+        }
+        // Create a copy to avoid concurrent modification during iteration
+        ThreadLevelCache<?>[] caches = reg.keySet().toArray(new ThreadLevelCache<?>[0]);
+        for (ThreadLevelCache<?> cache : caches) {
+            // Remove this cache's ThreadLocal for the current thread
+            cache.local.remove();
+        }
+        // Clear and remove the registry ThreadLocal for the current thread
+        reg.clear();
+        REGISTRY.remove();
     }
 }
 
