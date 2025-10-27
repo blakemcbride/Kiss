@@ -16,6 +16,7 @@ import java.util.TimeZone;
 
 /**
  * Class dealing with dates with times.
+ * Essentially a wrapper around ZonedDateTime.
  *
  */
 public class DateTime {

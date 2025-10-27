@@ -33,7 +33,7 @@
  *  <br><br>
  *  Functions that don't have a meaningful result otherwise, return 'this' so that function chaining can occur.
  *  <br><br>
- *  All of the controls support all of the standard HTML global attributes.  The following lists some of the attributes commonly used:
+ *  All the controls support all the standard HTML global attributes.  The following lists some of the attributes commonly used:
  *  <br><br>
  *  <table>
  *    <tr><th align="left" style="padding-right: 120px;">Common Attributes</th></tr>
@@ -605,11 +605,13 @@ class components {
     /**
      * This HTML tag, "time-input", provides a control where the user can enter a time.  The time appear like "3:30 PM".  A 24 hour clock is also supported automatically (like 14:30).
      * The values this control interacts with is a plain integer in the form HHMM in a 24 hour clock.  So, "1:30 PM" would be <code>1330</code>.
+     * -1 is returned if the field is left blank.
      * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    min="0800"     </td><td>     the minimum time allowed (also accept times like "3:30 pm", etc.)              </td></tr>
      *     <tr><td>    min="1800"     </td><td>     the maximum time allowed  (also accept times like "3:30 pm", etc.)               </td></tr>
+     *     <tr><td>    no-placeholder     </td><td>     do not display hh:mm when field is empty  </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
      *     <tr><td>    zero-fill     </td><td>     zero fill the display               </td></tr>
