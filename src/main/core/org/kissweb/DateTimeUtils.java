@@ -231,64 +231,71 @@ public class DateTimeUtils {
     }
 
     /**
-     * Add or subtract years to a YYYYMMDDHHMM
+     * Add years to a date/time given in the YYYYMMDDHHMM format.
+     * This method takes into account DST and leap years.
      *
-     * @param ymdhm     date/time as YYYYMMDDHHMM (e.g., 202501020305)
-     * @param years  the number of years to add, may be negative
-     * @return          the new date/time as a long integer in YYYYMMDDHHMM format
+     * @param ymdhm the date/time as YYYYMMDDHHMM (e.g., 202501020305)
+     * @param years the number of years to add, may be negative
+     * @return the resulting date/time as YYYYMMDDHHMM
      */
     public static long addYears(long ymdhm, int years) {
-        return add(ymdhm, Period.ofYears(years), Duration.ZERO);
+        return compose(normalize(parse(ymdhm).plusYears(years)));
     }
 
     /**
-     * Add or subtract months to a YYYYMMDDHHMM
+     * Add months to a date/time given in the YYYYMMDDHHMM format.
+     * This method takes into account DST and leap years.
      *
-     * @param ymdhm     date/time as YYYYMMDDHHMM (e.g., 202501020305)
-     * @param months  the number of months to add, may be negative
-     * @return          the new date/time as a long integer in YYYYMMDDHHMM format
+     * @param ymdhm the date/time as YYYYMMDDHHMM (e.g., 202501020305)
+     * @param months the number of months to add, may be negative
+     * @return the resulting date/time as YYYYMMDDHHMM
      */
     public static long addMonths(long ymdhm, int months) {
-        return add(ymdhm, Period.ofMonths(months), Duration.ZERO);
+        return compose(normalize(parse(ymdhm).plusMonths(months)));
     }
 
     /**
-     * Add or subtract days to a YYYYMMDDHHMM.
+     * Add days to a date/time given in the YYYYMMDDHHMM format.
+     * This method takes into account DST and leap years.
      *
-     * @param ymdhm     date/time as YYYYMMDDHHMM (e.g., 202501020305)
-     * @param days    the number of days to add, may be negative
-     * @return          the new date/time as a long integer in YYYYMMDDHHMM format
+     * @param ymdhm the date/time as YYYYMMDDHHMM (e.g., 202501020305)
+     * @param days the number of days to add, may be negative
+     * @return the resulting date/time as YYYYMMDDHHMM
      */
     public static long addDays(long ymdhm, int days) {
-        return add(ymdhm, Period.ofDays(days), Duration.ZERO);
+        return compose(normalize(parse(ymdhm).plusDays(days)));
     }
 
     /**
-     * Adds or subtracts hours from a YYYYMMDDHHMM.
+     * Add hours to a date/time given in the YYYYMMDDHHMM format.
+     * This method takes into account DST and leap years.
      *
-     * @param ymdhm     date/time as YYYYMMDDHHMM (e.g., 202501020305)
-     * @param hours  the number of hours to add, may be negative
-     * @return          the new date/time as a long integer in YYYYMMDDHHMM format
+     * @param ymdhm the date/time as YYYYMMDDHHMM (e.g., 202501020305)
+     * @param hours the number of hours to add, may be negative
+     * @return the new date/time as YYYYMMDDHHMM, or the original if ymdhm is 0
      */
     public static long addHours(long ymdhm, int hours) {
-        return add(ymdhm, Period.ZERO, Duration.ofHours(hours));
+        return compose(normalize(parse(ymdhm).plusHours(hours)));
     }
 
     /**
-     * Adds or subtracts minutes from a YYYYMMDDHHMM.
+     * Add minutes to a date/time given in the YYYYMMDDHHMM format.
+     * This method takes into account DST and leap years.
      *
-     * @param ymdhm     date/time as YYYYMMDDHHMM (e.g., 202501020305)
-     * @param minutes  the number of minutes to add, may be negative
-     * @return          the new date/time as a long integer in YYYYMMDDHHMM format
+     * @param ymdhm the date/time as YYYYMMDDHHMM (e.g., 202501020305)
+     * @param minutes the number of minutes to add, may be negative
+     * @return the new date/time as YYYYMMDDHHMM, or the original if ymdhm is 0
      */
     public static long addMinutes(long ymdhm, int minutes) {
-        return add(ymdhm, Period.ZERO, Duration.ofMinutes(minutes));
+        return compose(normalize(parse(ymdhm).plusMinutes(minutes)));
     }
 
-    private static long add(long ymdhm, Period dateDelta, Duration timeDelta) {
-        LocalDateTime ldt = parse(ymdhm);
-        ldt = ldt.plus(dateDelta).plus(timeDelta);
-        return compose(ldt);
+    // --- Helpers ---
+
+    // Normalizes through the system zone to handle DST gaps/overlaps correctly
+    private static LocalDateTime normalize(LocalDateTime ldt) {
+        ZonedDateTime zdt = ldt.atZone(ZoneId.systemDefault()); // handles spring-forward and fall-back transitions
+        return zdt.toLocalDateTime();
     }
 
     private static LocalDateTime parse(long ymdhm) {
