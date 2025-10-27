@@ -7,7 +7,7 @@
 'use strict';
 
 /**
- * Time utilities.
+ * Time utilities that deal with zoneless (local) times.
  *
  * Utilities to deal (mostly) with times stored as a number in the form HHMM since midnight.
  * Also, some handling of Date objects.
@@ -21,8 +21,7 @@ class TimeUtils {
      * @returns {number} HHMM
      */
     static current() {
-        const dt = new Date();
-        return dt.getHours() * 100 + dt.getMinutes();
+        return this.toInt(new Date());
     }
 
     /**
@@ -32,9 +31,7 @@ class TimeUtils {
      * @returns {string} hh:mm XM XST
      */
     static formatLong(dt) {
-        if (typeof dt !== 'object')
-            return '';
-        const idt = TimeUtils.dateToTime(dt);
+        const idt = this.toInt(dt);
         return TimeUtils.format(idt) + ' ' + dt.toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
     }
 
@@ -50,7 +47,8 @@ class TimeUtils {
     static format(val, zeroFill = false, tz) {
 
         /* ---------- normalise the first argument ---------- */
-        if (typeof val === 'string') val = Number(val);
+        if (typeof val === 'string')
+            val = Number(val);
 
         if (val === null || val === undefined || isNaN(val) || val < 0)
             return '';
@@ -74,7 +72,8 @@ class TimeUtils {
         const hours   = Math.floor(val / 100);
         const minutes = val % 100;
 
-        if (minutes > 59 || hours > 23) return '';   // basic sanity check
+        if (minutes > 59 || hours > 23)
+            return '';   // basic sanity check
 
         const hh = zeroFill ? String((hours % 12) || 12).padStart(2, '0')
             : String((hours % 12) || 12);
@@ -91,8 +90,8 @@ class TimeUtils {
      * @returns {null|number}   integer formatted as HHMM or null if not a time
      */
     static strToInt(sval) {
-        if (typeof sval === 'number')
-            return sval;
+        if (typeof sval !== 'string')
+            return this.toInt(sval);
         if (!sval)
             return null;
         sval = sval.trim();
@@ -202,9 +201,7 @@ class TimeUtils {
      * @returns {number}
      */
     static hours(time) {
-        if (typeof time !== 'number')
-            return 0;
-        return Math.floor(time / 100);
+        return Math.floor(this.toInt(time) / 100);
     }
 
     /**
@@ -214,18 +211,20 @@ class TimeUtils {
      * @returns {number}
      */
     static minutes(time) {
-        if (typeof time !== 'number')
-            return 0;
+        time = this.toInt(time);
         return time - Math.floor(time / 100) * 100;
     }
 
     /**
+     * @deprecated
+     *
      * Convert a number of milliseconds since 1970 UTC to an integer time HHMM.
      * This takes into account the local timezone.
      *
      * @param m {number} number of milliseconds since 1970 UTC
      * @returns {number} HHMM
      *
+     * @see TimeUtils.toInt()
      * @see DateTimeUtils.toMilliseconds()
      * @see DateUtils.millsToInt()
      */
@@ -243,9 +242,7 @@ class TimeUtils {
      * @returns {null|number}
      */
     static totalMinutes(time) {
-        if (typeof time !== 'number')
-            return null;
-        return TimeUtils.hours(time) * 60 + TimeUtils.minutes(time);
+        return this.hours(time) * 60 + this.minutes(time);
     }
 
     /**
@@ -256,9 +253,7 @@ class TimeUtils {
      * @returns {null|number}
      */
     static diff(t1, t2) {
-        if (typeof t1 !== 'number' || typeof t2 !== 'number')
-            return null;
-        return TimeUtils.totalMinutes(t1) - TimeUtils.totalMinutes(t2);
+        return this.totalMinutes(t1) - this.totalMinutes(t2);
     }
 
     /**
@@ -276,11 +271,15 @@ class TimeUtils {
     }
 
     /**
+     * @deprecated
+     *
      * Convert a Date object into a numeric time HHMM
      * dropping the date portion.
      *
      * @param dt {Date}
      * @returns {number} HHMM
+     *
+     * @see TimeUtils.toInt()
      */
     static dateToTime(dt) {
         if (typeof dt !== 'object')
@@ -318,6 +317,25 @@ class TimeUtils {
         const hours = Math.floor(totalMinutes / 60) % 24;
         const minutes = totalMinutes % 60;
         return hours * 100 + minutes;
+    }
+
+    /**
+     * Converts a date, string, or number into a time (HHMM) as an integer.
+     *
+     * @param dt {Date|number|string} The date, string, or number to convert
+     * @returns {number} The time (HHMM) as an integer
+     */
+    static toInt(dt) {
+        if (dt instanceof Date)
+            return dt.getHours() * 100 + dt.getMinutes();
+        if (typeof dt === 'number') {
+            if (dt > 2400)
+                return this.toInt(new Date(dt));
+            return dt;
+        }
+        if (typeof dt === 'string')
+            return this.strToInt(dt);
+        return 0;
     }
 
 }

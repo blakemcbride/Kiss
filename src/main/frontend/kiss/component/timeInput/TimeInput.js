@@ -22,6 +22,8 @@
         let enterFunction = null;
         let nattrs = '';
         let id;
+        let placeholder = true;
+
         for (let prop in attr) {
             switch (prop) {
 
@@ -38,6 +40,9 @@
                     break;
                 case 'zero-fill':
                     zero_fill = true;
+                    break;
+                case 'no-placeholder':
+                    placeholder = false;
                     break;
 
                 // preexisting attributes
@@ -59,7 +64,7 @@
         const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content ? content.trim() : ''
+            placeholder: content ? content.trim() : (placeholder ? 'hh:mm' : '')
         });
         if (!newElm)
             return;
@@ -85,24 +90,27 @@
         newElm.getValue = function () {
             const val = TimeUtils.strToInt(newElm.jqObj.val());
             if (val === null)
-                return 0;
+                return -1;
             const hours = Math.floor(val / 100);
             const minutes = val % 100;
             return hours > 23  ||  minutes > 59 ? null : val;
         };
 
-        newElm.setValue = function (val) {
+        newElm.setValue = function (val, timezone) {
             if (val === undefined  ||  val === null  ||  val === '') {
                 jqObj.val('');
-                originalValue = newElm.getValue();
+                originalValue = -1;
                 return this;
             }
             if (typeof val === 'string')
                 val = TimeUtils.strToInt(val);
-            else if (typeof val === 'object')
-                val = TimeUtils.dateToTime(val);
-            if (val > 2400)
-                val = TimeUtils.millsToInt(val);
+            else if (val instanceof Date)
+                val = TimeUtils.toInt(val);
+            if (val > 2400) {
+                if (timezone)
+                    val = DateTimeUtils.epochToDisplayEpoch(val, timezone);
+                val = TimeUtils.toInt(val);
+            }
             jqObj.val(TimeUtils.format(val, zero_fill));
             originalValue = newElm.getValue();
             return this;

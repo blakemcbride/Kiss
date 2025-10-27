@@ -24,6 +24,7 @@
         let nattrs = '';
         let id;
         let placeholder = true;
+
         for (let prop in attr) {
             switch (prop) {
 
@@ -97,12 +98,14 @@
 
         //--
 
-        newElm.getIntValue = function () {
+        newElm.getValue = function () {
             const val = jqObj.val();
             if (!val)
                 return 0;
             return DateUtils.strToInt(val);
         };
+
+        newElm.getIntValue = newElm.getValue; // for historic reasons
 
         newElm.getSQLValue = function () {
             return DateUtils.intToSQL(newElm.getIntValue());
@@ -112,13 +115,16 @@
             return DateUtils.intToDate(newElm.getIntValue());
         };
 
-        newElm.setValue = function (val) {
+        newElm.setValue = function (val, timezone) {
             if (!val) {
                 jqObj.val('');
                 originalValue = 0;
             } else if (typeof val === 'number') {
-                if (val > 30000000)
-                    val = DateUtils.millsToInt(val);
+                if (val > 30000000) {
+                    if (timezone)
+                        val = DateTimeUtils.epochToDisplayEpoch(val, timezone);
+                    val = DateUtils.toInt(val);
+                }
                 jqObj.val(DateUtils.intToStr4(val).trim())
                 originalValue = val;
             } else if (typeof val === 'string') {
@@ -129,8 +135,8 @@
                     originalValue = DateUtils.strToInt(val);
                     jqObj.val(DateUtils.intToStr4(originalValue).trim());
                 }
-            } else if (typeof val === 'object') { // Date
-                originalValue = DateUtils.dateToInt(val);
+            } else if (val instanceof Date) { // Date
+                originalValue = DateUtils.toInt(val);
                 jqObj.val(DateUtils.intToStr4(originalValue).trim());
             }
             return this;

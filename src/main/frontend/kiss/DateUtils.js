@@ -7,10 +7,12 @@
 'use strict';
 
 /**
+ DateUtils manipulates local (without timezones) dates stored a number in the YYYYMMDD form.
+
  Function names are meant to tell what the input and output date types they work on.
  In terms of understanding the data types used to represent dates:
 
- int          20180322
+ int          YYYYMMDD   e.g., 20180322
  str          "3/22/[20]18" (or similar international format)
  str2         "3/22/18" (or similar international format)
  str4         "3/22/2018" (or similar international format)
@@ -588,7 +590,7 @@ class DateUtils {
      * @returns {number}
      */
     static year(dt) {
-        if (typeof dt === 'object')
+        if (dt instanceof Date)
             return dt.getFullYear();
         return dt ? Math.floor(dt / 10000) : 0;
     }
@@ -602,7 +604,7 @@ class DateUtils {
     static month(dt) {
         if (!dt)
             return 0;
-        if (typeof dt === 'object')
+        if (dt instanceof Date)
             return dt.getMonth() + 1;
         const y = Math.floor(dt / 10000);
         dt -= y * 10000;
@@ -618,7 +620,7 @@ class DateUtils {
     static day(dt) {
         if (!dt)
             return 0;
-        if (typeof dt === 'object')
+        if (dt instanceof Date)
             return dt.getDate();
         const y = Math.floor(dt / 10000);
         dt -= y * 10000;
