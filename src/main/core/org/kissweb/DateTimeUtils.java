@@ -10,6 +10,23 @@ import java.util.Date;
 public class DateTimeUtils {
 
     /**
+     * Private constructor to prevent instantiation.
+     * This is a utility class containing only static methods.
+     */
+    private DateTimeUtils() {
+        // Prevent instantiation
+    }
+
+    /**
+     * Returns the current date and time as a long in the format YYYYMMDDHHMM.
+     *
+     * @return the current date and time as a long in the format YYYYMMDDHHMM
+     */
+    public static long now() {
+        return create(new Date());
+    }
+
+    /**
      * Creates a compact long date/time from individual date and time components.
      *
      * The returned long is in the format YYYYMMDDHHMM.
