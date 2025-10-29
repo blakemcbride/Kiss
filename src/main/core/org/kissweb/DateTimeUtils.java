@@ -357,4 +357,16 @@ public class DateTimeUtils {
         return Duration.between(fromInstant, toInstant).toMinutes();
     }
 
+    /**
+     * Compute the difference in minutes between two dates/times given in the YYYYMMDDHHMM format.
+     * The two dates/times are assumed to be in the system default timezone.
+     *
+     * @param fromYmdhm the starting date/time (in YYYYMMDDHHMM format)
+     * @param toYmdhm the ending date/time (in YYYYMMDDHHMM format)
+     * @return the difference in minutes between the two dates/times
+     */
+    public static long diffMinutes(long fromYmdhm, long toYmdhm) {
+        return diffMinutes(fromYmdhm, toYmdhm, null);
+    }
+
 }
