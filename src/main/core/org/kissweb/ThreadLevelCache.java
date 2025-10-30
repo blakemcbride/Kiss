@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 
 /**
- * Per-thread String→V cache providing thread-local storage for key-value pairs.
+ * Per-thread K→V cache providing thread-local storage for key-value pairs.
  * <p>
  * This class provides a thread-safe cache where each thread has its own isolated storage.
  * Key features:
@@ -17,15 +17,16 @@ import java.util.IdentityHashMap;
  *   <li>{@link #releaseThreadLocal()} removes per-thread maps/registrations for this instance</li>
  * </ul>
  *
+ * @param <K> the type of keys stored in this cache
  * @param <V> the type of values stored in this cache
  */
-public final class ThreadLevelCache<V> {
+public final class ThreadLevelCache<K,V> {
 
     /* ---- Per-thread registry of all cache instances ---- */
-    private static final ThreadLocal<IdentityHashMap<ThreadLevelCache<?>, Boolean>> REGISTRY = ThreadLocal.withInitial(IdentityHashMap::new);
+    private static final ThreadLocal<IdentityHashMap<ThreadLevelCache<?,?>, Boolean>> REGISTRY = ThreadLocal.withInitial(IdentityHashMap::new);
 
     /* ---- Per-instance, per-thread storage ---- */
-    private final ThreadLocal<HashMap<String, V>> local = ThreadLocal.withInitial(HashMap::new);
+    private final ThreadLocal<HashMap<K, V>> local = ThreadLocal.withInitial(HashMap::new);
 
     /**
      * Creates a new ThreadLevelCache instance.
@@ -45,7 +46,7 @@ public final class ThreadLevelCache<V> {
      * @param key the key whose associated value is to be returned
      * @return the value associated with the specified key, or null if no mapping exists
      */
-    public V get(String key) {
+    public V get(K key) {
         return local.get().get(key);
     }
 
@@ -57,8 +58,8 @@ public final class ThreadLevelCache<V> {
      * @param def the default value to be returned (and stored) if the key is not present
      * @return the value associated with the specified key, or def if no mapping existed
      */
-    public V getOrDefault(String key, V def) {
-        HashMap<String, V> hm = local.get();
+    public V getOrDefault(K key, V def) {
+        HashMap<K, V> hm = local.get();
         V val = hm.get(key);
         if (val == null) {
             hm.put(key, def);
@@ -73,7 +74,7 @@ public final class ThreadLevelCache<V> {
      * @param key the key whose presence is to be tested
      * @return true if this cache contains a mapping for the specified key
      */
-    public boolean containsKey(String key) {
+    public boolean containsKey(K key) {
         return local.get().containsKey(key);
     }
 
@@ -84,7 +85,7 @@ public final class ThreadLevelCache<V> {
      * @param value the value to be associated with the specified key
      * @return the previous value associated with key, or null if there was no mapping
      */
-    public V put(String key, V value) {
+    public V put(K key, V value) {
         return local.get().put(key, value);
     }
 
@@ -94,7 +95,7 @@ public final class ThreadLevelCache<V> {
      * @param key the key whose mapping is to be removed from the cache
      * @return the previous value associated with key, or null if there was no mapping
      */
-    public V invalidate(String key) {
+    public V invalidate(K key) {
         return local.get().remove(key);
     }
 
@@ -122,7 +123,7 @@ public final class ThreadLevelCache<V> {
      */
     public void releaseThreadLocal() {
         local.remove();
-        IdentityHashMap<ThreadLevelCache<?>, Boolean> reg = REGISTRY.get();
+        IdentityHashMap<ThreadLevelCache<?,?>, Boolean> reg = REGISTRY.get();
         reg.remove(this);
         if (reg.isEmpty())
             REGISTRY.remove();
@@ -136,10 +137,10 @@ public final class ThreadLevelCache<V> {
      * that have been used in the current thread.
      */
     public static void clearThreadCaches() {
-        IdentityHashMap<ThreadLevelCache<?>, Boolean> reg = REGISTRY.get();
+        IdentityHashMap<ThreadLevelCache<?,?>, Boolean> reg = REGISTRY.get();
         if (reg.isEmpty())
             return;
-        for (ThreadLevelCache<?> cache : reg.keySet()) {
+        for (ThreadLevelCache<?,?> cache : reg.keySet()) {
             // Safe: each instance has its own ThreadLocal map
             cache.local.get().clear();
         }
@@ -154,14 +155,14 @@ public final class ThreadLevelCache<V> {
      * long-lived threads.
      */
     public static void releaseThreadCaches() {
-        IdentityHashMap<ThreadLevelCache<?>, Boolean> reg = REGISTRY.get();
+        IdentityHashMap<ThreadLevelCache<?,?>, Boolean> reg = REGISTRY.get();
         if (reg.isEmpty()) {
             REGISTRY.remove();
             return;
         }
         // Create a copy to avoid concurrent modification during iteration
-        ThreadLevelCache<?>[] caches = reg.keySet().toArray(new ThreadLevelCache<?>[0]);
-        for (ThreadLevelCache<?> cache : caches) {
+        ThreadLevelCache<?,?>[] caches = reg.keySet().toArray(new ThreadLevelCache<?,?>[0]);
+        for (ThreadLevelCache<?,?> cache : caches) {
             // Remove this cache's ThreadLocal for the current thread
             cache.local.remove();
         }
