@@ -27,6 +27,17 @@ public class DateTimeUtils {
     }
 
     /**
+     * Returns the current date/time in the given time zone
+     * formatted as a long YYYYMMDDHHMM.
+     *
+     * @param zoneIdStr the time zone ID (e.g., "America/New_York")
+     * @return the current date/time as a long (YYYYMMDDHHMM)
+     */
+    public static long now(String zoneIdStr) {
+        return create(new Date(), zoneIdStr);
+    }
+
+    /**
      * Creates a compact long date/time from individual date and time components.
      *
      * The returned long is in the format YYYYMMDDHHMM.
@@ -66,19 +77,7 @@ public class DateTimeUtils {
                 : Instant.ofEpochMilli(epoch);
 
         final LocalDateTime ldt = LocalDateTime.ofInstant(instant, zone);
-
-        final int year   = ldt.getYear();          // e.g., 2025
-        final int month  = ldt.getMonthValue();    // 1..12
-        final int day    = ldt.getDayOfMonth();    // 1..31
-        final int hour   = ldt.getHour();          // 0..23
-        final int minute = ldt.getMinute();        // 0..59
-
-        // Build YYYYMMDDHHMM arithmetically (no formatting/parsing overhead).
-        return year * 100000000L
-                + month * 1000000L
-                + day   * 10000L
-                + hour  * 100L
-                + minute;
+        return create(ldt);
     }
 
     /**
@@ -93,32 +92,7 @@ public class DateTimeUtils {
     public static long create(Date date, String zoneIdStr) {
         if (date == null)
             return 0;
-
-        final ZoneId zone;
-        if (zoneIdStr == null || zoneIdStr.isBlank()) {
-            zone = ZoneId.systemDefault();
-        } else {
-            try {
-                zone = ZoneId.of(zoneIdStr);
-            } catch (DateTimeException dte) {
-                throw new IllegalArgumentException("Invalid timezone: " + zoneIdStr, dte);
-            }
-        }
-
-        Instant instant = date.toInstant();
-        LocalDateTime ldt = LocalDateTime.ofInstant(instant, zone);
-
-        int year   = ldt.getYear();
-        int month  = ldt.getMonthValue();
-        int day    = ldt.getDayOfMonth();
-        int hour   = ldt.getHour();
-        int minute = ldt.getMinute();
-
-        return year * 100000000L
-                + month * 1000000L
-                + day   * 10000L
-                + hour  * 100L
-                + minute;
+        return create(date.getTime(), zoneIdStr);
     }
 
     /**
