@@ -343,4 +343,34 @@ public class DateTimeUtils {
         return diffMinutes(fromYmdhm, toYmdhm, null);
     }
 
+    /**
+     * Converts a long in YYYYMMDDHHMM (wall time) to a java.util.Date,
+     * interpreting the value in the specified timezone.
+     *
+     * @param ymdhm a long representing local date/time as YYYYMMDDHHMM
+     * @param zoneIdStr the timezone ID string, e.g. "America/New_York";
+     *                  if null/blank, uses the system default zone
+     * @return a Date representing the same instant or null if ymdhm is 0
+     */
+    public static Date toDate(long ymdhm, String zoneIdStr) {
+        if (ymdhm == 0L)
+            return null;
+        int year = (int)(ymdhm / 100_00_00_00L);
+        int month = (int)((ymdhm / 100_00_00L) % 100);
+        int day = (int)((ymdhm / 10_000L) % 100);
+        int hour = (int)((ymdhm / 100L) % 100);
+        int minute = (int)(ymdhm % 100);
+
+        ZoneId zone =
+                zoneIdStr == null || zoneIdStr.isBlank()
+                        ? ZoneId.systemDefault()
+                        : ZoneId.of(zoneIdStr);
+
+        LocalDateTime ldt = LocalDateTime.of(year, month, day, hour, minute);
+        ZonedDateTime zdt = ldt.atZone(zone);
+        Instant instant = zdt.toInstant();
+
+        return Date.from(instant);
+    }
+
 }
