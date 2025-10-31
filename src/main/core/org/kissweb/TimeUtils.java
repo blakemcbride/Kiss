@@ -5,7 +5,11 @@
 
 package org.kissweb;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -42,6 +46,63 @@ public class TimeUtils {
         final int hour = cal.get(Calendar.HOUR_OF_DAY);
         final int min = cal.get(Calendar.MINUTE);
         return hour * 100 + min;
+    }
+
+    /**
+     * Extracts the time portion of a long representing either an epoch time (in seconds or milliseconds)
+     * or a YYYYMMDDHHMM value into an integer HHMM time.
+     *
+     * <p>If the value is less than 10^11, it is assumed to be an epoch time
+     * (seconds or milliseconds since 1970-01-01 UTC). Otherwise, it is treated
+     * as a YYYYMMDDHHMM representation.</p>
+     *
+     * @param value a long that is either an epoch timestamp or a YYYYMMDDHHMM value
+     * @return the time portion as an int in HHMM format
+     */
+    public static int toInt(long value) {
+        long ymdhm;
+
+        if (value < 10_000_000_000_000L) {
+            // epoch time: could be seconds or milliseconds
+            long ms = value < 1_000_000_000_000L ? value * 1000 : value;
+            java.time.LocalDateTime dt =
+                    java.time.Instant.ofEpochMilli(ms)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDateTime();
+
+            ymdhm = dt.getYear() * 100_00_00L
+                    + dt.getMonthValue() * 100_00L
+                    + dt.getDayOfMonth() * 100L
+                    + dt.getHour() * 100L
+                    + dt.getMinute();
+        } else
+            ymdhm = value;
+
+        return (int)(ymdhm % 10_000L);
+    }
+
+    /**
+     * Extracts the time portion from a java.util.Date into an integer HHMM time value.
+     *
+     * @param date a Date object (may be java.util.Date or java.sql.Timestamp)
+     * @return the time portion as an int in HHMM format
+     */
+    public static int toInt(Date date) {
+        if (date == null)
+            return 0;
+
+        LocalDateTime dt =
+                Instant.ofEpochMilli(date.getTime())
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime();
+
+        long ymdhm = dt.getYear() * 100_00_00L
+                + dt.getMonthValue() * 100_00L
+                + dt.getDayOfMonth() * 100L
+                + dt.getHour() * 100L
+                + dt.getMinute();
+
+        return (int)(ymdhm % 10_000L);
     }
 
     /**

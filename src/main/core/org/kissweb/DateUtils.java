@@ -152,6 +152,39 @@ public class DateUtils {
     }
 
     /**
+     * Extracts the date portion of a long representing either an epoch time (in seconds or milliseconds)
+     * or a YYYYMMDDHHMM value into an integer YYYYMMDD date.
+     *
+     * <p>If the value is less than 10^13, it is assumed to be an epoch time
+     * (seconds or milliseconds since 1970-01-01 UTC). Otherwise, it is treated
+     * as a YYYYMMDDHHMM representation.</p>
+     *
+     * @param value a long that is either an epoch timestamp or a YYYYMMDDHHMM value
+     * @return the date portion as an int in YYYYMMDD format
+     */
+    public static int toInt(long value) {
+        long ymdhm;
+
+        if (value < 10_000_000_000_000L) {
+            // epoch time: could be seconds or milliseconds
+            long ms = value < 1_000_000_000_000L ? value * 1000 : value;
+            java.time.LocalDateTime dt =
+                    java.time.Instant.ofEpochMilli(ms)
+                            .atZone(java.time.ZoneId.systemDefault())
+                            .toLocalDateTime();
+
+            ymdhm = dt.getYear() * 100_00_00L
+                    + dt.getMonthValue() * 100_00L
+                    + dt.getDayOfMonth() * 100L
+                    + dt.getHour() * 100L
+                    + dt.getMinute();
+        } else
+            ymdhm = value;
+
+        return (int)(ymdhm / 10_000L);
+    }
+
+    /**
      * Create a <code>Date</code> from a year, month, and day.
      *
      * @param y the year (2 or 4 digit)
