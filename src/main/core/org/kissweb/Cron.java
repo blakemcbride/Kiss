@@ -29,6 +29,7 @@ public class Cron {
     private final static Logger logger = Logger.getLogger(Cron.class);
 
     private final Timer timer;
+    private final TheTimerTask timerTask;
 
     /**
      * Start the cron process.
@@ -42,9 +43,9 @@ public class Cron {
     public Cron(String crontabFileName, Supplier<Object> getParameter, Consumer<Object> success, Consumer<Object> failure) throws IOException {
         //logger.setLevel(Level.INFO);
         CronFile cronFile = new CronFile(crontabFileName, getParameter, success, failure);
-        TheTimerTask ttt = new TheTimerTask(cronFile);
-        timer = new Timer();
-        timer.scheduleAtFixedRate(ttt, 0L, 60000L);
+        timerTask = new TheTimerTask(cronFile);
+        timer = new Timer(true);
+        timer.scheduleAtFixedRate(timerTask, 0L, 60000L);
     }
 
     /**
@@ -60,16 +61,22 @@ public class Cron {
     public Cron(String crontabFileName, Function<Object,Object> getParameterWithArg, Object argument, Consumer<Object> success, Consumer<Object> failure) throws IOException {
         //logger.setLevel(Level.INFO);
         CronFile cronFile = new CronFile(crontabFileName, getParameterWithArg, argument, success, failure);
-        TheTimerTask ttt = new TheTimerTask(cronFile);
-        timer = new Timer();
-        timer.scheduleAtFixedRate(ttt, 0L, 60000L);
+        timerTask = new TheTimerTask(cronFile);
+        timer = new Timer(true);
+        timer.scheduleAtFixedRate(timerTask, 0L, 60000L);
     }
 
     /**
      * Stop further evocation of all cron jobs.
+     * This method cancels both the TimerTask and the Timer to ensure proper cleanup of Timer threads.
      */
     public void cancel() {
-        timer.cancel();
+        if (timerTask != null)
+            timerTask.cancel();
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+        }
     }
 
     private static class TheTimerTask extends TimerTask {
