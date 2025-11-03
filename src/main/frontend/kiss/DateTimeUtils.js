@@ -20,6 +20,17 @@
 class DateTimeUtils {
 
     /**
+     * Creates an int date/time out of an int date and int time.
+     *
+     * @param dt YYYYMMDD
+     * @param tm HHMM
+     * @returns {number} YYYYMMDDHHMM
+     */
+    static create(dt, tm) {
+        return dt * 10000 + tm;
+    }
+
+    /**
      * Format a moment as "Wed Jan 4, 2022 12:31 PM CST".
      *
      * @param {Date|number|string} dt – Date object, epoch-millis, YYYYMMDDHHMM, or numeric string
@@ -70,7 +81,17 @@ class DateTimeUtils {
      * @returns {Date} - the converted date
      */
     static toDate(dt) {
-        return new Date(dt > 250001010000 ? dt : dt);
+        if (dt > 250001010000)
+            return new Date(dt);
+
+        const year  = Math.floor(dt / 100000000);
+        const month = Math.floor(dt / 1000000) % 100;
+        const day   = Math.floor(dt / 10000) % 100;
+        const hour  = Math.floor(dt / 100) % 100;
+        const minute= dt % 100;
+
+        // Note: JavaScript months are 0-based
+        return new Date(year, month - 1, day, hour, minute);
     }
 
     /**
@@ -427,7 +448,7 @@ class DateTimeUtils {
 
     /**
      * Combine a date and time into the number of milliseconds since 1970 UTC.
-     * This is very valuable when trying to transit a DateTime to a backend without losing timezone info.
+     * This is very valuable when trying to transmit a DateTime to a backend without losing timezone info.
      *
      * @param date {number|Date} YYYYMMDD (time portion of a Date is not used)
      * @param time {number|null|undefined} HHMM
