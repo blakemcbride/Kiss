@@ -1,7 +1,10 @@
 package org.kissweb;
 
+import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * This class represents date/times as a single long YYYYMMDDHHMM.
@@ -371,6 +374,80 @@ public class DateTimeUtils {
         Instant instant = zdt.toInstant();
 
         return Date.from(instant);
+    }
+
+    /**
+     * Format a date passed into a string according to a format specification.
+     * <p>
+     * The date is expected to be in the YYYYMMDDHHMM format.
+     * </p>
+     * <p>
+     * The format string follows the same rules as the {@link java.text.SimpleDateFormat} class.
+     * Some examples of format strings include:
+     * <ul>
+     * <li>"MM/dd/yyyy h:mm a"</li>
+     * <li>"yyyy-MM-dd HH:mm:ss z"</li>
+     * <li>"EEE, MMM d, yyyy, hh:mm a"</li>
+     * </ul>
+     * <p>
+     * If the date is 0, an empty string is returned.
+     * </p>
+     * @param dt long in YYYYMMDDHHMM
+     * @param fmt The format string.
+     * @param timeZoneId The ID of the time zone to use when formatting the date.
+     * If not null or empty, the time zone is set to that zone before formatting.
+     * @return The formatted string.
+     */
+    public static String format(long dt, String fmt, String timeZoneId) {
+        if (dt <= 0L)
+            return "";
+        Date date = toDate(dt, timeZoneId);
+        if (fmt == null)
+            fmt = "MM/dd/yyyy h:mm a";
+        final SimpleDateFormat df = new SimpleDateFormat(fmt);
+        if (timeZoneId != null && !timeZoneId.trim().isEmpty())
+            df.setTimeZone(TimeZone.getTimeZone(timeZoneId));
+        return df.format(date);
+    }
+
+    /**
+     * Formats a date passed into a string according to a format specification.
+     * <p>
+     * The date is expected to be in the YYYYMMDDHHMM format.
+     * </p>
+     * <p>
+     * The format string follows the same rules as the {@link java.text.SimpleDateFormat} class.
+     * Some examples of format strings include:
+     * <ul>
+     * <li>"MM/dd/yyyy h:mm a"</li>
+     * <li>"yyyy-MM-dd HH:mm:ss z"</li>
+     * <li>"EEE, MMM d, yyyy, hh:mm a"</li>
+     * </ul>
+     * <p>
+     * If the date is 0, an empty string is returned.
+     * </p>
+     * @param dt long in YYYYMMDDHHMM
+     * @param fmt The format string.
+     * @return The formatted string.
+     */
+    public static String format(long dt, String fmt) {
+        return format(dt, fmt, null);
+    }
+
+    /**
+     * Formats a date passed into a string using a default format.
+     * The default format is "MM/dd/yyyy h:mm a".
+     * <p>
+     * The date is expected to be in the YYYYMMDDHHMM format.
+     * </p>
+     * <p>
+     * If the date is 0, an empty string is returned.
+     * </p>
+     * @param dt long in YYYYMMDDHHMM
+     * @return The formatted string.
+     */
+    public static String format(long dt) {
+        return format(dt, null, null);
     }
 
 }
