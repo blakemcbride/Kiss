@@ -106,11 +106,18 @@
                 val = TimeUtils.strToInt(val);
             else if (val instanceof Date)
                 val = TimeUtils.toInt(val);
-            if (val > 2400) {
-                if (timezone)
-                    val = DateTimeUtils.epochToDisplayEpoch(val, timezone);
-                val = TimeUtils.toInt(val);
+            else if (typeof val === 'number') {
+                if (val > 250000000000) {
+                    // epoch
+                    if (timezone)
+                        val = DateTimeUtils.epochToDisplayEpoch(val, timezone);
+                    val = TimeUtils.toInt(val);
+                } else if (val > 19000101) {
+                    // YYYYMMDDHHMM
+                    val = DateTimeUtils.getTime(val);
+                }
             }
+            // val = HHMM
             jqObj.val(TimeUtils.format(val, zero_fill));
             originalValue = newElm.getValue();
             return this;
