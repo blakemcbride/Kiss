@@ -31,11 +31,22 @@ public final class ThreadLevelCache<K,V> {
     /**
      * Creates a new ThreadLevelCache instance.
      * Each instance maintains its own separate cache storage per thread.
-     * The instance is automatically registered for cleanup via {@link #clearThreadCaches()}.
+     * The instance is automatically registered for cleanup via {@link #clearThreadCaches()}
+     * on first use in each thread.
      */
     public ThreadLevelCache() {
-        // Register this instance in the current thread's registry
-        REGISTRY.get().put(this, Boolean.TRUE);
+        // Registration happens lazily on first use in each thread (see ensureRegistered())
+    }
+
+    /**
+     * Ensures this cache instance is registered in the current thread's registry.
+     * This must be called before any operation that accesses the cache data.
+     * Registration is done lazily per-thread to handle static cache instances correctly.
+     */
+    private void ensureRegistered() {
+        IdentityHashMap<ThreadLevelCache<?,?>, Boolean> reg = REGISTRY.get();
+        if (!reg.containsKey(this))
+            reg.put(this, Boolean.TRUE);
     }
 
     /* ---- Public API (explicit put/get) ---- */
@@ -47,6 +58,7 @@ public final class ThreadLevelCache<K,V> {
      * @return the value associated with the specified key, or null if no mapping exists
      */
     public V get(K key) {
+        ensureRegistered();
         return local.get().get(key);
     }
 
@@ -59,6 +71,7 @@ public final class ThreadLevelCache<K,V> {
      * @return the value associated with the specified key, or def if no mapping existed
      */
     public V getOrDefault(K key, V def) {
+        ensureRegistered();
         HashMap<K, V> hm = local.get();
         V val = hm.get(key);
         if (val == null) {
@@ -75,6 +88,7 @@ public final class ThreadLevelCache<K,V> {
      * @return true if this cache contains a mapping for the specified key
      */
     public boolean containsKey(K key) {
+        ensureRegistered();
         return local.get().containsKey(key);
     }
 
@@ -86,6 +100,7 @@ public final class ThreadLevelCache<K,V> {
      * @return the previous value associated with key, or null if there was no mapping
      */
     public V put(K key, V value) {
+        ensureRegistered();
         return local.get().put(key, value);
     }
 
@@ -96,6 +111,7 @@ public final class ThreadLevelCache<K,V> {
      * @return the previous value associated with key, or null if there was no mapping
      */
     public V invalidate(K key) {
+        ensureRegistered();
         return local.get().remove(key);
     }
 
@@ -104,6 +120,7 @@ public final class ThreadLevelCache<K,V> {
      * Other ThreadLevelCache instances remain unaffected.
      */
     public void clear() {
+        ensureRegistered();
         local.get().clear();
     }
 
@@ -113,6 +130,7 @@ public final class ThreadLevelCache<K,V> {
      * @return the number of key-value mappings in this cache
      */
     public int size() {
+        ensureRegistered();
         return local.get().size();
     }
 
