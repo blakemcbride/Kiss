@@ -20,6 +20,39 @@
 class DateTimeUtils {
 
     /**
+     * Returns the current date/time as an integer in the format YYYYMMDDHHMM
+     * for the specified timezone. If timezone is null or undefined,
+     * the system's local timezone is used.
+     *
+     * @param {string|null|undefined} timeZone - IANA timezone string, e.g. "America/New_York".
+     *                                 If null, the local timezone is used.
+     * @returns {number} - Current date/time as yyyymmddhhmm.
+     */
+    static now(timeZone) {
+        const options = {
+            timeZone: timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        };
+
+        const formatter = new Intl.DateTimeFormat('en-CA', options);
+        const parts = formatter.formatToParts(new Date());
+        const obj = Object.fromEntries(parts.map(p => [p.type, p.value]));
+
+        const y = obj.year;
+        const m = obj.month;
+        const d = obj.day;
+        const h = obj.hour;
+        const min = obj.minute;
+
+        return parseInt(`${y}${m}${d}${h}${min}`, 10);
+    }
+
+    /**
      * Creates an int date/time out of an int date and int time.
      *
      * @param dt YYYYMMDD
