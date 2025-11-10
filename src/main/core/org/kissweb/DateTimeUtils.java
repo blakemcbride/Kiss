@@ -327,11 +327,11 @@ public class DateTimeUtils {
                 : ZoneId.of(zoneIdStr);
 
         // Helper to convert YYYYMMDDHHMM → Instant
-        Instant toInstant = toInstant(subYmdhm, zone);
+        Instant subInstant = toInstant(subYmdhm, zone);
         Instant fromInstant = toInstant(fromYmdhm, zone);
 
         // Duration between the two instants
-        return Duration.between(fromInstant, toInstant).toMinutes();
+        return Duration.between(subInstant, fromInstant).toMinutes();
     }
 
     /**
