@@ -96,7 +96,7 @@
                 jqObj.val('');
             else if (typeof val === 'number') {
                 if (val > 30000000)
-                    val = DateUtils.millsToInt(val);
+                    val = DateUtils.toInt(val);
                 jqObj.val(DateUtils.intToSQL(val));
             } else if (typeof val === 'string') {
                 if (/^\d+$/.test(val))

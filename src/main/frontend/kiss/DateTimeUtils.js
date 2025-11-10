@@ -324,15 +324,22 @@ class DateTimeUtils {
      * Convert a moment in time to an integer clock value (HHMM).
      * The date portion is ignored.
      *
-     * @param {Date|number} dt          – Date instance **or** milliseconds-since-epoch
+     * @param {Date|number} dt          – Date instance or milliseconds-since-epoch or YYYYMMDDHHMM
      * @param {string}      [zoneId]    – optional IANA time-zone (e.g. "America/New_York");
      *                                    omit or falsy → use the host’s local zone
      * @returns {number}                – integer HHMM, or NaN on bad input
      */
     static toIntTime(dt, zoneId) {
         // ---------- normalise the input ----------
-        if (typeof dt === 'number') dt = new Date(dt);
-        if (!(dt instanceof Date) || isNaN(dt)) return NaN;
+        if (typeof dt === 'number') {
+            if (dt > 190000000000) {
+                // user supplied YYYYMMDDHHMM
+                dt = DateTimeUtils.toDate(dt);
+            } else
+                dt = new Date(dt);
+        }
+        if (!(dt instanceof Date) || isNaN(dt))
+            return NaN;
 
         let hours, minutes;
 

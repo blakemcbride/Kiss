@@ -181,7 +181,7 @@ class DateUtils {
     }
 
     /**
-     * Convert a JavaScript Date, a string, an integer date in the form of YYYYMMDD, or the number of milliseconds
+     * Convert a JavaScript Date, a string, an integer date in the form of YYYYMMDD, YYYYMMDDHHMM, or the number of milliseconds
      * since the epoch and returns a date formated as an integer in YYYYMMDD format.
      *
      * @param dt number, string, or date
@@ -192,8 +192,13 @@ class DateUtils {
             return 0;
         if (typeof dt === 'string')
             return this.strToInt(dt);
-        if (typeof dt === 'number' || dt instanceof Number)
-            return dt > 30000101 ? this.toInt(new Date(dt)) : dt;
+        if (typeof dt === 'number' || dt instanceof Number) {
+            if (dt > 250001010000)
+                return this.toInt(new Date(dt));
+            if (dt > 190001010000)
+                return dt / 10000;
+            return dt;
+        }
         if (dt instanceof Date)
             return dt.getFullYear() * 10000 + (dt.getMonth() + 1) * 100 + dt.getDate();
         return 0;
@@ -289,7 +294,7 @@ class DateUtils {
     /**
      * Convert a date to string yyyy-mm-dd
      *
-     * @param dt YYYYMMDD, Date, milliseconds, or string
+     * @param dt YYYYMMDD, YYYYMMDDHHMM, Date, milliseconds, or string
      * @returns {string}
      */
     static intToSQL(dt) {

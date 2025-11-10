@@ -67,6 +67,11 @@ class TimeUtils {
             return new Intl.DateTimeFormat(undefined, opts).format(val);
         }
 
+        if (val > 190000000000) {
+            // user supplied YYYYMMDDHHMM
+            val = DateTimeUtils.toIntTime(val);
+        }
+
         // ----- CASE 2: user gave HHMM as a number -----
         // HHMM is treated as a *plain clock reading*; the tz argument is ignored
         const hours   = Math.floor(val / 100);

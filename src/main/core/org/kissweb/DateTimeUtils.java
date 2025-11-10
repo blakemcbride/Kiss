@@ -316,18 +316,18 @@ public class DateTimeUtils {
      * timezone is used.
      *
      * @param fromYmdhm the starting date/time (in YYYYMMDDHHMM format)
-     * @param toYmdhm the ending date/time (in YYYYMMDDHHMM format)
+     * @param subYmdhm the date/time (in YYYYMMDDHHMM format) to be sybtracted
      * @param zoneIdStr the timezone ID to use (e.g. "America/Chicago"), or null for local system zone
      * @return the difference in minutes between the two dates/times
      */
-    public static long diffMinutes(long fromYmdhm, long toYmdhm, String zoneIdStr) {
+    public static long diffMinutes(long fromYmdhm, long subYmdhm, String zoneIdStr) {
         // Choose the zone (null or blank means local system zone)
         ZoneId zone = (zoneIdStr == null || zoneIdStr.isBlank())
                 ? ZoneId.systemDefault()
                 : ZoneId.of(zoneIdStr);
 
         // Helper to convert YYYYMMDDHHMM → Instant
-        Instant toInstant = toInstant(toYmdhm, zone);
+        Instant toInstant = toInstant(subYmdhm, zone);
         Instant fromInstant = toInstant(fromYmdhm, zone);
 
         // Duration between the two instants
@@ -339,11 +339,11 @@ public class DateTimeUtils {
      * The two dates/times are assumed to be in the system default timezone.
      *
      * @param fromYmdhm the starting date/time (in YYYYMMDDHHMM format)
-     * @param toYmdhm the ending date/time (in YYYYMMDDHHMM format)
+     * @param subYmdhm the date/time (in YYYYMMDDHHMM format) to be subtracted
      * @return the difference in minutes between the two dates/times
      */
-    public static long diffMinutes(long fromYmdhm, long toYmdhm) {
-        return diffMinutes(fromYmdhm, toYmdhm, null);
+    public static long diffMinutes(long fromYmdhm, long subYmdhm) {
+        return diffMinutes(fromYmdhm, subYmdhm, null);
     }
 
     /**
