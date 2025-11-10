@@ -614,15 +614,15 @@ class DateTimeUtils {
      * Calculate the difference in minutes between two YYYYMMDDHHMM date-time values in the same time zone.
      *
      * @param {number} fromYmdhm - starting date-time in YYYYMMDDHHMM format
-     * @param {number} toYmdhm - ending date-time in YYYYMMDDHHMM format
+     * @param {number} subYmdhm - date-time in YYYYMMDDHHMM format to subtract
      * @param {string} zoneId - IANA time zone name (e.g. "America/New_York")
      * @returns {number} difference in minutes between the two date-time values
      */
-    static diffMinutes(toYmdhm, fromYmdhm, zoneId) {
+    static diffMinutes(fromYmdhm, subYmdhm, zoneId) {
         const zone = this.#normZone(zoneId);
-        const fromMs = this.toEpoch(fromYmdhm, zone);
-        const toMs   = this.toEpoch(toYmdhm,   zone);
-        return Math.trunc((toMs - fromMs) / 60_000);
+        const subMs = this.toEpoch(subYmdhm, zone);
+        const fromMs   = this.toEpoch(fromYmdhm,   zone);
+        return Math.trunc((fromMs - subMs) / 60_000);
     }
 
     /**
