@@ -544,7 +544,7 @@ class DateTimeUtils {
      * @returns {number} epoch timestamp in milliseconds (UTC)
      */
     static toEpoch(dt, zoneId) {
-        if (!dt)
+        if (!dt || dt <= 0)
             return 0;
         if (dt instanceof Date)
             dt = this.toYmdhm(dt);
