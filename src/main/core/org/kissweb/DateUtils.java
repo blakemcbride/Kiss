@@ -2,6 +2,8 @@ package org.kissweb;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
@@ -152,36 +154,91 @@ public class DateUtils {
     }
 
     /**
-     * Extracts the date portion of a long representing either an epoch time (in seconds or milliseconds)
-     * or a YYYYMMDDHHMM value into an integer YYYYMMDD date.
+     * Extracts the date portion of a long representing one of:
+     * <ul>
+     *   <li>epoch time in seconds</li>
+     *   <li>epoch time in milliseconds</li>
+     *   <li>YYYYMMDD</li>
+     *   <li>YYYYMMDDHHMM</li>
+     * </ul>
      *
-     * <p>If the value is less than 10^13, it is assumed to be an epoch time
-     * (seconds or milliseconds since 1970-01-01 UTC). Otherwise, it is treated
-     * as a YYYYMMDDHHMM representation.</p>
+     * <p>The value is interpreted heuristically based on its numeric size and
+     * whether it forms a valid date or date-time:</p>
+     * <ul>
+     *   <li>If the value looks like a valid YYYYMMDDHHMM, it is treated as such.</li>
+     *   <li>Else if it looks like a valid YYYYMMDD, it is treated as such.</li>
+     *   <li>Otherwise, it is treated as an epoch timestamp in seconds (if &lt; 10^12)
+     *       or milliseconds (if ≥ 10^12).</li>
+     * </ul>
      *
-     * @param value a long that is either an epoch timestamp or a YYYYMMDDHHMM value
+     * @param value a long that is an epoch timestamp, YYYYMMDD, or YYYYMMDDHHMM
      * @return the date portion as an int in YYYYMMDD format
      */
     public static int toInt(long value) {
-        long ymdhm;
 
-        if (value < 10_000_000_000_000L) {
-            // epoch time: could be seconds or milliseconds
-            long ms = value < 1_000_000_000_000L ? value * 1000 : value;
-            java.time.LocalDateTime dt =
-                    java.time.Instant.ofEpochMilli(ms)
-                            .atZone(java.time.ZoneId.systemDefault())
-                            .toLocalDateTime();
+        // ---------- Try YYYYMMDDHHMM (range: 1000-01-01 00:00 .. 9999-12-31 23:59) ----------
+        if (value >= 1_000_01_01_0000L && value <= 9_999_12_31_2359L) {
+            long tmp = value;
 
-            ymdhm = dt.getYear() * 100_00_00L
-                    + dt.getMonthValue() * 100_00L
-                    + dt.getDayOfMonth() * 100L
-                    + dt.getHour() * 100L
-                    + dt.getMinute();
-        } else
-            ymdhm = value;
+            int minute = (int)(tmp % 100);
+            tmp /= 100;
+            int hour = (int)(tmp % 100);
+            tmp /= 100;
+            int day = (int)(tmp % 100);
+            tmp /= 100;
+            int month = (int)(tmp % 100);
+            int year = (int)(tmp / 100);
 
-        return (int)(ymdhm / 10_000L);
+            if (isValidDateTime(year, month, day, hour, minute))
+                return year * 10_000 + month * 100 + day;
+        }
+
+        // ---------- Try YYYYMMDD (range: 1000-01-01 .. 9999-12-31) ----------
+        if (value >= 1_000_01_01L && value <= 9_999_12_31L) {
+            int ymd = (int)value;
+
+            int day = ymd % 100;
+            int month = (ymd / 100) % 100;
+            int year = ymd / 10_000;
+
+            if (isValidDate(year, month, day))
+                return ymd;
+        }
+
+        // ---------- Fallback: epoch seconds or milliseconds ----------
+        long ms;
+        if (value < 1_000_000_000_000L)
+            ms = value * 1000L;      // assume seconds
+        else
+            ms = value;              // assume milliseconds
+
+        LocalDate date =
+                Instant.ofEpochMilli(ms)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate();
+
+        return date.getYear() * 10_000
+                + date.getMonthValue() * 100
+                + date.getDayOfMonth();
+    }
+
+    private static boolean isValidDateTime(int year, int month, int day, int hour, int minute) {
+        if (hour < 0 || hour > 23)
+            return false;
+
+        if (minute < 0 || minute > 59)
+            return false;
+
+        return isValidDate(year, month, day);
+    }
+
+    private static boolean isValidDate(int year, int month, int day) {
+        try {
+            LocalDate.of(year, month, day);
+            return true;
+        } catch (DateTimeException e) {
+            return false;
+        }
     }
 
     /**
