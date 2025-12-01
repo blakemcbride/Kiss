@@ -423,7 +423,7 @@ public class Tasks {
         rmRegex("src/main/frontend/lib", "jquery.*");
         delete(foreignLibs);
         rmTree("tomcat");
-        rm(tomcatTarFile);
+        rmRegex(".", "apache-tomcat-.*");
         rm("manual/Kiss.pdf");
 
         // remove old stuff
