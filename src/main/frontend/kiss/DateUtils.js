@@ -247,7 +247,7 @@ class DateUtils {
      */
     static isSQLDate(val) {
         if (val)
-            val = $.trim(val);
+            val = val.trim();
         if (!val)
             return false;
         return !!this.SQLtoInt(val);

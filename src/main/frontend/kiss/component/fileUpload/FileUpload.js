@@ -1,9 +1,9 @@
 /*
       Author: Blake McBride
       Date:  4/26/19
- */
+*/
 
-/* global Utils, Component */
+/* global Utils, Component, Kiss */
 
 'use strict';
 
@@ -66,66 +66,75 @@
 
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
         if (custom) {
-            $('#' + id + '-btn').on('click', function () {
-                jqObj.click();
-            });
+            const btnEl = document.getElementById(id + '-btn');
+            if (btnEl) {
+                btnEl.addEventListener('click', function () {
+                    el.click();
+                });
+            }
         }
 
         newElm.numberOfUploadFiles = function () {
-            return jqObj[0].files.length;
+            return el.files.length;
         };
 
         newElm.uploadFilename = function (idx) {
-            return jqObj[0].files[idx].name;
+            return el.files[idx].name;
         };
 
         newElm.uploadFileExtension = function (idx) {
-            const name = jqObj[0].files[idx].name;
+            const name = el.files[idx].name;
             const i = name.lastIndexOf(".");
             return i === -1 ? '' : name.substring(i+1);
         };
 
         newElm.uploadFile = function (idx) {
-            return typeof idx === 'undefined' ? jqObj[0].files : jqObj[0].files[idx];
+            return typeof idx === 'undefined' ? el.files : el.files[idx];
         };
 
         newElm.getFormData = function () {
             const fd = new FormData();
-            const n = jqObj[0].files.length;
+            const n = el.files.length;
             for (let i=0 ; i < n ; i++)
-                fd.append('_file-' + i, jqObj[0].files[i]);
+                fd.append('_file-' + i, el.files[i]);
             return fd;
         };
 
         newElm.click = function () {
-            jqObj.off('click').click();
+            // Remove any existing click handlers by cloning the element
+            const newEl = el.cloneNode(true);
+            el.parentNode.replaceChild(newEl, el);
+            // Update the reference
+            newElm.element = newEl;
+            newEl.click();
         };
 
         newElm.isDirty = function () {
-            return !!jqObj[0].files.length;
+            return !!el.files.length;
         };
 
         newElm.clear = function () {
-            return jqObj.val(null);
+            el.value = '';
+            return this;
         };
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return !!el.disabled;
         };
 
         //--
@@ -133,43 +142,51 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                Kiss.hide(el);
+            else {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            } else
+                Kiss.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return Kiss.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !Kiss.isHidden(el);
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('change').change(fun);
+            // Remove existing change event listeners by cloning
+            const newEl = el.cloneNode(true);
+            el.parentNode.replaceChild(newEl, el);
+            newElm.element = newEl;
+            // Add new listener
+            newEl.addEventListener('change', fun);
             return this;
         };
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
         newElm.isError = function (desc) {
-            if (required && !jqObj[0].files.length) {
+            if (required && !el.files.length) {
                 Utils.showMessage('Error', desc + " file selection is required.").then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }

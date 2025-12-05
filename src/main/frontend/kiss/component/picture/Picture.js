@@ -2,7 +2,7 @@
       Author: Blake McBride
  */
 
-/* global Utils, Component */
+/* global Utils, Component, Kiss */
 
 'use strict';
 
@@ -41,54 +41,60 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
+        let clickHandler = null;
 
         newElm.setValue = function (filename, data) {
             const idx = filename.lastIndexOf(".");
             const ext = filename.substring(idx+1).toLowerCase();
-            jqObj.attr('src', 'data:image/' + ext + ';base64,' + data);
+            el.setAttribute('src', 'data:image/' + ext + ';base64,' + data);
         }
 
         newElm.clear = function () {
-            jqObj.attr('src', '');
+            el.setAttribute('src', '');
             return this;
         };
 
         newElm.onclick = function (fun) {
-            // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
-            // but it also limits to a single callback function
-            jqObj.off('click');
-            if (fun)
-                jqObj.css('cursor', 'pointer').click(fun);
-            else
-                jqObj.css('cursor', 'default');
+            // Remove previous handler if exists
+            if (clickHandler) {
+                el.removeEventListener('click', clickHandler);
+                clickHandler = null;
+            }
+            if (fun) {
+                el.style.cursor = 'pointer';
+                clickHandler = fun;
+                el.addEventListener('click', clickHandler);
+            } else {
+                el.style.cursor = 'default';
+            }
             return this;
         };
 
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
+                Kiss.hide(el);
             else
-                jqObj.show().css('visibility', 'visible');
+                Kiss.show(el);
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.show().css('visibility', 'visible');
+                Kiss.show(el);
             else
-                jqObj.hide();
+                Kiss.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return Kiss.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return Kiss.isVisible(el);
         };
 
     };

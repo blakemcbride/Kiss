@@ -3,7 +3,7 @@
  * Date:  4/22/18
  */
 
-/* global Utils */
+/* global Utils, Kiss */
 
 'use strict';
 
@@ -57,18 +57,20 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
         let dataStore = {};
+        let changeHandler = null;
 
-        jqObj.on('change', function () {
+        changeHandler = function () {
             if (triggerGlobalChange)
                 Utils.someControlValueChanged();
-        });
+        };
+        el.addEventListener('change', changeHandler);
 
         //--
 
         newElm.clear = function () {
-            jqObj.empty();
+            el.innerHTML = '';
             if (default_option)
                 newElm.add('', default_option);
             dataStore = {};
@@ -79,10 +81,13 @@
         newElm.add = function (val, label, data) {
             if (typeof val === "number")
                 keyIsNumber = true;
-            jqObj.append($('<option></option>').attr('value', val).text(label));
+            const option = document.createElement('option');
+            option.value = val;
+            option.textContent = label;
+            el.appendChild(option);
             if (data)
                 dataStore[val] = data;
-            originalValue = jqObj.val();
+            originalValue = el.value;
             return this;
         };
 
@@ -94,10 +99,13 @@
                 let lbl = typeof labelField === 'function' ? labelField(item) : item[labelField];
                 if (typeof item[valField] === 'number')
                     keyIsNumber = true;
-                jqObj.append($('<option></option>').attr('value', item[valField]).text(lbl));
+                const option = document.createElement('option');
+                option.value = item[valField];
+                option.textContent = lbl;
+                el.appendChild(option);
                 dataStore[item[valField]] = dataField ? item[dataField] : item;
             }
-            originalValue = jqObj.val();
+            originalValue = el.value;
             return this;
         };
 
@@ -112,13 +120,13 @@
         };
 
         newElm.size = function () {
-            return jqObj.children('option').length;
+            return el.options.length;
         };
 
         newElm.getValue = function (row) {
             if (row !== 0 && !row)
-                return keyIsNumber ? Number(jqObj.val()) : jqObj.val();
-            const v = jqObj.find('option')[row].value;
+                return keyIsNumber ? Number(el.value) : el.value;
+            const v = el.options[row].value;
             return keyIsNumber ? Number(v) : v;
         };
 
@@ -134,11 +142,11 @@
 
         newElm.setValue = function (val, row) {
             if (row !== 0 && !row) {
-                jqObj.val(val);
-                originalValue = jqObj.val();
+                el.value = val;
+                originalValue = el.value;
             } else {
                 const origVal = newElm.getValue(row);
-                jqObj.find('option')[row].value = val;
+                el.options[row].value = val;
                 if (origVal) {
                     const data = dataStore[origVal];
                     delete dataStore[origVal];
@@ -150,23 +158,22 @@
 
         newElm.getLabel = function (row) {
             if (row !== 0 && !row)
-                return jqObj.find('option:selected').text();
-            return jqObj.find('option')[row].text;
+                return el.options[el.selectedIndex].text;
+            return el.options[row].text;
         };
 
         newElm.getAllLabels = function () {
             const r = [];
-            jqObj.find('option').each((idx, option) => {
-                r.push(option.text);
-            });
+            for (let i = 0; i < el.options.length; i++)
+                r.push(el.options[i].text);
             return r;
         };
 
         newElm.setLabel = function (lbl, row) {
             if (row !== 0 && !row)
-                jqObj.find('option:selected').text(lbl);
+                el.options[el.selectedIndex].text = lbl;
             else
-                jqObj.find('option')[row].text = lbl;
+                el.options[row].text = lbl;
             return this;
         };
 
@@ -179,75 +186,87 @@
         };
 
         newElm.isDirty = function () {
-            return originalValue !== jqObj.val();
+            return originalValue !== el.value;
         };
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            if (flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            if (flg)
+                el.removeAttribute('readonly');
+            else
+                el.setAttribute('readonly', 'readonly');
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.hasAttribute('readonly');
         };
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                Kiss.hide(el);
+            else {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            } else
+                Kiss.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return Kiss.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !Kiss.isHidden(el);
         };
 
         newElm.onChange = function (func) {
-            jqObj.off('change').on('change', function () {
+            if (changeHandler)
+                el.removeEventListener('change', changeHandler);
+            changeHandler = function () {
                 if (triggerGlobalChange)
                     Utils.someControlValueChanged();
                 // func gets passed the selected value, label
                 if (func)
-                    func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
-            });
+                    func(el.value, el.options[el.selectedIndex].text, dataStore[el.value]);
+            };
+            el.addEventListener('change', changeHandler);
             return this;
         };
 
@@ -256,7 +275,7 @@
         };
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
@@ -266,7 +285,7 @@
             let val = newElm.getValue();
             if (!val) {
                 Utils.showMessage('Error', desc + ' selection is required.').then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
@@ -274,21 +293,22 @@
         };
 
         newElm.selectedIndex = function () {
-            return jqObj.prop('selectedIndex');
+            return el.selectedIndex;
         };
 
         newElm.selectIndex = function (idx) {
-            jqObj.find(':nth-child(' + (idx+1) + ')').prop('selected', true);
+            if (idx >= 0 && idx < el.options.length)
+                el.selectedIndex = idx;
             return this;
         };
 
         newElm.removeByIndex = function (idx) {
-            const val = jqObj.val();
-            if (idx < jqObj.children('option').length)
-                jqObj.find('option').eq(idx).remove();
+            const val = el.value;
+            if (idx < el.options.length)
+                el.remove(idx);
             if (val)
                 delete dataStore[val];
-            originalValue = jqObj.val();
+            originalValue = el.value;
             return this;
         };
 
@@ -302,4 +322,3 @@
 
     Utils.newComponent(componentInfo);
 })();
-

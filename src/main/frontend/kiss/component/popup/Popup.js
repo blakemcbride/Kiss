@@ -3,7 +3,7 @@
       Date:  4/24/20
  */
 
-/* global Utils, Component */
+/* global Utils, Component, Kiss */
 
 'use strict';
 

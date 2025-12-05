@@ -8,7 +8,7 @@
       This version does not support html.
  */
 
-/* global Utils, Component */
+/* global Utils, Component, Kiss */
 
 'use strict';
 
@@ -72,24 +72,24 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
         function setColor(disabled) {
             if (disabled) {
-                jqObj.css('background-color', '#DDDDDD');
-                jqObj.css('color', 'rgb(84, 84, 84)');
+                el.style.backgroundColor = '#DDDDDD';
+                el.style.color = 'rgb(84, 84, 84)';
             } else {
-                jqObj.css('background-color', 'white');
-                jqObj.css('color', 'black');
+                el.style.backgroundColor = 'white';
+                el.style.color = 'black';
             }
         }
 
         setColor(disabled);
 
-        jqObj.keydown((event) => {
+        el.addEventListener('keydown', (event) => {
             if (!max || event.key && event.key.length > 1 && event.key !== 'Enter')
                 return;
-            let txt = Utils.htmlToText(jqObj.val()).replace(/^\s+/, '');
+            let txt = Utils.htmlToText(el.value).replace(/^\s+/, '');
             txt = Utils.toASCII(txt);
             if (txt && txt.length >= max) {
                 event.preventDefault();
@@ -104,27 +104,27 @@
                 Utils.someControlValueChanged();
         }
 
-        jqObj.keyup(keyUpHandler);
+        el.addEventListener('keyup', keyUpHandler);
 
-        jqObj.focusout(() => {
-            let sval = Utils.htmlToText(jqObj.val()).replace(/^\s+/, '');
+        el.addEventListener('focusout', () => {
+            let sval = Utils.htmlToText(el.value).replace(/^\s+/, '');
             sval = sval ? sval.replace(/ +/g, ' ') : '';
             if (Utils.forceASCII)
                 sval = Utils.toASCII(sval);
             if (sval)
-                jqObj.val(upcase ? sval.toUpperCase() : sval);
+                el.value = upcase ? sval.toUpperCase() : sval;
         });
 
         //--
 
         newElm.getValue = function () {
-            let sval = Utils.htmlToText(jqObj.val());
+            let sval = Utils.htmlToText(el.value);
             sval = sval ? sval.replace(/ +/g, ' ').trim() : '';
             if (Utils.forceASCII)
                 sval = Utils.toASCII(sval);
             if (sval && upcase) {
                 sval = sval.toUpperCase();
-                jqObj.val(sval);
+                el.value = sval;
             }
             if (max && sval && sval.length > max)
                 sval = Utils.take(sval, max);
@@ -137,10 +137,10 @@
             if (Utils.forceASCII)
                 val = Utils.toASCII(val);
             if (!val) {
-                jqObj.val(originalValue='');
+                el.value = originalValue = '';
                 return this;
             }
-            jqObj.val(originalValue=val);
+            el.value = originalValue = val;
             return this;
         };
 
@@ -148,12 +148,14 @@
             if (val)
                 val = val.trim();
             if (!val) {
-                jqObj.val(originalValue='');
+                el.value = originalValue = '';
                 return this;
             }
-            let encodedValue = $('<div/>').text(val).html();
+            const tempDiv = document.createElement('div');
+            tempDiv.textContent = val;
+            let encodedValue = tempDiv.innerHTML;
             originalValue = val;
-            jqObj.val(encodedValue);
+            el.value = encodedValue;
             return this;
         };
 
@@ -170,38 +172,38 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('readonly', flg);
+            el.readOnly = flg;
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('readonly', !flg);
+            el.readOnly = !flg;
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.readOnly;
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             setColor(flg);
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             setColor(!flg);
             return this;
         };
 
         newElm.isDisabled = function () {
-            return jqObj.is(':disabled');
+            return el.disabled;
         };
 
         //--
@@ -209,51 +211,67 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                Kiss.hide(el);
+            else {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            } else
+                Kiss.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return Kiss.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !Kiss.isHidden(el);
         };
 
         //--
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
+        let keyupHandler = null;
+
         newElm.onCChange = function (fun) {
-            jqObj.off('keyup').keyup(function (event) {
+            if (keyupHandler) {
+                el.removeEventListener('keyup', keyupHandler);
+            }
+            keyupHandler = function (event) {
                 keyUpHandler(event);
                 if (fun && (Utils.isChangeChar(event) || event.key === 'Enter'))
                     fun(newElm.getValue());
-            });
+            };
+            el.addEventListener('keyup', keyupHandler);
             return this;
         };
 
+        let changeHandler = null;
+
         newElm.onChange = function (fun) {
-            jqObj.off('change');
-            if (fun)
-                jqObj.change(() => {
+            if (changeHandler) {
+                el.removeEventListener('change', changeHandler);
+                changeHandler = null;
+            }
+            if (fun) {
+                changeHandler = () => {
                     fun(newElm.getValue());
-                });
+                };
+                el.addEventListener('change', changeHandler);
+            }
             return this;
         };
 
@@ -267,7 +285,7 @@
                     else
                         msg = desc + ' must be at least ' + min + ' characters long.';
                     Utils.showMessage('Error', msg).then(function () {
-                        jqObj.focus();
+                        el.focus();
                     });
                     return true;
                 }

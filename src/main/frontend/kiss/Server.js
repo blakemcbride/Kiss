@@ -265,15 +265,14 @@ class Server {
                 }
             Utils.waitMessage(waitMsg ? waitMsg : "File upload in progress.");
             Server.incCount();
-            $.ajax({
-                url: Server.url + '/rest',
-                type: 'POST',
-                processData: false,
-                contentType: false,
-                data: fd,
-                dataType: 'json',  // what is coming back
-                cache: false,
-                success: async function (res, status, hdr) {
+
+            (async () => {
+                try {
+                    const response = await fetch(Server.url + '/rest', {
+                        method: 'POST',
+                        body: fd  // FormData - browser sets Content-Type automatically
+                    });
+                    const res = await response.json();
                     Utils.waitMessageEnd();
                     Server.decCount();
                     if (res._Success) {
@@ -285,14 +284,13 @@ class Server {
                     } else
                         await Utils.showMessage("Error", res._ErrorMessage);
                     resolve(res);
-                },
-                error: async function (hdr, status, error) {
+                } catch (err) {
                     Utils.waitMessageEnd();
                     Server.decCount();
                     await Utils.showMessage("Error", Server.errorMessage);
                     resolve({_Success: false, _ErrorMessage: Server.errorMessage});
                 }
-            });
+            })();
         });
     }
 

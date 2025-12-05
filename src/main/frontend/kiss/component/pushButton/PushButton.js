@@ -1,9 +1,9 @@
 /*
       Author: Blake McBride
       Date:  4/25/18
- */
+*/
 
-/* global Utils */
+/* global Utils, Kiss */
 
 'use strict';
 
@@ -45,23 +45,41 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
-        jqObj.on('change', function () {
+        // Track event handlers for removal
+        let clickHandler = null;
+        let keyupHandler = null;
+        let keydownHandler = null;
+
+        const changeHandler = function () {
             //           Utils.someControlValueChanged();
-        });
+        };
+        el.addEventListener('change', changeHandler);
 
         newElm.onclick = function (fun) {
             // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
             // but it also limits to a single callback function
-            jqObj.off('click').off('keyup').off('keydown');
-            if (fun)
-                jqObj.on('click', function (e) {
+            if (clickHandler) {
+                el.removeEventListener('click', clickHandler);
+                clickHandler = null;
+            }
+            if (keyupHandler) {
+                el.removeEventListener('keyup', keyupHandler);
+                keyupHandler = null;
+            }
+            if (keydownHandler) {
+                el.removeEventListener('keydown', keydownHandler);
+                keydownHandler = null;
+            }
+            if (fun) {
+                clickHandler = function (e) {
                     if (Utils.suspendDepth < 0)  // should never happen but just in case
                         Utils.suspendDepth = 0;
                     if (!waitForKeyUp && !Utils.suspendDepth)
                         fun();
-                }).on('keyup', function (e) {
+                };
+                keyupHandler = function (e) {
                     if (Utils.suspendDepth < 0)  // should never happen but just in case
                         Utils.suspendDepth = 0;
                     e.stopPropagation();
@@ -69,25 +87,30 @@
                         fun();
                         waitForKeyUp = false;
                     }
-                }).on('keydown', function (e) {
+                };
+                keydownHandler = function (e) {
                     if (e.key === 'Enter')
                         waitForKeyUp = true;
                     e.stopPropagation();
-                });
+                };
+                el.addEventListener('click', clickHandler);
+                el.addEventListener('keyup', keyupHandler);
+                el.addEventListener('keydown', keydownHandler);
+            }
             return this;
         };
 
         newElm.click = function () {
-            jqObj.click();
+            el.click();
             return this;
         };
 
         newElm.getValue = function () {
-            return jqObj.val();
+            return el.value;
         };
 
         newElm.setValue = function (val) {
-            jqObj.val(val);
+            el.value = val;
             return this;
         };
 
@@ -95,36 +118,42 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            if (flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            if (!flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.hasAttribute('readonly');
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         //--
@@ -132,33 +161,37 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                qObj.show().css('visibility', 'visible');
+                Kiss.hide(el);
+            else {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
+            if (flg) {
+                Kiss.show(el);
+                el.style.visibility = 'visible';
+            }
             else
-                jqObj.hide();
+                Kiss.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return Kiss.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !Kiss.isHidden(el);
         };
 
         //--
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         }
     };

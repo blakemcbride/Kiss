@@ -2,7 +2,7 @@
       Author: Blake McBride
  */
 
-/* global Utils, Component */
+/* global Utils, Component, Kiss */
 
 'use strict';
 
@@ -48,75 +48,81 @@
             });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
+        let clickHandler = null;
 
         newElm.getValue = function () {
-            let sval = jqObj.text();
+            let sval = el.textContent;
             return sval ? sval : '';
         };
 
         newElm.setValue = function (val) {
             if (val !== 0  &&  !val) {
-                jqObj.text('');
+                el.textContent = '';
                 return this;
             }
-            jqObj.text(val);
+            el.textContent = val;
             return this;
         };
 
         newElm.setHTMLValue = function (val) {
             if (val !== 0  &&  !val) {
-                jqObj.text('');
+                el.textContent = '';
                 return this;
             }
-            jqObj.html(val);
+            el.innerHTML = val;
             return this;
         };
 
         newElm.clear = function () {
-            jqObj.text('');
+            el.textContent = '';
             return this;
         };
 
         newElm.onclick = function (fun) {
-            // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
-            // but it also limits to a single callback function
-            jqObj.off('click');
-            if (fun)
-                jqObj.css('cursor', 'pointer').click(fun);
-            else
-                jqObj.css('cursor', 'default');
+            // Remove previous handler if exists
+            if (clickHandler) {
+                el.removeEventListener('click', clickHandler);
+                clickHandler = null;
+            }
+            if (fun) {
+                el.style.cursor = 'pointer';
+                clickHandler = fun;
+                el.addEventListener('click', clickHandler);
+            } else {
+                el.style.cursor = 'default';
+            }
             return this;
         };
 
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
+                Kiss.hide(el);
             else
-                jqObj.show().css('visibility', 'visible');
+                Kiss.show(el);
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.show().css('visibility', 'visible');
+                Kiss.show(el);
             else
-                jqObj.hide();
+                Kiss.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return Kiss.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return Kiss.isVisible(el);
         };
 
         newElm.setColor = function (color) {
-            jqObj.css('color', color);
+            el.style.color = color;
             return this;
         };
     };

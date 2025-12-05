@@ -129,8 +129,6 @@
                 getScript("index.js");
             }
 
-            $.ajaxSetup({ cache: SystemInfo.controlCache });  // utilize browser cache to the fullest when version hasn't changed
-
             if (SystemInfo.controlCache) {
                 const now = getURLParameter("now");
                 let urlArgs = window.location.search.substring(1);
@@ -157,7 +155,7 @@
 
 <body onload="startup()">
 
-<script src="lib/jquery-3.6.3.min.js"></script>
+<script src="kiss/kiss.js"></script>
 <script src="lib/ag-grid-community.min.noStyle.js?nocache=20250711"></script>
 <script src="lib/ckeditor.js?nocache=20230813"></script>
 
