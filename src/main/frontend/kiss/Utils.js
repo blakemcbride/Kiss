@@ -200,7 +200,7 @@ class Utils {
      * Display a modal popup that asks the user a yes/no question.
      *
      * The yesFun/noFun can be used, or this function returns a promise
-     * so that is can be used with async/await.
+     * so that it can be used with async/await.
      *
      * @param {string} title text on the title bar of the popup
      * @param {string} message the question being asked
@@ -348,7 +348,7 @@ class Utils {
      * Test the validity of a domain name.
      *
      * @param d {string} the domain to be tested
-     * @returns {boolean}
+     * @returns {boolean} true if valid
      */
     static isValidDomain(d) {
         if (!d || typeof d !== 'string' || d.length < 3)
@@ -368,7 +368,7 @@ class Utils {
      * Test the validity of an email address.
      *
      * @param add {string} the email address to be tested
-     * @returns {boolean}
+     * @returns {boolean} true if valid
      */
     static isValidEmailAddress(add) {
         if (!add || typeof add !== 'string' || add.length < 5)
@@ -1183,7 +1183,7 @@ class Utils {
 
     static getAllAttributes(elm) {
         const ret = {};
-        // elm is now a native DOM element, not a jQuery object
+        // elm is a native DOM element
         const el = elm.nodeType ? elm : elm[0];  // handle both native and jQuery-like objects
         Array.from(el.attributes).forEach(function (attr) {
             ret[attr.name] = attr.value;
@@ -1515,8 +1515,13 @@ class Utils {
      */
     static popup_open(id, focus_ctl=null, replace = false) {
         const w = DOMUtils.getElement(id);
-        if (!w)
+        if (!w) {
+            console.log(`Popup ${id} not found.`);
             throw new Error(`Popup ${id} not found.`);
+        } else if (w.length > 1) {
+            console.log(`Popup ${id} found more than once.`);
+            throw new Error(`Popup ${id} found more than once.`);
+        }
 
         let prior_offset = null;
 
@@ -1540,7 +1545,7 @@ class Utils {
         });
         if (typeof AGGrid !== 'undefined')
             AGGrid.newGridContext();
-         if (typeof Editor !== 'undefined')
+        if (typeof Editor !== 'undefined')
             Editor.newEditorContext();
         Utils.newEnterContext();
         if (!DOMUtils.hasClass(w, 'popup-background')) {
@@ -1584,7 +1589,7 @@ class Utils {
             if (fctl)
                 fctl.focus();
             else
-                console.log("popup_open:  can't set focus to nonexistent field " + focus_ctl);
+                console.log("popup_open:  can't set focus to non-existent field " + focus_ctl);
         } else {
             const ctl = document.activeElement;
             if (ctl && ctl !== document.body)
@@ -1629,6 +1634,10 @@ class Utils {
      */
     static popup_close() {
         const context = Utils.popup_context.pop();
+        if (!context) {
+            console.log('popup_close called without an active popup');
+            return;
+        }
         if (typeof AGGrid !== 'undefined')
             AGGrid.popGridContext();
         if (typeof Editor !== 'undefined')
@@ -2297,7 +2306,7 @@ class Utils {
      * It tries to assure that the first letter of each word is uppercase and the rest is lowercase.
      * If the incoming string is already mixed-case, it leaves it alone.
      *
-     * @param s {string}
+     * @param str {string}
      * @returns {string}
      */
     static fixCapitalization(str) {
@@ -2376,6 +2385,7 @@ Utils.enterFunctionStack = [];      //  Save stack for enter key to handle popup
 Utils.screenStack = [];
 Utils.lastScreenLoaded = {};  //  current stackframe
 
+// This is used to prevent button clicks when there is an active web service call
 Utils.suspendDepth = 0;  // when > 0 suspend buttons
 
 Utils.globalData = {};
@@ -2392,7 +2402,7 @@ Utils.waitMessageStack = [];
  * If your database uses Unicode, then this should be set to <code>false</code>.
  * If set to <code>true</code>, it should be set elsewhere so that this file can remain
  * untouched.
- * 
+ *
  * @type {boolean}
  */
 Utils.forceASCII = false;
