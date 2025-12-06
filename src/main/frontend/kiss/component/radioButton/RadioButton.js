@@ -3,12 +3,12 @@
       Date:  4/23/18
 */
 
-/* global DOMHelper, Utils */
+/* global DOMUtils, Utils */
 
 'use strict';
 
-DOMHelper.RadioButtons = {};
-DOMHelper.RadioButtons.groups = {};
+DOMUtils.RadioButtons = {};
+DOMUtils.RadioButtons.groups = {};
 
 (function () {
 
@@ -81,16 +81,16 @@ DOMHelper.RadioButtons.groups = {};
         if (!id)
             id = Utils.nextID();
 
-        if (!DOMHelper.RadioButtons.groups[group]) {
-            DOMHelper.RadioButtons.groups[group] = {};
-            DOMHelper.RadioButtons.groups[group].required = false;
-            DOMHelper.RadioButtons.groups[group].ids = [];  //  the individual ids in the group
+        if (!DOMUtils.RadioButtons.groups[group]) {
+            DOMUtils.RadioButtons.groups[group] = {};
+            DOMUtils.RadioButtons.groups[group].required = false;
+            DOMUtils.RadioButtons.groups[group].ids = [];  //  the individual ids in the group
         }
         if (checked)
-            DOMHelper.RadioButtons.groups[group].default_value = value;
+            DOMUtils.RadioButtons.groups[group].default_value = value;
         if (required)
-            DOMHelper.RadioButtons.groups[group].required = true;
-        DOMHelper.RadioButtons.groups[group].ids.push(id);
+            DOMUtils.RadioButtons.groups[group].required = true;
+        DOMUtils.RadioButtons.groups[group].ids.push(id);
 
         if (!align_vertical)
             div_style = 'display: inline-block;' + div_style;
@@ -145,9 +145,9 @@ DOMHelper.RadioButtons.groups = {};
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             const divEl = document.getElementById(id + '--div');
             if (flg)
-                DOMHelper.hide(divEl);
+                DOMUtils.hide(divEl);
             else {
-                DOMHelper.show(divEl);
+                DOMUtils.show(divEl);
                 divEl.style.visibility = 'visible';
             }
             return this;
@@ -157,20 +157,20 @@ DOMHelper.RadioButtons.groups = {};
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             const divEl = document.getElementById(id + '--div');
             if (flg) {
-                DOMHelper.show(divEl);
+                DOMUtils.show(divEl);
                 divEl.style.visibility = 'visible';
             }
             else
-                DOMHelper.hide(divEl);
+                DOMUtils.hide(divEl);
             return this;
         };
 
         newElm.isHidden = function () {
-            return DOMHelper.isHidden(document.getElementById(id + '--div'));
+            return DOMUtils.isHidden(document.getElementById(id + '--div'));
         };
 
         newElm.isVisible = function () {
-            return !DOMHelper.isHidden(document.getElementById(id + '--div'));
+            return !DOMUtils.isHidden(document.getElementById(id + '--div'));
         };
 
     };
@@ -189,14 +189,14 @@ DOMHelper.RadioButtons.groups = {};
       Functionality for groups of radio buttons is as follows.
 */
 
-DOMHelper.RadioButtons.getValue = function (group) {
+DOMUtils.RadioButtons.getValue = function (group) {
     const checked = document.querySelector('input[type=radio][name="' + group + '"]:checked');
     return checked ? checked.value : undefined;
 };
 
-DOMHelper.RadioButtons.setValue = function (group, val) {
+DOMUtils.RadioButtons.setValue = function (group, val) {
     if (!val)
-        DOMHelper.RadioButtons.clear(group);
+        DOMUtils.RadioButtons.clear(group);
     else {
         const radio = document.querySelector('input[type=radio][name="' + group + '"][value="'+val+'"]');
         if (radio)
@@ -204,73 +204,73 @@ DOMHelper.RadioButtons.setValue = function (group, val) {
     }
 };
 
-DOMHelper.RadioButtons.clear = function (group) {
+DOMUtils.RadioButtons.clear = function (group) {
     const radios = document.querySelectorAll('input[type=radio][name="' + group + '"]');
-    if (DOMHelper.RadioButtons.groups[group].default_value !== undefined)
-        DOMHelper.RadioButtons.setValue(group, DOMHelper.RadioButtons.groups[group].default_value);
+    if (DOMUtils.RadioButtons.groups[group].default_value !== undefined)
+        DOMUtils.RadioButtons.setValue(group, DOMUtils.RadioButtons.groups[group].default_value);
     else
         radios.forEach(radio => radio.checked = false);
 };
 
 //--
 
-DOMHelper.RadioButtons.readOnly = function (group) {
+DOMUtils.RadioButtons.readOnly = function (group) {
     const radios = document.querySelectorAll('input[type=radio][name="' + group + '"]');
     radios.forEach(radio => radio.setAttribute('readonly', 'true'));
 };
 
-DOMHelper.RadioButtons.readWrite = function (group) {
+DOMUtils.RadioButtons.readWrite = function (group) {
     const radios = document.querySelectorAll('input[type=radio][name="' + group + '"]');
     radios.forEach(radio => radio.removeAttribute('readonly'));
 };
 
-DOMHelper.RadioButtons.isReadOnly = function (group) {
+DOMUtils.RadioButtons.isReadOnly = function (group) {
     const radio = document.querySelector('input[type=radio][name="' + group + '"]');
     return radio ? radio.hasAttribute('readonly') : false;
 };
 
 //--
 
-DOMHelper.RadioButtons.hide = function (group, flg=true) {
-    const ids = DOMHelper.RadioButtons.groups[group].ids;
+DOMUtils.RadioButtons.hide = function (group, flg=true) {
+    const ids = DOMUtils.RadioButtons.groups[group].ids;
     ids.forEach(id => {
         const divEl = document.getElementById(id + '--div');
         if (flg)
-            DOMHelper.hide(divEl);
+            DOMUtils.hide(divEl);
         else {
-            DOMHelper.show(divEl);
+            DOMUtils.show(divEl);
             divEl.style.visibility = 'visible';
         }
     });
 };
 
-DOMHelper.RadioButtons.show = function (group, flg=true) {
-    const ids = DOMHelper.RadioButtons.groups[group].ids;
+DOMUtils.RadioButtons.show = function (group, flg=true) {
+    const ids = DOMUtils.RadioButtons.groups[group].ids;
     ids.forEach(id => {
         const divEl = document.getElementById(id + '--div');
         if (flg) {
-            DOMHelper.show(divEl);
+            DOMUtils.show(divEl);
             divEl.style.visibility = 'visible';
         }
         else
-            DOMHelper.hide(divEl);
+            DOMUtils.hide(divEl);
     });
 };
 
-DOMHelper.RadioButtons.isHidden = function (group) {
+DOMUtils.RadioButtons.isHidden = function (group) {
     const radio = document.querySelector('input[type=radio][name="' + group + '"]');
-    return radio ? DOMHelper.isHidden(radio) : true;
+    return radio ? DOMUtils.isHidden(radio) : true;
 };
 
-DOMHelper.RadioButtons.isVisible = function (group) {
+DOMUtils.RadioButtons.isVisible = function (group) {
     const radio = document.querySelector('input[type=radio][name="' + group + '"]');
-    return radio ? !DOMHelper.isHidden(radio) : false;
+    return radio ? !DOMUtils.isHidden(radio) : false;
 };
 
 //--
 
-DOMHelper.RadioButtons.isError = function (group, desc) {
-    if (!DOMHelper.RadioButtons.groups[group].required)
+DOMUtils.RadioButtons.isError = function (group, desc) {
+    if (!DOMUtils.RadioButtons.groups[group].required)
         return false;
 
     const checked = document.querySelector('input[type=radio][name="' + group + '"]:checked');
@@ -282,7 +282,7 @@ DOMHelper.RadioButtons.isError = function (group, desc) {
     return false;
 };
 
-DOMHelper.RadioButtons.onChange = function (group, fun) {
+DOMUtils.RadioButtons.onChange = function (group, fun) {
     const radios = document.querySelectorAll('input[type=radio][name="' + group + '"]');
     radios.forEach(radio => {
         // Remove existing change listeners by cloning
@@ -299,27 +299,27 @@ DOMHelper.RadioButtons.onChange = function (group, fun) {
     });
 };
 
-DOMHelper.RadioButtons.resetGroups = function () {
-    DOMHelper.RadioButtons.groups = {};
+DOMUtils.RadioButtons.resetGroups = function () {
+    DOMUtils.RadioButtons.groups = {};
     return this;
 };
 
-DOMHelper.RadioButtons.enable = function (group, flg=true) {
+DOMUtils.RadioButtons.enable = function (group, flg=true) {
     const radios = document.querySelectorAll('input[type=radio][name="' + group + '"]');
     radios.forEach(radio => radio.disabled = !flg);
 };
 
-DOMHelper.RadioButtons.disable = function (group, flg=true) {
+DOMUtils.RadioButtons.disable = function (group, flg=true) {
     const radios = document.querySelectorAll('input[type=radio][name="' + group + '"]');
     radios.forEach(radio => radio.disabled = flg);
 };
 
-DOMHelper.RadioButtons.isDisabled = function (group) {
+DOMUtils.RadioButtons.isDisabled = function (group) {
     const radio = document.querySelector('input[type=radio][name="' + group + '"]');
     return radio ? radio.disabled : false;
 };
 
-DOMHelper.RadioButtons.focus = function (group) {
+DOMUtils.RadioButtons.focus = function (group) {
     const radio = document.querySelector('input[type=radio][name="' + group + '"]');
     if (radio)
         radio.focus();

@@ -3,7 +3,7 @@
  * Date:  4/22/18
  */
 
-/* global Utils, DOMHelper */
+/* global Utils, DOMUtils */
 
 'use strict';
 
@@ -230,9 +230,9 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                DOMHelper.hide(el);
+                DOMUtils.hide(el);
             else {
-                DOMHelper.show(el);
+                DOMUtils.show(el);
                 el.style.visibility = 'visible';
             }
             return this;
@@ -241,19 +241,19 @@
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg) {
-                DOMHelper.show(el);
+                DOMUtils.show(el);
                 el.style.visibility = 'visible';
             } else
-                DOMHelper.hide(el);
+                DOMUtils.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return DOMHelper.isHidden(el);
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return !DOMHelper.isHidden(el);
+            return !DOMUtils.isHidden(el);
         };
 
         newElm.onChange = function (func) {

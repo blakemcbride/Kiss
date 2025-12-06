@@ -1,9 +1,8 @@
 /**
- * DOMHelper DOM Helper Utilities
+ * DOMUtils DOM Helper Utilities
  * Native DOM API wrappers to replace jQuery functionality
  */
-
-const DOMHelper = {
+const DOMUtils = {
     // Radio button groups storage (moved from global scope)
     RadioButtons: {
         groups: {}
@@ -75,7 +74,7 @@ const DOMHelper = {
      * @param {HTMLElement} el
      * @returns {boolean}
      */
-    isVisible: (el) => !DOMHelper.isHidden(el),
+    isVisible: (el) => !DOMUtils.isHidden(el),
 
     /**
      * Set CSS property

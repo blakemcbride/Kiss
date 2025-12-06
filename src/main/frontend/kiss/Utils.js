@@ -13,9 +13,9 @@ Component.ComponentsBeingLoaded = 0;
 
 Component.ComponentList = [];
 
-// DOMHelper object is defined in DOMHelper.js - don't override if already exists
-if (typeof DOMHelper === 'undefined') {
-    console.warn('DOMHelper object not found - DOMHelper.js should be loaded before Utils.js');
+// DOMUtils object is defined in DOMUtils.js - don't override if already exists
+if (typeof DOMUtils === 'undefined') {
+    console.warn('DOMUtils object not found - DOMUtils.js should be loaded before Utils.js');
 }
 
 /**
@@ -25,23 +25,23 @@ if (typeof DOMHelper === 'undefined') {
  * @returns {*} the component object
  */
 function $$(id) {
-    if (typeof DOMHelper !== 'undefined' && typeof DOMHelper.RadioButtons !== 'undefined' && DOMHelper.RadioButtons.groups[id]) {
+    if (typeof DOMUtils !== 'undefined' && typeof DOMUtils.RadioButtons !== 'undefined' && DOMUtils.RadioButtons.groups[id]) {
         const rbObj = {};
         let originalValue;
         rbObj.getValue = function () {
-            return DOMHelper.RadioButtons.getValue(id);
+            return DOMUtils.RadioButtons.getValue(id);
         };
         rbObj.getIntValue = function () {
-            let val = DOMHelper.RadioButtons.getValue(id);
+            let val = DOMUtils.RadioButtons.getValue(id);
             return val ? Number(val) : 0;
         };
         rbObj.setValue = function (val) {
-            DOMHelper.RadioButtons.setValue(id, val);
+            DOMUtils.RadioButtons.setValue(id, val);
             originalValue = rbObj.getValue();
             return rbObj;
         };
         rbObj.clear = function () {
-            DOMHelper.RadioButtons.clear(id);
+            DOMUtils.RadioButtons.clear(id);
             originalValue = rbObj.getValue();
             return rbObj;
         };
@@ -49,52 +49,52 @@ function $$(id) {
             return originalValue !== rbObj.getValue(id);
         };
         rbObj.readOnly = function () {
-            DOMHelper.RadioButtons.readOnly(id);
+            DOMUtils.RadioButtons.readOnly(id);
             return rbObj;
         };
         rbObj.readWrite = function () {
-            DOMHelper.RadioButtons.readWrite(id);
+            DOMUtils.RadioButtons.readWrite(id);
             return rbObj;
         };
         rbObj.isReadOnly = function () {
-            return DOMHelper.RadioButtons.isReadOnly(id);
+            return DOMUtils.RadioButtons.isReadOnly(id);
         };
         rbObj.onChange = function (fun) {
-            DOMHelper.RadioButtons.onChange(id, fun);
+            DOMUtils.RadioButtons.onChange(id, fun);
             return rbObj;
         };
         rbObj.isError = function (lbl) {
-            return DOMHelper.RadioButtons.isError(id, lbl);
+            return DOMUtils.RadioButtons.isError(id, lbl);
         };
         rbObj.enable = function (flg=true) {
-            DOMHelper.RadioButtons.enable(id, flg);
+            DOMUtils.RadioButtons.enable(id, flg);
             return rbObj;
         };
         rbObj.disable = function (flg=true) {
-            DOMHelper.RadioButtons.disable(id, flg);
+            DOMUtils.RadioButtons.disable(id, flg);
             return rbObj;
         };
         rbObj.hide = function (flg=true) {
-            DOMHelper.RadioButtons.hide(id, flg);
+            DOMUtils.RadioButtons.hide(id, flg);
             return rbObj;
         };
         rbObj.show = function (flg=true) {
-            DOMHelper.RadioButtons.show(id, flg);
+            DOMUtils.RadioButtons.show(id, flg);
             return rbObj;
         };
         rbObj.isHidden = function () {
-            return DOMHelper.RadioButtons.isHidden(id);
+            return DOMUtils.RadioButtons.isHidden(id);
         };
         rbObj.isVisible = function () {
-            return DOMHelper.RadioButtons.isVisible(id);
+            return DOMUtils.RadioButtons.isVisible(id);
         };
         rbObj.focus = function () {
-            DOMHelper.RadioButtons.focus(id);
+            DOMUtils.RadioButtons.focus(id);
             return rbObj;
         };
         return rbObj;
     }
-    const e = DOMHelper.getElement(id);
+    const e = DOMUtils.getElement(id);
     if (e)
         return e.kiss;
     else {
@@ -119,9 +119,9 @@ class Utils {
         const self = this;
         Utils.waitMessageEnd();
         return new Promise(function (resolve, reject) {
-            let modal = DOMHelper.getElement('msg-modal');
+            let modal = DOMUtils.getElement('msg-modal');
             if (!modal) {
-                DOMHelper.append(document.body,
+                DOMUtils.append(document.body,
                     '<div id="msg-modal" class="msg-modal">' +
                     '  <!-- Modal content -->' +
                     '  <div class="msg-modal-content" id="msg-modal-content-tab">' +
@@ -137,22 +137,22 @@ class Utils {
                     '    </div>' +
                     '  </div>' +
                     '</div>');
-                modal = DOMHelper.getElement('msg-modal');
+                modal = DOMUtils.getElement('msg-modal');
 
                 // Adjust width for mobile
-                const content = DOMHelper.getElement('msg-modal-content-tab');
+                const content = DOMUtils.getElement('msg-modal-content-tab');
                 const smaller = screen.width < screen.height ? screen.width : screen.height;
-                if (smaller < DOMHelper.width(content) + 20)
-                    DOMHelper.setWidth(content, smaller - 20);
+                if (smaller < DOMUtils.width(content) + 20)
+                    DOMUtils.setWidth(content, smaller - 20);
             }
 
-            const msgHeader = DOMHelper.getElement('msg-header');
+            const msgHeader = DOMUtils.getElement('msg-header');
             msgHeader.textContent = title;
-            const header = DOMHelper.getElement('msg-modal-header-tab');
-            const content = DOMHelper.getElement('msg-modal-content-tab');
+            const header = DOMUtils.getElement('msg-modal-header-tab');
+            const content = DOMUtils.getElement('msg-modal-content-tab');
             self.makeDraggable(header, content);
-            DOMHelper.getElement('msg-message').textContent = message;
-            const closeBtn = DOMHelper.getElement('msg-close-btn');
+            DOMUtils.getElement('msg-message').textContent = message;
+            const closeBtn = DOMUtils.getElement('msg-close-btn');
             if (title === 'Error') {
                 header.style.backgroundColor = 'red';
                 Utils.lastError = message;
@@ -162,10 +162,10 @@ class Utils {
             } else
                 header.style.backgroundColor = '#6495ed';
             function endfun() {
-                DOMHelper.hide(modal);
+                DOMUtils.hide(modal);
                 resolve();
             }
-            DOMHelper.show(modal);
+            DOMUtils.show(modal);
             let waitForKeyUp = false;
 
             // Remove old handlers and add new ones
@@ -175,7 +175,7 @@ class Utils {
                 endfun();
             });
 
-            const okBtn = DOMHelper.getElement('message-ok');
+            const okBtn = DOMUtils.getElement('message-ok');
             const newOkBtn = okBtn.cloneNode(true);
             okBtn.parentNode.replaceChild(newOkBtn, okBtn);
             newOkBtn.addEventListener('click', function (e) {
@@ -209,9 +209,9 @@ class Utils {
      */
     static yesNo(title, message, yesFun = null, noFun = null) {
         return new Promise(function(resolve, reject) {
-            let modal = DOMHelper.getElement('yesno-modal');
+            let modal = DOMUtils.getElement('yesno-modal');
             if (!modal) {
-                DOMHelper.append(document.body,
+                DOMUtils.append(document.body,
                     '<div id="yesno-modal" class="msg-modal">' +
                     '  <!-- Modal content -->' +
                     '  <div class="msg-modal-content" id="yesno-popup-content">' +
@@ -228,46 +228,46 @@ class Utils {
                     '    </div>' +
                     '  </div>' +
                     '</div>');
-                modal = DOMHelper.getElement('yesno-modal');
+                modal = DOMUtils.getElement('yesno-modal');
 
                 // Adjust width for mobile
-                const content = DOMHelper.getElement('yesno-popup-content');
+                const content = DOMUtils.getElement('yesno-popup-content');
                 const smaller = screen.width < screen.height ? screen.width : screen.height;
-                if (smaller < DOMHelper.width(content) + 20)
-                    DOMHelper.setWidth(content, smaller - 20);
+                if (smaller < DOMUtils.width(content) + 20)
+                    DOMUtils.setWidth(content, smaller - 20);
             }
-            Utils.makeDraggable(DOMHelper.getElement('yesno-popup-header'), DOMHelper.getElement('yesno-popup-content'));
+            Utils.makeDraggable(DOMUtils.getElement('yesno-popup-header'), DOMUtils.getElement('yesno-popup-content'));
 
-            DOMHelper.getElement('yesno-header').textContent = title;
-            DOMHelper.getElement('yesno-message').textContent = message;
-            DOMHelper.show(modal);
+            DOMUtils.getElement('yesno-header').textContent = title;
+            DOMUtils.getElement('yesno-message').textContent = message;
+            DOMUtils.show(modal);
 
             // Remove old handlers by cloning and add new ones
-            const span = DOMHelper.getElement('yesno-close-btn');
+            const span = DOMUtils.getElement('yesno-close-btn');
             const newSpan = span.cloneNode(true);
             span.parentNode.replaceChild(newSpan, span);
             newSpan.addEventListener('click', function () {
-                DOMHelper.hide(modal);
+                DOMUtils.hide(modal);
                 if (noFun)
                     noFun();
                 resolve(false);
             });
 
-            const yesBtn = DOMHelper.getElement('yesno-yes');
+            const yesBtn = DOMUtils.getElement('yesno-yes');
             const newYesBtn = yesBtn.cloneNode(true);
             yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
             newYesBtn.addEventListener('click', function () {
-                DOMHelper.hide(modal);
+                DOMUtils.hide(modal);
                 if (yesFun)
                     yesFun();
                 resolve(true);
             });
 
-            const noBtn = DOMHelper.getElement('yesno-no');
+            const noBtn = DOMUtils.getElement('yesno-no');
             const newNoBtn = noBtn.cloneNode(true);
             noBtn.parentNode.replaceChild(newNoBtn, noBtn);
             newNoBtn.addEventListener('click', function () {
-                DOMHelper.hide(modal);
+                DOMUtils.hide(modal);
                 if (noFun)
                     noFun();
                 resolve(false);
@@ -288,9 +288,9 @@ class Utils {
         Utils.waitMessageStack.push(message);
         if (Utils.waitMessageStack.length > 1 && Utils.waitMessageStack[Utils.waitMessageStack.length-2] === message)
             return;
-        let modal = DOMHelper.getElement('wmsg-modal');
+        let modal = DOMUtils.getElement('wmsg-modal');
         if (!modal) {
-            DOMHelper.append(document.body,
+            DOMUtils.append(document.body,
                 '<div id="wmsg-modal" class="msg-modal">' +
                 '  <!-- Modal content -->' +
                 '  <div class="wmsg-modal-content" id="wait-msg-content">' +
@@ -299,18 +299,18 @@ class Utils {
                 '    </div>' +
                 '  </div>' +
                 '</div>');
-            modal = DOMHelper.getElement('wmsg-modal');
+            modal = DOMUtils.getElement('wmsg-modal');
 
             // Adjust width for mobile
-            const content = DOMHelper.getElement('wait-msg-content');
+            const content = DOMUtils.getElement('wait-msg-content');
             const smaller = screen.width < screen.height ? screen.width : screen.height;
-            if (smaller < DOMHelper.width(content) + 20)
-                DOMHelper.setWidth(content, smaller - 20);
+            if (smaller < DOMUtils.width(content) + 20)
+                DOMUtils.setWidth(content, smaller - 20);
         }
-        const content = DOMHelper.getElement('wait-msg-content');
+        const content = DOMUtils.getElement('wait-msg-content');
         this.makeDraggable(content, content);
-        DOMHelper.getElement('wmsg-message').textContent = message;
-        DOMHelper.show(modal);
+        DOMUtils.getElement('wmsg-message').textContent = message;
+        DOMUtils.show(modal);
     }
 
     /**
@@ -319,22 +319,22 @@ class Utils {
      */
     static waitMessageEnd() {
         Utils.waitMessageStack.pop();
-        const modal = DOMHelper.getElement('wmsg-modal');
+        const modal = DOMUtils.getElement('wmsg-modal');
         if (!Utils.waitMessageStack.length)
-            DOMHelper.hide(modal);
+            DOMUtils.hide(modal);
         else
-            DOMHelper.getElement('wmsg-message').textContent = Utils.waitMessageStack[Utils.waitMessageStack.length-1];
+            DOMUtils.getElement('wmsg-message').textContent = Utils.waitMessageStack[Utils.waitMessageStack.length-1];
     }
 
     static getID(id) {
-        let e = DOMHelper.getElement(id);
+        let e = DOMUtils.getElement(id);
         if (!e) {
             id = id.replace(/_/g, '-');
-            e = DOMHelper.getElement(id);
+            e = DOMUtils.getElement(id);
         }
         if (!e) {
             id = id.replace(/-/g, '_');
-            e = DOMHelper.getElement(id);
+            e = DOMUtils.getElement(id);
         }
         return e ? id : null;
     }
@@ -1143,7 +1143,7 @@ class Utils {
             for (let i = 0; i < Component.ComponentList.length; i++) {
                 let ci = Component.ComponentList[i];
                 if (ci.tag && ci.name === 'Popup') {
-                    const elements = DOMHelper.queryAll(ci.tag);
+                    const elements = DOMUtils.queryAll(ci.tag);
                     elements.forEach(function (el) {
                         ci.processor(el, Utils.getAllAttributes(el), el.innerHTML);
                         n++;
@@ -1154,7 +1154,7 @@ class Utils {
             for (let i = 0; i < Component.ComponentList.length; i++) {
                 let ci = Component.ComponentList[i];
                 if (ci.tag && ci.name !== "Popup") {
-                    const elements = DOMHelper.queryAll(ci.tag);
+                    const elements = DOMUtils.queryAll(ci.tag);
                     elements.forEach(function (el) {
                         ci.processor(el, Utils.getAllAttributes(el), el.innerHTML);
                         n++;
@@ -1231,7 +1231,7 @@ class Utils {
         // elm is now a native DOM element
         const el = elm.nodeType ? elm : elm[0];  // handle both native and jQuery-like objects
         el.outerHTML = newHTML;
-        const newElm = DOMHelper.getElement(id);
+        const newElm = DOMUtils.getElement(id);
         if (!newElm) {
             console.log(el.localName + ' is missing an ID');
             return undefined;
@@ -1297,7 +1297,7 @@ class Utils {
             Utils.lastScreenLoaded.retv = retv;
             Utils.getHTML(page + '.html').then(function (text) {
                 if (tag)
-                    DOMHelper.getElement(tag).innerHTML = text;
+                    DOMUtils.getElement(tag).innerHTML = text;
                 else
                     document.body.innerHTML = text;
                 Utils.rescan();  // does all the tag replacement
@@ -1452,12 +1452,12 @@ class Utils {
             drag.pageX0 = e.pageX;
             drag.pageY0 = e.pageY;
             drag.elem = content;
-            drag.offset0 = DOMHelper.offset(header);
+            drag.offset0 = DOMUtils.offset(header);
 
             mouseMoveHandler = function(e) {
                 const left = drag.offset0.left + (e.pageX - drag.pageX0);
                 const top = drag.offset0.top + (e.pageY - drag.pageY0);
-                DOMHelper.setOffset(drag.elem, {top: top, left: left});
+                DOMUtils.setOffset(drag.elem, {top: top, left: left});
             };
 
             mouseUpHandler = function(e) {
@@ -1479,12 +1479,12 @@ class Utils {
             drag.pageY0 = e.touches[0].clientY;
 
             drag.elem = content;
-            drag.offset0 = DOMHelper.offset(header);
+            drag.offset0 = DOMUtils.offset(header);
 
             touchMoveHandler = function(e) {
                 const left = drag.offset0.left + (e.touches[0].clientX - drag.pageX0);
                 const top = drag.offset0.top + (e.touches[0].clientY - drag.pageY0);
-                DOMHelper.setOffset(drag.elem, {top: top, left: left});
+                DOMUtils.setOffset(drag.elem, {top: top, left: left});
             };
 
             touchEndHandler = function(e) {
@@ -1514,7 +1514,7 @@ class Utils {
      * @see Utils.popup_close
      */
     static popup_open(id, focus_ctl=null, replace = false) {
-        const w = DOMHelper.getElement(id);
+        const w = DOMUtils.getElement(id);
         if (!w)
             throw new Error(`Popup ${id} not found.`);
 
@@ -1523,9 +1523,9 @@ class Utils {
         if (replace && Utils.popup_context.length) {
             const prior_context = Utils.popup_context[Utils.popup_context.length - 1];
             const prior_id = prior_context.id;
-            const prior_w = DOMHelper.getElement(prior_id);
+            const prior_w = DOMUtils.getElement(prior_id);
             const prior_content = prior_w.firstElementChild;
-            prior_offset = DOMHelper.offset(prior_content);
+            prior_offset = DOMUtils.offset(prior_content);
             Utils.popup_close();
         }
 
@@ -1543,24 +1543,24 @@ class Utils {
          if (typeof Editor !== 'undefined')
             Editor.newEditorContext();
         Utils.newEnterContext();
-        if (!DOMHelper.hasClass(w, 'popup-background')) {
+        if (!DOMUtils.hasClass(w, 'popup-background')) {
             let width = getComputedStyle(w).width;
             let height = getComputedStyle(w).height;
-            DOMHelper.addClass(w, 'popup-background');
+            DOMUtils.addClass(w, 'popup-background');
             w.style.zIndex = Utils.popup_zindex++;
             w.style.width = '100%';
             w.style.height = '100%';
             // wrapInner equivalent
-            content = DOMHelper.wrapInner(w, 'div');
-            DOMHelper.addClass(content, 'popup-content');
+            content = DOMUtils.wrapInner(w, 'div');
+            DOMUtils.addClass(content, 'popup-content');
             content.style.zIndex = Utils.popup_zindex++;
             content.id = id + '--width';
 
-            both_parts = DOMHelper.children(content);
+            both_parts = DOMUtils.children(content);
             header = both_parts[0];
-            DOMHelper.addClass(header, 'popup-header');
+            DOMUtils.addClass(header, 'popup-header');
             body = both_parts[1];
-            DOMHelper.addClass(body, 'popup-body');
+            DOMUtils.addClass(body, 'popup-body');
             body.id = id + '--height';
             content.style.width = width;
             body.style.height = height;
@@ -1568,19 +1568,19 @@ class Utils {
             w.style.zIndex = Utils.popup_zindex++;
             content = w.firstElementChild;
             content.style.zIndex = Utils.popup_zindex++;
-            both_parts = DOMHelper.children(content);
+            both_parts = DOMUtils.children(content);
             header = both_parts[0];
             body = both_parts[1];
         }
 
-        DOMHelper.show(w);
+        DOMUtils.show(w);
         if (prior_offset)
-            DOMHelper.setOffset(content, prior_offset);
+            DOMUtils.setOffset(content, prior_offset);
 
         this.makeDraggable(header, content);
 
         if (focus_ctl) {
-            const fctl = DOMHelper.getElement(focus_ctl);
+            const fctl = DOMUtils.getElement(focus_ctl);
             if (fctl)
                 fctl.focus();
             else
@@ -1600,7 +1600,7 @@ class Utils {
      * @param {string} height  like "200px"
      */
     static popup_set_height(id, height) {
-        const ctl = DOMHelper.getElement(id + '--height');
+        const ctl = DOMUtils.getElement(id + '--height');
         if (ctl)
             ctl.style.height = height;
         else
@@ -1615,7 +1615,7 @@ class Utils {
      * @param {string} width  like "200px"
      */
     static popup_set_width(id, width) {
-        const ctl = DOMHelper.getElement(id + '--width');
+        const ctl = DOMUtils.getElement(id + '--width');
         if (ctl)
             ctl.style.width = width;
         else
@@ -1634,7 +1634,7 @@ class Utils {
         if (typeof Editor !== 'undefined')
             Editor.popEditorContext();
         Utils.popEnterContext();
-        DOMHelper.hide(DOMHelper.getElement(context.id));
+        DOMUtils.hide(DOMUtils.getElement(context.id));
         Utils.globalEnterHandler(context.globalEnterHandler);
         Utils.popup_zindex -= 2;
         if (Utils.popup_zindex < 10)
@@ -1651,7 +1651,7 @@ class Utils {
      * @see Utils.getFileUploadFormData
      */
     static getFileUploadCount(id) {
-        const ctl = DOMHelper.getElement(id);
+        const ctl = DOMUtils.getElement(id);
         const file_list = ctl.files;
         return file_list.length;
     }
@@ -1670,7 +1670,7 @@ class Utils {
      * @see Utils.getFileUploadCount
      */
     static getFileUploadFormData(id) {
-        const ctl = DOMHelper.getElement(id);
+        const ctl = DOMUtils.getElement(id);
         const file_list = ctl.files;
         const data = new FormData();
         for (let i=0 ; i < file_list.length ; i++)
@@ -1925,8 +1925,8 @@ class Utils {
      */
     static cleanup() {
         Utils.clearSomeControlValueChanged(false);
-        if (typeof DOMHelper !== 'undefined' && typeof DOMHelper.RadioButtons !== 'undefined')
-            DOMHelper.RadioButtons.resetGroups();
+        if (typeof DOMUtils !== 'undefined' && typeof DOMUtils.RadioButtons !== 'undefined')
+            DOMUtils.RadioButtons.resetGroups();
         if (typeof AGGrid !== 'undefined') {
             AGGrid.popAllGridContexts();
             AGGrid.newGridContext();   //  for the new screen we are loading
@@ -2059,14 +2059,14 @@ class Utils {
     static appendChild(tag, html) {
         let node;
         if (typeof tag === 'string') {
-            node = DOMHelper.getElement(tag);
+            node = DOMUtils.getElement(tag);
             if (!node) {
                 console.log('tag ' + tag +' not found.');
                 return;
             }
         } else
             node = tag.nodeType ? tag : tag[0];  // handle both native and legacy jQuery-like objects
-        DOMHelper.append(node, html);
+        DOMUtils.append(node, html);
         return node;
     }
 
@@ -2083,14 +2083,14 @@ class Utils {
     static eraseChildren(tag) {
         let node;
         if (typeof tag === 'string') {
-            node = DOMHelper.getElement(tag);
+            node = DOMUtils.getElement(tag);
             if (!node) {
                 console.log('tag ' + tag +' not found.');
                 return;
             }
         } else
             node = tag.nodeType ? tag : tag[0];  // handle both native and legacy jQuery-like objects
-        DOMHelper.empty(node);
+        DOMUtils.empty(node);
         return node;
     }
 
@@ -2404,4 +2404,4 @@ document.addEventListener('keypress', function(e) {
 
 
 
-// Caret functionality has been moved to DOMHelper.caret() in DOMHelper.js
+// Caret functionality has been moved to DOMUtils.caret() in DOMUtils.js
