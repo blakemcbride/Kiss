@@ -116,7 +116,8 @@
         function startup() {
 
             async function loadUtils() {
-                await getScripts(["kiss/Utils.js",
+                await getScripts(["kiss/DOMHelper.js",
+                    "kiss/Utils.js",
                     "kiss/DateUtils.js",
                     "kiss/DateTimeUtils.js",
                     "kiss/TimeUtils.js",
@@ -155,7 +156,6 @@
 
 <body onload="startup()">
 
-<script src="kiss/DOMHelper.js"></script>
 <script src="lib/ag-grid-community.min.noStyle.js?nocache=20250711"></script>
 <script src="lib/ckeditor.js?nocache=20230813"></script>
 
