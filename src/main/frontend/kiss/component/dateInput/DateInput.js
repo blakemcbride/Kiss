@@ -3,7 +3,7 @@
       Date:  4/22/18
 */
 
-/* global Utils, DateUtils, Kiss */
+/* global Utils, DateUtils, DOMHelper */
 
 'use strict';
 
@@ -210,9 +210,9 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                Kiss.hide(el);
+                DOMHelper.hide(el);
             else {
-                Kiss.show(el);
+                DOMHelper.show(el);
                 el.style.visibility = 'visible';
             }
             return this;
@@ -221,20 +221,20 @@
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg) {
-                Kiss.show(el);
+                DOMHelper.show(el);
                 el.style.visibility = 'visible';
             }
             else
-                Kiss.hide(el);
+                DOMHelper.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return Kiss.isHidden(el);
+            return DOMHelper.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return !Kiss.isHidden(el);
+            return !DOMHelper.isHidden(el);
         };
 
         newElm.focus = function () {

@@ -3,7 +3,7 @@
       Date:  4/24/20
  */
 
-/* global Utils, Component, Kiss */
+/* global Utils, Component, DOMHelper */
 
 'use strict';
 
