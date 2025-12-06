@@ -113,9 +113,9 @@ class ServiceName {
 ## Development Commands
 
 - `./bld develop` - Start both frontend and backend development servers
-- `./bld build` - Build the application (compiles all Java files including precompiled directory)
+- `./bld -v build` - Build the application (compiles all Java files including precompiled directory)
 - `./bld war` - Create WAR file for deployment
-- `./bld test` - Run unit tests
+- `./bld -v test` - Run unit tests
 - `./bld clean` - Clean build artifacts
 - `./bld javadoc` - Generate JavaDoc documentation
 
@@ -327,7 +327,7 @@ The Kiss Framework emphasizes:
 ### Precompiled Utilities Directory
 The `src/main/precompiled/` directory is for shared Java utility classes that need to be accessible throughout the application:
 - Place reusable Java utilities here to avoid code duplication
-- Classes are automatically compiled by `./bld build` to `work/exploded/WEB-INF/classes/`
+- Classes are automatically compiled by `./bld -v build` to `work/exploded/WEB-INF/classes/`
 - Ideal for common functions like UUID generation, data formatting, validation utilities
 - **IMPORTANT**: Classes must have a package declaration to be accessible from Groovy services
   - Classes in the default package (no package declaration) cannot be accessed from packaged Groovy services
@@ -335,7 +335,7 @@ The `src/main/precompiled/` directory is for shared Java utility classes that ne
 - Recommended approach: Create your own package structure (e.g., `io.yourcompany.utils`)
 - Directory structure must match package declaration:
   - Example: `package io.stack360;` requires file at `src/main/precompiled/io/stack360/ClassName.java`
-- After adding new classes, run `./bld build` to compile them
+- After adding new classes, run `./bld -v build` to compile them
 - Access from Groovy services via standard import:
   ```groovy
   import io.stack360.UUIDGenerator
