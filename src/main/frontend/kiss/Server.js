@@ -74,6 +74,7 @@ class Server {
             try {
                 response = await fetch(Server.url + '/' + path, {
                     method: 'POST',
+                    cache: 'no-store',
                     body: JSON.stringify(injson),
                     headers: {
                         'Content-Type': 'application/json'
@@ -146,6 +147,7 @@ class Server {
             try {
                 response = await fetch(Server.url + '/' + path, {
                     method: 'POST',
+                    cache: 'no-store',
                     body: JSON.stringify(injson),
                     headers: {
                         'Content-Type': 'application/json'
@@ -270,6 +272,7 @@ class Server {
                 try {
                     const response = await fetch(Server.url + '/rest', {
                         method: 'POST',
+                        cache: 'no-store',
                         body: fd  // FormData - browser sets Content-Type automatically
                     });
                     const res = await response.json();
