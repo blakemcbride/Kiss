@@ -1248,7 +1248,7 @@ class Utils {
             try {
                 response = await fetch(url + (SystemInfo.controlCache ? '?ver=' + SystemInfo.softwareVersion : ''), {
                     method: 'GET',
-                    cache: SystemInfo.controlCache ? 'no-store' : 'default',
+                    cache: SystemInfo.controlCache ? 'default' : 'no-store',
                     headers: {
                         'Content-type': 'text/plain'
                     }
