@@ -1631,13 +1631,18 @@ class Utils {
     /**
      * Close the most recent modal popup.
      *
+     * @param {string} id optional popup ID to close (for validation)
+     *
      * @see Utils.popup_open
      */
-    static popup_close() {
+    static popup_close(id = null) {
         const context = Utils.popup_context.pop();
         if (!context) {
             console.log('popup_close called without an active popup');
             return;
+        }
+        if (id && context.id !== id) {
+            console.warn(`popup_close: Expected popup '${id}' but found '${context.id}'`);
         }
         if (typeof AGGrid !== 'undefined')
             AGGrid.popGridContext();

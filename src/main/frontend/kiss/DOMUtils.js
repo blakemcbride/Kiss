@@ -54,6 +54,7 @@ const DOMUtils = {
     hide: (el) => {
         if (el) {
             el.style.display = 'none';
+            el.setAttribute('hidden', '');
         }
     },
 
@@ -561,5 +562,79 @@ const DOMUtils = {
                 selection.addRange(range);
             }
         }
+    },
+
+    /**
+     * Execute callback when DOM is ready
+     * Replacement for $(function() {}) pattern
+     * @param {Function} callback - Function to execute when DOM is ready
+     */
+    documentReady: (callback) => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', callback);
+        } else {
+            callback();
+        }
+    },
+
+    /**
+     * Get currently focused element
+     * Replacement for $(':focus')
+     * @returns {Element|null}
+     */
+    getFocusedElement: () => document.activeElement,
+
+    /**
+     * Fetch HTML content from URL
+     * Replacement for $.get()
+     * @param {string} url - URL to fetch
+     * @param {Function} successCallback - Callback for success
+     * @param {Function} [errorCallback] - Callback for error
+     */
+    fetchHTML: (url, successCallback, errorCallback) => {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                if (successCallback) {
+                    successCallback(data);
+                }
+            })
+            .catch(error => {
+                if (errorCallback) {
+                    errorCallback(error);
+                } else {
+                    console.error('Fetch failed:', error);
+                }
+            });
+    },
+
+    /**
+     * Remove all event listeners from element
+     * Replacement for $('#el').off() without parameters
+     * @param {HTMLElement} el
+     * @returns {HTMLElement} The new cloned element
+     */
+    removeAllListeners: (el) => {
+        if (!el || !el.parentNode) return el;
+        const newElement = el.cloneNode(true);
+        el.parentNode.replaceChild(newElement, el);
+        return newElement;
+    },
+
+    /**
+     * Get element by ID and remove all its event listeners in one atomic operation.
+     * This is useful for popup buttons that may have handlers attached multiple times.
+     * @param {string} id - Element ID (with or without #)
+     * @returns {HTMLElement|null} The new cloned element with listeners removed, or null if not found
+     */
+    getElementWithCleanListeners: (id) => {
+        const el = DOMUtils.getElement(id);
+        if (!el) return null;
+        return DOMUtils.removeAllListeners(el);
     }
 };
