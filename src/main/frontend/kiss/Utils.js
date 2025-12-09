@@ -236,7 +236,7 @@ class Utils {
                 if (smaller < DOMUtils.width(content) + 20)
                     DOMUtils.setWidth(content, smaller - 20);
             }
-            Utils.makeDraggable(DOMUtils.getElement('yesno-popup-header'), DOMUtils.getElement('yesno-popup-content'));
+            Utils.makeDraggable('yesno-popup-header', DOMUtils.getElement('yesno-popup-content'));
 
             DOMUtils.getElement('yesno-header').textContent = title;
             DOMUtils.getElement('yesno-message').textContent = message;
@@ -1649,7 +1649,7 @@ class Utils {
         if (typeof Editor !== 'undefined')
             Editor.popEditorContext();
         Utils.popEnterContext();
-        DOMUtils.hide(DOMUtils.getElement(context.id));
+        DOMUtils.hide(context.id);
         Utils.globalEnterHandler(context.globalEnterHandler);
         Utils.popup_zindex -= 2;
         if (Utils.popup_zindex < 10)
