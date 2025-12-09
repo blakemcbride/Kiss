@@ -79,7 +79,8 @@ const DOMUtils = {
      */
     isHidden: (el) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return true;
+        if (!el)
+            return true;
         return el.offsetParent === null ||
                getComputedStyle(el).display === 'none' ||
                getComputedStyle(el).visibility === 'hidden';
@@ -114,7 +115,8 @@ const DOMUtils = {
      */
     attr: (el, name, val) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return undefined;
+        if (!el)
+            return undefined;
         if (val === undefined) {
             return el.getAttribute(name);
         }
@@ -142,7 +144,8 @@ const DOMUtils = {
      */
     prop: (el, name, val) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return undefined;
+        if (!el)
+            return undefined;
         if (val === undefined) {
             return el[name];
         }
@@ -303,7 +306,8 @@ const DOMUtils = {
      */
     offset: (el) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return { top: 0, left: 0 };
+        if (!el)
+            return { top: 0, left: 0 };
         const rect = el.getBoundingClientRect();
         return {
             top: rect.top + window.scrollY,
@@ -333,7 +337,8 @@ const DOMUtils = {
      */
     val: (el, value) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return undefined;
+        if (!el)
+            return undefined;
         if (value === undefined) {
             return el.value;
         }
@@ -481,7 +486,8 @@ const DOMUtils = {
      */
     text: (el, text) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return undefined;
+        if (!el)
+            return undefined;
         if (text === undefined) {
             return el.textContent;
         }
@@ -496,7 +502,8 @@ const DOMUtils = {
      */
     html: (el, html) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return undefined;
+        if (!el)
+            return undefined;
         if (html === undefined) {
             return el.innerHTML;
         }
@@ -510,7 +517,8 @@ const DOMUtils = {
      */
     replaceWith: (el, content) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return;
+        if (!el)
+            return;
         if (typeof content === 'string') {
             el.outerHTML = content;
         } else {
@@ -526,7 +534,8 @@ const DOMUtils = {
      */
     wrapInner: (el, wrapperTag = 'div') => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return null;
+        if (!el)
+            return null;
         const wrapper = document.createElement(wrapperTag);
         while (el.firstChild) {
             wrapper.appendChild(el.firstChild);
@@ -542,7 +551,8 @@ const DOMUtils = {
      */
     getAllAttributes: (el) => {
         el = DOMUtils._resolveElement(el);
-        if (!el) return {};
+        if (!el)
+            return {};
         const ret = {};
         Array.from(el.attributes).forEach(attr => {
             ret[attr.name] = attr.value;
@@ -559,7 +569,8 @@ const DOMUtils = {
      */
     caret: (target, pos) => {
         target = DOMUtils._resolveElement(target);
-        if (!target) return undefined;
+        if (!target)
+            return undefined;
 
         const isContentEditable = target.contentEditable === 'true';
 
@@ -634,6 +645,19 @@ const DOMUtils = {
     },
 
     /**
+     * Trigger an event on an element
+     * Replacement for $('#el').trigger('eventName')
+     * @param {HTMLElement} el - Element to trigger event on
+     * @param {string} eventName - Name of the event (e.g., 'click', 'change')
+     */
+    trigger: (el, eventName) => {
+        if (!el)
+            return;
+        const event = new Event(eventName, {bubbles: true, cancelable: true});
+        el.dispatchEvent(event);
+    },
+
+    /**
      * Execute callback when DOM is ready
      * Replacement for $(function() {}) pattern
      * @param {Function} callback - Function to execute when DOM is ready
@@ -690,7 +714,8 @@ const DOMUtils = {
      */
     removeAllListeners: (el) => {
         el = DOMUtils._resolveElement(el);
-        if (!el || !el.parentNode) return el;
+        if (!el || !el.parentNode)
+            return el;
         const newElement = el.cloneNode(true);
         el.parentNode.replaceChild(newElement, el);
         return newElement;
@@ -704,7 +729,8 @@ const DOMUtils = {
      */
     getElementWithCleanListeners: (id) => {
         const el = DOMUtils.getElement(id);
-        if (!el) return null;
+        if (!el)
+            return null;
         return DOMUtils.removeAllListeners(el);
     }
 };
