@@ -1453,7 +1453,7 @@ class Utils {
             drag.pageX0 = e.pageX;
             drag.pageY0 = e.pageY;
             drag.elem = content;
-            drag.offset0 = DOMUtils.offset(header);
+            drag.offset0 = DOMUtils.offset(content);
 
             mouseMoveHandler = function(e) {
                 const left = drag.offset0.left + (e.pageX - drag.pageX0);
@@ -1476,15 +1476,15 @@ class Utils {
 
             e.preventDefault();
 
-            drag.pageX0 = e.touches[0].clientX;
-            drag.pageY0 = e.touches[0].clientY;
+            drag.pageX0 = e.touches[0].pageX;
+            drag.pageY0 = e.touches[0].pageY;
 
             drag.elem = content;
-            drag.offset0 = DOMUtils.offset(header);
+            drag.offset0 = DOMUtils.offset(content);
 
             touchMoveHandler = function(e) {
-                const left = drag.offset0.left + (e.touches[0].clientX - drag.pageX0);
-                const top = drag.offset0.top + (e.touches[0].clientY - drag.pageY0);
+                const left = drag.offset0.left + (e.touches[0].pageX - drag.pageX0);
+                const top = drag.offset0.top + (e.touches[0].pageY - drag.pageY0);
                 DOMUtils.setOffset(drag.elem, {top: top, left: left});
             };
 

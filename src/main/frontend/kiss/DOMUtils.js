@@ -317,15 +317,45 @@ const DOMUtils = {
 
     /**
      * Set element offset (absolute position)
+     * Like jQuery's .offset() setter, this accounts for the element's offsetParent.
      * @param {HTMLElement|string} el - Element or element ID
-     * @param {{top: number, left: number}} pos
+     * @param {{top: number, left: number}} pos - Desired position relative to document
      */
     setOffset: (el, { top, left }) => {
         el = DOMUtils._resolveElement(el);
-        if (el) {
-            el.style.position = 'absolute';
-            el.style.top = top + 'px';
-            el.style.left = left + 'px';
+        if (!el) return;
+
+        // Ensure element is positioned
+        const currentPosition = getComputedStyle(el).position;
+        if (currentPosition === 'static') {
+            el.style.position = 'relative';
+        }
+
+        // Get current offset from document
+        const curOffset = DOMUtils.offset(el);
+
+        // Get current CSS top/left values (may be 'auto')
+        const curCSSTop = parseFloat(getComputedStyle(el).top) || 0;
+        const curCSSLeft = parseFloat(getComputedStyle(el).left) || 0;
+
+        // Calculate the adjustment needed
+        // The CSS top/left properties are relative to the offsetParent,
+        // but offset() returns document-relative coordinates.
+        // To set a document-relative position, we need to adjust for this difference.
+        const props = {};
+        if (top != null) {
+            props.top = (top - curOffset.top) + curCSSTop;
+        }
+        if (left != null) {
+            props.left = (left - curOffset.left) + curCSSLeft;
+        }
+
+        // Set the calculated values
+        if (props.top !== undefined) {
+            el.style.top = props.top + 'px';
+        }
+        if (props.left !== undefined) {
+            el.style.left = props.left + 'px';
         }
     },
 
