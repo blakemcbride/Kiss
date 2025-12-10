@@ -388,6 +388,72 @@ class Utils {
     }
 
     /**
+     * Validates a URL, checks if it is reachable, and opens it in a new browser tab.
+     * This method validates the URL format, attempts to verify if the URL is accessible,
+     * and opens it in a new tab if validation succeeds.
+     *
+     * @param url {string} the URL to validate and open (can be with or without protocol)
+     * @param addProtocol {boolean} if true, adds 'http://' to URLs without a protocol (default: true)
+     * @param timeout {number} timeout in milliseconds for the fetch request (default: 5000)
+     * @returns {Promise<string|null>} null if successful (URL opened), error message string if validation/check failed
+     */
+    static async openUrl(url, addProtocol = true, timeout = 5000) {
+        if (!url || typeof url !== 'string' || !url.trim())
+            return 'URL is empty or invalid.';
+
+        url = url.trim();
+
+        // Add protocol if missing and requested
+        if (addProtocol && url.search('://') === -1)
+            url = 'http://' + url;
+
+        // Validate URL format
+        let urlObj;
+        try {
+            urlObj = new URL(url);
+        } catch (e) {
+            return 'The provided URL format is invalid. Please check and try again.';
+        }
+
+        // Only validate HTTP/HTTPS URLs for reachability
+        if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
+            try {
+                // Use fetch with no-cors mode to check if URL is reachable
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                }).catch(() => {
+                    // If HEAD fails, try GET as some servers don't support HEAD
+                    return fetch(url, {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        signal: controller.signal
+                    });
+                });
+
+                clearTimeout(timeoutId);
+
+                // Validation successful - open URL in new tab
+                window.open(url, '_blank');
+                return null; // Success
+            } catch (error) {
+                if (error.name === 'AbortError')
+                    return 'The website could not be reached. The request timed out. Please verify the URL is correct.';
+                else
+                    return 'The website could not be reached. Please verify the URL is correct and accessible.';
+            }
+        }
+
+        // For non-HTTP protocols (like mailto:, ftp:, etc.), just open them
+        window.open(url, '_blank');
+        return null;
+    }
+
+    /**
      * Determines if an email address with or without a name is valid.
      * This accepts things like:
      *
