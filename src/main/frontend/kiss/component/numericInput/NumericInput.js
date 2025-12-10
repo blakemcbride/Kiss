@@ -3,7 +3,7 @@
       Date:  4/18/18
  */
 
-/* global Utils, Component */
+/* global Utils, Component, DOMUtils */
 
 'use strict';
 
@@ -87,9 +87,15 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
-        function keyUpHandler(event) {
+        // Event handler tracking for proper removal
+        let keyupHandler = null;
+        let changeHandler = null;
+        let inputHandler = null;
+        let focusoutHandler = null;
+
+        function defaultKeyUpHandler(event) {
             if (Utils.isChangeChar(event))
                 Utils.someControlValueChanged();
             if (enterFunction && event.key === 'Enter') {
@@ -98,12 +104,13 @@
             }
         }
 
-        jqObj.keyup(keyUpHandler);
+        keyupHandler = defaultKeyUpHandler;
+        el.addEventListener('keyup', keyupHandler);
 
         //--
 
         newElm.getValue = function () {
-            let sval = jqObj.val();
+            let sval = el.value;
             sval = sval.replace(/[^0-9.-]/g, '');  // remove commas and other characters
             return sval ? Number(sval) : 0;
         };
@@ -114,13 +121,13 @@
                 if (show_zero)
                     val = 0;
                 else {
-                    jqObj.val('');
+                    el.value = '';
                     return this;
                 }
             if (typeof val !== 'number')
                 val = Utils.toNumber(val);
             let str = Utils.format(val, (comma ? "C" : "") + (dollar ? "D" : "") + (show_zero ? "" : "B"), 0, dp);
-            jqObj.val(str);
+            el.value = str;
             return this;
         };
 
@@ -137,22 +144,35 @@
         };
 
         newElm.onCChange = function (fun) {
-            jqObj.off('keyup').keyup(function (event) {
+            // Remove old keyup handler
+            if (keyupHandler)
+                el.removeEventListener('keyup', keyupHandler);
+
+            // Create new handler
+            keyupHandler = function (event) {
                 if (!/^[0-9.-]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
                     return;
-                keyUpHandler(event);
+                defaultKeyUpHandler(event);
                 if (fun && Utils.isChangeChar(event))
                     fun(newElm.getValue());
-            });
+            };
+
+            el.addEventListener('keyup', keyupHandler);
             return this;
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('change');
-            if (fun)
-                jqObj.change(() => {
+            // Remove old change handler
+            if (changeHandler)
+                el.removeEventListener('change', changeHandler);
+
+            changeHandler = null;
+            if (fun) {
+                changeHandler = () => {
                     fun(newElm.getValue());
-                });
+                };
+                el.addEventListener('change', changeHandler);
+            }
             return this;
         };
 
@@ -170,36 +190,42 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            if (flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            if (flg)
+                el.removeAttribute('readonly');
+            else
+                el.setAttribute('readonly', 'readonly');
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.hasAttribute('readonly');
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         //--
@@ -207,33 +233,36 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.hide(el);
+            else {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            } else
+                DOMUtils.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !DOMUtils.isHidden(el);
         };
 
         //--
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
@@ -246,7 +275,7 @@
             let val = newElm.getValue();
             if (required  &&  !val) {
                 Utils.showMessage('Error', desc + ' is required.').then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
@@ -260,15 +289,15 @@
                 else
                     msg = desc + ' must be less than or equal to ' + Utils.format(max, (comma ? "C" : "") + (dollar ? "D" : ""), 0, dp) + '.';
                 Utils.showMessage('Error', msg).then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
             return false;
         };
 
-        jqObj.on('input', function () {
-            let val = jqObj.val().trim();
+        inputHandler = function () {
+            let val = el.value.trim();
             if (dollar)
                 if (typeof min === 'number'  &&  min >= 0)
                     val = val.replace(/[^0-9.,$]/g, '');  // remove characters
@@ -282,7 +311,7 @@
             let ndp = 0;  // number of decimal points
             let ndr = 0;  // number of digits to the right of the decimal point
             let andp = dp;
-            if (jqObj.val().trim() !== val)
+            if (el.value.trim() !== val)
                 Utils.beep();
             for (let i = 0; i < val.length; i++) {
                 let c = val.charAt(i);
@@ -301,18 +330,20 @@
                 } else
                     ret += c;
             }
-            jqObj.val(ret);
-        });
+            el.value = ret;
+        };
+        el.addEventListener('input', inputHandler);
 
-        jqObj.on('focusout', function () {
-            let sval = jqObj.val();
+        focusoutHandler = function () {
+            let sval = el.value;
             let ndp = dp;
             sval = sval.replace(/[^0-9.-]/g, '');  // remove commas and other characters
             if (!sval.length)
                 return sval;
             let nval = Number(sval);
-            jqObj.val(Utils.format(nval, (comma ? "C" : "") + (dollar ? 'D' : '') + (show_zero ? "" : "B"), 0, ndp));
-        });
+            el.value = Utils.format(nval, (comma ? "C" : "") + (dollar ? 'D' : '') + (show_zero ? "" : "B"), 0, ndp);
+        };
+        el.addEventListener('focusout', focusoutHandler);
 
     };
 

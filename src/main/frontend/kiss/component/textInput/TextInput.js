@@ -3,7 +3,7 @@
       Date:  4/18/18
  */
 
-/* global Utils, Component */
+/* global Utils, Component, DOMUtils */
 
 'use strict';
 
@@ -73,9 +73,14 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
-        function keyUpHandler(event) {
+        // Event handler tracking for proper removal
+        let keyupHandler = null;
+        let changeHandler = null;
+        let inputHandler = null;
+
+        function defaultKeyUpHandler(event) {
             if (enterFunction && event.key === 'Enter') {
                 event.stopPropagation();
                 enterFunction();
@@ -84,19 +89,20 @@
                 Utils.someControlValueChanged();
         }
 
-        jqObj.keyup(keyUpHandler);
+        keyupHandler = defaultKeyUpHandler;
+        el.addEventListener('keyup', keyupHandler);
 
         newElm.setPassword = function (val) {
             let prev = password;
             password = val;
-            jqObj.attr('type', password ? 'password' : 'text');
+            el.type = password ? 'password' : 'text';
             return prev;
         }
 
         //--
 
         newElm.getValue = function () {
-            let sval = jqObj.val();
+            let sval = el.value;
             sval = sval ? sval.replace(/\s+/g, ' ').trim() : '';
             if (fixcap && sval)
                 sval = Utils.fixCapitalization(sval);
@@ -113,12 +119,12 @@
             if (Utils.forceASCII)
                 val = Utils.toASCII(val);
             if (!val) {
-                jqObj.val(originalValue = '');
+                el.value = originalValue = '';
                 return this;
             }
             if (upcase)
                 val = val.toUpperCase();
-            jqObj.val(originalValue = val);
+            el.value = originalValue = val;
             return this;
         };
 
@@ -134,36 +140,36 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            el.readOnly = flg;
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            el.readOnly = !flg;
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.readOnly;
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         //--
@@ -171,51 +177,67 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.hide(el);
+            else {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            } else
+                DOMUtils.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !DOMUtils.isHidden(el);
         };
 
         //--
 
         newElm.onCChange = function (fun) {
-            jqObj.off('keyup').keyup(function (event) {
-                keyUpHandler(event);
+            // Remove old keyup handler
+            if (keyupHandler)
+                el.removeEventListener('keyup', keyupHandler);
+
+            // Create new handler
+            keyupHandler = function (event) {
+                defaultKeyUpHandler(event);
                 if (fun && Utils.isChangeChar(event))
                     fun(newElm.getValue());
-            });
+            };
+
+            el.addEventListener('keyup', keyupHandler);
             return this;
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('change');
-            if (fun)
-                jqObj.change(() => {
+            // Remove old change handler
+            if (changeHandler)
+                el.removeEventListener('change', changeHandler);
+
+            changeHandler = null;
+            if (fun) {
+                changeHandler = () => {
                     fun(newElm.getValue());
-                });
+                };
+                el.addEventListener('change', changeHandler);
+            }
             return this;
         };
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
@@ -235,7 +257,7 @@
                     else
                         msg = desc + ' must be at least ' + min + ' characters long.';
                     Utils.showMessage('Error', msg).then(function () {
-                        jqObj.focus();
+                        el.focus();
                     });
                     return true;
                 }
@@ -243,12 +265,13 @@
             return false;
         };
 
-        jqObj.on('input', function () {
-            let val = jqObj.val().replace(/^\s+/, "");
+        inputHandler = function () {
+            let val = el.value.replace(/^\s+/, "");
             if (Utils.forceASCII)
                 val = Utils.toASCII(val);
-            jqObj.val(upcase ? val.toUpperCase() : val);
-        });
+            el.value = upcase ? val.toUpperCase() : val;
+        };
+        el.addEventListener('input', inputHandler);
     };
 
     const componentInfo = {

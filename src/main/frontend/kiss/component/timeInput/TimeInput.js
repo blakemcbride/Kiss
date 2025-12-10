@@ -1,9 +1,9 @@
 /*
       Author: Blake McBride
       Date:  6/18/18
- */
+*/
 
-/* global Utils, TimeUtils, Component */
+/* global Utils, TimeUtils, Component, DOMUtils */
 
 'use strict';
 
@@ -68,7 +68,7 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
         newElm.elementInfo.min = min;
         newElm.elementInfo.max = max;
@@ -83,12 +83,12 @@
                 Utils.someControlValueChanged();
         }
 
-        jqObj.keyup(keyUpHandler);
+        el.addEventListener('keyup', keyUpHandler);
 
         //--
 
         newElm.getValue = function () {
-            const val = TimeUtils.strToInt(newElm.jqObj.val());
+            const val = TimeUtils.strToInt(el.value);
             if (val === null)
                 return -1;
             const hours = Math.floor(val / 100);
@@ -98,7 +98,7 @@
 
         newElm.setValue = function (val, timezone) {
             if (val === undefined  ||  val === null  ||  val === '') {
-                jqObj.val('');
+                el.value = '';
                 originalValue = -1;
                 return this;
             }
@@ -118,21 +118,21 @@
                 }
             }
             // val = HHMM
-            jqObj.val(TimeUtils.format(val, zero_fill));
+            el.value = TimeUtils.format(val, zero_fill);
             originalValue = newElm.getValue();
             return this;
         };
 
-        jqObj.focusout(async function () {
-            const val = jqObj.val().trim();
+        el.addEventListener('blur', async function () {
+            const val = el.value.trim();
             if (!val)
                 return;
             const ival = TimeUtils.strToInt(val);
             if (ival === null) {
                 await Utils.showMessage('Error', 'Invalid time.');
-                jqObj.focus();
+                el.focus();
             } else
-                jqObj.val(TimeUtils.format(ival));
+                el.value = TimeUtils.format(ival);
         });
 
         /**
@@ -162,36 +162,36 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            el.readOnly = flg;
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            el.readOnly = !flg;
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.readOnly;
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         //--
@@ -199,33 +199,36 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.hide(el);
+            else {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            } else
+                DOMUtils.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !DOMUtils.isHidden(el);
         };
 
         //--
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
@@ -234,31 +237,46 @@
             return this;
         }
 
+        let changeKeyUpHandler = null;
+
         newElm.onCChange = function (fun) {
-            jqObj.off('keyup').keyup(function (event) {
+            if (changeKeyUpHandler) {
+                el.removeEventListener('keyup', changeKeyUpHandler);
+                changeKeyUpHandler = null;
+            }
+            changeKeyUpHandler = function (event) {
                 if (!/^[0-9:aApPmM]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
                     return;
                 keyUpHandler(event);
                 if (fun && Utils.isChangeChar(event))
                     fun(newElm.getValue());
-            });
+            };
+            el.removeEventListener('keyup', keyUpHandler);
+            el.addEventListener('keyup', changeKeyUpHandler);
             return this;
         };
 
+        let changeHandler = null;
+
         newElm.onChange = function (fun) {
-            jqObj.off('change');
-            if (fun)
-                jqObj.change(() => {
+            if (changeHandler) {
+                el.removeEventListener('change', changeHandler);
+                changeHandler = null;
+            }
+            if (fun) {
+                changeHandler = function () {
                     fun(newElm.getValue());
-                });
+                };
+                el.addEventListener('change', changeHandler);
+            }
             return this;
         };
 
         newElm.isError = function (desc) {
-            const val = TimeUtils.strToInt(newElm.jqObj.val());
+            const val = TimeUtils.strToInt(el.value);
             if (required  &&  val === null) {
                 Utils.showMessage('Error', desc + ' is required.').then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
@@ -266,7 +284,7 @@
             const minutes = val % 100;
             if (hours > 23  ||  minutes > 59) {
                 Utils.showMessage('Error', desc + ' is not a valid date.').then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
@@ -280,7 +298,7 @@
                 else
                     msg = desc + ' must be less than or equal to ' + TimeUtils.format(max) + '.';
                 Utils.showMessage('Error', msg).then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }

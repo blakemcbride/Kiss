@@ -1,9 +1,9 @@
 /*
       Author: Blake McBride
       Date:  4/24/18
- */
+*/
 
-/* global Utils */
+/* global Utils, DOMUtils */
 
 'use strict';
 
@@ -53,27 +53,28 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
-        jqObj.change(function () {
+        let changeHandler = function () {
             if (processChanges)
                 Utils.someControlValueChanged();
-        });
+        };
+        el.addEventListener('change', changeHandler);
 
         newElm.getValue = function () {
-            return jqObj.prop('checked');
+            return el.checked;
         };
 
         newElm.setValue = function (val) {
             if (typeof val === 'string')
                 val = val === 'true';
-            jqObj.prop('checked', !!val);
+            el.checked = !!val;
             originalValue = newElm.getValue();
             return this;
         };
 
         newElm.clear = function () {
-            jqObj.prop('checked', false);
+            el.checked = false;
             originalValue = newElm.getValue();
             return this;
         };
@@ -92,76 +93,85 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            if (flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            if (flg)
+                el.removeAttribute('readonly');
+            else
+                el.setAttribute('readonly', 'readonly');
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.hasAttribute('readonly');
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.hide(el);
+            else {
+                DOMUtils.show(el);
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.show(el);
             else
-                jqObj.hide();
+                DOMUtils.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return DOMUtils.isVisible(el);
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('change').change(() => {
+            el.removeEventListener('change', changeHandler);
+            changeHandler = () => {
                 if (fun)
-                    fun(jqObj.prop('checked'));
+                    fun(el.checked);
                 if (processChanges)
                     Utils.someControlValueChanged();
-            });
+            };
+            el.addEventListener('change', changeHandler);
             return this;
         };
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
     };

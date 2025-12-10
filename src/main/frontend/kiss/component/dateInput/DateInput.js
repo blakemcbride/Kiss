@@ -1,9 +1,9 @@
 /*
       Author: Blake McBride
       Date:  4/22/18
- */
+*/
 
-/* global Utils, DateUtils */
+/* global Utils, DateUtils, DOMUtils */
 
 'use strict';
 
@@ -66,15 +66,22 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
-        jqObj.on('input', function () {
-            let val = jqObj.val().trim();
+        // Track event handlers for removal
+        let inputHandler = null;
+        let keyupHandler = null;
+        let focusoutHandler = null;
+        let changeHandler = null;
+
+        inputHandler = function () {
+            let val = el.value.trim();
             val = val.replace(/[^0-9./-]/g, '');  // remove characters
-            jqObj.val(val);
-        });
+            el.value = val;
+        };
+        el.addEventListener('input', inputHandler);
 
-        function keyUpHandler(event) {
+        function baseKeyUpHandler(event) {
             if (enterFunction && event.key === 'Enter') {
                 event.stopPropagation();
                 enterFunction();
@@ -83,23 +90,26 @@
                 Utils.someControlValueChanged();
         }
 
-        jqObj.keyup(keyUpHandler);
+        keyupHandler = baseKeyUpHandler;
+        el.addEventListener('keyup', keyupHandler);
 
-        jqObj.focusout(async function () {
-            const val = jqObj.val();
+        focusoutHandler = async function () {
+            const val = el.value;
             if (!val)
                 return;
             if (!DateUtils.isValid(val)) {
                 await Utils.showMessage('Error', 'Invalid date.');
-                jqObj.focus();
-            } else
-                jqObj.val(DateUtils.intToStr4(DateUtils.strToInt(val)).trim());
-        })
+                el.focus();
+            }
+            else
+                el.value = DateUtils.intToStr4(DateUtils.strToInt(val)).trim();
+        };
+        el.addEventListener('focusout', focusoutHandler);
 
         //--
 
         newElm.getValue = function () {
-            const val = jqObj.val();
+            const val = el.value;
             if (!val)
                 return 0;
             return DateUtils.strToInt(val);
@@ -117,27 +127,31 @@
 
         newElm.setValue = function (val, timezone) {
             if (!val) {
-                jqObj.val('');
+                el.value = '';
                 originalValue = 0;
-            } else if (typeof val === 'number') {
+            }
+            else if (typeof val === 'number') {
                 if (val > 30000000) {
                     if (timezone)
                         val = DateTimeUtils.epochToDisplayEpoch(val, timezone);
                     val = DateUtils.toInt(val);
                 }
-                jqObj.val(DateUtils.intToStr4(val).trim())
+                el.value = DateUtils.intToStr4(val).trim();
                 originalValue = val;
-            } else if (typeof val === 'string') {
+            }
+            else if (typeof val === 'string') {
                 if (/^\d+$/.test(val)) {
-                    jqObj.val(DateUtils.intToStr4(val=Number(val)).trim());
+                    el.value = DateUtils.intToStr4(val=Number(val)).trim();
                     originalValue = val;
-                } else {
-                    originalValue = DateUtils.strToInt(val);
-                    jqObj.val(DateUtils.intToStr4(originalValue).trim());
                 }
-            } else if (val instanceof Date) { // Date
+                else {
+                    originalValue = DateUtils.strToInt(val);
+                    el.value = DateUtils.intToStr4(originalValue).trim();
+                }
+            }
+            else if (val instanceof Date) { // Date
                 originalValue = DateUtils.toInt(val);
-                jqObj.val(DateUtils.intToStr4(originalValue).trim());
+                el.value = DateUtils.intToStr4(originalValue).trim();
             }
             return this;
         };
@@ -163,95 +177,108 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            el.readOnly = flg;
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            el.readOnly = !flg;
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.readOnly;
         };
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.hide(el);
+            else {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
+            if (flg) {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            }
             else
-                jqObj.hide();
+                DOMUtils.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !DOMUtils.isHidden(el);
         };
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
         newElm.onCChange = function (fun) {
-            jqObj.off('keyup').keyup(function (event) {
-                keyUpHandler(event);
+            if (keyupHandler) {
+                el.removeEventListener('keyup', keyupHandler);
+            }
+            keyupHandler = function (event) {
+                baseKeyUpHandler(event);
                 if (fun && (Utils.isChangeChar(event) || event.key === 'Enter'))
                     fun(newElm.getIntValue());
-            });
+            };
+            el.addEventListener('keyup', keyupHandler);
             return this;
         };
 
         newElm.onChange = function (fun) {
-            jqObj.off('change');
-            if (fun)
-                jqObj.change(() => {
+            if (changeHandler) {
+                el.removeEventListener('change', changeHandler);
+                changeHandler = null;
+            }
+            if (fun) {
+                changeHandler = () => {
                     fun(newElm.getIntValue());
-                });
+                };
+                el.addEventListener('change', changeHandler);
+            }
             return this;
         };
 
         newElm.onEnter = function (fun) {
             enterFunction = fun;
             return this;
-        }
+        };
 
         newElm.isError = function (desc) {
             let val = newElm.getIntValue();
             if (required  &&  !val) {
                 Utils.showMessage('Error', desc + ' is required.').then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
@@ -264,7 +291,7 @@
                 else
                     msg = desc + ' must be less than or equal to ' + DateUtils.intToStr4(max) + '.';
                 Utils.showMessage('Error', msg).then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }

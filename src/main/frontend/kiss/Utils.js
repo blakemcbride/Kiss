@@ -13,7 +13,10 @@ Component.ComponentsBeingLoaded = 0;
 
 Component.ComponentList = [];
 
-let Kiss = {};
+// DOMUtils object is defined in DOMUtils.js - don't override if already exists
+if (typeof DOMUtils === 'undefined') {
+    console.warn('DOMUtils object not found - DOMUtils.js should be loaded before Utils.js');
+}
 
 /**
  * This is how components are accessed.
@@ -22,23 +25,23 @@ let Kiss = {};
  * @returns {*} the component object
  */
 function $$(id) {
-    if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined' && Kiss.RadioButtons.groups[id]) {
+    if (typeof DOMUtils !== 'undefined' && typeof DOMUtils.RadioButtons !== 'undefined' && DOMUtils.RadioButtons.groups[id]) {
         const rbObj = {};
         let originalValue;
         rbObj.getValue = function () {
-            return Kiss.RadioButtons.getValue(id);
+            return DOMUtils.RadioButtons.getValue(id);
         };
         rbObj.getIntValue = function () {
-            let val = Kiss.RadioButtons.getValue(id);
+            let val = DOMUtils.RadioButtons.getValue(id);
             return val ? Number(val) : 0;
         };
         rbObj.setValue = function (val) {
-            Kiss.RadioButtons.setValue(id, val);
+            DOMUtils.RadioButtons.setValue(id, val);
             originalValue = rbObj.getValue();
             return rbObj;
         };
         rbObj.clear = function () {
-            Kiss.RadioButtons.clear(id);
+            DOMUtils.RadioButtons.clear(id);
             originalValue = rbObj.getValue();
             return rbObj;
         };
@@ -46,54 +49,54 @@ function $$(id) {
             return originalValue !== rbObj.getValue(id);
         };
         rbObj.readOnly = function () {
-            Kiss.RadioButtons.readOnly(id);
+            DOMUtils.RadioButtons.readOnly(id);
             return rbObj;
         };
         rbObj.readWrite = function () {
-            Kiss.RadioButtons.readWrite(id);
+            DOMUtils.RadioButtons.readWrite(id);
             return rbObj;
         };
         rbObj.isReadOnly = function () {
-            return Kiss.RadioButtons.isReadOnly(id);
+            return DOMUtils.RadioButtons.isReadOnly(id);
         };
         rbObj.onChange = function (fun) {
-            Kiss.RadioButtons.onChange(id, fun);
+            DOMUtils.RadioButtons.onChange(id, fun);
             return rbObj;
         };
         rbObj.isError = function (lbl) {
-            return Kiss.RadioButtons.isError(id, lbl);
+            return DOMUtils.RadioButtons.isError(id, lbl);
         };
         rbObj.enable = function (flg=true) {
-            Kiss.RadioButtons.enable(id, flg);
+            DOMUtils.RadioButtons.enable(id, flg);
             return rbObj;
         };
         rbObj.disable = function (flg=true) {
-            Kiss.RadioButtons.disable(id, flg);
+            DOMUtils.RadioButtons.disable(id, flg);
             return rbObj;
         };
         rbObj.hide = function (flg=true) {
-            Kiss.RadioButtons.hide(id, flg);
+            DOMUtils.RadioButtons.hide(id, flg);
             return rbObj;
         };
         rbObj.show = function (flg=true) {
-            Kiss.RadioButtons.show(id, flg);
+            DOMUtils.RadioButtons.show(id, flg);
             return rbObj;
         };
         rbObj.isHidden = function () {
-            return Kiss.RadioButtons.isHidden(id);
+            return DOMUtils.RadioButtons.isHidden(id);
         };
         rbObj.isVisible = function () {
-            return Kiss.RadioButtons.isVisible(id);
+            return DOMUtils.RadioButtons.isVisible(id);
         };
         rbObj.focus = function () {
-            Kiss.RadioButtons.focus(id);
+            DOMUtils.RadioButtons.focus(id);
             return rbObj;
         };
         return rbObj;
     }
-    const e = $((id.charAt(0) === '#' ? '' : '#') + id);
-    if (e.length)
-        return e[0].kiss;
+    const e = DOMUtils.getElement(id);
+    if (e)
+        return e.kiss;
     else {
         console.log("$$: field " + id + " does not exist.");
         return null;
@@ -116,9 +119,9 @@ class Utils {
         const self = this;
         Utils.waitMessageEnd();
         return new Promise(function (resolve, reject) {
-            let modal = $('#msg-modal');
-            if (!modal.length) {
-                $('body').append(
+            let modal = DOMUtils.getElement('msg-modal');
+            if (!modal) {
+                DOMUtils.append(document.body,
                     '<div id="msg-modal" class="msg-modal">' +
                     '  <!-- Modal content -->' +
                     '  <div class="msg-modal-content" id="msg-modal-content-tab">' +
@@ -134,49 +137,62 @@ class Utils {
                     '    </div>' +
                     '  </div>' +
                     '</div>');
-                modal = $('#msg-modal');  // the append changes this
+                modal = DOMUtils.getElement('msg-modal');
 
                 // Adjust width for mobile
-                const content = $('#msg-modal-content-tab');
+                const content = DOMUtils.getElement('msg-modal-content-tab');
                 const smaller = screen.width < screen.height ? screen.width : screen.height;
-                if (smaller < content.width() + 20)
-                    content.width(smaller-20);
+                if (smaller < DOMUtils.width(content) + 20)
+                    DOMUtils.setWidth(content, smaller - 20);
             }
 
-            $('#msg-header').text(title);
-            const header = $('#msg-modal-header-tab');
-            self.makeDraggable(header, $('#msg-modal-content-tab'));
-            $('#msg-message').text(message);
-            const closeBtn = $('#msg-close-btn');
+            const msgHeader = DOMUtils.getElement('msg-header');
+            msgHeader.textContent = title;
+            const header = DOMUtils.getElement('msg-modal-header-tab');
+            const content = DOMUtils.getElement('msg-modal-content-tab');
+            self.makeDraggable(header, content);
+            DOMUtils.getElement('msg-message').textContent = message;
+            const closeBtn = DOMUtils.getElement('msg-close-btn');
             if (title === 'Error') {
-                header.css('background-color', 'red');
+                header.style.backgroundColor = 'red';
                 Utils.lastError = message;
                 Utils.lastErrorDate = new Date();
                 if (Utils.errorFunction)
                     Utils.errorFunction();
             } else
-                header.css('background-color', '#6495ed');
+                header.style.backgroundColor = '#6495ed';
             function endfun() {
-                modal.hide();
+                DOMUtils.hide(modal);
                 resolve();
             }
-            modal.show();
+            DOMUtils.show(modal);
             let waitForKeyUp = false;
-            closeBtn.off('click').click(function (e) {
+
+            // Remove old handlers and add new ones
+            const newCloseBtn = closeBtn.cloneNode(true);
+            closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+            newCloseBtn.addEventListener('click', function (e) {
                 endfun();
             });
-            $('#message-ok').off('click').off('keyup').click(function (e) {
+
+            const okBtn = DOMUtils.getElement('message-ok');
+            const newOkBtn = okBtn.cloneNode(true);
+            okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+            newOkBtn.addEventListener('click', function (e) {
                 if (!waitForKeyUp)
                     endfun();
-            }).focus().on('keyup', function (e) {
+            });
+            newOkBtn.addEventListener('keyup', function (e) {
                 e.stopPropagation();
                 if (waitForKeyUp && e.key === 'Enter')
                     endfun();
-            }).on('keydown', function (e) {
+            });
+            newOkBtn.addEventListener('keydown', function (e) {
                 e.stopPropagation();
                 if (e.key === 'Enter')
                     waitForKeyUp = true;
             });
+            newOkBtn.focus();
         });
     }
 
@@ -184,7 +200,7 @@ class Utils {
      * Display a modal popup that asks the user a yes/no question.
      *
      * The yesFun/noFun can be used, or this function returns a promise
-     * so that is can be used with async/await.
+     * so that it can be used with async/await.
      *
      * @param {string} title text on the title bar of the popup
      * @param {string} message the question being asked
@@ -193,8 +209,9 @@ class Utils {
      */
     static yesNo(title, message, yesFun = null, noFun = null) {
         return new Promise(function(resolve, reject) {
-            if (!$('#yesno-modal').length) {
-                $('body').append(
+            let modal = DOMUtils.getElement('yesno-modal');
+            if (!modal) {
+                DOMUtils.append(document.body,
                     '<div id="yesno-modal" class="msg-modal">' +
                     '  <!-- Modal content -->' +
                     '  <div class="msg-modal-content" id="yesno-popup-content">' +
@@ -211,34 +228,46 @@ class Utils {
                     '    </div>' +
                     '  </div>' +
                     '</div>');
+                modal = DOMUtils.getElement('yesno-modal');
 
                 // Adjust width for mobile
-                const content = $('#yesno-popup-content');
+                const content = DOMUtils.getElement('yesno-popup-content');
                 const smaller = screen.width < screen.height ? screen.width : screen.height;
-                if (smaller < content.width() + 20)
-                    content.width(smaller-20);
+                if (smaller < DOMUtils.width(content) + 20)
+                    DOMUtils.setWidth(content, smaller - 20);
             }
-            Utils.makeDraggable($('#yesno-popup-header'), $('#yesno-popup-content'));
+            Utils.makeDraggable('yesno-popup-header', DOMUtils.getElement('yesno-popup-content'));
 
-            $('#yesno-header').text(title);
-            $('#yesno-message').text(message);
-            const modal = $('#yesno-modal');
-            const span = $('#yesno-close-btn');
-            modal.show();
-            span.off('click').click(function () {
-                modal.hide();
+            DOMUtils.getElement('yesno-header').textContent = title;
+            DOMUtils.getElement('yesno-message').textContent = message;
+            DOMUtils.show(modal);
+
+            // Remove old handlers by cloning and add new ones
+            const span = DOMUtils.getElement('yesno-close-btn');
+            const newSpan = span.cloneNode(true);
+            span.parentNode.replaceChild(newSpan, span);
+            newSpan.addEventListener('click', function () {
+                DOMUtils.hide(modal);
                 if (noFun)
                     noFun();
                 resolve(false);
             });
-            $('#yesno-yes').off('click').click(function () {
-                modal.hide();
+
+            const yesBtn = DOMUtils.getElement('yesno-yes');
+            const newYesBtn = yesBtn.cloneNode(true);
+            yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
+            newYesBtn.addEventListener('click', function () {
+                DOMUtils.hide(modal);
                 if (yesFun)
                     yesFun();
                 resolve(true);
             });
-            $('#yesno-no').off('click').click(function () {
-                modal.hide();
+
+            const noBtn = DOMUtils.getElement('yesno-no');
+            const newNoBtn = noBtn.cloneNode(true);
+            noBtn.parentNode.replaceChild(newNoBtn, noBtn);
+            newNoBtn.addEventListener('click', function () {
+                DOMUtils.hide(modal);
                 if (noFun)
                     noFun();
                 resolve(false);
@@ -259,8 +288,9 @@ class Utils {
         Utils.waitMessageStack.push(message);
         if (Utils.waitMessageStack.length > 1 && Utils.waitMessageStack[Utils.waitMessageStack.length-2] === message)
             return;
-        if (!$('#wmsg-modal').length) {
-            $('body').append(
+        let modal = DOMUtils.getElement('wmsg-modal');
+        if (!modal) {
+            DOMUtils.append(document.body,
                 '<div id="wmsg-modal" class="msg-modal">' +
                 '  <!-- Modal content -->' +
                 '  <div class="wmsg-modal-content" id="wait-msg-content">' +
@@ -269,17 +299,18 @@ class Utils {
                 '    </div>' +
                 '  </div>' +
                 '</div>');
+            modal = DOMUtils.getElement('wmsg-modal');
 
             // Adjust width for mobile
-            const content = $('#wait-msg-content');
+            const content = DOMUtils.getElement('wait-msg-content');
             const smaller = screen.width < screen.height ? screen.width : screen.height;
-            if (smaller < content.width() + 20)
-                content.width(smaller-20);
+            if (smaller < DOMUtils.width(content) + 20)
+                DOMUtils.setWidth(content, smaller - 20);
         }
-        const content = $('#wait-msg-content');
+        const content = DOMUtils.getElement('wait-msg-content');
         this.makeDraggable(content, content);
-        $('#wmsg-message').text(message);
-        $('#wmsg-modal').show();
+        DOMUtils.getElement('wmsg-message').textContent = message;
+        DOMUtils.show(modal);
     }
 
     /**
@@ -288,23 +319,24 @@ class Utils {
      */
     static waitMessageEnd() {
         Utils.waitMessageStack.pop();
+        const modal = DOMUtils.getElement('wmsg-modal');
         if (!Utils.waitMessageStack.length)
-            $('#wmsg-modal').hide();
+            DOMUtils.hide(modal);
         else
-            $('#wmsg-message').text(Utils.waitMessageStack[Utils.waitMessageStack.length-1]);
+            DOMUtils.getElement('wmsg-message').textContent = Utils.waitMessageStack[Utils.waitMessageStack.length-1];
     }
 
     static getID(id) {
-        let e = $('#' + id);
-        if (!e.length) {
+        let e = DOMUtils.getElement(id);
+        if (!e) {
             id = id.replace(/_/g, '-');
-            e = $('#' + id);
+            e = DOMUtils.getElement(id);
         }
-        if (!e.length) {
+        if (!e) {
             id = id.replace(/-/g, '_');
-            e = $('#' + id);
+            e = DOMUtils.getElement(id);
         }
-        return e.length ? id : null;
+        return e ? id : null;
     }
 
     static zeroPad(num, places) {
@@ -316,7 +348,7 @@ class Utils {
      * Test the validity of a domain name.
      *
      * @param d {string} the domain to be tested
-     * @returns {boolean}
+     * @returns {boolean} true if valid
      */
     static isValidDomain(d) {
         if (!d || typeof d !== 'string' || d.length < 3)
@@ -336,7 +368,7 @@ class Utils {
      * Test the validity of an email address.
      *
      * @param add {string} the email address to be tested
-     * @returns {boolean}
+     * @returns {boolean} true if valid
      */
     static isValidEmailAddress(add) {
         if (!add || typeof add !== 'string' || add.length < 5)
@@ -353,6 +385,72 @@ class Utils {
         if (user.indexOf('..') !== -1)
             return false;
         return true;
+    }
+
+    /**
+     * Validates a URL, checks if it is reachable, and opens it in a new browser tab.
+     * This method validates the URL format, attempts to verify if the URL is accessible,
+     * and opens it in a new tab if validation succeeds.
+     *
+     * @param url {string} the URL to validate and open (can be with or without protocol)
+     * @param addProtocol {boolean} if true, adds 'http://' to URLs without a protocol (default: true)
+     * @param timeout {number} timeout in milliseconds for the fetch request (default: 5000)
+     * @returns {Promise<string|null>} null if successful (URL opened), error message string if validation/check failed
+     */
+    static async openUrl(url, addProtocol = true, timeout = 5000) {
+        if (!url || typeof url !== 'string' || !url.trim())
+            return 'URL is empty or invalid.';
+
+        url = url.trim();
+
+        // Add protocol if missing and requested
+        if (addProtocol && url.search('://') === -1)
+            url = 'http://' + url;
+
+        // Validate URL format
+        let urlObj;
+        try {
+            urlObj = new URL(url);
+        } catch (e) {
+            return 'The provided URL format is invalid. Please check and try again.';
+        }
+
+        // Only validate HTTP/HTTPS URLs for reachability
+        if (urlObj.protocol === 'http:' || urlObj.protocol === 'https:') {
+            try {
+                // Use fetch with no-cors mode to check if URL is reachable
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+                await fetch(url, {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    signal: controller.signal
+                }).catch(() => {
+                    // If HEAD fails, try GET as some servers don't support HEAD
+                    return fetch(url, {
+                        method: 'GET',
+                        mode: 'no-cors',
+                        signal: controller.signal
+                    });
+                });
+
+                clearTimeout(timeoutId);
+
+                // Validation successful - open URL in new tab
+                window.open(url, '_blank');
+                return null; // Success
+            } catch (error) {
+                if (error.name === 'AbortError')
+                    return 'The website could not be reached. The request timed out. Please verify the URL is correct.';
+                else
+                    return 'The website could not be reached. Please verify the URL is correct and accessible.';
+            }
+        }
+
+        // For non-HTTP protocols (like mailto:, ftp:, etc.), just open them
+        window.open(url, '_blank');
+        return null;
     }
 
     /**
@@ -1023,7 +1121,7 @@ class Utils {
      * @returns {Array}
      */
     static assureArray(x) {
-        if ($.isArray(x))
+        if (Array.isArray(x))
             return x;
         let r = [];
         if (x)
@@ -1111,9 +1209,9 @@ class Utils {
             for (let i = 0; i < Component.ComponentList.length; i++) {
                 let ci = Component.ComponentList[i];
                 if (ci.tag && ci.name === 'Popup') {
-                    $(ci.tag).each(function () {
-                        let elm = $(this);
-                        ci.processor(elm, Utils.getAllAttributes(elm), elm.html());
+                    const elements = DOMUtils.queryAll(ci.tag);
+                    elements.forEach(function (el) {
+                        ci.processor(el, Utils.getAllAttributes(el), el.innerHTML);
                         n++;
                     });
                     break;
@@ -1121,12 +1219,13 @@ class Utils {
             }
             for (let i = 0; i < Component.ComponentList.length; i++) {
                 let ci = Component.ComponentList[i];
-                if (ci.tag && ci.name !== "Popup")
-                    $(ci.tag).each(function () {
-                        let elm = $(this);
-                        ci.processor(elm, Utils.getAllAttributes(elm), elm.html());
+                if (ci.tag && ci.name !== "Popup") {
+                    const elements = DOMUtils.queryAll(ci.tag);
+                    elements.forEach(function (el) {
+                        ci.processor(el, Utils.getAllAttributes(el), el.innerHTML);
                         n++;
                     });
+                }
             }
         }
     }
@@ -1150,8 +1249,10 @@ class Utils {
 
     static getAllAttributes(elm) {
         const ret = {};
-        $.each(elm[0].attributes, function () {
-            ret[this.name] = this.value;
+        // elm is a native DOM element
+        const el = elm.nodeType ? elm : elm[0];  // handle both native and jQuery-like objects
+        Array.from(el.attributes).forEach(function (attr) {
+            ret[attr.name] = attr.value;
         });
         return ret;
     }
@@ -1193,15 +1294,16 @@ class Utils {
             id = Utils.nextID();
         rplobj.id = id;
         const newHTML = Utils.tagReplace(template, rplobj);
-        elm.replaceWith(newHTML);
-        const jqObj = $('#' + id);
-        const newElm = jqObj[0];
+        // elm is now a native DOM element
+        const el = elm.nodeType ? elm : elm[0];  // handle both native and jQuery-like objects
+        el.outerHTML = newHTML;
+        const newElm = DOMUtils.getElement(id);
         if (!newElm) {
-            console.log(elm[0].localName + ' is missing an ID');
+            console.log(el.localName + ' is missing an ID');
             return undefined;
         }
         newElm.kiss = {};
-        newElm.kiss.jqObj = jqObj;
+        newElm.kiss.element = newElm;  // store native element reference instead of jQuery object
         newElm.kiss.elementInfo = {};
         return newElm.kiss;
     }
@@ -1212,6 +1314,7 @@ class Utils {
             try {
                 response = await fetch(url + (SystemInfo.controlCache ? '?ver=' + SystemInfo.softwareVersion : ''), {
                     method: 'GET',
+                    cache: SystemInfo.controlCache ? 'default' : 'no-store',
                     headers: {
                         'Content-type': 'text/plain'
                     }
@@ -1261,9 +1364,9 @@ class Utils {
             Utils.lastScreenLoaded.retv = retv;
             Utils.getHTML(page + '.html').then(function (text) {
                 if (tag)
-                    $('#' + tag).html(text);
+                    DOMUtils.getElement(tag).innerHTML = text;
                 else
-                    $('body').html(text);
+                    document.body.innerHTML = text;
                 Utils.rescan();  // does all the tag replacement
                 window.scrollTo(0, 0);
                 getScript(page + '.js').then(function () {
@@ -1400,72 +1503,69 @@ class Utils {
     /**
      * This makes a window draggable.
      *
-     * @param header jQuery object
-     * @param content jQuery object
+     * @param header DOM element
+     * @param content DOM element
      */
     static makeDraggable(header, content) {
+        // Store handler references for cleanup
+        let mouseMoveHandler = null;
+        let mouseUpHandler = null;
+        let touchMoveHandler = null;
+        let touchEndHandler = null;
 
-        function handle_mousedown(e)
-        {
-            const body = $('body');
+        function handle_mousedown(e) {
             const drag = {};
 
             drag.pageX0 = e.pageX;
             drag.pageY0 = e.pageY;
             drag.elem = content;
-            drag.offset0 = $(this).offset();
+            drag.offset0 = DOMUtils.offset(content);
 
-            function handle_dragging(e) {
+            mouseMoveHandler = function(e) {
                 const left = drag.offset0.left + (e.pageX - drag.pageX0);
                 const top = drag.offset0.top + (e.pageY - drag.pageY0);
-                $(drag.elem)
-                    .offset({top: top, left: left});
-            }
+                DOMUtils.setOffset(drag.elem, {top: top, left: left});
+            };
 
-            function handle_mouseup(e) {
-                body
-                    .off('mousemove')
-                    .off('mouseup');
-            }
+            mouseUpHandler = function(e) {
+                document.body.removeEventListener('mousemove', mouseMoveHandler);
+                document.body.removeEventListener('mouseup', mouseUpHandler);
+            };
 
-            body.on('mouseup', handle_mouseup)
-                .on('mousemove', handle_dragging);
+            document.body.addEventListener('mouseup', mouseUpHandler);
+            document.body.addEventListener('mousemove', mouseMoveHandler);
         }
 
         // for mobile devices
-        function handle_touchstart(e)
-        {
-            const body = $('body');
+        function handle_touchstart(e) {
             const drag = {};
 
             e.preventDefault();
 
-            drag.pageX0 = e.originalEvent.touches[0].clientX;
-            drag.pageY0 = e.originalEvent.touches[0].clientY;
+            drag.pageX0 = e.touches[0].pageX;
+            drag.pageY0 = e.touches[0].pageY;
 
             drag.elem = content;
-            drag.offset0 = $(this).offset();
+            drag.offset0 = DOMUtils.offset(content);
 
-            function handle_dragging(e) {
-                const left = drag.offset0.left + (e.originalEvent.touches[0].clientX - drag.pageX0);
-                const top = drag.offset0.top + (e.originalEvent.touches[0].clientY - drag.pageY0);
-                $(drag.elem)
-                    .offset({top: top, left: left});
-            }
+            touchMoveHandler = function(e) {
+                const left = drag.offset0.left + (e.touches[0].pageX - drag.pageX0);
+                const top = drag.offset0.top + (e.touches[0].pageY - drag.pageY0);
+                DOMUtils.setOffset(drag.elem, {top: top, left: left});
+            };
 
-            function handle_mouseup(e) {
-                body
-                    .off('touchmove')
-                    .off('touchend');
-            }
+            touchEndHandler = function(e) {
+                document.body.removeEventListener('touchmove', touchMoveHandler);
+                document.body.removeEventListener('touchend', touchEndHandler);
+            };
 
-            body
-                .on('touchmove', handle_dragging)
-                .on('touchend', handle_mouseup);
+            document.body.addEventListener('touchmove', touchMoveHandler);
+            document.body.addEventListener('touchend', touchEndHandler);
         }
-        header.css('cursor', 'all-scroll');
-        header.on('mousedown', handle_mousedown);
-        header.on('touchstart', handle_touchstart);
+
+        header.style.cursor = 'all-scroll';
+        header.addEventListener('mousedown', handle_mousedown);
+        header.addEventListener('touchstart', handle_touchstart);
     }
 
     /**
@@ -1481,20 +1581,23 @@ class Utils {
      * @see Utils.popup_close
      */
     static popup_open(id, focus_ctl=null, replace = false) {
-        const w = $('#' + id);
-        if (!w.length)
+        const w = DOMUtils.getElement(id);
+        if (!w) {
+            console.log(`Popup ${id} not found.`);
             throw new Error(`Popup ${id} not found.`);
-        else if (w.length > 1)
+        } else if (w.length > 1) {
+            console.log(`Popup ${id} found more than once.`);
             throw new Error(`Popup ${id} found more than once.`);
+        }
 
         let prior_offset = null;
 
         if (replace && Utils.popup_context.length) {
             const prior_context = Utils.popup_context[Utils.popup_context.length - 1];
             const prior_id = prior_context.id;
-            const prior_w = $('#' + prior_id);
-            const prior_content = prior_w.children();
-            prior_offset = $(prior_content).offset();
+            const prior_w = DOMUtils.getElement(prior_id);
+            const prior_content = prior_w.firstElementChild;
+            prior_offset = DOMUtils.offset(prior_content);
             Utils.popup_close();
         }
 
@@ -1509,54 +1612,54 @@ class Utils {
         });
         if (typeof AGGrid !== 'undefined')
             AGGrid.newGridContext();
-         if (typeof Editor !== 'undefined')
+        if (typeof Editor !== 'undefined')
             Editor.newEditorContext();
         Utils.newEnterContext();
-        if (!w.hasClass('popup-background')) {
-            let width = w.css('width');
-            let height = w.css('height');
-            w.addClass('popup-background');
-            w.css('z-index', Utils.popup_zindex++);
-            w.css('width', '100%');
-            w.css('height', '100%');
-            w.wrapInner('<div></div>');
-            content = w.children();
-            content.addClass('popup-content');
-            content.css('z-index', Utils.popup_zindex++);
-            content.attr('id', id + '--width');
+        if (!DOMUtils.hasClass(w, 'popup-background')) {
+            let width = getComputedStyle(w).width;
+            let height = getComputedStyle(w).height;
+            DOMUtils.addClass(w, 'popup-background');
+            w.style.zIndex = Utils.popup_zindex++;
+            w.style.width = '100%';
+            w.style.height = '100%';
+            // wrapInner equivalent
+            content = DOMUtils.wrapInner(w, 'div');
+            DOMUtils.addClass(content, 'popup-content');
+            content.style.zIndex = Utils.popup_zindex++;
+            content.id = id + '--width';
 
-            both_parts = content.children();
-            header = both_parts.first();
-            header.addClass('popup-header');
-            body = header.next();
-            body.addClass('popup-body');
-            body.attr('id', id + '--height');
-            content.css('width', width);
-            body.css('height', height);
+            both_parts = DOMUtils.children(content);
+            header = both_parts[0];
+            DOMUtils.addClass(header, 'popup-header');
+            body = both_parts[1];
+            DOMUtils.addClass(body, 'popup-body');
+            body.id = id + '--height';
+            content.style.width = width;
+            body.style.height = height;
         } else {
-            w.css('z-index', Utils.popup_zindex++);
-            content = w.children();
-            content.css('z-index', Utils.popup_zindex++);
-            both_parts = content.children();
-            header = both_parts.first();
-            body = header.next();
+            w.style.zIndex = Utils.popup_zindex++;
+            content = w.firstElementChild;
+            content.style.zIndex = Utils.popup_zindex++;
+            both_parts = DOMUtils.children(content);
+            header = both_parts[0];
+            body = both_parts[1];
         }
 
-        w.show();
+        DOMUtils.show(w);
         if (prior_offset)
-            $(content).offset(prior_offset);
+            DOMUtils.setOffset(content, prior_offset);
 
         this.makeDraggable(header, content);
 
         if (focus_ctl) {
-            const fctl = $('#' + focus_ctl);
-            if (fctl.length)
+            const fctl = DOMUtils.getElement(focus_ctl);
+            if (fctl)
                 fctl.focus();
             else
-                console.log("popup_open:  can't set focus to nonexistent field " + focus_ctl);
+                console.log("popup_open:  can't set focus to non-existent field " + focus_ctl);
         } else {
-            const ctl = $(':focus');
-            if (ctl)
+            const ctl = document.activeElement;
+            if (ctl && ctl !== document.body)
                 ctl.blur();
         }
     }
@@ -1569,9 +1672,9 @@ class Utils {
      * @param {string} height  like "200px"
      */
     static popup_set_height(id, height) {
-        const ctl = $('#' + id + '--height');
-        if (ctl.length)
-            ctl.css('height', height);
+        const ctl = DOMUtils.getElement(id + '--height');
+        if (ctl)
+            ctl.style.height = height;
         else
             console.log("Utils.popup_set_height:  can't set height before popup " + id + " is open");
     }
@@ -1584,9 +1687,9 @@ class Utils {
      * @param {string} width  like "200px"
      */
     static popup_set_width(id, width) {
-        const ctl = $('#' + id + '--width');
-        if (ctl.length)
-            ctl.css('width', width);
+        const ctl = DOMUtils.getElement(id + '--width');
+        if (ctl)
+            ctl.style.width = width;
         else
             console.log("Utils.popup_set_width:  can't set width before popup " + id + " is open");
     }
@@ -1594,16 +1697,25 @@ class Utils {
     /**
      * Close the most recent modal popup.
      *
+     * @param {string} id optional popup ID to close (for validation)
+     *
      * @see Utils.popup_open
      */
-    static popup_close() {
+    static popup_close(id = null) {
         const context = Utils.popup_context.pop();
+        if (!context) {
+            console.log('popup_close called without an active popup');
+            return;
+        }
+        if (id && context.id !== id) {
+            console.warn(`popup_close: Expected popup '${id}' but found '${context.id}'`);
+        }
         if (typeof AGGrid !== 'undefined')
             AGGrid.popGridContext();
         if (typeof Editor !== 'undefined')
             Editor.popEditorContext();
         Utils.popEnterContext();
-        $('#' + context.id).hide();
+        DOMUtils.hide(context.id);
         Utils.globalEnterHandler(context.globalEnterHandler);
         Utils.popup_zindex -= 2;
         if (Utils.popup_zindex < 10)
@@ -1620,8 +1732,8 @@ class Utils {
      * @see Utils.getFileUploadFormData
      */
     static getFileUploadCount(id) {
-        const ctl = $('#'+id);
-        const file_list = ctl.get(0).files;
+        const ctl = DOMUtils.getElement(id);
+        const file_list = ctl.files;
         return file_list.length;
     }
 
@@ -1639,8 +1751,8 @@ class Utils {
      * @see Utils.getFileUploadCount
      */
     static getFileUploadFormData(id) {
-        const ctl = $('#'+id);
-        const file_list = ctl.get(0).files;
+        const ctl = DOMUtils.getElement(id);
+        const file_list = ctl.files;
         const data = new FormData();
         for (let i=0 ; i < file_list.length ; i++)
             data.append('file-'+i, file_list[i]);
@@ -1874,13 +1986,18 @@ class Utils {
     static globalEnterHandler(fun) {
         const prevFun = Utils.globalEnterFunction;
         Utils.globalEnterFunction = fun;
-        const obj = $('body');
-        obj.off('keyup');
-        if (fun)
-            obj.on('keyup', function (e) {
+        // Remove previous handler if exists
+        if (Utils._globalEnterKeyHandler) {
+            document.body.removeEventListener('keyup', Utils._globalEnterKeyHandler);
+            Utils._globalEnterKeyHandler = null;
+        }
+        if (fun) {
+            Utils._globalEnterKeyHandler = function (e) {
                 if (e.key === 'Enter')
                     fun();
-            });
+            };
+            document.body.addEventListener('keyup', Utils._globalEnterKeyHandler);
+        }
         return prevFun;
     }
 
@@ -1889,8 +2006,8 @@ class Utils {
      */
     static cleanup() {
         Utils.clearSomeControlValueChanged(false);
-        if (typeof Kiss !== 'undefined' && typeof Kiss.RadioButtons !== 'undefined')
-            Kiss.RadioButtons.resetGroups();
+        if (typeof DOMUtils !== 'undefined' && typeof DOMUtils.RadioButtons !== 'undefined')
+            DOMUtils.RadioButtons.resetGroups();
         if (typeof AGGrid !== 'undefined') {
             AGGrid.popAllGridContexts();
             AGGrid.newGridContext();   //  for the new screen we are loading
@@ -1903,8 +2020,8 @@ class Utils {
         Utils.newEnterContext();
         Utils.globalEnterHandler(null);
         Utils.popup_context = [];
-        const ctl = $(':focus');   // remove any focus
-        if (ctl)
+        const ctl = document.activeElement;   // remove any focus
+        if (ctl && ctl !== document.body)
             ctl.blur();
     }
 
@@ -2012,49 +2129,49 @@ class Utils {
     /**
      * Append html (as text) to the list of children of a node.
      * <br><br>
-     * @code{tag} can be the id of the control or its jQuery node.
-     * This function returns the jQuery node that can be used
+     * @code{tag} can be the id of the control or a DOM element.
+     * This function returns the DOM element that can be used
      * for additional calls to this function (so it'll be faster).
      *
      * @param tag {object|string} see above
      * @param html {string} the html to be
-     * @returns {object} the jQuery node
+     * @returns {object} the DOM element
      */
     static appendChild(tag, html) {
         let node;
         if (typeof tag === 'string') {
-            node = $('#' + tag);
-            if (!node || !node.length) {
+            node = DOMUtils.getElement(tag);
+            if (!node) {
                 console.log('tag ' + tag +' not found.');
                 return;
             }
         } else
-            node = tag;
-        node.append(html);
+            node = tag.nodeType ? tag : tag[0];  // handle both native and legacy jQuery-like objects
+        DOMUtils.append(node, html);
         return node;
     }
 
     /**
      * Erase all the child nodes.
      * <br><br>
-     * @code{tag} can be the id of the control or its jQuery node.
-     * This function returns the jQuery node that can be used
+     * @code{tag} can be the id of the control or a DOM element.
+     * This function returns the DOM element that can be used
      * for additional calls to this function.
      *
      * @param tag {object|string} see above
-     * @returns {object} the jQuery node
+     * @returns {object} the DOM element
      */
     static eraseChildren(tag) {
         let node;
         if (typeof tag === 'string') {
-            node = $('#' + tag);
-            if (!node || !node.length) {
+            node = DOMUtils.getElement(tag);
+            if (!node) {
                 console.log('tag ' + tag +' not found.');
                 return;
             }
         } else
-            node = tag;
-        node.empty();
+            node = tag.nodeType ? tag : tag[0];  // handle both native and legacy jQuery-like objects
+        DOMUtils.empty(node);
         return node;
     }
 
@@ -2261,7 +2378,7 @@ class Utils {
      * It tries to assure that the first letter of each word is uppercase and the rest is lowercase.
      * If the incoming string is already mixed-case, it leaves it alone.
      *
-     * @param s {string}
+     * @param str {string}
      * @returns {string}
      */
     static fixCapitalization(str) {
@@ -2340,6 +2457,7 @@ Utils.enterFunctionStack = [];      //  Save stack for enter key to handle popup
 Utils.screenStack = [];
 Utils.lastScreenLoaded = {};  //  current stackframe
 
+// This is used to prevent button clicks when there is an active web service call
 Utils.suspendDepth = 0;  // when > 0 suspend buttons
 
 Utils.globalData = {};
@@ -2356,110 +2474,16 @@ Utils.waitMessageStack = [];
  * If your database uses Unicode, then this should be set to <code>false</code>.
  * If set to <code>true</code>, it should be set elsewhere so that this file can remain
  * untouched.
- * 
+ *
  * @type {boolean}
  */
 Utils.forceASCII = false;
 
-$(document).on('keypress', function(e) {
+document.addEventListener('keypress', function(e) {
     if (Utils.enterFunction  &&  e.key === 'Enter')
         Utils.enterFunction();
 });
 
 
 
-// taken from https://github.com/accursoft/caret/blob/master/jquery.caret.js
-(function($) {
-    function focus(target) {
-        if (!document.activeElement || document.activeElement !== target) {
-            target.focus();
-        }
-    }
-
-    $.fn.caret = function(pos) {
-        let target = this[0];
-        let isContentEditable = target && target.contentEditable === 'true';
-        if (arguments.length === 0) {
-            //get
-            if (target) {
-                //HTML5
-                if (window.getSelection) {
-                    //contenteditable
-                    if (isContentEditable) {
-                        focus(target);
-                        let selection = window.getSelection();
-                        // Opera 12 check
-                        if (!selection.rangeCount) {
-                            return 0;
-                        }
-                        let range1 = selection.getRangeAt(0),
-                            range2 = range1.cloneRange();
-                        range2.selectNodeContents(target);
-                        range2.setEnd(range1.endContainer, range1.endOffset);
-                        return range2.toString().length;
-                    }
-                    //textarea
-                    return target.selectionStart;
-                }
-                //IE<9
-                if (document.selection) {
-                    focus(target);
-                    //contenteditable
-                    if (isContentEditable) {
-                        let range1 = document.selection.createRange(),
-                            range2 = document.body.createTextRange();
-                        range2.moveToElementText(target);
-                        range2.setEndPoint('EndToEnd', range1);
-                        return range2.text.length;
-                    }
-                    //textarea
-                    let pos = 0,
-                        range = target.createTextRange(),
-                        range2 = document.selection.createRange().duplicate(),
-                        bookmark = range2.getBookmark();
-                    range.moveToBookmark(bookmark);
-                    while (range.moveStart('character', -1) !== 0) pos++;
-                    return pos;
-                }
-                // Addition for jsdom support
-                if (target.selectionStart)
-                    return target.selectionStart;
-            }
-            //not supported
-            return;
-        }
-        //set
-        if (target) {
-            if (pos === -1)
-                pos = this[isContentEditable? 'text' : 'val']().length;
-            //HTML5
-            if (window.getSelection) {
-                //contenteditable
-                if (isContentEditable) {
-                    focus(target);
-                    window.getSelection().collapse(target.firstChild, pos);
-                }
-                //textarea
-                else
-                    target.setSelectionRange(pos, pos);
-            }
-            //IE<9
-            else if (document.body.createTextRange) {
-                if (isContentEditable) {
-                    let range = document.body.createTextRange();
-                    range.moveToElementText(target);
-                    range.moveStart('character', pos);
-                    range.collapse(true);
-                    range.select();
-                } else {
-                    let range = target.createTextRange();
-                    range.move('character', pos);
-                    range.select();
-                }
-            }
-            if (!isContentEditable)
-                focus(target);
-        }
-        return this;
-    };
-})(jQuery);
+// Caret functionality has been moved to DOMUtils.caret() in DOMUtils.js

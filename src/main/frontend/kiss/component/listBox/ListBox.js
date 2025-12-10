@@ -1,9 +1,9 @@
 /*
       Author: Blake McBride
       Date:  5/25/18
- */
+*/
 
-/* global Utils */
+/* global Utils, DOMUtils */
 
 'use strict';
 
@@ -89,18 +89,20 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
         let dataStore = {};
+        let changeHandler;
 
-        jqObj.on('change', function () {
+        changeHandler = function () {
             if (triggerGlobalChange)
                 Utils.someControlValueChanged();
-        });
+        };
+        el.addEventListener('change', changeHandler);
 
         //--
 
         newElm.clear = function () {
-            jqObj.empty();
+            el.innerHTML = '';
             if (default_option)
                 newElm.add('', default_option);
             dataStore = {};
@@ -111,10 +113,13 @@
         newElm.add = function (val, label, data) {
             if (typeof val === "number")
                 keyIsNumber = true;
-            jqObj.append($('<option></option>').attr('value', val).text(label));
+            const option = document.createElement('option');
+            option.value = val;
+            option.textContent = label;
+            el.appendChild(option);
             if (data)
                 dataStore[val] = data;
-            originalValue = jqObj.val();
+            originalValue = el.value;
             return this;
         };
 
@@ -126,10 +131,13 @@
                 let lbl = typeof labelField === 'function' ? labelField(item) : item[labelField];
                 if (typeof item[valField] === 'number')
                     keyIsNumber = true;
-                jqObj.append($('<option></option>').attr('value', item[valField]).text(lbl));
+                const option = document.createElement('option');
+                option.value = item[valField];
+                option.textContent = lbl;
+                el.appendChild(option);
                 dataStore[item[valField]] = dataField ? item[dataField] : item;
             }
-            originalValue = jqObj.val();
+            originalValue = el.value;
             return this;
         };
 
@@ -144,15 +152,15 @@
         }
 
         newElm.size = function () {
-            return jqObj.children('option').length;
+            return el.options.length;
         };
 
         //--
 
         newElm.getValue = function (row) {
             if (row !== 0 && !row)
-                return keyIsNumber ? Number(jqObj.val()) : jqObj.val();
-            const v = jqObj.find('option')[row].value;
+                return keyIsNumber ? Number(el.value) : el.value;
+            const v = el.options[row].value;
             return keyIsNumber ? Number(v) : v;
         };
 
@@ -168,11 +176,11 @@
 
         newElm.setValue = function (val, row) {
             if (row !== 0 && !row) {
-                jqObj.val(val);
-                originalValue = jqObj.val();
+                el.value = val;
+                originalValue = el.value;
             } else {
                 const origVal = newElm.getValue(row);
-                jqObj.find('option')[row].value = val;
+                el.options[row].value = val;
                 if (origVal) {
                     const data = dataStore[origVal];
                     delete dataStore[origVal];
@@ -183,24 +191,29 @@
         };
 
         newElm.getLabel = function (row) {
-            if (row !== 0 && !row)
-                return jqObj.find('option:selected').text();
-            return jqObj.find('option')[row].text;
+            if (row !== 0 && !row) {
+                const selectedOption = el.selectedOptions[0];
+                return selectedOption ? selectedOption.textContent : '';
+            }
+            return el.options[row].textContent;
         };
 
         newElm.getAllLabels = function () {
             const r = [];
-            jqObj.find('option').each((idx, option) => {
-                r.push(option.text);
+            Array.from(el.options).forEach((option) => {
+                r.push(option.textContent);
             });
             return r;
         };
 
         newElm.setLabel = function (lbl, row) {
-            if (row !== 0 && !row)
-                jqObj.find('option:selected').text(lbl);
-            else
-                jqObj.find('option')[row].text = lbl;
+            if (row !== 0 && !row) {
+                const selectedOption = el.selectedOptions[0];
+                if (selectedOption)
+                    selectedOption.textContent = lbl;
+            } else {
+                el.options[row].textContent = lbl;
+            }
             return this;
         };
 
@@ -213,43 +226,49 @@
         };
 
         newElm.isDirty = function () {
-            return originalValue !== jqObj.val();
+            return originalValue !== el.value;
         };
 
         //--
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            if (flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            if (!flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.hasAttribute('readonly');
         };
 
         //--
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         //--
@@ -257,33 +276,37 @@
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.hide(el);
+            else {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            } else {
+                DOMUtils.hide(el);
+            }
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return DOMUtils.isVisible(el);
         };
 
         //--
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
@@ -293,7 +316,7 @@
             let val = newElm.getValue();
             if (!val) {
                 Utils.showMessage('Error', desc + ' selection is required.').then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
@@ -301,13 +324,19 @@
         };
 
         newElm.onChange = function (func) {
-            jqObj.off('change').on('change', function () {
+            el.removeEventListener('change', changeHandler);
+            changeHandler = function () {
                 if (triggerGlobalChange)
                     Utils.someControlValueChanged();
                 // func gets passed the selected value, label
-                if (func)
-                    func(jqObj.val(), jqObj.find('option:selected').text(), dataStore[jqObj.val()]);
-            });
+                if (func) {
+                    const selectedOption = el.selectedOptions[0];
+                    const val = el.value;
+                    const label = selectedOption ? selectedOption.textContent : '';
+                    func(val, label, dataStore[val]);
+                }
+            };
+            el.addEventListener('change', changeHandler);
             return this;
         };
 
@@ -316,61 +345,77 @@
         }
 
         let timeout;
+        let clickHandler;
 
         newElm.onClick = function (fun) {
-            jqObj.off('click').click(function () {
+            if (clickHandler)
+                el.removeEventListener('click', clickHandler);
+            clickHandler = function () {
                 timeout = setTimeout(function () {
                     if (fun) {
-                        const val = jqObj.val();
-                        if (val)
-                            fun(val, jqObj.find('option:selected').text(), dataStore[val]);
-                        else
+                        const val = el.value;
+                        if (val) {
+                            const selectedOption = el.selectedOptions[0];
+                            const label = selectedOption ? selectedOption.textContent : '';
+                            fun(val, label, dataStore[val]);
+                        } else {
                             fun(null, null, null);
+                        }
                     }
                 }, 300);
-            });
+            };
+            el.addEventListener('click', clickHandler);
             return this;
         };
 
         // double-click is not recognised on mobile devices
+        let dblclickHandler;
+
         newElm.onDblClick = function (fun) {
-            jqObj.off('dblclick').dblclick(function () {
+            if (dblclickHandler)
+                el.removeEventListener('dblclick', dblclickHandler);
+            dblclickHandler = function () {
                 if (timeout) {
                     clearTimeout(timeout);
                     timeout = null;
                 }
                 if (fun) {
-                    const val = jqObj.val();
-                    if (val)
-                        fun(val, jqObj.find('option:selected').text(), dataStore[val]);
-                    else
+                    const val = el.value;
+                    if (val) {
+                        const selectedOption = el.selectedOptions[0];
+                        const label = selectedOption ? selectedOption.textContent : '';
+                        fun(val, label, dataStore[val]);
+                    } else {
                         fun(null, null, null);
+                    }
                 }
-            });
+            };
+            el.addEventListener('dblclick', dblclickHandler);
             return this;
         };
 
         newElm.selectedIndex = function () {
-            return jqObj.prop('selectedIndex');
+            return el.selectedIndex;
         };
 
         newElm.selectIndex = function (idx) {
-            jqObj.find(':nth-child(' + (idx+1) + ')').prop('selected', true);
+            if (idx >= 0 && idx < el.options.length)
+                el.options[idx].selected = true;
             return this;
         };
 
         newElm.removeByIndex = function (idx) {
-            const val = jqObj.val();
-            if (idx < jqObj.children('option').length)
-                jqObj.find('option').eq(idx).remove();
+            const val = el.value;
+            if (idx < el.options.length)
+                el.options[idx].remove();
             if (val)
                 delete dataStore[val];
-            originalValue = jqObj.val();
+            originalValue = el.value;
             return this;
         };
 
         newElm.clearSelection = function () {
-            jqObj.val(null);
+            el.selectedIndex = -1;
         };
 
     };

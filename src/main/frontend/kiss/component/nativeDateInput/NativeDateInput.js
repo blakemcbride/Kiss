@@ -3,7 +3,7 @@
       Date:  4/22/18
  */
 
-/* global Utils, DateUtils */
+/* global Utils, DateUtils, DOMUtils */
 
 'use strict';
 
@@ -60,9 +60,15 @@
         });
         if (!newElm)
             return;
-        const jqObj = newElm.jqObj;
+        const el = newElm.element;
 
-        function keyUpHandler(event) {
+        // Event handler tracking for proper removal
+        let keyupHandler = null;
+        let changeHandler = null;
+        let blurHandler = null;
+        let keydownHandler = null;
+
+        function defaultKeyUpHandler(event) {
             if (enterFunction && event.key === 'Enter') {
                 event.stopPropagation();
                 enterFunction();
@@ -71,40 +77,42 @@
                 Utils.someControlValueChanged();
         }
 
-        jqObj.keyup(keyUpHandler);
+        keyupHandler = defaultKeyUpHandler;
+        el.addEventListener('keyup', keyupHandler);
 
-        jqObj.on('change', function () {
+        changeHandler = function () {
             Utils.someControlValueChanged();
-        });
+        };
+        el.addEventListener('change', changeHandler);
 
         //--
 
         newElm.getIntValue = function () {
-            return DateUtils.SQLtoInt(jqObj.val());
+            return DateUtils.SQLtoInt(el.value);
         };
 
         newElm.getSQLValue = function () {
-            return jqObj.val();
+            return el.value;
         };
 
         newElm.getDateValue = function () {
-            return DateUtils.intToDate(DateUtils.SQLtoInt(jqObj.val()));
+            return DateUtils.intToDate(DateUtils.SQLtoInt(el.value));
         };
 
         newElm.setValue = function (val) {
             if (!val)
-                jqObj.val('');
+                el.value = '';
             else if (typeof val === 'number') {
                 if (val > 30000000)
                     val = DateUtils.toInt(val);
-                jqObj.val(DateUtils.intToSQL(val));
+                el.value = DateUtils.intToSQL(val);
             } else if (typeof val === 'string') {
                 if (/^\d+$/.test(val))
-                    jqObj.val(DateUtils.intToSQL(Number(val)));
+                    el.value = DateUtils.intToSQL(Number(val));
                 else
-                    jqObj.val(DateUtils.intToSQL(DateUtils.strToInt(val)));
+                    el.value = DateUtils.intToSQL(DateUtils.strToInt(val));
             } else if (typeof val === 'object')  // Date
-                jqObj.val(DateUtils.intToSQL(DateUtils.dateToInt(val)));
+                el.value = DateUtils.intToSQL(DateUtils.dateToInt(val));
             originalValue = newElm.getIntValue();
             return this;
         };
@@ -114,7 +122,7 @@
         };
 
         newElm.clear = function () {
-            jqObj.val('');
+            el.value = '';
             originalValue = newElm.getIntValue();
             return this;
         };
@@ -131,73 +139,88 @@
 
         newElm.readOnly = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', flg);
+            if (flg)
+                el.setAttribute('readonly', 'readonly');
+            else
+                el.removeAttribute('readonly');
             return this;
         };
 
         newElm.readWrite = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.attr('readonly', !flg);
+            if (flg)
+                el.removeAttribute('readonly');
+            else
+                el.setAttribute('readonly', 'readonly');
             return this;
         };
 
         newElm.isReadOnly = function () {
-            return !!jqObj.attr('readonly');
+            return el.hasAttribute('readonly');
         };
 
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', flg);
+            el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            jqObj.prop('disabled', !flg);
+            el.disabled = !flg;
             return this;
         };
 
         newElm.isDisabled = function () {
-            return !!jqObj.attr('disabled');
+            return el.disabled;
         };
 
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
-                jqObj.hide();
-            else
-                jqObj.show().css('visibility', 'visible');
+                DOMUtils.hide(el);
+            else {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg)
-                jqObj.show().css('visibility', 'visible');
-            else
-                jqObj.hide();
+            if (flg) {
+                DOMUtils.show(el);
+                el.style.visibility = 'visible';
+            } else
+                DOMUtils.hide(el);
             return this;
         };
 
         newElm.isHidden = function () {
-            return jqObj.is(':hidden');
+            return DOMUtils.isHidden(el);
         };
 
         newElm.isVisible = function () {
-            return jqObj.is(':visible');
+            return !DOMUtils.isHidden(el);
         };
 
         newElm.focus = function () {
-            jqObj.focus();
+            el.focus();
             return this;
         };
 
         newElm.onCChange = function (fun) {
-            jqObj.off('change');
-            if (fun)
-                jqObj.change(() => {
+            // Remove old change handler
+            if (changeHandler)
+                el.removeEventListener('change', changeHandler);
+
+            changeHandler = null;
+            if (fun) {
+                changeHandler = () => {
                     fun(newElm.getIntValue());
-                });
+                };
+                el.addEventListener('change', changeHandler);
+            }
             return this;
         };
 
@@ -210,20 +233,36 @@
                To complicate matters.  Chrome and Firefox act differently.  When you are typing and hit a tab, Chrome
                takes you completely out of the control while Firefox takes you to the calendar icon.
              */
-            jqObj.off('blur').off('change').off('keydown');
+            // Remove old handlers
+            if (blurHandler)
+                el.removeEventListener('blur', blurHandler);
+            if (changeHandler)
+                el.removeEventListener('change', changeHandler);
+            if (keydownHandler)
+                el.removeEventListener('keydown', keydownHandler);
+
+            blurHandler = null;
+            changeHandler = null;
+            keydownHandler = null;
+
             if (fun) {
-                jqObj.on('keydown', (event) => {
+                keydownHandler = (event) => {
                     typing = true;
-                });
-                jqObj.on('change', (event) => {
+                };
+                el.addEventListener('keydown', keydownHandler);
+
+                changeHandler = (event) => {
                     if (!typing)
                         fun(newElm.getIntValue());
-                });
-                jqObj.on('blur', (event) => {
+                };
+                el.addEventListener('change', changeHandler);
+
+                blurHandler = (event) => {
                     if (typing)
                         fun(newElm.getIntValue());
                     typing = false;
-                });
+                };
+                el.addEventListener('blur', blurHandler);
             }
             return this;
         };
@@ -237,7 +276,7 @@
             let val = newElm.getIntValue();
             if (required  &&  !val) {
                 Utils.showMessage('Error', desc + ' is required.').then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
@@ -250,7 +289,7 @@
                 else
                     msg = desc + ' must be less than or equal to ' + DateUtils.intToStr4(max) + '.';
                 Utils.showMessage('Error', msg).then(function () {
-                    jqObj.focus();
+                    el.focus();
                 });
                 return true;
             }
