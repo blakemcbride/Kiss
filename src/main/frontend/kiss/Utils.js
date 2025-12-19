@@ -236,7 +236,7 @@ class Utils {
                 if (smaller < DOMUtils.width(content) + 20)
                     DOMUtils.setWidth(content, smaller - 20);
             }
-            Utils.makeDraggable('yesno-popup-header', DOMUtils.getElement('yesno-popup-content'));
+            Utils.makeDraggable(DOMUtils.getElement('yesno-popup-header'), DOMUtils.getElement('yesno-popup-content'));
 
             DOMUtils.getElement('yesno-header').textContent = title;
             DOMUtils.getElement('yesno-message').textContent = message;
