@@ -450,6 +450,81 @@ cal.setTime(myDate);
 int timeHHMM = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
 ```
 
+## Browser Back Button Prevention
+
+The Kiss framework implements browser back button prevention using the History API instead of `window.onbeforeunload` for better mobile browser compatibility.
+
+### Implementation Details
+
+**Login Handling** (in `login.js` and `mobile/login.js`):
+- After successful login, sets `Server.isLoggedIn = true`
+- Uses `history.pushState()` to add a state entry
+- Adds a `popstate` event listener that:
+  - Checks if user is logged in via `Server.isLoggedIn` flag
+  - Re-pushes state to prevent navigation
+  - Shows confirmation dialog asking user if they want to logout
+  - Calls `Server.logout()` if user confirms
+
+**Logout Handling** (in `Server.js`):
+- `Server.logout()`: Sets `Server.isLoggedIn = false` before reload to disable back button protection
+- `Server.checkTime()`: Sets `Server.isLoggedIn = false` before auto-logout due to inactivity
+
+**State Management**:
+- `Server.isLoggedIn` is a class variable initialized to `false`
+- Set to `true` after successful login
+- Set to `false` before any logout (manual or automatic)
+
+This approach works reliably across all browsers including mobile devices where `window.onbeforeunload` may not function correctly.
+
+## Dialog Components
+
+### Utils.yesNo() - Confirmation Dialog
+Located in `Utils.js`, the `yesNo()` method displays a draggable confirmation dialog with "Yes" and "No" buttons.
+
+**Usage:**
+```javascript
+Utils.yesNo('Title', 'Question text', yesFun, noFun);
+```
+
+**Parameters:**
+- `title` (string): Text displayed in the dialog header
+- `message` (string): The question or prompt shown to the user
+- `yesFun` (function, optional): Callback executed if user clicks "Yes"
+- `noFun` (function, optional): Callback executed if user clicks "No"
+
+**Returns:** Promise that resolves when dialog is closed
+
+**Implementation Notes:**
+- Creates modal DOM structure if it doesn't exist (id: `yesno-modal`)
+- Dialog is draggable via `Utils.makeDraggable()`
+- Mobile-responsive: adjusts width based on screen size
+- Uses custom CSS classes: `msg-modal`, `msg-modal-content`, `msg-modal-header`, etc.
+
+### Utils.makeDraggable() - Draggable Windows
+Makes a window or dialog draggable by the header/title bar.
+
+**Usage:**
+```javascript
+Utils.makeDraggable(headerElement, contentElement);
+```
+
+**Parameters:**
+- `header` (DOM Element): The element to use as drag handle (typically the title bar)
+- `content` (DOM Element): The element to be moved when dragging
+
+**IMPORTANT:** Both parameters must be DOM elements, not string IDs. Use `DOMUtils.getElement()` to get element references:
+```javascript
+Utils.makeDraggable(
+    DOMUtils.getElement('header-id'),
+    DOMUtils.getElement('content-id')
+);
+```
+
+**Implementation Details:**
+- Supports both mouse and touch events (mobile compatible)
+- Sets cursor style to 'all-scroll' on header
+- Stores handler references for proper cleanup
+
 ---
 
-*Updated: 2025-10-08*
+*Updated: 2025-12-19*

@@ -18,10 +18,19 @@
         const res = await Server.call('', 'Login', data);
         if (res._Success) {
             Server.setUUID(res.uuid);
-            // prevent accidental browser back button
-            window.onbeforeunload = function() {
-                return "Back button hit.";
-            };
+            // prevent accidental browser back button using History API (works reliably on mobile)
+            Server.isLoggedIn = true;
+            history.pushState(null, document.title, location.href);
+            window.addEventListener('popstate', function(event) {
+                if (Server.isLoggedIn) {
+                    history.pushState(null, document.title, location.href);
+                    Utils.yesNo('Confirm', 'Are you sure you want to logout?', function() {
+                        Server.logout();
+                    }, function() {
+                        // User chose to stay, do nothing (already pushed state back)
+                    });
+                }
+            });
             Utils.loadPage('screens/Framework/Framework');
         } else {
             $$('password').clear().focus();

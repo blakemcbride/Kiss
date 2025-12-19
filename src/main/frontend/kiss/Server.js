@@ -41,7 +41,8 @@ class Server {
         document.body.style.cursor = 'default';
         Utils.cleanup();  //  clean up any context information
         Server.uuid = '';
-        window.onbeforeunload = null;  //  allow logout
+        Server.isLoggedIn = false;  //  disable back button protection
+        window.onbeforeunload = null;  //  allow logout (kept for backward compatibility)
         location.reload();
     }
 
@@ -374,6 +375,7 @@ class Server {
             return;
         const now = (new Date()).getTime() / 1000;
         if (now - Server.timeLastCall > Server.maxInactiveSeconds) {
+            Server.isLoggedIn = false;  //  disable back button protection
             await Utils.showMessage("Warning", "Auto logout due to inactivity.  Please re-login.");
             Server.logout();
         } else
@@ -385,6 +387,7 @@ class Server {
 Server.errorMessage = 'Error communicating with the server.';
 Server.timeLastCall;
 Server.maxInactiveSeconds = 0;  // max number of seconds between calls or zero for no max (or auto logout)
+Server.isLoggedIn = false;  // flag to track login state for History API back button handling
 
 
 
