@@ -986,9 +986,9 @@ public class BuildUtils {
                 (new StreamGobbler(proc.getInputStream())).start();
             }
             if (wait && proc.waitFor() != 0)
-                throw new RuntimeException("error executing " + cmd);
+                throw new RuntimeException("error executing " + cmd + "\n *** Rerun with bld -v ... for verbose output");
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("error executing " + cmd);
+            throw new RuntimeException("error executing " + cmd + "\n *** Rerun with bld -v ... for verbose output");
         }
         return proc;
     }
@@ -1253,9 +1253,9 @@ public class BuildUtils {
         String cmd, argsFile = null;
         if (ldep != null  &&  !ldep.deps.isEmpty()  ||  fdep != null  &&  !fdep.isEmpty()) {
             argsFile = writeDependencyArgsToFile(true, additionalSourceRoot,ldep, fdep);
-            cmd = "javac -g @" + argsFile + " -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
+            cmd = "javac -proc:full -g @" + argsFile + " -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
         } else
-            cmd = "javac -g -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
+            cmd = "javac -proc:full -g -sourcepath " + sourcePath + " -d " + destPath + " @" + filelist;
         runWait(verbose, cmd);
         rm(argsFile);
     }
