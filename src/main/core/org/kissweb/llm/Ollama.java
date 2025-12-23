@@ -1,6 +1,7 @@
 package org.kissweb.llm;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kissweb.json.JSONArray;
 import org.kissweb.json.JSONObject;
 import org.kissweb.RestClient;
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public class Ollama {
 
-    private static final Logger logger = Logger.getLogger(Ollama.class);
+    private static final Logger logger = LogManager.getLogger(Ollama.class);
     private static final Pattern thinkPattern = Pattern.compile("(?s).*<think>(.*?)</think>(.*)"); // for integration with ollama
     private String URL = "http://localhost:11434/api/";
     private String model = null;

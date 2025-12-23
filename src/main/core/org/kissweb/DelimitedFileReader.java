@@ -32,11 +32,12 @@
 
 package org.kissweb;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Read and parse a CSV file.
@@ -51,10 +52,12 @@ import java.util.logging.Logger;
 @SuppressWarnings("unchecked")
 public class DelimitedFileReader implements AutoCloseable {
 
+    private static final Logger logger = LogManager.getLogger(DelimitedFileReader.class);
+
     private char delimiter;
     private String delimiterString;
     private char quote;
-    private final ArrayList<String> lineValues = new ArrayList();
+    private final ArrayList<String> lineValues = new ArrayList<>();
     private int fieldPos = 0;
     private int fieldCountCheck = -1;
     private BufferedReader fr;
@@ -165,7 +168,7 @@ public class DelimitedFileReader implements AutoCloseable {
             fr.close();
             fr = new BufferedReader(new FileReader(fyle));
         } catch (IOException ex) {//it was just there! so log it only
-            Logger.getLogger(DelimitedFileReader.class.getName()).log(Level.SEVERE, null, ex);
+            logger.error("Error resetting file reader", ex);
         }
     }
 
@@ -322,7 +325,7 @@ public class DelimitedFileReader implements AutoCloseable {
                             sb.setLength(0); // start work on next token
                             state = State.AFTER_DELIMITER;
                         } else if (c == quote) {
-                            if (sb.length() == 0 || sb.toString().trim().isEmpty()) {
+                            if (sb.isEmpty() || sb.toString().trim().isEmpty()) {
                                 state = State.QUOTE;
                                 sb.setLength(0);
                             } else

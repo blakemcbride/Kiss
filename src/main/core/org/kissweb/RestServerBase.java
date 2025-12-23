@@ -1,6 +1,7 @@
 package org.kissweb;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kissweb.json.JSONObject;
 
 import jakarta.servlet.http.HttpServlet;
@@ -25,7 +26,7 @@ public abstract class RestServerBase extends HttpServlet {
     protected RestServerBase() {
     }
 
-    private static final Logger logger = Logger.getLogger(RestServerBase.class);
+    private static final Logger logger = LogManager.getLogger(RestServerBase.class);
 
     /**
      * Support for Basic Authentication.

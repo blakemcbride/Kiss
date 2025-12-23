@@ -1,7 +1,8 @@
 package org.kissweb;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -33,7 +34,7 @@ import java.io.IOException;
  * Date: 3/5/16
  */
 public class PDF {
-    private final static Logger logger = Logger.getLogger(PDF.class);
+    private static final Logger logger = LogManager.getLogger(PDF.class);
 
     private static final PDType1Font COURIER_FONT = new PDType1Font(Standard14Fonts.FontName.COURIER);
 

@@ -1,7 +1,8 @@
 package org.kissweb.restServer;
 
 import org.kissweb.lisp.ABCL;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.armedbear.lisp.LispObject;
 import org.kissweb.json.JSONObject;
 
@@ -21,7 +22,7 @@ import static org.kissweb.restServer.ProcessServlet.CheckCacheDelay;
  */
 class LispService {
 
-    private static final transient Logger logger = Logger.getLogger(LispService.class);
+    private static final transient Logger logger = LogManager.getLogger(LispService.class);
 
     private static final HashMap<String, LispPackageInfo> lispPackageCache = new HashMap<>();
 

@@ -1,8 +1,10 @@
 package org.kissweb.restServer;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.kissweb.Cron;
 import org.kissweb.IniFile;
 import org.kissweb.database.Connection;
@@ -42,7 +44,7 @@ public class MainServlet extends HttpServlet {
         super();
     }
 
-    private static final Logger logger = Logger.getLogger(MainServlet.class);
+    private static final Logger logger = LogManager.getLogger(MainServlet.class);
     private static String databaseName;              // database name, set by application.ini
     private static String databaseSchema;            // database schema, set by application.ini
     private static String applicationPath;           // where the application files are
@@ -142,7 +144,7 @@ public class MainServlet extends HttpServlet {
      */
     static void setApplicationPathInternal(String _rootPath) {
         Level level = logger.getLevel();
-        logger.setLevel(Level.ALL);
+        Configurator.setLevel(logger, Level.ALL);
         rootPath = _rootPath;
         logger.info("* * * Root path = " + rootPath);
         applicationPath = System.getenv("KISS_ROOT");
@@ -172,7 +174,7 @@ public class MainServlet extends HttpServlet {
         }
         logger.info(underIDE ? "* * * Is running with source" : "* * * Is not running with source");
         logger.info("* * * Application path set to " + applicationPath);
-        logger.setLevel(level);
+        Configurator.setLevel(logger, level);
     }
 
     /**
@@ -182,7 +184,7 @@ public class MainServlet extends HttpServlet {
      */
     static void initializeSystem(String path) {
         Level level = logger.getLevel();
-        logger.setLevel(Level.ALL);
+        Configurator.setLevel(logger, Level.ALL);
         final String osName = System.getProperty("os.name");
         isLinux = osName.startsWith("Linux");
         isMacOS = osName.startsWith("Mac OS X");
@@ -228,7 +230,7 @@ public class MainServlet extends HttpServlet {
             logger.error(e);
         }
 
-        logger.setLevel(level);
+        Configurator.setLevel(logger, level);
     }
 
     /**
@@ -366,7 +368,7 @@ public class MainServlet extends HttpServlet {
 
     private static void makeDatabaseConnection() throws PropertyVetoException, SQLException, ClassNotFoundException {
         Level level = logger.getLevel();
-        logger.setLevel(Level.ALL);
+        Configurator.setLevel(logger, Level.ALL);
         if (!hasDatabase) {
             logger.info("* * * No database configured; bypassing login requirements");
             return;
@@ -459,7 +461,7 @@ public class MainServlet extends HttpServlet {
             
             logger.info("C3P0 pool configured (CPU cores=" + cores + "): min=" + minPoolSize + ", initial=" + initialPoolSize + ", max=" + maxPoolSize + ", increment=" + acquireIncrement);
         }
-        logger.setLevel(level);
+        Configurator.setLevel(logger, level);
     }
 
     private static int defaultMaxPoolSize() {

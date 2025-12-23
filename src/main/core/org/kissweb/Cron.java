@@ -1,7 +1,8 @@
 package org.kissweb;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kissweb.restServer.GroovyClass;
 
 import java.io.*;
@@ -26,7 +27,7 @@ import java.util.function.Supplier;
  */
 public class Cron {
 
-    private final static Logger logger = Logger.getLogger(Cron.class);
+    private static final Logger logger = LogManager.getLogger(Cron.class);
 
     private final Timer timer;
     private final TheTimerTask timerTask;

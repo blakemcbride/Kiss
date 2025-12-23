@@ -1,7 +1,9 @@
 package org.kissweb.restServer;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
@@ -18,14 +20,14 @@ public class StartupListener implements ServletContextListener {
     public StartupListener() {
     }
 
-    private static final Logger logger = Logger.getLogger(StartupListener.class);
+    private static final Logger logger = LogManager.getLogger(StartupListener.class);
 
     /**
      * This is the first method that gets called.  It is where the whole process starts.
      */
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-        logger.setLevel(Level.ALL);
+        Configurator.setLevel(logger, Level.ALL);
         logger.info("* * * INITIALIZING APPLICATION * * *");
         MainServlet.initializeSystem(sce.getServletContext().getRealPath("/"));
         logger.info("* * * APPLICATION STARTED * * *");

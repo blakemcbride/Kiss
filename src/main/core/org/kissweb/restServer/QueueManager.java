@@ -7,7 +7,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Author: Blake McBride
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
  * This class processes the incoming REST event queue.
  */
 class QueueManager {
-    private static final Logger logger = Logger.getLogger(QueueManager.class);
+    private static final Logger logger = LogManager.getLogger(QueueManager.class);
     private final ExecutorService pool;
 
     QueueManager(int maxThreads) {

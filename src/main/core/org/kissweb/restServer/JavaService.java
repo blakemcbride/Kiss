@@ -3,7 +3,8 @@ package org.kissweb.restServer;
 import org.kissweb.UserException;
 import org.kissweb.ServerException;
 import org.kissweb.database.Connection;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kissweb.json.JSONObject;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,7 +32,7 @@ import java.util.regex.Pattern;
  */
 class JavaService {
 
-    private static final Logger logger = Logger.getLogger(JavaService.class);
+    private static final Logger logger = LogManager.getLogger(JavaService.class);
 
     private static final HashMap<String, JavaClassInfo> javaClassCache = new HashMap<>();
 

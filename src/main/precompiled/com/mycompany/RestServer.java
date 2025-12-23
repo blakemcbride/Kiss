@@ -1,6 +1,7 @@
 package com.mycompany;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kissweb.json.JSONObject;
 import org.kissweb.RestServerBase;
 
@@ -40,7 +41,7 @@ import java.io.IOException;
 @MultipartConfig
 public class RestServer extends RestServerBase {
 
-    private static final Logger logger = Logger.getLogger(RestServer.class);
+    private static final Logger logger = LogManager.getLogger(RestServer.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {

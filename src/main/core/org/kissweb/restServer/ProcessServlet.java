@@ -1,6 +1,7 @@
 package org.kissweb.restServer;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.kissweb.*;
 import org.kissweb.json.JSONObject;
 import org.kissweb.database.Connection;
@@ -29,7 +30,7 @@ import java.io.OutputStreamWriter;
  */
 public class ProcessServlet implements Runnable {
 
-    private static final Logger logger = Logger.getLogger(ProcessServlet.class);
+    private static final Logger logger = LogManager.getLogger(ProcessServlet.class);
 
     static final int MaxHold = 600;         // number of seconds to cache microservices before unloading them
     static final int CheckCacheDelay = 60;  // how often to check to unload microservices in seconds
