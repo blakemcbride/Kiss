@@ -22,6 +22,11 @@
         Utils.loadPage('screens/CRUD/CRUD', screenArea);
     });
 
+    $$('users').onclick(function () {
+        Utils.cleanup();  //  clean up any context information
+        Utils.loadPage('screens/Users/Users', screenArea);
+    });
+
     $$('file-upload').onclick(function () {
         Utils.cleanup();  //  clean up any context information
         Utils.loadPage('screens/FileUpload/FileUpload', screenArea);

@@ -1,0 +1,52 @@
+<div>
+
+    <style>
+        .space {
+            margin-left: 10px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: max-content max-content;
+            grid-gap: 10px;
+            margin-top: 20px;
+            margin-left: 10px;
+        }
+
+        .grid-layout span {
+            margin-top: 3px;
+            text-align: right;
+        }
+    </style>
+
+    <span>User Management</span>
+
+    <div id="users-grid" style="margin-top: 10px; width: 100%; height: calc(100vh - 400px);"></div>
+
+    <div style="margin-top: 20px;">
+        <push-button id="users-new">New</push-button>
+        <push-button id="users-edit" class="space" disabled>Edit</push-button>
+        <push-button id="users-delete" class="space" disabled>Delete</push-button>
+    </div>
+
+    <popup id="users-edit-popup" height="200px" width="430px">
+        <popup-title><text-label id="users-popup-title"></text-label></popup-title>
+        <popup-body>
+            <div class="grid-layout">
+                <span>User Name:</span>
+                <text-input id="users-user-name" style="width: 250px" maxlength="20" required></text-input>
+
+                <span>Password:</span>
+                <text-input id="users-password" style="width: 250px" maxlength="64" required></text-input>
+
+                <span>Active:</span>
+                <drop-down id="users-active" style="width: 80px"></drop-down>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <push-button id="users-ok">OK</push-button>
+                <push-button id="users-cancel" style="margin-left: 10px; margin-right: 20px;">Cancel</push-button>
+            </div>
+        </popup-body>
+    </popup>
+
+</div>

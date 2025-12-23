@@ -167,7 +167,7 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
 ### Backend Dependencies
 - Groovy 4.0.26 - Dynamic language support
 - C3P0 0.11.2 - Database connection pooling
-- Log4j 2.22.0 - Logging framework
+- Log4j 2.25.3 - Logging framework (log4j 2.x API)
 - PDFBox 3.0.5 - PDF generation
 - Database drivers for PostgreSQL, MySQL, SQLite, MS SQL, Oracle
 
@@ -450,6 +450,51 @@ cal.setTime(myDate);
 int timeHHMM = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
 ```
 
+## Logging
+
+Kiss uses **Log4j 2.x** for all logging. The framework uses the modern log4j 2.x API throughout.
+
+### Required Imports
+```java
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+```
+
+### Logger Declaration
+```java
+private static final Logger logger = LogManager.getLogger(YourClass.class);
+```
+
+### Logging Methods
+```java
+logger.trace("Trace message");
+logger.debug("Debug message");
+logger.info("Info message");
+logger.warn("Warning message");
+logger.error("Error message");
+logger.error("Error with exception", exception);
+logger.fatal("Fatal message");
+```
+
+### Setting Log Level Programmatically
+To change log levels at runtime, use `Configurator`:
+```java
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+
+// Set level for a specific logger
+Configurator.setLevel(logger, Level.ALL);
+Configurator.setLevel(logger, Level.DEBUG);
+Configurator.setLevel(logger, Level.INFO);
+```
+
+### Log4j JARs
+The framework includes:
+- `log4j-api-2.25.3.jar` - Log4j 2.x API
+- `log4j-core-2.25.3.jar` - Log4j 2.x implementation
+
+**Note:** Do NOT use the old log4j 1.x API (`org.apache.log4j.*`) or Java util logging (`java.util.logging.*`).
+
 ## Browser Back Button Prevention
 
 The Kiss framework implements browser back button prevention using the History API instead of `window.onbeforeunload` for better mobile browser compatibility.
@@ -527,4 +572,4 @@ Utils.makeDraggable(
 
 ---
 
-*Updated: 2025-12-19*
+*Updated: 2025-12-22*
