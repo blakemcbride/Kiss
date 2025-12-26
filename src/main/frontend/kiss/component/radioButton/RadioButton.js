@@ -109,7 +109,7 @@ DOMUtils.RadioButtons.groups = {};
             return;
         const el = newElm.element;
 
-        el.addEventListener('change', function () {
+        DOMUtils.on(el, 'change', function () {
             Utils.someControlValueChanged();
         });
 
@@ -146,20 +146,16 @@ DOMUtils.RadioButtons.groups = {};
             const divEl = document.getElementById(id + '--div');
             if (flg)
                 DOMUtils.hide(divEl);
-            else {
+            else
                 DOMUtils.show(divEl);
-                divEl.style.visibility = 'visible';
-            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             const divEl = document.getElementById(id + '--div');
-            if (flg) {
+            if (flg)
                 DOMUtils.show(divEl);
-                divEl.style.visibility = 'visible';
-            }
             else
                 DOMUtils.hide(divEl);
             return this;
@@ -237,10 +233,8 @@ DOMUtils.RadioButtons.hide = function (group, flg=true) {
         const divEl = document.getElementById(id + '--div');
         if (flg)
             DOMUtils.hide(divEl);
-        else {
+        else
             DOMUtils.show(divEl);
-            divEl.style.visibility = 'visible';
-        }
     });
 };
 
@@ -248,10 +242,8 @@ DOMUtils.RadioButtons.show = function (group, flg=true) {
     const ids = DOMUtils.RadioButtons.groups[group].ids;
     ids.forEach(id => {
         const divEl = document.getElementById(id + '--div');
-        if (flg) {
+        if (flg)
             DOMUtils.show(divEl);
-            divEl.style.visibility = 'visible';
-        }
         else
             DOMUtils.hide(divEl);
     });

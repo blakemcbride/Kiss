@@ -29,7 +29,7 @@
 
     $$('file-upload').onclick(function () {
         Utils.cleanup();  //  clean up any context information
-        Utils.loadPage('screens/FileUpload/FileUpload', screenArea);
+        Utils.loadPage('screens/FileUploadScreen/FileUploadScreen', screenArea);
     });
 
     $$('ai').onclick(function () {

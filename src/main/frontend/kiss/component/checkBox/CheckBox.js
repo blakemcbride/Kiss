@@ -59,7 +59,7 @@
             if (processChanges)
                 Utils.someControlValueChanged();
         };
-        el.addEventListener('change', changeHandler);
+        DOMUtils.on(el, 'change', changeHandler);
 
         newElm.getValue = function () {
             return el.checked;
@@ -159,14 +159,14 @@
         };
 
         newElm.onChange = function (fun) {
-            el.removeEventListener('change', changeHandler);
+            DOMUtils.off(el, 'change', changeHandler);
             changeHandler = () => {
                 if (fun)
                     fun(el.checked);
                 if (processChanges)
                     Utils.someControlValueChanged();
             };
-            el.addEventListener('change', changeHandler);
+            DOMUtils.on(el, 'change', changeHandler);
             return this;
         };
 

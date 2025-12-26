@@ -97,7 +97,7 @@
             if (triggerGlobalChange)
                 Utils.someControlValueChanged();
         };
-        el.addEventListener('change', changeHandler);
+        DOMUtils.on(el, 'change', changeHandler);
 
         //--
 
@@ -277,21 +277,17 @@
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
                 DOMUtils.hide(el);
-            else {
+            else
                 DOMUtils.show(el);
-                el.style.visibility = 'visible';
-            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg) {
+            if (flg)
                 DOMUtils.show(el);
-                el.style.visibility = 'visible';
-            } else {
+            else
                 DOMUtils.hide(el);
-            }
             return this;
         };
 
@@ -324,7 +320,7 @@
         };
 
         newElm.onChange = function (func) {
-            el.removeEventListener('change', changeHandler);
+            DOMUtils.off(el, 'change', changeHandler);
             changeHandler = function () {
                 if (triggerGlobalChange)
                     Utils.someControlValueChanged();
@@ -336,7 +332,7 @@
                     func(val, label, dataStore[val]);
                 }
             };
-            el.addEventListener('change', changeHandler);
+            DOMUtils.on(el, 'change', changeHandler);
             return this;
         };
 
@@ -349,7 +345,7 @@
 
         newElm.onClick = function (fun) {
             if (clickHandler)
-                el.removeEventListener('click', clickHandler);
+                DOMUtils.off(el, 'click', clickHandler);
             clickHandler = function () {
                 timeout = setTimeout(function () {
                     if (fun) {
@@ -364,7 +360,7 @@
                     }
                 }, 300);
             };
-            el.addEventListener('click', clickHandler);
+            DOMUtils.on(el, 'click', clickHandler);
             return this;
         };
 
@@ -373,7 +369,7 @@
 
         newElm.onDblClick = function (fun) {
             if (dblclickHandler)
-                el.removeEventListener('dblclick', dblclickHandler);
+                DOMUtils.off(el, 'dblclick', dblclickHandler);
             dblclickHandler = function () {
                 if (timeout) {
                     clearTimeout(timeout);
@@ -390,7 +386,7 @@
                     }
                 }
             };
-            el.addEventListener('dblclick', dblclickHandler);
+            DOMUtils.on(el, 'dblclick', dblclickHandler);
             return this;
         };
 

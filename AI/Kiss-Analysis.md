@@ -295,6 +295,18 @@ The Kiss Framework emphasizes:
 
 ## Important Development Notes
 
+### DOM Access Rules
+
+**CRITICAL: DOM access is strictly layered in the Kiss framework:**
+
+1. **Only `DOMUtils.js` is allowed to access the HTML DOM directly** - All direct DOM manipulation (e.g., `element.style`, `element.setAttribute`, `document.getElementById`, etc.) must be done through DOMUtils.
+2. **Only files under `kiss/component/` can access `DOMUtils.js`** - Application screens and other code must use the Kiss component APIs, not DOMUtils directly.
+
+This layered architecture ensures:
+- Consistent DOM manipulation across the framework
+- Easier maintenance and bug fixes (changes to DOM handling only need to be made in one place)
+- Proper abstraction between application code and low-level DOM operations
+
 ### File Restrictions
 - **DO NOT MODIFY** files under:
   - `src/main/frontend/kiss/` - Framework components

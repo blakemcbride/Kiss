@@ -58,20 +58,8 @@
         el.addEventListener('change', changeHandler);
 
         newElm.onclick = function (fun) {
-            // the off() is used to assure that multiple calls to this method doesn't cause the function to execute multiple times
-            // but it also limits to a single callback function
-            if (clickHandler) {
-                el.removeEventListener('click', clickHandler);
-                clickHandler = null;
-            }
-            if (keyupHandler) {
-                el.removeEventListener('keyup', keyupHandler);
-                keyupHandler = null;
-            }
-            if (keydownHandler) {
-                el.removeEventListener('keydown', keydownHandler);
-                keydownHandler = null;
-            }
+            // Use DOMUtils.on() to ensure only one handler at a time
+            // DOMUtils.on() automatically removes previous handlers before adding new ones
             if (fun) {
                 clickHandler = function (e) {
                     if (Utils.suspendDepth < 0)  // should never happen but just in case
@@ -93,9 +81,18 @@
                         waitForKeyUp = true;
                     e.stopPropagation();
                 };
-                el.addEventListener('click', clickHandler);
-                el.addEventListener('keyup', keyupHandler);
-                el.addEventListener('keydown', keydownHandler);
+                // DOMUtils.on automatically removes previous handlers
+                DOMUtils.on(el, 'click', clickHandler);
+                DOMUtils.on(el, 'keyup', keyupHandler);
+                DOMUtils.on(el, 'keydown', keydownHandler);
+            } else {
+                // Remove handlers by passing null
+                DOMUtils.on(el, 'click', null);
+                DOMUtils.on(el, 'keyup', null);
+                DOMUtils.on(el, 'keydown', null);
+                clickHandler = null;
+                keyupHandler = null;
+                keydownHandler = null;
             }
             return this;
         };
@@ -162,19 +159,15 @@
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
                 DOMUtils.hide(el);
-            else {
+            else
                 DOMUtils.show(el);
-                el.style.visibility = 'visible';
-            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg) {
+            if (flg)
                 DOMUtils.show(el);
-                el.style.visibility = 'visible';
-            }
             else
                 DOMUtils.hide(el);
             return this;

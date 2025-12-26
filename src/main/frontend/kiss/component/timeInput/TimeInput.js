@@ -83,7 +83,7 @@
                 Utils.someControlValueChanged();
         }
 
-        el.addEventListener('keyup', keyUpHandler);
+        DOMUtils.on(el, 'keyup', keyUpHandler);
 
         //--
 
@@ -200,19 +200,16 @@
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
             if (flg)
                 DOMUtils.hide(el);
-            else {
+            else
                 DOMUtils.show(el);
-                el.style.visibility = 'visible';
-            }
             return this;
         };
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
-            if (flg) {
+            if (flg)
                 DOMUtils.show(el);
-                el.style.visibility = 'visible';
-            } else
+            else
                 DOMUtils.hide(el);
             return this;
         };
@@ -241,7 +238,7 @@
 
         newElm.onCChange = function (fun) {
             if (changeKeyUpHandler) {
-                el.removeEventListener('keyup', changeKeyUpHandler);
+                DOMUtils.off(el, 'keyup', changeKeyUpHandler);
                 changeKeyUpHandler = null;
             }
             changeKeyUpHandler = function (event) {
@@ -251,8 +248,8 @@
                 if (fun && Utils.isChangeChar(event))
                     fun(newElm.getValue());
             };
-            el.removeEventListener('keyup', keyUpHandler);
-            el.addEventListener('keyup', changeKeyUpHandler);
+            DOMUtils.off(el, 'keyup', keyUpHandler);
+            DOMUtils.on(el, 'keyup', changeKeyUpHandler);
             return this;
         };
 
@@ -260,14 +257,14 @@
 
         newElm.onChange = function (fun) {
             if (changeHandler) {
-                el.removeEventListener('change', changeHandler);
+                DOMUtils.off(el, 'change', changeHandler);
                 changeHandler = null;
             }
             if (fun) {
                 changeHandler = function () {
                     fun(newElm.getValue());
                 };
-                el.addEventListener('change', changeHandler);
+                DOMUtils.on(el, 'change', changeHandler);
             }
             return this;
         };
