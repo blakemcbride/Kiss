@@ -225,7 +225,6 @@ public class PDF {
             contentStream = new PDPageContentStream(doc, page, AppendMode.OVERWRITE, false);
             contentStream.setFont(font, fontSize);
             doc.addPage(page);
-            startText();
             if (landscape) {
                 page.setRotation(90);
                 PDRectangle pageSize = page.getMediaBox();
@@ -241,6 +240,7 @@ public class PDF {
                 pageHeight = pageSize.getHeight();
                 pageWidth = pageSize.getWidth();
             }
+            startText();
         } catch (IOException e) {
             logger.error("Error", e);
         }
@@ -260,7 +260,6 @@ public class PDF {
             page = doc.getPage(n);
             contentStream = new PDPageContentStream(doc, page, AppendMode.APPEND, false);
             contentStream.setFont(font, fontSize);
-            startText();
             if (landscape) {
                 page.setRotation(90);
                 PDRectangle pageSize = page.getMediaBox();
@@ -276,6 +275,7 @@ public class PDF {
                 pageHeight = pageSize.getHeight();
                 pageWidth = pageSize.getWidth();
             }
+            startText();
         } catch (IOException e) {
             logger.error("Error", e);
         }

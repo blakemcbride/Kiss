@@ -59,11 +59,31 @@ const DOMUtils = {
             if (originalDisplay !== undefined) {
                 el.style.display = originalDisplay;
             } else {
+                // Temporarily clear inline display to check what CSS would apply
+                const currentInlineDisplay = el.style.display;
                 el.style.display = '';
-                // If still hidden by CSS class (like .msg-modal), override
-                if (getComputedStyle(el).display === 'none') {
-                    el.style.display = 'block';
+
+                // Get the computed style after clearing inline display
+                const computedDisplay = getComputedStyle(el).display;
+
+                // If CSS (not inline) is making it 'none', we need to override
+                if (computedDisplay === 'none') {
+                    // Try to determine the appropriate display value
+                    // 1. Check if element has inline-block children (like radio buttons)
+                    const hasInlineBlockChild = el.querySelector('[style*="inline-block"]') !== null;
+                    // 2. Check for common inline elements
+                    const isInlineElement = ['SPAN', 'A', 'LABEL', 'INPUT', 'BUTTON'].includes(el.tagName);
+
+                    if (hasInlineBlockChild || isInlineElement) {
+                        el.style.display = 'inline-block';
+                    } else {
+                        el.style.display = 'block';
+                    }
+                } else if (currentInlineDisplay && currentInlineDisplay !== 'none') {
+                    // If there was a previous inline display value, restore it
+                    el.style.display = currentInlineDisplay;
                 }
+                // Otherwise leave it cleared - CSS will handle it
             }
             el.style.visibility = 'visible';
         }
