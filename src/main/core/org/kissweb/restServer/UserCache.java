@@ -1,9 +1,16 @@
 package org.kissweb.restServer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * This class manages all the users currently logged into the system.
@@ -12,6 +19,8 @@ import java.util.Hashtable;
  * Date: 3/23/18
  */
 public class UserCache {
+
+    private static final Logger logger = LogManager.getLogger(UserCache.class);
 
     /**
      * Private constructor to prevent instantiation of this utility class.
@@ -22,6 +31,8 @@ public class UserCache {
     private static final Hashtable<String, UserData> uuidTable = new Hashtable<>();
     private static LocalDateTime lastPurge = LocalDateTime.now();
     private static int inactiveUserMaxSeconds;
+    private static ScheduledExecutorService scheduler;
+    private static Consumer<UserData> globalLogoutHandler;
 
     /**
      * Create a new user and add it to the cache.
@@ -45,7 +56,22 @@ public class UserCache {
     }
 
     static void removeUser(String uuid) {
-        uuidTable.remove(uuid);
+        UserData ud = uuidTable.get(uuid);
+        try {
+            if (ud != null) {
+                logger.info("User " + ud.getUsername() + " is being logged out");
+                if (globalLogoutHandler != null) {
+                    try {
+                        globalLogoutHandler.accept(ud);
+                    } catch (Exception e) {
+                        logger.error("Error executing global logout handler for " + ud.getUsername(), e);
+                    }
+                }
+            }
+        } finally {
+            // Always remove user from cache, even if lambda throws exception
+            uuidTable.remove(uuid);
+        }
     }
 
     private static void purgeOld() {
@@ -58,12 +84,39 @@ public class UserCache {
         if (maxSeconds == 0)
             maxSeconds = 3600;  // no more than 60 minutes
         old = old.minusSeconds(maxSeconds);
-        for (UserData ud : uuidTable.values())
-            if (ud.getLastAccessDate().isBefore(old))
+        for (UserData ud : uuidTable.values()) {
+            if (ud.getLastAccessDate().isBefore(old)) {
                 purge.add(ud.getUuid());
+            }
+        }
         for (String s : purge)
-            uuidTable.remove(s);
+            removeUser(s);
         lastPurge = LocalDateTime.now();
+    }
+
+    static void startAutoPurge() {
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+
+        scheduler.scheduleAtFixedRate(
+                UserCache::purgeOld,
+                0,
+                60,
+                TimeUnit.SECONDS
+        );
+    }
+
+    static void stopAutoPurge() {
+        if (scheduler != null) {
+            scheduler.shutdown();
+            try {
+                if (!scheduler.awaitTermination(5, TimeUnit.SECONDS)) {
+                    scheduler.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                scheduler.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
     }
 
     /**
@@ -73,5 +126,15 @@ public class UserCache {
      */
     public static void setInactiveUserMaxSeconds(int inactiveUserMaxSeconds) {
         UserCache.inactiveUserMaxSeconds = inactiveUserMaxSeconds;
+    }
+
+    /**
+     * Set a global logout handler that will be called whenever any user logs out.
+     * This should be called from KissInit.init() to configure custom logout behavior.
+     *
+     * @param handler the logout handler (Consumer that accepts UserData)
+     */
+    public static void setLogoutHandler(Consumer<UserData> handler) {
+        globalLogoutHandler = handler;
     }
 }

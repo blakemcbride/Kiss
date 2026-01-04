@@ -393,6 +393,22 @@ public class ProcessServlet implements Runnable {
                     loginFailure(response, e);
                     return;
                 }
+            } else if (_method.equals("Logout")) {
+                try {
+                    String uuid = injson.getString("_uuid");
+                    logger.info("Attempting logout for uuid " + uuid);
+                    UserData ud = UserCache.findUser(uuid);
+                    checkLogin(ud);  // Validate the user before logging them out
+                    UserCache.removeUser(uuid);
+                    outjson.put("success", true);
+                    successReturn(response, outjson);
+                    logger.info("Logout successful");
+                    return;
+                } catch (Exception e) {
+                    logger.info("Logout failure - invalid session");
+                    loginFailure(response, e);
+                    return;
+                }
             } else {
                 logger.error("Incorrect internal method call.");
                 errorReturn(response, "Incorrect internal method call.", null);

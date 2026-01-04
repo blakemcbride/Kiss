@@ -422,3 +422,193 @@ See that class for documentation.
 These utilities are located under the @code{src/main/core/org/kissweb} directory and have names such as
 @code{DateTime.java}, @code{NumberFormat}, etc.  These utilities
 are documented in the JavaDocs.
+
+@section Global Logout Handler
+
+The @emph{Kiss} framework provides a mechanism to execute custom code whenever a user logs out of the system. This is useful for cleanup tasks, logging, resource management, and other operations that should occur when a user's session ends.
+
+@subsection How It Works
+
+The logout handler is a @strong{global handler} that applies to all users. When any user logs out (whether manually or due to inactivity timeout), the handler is called with the @code{UserData} object for that user, allowing you to perform user-specific cleanup.
+
+@subsection Setting Up a Logout Handler
+
+The logout handler is configured in the @code{init()} method of @code{KissInit.groovy}, which is located at:
+
+@example
+src/main/backend/KissInit.groovy
+@end example
+
+@noindent
+A basic example:
+
+@example
+import org.kissweb.database.Connection
+import org.kissweb.restServer.MainServlet
+import org.kissweb.restServer.UserCache
+import org.kissweb.restServer.UserData
+import java.util.function.Consumer
+
+class KissInit @{
+
+    static void init() @{
+        MainServlet.readIniFile "application.ini", "main"
+
+        // Set up global logout handler
+        UserCache.setLogoutHandler(@{ UserData ud ->
+            println "User $@{ud.getUsername()@} is logging out"
+
+            // Add your custom cleanup code here
+        @} as Consumer<UserData>)
+    @}
+
+    static void init2(Connection db) @{
+        // Database initialization code
+    @}
+@}
+@end example
+
+@subsection UserData Object
+
+When the logout handler is called, it receives a @code{UserData} object with the following methods:
+
+@table @code
+@item getUsername()
+Returns the username of the logging-out user (String).
+@item getUserId()
+Returns the user ID object (typically an Integer).
+@item getUuid()
+Returns the session UUID (String).
+@item getLastAccessDate()
+Returns when the user last accessed the system (LocalDateTime).
+@item getUserData(String key)
+Retrieves custom data stored for this user (Object).
+@end table
+
+@subsection Common Use Cases
+
+@subsubsection Logging Logout Events
+
+@example
+UserCache.setLogoutHandler(@{ UserData ud ->
+    println "LOGOUT: User $@{ud.getUsername()@} at $@{LocalDateTime.now()@}"
+@} as Consumer<UserData>)
+@end example
+
+@subsubsection Updating Database Logout Timestamp
+
+@example
+UserCache.setLogoutHandler(@{ UserData ud ->
+    Connection db = MainServlet.openNewConnection()
+    try @{
+        db.execute("""UPDATE users
+                      SET last_logout = CURRENT_TIMESTAMP
+                      WHERE user_id = ?""",
+                   ud.getUserId())
+        db.commit()
+    @} finally @{
+        MainServlet.closeConnection(db)
+    @}
+@} as Consumer<UserData>)
+@end example
+
+@subsubsection Cleaning Up User-Specific Resources
+
+@example
+UserCache.setLogoutHandler(@{ UserData ud ->
+    // Close any user-specific resources
+    def userResource = ud.getUserData("UserResource")
+    if (userResource != null) @{
+        userResource.close()
+    @}
+
+    // Delete temporary files
+    def tempDir = new File("/tmp/user_$@{ud.getUserId()@}")
+    if (tempDir.exists()) @{
+        tempDir.deleteDir()
+    @}
+@} as Consumer<UserData>)
+@end example
+
+@subsection When the Handler is Called
+
+The logout handler is invoked in the following scenarios:
+
+@enumerate
+@item
+@strong{Manual Logout}: When the user explicitly logs out by calling the Logout REST service.
+@item
+@strong{Inactivity Timeout}: When the user is automatically logged out due to inactivity (configured via @code{UserInactiveSeconds} in @code{application.ini}).
+@item
+@strong{Session Termination}: When the server removes stale sessions.
+@end enumerate
+
+@subsection Logging Out Users from the Front-end
+
+To log out the current user from the front-end, use the @code{Server.logout()} method:
+
+@example
+// In your front-end JavaScript
+Server.logout();
+@end example
+
+@noindent
+This will:
+
+@enumerate
+@item
+Call the Logout REST service with the user's session UUID.
+@item
+Trigger the global logout handler on the back-end.
+@item
+Remove the user from the session cache.
+@item
+Redirect to the login page.
+@end enumerate
+
+@subsection Error Handling
+
+The framework automatically catches and logs any exceptions thrown by your logout handler. Even if your handler throws an exception, the user will still be logged out properly.
+
+@subsection Important Notes
+
+@enumerate
+@item
+@strong{Global Handler}: There is only ONE logout handler for the entire application. Setting a new handler replaces any previous handler.
+@item
+@strong{Execution Context}: The logout handler runs in the context of the thread that triggered the logout (could be a web request thread or the auto-purge thread).
+@item
+@strong{Database Access}: If you need database access in your handler, open a new connection and make sure to close it:
+@example
+Connection db = MainServlet.openNewConnection()
+try @{
+    // Use db
+    db.commit()
+@} finally @{
+    MainServlet.closeConnection(db)
+@}
+@end example
+@item
+@strong{Performance}: Keep your logout handler fast. Long-running operations in the handler can delay logout processing and affect system performance.
+@item
+@strong{Optional}: The logout handler is completely optional. If you don't set one, users will still log out normally.
+@end enumerate
+
+@subsection API Reference
+
+@deffn Method UserCache.setLogoutHandler handler
+Sets the global logout handler for the application.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{handler} - A @code{Consumer<UserData>} that will be called whenever any user logs out.
+@end itemize
+
+@strong{Example:}
+@example
+UserCache.setLogoutHandler(@{ UserData ud ->
+    println "User $@{ud.getUsername()@} logged out"
+@} as Consumer<UserData>)
+@end example
+@end deffn

@@ -29,20 +29,30 @@ class Server {
     }
 
     /**
-     * Reloads the top/main page from the server and clears all context.
+     * Logs out the current user and reloads the page.
      * <br><br>
-     * This is a deep reload, meaning it will bypass any cached page content.
-     * It is a full page reload, so it will also destroy any context information.
-     * It also effectively works as a logout.
+     * This calls the backend Logout service to properly terminate the session,
+     * then performs a full page reload to clear all context and return to the login screen.
      *
      */
-    static logout() {
+    static async logout() {
         Utils.suspendDepth = 0;
         document.body.style.cursor = 'default';
         Utils.cleanup();  //  clean up any context information
-        Server.uuid = '';
         Server.isLoggedIn = false;  //  disable back button protection
         window.onbeforeunload = null;  //  allow logout (kept for backward compatibility)
+
+        // Call backend Logout service if we have a valid UUID
+        if (Server.uuid) {
+            try {
+                await Server.call('', 'Logout', {});
+            } catch (err) {
+                // Ignore errors - we're logging out anyway
+                console.log('Logout service call failed:', err);
+            }
+        }
+
+        Server.uuid = '';
         location.reload();
     }
 

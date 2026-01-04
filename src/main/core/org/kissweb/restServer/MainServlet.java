@@ -192,14 +192,14 @@ public class MainServlet extends HttpServlet {
         isSunOS = osName.startsWith("SunOS");  // includes OpenIndiana and Solaris
         isHaiku = osName.startsWith("Haiku");
         isFreeBSD = osName.startsWith("FreeBSD");
-        Integer userInactiveSeconds = getEnvironmentInt("UserInactiveSeconds");
-        if (userInactiveSeconds != null)
-            UserCache.setInactiveUserMaxSeconds(userInactiveSeconds);
         setApplicationPathInternal(path);
         ProcessServlet.ExecutionReturn res = (new GroovyService()).internalGroovy(null, "KissInit", "init");
         String databaseType = (String) environment.get("DatabaseType");
         databaseName = (String) environment.get("DatabaseName");
         databaseSchema = (String) environment.get("DatabaseSchema");
+        Integer userInactiveSeconds = getEnvironmentInt("UserInactiveSeconds");
+        if (userInactiveSeconds != null)
+            UserCache.setInactiveUserMaxSeconds(userInactiveSeconds);
         if (res == ProcessServlet.ExecutionReturn.Success) {
             hasDatabase = databaseType != null  &&  !databaseType.isEmpty()  &&  databaseName != null  &&  !databaseName.isEmpty();
             if (hasDatabase) {

@@ -30,6 +30,7 @@ public class StartupListener implements ServletContextListener {
         Configurator.setLevel(logger, Level.ALL);
         logger.info("* * * INITIALIZING APPLICATION * * *");
         MainServlet.initializeSystem(sce.getServletContext().getRealPath("/"));
+        UserCache.startAutoPurge();
         logger.info("* * * APPLICATION STARTED * * *");
     }
 
@@ -38,6 +39,7 @@ public class StartupListener implements ServletContextListener {
      */
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        UserCache.stopAutoPurge();
         MainServlet.stopCron();
         MainServlet.cleanupDatabaseResources();
         logger.info("* * * APPLICATION STOPPED * * *");
