@@ -18,7 +18,11 @@ const DOMUtils = {
      */
     _resolveElement: (elementOrId) => {
         if (typeof elementOrId === 'string') {
-            return DOMUtils.getElement(elementOrId);
+            const element = DOMUtils.getElement(elementOrId);
+            if (!element) {
+                console.log(`DOMUtils: Element with id "${elementOrId}" not found`);
+            }
+            return element;
         }
         return elementOrId;
     },
@@ -751,10 +755,11 @@ const DOMUtils = {
     /**
      * Trigger an event on an element
      * Replacement for $('#el').trigger('eventName')
-     * @param {HTMLElement} el - Element to trigger event on
+     * @param {HTMLElement|string} el - Element or element ID
      * @param {string} eventName - Name of the event (e.g., 'click', 'change')
      */
     trigger: (el, eventName) => {
+        el = DOMUtils._resolveElement(el);
         if (!el)
             return;
         const event = new Event(eventName, {bubbles: true, cancelable: true});
