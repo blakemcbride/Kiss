@@ -342,7 +342,7 @@ public class GroovyService {
                     }
                     ms.errorReturn(response, te.getMessage(), te);
                     return ProcessServlet.ExecutionReturn.Error;
-                } catch (Exception e) {  // Same as KissException
+                } catch (Exception e) {  // Same as ServerException
                     Throwable root = (e.getCause() != null) ? e.getCause() : e;
                     logger.error(root);
                     ms.errorReturn(response, fileName + " " + _method + "()", e.getCause());

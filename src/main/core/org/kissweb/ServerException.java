@@ -1,16 +1,16 @@
 package org.kissweb;
 
 /**
- * Throwing a KissExceptions cause two things:
+ * Throwing a ServerExceptions cause two things:
  * <p>
  * 1.  specify an error string and error code for the front-end
  * 2.  print an error and stacktrace on the back-end log
  * <p>
- * Throwing a KissWarning does only one thing:
+ * Throwing a UserException does only one thing:
  * <p>
  * 1.  specify an error string and error code for the front-end
  * <p>
- * KissWarning does not print an error or stacktrace in the back-end log
+ * UserException does not print an error or stacktrace in the back-end log
  * <p>
  * In either case, the web service call handler on the front-end (Server class) automatically handles the error
  * by displaying the error to the user in a popup and returning _Success = false.  The front-end also receives
