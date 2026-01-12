@@ -74,8 +74,8 @@ public class Tasks {
     public static void listTasks() {
         println("");
         println("develop                  build and run the entire system in the foreground");
-        println("run-backend              build and run backend in the background");
-        println("run-frontend             build and run frontend in the background");
+        println("start-backend            build and run backend in the background");
+        println("start-frontend           build and run frontend in the background");
         println("stop-backend             stop the background backend");
         println("stop-frontend            stop the background frontend");
         println("build                    build the entire system but don't run it");
