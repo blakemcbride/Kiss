@@ -3,6 +3,7 @@ package org.kissweb.restServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kissweb.*;
+import org.kissweb.json.JSONException;
 import org.kissweb.json.JSONObject;
 import org.kissweb.database.Connection;
 
@@ -358,6 +359,30 @@ public class ProcessServlet implements Runnable {
                     return; // ignore
                 }
                 errorReturn(response, "I/O error reading request body", ioe);
+                return;
+            } catch (JSONException je) {
+                // Invalid JSON from bots, scanners, or misconfigured clients - log at debug level only
+                logger.debug("Invalid JSON request received: " + je.getMessage());
+                // Handle response directly to avoid ERROR level logging
+                try {
+                    if (DB != null) {
+                        try {
+                            DB.rollback();
+                        } catch (SQLException ignored) {
+                        }
+                    }
+                    response.setContentType("application/json");
+                    response.setStatus(200);
+                    JSONObject errorJson = new JSONObject();
+                    errorJson.put("_Success", false);
+                    errorJson.put("_ErrorMessage", "Invalid JSON format");
+                    errorJson.put("_ErrorCode", -1);
+                    out.print(errorJson.toString());
+                    out.flush();
+                    out.close();
+                    asyncContext.complete();
+                } catch (Exception ignored) {
+                }
                 return;
             } catch (Exception e) {                             // JSON etc.
                 errorReturn(response, "Unable to parse request JSON", e);
