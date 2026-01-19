@@ -31,6 +31,14 @@
                     });
                 }
             });
+            // Warn on page reload/close
+            window.addEventListener('beforeunload', function(e) {
+                if (Server.isLoggedIn) {
+                    e.preventDefault();
+                    e.returnValue = '';
+                    return '';
+                }
+            });
             Utils.loadPage('screens/Framework/Framework');
         } else {
             $$('password').clear().focus();
