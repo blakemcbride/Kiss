@@ -679,6 +679,76 @@ To prevent browser warnings about password fields not being in forms, login page
 - `/src/main/frontend/login.html` - Desktop login page
 - `/src/main/frontend/mobile/login.html` - Mobile login page
 
+## Popup Structure Requirements
+
+The `Utils.popup_open()` function requires popups to have exactly TWO direct children:
+1. `<popup-title>` - Header element containing the popup title
+2. `<popup-body>` - Body element containing the popup content
+
+### Correct Structure
+```html
+<popup id="my-popup">
+    <popup-title>Popup Title</popup-title>
+    <popup-body>
+        <!-- popup content here -->
+    </popup-body>
+</popup>
+```
+
+### Common Mistake (Causes Errors)
+```html
+<!-- WRONG: Single wrapper div causes "Cannot set properties of undefined" error -->
+<popup id="my-popup">
+    <div class="popup-content">
+        <!-- This single wrapper div breaks the popup -->
+    </div>
+</popup>
+```
+
+### Usage
+```javascript
+Utils.popup_open('my-popup');   // Open popup
+Utils.popup_close('my-popup');  // Close popup
+```
+
+## DateTime Formatting
+
+### Backend DateTime Formats
+The backend may return datetime values in different formats:
+- **Epoch milliseconds**: Large numbers like 1737292576000 (milliseconds since Jan 1, 1970)
+- **Date integer**: YYYYMMDD format (e.g., 20260119)
+- **Time integer**: HHMM format (e.g., 1430 for 2:30 PM)
+- **DateTime integer**: YYYYMMDDHHMM format (e.g., 202601191430)
+
+### Correct Approach
+Always use `DateTimeUtils.formatDate()` to format datetime values:
+```javascript
+const formattedDateTime = DateTimeUtils.formatDate(msg.dateTime);
+```
+
+This method automatically detects if input is epoch milliseconds and formats according to user's locale preference.
+
+### Common Mistake (Causes Wrong Dates)
+```javascript
+// WRONG: Manual substring parsing assumes specific format
+// Produces garbage like "49/12/1768" when given epoch milliseconds
+const dateTimeStr = msg.dateTime.toString();
+const year = dateTimeStr.substring(0, 4);  // Don't do this!
+```
+
+## Input Control Styling
+
+### Avoid width: 100% on Input Controls
+Do not use `width: 100%` on input controls (textbox-input, text-input, etc.). This can cause layout issues. Use specific pixel widths or other sizing approaches instead.
+
+```html
+<!-- WRONG -->
+<textbox-input style="width: 100%;"></textbox-input>
+
+<!-- CORRECT -->
+<textbox-input style="width: 300px;"></textbox-input>
+```
+
 ---
 
 *Updated: 2026-01-19*
