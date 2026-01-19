@@ -616,7 +616,69 @@ Utils.makeDraggable(
 - Supports both mouse and touch events (mobile compatible)
 - Sets cursor style to 'all-scroll' on header
 - Stores handler references for proper cleanup
+- Touch event listeners are explicitly marked as `{ passive: false }` because the touchstart handler calls `preventDefault()` to prevent page scrolling during drag operations
+- This prevents Chrome's "Added non-passive event listener to a scroll-blocking event" warning while maintaining proper drag functionality on mobile devices
+
+## Script Loading Order
+
+**CRITICAL:** DOMUtils.js must be fully loaded before Utils.js and other framework scripts.
+
+The `index.html` file uses two helper functions for loading scripts:
+- `getScript(url)` - Loads a single script file (returns Promise)
+- `getScripts(urls)` - Loads multiple scripts **in parallel** using Promise.all()
+
+### Correct Loading Pattern
+
+```javascript
+async function loadUtils() {
+    // Load DOMUtils first (must complete before Utils.js)
+    await getScript("kiss/DOMUtils.js");
+    // Load remaining scripts in parallel
+    await getScripts([
+        "kiss/Utils.js",
+        "kiss/DateUtils.js",
+        "kiss/DateTimeUtils.js",
+        "kiss/TimeUtils.js",
+        "kiss/NumberUtils.js",
+        "kiss/Server.js",
+        "kiss/AGGrid.js",
+        "kiss/Editor.js",
+        "kiss/MutableString.js"
+    ]);
+    getScript("index.js");
+}
+```
+
+**Why This Matters:**
+- `getScripts()` loads files in parallel, not sequentially
+- Utils.js checks for DOMUtils object at load time (line 17-18)
+- If DOMUtils hasn't finished loading, you'll get: "DOMUtils object not found - DOMUtils.js should be loaded before Utils.js"
+- This is a race condition that can cause intermittent startup failures
+
+## Login Form Structure
+
+To prevent browser warnings about password fields not being in forms, login pages must wrap input fields in a `<form>` tag:
+
+**Pattern:**
+```html
+<form onsubmit="return false;" autocomplete="on">
+    <text-input id="username" required autocomplete="username"></text-input>
+    <text-input id="password" required password autocomplete="current-password"></text-input>
+    <push-button id="login">Login</push-button>
+</form>
+```
+
+**Key Points:**
+- `onsubmit="return false;"` prevents actual form submission (login is handled via JavaScript)
+- `autocomplete="on"` on form enables browser password manager
+- `autocomplete="username"` on username field helps password managers identify the username
+- `autocomplete="current-password"` on password field for existing credentials
+- The TextInput component passes through the `autocomplete` attribute to the underlying `<input>` element
+
+**Files with login forms:**
+- `/src/main/frontend/login.html` - Desktop login page
+- `/src/main/frontend/mobile/login.html` - Mobile login page
 
 ---
 
-*Updated: 2026-01-04*
+*Updated: 2026-01-19*

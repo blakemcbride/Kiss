@@ -2,17 +2,19 @@
     <div style="display: inline-block; text-align: center;">
         <h1>Kiss Login Page</h1>
 
-        <div style="display: inline-block; width: 100px; text-align: right; margin-right: 10px;">Username:</div>
-        <text-input id="username" required></text-input>
+        <form onsubmit="return false;" autocomplete="on">
+            <div style="display: inline-block; width: 100px; text-align: right; margin-right: 10px;">Username:</div>
+            <text-input id="username" required autocomplete="username"></text-input>
 
-        <br>
+            <br>
 
-        <div style="display: inline-block; width: 100px; text-align: right; margin-right: 10px;">Password:</div>
-        <text-input id="password" style="margin-top: 20px;" required password></text-input>
+            <div style="display: inline-block; width: 100px; text-align: right; margin-right: 10px;">Password:</div>
+            <text-input id="password" style="margin-top: 20px;" required password autocomplete="current-password"></text-input>
 
-        <br>
+            <br>
 
-        <push-button id="login" style="margin-top: 20px;">Login</push-button>
+            <push-button id="login" style="margin-top: 20px;">Login</push-button>
+        </form>
         <br><br><br><br>
         (As shipped, Kiss is configured to use an included SQLite demo database.  The default Username is "kiss" and the
         default password is "password".  If no database is configured, any username and password will work.)

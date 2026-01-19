@@ -116,7 +116,10 @@
         function startup() {
 
             async function loadUtils() {
-                await getScripts(["kiss/DOMUtils.js",
+                // Load DOMUtils first (must complete before Utils.js)
+                await getScript("kiss/DOMUtils.js");
+                // Load remaining scripts in parallel
+                await getScripts([
                     "kiss/Utils.js",
                     "kiss/DateUtils.js",
                     "kiss/DateTimeUtils.js",

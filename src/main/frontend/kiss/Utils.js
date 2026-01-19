@@ -1363,9 +1363,13 @@ class Utils {
             Utils.lastScreenLoaded.argv  = argv;
             Utils.lastScreenLoaded.retv = retv;
             Utils.getHTML(page + '.html').then(function (text) {
-                if (tag)
-                    DOMUtils.getElement(tag).innerHTML = text;
-                else
+                if (tag) {
+                    const element = DOMUtils.getElement(tag);
+                    if (element)
+                        element.innerHTML = text;
+                    else
+                        document.body.innerHTML = text;
+                } else
                     document.body.innerHTML = text;
                 Utils.rescan();  // does all the tag replacement
                 window.scrollTo(0, 0);
@@ -1559,13 +1563,13 @@ class Utils {
                 document.body.removeEventListener('touchend', touchEndHandler);
             };
 
-            document.body.addEventListener('touchmove', touchMoveHandler);
-            document.body.addEventListener('touchend', touchEndHandler);
+            document.body.addEventListener('touchmove', touchMoveHandler, { passive: false });
+            document.body.addEventListener('touchend', touchEndHandler, { passive: false });
         }
 
         header.style.cursor = 'all-scroll';
         header.addEventListener('mousedown', handle_mousedown);
-        header.addEventListener('touchstart', handle_touchstart);
+        header.addEventListener('touchstart', handle_touchstart, { passive: false });
     }
 
     /**

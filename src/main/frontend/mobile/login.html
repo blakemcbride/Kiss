@@ -2,20 +2,22 @@
     <div style="text-align: center;">
         <h1>Kiss Mobile Login Page</h1>
 
-        <div style="margin-top: 20px;">User Name:</div>
-        <div style="margin-top: 3px;">
-            <text-input id="username" required></text-input>
-        </div>
+        <form onsubmit="return false;" autocomplete="on">
+            <div style="margin-top: 20px;">User Name:</div>
+            <div style="margin-top: 3px;">
+                <text-input id="username" required autocomplete="username"></text-input>
+            </div>
 
 
-        <div style="margin-top: 20px;">Password:</div>
-        <div style="margin-top: 3px;">
-            <text-input id="password" required password></text-input>
-        </div>
+            <div style="margin-top: 20px;">Password:</div>
+            <div style="margin-top: 3px;">
+                <text-input id="password" required password autocomplete="current-password"></text-input>
+            </div>
 
-        <div style="margin-top: 20px;">
-            <push-button id="login" >Login</push-button>
-        </div>
+            <div style="margin-top: 20px;">
+                <push-button id="login" >Login</push-button>
+            </div>
+        </form>
 
         <div style="margin-top: 40px; margin-right: 20px; margin-left: 20px; text-align: left;">
             (As shipped, Kiss is configured to use an included SQLite demo database.  The default User Name is "kiss" and the
