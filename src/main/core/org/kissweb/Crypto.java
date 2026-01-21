@@ -28,17 +28,14 @@ public final class Crypto {
 
     private static final String ALGORITHM = "AES";
     private static String defaultPassword;
-    private static final Cipher cipher;
-    private final static Random random = new Random();
-
-    static {
+    private static final ThreadLocal<Cipher> cipher = ThreadLocal.withInitial(() -> {
         try {
-            cipher = Cipher.getInstance(ALGORITHM);
+            return Cipher.getInstance(ALGORITHM);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            //e.printStackTrace();
             throw new Error(e);
         }
-    }
+    });
+    private final static Random random = new Random();
 
     /**
      * Encrypt a string utilizing the passed in salt and password.
@@ -54,8 +51,8 @@ public final class Crypto {
      */
     public static String encrypt(String salt, String password, String valueToEnc) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        final byte[] encValue = cipher.doFinal(valueToEnc.getBytes());
+        cipher.get().init(Cipher.ENCRYPT_MODE, key);
+        final byte[] encValue = cipher.get().doFinal(valueToEnc.getBytes());
         return Base64.encode(encValue);
     }
 
@@ -121,8 +118,8 @@ public final class Crypto {
      */
     public static byte [] encrypt(String salt, String password, byte [] valueToEnc) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(valueToEnc);
+        cipher.get().init(Cipher.ENCRYPT_MODE, key);
+        return cipher.get().doFinal(valueToEnc);
     }
 
     /**
@@ -190,9 +187,9 @@ public final class Crypto {
      */
     public static String decrypt(String salt, String password, String encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.init(Cipher.DECRYPT_MODE, key);
+        cipher.get().init(Cipher.DECRYPT_MODE, key);
         final byte[] decodedValue = Base64.decode(encryptedValue);
-        final byte[] decValue = cipher.doFinal(decodedValue);
+        final byte[] decValue = cipher.get().doFinal(decodedValue);
         return new String(decValue);
     }
 
@@ -247,8 +244,8 @@ public final class Crypto {
      */
     public static byte [] decrypt(String salt, String password, byte [] encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        return cipher.doFinal(encryptedValue);
+        cipher.get().init(Cipher.DECRYPT_MODE, key);
+        return cipher.get().doFinal(encryptedValue);
     }
 
     /**
