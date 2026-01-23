@@ -17,23 +17,23 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.mchange:c3p0:0.9.5.5'
-    implementation 'org.apache.groovy:groovy:4.0.26'
-    implementation 'javax.servlet:javax.servlet-api:4.0.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.22.0'
-    implementation 'org.apache.logging.log4j:log4j-api:2.22.0'
-    implementation 'org.apache.logging.log4j:log4j-1.2-api:2.22.0'
-    implementation 'com.mchange:mchange-commons-java:0.2.20'
+    implementation 'com.mchange:c3p0:0.11.2'
+    implementation 'org.apache.groovy:groovy:4.0.28'
+    implementation 'jakarta.servlet:jakarta.servlet-api:6.1.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.25.3'
+    implementation 'org.apache.logging.log4j:log4j-api:2.25.3'
+    implementation 'com.mchange:mchange-commons-java:0.3.2'
     implementation 'com.microsoft.sqlserver:mssql-jdbc:12.4.2.jre8'
     // mysql-connector-java is not included because it must be manually downloaded
-    implementation 'org.postgresql:postgresql:42.7.5'
+    implementation 'org.postgresql:postgresql:42.7.8'
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
-    implementation 'org.xerial:sqlite-jdbc:3.45.0.0'
+    implementation 'org.xerial:sqlite-jdbc:3.47.1.0'
     implementation 'org.webjars.bower:jquery:3.6.3'
     implementation 'cljsjs:ag-grid-community:34.0.1'
-    implementation 'org.apache.pdfbox:pdfbox:2.0.31'
-    implementation 'org.apache.pdfbox:fontbox:2.0.31'
+    implementation 'org.apache.pdfbox:pdfbox:3.0.5'
+    implementation 'org.apache.pdfbox:fontbox:3.0.5'
+    implementation 'org.apache.pdfbox:pdfbox-io:3.0.5'
     implementation 'com.oracle.ojdbc:ojdbc10:19.3.0.0'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.0'
@@ -41,6 +41,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.0'
     testImplementation 'org.junit.platform:junit-platform-console:1.11.0'
     testImplementation 'org.junit.platform:junit-platform-console-standalone:1.11.0'
+    testImplementation 'org.apiguardian:apiguardian-api:1.1.2'
 }
 
 sourceSets {
