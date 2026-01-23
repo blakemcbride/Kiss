@@ -10,294 +10,232 @@ import java.util.Random;
 
 /**
  * This class provides the ability to encrypt/decrypt strings and byte arrays with very strong (AES) encryption.
+ * <br><br>
+ * Each instance of this class maintains its own Cipher, making it thread-safe when each thread uses
+ * its own instance. For concurrent operations, create a separate Crypto instance for each operation.
+ * <br><br>
+ * <b>Usage Example:</b>
+ * <pre>
+ * // Create a Crypto instance with a password
+ * Crypto crypto = new Crypto("mySecretPassword");
+ *
+ * // Encrypt a string
+ * String encrypted = crypto.encrypt("Hello World");
+ *
+ * // Decrypt the string
+ * String decrypted = crypto.decrypt(encrypted);
+ *
+ * // With salt
+ * String encrypted = crypto.encrypt("mySalt", "Hello World");
+ * String decrypted = crypto.decrypt("mySalt", encrypted);
+ *
+ * // With random salt (salt is prepended to encrypted value)
+ * String encrypted = crypto.encryptWithRandomSalt("Hello World");
+ * String decrypted = crypto.decryptWithRandomSalt(encrypted);
+ * </pre>
  *
  * Author: Blake McBride<br>
  * Date: 2/1/22
- * <br><br>
- * This class provides the ability to encrypt/decrypt strings and byte arrays with very strong (AES) encryption.
  */
 public final class Crypto {
 
+    private static final String ALGORITHM = "AES";
+    private static final Random random = new Random();
+
+    private final Cipher cipher;
+    private final String password;
+
     /**
-     * Private constructor to prevent instantiation of this utility class.
-     * All methods in this class are static and should be called directly.
+     * Create a new Crypto instance with the specified password.
+     * <br><br>
+     * The password can be any size greater than 0 but only a max of the first 32 bytes will be used.
+     *
+     * @param password the password to use for encryption/decryption
+     * @throws IllegalArgumentException if password is null or empty
      */
-    private Crypto() {
-        // Utility class - not meant to be instantiated
+    public Crypto(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be null or empty");
+        }
+        this.password = password;
+        try {
+            this.cipher = Cipher.getInstance(ALGORITHM);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+            throw new RuntimeException("Failed to initialize cipher", e);
+        }
     }
 
-    private static final String ALGORITHM = "AES";
-    private static String defaultPassword;
-    private static final ThreadLocal<Cipher> cipher = ThreadLocal.withInitial(() -> {
-        try {
-            return Cipher.getInstance(ALGORITHM);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new Error(e);
-        }
-    });
-    private final static Random random = new Random();
-
     /**
-     * Encrypt a string utilizing the passed in salt and password.
+     * Encrypt a string utilizing the passed in salt.
      * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password the password to use for encryption
      * @param valueToEnc the string value to encrypt
      * @return the encrypted string encoded in Base64
      * @throws Exception if encryption fails
      */
-    public static String encrypt(String salt, String password, String valueToEnc) throws Exception {
+    public String encrypt(String salt, String valueToEnc) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.get().init(Cipher.ENCRYPT_MODE, key);
-        final byte[] encValue = cipher.get().doFinal(valueToEnc.getBytes());
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        final byte[] encValue = cipher.doFinal(valueToEnc.getBytes());
         return Base64.encode(encValue);
     }
 
     /**
-     * Encrypt a string utilizing the passed in salt and the default password.
-     *
-     * @param salt the salt or null
-     * @param valueToEnc the string value to encrypt
-     * @return the encrypted string encoded in Base64
-     * @throws Exception if encryption fails
-     */
-    public static String encrypt(String salt, String valueToEnc) throws Exception {
-        return encrypt(salt, defaultPassword, valueToEnc);
-    }
-
-    /**
-     * Encrypt using the default password and no salt.
+     * Encrypt using the instance password and no salt.
      *
      * @param valueToEnc the string value to encrypt
      * @return the encrypted string encoded in Base64
      * @throws Exception if encryption fails
      */
-    public static String encrypt(String valueToEnc) throws Exception {
-        return encrypt(null, defaultPassword, valueToEnc);
+    public String encrypt(String valueToEnc) throws Exception {
+        return encrypt(null, valueToEnc);
     }
 
     /**
-     * Encrypt with a given password and random salt.
-     *
-     * @param password the password to use for encryption
-     * @param valueToEnc the string value to encrypt
-     * @return the salt prepended to the encrypted string encoded in Base64
-     * @throws Exception if encryption fails
-     */
-    public static String encryptWithRandomSalt(String password, String valueToEnc) throws Exception {
-        final String salt = createSalt();
-        return salt + encrypt(salt, password, valueToEnc);
-    }
-
-    /**
-     * Encrypt using the default password and random salt.
+     * Encrypt with a random salt.
      *
      * @param valueToEnc the string value to encrypt
      * @return the salt prepended to the encrypted string encoded in Base64
      * @throws Exception if encryption fails
      */
-    public static String encryptWithRandomSalt(String valueToEnc) throws Exception {
+    public String encryptWithRandomSalt(String valueToEnc) throws Exception {
         final String salt = createSalt();
-        return salt + encrypt(salt, defaultPassword, valueToEnc);
+        return salt + encrypt(salt, valueToEnc);
     }
 
     /**
-     * Encrypt a byte array utilizing the passed in salt and password.
+     * Encrypt a byte array utilizing the passed in salt.
      * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password the password to use for encryption
      * @param valueToEnc the byte array to encrypt
      * @return the encrypted byte array
      * @throws Exception if encryption fails
      */
-    public static byte [] encrypt(String salt, String password, byte [] valueToEnc) throws Exception {
+    public byte[] encrypt(String salt, byte[] valueToEnc) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.get().init(Cipher.ENCRYPT_MODE, key);
-        return cipher.get().doFinal(valueToEnc);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        return cipher.doFinal(valueToEnc);
     }
 
     /**
-     * Encrypt a byte array utilizing a salt and the default password.
-     *
-     * @param salt the salt or null
-     * @param valueToEnc the byte array to encrypt
-     * @return the encrypted byte array
-     * @throws Exception if encryption fails
-     */
-    public static byte [] encrypt(String salt, byte [] valueToEnc) throws Exception {
-        return encrypt(salt, defaultPassword, valueToEnc);
-    }
-
-    /**
-     * Encrypt with the default password and no salt.
+     * Encrypt with the instance password and no salt.
      *
      * @param valueToEnc the byte array to encrypt
      * @return the encrypted byte array
      * @throws Exception if encryption fails
      */
-    public static byte [] encrypt(byte [] valueToEnc) throws Exception {
-        return encrypt(null, defaultPassword, valueToEnc);
+    public byte[] encrypt(byte[] valueToEnc) throws Exception {
+        return encrypt(null, valueToEnc);
     }
 
     /**
-     * Encrypt with the given password and random salt.
+     * Encrypt with a random salt.
      *
-     * @param password the password to use for encryption
      * @param valueToEnc the byte array to encrypt
      * @return the salt prepended to the encrypted byte array
      * @throws Exception if encryption fails
      */
-    public static byte [] encryptWithRandomSalt(String password, byte [] valueToEnc) throws Exception {
+    public byte[] encryptWithRandomSalt(byte[] valueToEnc) throws Exception {
         final String salt = createSalt();
-        final byte [] ba = encrypt(salt, password, valueToEnc);
-        final byte [] salta = salt.getBytes();
-        final byte [] na = Arrays.copyOf(salta, salta.length + ba.length);
+        final byte[] ba = encrypt(salt, valueToEnc);
+        final byte[] salta = salt.getBytes();
+        final byte[] na = Arrays.copyOf(salta, salta.length + ba.length);
         System.arraycopy(ba, 0, na, salta.length, ba.length);
         return na;
     }
 
     /**
-     * Encrypt with the default password and random salt.
-     *
-     * @param valueToEnc the byte array to encrypt
-     * @return the salt prepended to the encrypted byte array
-     * @throws Exception if encryption fails
-     */
-    public static byte [] encryptWithRandomSalt(byte [] valueToEnc) throws Exception {
-        return encryptWithRandomSalt(defaultPassword, valueToEnc);
-    }
-
-    /**
-     * Decrypt a string utilizing the passed in salt and password.
+     * Decrypt a string utilizing the passed in salt.
      * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password the password to use for decryption
      * @param encryptedValue the Base64 encoded encrypted string
      * @return the decrypted string
      * @throws Exception if decryption fails
      */
-    public static String decrypt(String salt, String password, String encryptedValue) throws Exception {
+    public String decrypt(String salt, String encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.get().init(Cipher.DECRYPT_MODE, key);
+        cipher.init(Cipher.DECRYPT_MODE, key);
         final byte[] decodedValue = Base64.decode(encryptedValue);
-        final byte[] decValue = cipher.get().doFinal(decodedValue);
+        final byte[] decValue = cipher.doFinal(decodedValue);
         return new String(decValue);
     }
 
     /**
-     * Decrypt a string utilizing the passed in salt and the default password.
+     * Decrypt a string using the instance password and no salt.
      *
-     * @param salt the salt or null
      * @param encryptedValue the Base64 encoded encrypted string
      * @return the decrypted string
      * @throws Exception if decryption fails
      */
-    public static String decrypt(String salt, String encryptedValue) throws Exception {
-        return decrypt(salt, defaultPassword, encryptedValue);
+    public String decrypt(String encryptedValue) throws Exception {
+        return decrypt(null, encryptedValue);
     }
 
     /**
-     * Decrypt a string that was encrypted with random salt using the provided password.
+     * Decrypt a string that was encrypted with random salt.
      *
-     * @param password the password to use for decryption
      * @param encryptedValue the salt prepended encrypted string
      * @return the decrypted string
      * @throws Exception if decryption fails
      */
-    public static String decryptWithRandomSalt(String password, String encryptedValue) throws Exception {
+    public String decryptWithRandomSalt(String encryptedValue) throws Exception {
         final String salt = encryptedValue.substring(0, 11);
         encryptedValue = encryptedValue.substring(11);
-        return decrypt(salt, password, encryptedValue);
+        return decrypt(salt, encryptedValue);
     }
 
     /**
-     * Decrypt a string that was encrypted with random salt using the default password.
-     *
-     * @param encryptedValue the salt prepended encrypted string
-     * @return the decrypted string
-     * @throws Exception if decryption fails
-     */
-    public static String decryptWithRandomSalt(String encryptedValue) throws Exception {
-        return decryptWithRandomSalt(defaultPassword, encryptedValue);
-    }
-
-    /**
-     * Decrypt a byte array utilizing the passed in salt and password.
+     * Decrypt a byte array utilizing the passed in salt.
      * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
      *
      * @param salt the salt or null
-     * @param password the password to use for decryption
      * @param encryptedValue the encrypted byte array
      * @return the decrypted byte array
      * @throws Exception if decryption fails
      */
-    public static byte [] decrypt(String salt, String password, byte [] encryptedValue) throws Exception {
+    public byte[] decrypt(String salt, byte[] encryptedValue) throws Exception {
         final Key key = generateKey(salt, password);
-        cipher.get().init(Cipher.DECRYPT_MODE, key);
-        return cipher.get().doFinal(encryptedValue);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        return cipher.doFinal(encryptedValue);
     }
 
     /**
-     * Decrypt a byte array utilizing a slat and the default password.
+     * Decrypt a byte array using the instance password and no salt.
      *
-     * @param salt the salt or null
      * @param encryptedValue the encrypted byte array
      * @return the decrypted byte array
      * @throws Exception if decryption fails
      */
-    public static byte [] decrypt(String salt, byte [] encryptedValue) throws Exception {
-        return decrypt(salt, defaultPassword, encryptedValue);
+    public byte[] decrypt(byte[] encryptedValue) throws Exception {
+        return decrypt(null, encryptedValue);
     }
 
     /**
-     * Decrypt a byte array that was encrypted with random salt using the provided password.
+     * Decrypt a byte array that was encrypted with random salt.
      *
-     * @param password the password to use for decryption
      * @param encryptedValue the salt prepended encrypted byte array
      * @return the decrypted byte array
      * @throws Exception if decryption fails
      */
-    public static byte [] decryptWithRandomSalt(String password, byte [] encryptedValue) throws Exception {
+    public byte[] decryptWithRandomSalt(byte[] encryptedValue) throws Exception {
         final String salt = new String(Arrays.copyOfRange(encryptedValue, 0, 11));
         encryptedValue = Arrays.copyOfRange(encryptedValue, 11, encryptedValue.length);
-        return decrypt(salt, password, encryptedValue);
+        return decrypt(salt, encryptedValue);
     }
 
     /**
-     * Decrypt a byte array that was encrypted with random salt using the default password.
-     *
-     * @param encryptedValue the salt prepended encrypted byte array
-     * @return the decrypted byte array
-     * @throws Exception if decryption fails
-     */
-    public static byte [] decryptWithRandomSalt(byte [] encryptedValue) throws Exception {
-        return decryptWithRandomSalt(defaultPassword, encryptedValue);
-    }
-
-    /**
-     * Set the default password.  This remains until it is changed.
-     * <br><br>
-     * The password can be any size greater than 0 but only a max of the first 32 bytes will be used.
-     *
-     * @param password the password
-     */
-    public static void setDefaultPassword(String password) {
-        defaultPassword = password;
-    }
-
-    /**
-     * Take a salt and password of any size and convert produce an encryption key.
+     * Take a salt and password of any size and produce an encryption key.
      * <br><br>
      * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
      * 32 bytes are used.
@@ -309,15 +247,15 @@ public final class Crypto {
     private static Key generateKey(String salt, String password) {
         int i = 0;
         final int size = 32;
-        final byte [] bytes = new byte[size];
+        final byte[] bytes = new byte[size];
         if (salt != null) {
-            final byte [] sb = salt.getBytes();
+            final byte[] sb = salt.getBytes();
             int j = 0;
-            while (j < sb.length  &&  i < size)
-                bytes[i++] = sb[j];
+            while (j < sb.length && i < size)
+                bytes[i++] = sb[j++];
         }
         if (password != null) {
-            final byte [] sb = password.getBytes();
+            final byte[] sb = password.getBytes();
             int j = 0;
             while (j < sb.length && i < size)
                 bytes[i++] = sb[j++];
@@ -326,7 +264,7 @@ public final class Crypto {
             int j = 0;
             while (i < size) {
                 bytes[i++] = bytes[j++];
-                if (j > size)
+                if (j >= i - 1)
                     j = 0;
             }
         }
@@ -360,7 +298,7 @@ public final class Crypto {
      */
     private static String createSalt() {
         final long rl = random.nextLong();
-        final byte [] ba = longtoBytes(rl);
+        final byte[] ba = longtoBytes(rl);
         return Base64.encode(ba);
     }
 
@@ -370,18 +308,21 @@ public final class Crypto {
      * @param args command line arguments
      * @throws Exception if encryption/decryption fails
      */
-    public static void main(String [] args) throws Exception {
+    public static void main(String[] args) throws Exception {
         final String unencrypted = "Now is the time for all good men to come to the aid of their party.";
         final String password = "ThisIsASecretKey";
+
+        // Create a Crypto instance with the password
+        Crypto crypto = new Crypto(password);
 
         /*
           The following example is interesting because we are encrypting the same text twice with the same password
           yet getting totally different encryption texts.  Yet they both decrypt fine!
          */
-        String encrypted1 = encryptWithRandomSalt(password, unencrypted);
-        String encrypted2 = encryptWithRandomSalt(password, unencrypted);
-        String decrypted1 = decryptWithRandomSalt(password, encrypted1);
-        String decrypted2 = decryptWithRandomSalt(password, encrypted2);
+        String encrypted1 = crypto.encryptWithRandomSalt(unencrypted);
+        String encrypted2 = crypto.encryptWithRandomSalt(unencrypted);
+        String decrypted1 = crypto.decryptWithRandomSalt(encrypted1);
+        String decrypted2 = crypto.decryptWithRandomSalt(encrypted2);
         System.out.println("\n" + unencrypted + " (" + unencrypted.length() + ")");
         System.out.println(encrypted1 + " (" + encrypted1.length() + ")");
         System.out.println(encrypted2 + " (" + encrypted2.length() + ")");
@@ -392,10 +333,10 @@ public final class Crypto {
          * Same thing with byte array.
          */
         System.out.println();
-        byte [] e1 = encryptWithRandomSalt(password, unencrypted.getBytes());
-        byte [] e2 = encryptWithRandomSalt(password, unencrypted.getBytes());
-        byte [] d1 = decryptWithRandomSalt(password, e1);
-        byte [] d2 = decryptWithRandomSalt(password, e2);
+        byte[] e1 = crypto.encryptWithRandomSalt(unencrypted.getBytes());
+        byte[] e2 = crypto.encryptWithRandomSalt(unencrypted.getBytes());
+        byte[] d1 = crypto.decryptWithRandomSalt(e1);
+        byte[] d2 = crypto.decryptWithRandomSalt(e2);
         System.out.println("\n" + unencrypted + " (" + unencrypted.length() + ")");
         System.out.println(Base64.encode(e1) + " (" + e1.length + ")");
         System.out.println(Base64.encode(e2) + " (" + e2.length + ")");
