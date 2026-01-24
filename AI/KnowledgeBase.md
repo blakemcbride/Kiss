@@ -1,4 +1,7 @@
-# KISS Web Development Framework Analysis
+# KISS Web Development Framework Knowledge Base
+
+## Important Instructions
+**This file must be updated whenever new information about the Kiss framework is discovered or learned. Any significant findings, patterns, configurations, or solutions should be documented here immediately.**
 
 ## Overview
 KISS is a **Kiss Framework application** - a full-stack Java web framework designed for rapid business application development. It includes both front-end and back-end already integrated and running as a basic example application. The framework emphasizes simplicity, productivity, and the ability to make changes while the system is running without requiring compilation or restarts.
@@ -101,7 +104,7 @@ UserInactiveSeconds = 900
 Services follow a standard pattern as shown in `Crud.groovy`:
 ```groovy
 class ServiceName {
-    void methodName(JSONObject injson, JSONObject outjson, 
+    void methodName(JSONObject injson, JSONObject outjson,
                    Connection db, ProcessServlet servlet) {
         // Authentication already handled by framework
         // Process request from injson
@@ -406,7 +409,7 @@ The `src/main/precompiled/` directory is for shared Java utility classes that ne
     ```
   - Sorting with closures works well:
     ```groovy
-    sqlFiles.sort { File a, File b -> 
+    sqlFiles.sort { File a, File b ->
         Long.compare(b.lastModified(), a.lastModified())
     }
     ```
@@ -711,6 +714,35 @@ Utils.popup_open('my-popup');   // Open popup
 Utils.popup_close('my-popup');  // Close popup
 ```
 
+### Popup Control Behavior After Close
+
+**IMPORTANT: Popup controls remain valid after the popup is closed.**
+
+When `Utils.popup_close()` is called, the popup is hidden but the DOM elements are not destroyed. This means:
+
+- All controls and DOM elements within the popup remain accessible and valid
+- Values can be read from popup controls even after the popup has been closed
+- Control references (e.g., `$$('popup-control-id')`) continue to work
+- The popup's DOM structure is preserved in the document
+
+**Example:**
+```javascript
+// Open popup and let user interact
+Utils.popup_open('my-popup');
+
+// Later, close the popup
+Utils.popup_close('my-popup');
+
+// Controls are still accessible - values can be retrieved
+const selectedValue = $$('popup-select').getValue();  // This works!
+const inputText = $$('popup-input').getValue();        // This works too!
+```
+
+This behavior is useful for:
+- Reading user selections after closing a popup
+- Preserving state between popup open/close cycles
+- Avoiding unnecessary re-initialization of controls
+
 ## DateTime Formatting
 
 ### Backend DateTime Formats
@@ -749,6 +781,10 @@ Do not use `width: 100%` on input controls (textbox-input, text-input, etc.). Th
 <textbox-input style="width: 300px;"></textbox-input>
 ```
 
+## Known Issues & Solutions
+
+None currently documented.
+
 ---
 
-*Updated: 2026-01-19*
+*Last Updated: 2026-01-23*
