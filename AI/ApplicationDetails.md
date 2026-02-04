@@ -9,8 +9,8 @@
 ## Technical Requirements
 
 ### Framework Foundation
-- Built on the KISS framework (see `Kiss-Analysis.md` for detailed framework documentation)
-- Review `Kiss-Analysis.md` before starting development
+- Built on the KISS framework (see `AI/KnowledgeBase.md` for detailed framework documentation)
+- Review `AI/KnowledgeBase.md` before starting development
 - Database schema should be defined in SQL files (e.g., `schema.sql`)
 
 ### Backend Implementation
@@ -22,7 +22,7 @@
 ### Frontend Implementation
 - **Screen Location**: `src/main/frontend/screens/`
 - **Structure**: Each screen in its own directory with `.html` and `.js` files
-- **Components**: Use KISS framework custom HTML tags (see Kiss-Analysis.md)
+- **Components**: Use KISS framework custom HTML tags (see AI/KnowledgeBase.md)
 - **Main Navigation**: Update `Framework/Framework.html` and `Framework/Framework.js`
 
 ## Database Schema
@@ -190,12 +190,12 @@ When using this template with Claude:
 5. Be explicit about what should NOT be done
 
 ## Related Documentation
-- `Kiss-Analysis.md` - Complete KISS framework reference
-- `Application.md` - Your specific application implementation
+- `AI/KnowledgeBase.md` - Complete KISS framework reference
+- `AI/ApplicationDetails.md` - Your specific application implementation
 - Framework documentation in `/manual/` directory
 
 ---
 
 *Template Version: 1.0*
 *Created for: KISS Framework Applications*
-*Last Updated: 2025-08-06*
+*Last Updated: 2026-02-04*
