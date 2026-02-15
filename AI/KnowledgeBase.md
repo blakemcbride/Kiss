@@ -338,10 +338,11 @@ The Kiss Framework emphasizes:
 **CRITICAL: DOM access is strictly layered in the Kiss framework:**
 
 1. **Only `DOMUtils.js` is allowed to access the HTML DOM directly** - All direct DOM manipulation (e.g., `element.style`, `element.setAttribute`, `document.getElementById`, etc.) must be done through DOMUtils.
-2. **Only files under `kiss/component/` can access `DOMUtils.js`** - Application screens and other code must use the Kiss component APIs, not DOMUtils directly.
+2. **In general, only front-end files under the kiss directory should use DOMUtils.js** - Application screens and other code should use the Kiss component APIs, not DOMUtils directly.  If an exception arises yu must get explicit approval
+3. **Existing DOMUtils functions must not be changed without explicit approval** - New functions may be added, but existing functions should remain stable to avoid breaking dependent code.
 
 This layered architecture ensures:
-- Consistent DOM manipulation across the framework
+- Consistent DOM manipulation across the framework and application code
 - Easier maintenance and bug fixes (changes to DOM handling only need to be made in one place)
 - Proper abstraction between application code and low-level DOM operations
 
@@ -545,31 +546,33 @@ The framework includes:
 
 **Note:** Do NOT use the old log4j 1.x API (`org.apache.log4j.*`) or Java util logging (`java.util.logging.*`).
 
-## Browser Back Button Prevention
+## Browser Back Button and Reload Prevention
 
-The Kiss framework implements browser back button prevention using the History API instead of `window.onbeforeunload` for better mobile browser compatibility.
+The Kiss framework provides `DOMUtils.preventNavigation()` to prevent accidental browser back button usage and page reload/close.
 
-### Implementation Details
+### DOMUtils.preventNavigation(isActive, onBack)
 
-**Login Handling** (in `login.js` and `mobile/login.js`):
-- After successful login, sets `Server.isLoggedIn = true`
-- Uses `history.pushState()` to add a state entry
-- Adds a `popstate` event listener that:
-  - Checks if user is logged in via `Server.isLoggedIn` flag
-  - Re-pushes state to prevent navigation
-  - Shows confirmation dialog asking user if they want to logout
-  - Calls `Server.logout()` if user confirms
+**Parameters:**
+- `isActive` (Function) - Returns `true` when navigation protection should be active
+- `onBack` (Function, optional) - Called when the back button is pressed while active
 
-**Logout Handling** (in `Server.js`):
-- `Server.logout()`: Sets `Server.isLoggedIn = false` before reload to disable back button protection
-- `Server.checkTime()`: Sets `Server.isLoggedIn = false` before auto-logout due to inactivity
+**What it does:**
+- Pushes a history entry and adds a `popstate` listener to intercept the browser back button. When triggered and `isActive()` returns true, pushes a new state to maintain protection and calls `onBack`.
+- Uses `beforeunload` listener to show the browser's built-in "Leave site?" warning on page reload or close when `isActive()` returns true.
 
-**State Management**:
-- `Server.isLoggedIn` is a class variable initialized to `false`
-- Set to `true` after successful login
-- Set to `false` before any logout (manual or automatic)
+**Chrome user activation limitation:** Chrome blocks all script-based navigation prevention (pushState in popstate handlers, beforeunload dialogs, and Navigation API intercept) until the page has received a "user gesture" (click, keypress, or touch). This is enforced at the browser engine level and cannot be bypassed by any JavaScript technique. On a brand new tab before any interaction, the back button and reload cannot be prevented. After the user's first click or keypress anywhere on the page, full protection activates.
 
-This approach works reliably across all browsers including mobile devices where `window.onbeforeunload` may not function correctly.
+**Usage:**
+```javascript
+DOMUtils.preventNavigation(
+    function () { return true; },
+    function () {
+        Utils.yesNo('Confirm', 'Are you sure you want to logout?', function () {
+            Server.logout();
+        });
+    }
+);
+```
 
 ## Dialog Components
 
