@@ -841,5 +841,132 @@ const DOMUtils = {
         if (!el)
             return null;
         return DOMUtils.removeAllListeners(el);
-    }
+    },
+
+    /**
+     * Get element bounding client rect
+     * @param {HTMLElement|string} el - Element or element ID
+     * @returns {DOMRect|null}
+     */
+    getRect: (el) => {
+        el = DOMUtils._resolveElement(el);
+        return el ? el.getBoundingClientRect() : null;
+    },
+
+    /**
+     * Check if element contains another element
+     * @param {HTMLElement|string} el - Element or element ID
+     * @param {HTMLElement} other - Element to check
+     * @returns {boolean}
+     */
+    contains: (el, other) => {
+        el = DOMUtils._resolveElement(el);
+        return el ? el.contains(other) : false;
+    },
+
+    /**
+     * Download content as a file
+     * @param {string} filename - Name for the downloaded file
+     * @param {string} content - File content
+     * @param {string} [mimeType='text/html'] - MIME type
+     */
+    downloadFile: (filename, content, mimeType) => {
+        let blob = new Blob([content], { type: mimeType || 'text/html' });
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    },
+
+    /**
+     * Prevent accidental browser back button and page reload/close.
+     * Back button shows a confirmation via onBack callback.
+     * Reload/close triggers the browser's built-in "Leave site?" warning.
+     * Both are gated on the isActive function.
+     * @param {Function} isActive - Returns true when protection should be active
+     * @param {Function} [onBack] - Called when back button is pressed while active
+     */
+    preventNavigation: (() => {
+        let enabled = false;
+        let popHandler = null;
+        let unloadHandler = null;
+        let stateTag = null;
+        let addedHistoryEntry = false;
+
+        function enable(onBack) {
+            if (enabled)
+                return;
+
+            enabled = true;
+
+            // Unique marker for our state entry
+            stateTag = "prevent-nav-" + Date.now() + "-" + Math.random();
+
+            // Add ONE history entry we can recognize
+            history.pushState({ __preventNav: stateTag }, document.title, location.href);
+            addedHistoryEntry = true;
+
+            popHandler = function (e) {
+                if (!enabled)
+                    return;
+
+                // If we landed on an entry that is NOT ours, bounce back to ours once.
+                const st = e.state;
+                if (!st || st.__preventNav !== stateTag)
+                    history.pushState({ __preventNav: stateTag }, document.title, location.href);
+
+                if (onBack)
+                    onBack();
+            };
+
+            unloadHandler = function (e) {
+                if (!enabled)
+                    return;
+
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            };
+
+            window.addEventListener('popstate', popHandler);
+            window.addEventListener('beforeunload', unloadHandler);
+        }
+
+        function disable({ undoHistory = true } = {}) {
+            if (!enabled)
+                return;
+ 
+            enabled = false;
+
+            if (popHandler)
+                window.removeEventListener('popstate', popHandler);
+
+            if (unloadHandler)
+                window.removeEventListener('beforeunload', unloadHandler);
+
+            popHandler = null;
+            unloadHandler = null;
+
+            // Optional: attempt to remove the entry we added by going back once.
+            // This is the closest you can get to "undo pushState".
+            if (undoHistory && addedHistoryEntry) {
+                addedHistoryEntry = false;
+                history.back();
+            }
+
+            stateTag = null;
+        }
+
+        return function (isActive, onBack, options) {
+            if (isActive)
+                enable(onBack);
+            else
+                disable(options);
+        };
+    })()
+
 };
