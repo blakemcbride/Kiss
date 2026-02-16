@@ -1,0 +1,166 @@
+#!/bin/bash
+#
+# Build a distributable package.
+# Usage: ./build-dist <name>
+# Prerequisite: ./bld build
+#
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: ./build-dist <name>"
+    echo "Example: ./build-dist MyApp"
+    exit 1
+fi
+
+NAME="$1"
+DIST="work/$NAME"
+
+# Ensure the app has been deployed to Tomcat
+if [ ! -d "tomcat/webapps/ROOT/WEB-INF" ]; then
+    echo "Error: tomcat/webapps/ROOT not found."
+    echo "Run './bld start-backend' first (then stop it) to deploy the application."
+    exit 1
+fi
+
+echo "Building distribution..."
+
+# Clean previous build
+rm -rf "$DIST"
+rm -f "work/$NAME.zip"
+
+# Create staging directory
+mkdir -p "$DIST"
+
+# Copy Tomcat (the app is already deployed in webapps/ROOT)
+cp -a tomcat "$DIST/tomcat"
+
+# Remove unnecessary Tomcat webapps
+rm -rf "$DIST/tomcat/webapps/docs"
+rm -rf "$DIST/tomcat/webapps/examples"
+rm -rf "$DIST/tomcat/webapps/host-manager"
+rm -rf "$DIST/tomcat/webapps/manager"
+rm -f  "$DIST/tomcat/webapps/ROOT.war"
+
+# Clean runtime directories
+rm -rf "$DIST/tomcat/logs/"*
+rm -rf "$DIST/tomcat/temp/"*
+rm -rf "$DIST/tomcat/work/"*
+
+# Remove the debug script (has hardcoded paths)
+rm -f "$DIST/tomcat/bin/debug"
+rm -f "$DIST/tomcat/bin/debug.cmd"
+rm -f "$DIST/tomcat/bin/stopdebug.cmd"
+
+# Create start script for Linux/macOS
+cat > "$DIST/start.sh" << 'SCRIPT'
+#!/bin/bash
+cd "$(dirname "$0")"
+
+# Check for Java
+if ! command -v java &> /dev/null; then
+    echo "Error: Java is not installed or not in PATH."
+    echo "This application requires Java 17 or later."
+    exit 1
+fi
+
+JAVA_VER=$(java -version 2>&1 | head -1 | sed 's/.*"\([0-9]*\).*/\1/')
+if [ "$JAVA_VER" -lt 17 ] 2>/dev/null; then
+    echo "Error: Java 17 or later is required (found Java $JAVA_VER)."
+    exit 1
+fi
+
+# Check if already running
+if [ -f "tomcat/bin/catalina.pid" ] && kill -0 $(cat tomcat/bin/catalina.pid) 2>/dev/null; then
+    echo "Application is already running."
+    echo "Open http://localhost:8080 in your browser."
+    exit 0
+fi
+
+echo "Starting application..."
+export CATALINA_PID="$(pwd)/tomcat/bin/catalina.pid"
+tomcat/bin/catalina.sh start > /dev/null 2>&1
+
+# Wait for server to be ready
+printf "Waiting for server"
+for i in $(seq 1 60); do
+    if curl -s -o /dev/null http://localhost:8080 2>/dev/null; then
+        echo ""
+        echo "Application is running at http://localhost:8080"
+
+        # Open browser
+        if command -v xdg-open &> /dev/null; then
+            xdg-open "http://localhost:8080" 2>/dev/null &
+        elif command -v open &> /dev/null; then
+            open "http://localhost:8080" 2>/dev/null &
+        fi
+
+        echo "Run ./stop.sh to shut down."
+        exit 0
+    fi
+    printf "."
+    sleep 1
+done
+
+echo ""
+echo "Warning: Server may not have started properly."
+echo "Check tomcat/logs/catalina.out for details."
+SCRIPT
+
+# Create stop script for Linux/macOS
+cat > "$DIST/stop.sh" << 'SCRIPT'
+#!/bin/bash
+cd "$(dirname "$0")"
+echo "Stopping application..."
+export CATALINA_PID="$(pwd)/tomcat/bin/catalina.pid"
+tomcat/bin/shutdown.sh > /dev/null 2>&1
+echo "Application stopped."
+SCRIPT
+
+# Create start script for Windows
+cat > "$DIST/start.bat" << 'SCRIPT'
+@echo off
+cd /d "%~dp0"
+
+where java >nul 2>&1
+if %errorlevel% neq 0 (
+    echo Error: Java is not installed or not in PATH.
+    echo This application requires Java 17 or later.
+    pause
+    exit /b 1
+)
+
+echo Starting application...
+call tomcat\bin\startup.bat
+
+echo Waiting for server...
+:wait_loop
+timeout /t 1 /nobreak >nul
+curl -s -o nul http://localhost:8080 2>nul
+if %errorlevel% neq 0 goto wait_loop
+
+echo Application is running at http://localhost:8080
+start http://localhost:8080
+echo Run stop.bat to shut down.
+SCRIPT
+
+# Create stop script for Windows
+cat > "$DIST/stop.bat" << 'SCRIPT'
+@echo off
+cd /d "%~dp0"
+echo Stopping application...
+call tomcat\bin\shutdown.bat
+echo Application stopped.
+SCRIPT
+
+chmod +x "$DIST/start.sh" "$DIST/stop.sh"
+
+# Package into zip and remove staging directory
+echo "Packaging..."
+cd work
+zip -qr "$NAME.zip" "$NAME/"
+cd ..
+rm -rf "$DIST"
+
+echo ""
+echo "Distribution created: work/$NAME.zip"

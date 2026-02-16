@@ -1,0 +1,152 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2023 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+@node Browser Distribution
+
+@html
+@include style.css
+@end html
+
+@chapter Browser-Based Distribution
+
+As an alternative to packaging a @emph{Kiss} application as a desktop
+application with Electron, the application can be distributed as a
+standalone, browser-based package.  This approach uses the system's
+default web browser as the user interface and requires no additional
+frameworks beyond Java.
+
+The resulting distribution is a single zip file that works on Linux,
+macOS, and Windows --- a single package for all platforms.
+
+@section Prerequisites
+
+The target system must have the following installed:
+
+@itemize @bullet
+@item
+Java 17 or later
+@end itemize
+
+No other dependencies are required.  The distribution includes its own
+embedded Tomcat server.
+
+@section Building the Distribution
+
+@subsection Step 1: Build the Application
+
+@example
+./bld build              [Linux / macOS]
+    or
+bld build                [Windows]
+@end example
+
+This compiles the application and deploys it to the embedded Tomcat
+server.
+
+@subsection Step 2: Create the Distribution
+
+Run the distribution build script from the project root, passing the
+desired distribution name as an argument:
+
+@example
+./build-dist MyApp
+@end example
+
+This creates @file{work/MyApp.zip} ready for distribution to end users.
+The name argument determines both the zip filename and the directory
+name inside the zip.
+
+@section What the Distribution Contains
+
+@table @file
+@item start.sh
+Launcher script for Linux and macOS.  Checks for Java, starts the
+server, waits for it to be ready, and opens the default web browser.
+@item stop.sh
+Shutdown script for Linux and macOS.
+@item start.bat
+Launcher script for Windows.
+@item stop.bat
+Shutdown script for Windows.
+@item tomcat/
+The embedded Tomcat server with the application pre-deployed in
+@file{tomcat/webapps/ROOT/}.
+@end table
+
+@section End User Instructions
+
+@enumerate
+@item
+Install Java 17 or later if not already installed.
+@item
+Unzip the distribution zip file.
+@item
+Run the appropriate start script:
+
+@example
+./start.sh               [Linux / macOS]
+    or
+start.bat                [Windows]
+@end example
+
+@item
+The default web browser will open to @code{http://localhost:8080}.
+@item
+To shut down the application, run:
+
+@example
+./stop.sh                [Linux / macOS]
+    or
+stop.bat                 [Windows]
+@end example
+@end enumerate
+
+@section Comparison with Desktop Application
+
+@multitable @columnfractions .40 .30 .30
+@headitem Feature @tab Browser Distribution @tab Electron Desktop
+@item Cross-platform from single package
+@tab Yes
+@tab No (build per OS)
+@item Dedicated application window
+@tab No (browser tab)
+@tab Yes
+@item Custom application menus
+@tab No
+@tab Yes
+@item Distribution size
+@tab ~30 MB
+@tab ~150 MB+ per OS
+@item Requires Java
+@tab Yes
+@tab Yes
+@item Requires Node.js / npm
+@tab No
+@tab Yes
+@end multitable

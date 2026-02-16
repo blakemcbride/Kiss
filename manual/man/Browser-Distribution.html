@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Browser Distribution (Kiss Manual)</title>
+
+<meta name="description" content="Browser Distribution (Kiss Manual)">
+<meta name="keywords" content="Browser Distribution (Kiss Manual)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="index.html" rel="start" title="Top">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="index.html" rel="up" title="Top">
+<link href="Desktop-Application.html" rel="next" title="Desktop Application">
+<link href="Split-System.html" rel="prev" title="Split System">
+<style type="text/css">
+<!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
+div.example {margin-left: 3.2em}
+span:hover a.copiable-link {visibility: visible}
+ul.mark-bullet {list-style-type: disc}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<div class="chapter-level-extent" id="Browser-Distribution">
+<div class="nav-panel">
+<p>
+Next: <a href="Desktop-Application.html" accesskey="n" rel="next">Desktop Applications</a>, Previous: <a href="Split-System.html" accesskey="p" rel="prev">Split System</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (February 15, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+<hr>
+
+<style>
+body {
+	margin: 0 auto;
+        padding: 20px;
+        max-width: 800px;
+	background-color: #fffff8; 
+}
+body {
+    font-family: "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #333; /* dark gray */
+    margin-top: 20px;
+}
+a {
+    color: #007BFF; /* blue */
+    text-decoration: none;
+}
+a:hover {
+    text-decoration: underline;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+table, th, td {
+    border: 1px solid #ddd; /* light gray */
+}
+th, td {
+    padding: 8px;
+    text-align: left;
+}
+tr:nth-child(even) {
+    background-color: #f2f2f2; /* very light gray */
+}
+pre, code {
+    font-family: "Courier New", Courier, monospace;
+    background-color: #f5f5f5; /* light grey */
+    border: 1px solid #e0e0e0; /* slightly darker grey for the border */
+    padding: 10px; /* space inside the box */
+    overflow-x: auto; /* adds horizontal scroll if the content is too wide */
+}
+h1 {  /* section titles */
+    color: #2c3e50; /* example dark blue color */
+}
+
+h2, h3, h4 {  /* subsection titles */
+    color: #e74c3c; /* example red color */
+}
+:not(pre) > code {
+    background-color: #f5f5f5; /* Light gray */
+    padding: 2px 4px;  /* Adjust this value */
+    border-radius: 3px; /* Optional: adds rounded corners */
+    margin: 0;  /* Adjust if needed */
+}
+
+</style>
+
+
+<h2 class="chapter" id="Browser_002dBased-Distribution"><span>9 Browser-Based Distribution<a class="copiable-link" href="#Browser_002dBased-Distribution"> &para;</a></span></h2>
+
+<p>As an alternative to packaging a <em class="emph">Kiss</em> application as a desktop
+application with Electron, the application can be distributed as a
+standalone, browser-based package.  This approach uses the system&rsquo;s
+default web browser as the user interface and requires no additional
+frameworks beyond Java.
+</p>
+<p>The resulting distribution is a single zip file that works on Linux,
+macOS, and Windows &mdash; a single package for all platforms.
+</p>
+<ul class="mini-toc">
+<li><a href="#Prerequisites" accesskey="1">Prerequisites</a></li>
+<li><a href="#Building-the-Distribution" accesskey="2">Building the Distribution</a></li>
+<li><a href="#What-the-Distribution-Contains" accesskey="3">What the Distribution Contains</a></li>
+<li><a href="#End-User-Instructions" accesskey="4">End User Instructions</a></li>
+<li><a href="#Comparison-with-Desktop-Application" accesskey="5">Comparison with Desktop Application</a></li>
+</ul>
+<div class="section-level-extent" id="Prerequisites">
+<h3 class="section"><span>9.1 Prerequisites<a class="copiable-link" href="#Prerequisites"> &para;</a></span></h3>
+
+<p>The target system must have the following installed:
+</p>
+<ul class="itemize mark-bullet">
+<li>Java 17 or later
+</li></ul>
+
+<p>No other dependencies are required.  The distribution includes its own
+embedded Tomcat server.
+</p>
+</div>
+<div class="section-level-extent" id="Building-the-Distribution">
+<h3 class="section"><span>9.2 Building the Distribution<a class="copiable-link" href="#Building-the-Distribution"> &para;</a></span></h3>
+
+<ul class="mini-toc">
+<li><a href="#Step-1_003a-Build-the-Application" accesskey="1">Step 1: Build the Application</a></li>
+<li><a href="#Step-2_003a-Create-the-Distribution" accesskey="2">Step 2: Create the Distribution</a></li>
+</ul>
+<div class="subsection-level-extent" id="Step-1_003a-Build-the-Application">
+<h4 class="subsection"><span>9.2.1 Step 1: Build the Application<a class="copiable-link" href="#Step-1_003a-Build-the-Application"> &para;</a></span></h4>
+
+<div class="example">
+<pre class="example-preformatted">./bld build              [Linux / macOS]
+    or
+bld build                [Windows]
+</pre></div>
+
+<p>This compiles the application and deploys it to the embedded Tomcat
+server.
+</p>
+</div>
+<div class="subsection-level-extent" id="Step-2_003a-Create-the-Distribution">
+<h4 class="subsection"><span>9.2.2 Step 2: Create the Distribution<a class="copiable-link" href="#Step-2_003a-Create-the-Distribution"> &para;</a></span></h4>
+
+<p>Run the distribution build script from the project root, passing the
+desired distribution name as an argument:
+</p>
+<div class="example">
+<pre class="example-preformatted">./build-dist MyApp
+</pre></div>
+
+<p>This creates <samp class="file">work/MyApp.zip</samp> ready for distribution to end users.
+The name argument determines both the zip filename and the directory
+name inside the zip.
+</p>
+</div>
+</div>
+<div class="section-level-extent" id="What-the-Distribution-Contains">
+<h3 class="section"><span>9.3 What the Distribution Contains<a class="copiable-link" href="#What-the-Distribution-Contains"> &para;</a></span></h3>
+
+<dl class="table">
+<dt><samp class="file">start.sh</samp></dt>
+<dd><p>Launcher script for Linux and macOS.  Checks for Java, starts the
+server, waits for it to be ready, and opens the default web browser.
+</p></dd>
+<dt><samp class="file">stop.sh</samp></dt>
+<dd><p>Shutdown script for Linux and macOS.
+</p></dd>
+<dt><samp class="file">start.bat</samp></dt>
+<dd><p>Launcher script for Windows.
+</p></dd>
+<dt><samp class="file">stop.bat</samp></dt>
+<dd><p>Shutdown script for Windows.
+</p></dd>
+<dt><samp class="file">tomcat/</samp></dt>
+<dd><p>The embedded Tomcat server with the application pre-deployed in
+<samp class="file">tomcat/webapps/ROOT/</samp>.
+</p></dd>
+</dl>
+
+</div>
+<div class="section-level-extent" id="End-User-Instructions">
+<h3 class="section"><span>9.4 End User Instructions<a class="copiable-link" href="#End-User-Instructions"> &para;</a></span></h3>
+
+<ol class="enumerate">
+<li> Install Java 17 or later if not already installed.
+</li><li> Unzip the distribution zip file.
+</li><li> Run the appropriate start script:
+
+<div class="example">
+<pre class="example-preformatted">./start.sh               [Linux / macOS]
+    or
+start.bat                [Windows]
+</pre></div>
+
+</li><li> The default web browser will open to <code class="code">http://localhost:8080</code>.
+</li><li> To shut down the application, run:
+
+<div class="example">
+<pre class="example-preformatted">./stop.sh                [Linux / macOS]
+    or
+stop.bat                 [Windows]
+</pre></div>
+</li></ol>
+
+</div>
+<div class="section-level-extent" id="Comparison-with-Desktop-Application">
+<h3 class="section"><span>9.5 Comparison with Desktop Application<a class="copiable-link" href="#Comparison-with-Desktop-Application"> &para;</a></span></h3>
+
+<table class="multitable">
+<thead><tr><th width="40%">Feature</th><th width="30%">Browser Distribution</th><th width="30%">Electron Desktop</th></tr></thead>
+<tbody><tr><td width="40%">Cross-platform from single package</td><td width="30%">Yes</td><td width="30%">No (build per OS)</td></tr>
+<tr><td width="40%">Dedicated application window</td><td width="30%">No (browser tab)</td><td width="30%">Yes</td></tr>
+<tr><td width="40%">Custom application menus</td><td width="30%">No</td><td width="30%">Yes</td></tr>
+<tr><td width="40%">Distribution size</td><td width="30%">~30 MB</td><td width="30%">~150 MB+ per OS</td></tr>
+<tr><td width="40%">Requires Java</td><td width="30%">Yes</td><td width="30%">Yes</td></tr>
+<tr><td width="40%">Requires Node.js / npm</td><td width="30%">No</td><td width="30%">Yes</td></tr>
+</tbody>
+</table>
+
+
+
+</div>
+</div>
+<hr>
+<div class="nav-panel">
+<p>
+Next: <a href="Desktop-Application.html">Desktop Applications</a>, Previous: <a href="Split-System.html">Split System</a>, Up: <a href="index.html">Kiss Developer Manual (February 15, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+</div>
+
+
+
+</body>
+</html>
