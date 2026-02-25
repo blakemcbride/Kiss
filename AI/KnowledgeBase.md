@@ -501,6 +501,56 @@ cal.setTime(myDate);
 int timeHHMM = cal.get(Calendar.HOUR_OF_DAY) * 100 + cal.get(Calendar.MINUTE);
 ```
 
+### NumberFormat (org.kissweb.NumberFormat)
+
+Utility class (private constructor, all static methods) for advanced numeric formatting. Converts doubles into formatted strings with fine-grained control over base, width, decimal places, and display options.
+
+#### Key Methods
+
+**`Formatb(double num, int base, String msk, int wth, int dp)`** - Full-featured formatter supporting any numeric base (2-36).
+- `num` - the number to format
+- `base` - numeric base (2=binary, 8=octal, 10=decimal, 16=hex, etc.)
+- `msk` - format mask string combining any of these flags:
+  - `B` = blank if zero (returns spaces)
+  - `C` = add commas (or grouping separators)
+  - `L` = left justify
+  - `P` = parentheses around negative numbers (accounting style)
+  - `Z` = zero fill
+  - `D` = floating dollar sign
+  - `U` = uppercase letters (for hex digits etc.)
+  - `R` = append percent sign
+- `wth` - total field width (0 = auto-size)
+- `dp` - decimal places (-1 = auto-detect)
+- Returns asterisks (`***`) if the number cannot fit in the specified width
+
+**`Format(double num, String msk, int wth, int dp)`** - Convenience wrapper for base-10 formatting. Equivalent to `Formatb` with `base=10`.
+
+**`FormatVWF(double n, String fmt, int wth, int dec)`** - Variable Width Format. Formats the number and adds extra spaces to account for comma positions, enabling visual alignment of columns in reports where some values have commas and others do not.
+
+#### Usage Examples
+```java
+// Currency with commas, parentheses for negatives, dollar sign, 12-char width, 2 decimals
+NumberFormat.Format(-12345.348, "CDP", 12, 2);   // "($12,345.35)"
+
+// Simple comma and dollar sign formatting
+NumberFormat.Format(12345.146, "CD", 10, 2);     // "$12,345.15"
+
+// Left-justified with dollar sign
+NumberFormat.Format(125.146, "CDL", 10, 2);      // "$125.15   "
+
+// Auto width and auto decimal places
+NumberFormat.Format(1236354545.146, "CD", 0, -1);
+
+// Zero-filled with commas and parentheses for negatives
+NumberFormat.Format(-5.146, "ZCP", 10, 2);       // "(00005.15)"
+```
+
+#### Key Behaviors
+- Rounds the number to the specified decimal places before formatting
+- If the formatted number exceeds the field width, it progressively drops formatting elements in order: leading zero, dollar sign, commas, parentheses, percent sign. If it still does not fit, returns asterisks (`***`)
+- Supports numeric bases 2 through 36 using digits 0-9 and letters a-z
+- `FormatVWF` doubles spaces and adds leading spaces equal to the comma count, enabling consistent visual alignment in tabular or report output
+
 ## Logging
 
 Kiss uses **Log4j 2.x** for all logging. The framework uses the modern log4j 2.x API throughout.
