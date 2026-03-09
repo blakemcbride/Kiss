@@ -304,9 +304,13 @@ public class Connection implements AutoCloseable {
     /**
      * Commit all the operations to the database since the last commit().
      * <br><br>
+     * The system is always in a transaction.  There is no need to start one.
+     * <br><br>
      * Updates to a database do not take effect until they are committed.  This method performs the commit.
      * When a commit occurs, all database changes done since the last commit are effectively written to the database.
      * If a commit does not occur, the updates will not occur.
+     * <br><br>
+     * After each commit, the underlying system automatically opens a new transaction.
      * <br><br>
      * Note that the KISS system does a commit at the end of each web service if the service completes.  However, if the
      * service fails (throws an exception) KISS does a rollback instead.
