@@ -290,6 +290,9 @@ This pattern provides a cleaner, more maintainable approach to database record i
 
 ## Frontend Components
 
+### Component Documentation
+The file `Kiss/src/main/frontend/kiss/component/components.js` serves as the JSDoc documentation for all components under the `Kiss/src/main/frontend/kiss/component/` directory. Each component's API (methods, attributes, events) is documented there. When a component implementation is changed, `components.js` must be updated to reflect the change.
+
 ### Custom HTML Tags
 The framework provides custom HTML components that should be used:
 - `<text-input>` - Text input field

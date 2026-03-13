@@ -158,8 +158,15 @@
         //--
 
         newElm.getValue = function (row) {
-            if (row !== 0 && !row)
+            if (row !== 0 && !row) {
+                // For multi-select with no specific row requested, return an array of all selected values.
+                if (multiple) {
+                    return Array.from(el.selectedOptions).map(function (opt) {
+                        return keyIsNumber ? Number(opt.value) : opt.value;
+                    });
+                }
                 return keyIsNumber ? Number(el.value) : el.value;
+            }
             const v = el.options[row].value;
             return keyIsNumber ? Number(v) : v;
         };
