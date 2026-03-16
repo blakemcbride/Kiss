@@ -370,9 +370,8 @@ database is normally required.  However, for testing purposes, if no
 database is configured, the system will still run and allow any
 username and password to succeed.
 
-If you are using an alternative data store (such as Perst or another
-non-SQL database) for user management, you can force authentication
-without configuring a SQL database by setting
+If you are using an alternative data store for user management, you
+can force authentication without configuring a SQL database by setting
 @code{RequireAuthentication = true} in @code{application.ini}.  When
 this option is enabled, the system will delegate authentication to
 @code{Login.groovy} even when no SQL database is configured.

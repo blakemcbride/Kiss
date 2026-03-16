@@ -3,6 +3,8 @@
 ## Important Instructions
 **This file must be updated whenever new information about the Kiss framework is discovered or learned. Any significant findings, patterns, configurations, or solutions should be documented here immediately.**
 
+**CRITICAL: Kiss is a generic, application-neutral framework. All changes to Kiss core code, configuration options, documentation, and comments must remain completely free of references to any specific application, third-party product, or proprietary technology. Never reference specific application names, specific non-SQL databases, or any application-specific concepts in framework code or documentation. Use generic terms such as "alternative data store" rather than naming specific products.**
+
 ## Overview
 KISS is a **Kiss Framework application** - a full-stack Java web framework designed for rapid business application development. It includes both front-end and back-end already integrated and running as a basic example application. The framework emphasizes simplicity, productivity, and the ability to make changes while the system is running without requiring compilation or restarts.
 

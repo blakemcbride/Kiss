@@ -81,11 +81,41 @@ public class GroovyClass {
 	}
 
 	private Method getMethod(String methodName, Object... args) throws Exception {
-		Class<?>[] argTypes = new Class[args.length];
-		for (int i = 0; i < args.length; i++)
-			argTypes[i] = args[i].getClass();  //   Object.class;
+		// Check if any arguments are null
+		boolean hasNull = false;
+		for (Object arg : args)
+			if (arg == null) {
+				hasNull = true;
+				break;
+			}
 
-		return groovyClass.getMethod(methodName, argTypes);
+		if (!hasNull) {
+			// Fast path: all arguments are non-null, use exact type lookup
+			Class<?>[] argTypes = new Class[args.length];
+			for (int i = 0; i < args.length; i++)
+				argTypes[i] = args[i].getClass();
+			return groovyClass.getMethod(methodName, argTypes);
+		}
+
+		// Slow path: one or more arguments are null, search by name and parameter count
+		// then verify type compatibility for non-null arguments
+		for (Method m : groovyClass.getMethods()) {
+			if (!m.getName().equals(methodName))
+				continue;
+			Class<?>[] paramTypes = m.getParameterTypes();
+			if (paramTypes.length != args.length)
+				continue;
+			boolean match = true;
+			for (int i = 0; i < args.length; i++) {
+				if (args[i] != null && !paramTypes[i].isInstance(args[i])) {
+					match = false;
+					break;
+				}
+			}
+			if (match)
+				return m;
+		}
+		throw new NoSuchMethodException(methodName);
 	}
 		
 	/**
@@ -136,10 +166,39 @@ public class GroovyClass {
 	}
 		
 	private Constructor<?> getConstructor(Object... args) throws Exception {
-		Class<?>[] argTypes = new Class[args.length];
-		for (int i = 0; i < args.length; i++)
-			argTypes[i] = args[i].getClass();  //   Object.class;
-		return groovyClass.getConstructor(argTypes);
+		// Check if any arguments are null
+		boolean hasNull = false;
+		for (Object arg : args)
+			if (arg == null) {
+				hasNull = true;
+				break;
+			}
+
+		if (!hasNull) {
+			// Fast path: all arguments are non-null, use exact type lookup
+			Class<?>[] argTypes = new Class[args.length];
+			for (int i = 0; i < args.length; i++)
+				argTypes[i] = args[i].getClass();
+			return groovyClass.getConstructor(argTypes);
+		}
+
+		// Slow path: one or more arguments are null, search by parameter count
+		// then verify type compatibility for non-null arguments
+		for (Constructor<?> c : groovyClass.getConstructors()) {
+			Class<?>[] paramTypes = c.getParameterTypes();
+			if (paramTypes.length != args.length)
+				continue;
+			boolean match = true;
+			for (int i = 0; i < args.length; i++) {
+				if (args[i] != null && !paramTypes[i].isInstance(args[i])) {
+					match = false;
+					break;
+				}
+			}
+			if (match)
+				return c;
+		}
+		throw new NoSuchMethodException("<init>");
 	}
 		
 	Object invokeConstructor(Object... args) throws Exception {
