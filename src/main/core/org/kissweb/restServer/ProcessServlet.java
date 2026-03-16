@@ -401,8 +401,8 @@ public class ProcessServlet implements Runnable {
         if (_className.isEmpty()) {
             // Core method
             if (_method.equals("LoginRequired")) {
-                logger.info("Login is " + (MainServlet.hasDatabase() ? "" : "not ") + "required");
-                outjson.put("LoginRequired", MainServlet.hasDatabase());
+                logger.info("Login is " + (MainServlet.requiresAuthentication() ? "" : "not ") + "required");
+                outjson.put("LoginRequired", MainServlet.requiresAuthentication());
                 successReturn(response, outjson);
                 return;
             } else if (_method.equals("Login")) {
@@ -440,7 +440,7 @@ public class ProcessServlet implements Runnable {
             }
         } else {
             // User defined method
-            if (MainServlet.hasDatabase()) {
+            if (MainServlet.requiresAuthentication()) {
                 if (MainServlet.shouldAllowWithoutAuthentication(_className, _method)) {
                     ud = UserCache.findUser(injson.getString("_uuid"));  // in case they are logged in
                     logger.info("Method " + _className + "." + _method + "() allowed without authentication");
@@ -911,7 +911,7 @@ public class ProcessServlet implements Runnable {
 
     private String login(String user, String password, JSONObject outjson) throws Exception {
         UserData ud = null;
-        if (MainServlet.hasDatabase()) {
+        if (MainServlet.requiresAuthentication()) {
             try {
                 ud = (UserData) GroovyClass.invoke(true, "Login", "login", null, DB, user, password, outjson, this);
             } catch (InvocationTargetException e) {
@@ -931,7 +931,7 @@ public class ProcessServlet implements Runnable {
             throw new UserException("You have been logged out due to inactivity. Please log in again.");
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime timeout = ud.getLastAccessDate().plusSeconds(120);  // cache user data for 120 seconds
-        if (MainServlet.hasDatabase() && now.isAfter(timeout)) {
+        if (MainServlet.requiresAuthentication() && now.isAfter(timeout)) {
             Boolean good = (Boolean) GroovyClass.invoke(true, "Login", "checkLogin", null, DB, ud, this);
             if (!good) {
                 UserCache.removeUser(ud.getUuid());

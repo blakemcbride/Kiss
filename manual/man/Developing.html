@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Developing">
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (February 15, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html" accesskey="n" rel="next">Front-end API</a>, Previous: <a href="Orientation.html" accesskey="p" rel="prev">Orientation</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (March 16, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -537,8 +537,19 @@ calls. <em class="emph">Kiss</em> has a generic and easy way of handling these n
 </p>
 <p>Application-specific user login and data are handled by the Groovy file
 located in the <code class="code">backend</code> directory named <code class="code">Login.groovy</code>.
-That file must have two methods: <code class="code">login</code> and <code class="code">checkLogin</code>.  
+That file must have two methods: <code class="code">login</code> and <code class="code">checkLogin</code>.
 See that file for more details.
+</p>
+<p>By default, authentication requires a SQL database to be configured.
+If no SQL database is configured, the system bypasses authentication
+entirely.  However, if your application uses a non-SQL data store
+(such as Perst) for user management, you can enforce authentication by
+setting <code class="code">RequireAuthentication = true</code> in <code class="code">application.ini</code>.
+When enabled, the system calls <code class="code">Login.groovy</code> for authentication
+regardless of whether a SQL database is configured.  Note that the
+<code class="code">db</code> parameter passed to the <code class="code">login</code> and <code class="code">checkLogin</code>
+methods will be <code class="code">null</code> when no SQL database is configured, so
+your <code class="code">Login.groovy</code> must handle this appropriately.
 </p>
 <p>See <a class="xref" href="#cached_005fuser_005fdata">Cached User Data</a>
 </p>
@@ -637,7 +648,7 @@ and it will fix them.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (February 15, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Front_002dend-API.html">Front-end API</a>, Previous: <a href="Orientation.html">Orientation</a>, Up: <a href="index.html">Kiss Developer Manual (March 16, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

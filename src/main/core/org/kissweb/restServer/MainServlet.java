@@ -212,8 +212,13 @@ public class MainServlet extends HttpServlet {
                 }
                 logger.info("* * * Database " + databaseName + " opened successfully");
             }
-            else
-                logger.info("* * * No database configured; bypassing login requirements");
+            else {
+                String requireAuth = (String) environment.get("RequireAuthentication");
+                if ("true".equalsIgnoreCase(requireAuth))
+                    logger.info("* * * No database configured; authentication required via RequireAuthentication setting");
+                else
+                    logger.info("* * * No database configured; bypassing login requirements");
+            }
         } else
             logger.error("* * * Error executing KissInit.groovy");
 
@@ -587,6 +592,22 @@ public class MainServlet extends HttpServlet {
      */
     public static boolean hasDatabase() {
         return hasDatabase;
+    }
+
+    /**
+     * Checks if authentication is required.
+     * Returns true if a SQL database is configured or if the RequireAuthentication
+     * setting is enabled in application.ini.  This allows authentication to be
+     * enforced even when no SQL database is configured (e.g., when using an
+     * alternative data store for user management).
+     *
+     * @return true if authentication is required
+     */
+    public static boolean requiresAuthentication() {
+        if (hasDatabase)
+            return true;
+        String requireAuth = (String) environment.get("RequireAuthentication");
+        return "true".equalsIgnoreCase(requireAuth);
     }
 
     static ComboPooledDataSource getCpds() {

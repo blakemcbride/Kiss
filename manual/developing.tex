@@ -434,8 +434,19 @@ calls. @emph{Kiss} has a generic and easy way of handling these needs.
 
 Application-specific user login and data are handled by the Groovy file
 located in the @code{backend} directory named @code{Login.groovy}.
-That file must have two methods: @code{login} and @code{checkLogin}.  
+That file must have two methods: @code{login} and @code{checkLogin}.
 See that file for more details.
+
+By default, authentication requires a SQL database to be configured.
+If no SQL database is configured, the system bypasses authentication
+entirely.  However, if your application uses a non-SQL data store
+(such as Perst) for user management, you can enforce authentication by
+setting @code{RequireAuthentication = true} in @code{application.ini}.
+When enabled, the system calls @code{Login.groovy} for authentication
+regardless of whether a SQL database is configured.  Note that the
+@code{db} parameter passed to the @code{login} and @code{checkLogin}
+methods will be @code{null} when no SQL database is configured, so
+your @code{Login.groovy} must handle this appropriately.
 
 @xref{cached_user_data,,Cached User Data}
 
