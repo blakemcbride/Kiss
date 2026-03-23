@@ -52,6 +52,21 @@ class Editor {
                     }
                 } )
                 .then( editor => {
+                    // Configure a base64 upload adapter so images are embedded as
+                    // data URIs inline in the HTML — no backend endpoint required.
+                    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                        return {
+                            upload() {
+                                return loader.file.then((file) => new Promise((res, rej) => {
+                                    const reader = new FileReader();
+                                    reader.onload = () => res({ default: reader.result });
+                                    reader.onerror = (err) => rej(err);
+                                    reader.readAsDataURL(file);
+                                }));
+                            },
+                            abort() {}
+                        };
+                    };
                     toolbarDiv.appendChild(editor.ui.view.toolbar.element);
                     resolve( editor );
                 } )
