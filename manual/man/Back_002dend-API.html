@@ -34,7 +34,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (March 16, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (March 26, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -449,11 +449,12 @@ with the return data.  Useful JSON utilities include the following:
 <div class="section-level-extent" id="Large-Language-Models">
 <h3 class="section"><span>6.4 Large Language Models<a class="copiable-link" href="#Large-Language-Models"> &para;</a></span></h3>
 
-<p><em class="emph">Kiss</em> provides a high-level interface to both the <em class="emph">Ollama</em> large language model (LLM) and the OpenAI (chatGPT) server. This makes it easy for you to add LLM features to your application.
+<p><em class="emph">Kiss</em> provides a high-level interface to the <em class="emph">Ollama</em> large language model (LLM), the <em class="emph">OpenAI</em> (chatGPT) server, and the <em class="emph">Anthropic</em> (Claude) server. This makes it easy for you to add LLM features to your application.
 </p>
 <ul class="mini-toc">
 <li><a href="#Ollama" accesskey="1">Ollama</a></li>
 <li><a href="#OpenAI-_0028chatGPT_0029" accesskey="2">OpenAI (chatGPT)</a></li>
+<li><a href="#Anthropic-_0028Claude_0029" accesskey="3">Anthropic (Claude)</a></li>
 </ul>
 <div class="subsection-level-extent" id="Ollama">
 <h4 class="subsection"><span>6.4.1 Ollama<a class="copiable-link" href="#Ollama"> &para;</a></span></h4>
@@ -488,6 +489,29 @@ named <em class="emph">OpenAI</em>.
 </pre></div>
 
 <p>See that class for documentation.
+</p>
+</div>
+<div class="subsection-level-extent" id="Anthropic-_0028Claude_0029">
+<h4 class="subsection"><span>6.4.3 Anthropic (Claude)<a class="copiable-link" href="#Anthropic-_0028Claude_0029"> &para;</a></span></h4>
+
+<p>Like <em class="emph">OpenAI</em>, the <em class="emph">Anthropic</em> server runs in the cloud.
+In order to use it, you must have an account with Anthropic.
+Once you get an account, you will need an API Key to interface with their server.
+Once you have this API Key, you may query <em class="emph">Claude</em>.
+</p>
+<p>The single <em class="emph">KISS</em> class that interfaces with <em class="emph">Anthropic</em> is
+named <em class="emph">Anthropic</em>.
+</p>
+<p>Typical usage would look as follows:
+</p>
+<div class="example">
+<pre class="example-preformatted">    String apiKey = &quot;xxxxxxxxxxxxxxx&quot;;
+    Anthropic claude = new Anthropic(apiKey, &quot;claude-sonnet-4-20250514&quot;);
+    String result = claude.send(&quot;Who is president Bush?&quot;);
+</pre></div>
+
+<p>The class also supports streaming responses and image inputs.
+See that class for documentation.
 </p>
 </div>
 </div>
@@ -728,7 +752,7 @@ try {
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (March 16, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (March 26, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

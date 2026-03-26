@@ -381,7 +381,7 @@ JSONArray.put(Object obj)
 
 @section Large Language Models
 
-@emph{Kiss} provides a high-level interface to both the @emph{Ollama} large language model (LLM) and the OpenAI (chatGPT) server. This makes it easy for you to add LLM features to your application.
+@emph{Kiss} provides a high-level interface to the @emph{Ollama} large language model (LLM), the @emph{OpenAI} (chatGPT) server, and the @emph{Anthropic} (Claude) server. This makes it easy for you to add LLM features to your application.
 
 @subsection Ollama
 
@@ -415,6 +415,27 @@ Typical usage would look as follows:
     String result = chatGPT.send("Who is president Bush?")
 @end example
 
+See that class for documentation.
+
+@subsection Anthropic (Claude)
+
+Like @emph{OpenAI}, the @emph{Anthropic} server runs in the cloud.
+In order to use it, you must have an account with Anthropic.
+Once you get an account, you will need an API Key to interface with their server.
+Once you have this API Key, you may query @emph{Claude}.
+
+The single @emph{KISS} class that interfaces with @emph{Anthropic} is
+named @emph{Anthropic}.
+
+Typical usage would look as follows:
+
+@example
+    String apiKey = "xxxxxxxxxxxxxxx";
+    Anthropic claude = new Anthropic(apiKey, "claude-sonnet-4-20250514");
+    String result = claude.send("Who is president Bush?");
+@end example
+
+The class also supports streaming responses and image inputs.
 See that class for documentation.
 
 @section Utilities
