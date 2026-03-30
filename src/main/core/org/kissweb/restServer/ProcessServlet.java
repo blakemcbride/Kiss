@@ -854,9 +854,13 @@ public class ProcessServlet implements Runnable {
         String remoteAddr = "";
 
         if (request != null) {
-            remoteAddr = request.getHeader("X-FORWARDED-FOR");
-            if (remoteAddr == null || "".equals(remoteAddr))
-                remoteAddr = request.getRemoteAddr();
+            try {
+                remoteAddr = request.getHeader("X-FORWARDED-FOR");
+                if (remoteAddr == null || "".equals(remoteAddr))
+                    remoteAddr = request.getRemoteAddr();
+            } catch (IllegalStateException ignored) {
+                // Request object has been recycled (e.g. client disconnected during HTTP/2 stream)
+            }
         }
         return remoteAddr;
     }
