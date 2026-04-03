@@ -100,7 +100,7 @@ h2, h3, h4 {  /* subsection titles */
 Next: <a href="Introduction.html" accesskey="n" rel="next">Introduction</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
-<h1 class="top" id="Kiss-Developer-Manual-_0028_0029"><span>Kiss Developer Manual (March 26, 2026)<a class="copiable-link" href="#Kiss-Developer-Manual-_0028_0029"> &para;</a></span></h1>
+<h1 class="top" id="Kiss-Developer-Manual-_0028_0029"><span>Kiss Developer Manual (April 3, 2026)<a class="copiable-link" href="#Kiss-Developer-Manual-_0028_0029"> &para;</a></span></h1>
 
 
 
@@ -251,50 +251,121 @@ Next: <a href="Introduction.html" accesskey="n" rel="next">Introduction</a> &nbs
       <li><a id="toc-API-Reference" href="Back_002dend-API.html#API-Reference">6.6.9 API Reference</a></li>
     </ul></li>
   </ul></li>
-  <li><a id="toc-Command-Line-Utility" href="Command-Line-Utility.html">7 Command Line Utility</a>
+  <li><a id="toc-SQL-Query-Generator" href="SQL-Query-Generator.html">7 SQL Query Generator</a>
   <ul class="toc-numbered-mark">
-    <li><a id="toc-Building-The-Utility" href="Command-Line-Utility.html#Building-The-Utility">7.1 Building The Utility</a></li>
-    <li><a id="toc-Using-The-System" href="Command-Line-Utility.html#Using-The-System">7.2 Using The System</a></li>
-    <li><a id="toc-Databases-Other-Than-PostgreSQL" href="Command-Line-Utility.html#Databases-Other-Than-PostgreSQL">7.3 Databases Other Than PostgreSQL</a></li>
+    <li><a id="toc-Quick-Start" href="SQL-Query-Generator.html#Quick-Start">7.1 Quick Start</a>
+    <ul class="toc-numbered-mark">
+      <li><a id="toc-Building-the-Schema-Graph" href="SQL-Query-Generator.html#Building-the-Schema-Graph">7.1.1 Building the Schema Graph</a>
+      <ul class="toc-numbered-mark">
+        <li><a id="toc-From-Live-Database-Metadata" href="SQL-Query-Generator.html#From-Live-Database-Metadata">7.1.1.1 From Live Database Metadata</a></li>
+        <li><a id="toc-Programmatic-Declaration" href="SQL-Query-Generator.html#Programmatic-Declaration">7.1.1.2 Programmatic Declaration</a></li>
+        <li><a id="toc-Hybrid" href="SQL-Query-Generator.html#Hybrid">7.1.1.3 Hybrid</a></li>
+        <li><a id="toc-Cached-_0028for-Fast-Startup_0029" href="SQL-Query-Generator.html#Cached-_0028for-Fast-Startup_0029">7.1.1.4 Cached (for Fast Startup)</a></li>
+      </ul></li>
+      <li><a id="toc-Building-and-Executing-a-Query" href="SQL-Query-Generator.html#Building-and-Executing-a-Query">7.1.2 Building and Executing a Query</a></li>
+    </ul></li>
+    <li><a id="toc-SchemaGraph-API" href="SQL-Query-Generator.html#SchemaGraph-API">7.2 SchemaGraph API</a>
+    <ul class="toc-numbered-mark">
+      <li><a id="toc-Construction" href="SQL-Query-Generator.html#Construction">7.2.1 Construction</a></li>
+      <li><a id="toc-Populating" href="SQL-Query-Generator.html#Populating">7.2.2 Populating</a></li>
+      <li><a id="toc-Querying-the-Graph" href="SQL-Query-Generator.html#Querying-the-Graph">7.2.3 Querying the Graph</a></li>
+      <li><a id="toc-Schema-Caching" href="SQL-Query-Generator.html#Schema-Caching">7.2.4 Schema Caching</a></li>
+      <li><a id="toc-Edge-Inner-Class" href="SQL-Query-Generator.html#Edge-Inner-Class">7.2.5 Edge Inner Class</a></li>
+    </ul></li>
+    <li><a id="toc-QueryBuilder-API" href="SQL-Query-Generator.html#QueryBuilder-API">7.3 QueryBuilder API</a>
+    <ul class="toc-numbered-mark">
+      <li><a id="toc-SELECT" href="SQL-Query-Generator.html#SELECT">7.3.1 SELECT</a></li>
+      <li><a id="toc-Aggregate-Helpers" href="SQL-Query-Generator.html#Aggregate-Helpers">7.3.2 Aggregate Helpers</a></li>
+      <li><a id="toc-WHERE" href="SQL-Query-Generator.html#WHERE">7.3.3 WHERE</a></li>
+      <li><a id="toc-OR-_002f-AND-Grouping" href="SQL-Query-Generator.html#OR-_002f-AND-Grouping">7.3.4 OR / AND Grouping</a></li>
+      <li><a id="toc-Subqueries-in-WHERE" href="SQL-Query-Generator.html#Subqueries-in-WHERE">7.3.5 Subqueries in WHERE</a>
+      <ul class="toc-numbered-mark">
+        <li><a id="toc-IN-_002f-NOT-IN-with-Subquery" href="SQL-Query-Generator.html#IN-_002f-NOT-IN-with-Subquery">7.3.5.1 IN / NOT IN with Subquery</a></li>
+        <li><a id="toc-EXISTS-_002f-NOT-EXISTS" href="SQL-Query-Generator.html#EXISTS-_002f-NOT-EXISTS">7.3.5.2 EXISTS / NOT EXISTS</a></li>
+        <li><a id="toc-Subquery-Methods" href="SQL-Query-Generator.html#Subquery-Methods">7.3.5.3 Subquery Methods</a></li>
+      </ul></li>
+      <li><a id="toc-ORDER-BY" href="SQL-Query-Generator.html#ORDER-BY">7.3.6 ORDER BY</a></li>
+      <li><a id="toc-GROUP-BY-_002f-HAVING" href="SQL-Query-Generator.html#GROUP-BY-_002f-HAVING">7.3.7 GROUP BY / HAVING</a></li>
+      <li><a id="toc-Explicit-Joins" href="SQL-Query-Generator.html#Explicit-Joins">7.3.8 Explicit Joins</a>
+      <ul class="toc-numbered-mark">
+        <li><a id="toc-INNER-JOIN" href="SQL-Query-Generator.html#INNER-JOIN">7.3.8.1 INNER JOIN</a></li>
+        <li><a id="toc-LEFT-JOIN" href="SQL-Query-Generator.html#LEFT-JOIN">7.3.8.2 LEFT JOIN</a></li>
+        <li><a id="toc-RIGHT-JOIN" href="SQL-Query-Generator.html#RIGHT-JOIN">7.3.8.3 RIGHT JOIN</a></li>
+      </ul></li>
+      <li><a id="toc-LIMIT" href="SQL-Query-Generator.html#LIMIT">7.3.9 LIMIT</a></li>
+      <li><a id="toc-Common-Table-Expressions-_0028CTEs_0029" href="SQL-Query-Generator.html#Common-Table-Expressions-_0028CTEs_0029">7.3.10 Common Table Expressions (CTEs)</a></li>
+      <li><a id="toc-UNION" href="SQL-Query-Generator.html#UNION">7.3.11 UNION</a></li>
+      <li><a id="toc-Build-and-Execute" href="SQL-Query-Generator.html#Build-and-Execute">7.3.12 Build and Execute</a></li>
+    </ul></li>
+    <li><a id="toc-Examples" href="SQL-Query-Generator.html#Examples">7.4 Examples</a>
+    <ul class="toc-numbered-mark">
+      <li><a id="toc-Basic-Multi_002dTable-Query" href="SQL-Query-Generator.html#Basic-Multi_002dTable-Query">7.4.1 Basic Multi-Table Query</a></li>
+      <li><a id="toc-Self_002dJoin-_0028Employee-to-Manager_0029" href="SQL-Query-Generator.html#Self_002dJoin-_0028Employee-to-Manager_0029">7.4.2 Self-Join (Employee to Manager)</a></li>
+      <li><a id="toc-Multiple-Self_002dJoins" href="SQL-Query-Generator.html#Multiple-Self_002dJoins">7.4.3 Multiple Self-Joins</a></li>
+      <li><a id="toc-LEFT-JOIN-with-Aggregate" href="SQL-Query-Generator.html#LEFT-JOIN-with-Aggregate">7.4.4 LEFT JOIN with Aggregate</a></li>
+      <li><a id="toc-Multiple-Aggregates" href="SQL-Query-Generator.html#Multiple-Aggregates">7.4.5 Multiple Aggregates</a></li>
+      <li><a id="toc-Composite-Foreign-Key-Join" href="SQL-Query-Generator.html#Composite-Foreign-Key-Join">7.4.6 Composite Foreign Key Join</a></li>
+      <li><a id="toc-Picking-a-Specific-Foreign-Key-Path" href="SQL-Query-Generator.html#Picking-a-Specific-Foreign-Key-Path">7.4.7 Picking a Specific Foreign Key Path</a></li>
+      <li><a id="toc-Schema-Caching-for-Fast-Startup" href="SQL-Query-Generator.html#Schema-Caching-for-Fast-Startup">7.4.8 Schema Caching for Fast Startup</a></li>
+      <li><a id="toc-OR-Conditions-with-Dynamic-Building" href="SQL-Query-Generator.html#OR-Conditions-with-Dynamic-Building">7.4.9 OR Conditions with Dynamic Building</a></li>
+      <li><a id="toc-Subquery-in-WHERE" href="SQL-Query-Generator.html#Subquery-in-WHERE">7.4.10 Subquery in WHERE</a></li>
+      <li><a id="toc-CTE-with-LEFT-JOIN" href="SQL-Query-Generator.html#CTE-with-LEFT-JOIN">7.4.11 CTE with LEFT JOIN</a></li>
+      <li><a id="toc-UNION-ALL-with-ORDER-BY" href="SQL-Query-Generator.html#UNION-ALL-with-ORDER-BY">7.4.12 UNION ALL with ORDER BY</a></li>
+    </ul></li>
+    <li><a id="toc-How-It-Works-1" href="SQL-Query-Generator.html#How-It-Works-1">7.5 How It Works</a>
+    <ul class="toc-numbered-mark">
+      <li><a id="toc-Join-Path-Finding-_0028BFS_0029" href="SQL-Query-Generator.html#Join-Path-Finding-_0028BFS_0029">7.5.1 Join Path Finding (BFS)</a></li>
+      <li><a id="toc-Explicit-Join-Isolation" href="SQL-Query-Generator.html#Explicit-Join-Isolation">7.5.2 Explicit Join Isolation</a></li>
+      <li><a id="toc-Join-Type-Rules" href="SQL-Query-Generator.html#Join-Type-Rules">7.5.3 Join Type Rules</a></li>
+    </ul></li>
+    <li><a id="toc-Edge-Cases-and-Limitations" href="SQL-Query-Generator.html#Edge-Cases-and-Limitations">7.6 Edge Cases and Limitations</a></li>
+    <li><a id="toc-Performance" href="SQL-Query-Generator.html#Performance">7.7 Performance</a></li>
+    <li><a id="toc-Source-Files" href="SQL-Query-Generator.html#Source-Files">7.8 Source Files</a></li>
   </ul></li>
-  <li><a id="toc-Split-System" href="Split-System.html">8 Split System</a>
+  <li><a id="toc-Command-Line-Utility" href="Command-Line-Utility.html">8 Command Line Utility</a>
   <ul class="toc-numbered-mark">
-    <li><a id="toc-Back_002dend_002donly-System" href="Split-System.html#Back_002dend_002donly-System">8.1 Back-end-only System</a>
+    <li><a id="toc-Building-The-Utility" href="Command-Line-Utility.html#Building-The-Utility">8.1 Building The Utility</a></li>
+    <li><a id="toc-Using-The-System" href="Command-Line-Utility.html#Using-The-System">8.2 Using The System</a></li>
+    <li><a id="toc-Databases-Other-Than-PostgreSQL" href="Command-Line-Utility.html#Databases-Other-Than-PostgreSQL">8.3 Databases Other Than PostgreSQL</a></li>
+  </ul></li>
+  <li><a id="toc-Split-System" href="Split-System.html">9 Split System</a>
+  <ul class="toc-numbered-mark">
+    <li><a id="toc-Back_002dend_002donly-System" href="Split-System.html#Back_002dend_002donly-System">9.1 Back-end-only System</a>
     <ul class="toc-numbered-mark">
-      <li><a id="toc-Creating" href="Split-System.html#Creating">8.1.1 Creating</a></li>
-      <li><a id="toc-Developing-1" href="Split-System.html#Developing-2">8.1.2 Developing</a></li>
-      <li><a id="toc-Deploying" href="Split-System.html#Deploying">8.1.3 Deploying</a></li>
-      <li><a id="toc-Upgrading" href="Split-System.html#Upgrading">8.1.4 Upgrading</a></li>
+      <li><a id="toc-Creating" href="Split-System.html#Creating">9.1.1 Creating</a></li>
+      <li><a id="toc-Developing-1" href="Split-System.html#Developing-2">9.1.2 Developing</a></li>
+      <li><a id="toc-Deploying" href="Split-System.html#Deploying">9.1.3 Deploying</a></li>
+      <li><a id="toc-Upgrading" href="Split-System.html#Upgrading">9.1.4 Upgrading</a></li>
     </ul></li>
-    <li><a id="toc-Front_002dend_002donly-System" href="Split-System.html#Front_002dend_002donly-System">8.2 Front-end-only System</a>
+    <li><a id="toc-Front_002dend_002donly-System" href="Split-System.html#Front_002dend_002donly-System">9.2 Front-end-only System</a>
     <ul class="toc-numbered-mark">
-      <li><a id="toc-Creating-1" href="Split-System.html#Creating-1">8.2.1 Creating</a></li>
-      <li><a id="toc-Developing-2" href="Split-System.html#Developing-3">8.2.2 Developing</a></li>
-      <li><a id="toc-Deploying-1" href="Split-System.html#Deploying-1">8.2.3 Deploying</a></li>
-      <li><a id="toc-Upgrading-1" href="Split-System.html#Upgrading-1">8.2.4 Upgrading</a></li>
+      <li><a id="toc-Creating-1" href="Split-System.html#Creating-1">9.2.1 Creating</a></li>
+      <li><a id="toc-Developing-2" href="Split-System.html#Developing-3">9.2.2 Developing</a></li>
+      <li><a id="toc-Deploying-1" href="Split-System.html#Deploying-1">9.2.3 Deploying</a></li>
+      <li><a id="toc-Upgrading-1" href="Split-System.html#Upgrading-1">9.2.4 Upgrading</a></li>
     </ul></li>
   </ul></li>
-  <li><a id="toc-Browser_002dBased-Distribution" href="Browser-Distribution.html">9 Browser-Based Distribution</a>
+  <li><a id="toc-Browser_002dBased-Distribution" href="Browser-Distribution.html">10 Browser-Based Distribution</a>
   <ul class="toc-numbered-mark">
-    <li><a id="toc-Prerequisites" href="Browser-Distribution.html#Prerequisites">9.1 Prerequisites</a></li>
-    <li><a id="toc-Building-the-Distribution" href="Browser-Distribution.html#Building-the-Distribution">9.2 Building the Distribution</a>
+    <li><a id="toc-Prerequisites" href="Browser-Distribution.html#Prerequisites">10.1 Prerequisites</a></li>
+    <li><a id="toc-Building-the-Distribution" href="Browser-Distribution.html#Building-the-Distribution">10.2 Building the Distribution</a>
     <ul class="toc-numbered-mark">
-      <li><a id="toc-Step-1_003a-Build-the-Application" href="Browser-Distribution.html#Step-1_003a-Build-the-Application">9.2.1 Step 1: Build the Application</a></li>
-      <li><a id="toc-Step-2_003a-Create-the-Distribution" href="Browser-Distribution.html#Step-2_003a-Create-the-Distribution">9.2.2 Step 2: Create the Distribution</a></li>
+      <li><a id="toc-Step-1_003a-Build-the-Application" href="Browser-Distribution.html#Step-1_003a-Build-the-Application">10.2.1 Step 1: Build the Application</a></li>
+      <li><a id="toc-Step-2_003a-Create-the-Distribution" href="Browser-Distribution.html#Step-2_003a-Create-the-Distribution">10.2.2 Step 2: Create the Distribution</a></li>
     </ul></li>
-    <li><a id="toc-What-the-Distribution-Contains" href="Browser-Distribution.html#What-the-Distribution-Contains">9.3 What the Distribution Contains</a></li>
-    <li><a id="toc-End-User-Instructions" href="Browser-Distribution.html#End-User-Instructions">9.4 End User Instructions</a></li>
-    <li><a id="toc-Comparison-with-Desktop-Application" href="Browser-Distribution.html#Comparison-with-Desktop-Application">9.5 Comparison with Desktop Application</a></li>
+    <li><a id="toc-What-the-Distribution-Contains" href="Browser-Distribution.html#What-the-Distribution-Contains">10.3 What the Distribution Contains</a></li>
+    <li><a id="toc-End-User-Instructions" href="Browser-Distribution.html#End-User-Instructions">10.4 End User Instructions</a></li>
+    <li><a id="toc-Comparison-with-Desktop-Application" href="Browser-Distribution.html#Comparison-with-Desktop-Application">10.5 Comparison with Desktop Application</a></li>
   </ul></li>
-  <li><a id="toc-Desktop-Applications" href="Desktop-Application.html">10 Desktop Applications</a>
+  <li><a id="toc-Desktop-Applications" href="Desktop-Application.html">11 Desktop Applications</a>
   <ul class="toc-numbered-mark">
-    <li><a id="toc-Setup" href="Desktop-Application.html#Setup">10.1 Setup</a>
+    <li><a id="toc-Setup" href="Desktop-Application.html#Setup">11.1 Setup</a>
     <ul class="toc-numbered-mark">
-      <li><a id="toc-Installing-Nodejs-_0026-Npm" href="Desktop-Application.html#Installing-Nodejs-_0026-Npm">10.1.1 Installing Nodejs &amp; Npm</a></li>
-      <li><a id="toc-Installing-Electron" href="Desktop-Application.html#Installing-Electron">10.1.2 Installing Electron</a></li>
+      <li><a id="toc-Installing-Nodejs-_0026-Npm" href="Desktop-Application.html#Installing-Nodejs-_0026-Npm">11.1.1 Installing Nodejs &amp; Npm</a></li>
+      <li><a id="toc-Installing-Electron" href="Desktop-Application.html#Installing-Electron">11.1.2 Installing Electron</a></li>
     </ul></li>
-    <li><a id="toc-Building-_0026-Running" href="Desktop-Application.html#Building-_0026-Running">10.2 Building &amp; Running</a></li>
-    <li><a id="toc-Debug-Mode" href="Desktop-Application.html#Debug-Mode">10.3 Debug Mode</a></li>
+    <li><a id="toc-Building-_0026-Running" href="Desktop-Application.html#Building-_0026-Running">11.2 Building &amp; Running</a></li>
+    <li><a id="toc-Debug-Mode" href="Desktop-Application.html#Debug-Mode">11.3 Debug Mode</a></li>
   </ul></li>
 </ul>
 </div>

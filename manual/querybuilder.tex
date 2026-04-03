@@ -1,0 +1,1104 @@
+@c -*-texinfo-*-
+
+@c  Copyright (c) 2018 Blake McBride
+@c  All rights reserved.
+@c
+@c  Redistribution and use in source and binary forms, with or without
+@c  modification, are permitted provided that the following conditions are
+@c  met:
+@c
+@c  1. Redistributions of source code must retain the above copyright
+@c  notice, this list of conditions and the following disclaimer.
+@c
+@c  2. Redistributions in binary form must reproduce the above copyright
+@c  notice, this list of conditions and the following disclaimer in the
+@c  documentation and/or other materials provided with the distribution.
+@c
+@c  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+@c  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+@c  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+@c  A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+@c  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+@c  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+@c  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+@c  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+@c  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+@c  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+@c  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+@node SQL Query Generator
+
+@html
+@include style.css
+@end html
+
+@chapter SQL Query Generator
+
+In systems with many interrelated SQL tables, writing queries with the
+correct joins is complex and error-prone.  Developers must manually
+trace foreign key relationships, determine join paths, and construct
+multi-table queries --- work that the schema itself already encodes.
+
+@emph{Kiss} provides an automatic SQL query generator that solves this
+problem.  The developer specifies what columns to select, what
+conditions to apply, and how to order the results.  The system
+determines the join path automatically and produces the correct SQL.
+
+All classes are in the @code{org.kissweb.database} package:
+
+@table @code
+@item SchemaGraph
+Models the database schema as a graph where tables are nodes and
+foreign key relationships are edges.  Finds the shortest join path
+between tables using BFS (breadth-first search).
+@item QueryBuilder
+Fluent API to specify SELECT, WHERE, ORDER BY, GROUP BY, HAVING, and
+explicit joins.  Uses a @code{SchemaGraph} to automatically determine the
+required joins and produce the final SQL.
+@item SchemaGraph.Edge
+Represents a single or composite foreign key relationship between two
+tables.
+@end table
+
+@section Quick Start
+
+@subsection Building the Schema Graph
+
+The schema graph must be built once at application startup.  There
+are several ways to create it.
+
+@subsubsection From Live Database Metadata
+
+@example
+SchemaGraph graph = SchemaGraph.fromDatabase(conn);
+@end example
+
+@noindent
+This reads JDBC @code{DatabaseMetaData} for all tables and their foreign
+keys.  Composite (multi-column) foreign keys are automatically grouped
+by constraint name.  Works on all five supported databases (PostgreSQL,
+MySQL, SQLite, SQL Server, Oracle).
+
+@subsubsection Programmatic Declaration
+
+@example
+SchemaGraph graph = new SchemaGraph();
+graph.addForeignKey("employee", "department_id",
+                    "department", "department_id");
+graph.addForeignKey("order_line",
+    new String[]@{"order_id", "product_id"@},
+    "order_product",
+    new String[]@{"order_id", "product_id"@});
+@end example
+
+@subsubsection Hybrid
+
+@example
+SchemaGraph graph = SchemaGraph.fromDatabase(conn);
+graph.addForeignKey("audit_log", "user_id",
+                    "employee", "employee_id");
+@end example
+
+@subsubsection Cached (for Fast Startup)
+
+@example
+// First run: read from database, save cache
+SchemaGraph graph = SchemaGraph.fromDatabase(conn);
+graph.saveToFile("schema-cache.txt");
+
+// Subsequent runs: load from cache (sub-millisecond)
+SchemaGraph graph = SchemaGraph.loadFromFile("schema-cache.txt");
+@end example
+
+@subsection Building and Executing a Query
+
+@example
+List<Record> records = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name")
+    .select("department.name AS dept_name")
+    .select("building.address")
+    .where("project.project_id = ?", projectId)
+    .where("employee.active = 'Y'")
+    .orderBy("employee.last_name")
+    .orderBy("employee.first_name")
+    .fetchAll(conn);
+
+for (Record r : records) @{
+    String name = r.getString("first_name");
+    String dept = r.getString("dept_name");
+@}
+@end example
+
+@noindent
+The system automatically generates SQL such as:
+
+@example
+SELECT employee.first_name, employee.last_name,
+       department.name AS dept_name, building.address
+FROM project
+JOIN project_assignment
+  ON project_assignment.project_id = project.project_id
+JOIN employee
+  ON project_assignment.employee_id = employee.employee_id
+JOIN department
+  ON employee.department_id = department.department_id
+JOIN building
+  ON department.building_id = building.building_id
+WHERE project.project_id = ?
+  AND employee.active = 'Y'
+ORDER BY employee.last_name, employee.first_name
+@end example
+
+@section SchemaGraph API
+
+@subsection Construction
+
+@deffn Method SchemaGraph ()
+Create an empty schema graph for programmatic population.
+@end deffn
+
+@deffn {Static Method} SchemaGraph.fromDatabase conn
+Build a schema graph by reading all tables and foreign keys from JDBC
+@code{DatabaseMetaData}.  Called once at application startup.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{conn} --- a Kiss @code{Connection} object
+@end itemize
+
+@strong{Returns:} a populated @code{SchemaGraph}
+
+@strong{Throws:} @code{SQLException} if database metadata cannot be read
+@end deffn
+
+@deffn {Static Method} SchemaGraph.loadFromFile path
+Load a schema graph from a cache file previously saved with
+@code{saveToFile()}.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{path} --- path to the cache file
+@end itemize
+
+@strong{Returns:} a populated @code{SchemaGraph}
+
+@strong{Throws:} @code{IOException} if the file cannot be read or has an invalid format
+@end deffn
+
+@subsection Populating
+
+@deffn Method addTable tableName
+Declare a table in the graph.  This is optional --- tables are
+automatically created when referenced by @code{addForeignKey}.
+@end deffn
+
+@deffn Method addForeignKey fromTable fromColumn toTable toColumn
+Declare a single-column foreign key relationship between two tables.
+Both tables are automatically added to the graph if not already present.
+Duplicate edges are ignored.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{fromTable} --- the child table containing the FK column
+@item
+@code{fromColumn} --- the FK column in the child table
+@item
+@code{toTable} --- the parent/referenced table
+@item
+@code{toColumn} --- the referenced column (usually the primary key)
+@end itemize
+@end deffn
+
+@deffn Method addForeignKey fromTable fromColumns[] toTable toColumns[]
+Declare a composite (multi-column) foreign key relationship.
+Both tables are automatically added to the graph if not already present.
+Duplicate edges are ignored.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{fromTable} --- the child table containing the FK columns
+@item
+@code{fromColumns} --- array of FK column names in the child table
+@item
+@code{toTable} --- the parent/referenced table
+@item
+@code{toColumns} --- array of referenced column names
+@end itemize
+@end deffn
+
+@subsection Querying the Graph
+
+@deffn Method hasTable tableName
+Check whether a table exists in the graph.
+
+@strong{Returns:} @code{true} if the table has been added
+@end deffn
+
+@deffn Method getTables
+Return all table names in the graph.
+
+@strong{Returns:} an unmodifiable @code{Set<String>} of table names
+@end deffn
+
+@deffn Method getEdges tableName
+Return all foreign key edges incident on a given table.
+
+@strong{Returns:} unmodifiable list of @code{Edge} objects, or an empty list if the table is not in the graph
+@end deffn
+
+@deffn Method findJoinPath tables rootTable
+Find the shortest join path connecting all the given tables using BFS.
+The algorithm picks the root table as the starting point, then greedily
+adds the shortest BFS path from the current tree to each remaining
+table (a standard Steiner tree approximation).
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{tables} --- @code{Set<String>} of tables that must be connected
+@item
+@code{rootTable} --- the preferred root table (used as FROM), or @code{null}
+@end itemize
+
+@strong{Returns:} an ordered list of @code{Edge} objects representing the joins
+
+@strong{Throws:} @code{SQLException} if no path exists between some tables
+@end deffn
+
+@subsection Schema Caching
+
+@deffn Method saveToFile path
+Write the schema graph to a text file for later loading.
+
+The cache file format is line-based text:
+@example
+# SchemaGraph cache v1
+TABLE employee
+TABLE department
+FK employee department_id department department_id
+FK order_line order_id,product_id order_product order_id,product_id
+@end example
+@end deffn
+
+@deffn {Static Method} SchemaGraph.loadFromFile path
+Read a schema graph from a cache file previously saved with @code{saveToFile()}.
+Comments (lines starting with @code{#}) and blank lines are allowed.
+@end deffn
+
+@subsection Edge Inner Class
+
+@code{SchemaGraph.Edge} represents a foreign key relationship (single or
+composite).
+
+@deffn Method getFromTable
+Return the child table name.
+@end deffn
+
+@deffn Method getToTable
+Return the parent/referenced table name.
+@end deffn
+
+@deffn Method getFromColumn
+Return the first (or only) FK column name.
+@end deffn
+
+@deffn Method getToColumn
+Return the first (or only) referenced column name.
+@end deffn
+
+@deffn Method getFromColumns
+Return all FK column names as @code{List<String>}.
+@end deffn
+
+@deffn Method getToColumns
+Return all referenced column names as @code{List<String>}.
+@end deffn
+
+@deffn Method isComposite
+Return @code{true} if this is a composite (multi-column) foreign key.
+@end deffn
+
+@deffn Method buildOnCondition fromAlias toAlias
+Generate the ON condition clause for this edge.  For composite keys,
+column pairs are separated with @code{AND}.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{fromAlias} --- alias for the from table, or @code{null} to use the table name
+@item
+@code{toAlias} --- alias for the to table, or @code{null} to use the table name
+@end itemize
+
+@strong{Returns:} the ON condition string (e.g.@: @code{employee.dept_id = department.dept_id})
+@end deffn
+
+@noindent
+All table and column names are case-insensitive (stored lowercase
+internally).
+
+@section QueryBuilder API
+
+@subsection SELECT
+
+@deffn Method select tableColumn
+Add a column to the SELECT list.  Accepts formats such as
+@code{"table.column"}, @code{"table.column AS alias"},
+@code{"COUNT(table.column)"}, and @code{"SUM(table.column) AS total"}.
+
+@strong{Returns:} @code{this} for chaining
+@end deffn
+
+@deffn Method select tableColumns...
+Add multiple columns to the SELECT list.
+
+@strong{Returns:} @code{this} for chaining
+@end deffn
+
+@deffn Method distinct
+Enable @code{SELECT DISTINCT}.
+
+@strong{Returns:} @code{this} for chaining
+@end deffn
+
+@subsection Aggregate Helpers
+
+The following methods add aggregate function calls to the SELECT list.
+Each has a variant without an alias and a variant with an alias.
+
+@deffn Method selectCount tableColumn
+@deffnx Method selectCount tableColumn alias
+Add @code{COUNT(table.column)} or @code{COUNT(table.column) AS alias}.
+@end deffn
+
+@deffn Method selectSum tableColumn
+@deffnx Method selectSum tableColumn alias
+Add @code{SUM(table.column)} or @code{SUM(table.column) AS alias}.
+@end deffn
+
+@deffn Method selectAvg tableColumn
+@deffnx Method selectAvg tableColumn alias
+Add @code{AVG(table.column)} or @code{AVG(table.column) AS alias}.
+@end deffn
+
+@deffn Method selectMin tableColumn
+@deffnx Method selectMin tableColumn alias
+Add @code{MIN(table.column)} or @code{MIN(table.column) AS alias}.
+@end deffn
+
+@deffn Method selectMax tableColumn
+@deffnx Method selectMax tableColumn alias
+Add @code{MAX(table.column)} or @code{MAX(table.column) AS alias}.
+@end deffn
+
+@subsection WHERE
+
+@deffn Method where condition params...
+Add a WHERE condition.  Multiple calls at the same level are combined
+with the current group's operator (AND by default).
+Use @code{?} for parameter placeholders.
+
+@strong{Example:}
+@example
+.where("employee.active = ?", "Y")
+.where("employee.salary > ?", 50000)
+@end example
+@end deffn
+
+@subsection OR / AND Grouping
+
+By default, multiple @code{where()} calls are combined with AND.
+Use @code{startOr()} and @code{endOr()} to group conditions with OR:
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name")
+    .startOr()
+        .where("employee.department_id = ?", 10)
+        .where("employee.department_id = ?", 20)
+    .endOr()
+    .where("employee.active = 'Y'")
+    .build();
+// WHERE (department_id = ? OR department_id = ?)
+//   AND employee.active = 'Y'
+@end example
+
+@noindent
+OR groups can be nested with explicit AND groups:
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .startOr()
+        .where("employee.salary > ?", 100000)
+        .startAnd()
+            .where("employee.department_id = ?", 5)
+            .where("employee.level = ?", "senior")
+        .endAnd()
+    .endOr()
+    .build();
+// WHERE (salary > ? OR (department_id = ? AND level = ?))
+@end example
+
+@noindent
+Conditions can be added conditionally (the most common pattern in
+real codebases):
+
+@example
+QueryBuilder qb = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name");
+qb.startOr();
+if (dept1 != null) qb.where("employee.department_id = ?", dept1);
+if (dept2 != null) qb.where("employee.department_id = ?", dept2);
+qb.endOr();
+@end example
+
+@noindent
+Empty OR/AND groups (no conditions inside) are silently omitted from
+the SQL.
+
+@deffn Method startOr
+Begin an OR group --- conditions added between @code{startOr()} and
+@code{endOr()} are combined with OR.
+@end deffn
+
+@deffn Method endOr
+End the current OR group and return to the parent group.
+@end deffn
+
+@deffn Method startAnd
+Begin an AND group.  Useful inside an OR group to explicitly group
+conditions with AND.
+@end deffn
+
+@deffn Method endAnd
+End the current AND group and return to the parent group.
+@end deffn
+
+@subsection Subqueries in WHERE
+
+@subsubsection IN / NOT IN with Subquery
+
+Use @code{whereIn()} and @code{whereNotIn()} with a nested
+@code{QueryBuilder} or raw SQL:
+
+@example
+QueryBuilder sub = new QueryBuilder(graph)
+    .select("project_assignment.employee_id")
+    .where("project_assignment.project_id = ?", projectId);
+
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name")
+    .whereIn("employee.employee_id", sub)
+    .build();
+// WHERE employee.employee_id IN
+//   (SELECT project_assignment.employee_id ...)
+@end example
+
+@noindent
+With raw SQL:
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .whereIn("employee.employee_id",
+        "SELECT person_id FROM timesheet WHERE work_date = ?",
+        20260101)
+    .build();
+@end example
+
+@subsubsection EXISTS / NOT EXISTS
+
+@example
+QueryBuilder sub = new QueryBuilder(graph)
+    .select("1")
+    .where("project_assignment.employee_id = employee.employee_id")
+    .where("project_assignment.project_id = ?", 42);
+
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .whereExists(sub)
+    .build();
+// WHERE EXISTS (SELECT 1 FROM project_assignment WHERE ...)
+@end example
+
+@noindent
+With raw SQL:
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("department.name")
+    .whereExists("SELECT 1 FROM employee "
+       + "WHERE employee.department_id = department.department_id "
+       + "AND employee.active = 'Y'")
+    .build();
+@end example
+
+@subsubsection Subquery Methods
+
+@deffn Method whereIn column subquery
+Add @code{column IN (SELECT ...)} using a @code{QueryBuilder} subquery.
+@end deffn
+
+@deffn Method whereIn column rawSQL params...
+Add @code{column IN (raw SQL)} with parameter values.
+@end deffn
+
+@deffn Method whereNotIn column subquery
+Add @code{column NOT IN (SELECT ...)} using a @code{QueryBuilder} subquery.
+@end deffn
+
+@deffn Method whereNotIn column rawSQL params...
+Add @code{column NOT IN (raw SQL)} with parameter values.
+@end deffn
+
+@deffn Method whereExists subquery
+Add @code{EXISTS (SELECT ...)} using a @code{QueryBuilder} subquery.
+@end deffn
+
+@deffn Method whereExists rawSQL params...
+Add @code{EXISTS (raw SQL)} with parameter values.
+@end deffn
+
+@deffn Method whereNotExists subquery
+Add @code{NOT EXISTS (SELECT ...)} using a @code{QueryBuilder} subquery.
+@end deffn
+
+@deffn Method whereNotExists rawSQL params...
+Add @code{NOT EXISTS (raw SQL)} with parameter values.
+@end deffn
+
+@noindent
+Subquery parameters are merged into the outer query's parameter list
+in the correct positional order.
+
+@subsection ORDER BY
+
+@deffn Method orderBy tableColumn
+Add an ascending ORDER BY column.
+@end deffn
+
+@deffn Method orderByDesc tableColumn
+Add a descending ORDER BY column.
+@end deffn
+
+@subsection GROUP BY / HAVING
+
+@deffn Method groupBy tableColumn
+Add a GROUP BY column.
+@end deffn
+
+@deffn Method having condition params...
+Add a HAVING condition.  Multiple calls are combined with @code{AND}.
+@end deffn
+
+@subsection Explicit Joins
+
+Explicit joins give the developer control over exactly which columns
+are used for a join.  They are necessary for self-joins, and useful
+when multiple foreign key paths exist between two tables and the
+developer needs to select a specific one.
+
+@subsubsection INNER JOIN
+
+@deffn Method join fromTable fromColumn toTable toColumn
+Single-column INNER JOIN without alias.
+@end deffn
+
+@deffn Method join fromTable fromColumn toTable toColumn alias
+Single-column INNER JOIN with alias.  The alias is required for self-joins.
+@end deffn
+
+@deffn Method join fromTable fromColumns[] toTable toColumns[] alias
+Composite (multi-column) INNER JOIN, optionally with alias.
+@end deffn
+
+@subsubsection LEFT JOIN
+
+@deffn Method leftJoin fromTable fromColumn toTable toColumn
+Single-column LEFT JOIN without alias.
+@end deffn
+
+@deffn Method leftJoin fromTable fromColumn toTable toColumn alias
+Single-column LEFT JOIN with alias.
+@end deffn
+
+@deffn Method leftJoin fromTable fromColumns[] toTable toColumns[] alias
+Composite LEFT JOIN, optionally with alias.
+@end deffn
+
+@subsubsection RIGHT JOIN
+
+@deffn Method rightJoin fromTable fromColumn toTable toColumn
+Single-column RIGHT JOIN without alias.
+@end deffn
+
+@deffn Method rightJoin fromTable fromColumn toTable toColumn alias
+Single-column RIGHT JOIN with alias.
+@end deffn
+
+@deffn Method rightJoin fromTable fromColumns[] toTable toColumns[] alias
+Composite RIGHT JOIN, optionally with alias.
+@end deffn
+
+@subsection LIMIT
+
+@deffn Method limit max
+Limit the number of rows returned.  Uses @code{Connection.limit()} to
+produce database-specific SQL.
+@end deffn
+
+@subsection Common Table Expressions (CTEs)
+
+Use @code{with()} to prepend CTE blocks to the query:
+
+@example
+String sql = new QueryBuilder(graph)
+    .with("last_timesheet",
+          "SELECT person_id, MAX(work_date) work_date "
+        + "FROM timesheet WHERE billable = 'Y' "
+        + "GROUP BY person_id")
+    .select("employee.first_name", "employee.last_name")
+    .select("last_timesheet.work_date")
+    .leftJoin("employee", "employee_id",
+              "last_timesheet", "person_id")
+    .build();
+// WITH last_timesheet AS (SELECT ...) SELECT ...
+@end example
+
+@noindent
+Multiple CTEs are supported:
+
+@example
+String sql = new QueryBuilder(graph)
+    .with("cte1", "SELECT employee_id FROM employee "
+        + "WHERE active = 'Y'")
+    .with("cte2", "SELECT employee_id, MAX(work_date) "
+        + "last_date FROM timesheet GROUP BY employee_id")
+    .select("cte1.employee_id")
+    .select("cte2.last_date")
+    .leftJoin("cte1", "employee_id",
+              "cte2", "employee_id")
+    .build();
+// WITH cte1 AS (...), cte2 AS (...) SELECT ...
+@end example
+
+@noindent
+A CTE can also use a @code{QueryBuilder} as its body:
+
+@example
+QueryBuilder cteSub = new QueryBuilder(graph)
+    .select("employee.employee_id")
+    .where("employee.active = ?", "Y");
+
+String sql = new QueryBuilder(graph)
+    .with("active_emps", cteSub)
+    .select("active_emps.employee_id")
+    .build();
+@end example
+
+@deffn Method with name rawSQL params...
+Add a CTE with a raw SQL body and optional parameters.
+@end deffn
+
+@deffn Method with name subquery
+Add a CTE whose body is built from a @code{QueryBuilder}.
+@end deffn
+
+@noindent
+CTE names are treated like aliases --- they are excluded from the
+schema graph path finding.  CTE parameters appear before WHERE
+parameters in the final parameter list.
+
+@subsection UNION
+
+Combine multiple queries with @code{union()} or @code{unionAll()}:
+
+@example
+QueryBuilder q1 = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name")
+    .select("'Employee' AS person_type")
+    .where("employee.active = 'Y'");
+
+QueryBuilder q2 = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name")
+    .select("'Contractor' AS person_type")
+    .where("employee.active = 'N'");
+
+String sql = q1.unionAll(q2)
+    .orderBy("last_name")
+    .build();
+// SELECT ... UNION ALL SELECT ... ORDER BY last_name
+@end example
+
+@deffn Method union other
+Append a UNION (removes duplicates) with another @code{QueryBuilder}.
+@end deffn
+
+@deffn Method unionAll other
+Append a UNION ALL (keeps duplicates) with another @code{QueryBuilder}.
+@end deffn
+
+@noindent
+ORDER BY and LIMIT on a UNION apply to the combined result.  Multiple
+unions can be chained.  Parameters from all parts are merged in the
+correct positional order.
+
+@subsection Build and Execute
+
+@deffn Method build
+Generate the SQL query string.  After calling this method,
+@code{getParameters()} returns the ordered parameter values.
+
+@strong{Returns:} the generated SQL string
+
+@strong{Throws:} @code{SQLException} if no join path exists between the referenced tables, or if no SELECT columns were specified
+@end deffn
+
+@deffn Method getParameters
+Return the ordered list of @code{?} placeholder values.  Must be called
+after @code{build()}.
+
+@strong{Returns:} unmodifiable @code{List<Object>}
+
+@strong{Throws:} @code{IllegalStateException} if called before @code{build()}
+@end deffn
+
+@deffn Method fetchAll conn
+Build and execute the query, returning all results as @code{Record}
+objects.
+
+@strong{Returns:} @code{List<Record>}
+
+@strong{Throws:} @code{Exception} on database or query building errors
+@end deffn
+
+@deffn Method fetchOne conn
+Build and execute the query, returning the first result or @code{null}.
+
+@strong{Returns:} @code{Record} or @code{null}
+
+@strong{Throws:} @code{Exception} on database or query building errors
+@end deffn
+
+@deffn Method fetchAllJSON conn
+Build and execute the query, returning results as a @code{JSONArray}.
+
+@strong{Returns:} @code{JSONArray}
+
+@strong{Throws:} @code{Exception} on database or query building errors
+@end deffn
+
+@section Examples
+
+@subsection Basic Multi-Table Query
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name")
+    .select("department.name")
+    .select("building.address")
+    .where("employee.active = ?", "Y")
+    .orderBy("employee.last_name")
+    .build();
+@end example
+
+@noindent
+The builder automatically determines the join path from
+@code{employee} through @code{department} to @code{building}
+based on the foreign key relationships in the schema graph.
+
+@subsection Self-Join (Employee to Manager)
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .select("mgr.first_name AS manager_name")
+    .join("employee", "manager_id",
+          "employee", "employee_id", "mgr")
+    .build();
+// ... JOIN employee mgr
+//       ON employee.manager_id = mgr.employee_id
+@end example
+
+@subsection Multiple Self-Joins
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .select("mgr.first_name AS manager")
+    .select("mentor.first_name AS mentor_name")
+    .join("employee", "manager_id",
+          "employee", "employee_id", "mgr")
+    .join("employee", "mentor_id",
+          "employee", "employee_id", "mentor")
+    .build();
+@end example
+
+@subsection LEFT JOIN with Aggregate
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("department.name")
+    .selectCount("employee.employee_id", "emp_count")
+    .leftJoin("department", "department_id",
+              "employee", "department_id")
+    .groupBy("department.name")
+    .build();
+// SELECT department.name,
+//        COUNT(employee.employee_id) AS emp_count
+// FROM department
+// LEFT JOIN employee
+//   ON department.department_id = employee.department_id
+// GROUP BY department.name
+@end example
+
+@subsection Multiple Aggregates
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("department.name")
+    .selectCount("employee.employee_id", "emp_count")
+    .selectAvg("employee.salary", "avg_salary")
+    .selectSum("employee.salary", "total_salary")
+    .selectMin("employee.salary", "min_salary")
+    .selectMax("employee.salary", "max_salary")
+    .groupBy("department.name")
+    .having("COUNT(employee.employee_id) > ?", 5)
+    .build();
+@end example
+
+@subsection Composite Foreign Key Join
+
+@example
+String sql = new QueryBuilder(graph)
+    .select("order_line.qty")
+    .select("pricing.price")
+    .join("order_line",
+          new String[]@{"product_id", "region_id"@},
+          "pricing",
+          new String[]@{"product_id", "region_id"@}, null)
+    .build();
+// ... JOIN pricing
+//   ON order_line.product_id = pricing.product_id
+//  AND order_line.region_id = pricing.region_id
+@end example
+
+@subsection Picking a Specific Foreign Key Path
+
+When a table has multiple foreign keys pointing to the same table,
+use an explicit join to select which one:
+
+@example
+// employee has both department_id and home_department_id
+String sql = new QueryBuilder(graph)
+    .select("employee.name")
+    .select("department.name AS home_dept")
+    .join("employee", "home_department_id",
+          "department", "department_id")
+    .build();
+@end example
+
+@subsection Schema Caching for Fast Startup
+
+@example
+// First run: read from database, save cache
+SchemaGraph graph = SchemaGraph.fromDatabase(conn);
+graph.saveToFile("schema-cache.txt");
+
+// Subsequent runs: load from cache (sub-millisecond)
+SchemaGraph graph = SchemaGraph.loadFromFile("schema-cache.txt");
+
+// Hybrid: load cache, then add extra relationships
+SchemaGraph graph = SchemaGraph.loadFromFile("schema-cache.txt");
+graph.addForeignKey("audit_log", "user_id",
+                    "employee", "employee_id");
+@end example
+
+@subsection OR Conditions with Dynamic Building
+
+@example
+QueryBuilder qb = new QueryBuilder(graph)
+    .select("employee.first_name", "employee.last_name");
+qb.startOr();
+if (dept1 != null)
+    qb.where("employee.department_id = ?", dept1);
+if (dept2 != null)
+    qb.where("employee.department_id = ?", dept2);
+qb.endOr();
+qb.where("employee.active = 'Y'");
+String sql = qb.build();
+// WHERE (department_id = ? OR department_id = ?)
+//   AND employee.active = 'Y'
+@end example
+
+@subsection Subquery in WHERE
+
+@example
+QueryBuilder sub = new QueryBuilder(graph)
+    .select("project_assignment.employee_id")
+    .where("project_assignment.project_id = ?", projId);
+
+String sql = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .where("employee.active = 'Y'")
+    .whereIn("employee.employee_id", sub)
+    .build();
+// WHERE employee.active = 'Y'
+//   AND employee.employee_id IN
+//     (SELECT project_assignment.employee_id ...)
+@end example
+
+@subsection CTE with LEFT JOIN
+
+@example
+String sql = new QueryBuilder(graph)
+    .with("last_ts",
+          "SELECT person_id, MAX(work_date) work_date "
+        + "FROM timesheet WHERE billable = 'Y' "
+        + "GROUP BY person_id")
+    .select("employee.first_name")
+    .select("last_ts.work_date")
+    .leftJoin("employee", "employee_id",
+              "last_ts", "person_id")
+    .build();
+@end example
+
+@subsection UNION ALL with ORDER BY
+
+@example
+QueryBuilder q1 = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .select("'Active' AS status")
+    .where("employee.active = 'Y'");
+
+QueryBuilder q2 = new QueryBuilder(graph)
+    .select("employee.first_name")
+    .select("'Inactive' AS status")
+    .where("employee.active = 'N'");
+
+String sql = q1.unionAll(q2)
+    .orderBy("first_name")
+    .build();
+@end example
+
+@section How It Works
+
+@subsection Join Path Finding (BFS)
+
+When @code{build()} is called, the query builder:
+
+@enumerate
+@item
+Collects all distinct table names mentioned in SELECT, WHERE, ORDER BY,
+GROUP BY, and HAVING clauses.
+@item
+Picks the root table (first WHERE table, or first SELECT table).
+@item
+For each remaining table, runs BFS from the set of already-connected
+tables to find the shortest path through the schema graph.
+@item
+Merges overlapping paths (deduplicates edges).  The result is a tree
+of joins connecting all required tables.
+@item
+If any table is unreachable, throws @code{SQLException} naming the
+disconnected tables.
+@end enumerate
+
+@noindent
+BFS is optimal because all foreign key edges have equal weight.  It
+runs in O(V+E) time, which is sub-millisecond even for 300+ tables.
+
+@subsection Explicit Join Isolation
+
+Tables that are the target (@code{toTable}) of an explicit @code{join()},
+@code{leftJoin()}, or @code{rightJoin()} are excluded from the automatic
+join graph traversal.  This means:
+
+@itemize @bullet
+@item
+Explicit joins work even for tables not in the schema graph.
+@item
+Self-joins are handled correctly (same table as both from and to, with
+an alias).
+@item
+The developer controls exactly how explicit-join tables are reached.
+@end itemize
+
+@subsection Join Type Rules
+
+@itemize @bullet
+@item
+Auto-discovered joins (from schema graph path finding) are always @code{INNER JOIN}.
+@item
+Explicit joins use the type specified: @code{join()} produces @code{JOIN},
+@code{leftJoin()} produces @code{LEFT JOIN}, and @code{rightJoin()} produces @code{RIGHT JOIN}.
+@end itemize
+
+@section Edge Cases and Limitations
+
+@table @asis
+@item Tables with no FK path between them
+@code{build()} throws @code{SQLException} naming the disconnected tables.
+@item Composite foreign keys (multi-column)
+Fully supported.  @code{Edge} holds column lists; the ON condition emits
+@code{AND}-separated column pairs.
+@item Self-joins
+Supported via explicit @code{join()} with an alias.
+@item Multiple FK paths between two tables
+Auto-join picks the first path found.  Use an explicit @code{join()} to
+select a specific path.
+@item Tables only reachable via explicit join
+Works correctly --- explicit join target tables bypass graph path finding.
+@item Schema-qualified table names
+Supported --- table names include the schema prefix throughout.
+@item Aggregate queries without GROUP BY
+The developer's responsibility to ensure correct SQL semantics.
+@item OR conditions
+Supported via @code{startOr()} / @code{endOr()} grouping with nesting.
+@item Subqueries (IN, EXISTS)
+Supported via @code{whereIn()}, @code{whereExists()}, etc.
+@item CTEs (WITH ... AS)
+Supported via @code{with()}.  CTE names are excluded from auto-join path finding.
+@item UNION / UNION ALL
+Supported via @code{union()} / @code{unionAll()}.
+@item INTERSECT, EXCEPT
+Not supported; use raw SQL.
+@item FULL OUTER JOIN
+Not supported.
+@end table
+
+@section Performance
+
+@itemize @bullet
+@item
+@strong{Schema graph construction from DB:} One-time cost, typically 1--3
+seconds for 300 tables.
+@item
+@strong{Schema graph load from cache file:} Sub-millisecond.
+@item
+@strong{Path finding:} Sub-millisecond BFS on 300 nodes.
+@item
+@strong{Memory:} Adjacency list for 300 tables with ~500 FK relationships
+uses less than 1 MB.
+@item
+@strong{Thread safety:} @code{SchemaGraph} is safe for concurrent read
+operations after construction.
+@end itemize
+
+@section Source Files
+
+@table @code
+@item src/main/core/org/kissweb/database/SchemaGraph.java
+Schema graph model: table/edge management, BFS path finding, schema
+caching.
+@item src/main/core/org/kissweb/database/QueryBuilder.java
+Fluent query builder: SELECT, WHERE, ORDER BY, GROUP BY, HAVING,
+explicit joins, aggregate helpers, build, and execute methods.
+@item src/test/core/org/kissweb/database/QueryBuilderTest.java
+108 unit tests covering all functionality.
+@end table
