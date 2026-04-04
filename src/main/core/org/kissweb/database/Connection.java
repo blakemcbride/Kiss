@@ -93,6 +93,8 @@ public class Connection implements AutoCloseable {
     private ConnectionType ctype;
     /** Cache of table and column information */
     private final HashMap<String,HashMap<String,ColumnInfo>> columnInfo = new HashMap<>();
+    /** Schema graph */
+    private SchemaGraph schemaGraph;
 
     /**
      * Create a Connection out of a pre-opened JDBC connection.
@@ -387,6 +389,22 @@ public class Connection implements AutoCloseable {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * Create a new {@link QueryBuilder} that uses this connection's
+     * {@link SchemaGraph} for automatic join resolution.  The connection
+     * is stored in the builder so that the no-argument
+     * {@code fetchAll()}, {@code fetchOne()}, and {@code fetchAllJSON()}
+     * methods can be used without passing a connection explicitly.
+     *
+     * @return a new QueryBuilder instance
+     * @throws SQLException if the schema graph cannot be obtained
+     *
+     * @see QueryBuilder
+     */
+    public QueryBuilder newQueryBuilder() throws SQLException {
+        return new QueryBuilder(this);
     }
 
     /**
@@ -1010,7 +1028,20 @@ public class Connection implements AutoCloseable {
     public String setSchema(String schema) throws SQLException {
         String oldSchema = conn.getSchema();
         conn.setSchema(schema);
+        schemaGraph = SchemaGraph.fromDatabase(this, schema);
         return oldSchema;
+    }
+
+    /**
+     * Get the schema graph for the connection.
+     *
+     * @return the schema graph
+     * @throws SQLException if the schema graph needs to be built and database metadata cannot be read
+     */
+    public SchemaGraph getSchemaGraph() throws SQLException {
+        if (schemaGraph == null)
+            schemaGraph = SchemaGraph.fromDatabase(this);
+        return schemaGraph;
     }
 
     /**

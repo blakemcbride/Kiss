@@ -90,6 +90,7 @@ public class QueryBuilder {
     }
 
     private final SchemaGraph graph;
+    private Connection storedConn;  // optional, set by Connection-based constructor
     private final List<String> selectColumns = new ArrayList<>();
     private final List<String> orderByColumns = new ArrayList<>();
     private final List<String> groupByColumns = new ArrayList<>();
@@ -119,6 +120,22 @@ public class QueryBuilder {
      */
     public QueryBuilder(SchemaGraph graph) {
         this.graph = graph;
+        this.currentWhereGroup = rootWhereGroup;
+    }
+
+    /**
+     * Create a new query builder using the schema graph associated with
+     * the given connection.  The connection is also stored so that the
+     * no-argument {@link #fetchAll()}, {@link #fetchOne()}, and
+     * {@link #fetchAllJSON()} methods can be used without passing a
+     * connection explicitly.
+     *
+     * @param conn a Kiss database connection (must have a schema graph available)
+     * @throws SQLException if the schema graph cannot be obtained from the connection
+     */
+    public QueryBuilder(Connection conn) throws SQLException {
+        this.graph = conn.getSchemaGraph();
+        this.storedConn = conn;
         this.currentWhereGroup = rootWhereGroup;
     }
 
@@ -1000,6 +1017,89 @@ public class QueryBuilder {
         if (maxRows > 0)
             sql = conn.limit(maxRows, sql);
         return conn.fetchAllJSON(sql, parameters.toArray());
+    }
+
+    /**
+     * Build and execute the query using the stored connection, returning
+     * all results as {@code Record} objects.
+     * <br><br>
+     * This method requires that the builder was created with
+     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     *
+     * @return list of matching records
+     * @throws Exception on database or query building errors
+     * @throws IllegalStateException if no connection was stored
+     */
+    public List<Record> fetchAll() throws Exception {
+        if (storedConn == null)
+            throw new IllegalStateException("No connection available — use fetchAll(Connection) or create the QueryBuilder with a Connection");
+        return fetchAll(storedConn);
+    }
+
+    /**
+     * Build and execute the query using the stored connection, returning
+     * the first result or null.
+     * <br><br>
+     * This method requires that the builder was created with
+     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     *
+     * @return the first matching record, or null
+     * @throws Exception on database or query building errors
+     * @throws IllegalStateException if no connection was stored
+     */
+    public Record fetchOne() throws Exception {
+        if (storedConn == null)
+            throw new IllegalStateException("No connection available — use fetchOne(Connection) or create the QueryBuilder with a Connection");
+        return fetchOne(storedConn);
+    }
+
+    /**
+     * Build and execute the query using the stored connection, returning
+     * results as a {@code JSONArray}.
+     * <br><br>
+     * This method requires that the builder was created with
+     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     *
+     * @return JSONArray of results
+     * @throws Exception on database or query building errors
+     * @throws IllegalStateException if no connection was stored
+     */
+    public JSONArray fetchAllJSON() throws Exception {
+        if (storedConn == null)
+            throw new IllegalStateException("No connection available — use fetchAllJSON(Connection) or create the QueryBuilder with a Connection");
+        return fetchAllJSON(storedConn);
+    }
+
+    /**
+     * Build and execute the query, returning a {@code Cursor} for
+     * row-by-row iteration.
+     *
+     * @param conn the database connection
+     * @return a Cursor over the result set
+     * @throws Exception on database or query building errors
+     */
+    public Cursor query(Connection conn) throws Exception {
+        String sql = build();
+        if (maxRows > 0)
+            sql = conn.limit(maxRows, sql);
+        return conn.query(sql, parameters.toArray());
+    }
+
+    /**
+     * Build and execute the query using the stored connection, returning
+     * a {@code Cursor} for row-by-row iteration.
+     * <br><br>
+     * This method requires that the builder was created with
+     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     *
+     * @return a Cursor over the result set
+     * @throws Exception on database or query building errors
+     * @throws IllegalStateException if no connection was stored
+     */
+    public Cursor query() throws Exception {
+        if (storedConn == null)
+            throw new IllegalStateException("No connection available — use query(Connection) or create the QueryBuilder with a Connection");
+        return query(storedConn);
     }
 
     // ---- Internal helpers -------------------------------------------------------

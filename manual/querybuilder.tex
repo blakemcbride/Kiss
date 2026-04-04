@@ -99,6 +99,20 @@ graph.addForeignKey("audit_log", "user_id",
                     "employee", "employee_id");
 @end example
 
+@subsubsection Cached per Schema (Thread-Safe)
+
+@example
+// First call builds from the database and caches
+SchemaGraph graph = SchemaGraph.fromDatabase(conn, "mySchema");
+
+// Subsequent calls return the cached instance immediately
+SchemaGraph graph = SchemaGraph.fromDatabase(conn, "mySchema");
+
+// Clear cache if schema changes
+SchemaGraph.clearSchemaCache("mySchema");  // one entry
+SchemaGraph.clearSchemaCache();            // all entries
+@end example
+
 @subsubsection Cached (for Fast Startup)
 
 @example
@@ -111,6 +125,32 @@ SchemaGraph graph = SchemaGraph.loadFromFile("schema-cache.txt");
 @end example
 
 @subsection Building and Executing a Query
+
+The simplest approach is to create a @code{QueryBuilder} directly from
+a @code{Connection}.  The connection's schema graph is used automatically,
+and the no-argument @code{fetchAll()}, @code{fetchOne()}, and
+@code{fetchAllJSON()} methods execute against that connection:
+
+@example
+List<Record> records = conn.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .select("department.name AS dept_name")
+    .select("building.address")
+    .where("project.project_id = ?", projectId)
+    .where("employee.active = 'Y'")
+    .orderBy("employee.last_name")
+    .orderBy("employee.first_name")
+    .fetchAll();
+
+for (Record r : records) @{
+    String name = r.getString("first_name");
+    String dept = r.getString("dept_name");
+@}
+@end example
+
+@noindent
+Alternatively, a @code{QueryBuilder} can be created with an explicit
+@code{SchemaGraph} and a connection passed to the execute methods:
 
 @example
 List<Record> records = new QueryBuilder(graph)
@@ -170,6 +210,43 @@ Build a schema graph by reading all tables and foreign keys from JDBC
 @strong{Returns:} a populated @code{SchemaGraph}
 
 @strong{Throws:} @code{SQLException} if database metadata cannot be read
+@end deffn
+
+@deffn {Static Method} SchemaGraph.fromDatabase conn schema
+Build or retrieve a cached schema graph for the given schema name.
+On the first call for a given schema, this delegates to the
+single-argument @code{fromDatabase(conn)} and caches the result.
+Subsequent calls with the same schema name return the cached instance
+without reading the database again.
+
+This method is safe for use by multiple threads.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{conn} --- a Kiss @code{Connection} object
+@item
+@code{schema} --- a @code{String} used as the cache key (case-sensitive)
+@end itemize
+
+@strong{Returns:} a populated @code{SchemaGraph}, either newly built or from the cache
+
+@strong{Throws:} @code{SQLException} if the graph needs to be built and database metadata cannot be read
+@end deffn
+
+@deffn {Static Method} SchemaGraph.clearSchemaCache
+Clear the entire internal schema cache used by @code{fromDatabase(conn, schema)}.
+After calling this method, subsequent calls will re-read the database metadata.
+@end deffn
+
+@deffn {Static Method} SchemaGraph.clearSchemaCache schema
+Remove a single entry from the internal schema cache.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{schema} --- the schema identifier to remove
+@end itemize
 @end deffn
 
 @deffn {Static Method} SchemaGraph.loadFromFile path
@@ -342,6 +419,47 @@ All table and column names are case-insensitive (stored lowercase
 internally).
 
 @section QueryBuilder API
+
+@subsection Construction
+
+@deffn Method {Connection.newQueryBuilder}
+Create a new @code{QueryBuilder} that uses this connection's schema graph
+for automatic join resolution.  The connection is stored in the builder
+so that the no-argument @code{fetchAll()}, @code{fetchOne()}, and
+@code{fetchAllJSON()} methods can be used.  This is the recommended way
+to create a @code{QueryBuilder}.
+
+@strong{Returns:} a new @code{QueryBuilder}
+
+@strong{Throws:} @code{SQLException} if the schema graph cannot be obtained
+@end deffn
+
+@deffn Constructor QueryBuilder conn
+Create a query builder from a @code{Connection}.  Equivalent to
+@code{conn.newQueryBuilder()}.
+The connection's schema graph is used for join resolution, and the
+connection is stored for the no-argument execute methods.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{conn} --- a Kiss @code{Connection} object
+@end itemize
+
+@strong{Throws:} @code{SQLException} if the schema graph cannot be obtained
+@end deffn
+
+@deffn Constructor QueryBuilder graph
+Create a query builder with an explicit @code{SchemaGraph}.  The
+connection must be passed to the execute methods (@code{fetchAll(conn)},
+etc.) when using this constructor.
+
+@strong{Parameters:}
+@itemize @bullet
+@item
+@code{graph} --- the @code{SchemaGraph} describing table relationships
+@end itemize
+@end deffn
 
 @subsection SELECT
 
@@ -768,27 +886,46 @@ after @code{build()}.
 @strong{Throws:} @code{IllegalStateException} if called before @code{build()}
 @end deffn
 
-@deffn Method fetchAll conn
+@deffn Method fetchAll
+@deffnx Method fetchAll conn
 Build and execute the query, returning all results as @code{Record}
-objects.
+objects.  The no-argument form uses the stored connection (requires
+the builder to have been created with @code{Connection.newQueryBuilder()}
+or @code{new QueryBuilder(conn)}).
 
 @strong{Returns:} @code{List<Record>}
 
 @strong{Throws:} @code{Exception} on database or query building errors
 @end deffn
 
-@deffn Method fetchOne conn
+@deffn Method fetchOne
+@deffnx Method fetchOne conn
 Build and execute the query, returning the first result or @code{null}.
+The no-argument form uses the stored connection.
 
 @strong{Returns:} @code{Record} or @code{null}
 
 @strong{Throws:} @code{Exception} on database or query building errors
 @end deffn
 
-@deffn Method fetchAllJSON conn
+@deffn Method fetchAllJSON
+@deffnx Method fetchAllJSON conn
 Build and execute the query, returning results as a @code{JSONArray}.
+The no-argument form uses the stored connection.
 
 @strong{Returns:} @code{JSONArray}
+
+@strong{Throws:} @code{Exception} on database or query building errors
+@end deffn
+
+@deffn Method query
+@deffnx Method query conn
+Build and execute the query, returning a @code{Cursor} for row-by-row
+iteration.  This is useful when a large number of records is possible
+and loading all into memory at once is unnecessary.
+The no-argument form uses the stored connection.
+
+@strong{Returns:} @code{Cursor}
 
 @strong{Throws:} @code{Exception} on database or query building errors
 @end deffn

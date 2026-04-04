@@ -34,7 +34,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="SQL-Query-Generator">
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Back_002dend-API.html" accesskey="p" rel="prev">Back-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 3, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html" accesskey="n" rel="next">Command Line Utility</a>, Previous: <a href="Back_002dend-API.html" accesskey="p" rel="prev">Back-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 4, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -157,7 +157,8 @@ are several ways to create it.
 <li><a href="#From-Live-Database-Metadata" accesskey="1">From Live Database Metadata</a></li>
 <li><a href="#Programmatic-Declaration" accesskey="2">Programmatic Declaration</a></li>
 <li><a href="#Hybrid" accesskey="3">Hybrid</a></li>
-<li><a href="#Cached-_0028for-Fast-Startup_0029" accesskey="4">Cached (for Fast Startup)</a></li>
+<li><a href="#Cached-per-Schema-_0028Thread_002dSafe_0029" accesskey="4">Cached per Schema (Thread-Safe)</a></li>
+<li><a href="#Cached-_0028for-Fast-Startup_0029" accesskey="5">Cached (for Fast Startup)</a></li>
 </ul>
 <div class="subsubsection-level-extent" id="From-Live-Database-Metadata">
 <h4 class="subsubsection"><span>7.1.1.1 From Live Database Metadata<a class="copiable-link" href="#From-Live-Database-Metadata"> &para;</a></span></h4>
@@ -196,8 +197,24 @@ graph.addForeignKey(&quot;audit_log&quot;, &quot;user_id&quot;,
 </pre></div>
 
 </div>
+<div class="subsubsection-level-extent" id="Cached-per-Schema-_0028Thread_002dSafe_0029">
+<h4 class="subsubsection"><span>7.1.1.4 Cached per Schema (Thread-Safe)<a class="copiable-link" href="#Cached-per-Schema-_0028Thread_002dSafe_0029"> &para;</a></span></h4>
+
+<div class="example">
+<pre class="example-preformatted">// First call builds from the database and caches
+SchemaGraph graph = SchemaGraph.fromDatabase(conn, &quot;mySchema&quot;);
+
+// Subsequent calls return the cached instance immediately
+SchemaGraph graph = SchemaGraph.fromDatabase(conn, &quot;mySchema&quot;);
+
+// Clear cache if schema changes
+SchemaGraph.clearSchemaCache(&quot;mySchema&quot;);  // one entry
+SchemaGraph.clearSchemaCache();            // all entries
+</pre></div>
+
+</div>
 <div class="subsubsection-level-extent" id="Cached-_0028for-Fast-Startup_0029">
-<h4 class="subsubsection"><span>7.1.1.4 Cached (for Fast Startup)<a class="copiable-link" href="#Cached-_0028for-Fast-Startup_0029"> &para;</a></span></h4>
+<h4 class="subsubsection"><span>7.1.1.5 Cached (for Fast Startup)<a class="copiable-link" href="#Cached-_0028for-Fast-Startup_0029"> &para;</a></span></h4>
 
 <div class="example">
 <pre class="example-preformatted">// First run: read from database, save cache
@@ -213,6 +230,31 @@ SchemaGraph graph = SchemaGraph.loadFromFile(&quot;schema-cache.txt&quot;);
 <div class="subsection-level-extent" id="Building-and-Executing-a-Query">
 <h4 class="subsection"><span>7.1.2 Building and Executing a Query<a class="copiable-link" href="#Building-and-Executing-a-Query"> &para;</a></span></h4>
 
+<p>The simplest approach is to create a <code class="code">QueryBuilder</code> directly from
+a <code class="code">Connection</code>.  The connection&rsquo;s schema graph is used automatically,
+and the no-argument <code class="code">fetchAll()</code>, <code class="code">fetchOne()</code>, and
+<code class="code">fetchAllJSON()</code> methods execute against that connection:
+</p>
+<div class="example">
+<pre class="example-preformatted">List&lt;Record&gt; records = conn.newQueryBuilder()
+    .select(&quot;employee.first_name&quot;, &quot;employee.last_name&quot;)
+    .select(&quot;department.name AS dept_name&quot;)
+    .select(&quot;building.address&quot;)
+    .where(&quot;project.project_id = ?&quot;, projectId)
+    .where(&quot;employee.active = 'Y'&quot;)
+    .orderBy(&quot;employee.last_name&quot;)
+    .orderBy(&quot;employee.first_name&quot;)
+    .fetchAll();
+
+for (Record r : records) {
+    String name = r.getString(&quot;first_name&quot;);
+    String dept = r.getString(&quot;dept_name&quot;);
+}
+</pre></div>
+
+<p>Alternatively, a <code class="code">QueryBuilder</code> can be created with an explicit
+<code class="code">SchemaGraph</code> and a connection passed to the execute methods:
+</p>
 <div class="example">
 <pre class="example-preformatted">List&lt;Record&gt; records = new QueryBuilder(graph)
     .select(&quot;employee.first_name&quot;, &quot;employee.last_name&quot;)
@@ -283,6 +325,43 @@ ORDER BY employee.last_name, employee.first_name
 </p>
 <p><strong class="strong">Throws:</strong> <code class="code">SQLException</code> if database metadata cannot be read
 </p></dd></dl>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-SchemaGraph_002efromDatabase-1"><span class="category-def">Static Method: </span><span><strong class="def-name">SchemaGraph.fromDatabase</strong> <var class="def-var-arguments">conn schema</var><a class="copiable-link" href="#index-SchemaGraph_002efromDatabase-1"> &para;</a></span></dt>
+<dd><p>Build or retrieve a cached schema graph for the given schema name.
+On the first call for a given schema, this delegates to the
+single-argument <code class="code">fromDatabase(conn)</code> and caches the result.
+Subsequent calls with the same schema name return the cached instance
+without reading the database again.
+</p>
+<p>This method is safe for use by multiple threads.
+</p>
+<p><strong class="strong">Parameters:</strong>
+</p><ul class="itemize mark-bullet">
+<li><code class="code">conn</code> &mdash; a Kiss <code class="code">Connection</code> object
+</li><li><code class="code">schema</code> &mdash; a <code class="code">String</code> used as the cache key (case-sensitive)
+</li></ul>
+
+<p><strong class="strong">Returns:</strong> a populated <code class="code">SchemaGraph</code>, either newly built or from the cache
+</p>
+<p><strong class="strong">Throws:</strong> <code class="code">SQLException</code> if the graph needs to be built and database metadata cannot be read
+</p></dd></dl>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-SchemaGraph_002eclearSchemaCache"><span class="category-def">Static Method: </span><span><strong class="def-name">SchemaGraph.clearSchemaCache</strong><a class="copiable-link" href="#index-SchemaGraph_002eclearSchemaCache"> &para;</a></span></dt>
+<dd><p>Clear the entire internal schema cache used by <code class="code">fromDatabase(conn, schema)</code>.
+After calling this method, subsequent calls will re-read the database metadata.
+</p></dd></dl>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-SchemaGraph_002eclearSchemaCache-1"><span class="category-def">Static Method: </span><span><strong class="def-name">SchemaGraph.clearSchemaCache</strong> <var class="def-var-arguments">schema</var><a class="copiable-link" href="#index-SchemaGraph_002eclearSchemaCache-1"> &para;</a></span></dt>
+<dd><p>Remove a single entry from the internal schema cache.
+</p>
+<p><strong class="strong">Parameters:</strong>
+</p><ul class="itemize mark-bullet">
+<li><code class="code">schema</code> &mdash; the schema identifier to remove
+</li></ul>
+</dd></dl>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-SchemaGraph_002eloadFromFile"><span class="category-def">Static Method: </span><span><strong class="def-name">SchemaGraph.loadFromFile</strong> <var class="def-var-arguments">path</var><a class="copiable-link" href="#index-SchemaGraph_002eloadFromFile"> &para;</a></span></dt>
@@ -471,21 +550,66 @@ internally).
 <h3 class="section"><span>7.3 QueryBuilder API<a class="copiable-link" href="#QueryBuilder-API"> &para;</a></span></h3>
 
 <ul class="mini-toc">
-<li><a href="#SELECT" accesskey="1">SELECT</a></li>
-<li><a href="#Aggregate-Helpers" accesskey="2">Aggregate Helpers</a></li>
-<li><a href="#WHERE" accesskey="3">WHERE</a></li>
-<li><a href="#OR-_002f-AND-Grouping" accesskey="4">OR / AND Grouping</a></li>
-<li><a href="#Subqueries-in-WHERE" accesskey="5">Subqueries in WHERE</a></li>
-<li><a href="#ORDER-BY" accesskey="6">ORDER BY</a></li>
-<li><a href="#GROUP-BY-_002f-HAVING" accesskey="7">GROUP BY / HAVING</a></li>
-<li><a href="#Explicit-Joins" accesskey="8">Explicit Joins</a></li>
-<li><a href="#LIMIT" accesskey="9">LIMIT</a></li>
+<li><a href="#Construction-1" accesskey="1">Construction</a></li>
+<li><a href="#SELECT" accesskey="2">SELECT</a></li>
+<li><a href="#Aggregate-Helpers" accesskey="3">Aggregate Helpers</a></li>
+<li><a href="#WHERE" accesskey="4">WHERE</a></li>
+<li><a href="#OR-_002f-AND-Grouping" accesskey="5">OR / AND Grouping</a></li>
+<li><a href="#Subqueries-in-WHERE" accesskey="6">Subqueries in WHERE</a></li>
+<li><a href="#ORDER-BY" accesskey="7">ORDER BY</a></li>
+<li><a href="#GROUP-BY-_002f-HAVING" accesskey="8">GROUP BY / HAVING</a></li>
+<li><a href="#Explicit-Joins" accesskey="9">Explicit Joins</a></li>
+<li><a href="#LIMIT">LIMIT</a></li>
 <li><a href="#Common-Table-Expressions-_0028CTEs_0029">Common Table Expressions (CTEs)</a></li>
 <li><a href="#UNION">UNION</a></li>
 <li><a href="#Build-and-Execute">Build and Execute</a></li>
 </ul>
+<div class="subsection-level-extent" id="Construction-1">
+<h4 class="subsection"><span>7.3.1 Construction<a class="copiable-link" href="#Construction-1"> &para;</a></span></h4>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-Connection_002enewQueryBuilder"><span class="category-def">Method: </span><span><strong class="def-name">Connection.newQueryBuilder</strong><a class="copiable-link" href="#index-Connection_002enewQueryBuilder"> &para;</a></span></dt>
+<dd><p>Create a new <code class="code">QueryBuilder</code> that uses this connection&rsquo;s schema graph
+for automatic join resolution.  The connection is stored in the builder
+so that the no-argument <code class="code">fetchAll()</code>, <code class="code">fetchOne()</code>, and
+<code class="code">fetchAllJSON()</code> methods can be used.  This is the recommended way
+to create a <code class="code">QueryBuilder</code>.
+</p>
+<p><strong class="strong">Returns:</strong> a new <code class="code">QueryBuilder</code>
+</p>
+<p><strong class="strong">Throws:</strong> <code class="code">SQLException</code> if the schema graph cannot be obtained
+</p></dd></dl>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-QueryBuilder"><span class="category-def">Constructor: </span><span><strong class="def-name">QueryBuilder</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-QueryBuilder"> &para;</a></span></dt>
+<dd><p>Create a query builder from a <code class="code">Connection</code>.  Equivalent to
+<code class="code">conn.newQueryBuilder()</code>.
+The connection&rsquo;s schema graph is used for join resolution, and the
+connection is stored for the no-argument execute methods.
+</p>
+<p><strong class="strong">Parameters:</strong>
+</p><ul class="itemize mark-bullet">
+<li><code class="code">conn</code> &mdash; a Kiss <code class="code">Connection</code> object
+</li></ul>
+
+<p><strong class="strong">Throws:</strong> <code class="code">SQLException</code> if the schema graph cannot be obtained
+</p></dd></dl>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-QueryBuilder-1"><span class="category-def">Constructor: </span><span><strong class="def-name">QueryBuilder</strong> <var class="def-var-arguments">graph</var><a class="copiable-link" href="#index-QueryBuilder-1"> &para;</a></span></dt>
+<dd><p>Create a query builder with an explicit <code class="code">SchemaGraph</code>.  The
+connection must be passed to the execute methods (<code class="code">fetchAll(conn)</code>,
+etc.) when using this constructor.
+</p>
+<p><strong class="strong">Parameters:</strong>
+</p><ul class="itemize mark-bullet">
+<li><code class="code">graph</code> &mdash; the <code class="code">SchemaGraph</code> describing table relationships
+</li></ul>
+</dd></dl>
+
+</div>
 <div class="subsection-level-extent" id="SELECT">
-<h4 class="subsection"><span>7.3.1 SELECT<a class="copiable-link" href="#SELECT"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.2 SELECT<a class="copiable-link" href="#SELECT"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-select"><span class="category-def">Method: </span><span><strong class="def-name">select</strong> <var class="def-var-arguments">tableColumn</var><a class="copiable-link" href="#index-select"> &para;</a></span></dt>
@@ -512,7 +636,7 @@ internally).
 
 </div>
 <div class="subsection-level-extent" id="Aggregate-Helpers">
-<h4 class="subsection"><span>7.3.2 Aggregate Helpers<a class="copiable-link" href="#Aggregate-Helpers"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.3 Aggregate Helpers<a class="copiable-link" href="#Aggregate-Helpers"> &para;</a></span></h4>
 
 <p>The following methods add aggregate function calls to the SELECT list.
 Each has a variant without an alias and a variant with an alias.
@@ -549,7 +673,7 @@ Each has a variant without an alias and a variant with an alias.
 
 </div>
 <div class="subsection-level-extent" id="WHERE">
-<h4 class="subsection"><span>7.3.3 WHERE<a class="copiable-link" href="#WHERE"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.4 WHERE<a class="copiable-link" href="#WHERE"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-where"><span class="category-def">Method: </span><span><strong class="def-name">where</strong> <var class="def-var-arguments">condition params...</var><a class="copiable-link" href="#index-where"> &para;</a></span></dt>
@@ -566,7 +690,7 @@ Use <code class="code">?</code> for parameter placeholders.
 
 </div>
 <div class="subsection-level-extent" id="OR-_002f-AND-Grouping">
-<h4 class="subsection"><span>7.3.4 OR / AND Grouping<a class="copiable-link" href="#OR-_002f-AND-Grouping"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.5 OR / AND Grouping<a class="copiable-link" href="#OR-_002f-AND-Grouping"> &para;</a></span></h4>
 
 <p>By default, multiple <code class="code">where()</code> calls are combined with AND.
 Use <code class="code">startOr()</code> and <code class="code">endOr()</code> to group conditions with OR:
@@ -639,7 +763,7 @@ conditions with AND.
 
 </div>
 <div class="subsection-level-extent" id="Subqueries-in-WHERE">
-<h4 class="subsection"><span>7.3.5 Subqueries in WHERE<a class="copiable-link" href="#Subqueries-in-WHERE"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.6 Subqueries in WHERE<a class="copiable-link" href="#Subqueries-in-WHERE"> &para;</a></span></h4>
 
 <ul class="mini-toc">
 <li><a href="#IN-_002f-NOT-IN-with-Subquery" accesskey="1">IN / NOT IN with Subquery</a></li>
@@ -647,7 +771,7 @@ conditions with AND.
 <li><a href="#Subquery-Methods" accesskey="3">Subquery Methods</a></li>
 </ul>
 <div class="subsubsection-level-extent" id="IN-_002f-NOT-IN-with-Subquery">
-<h4 class="subsubsection"><span>7.3.5.1 IN / NOT IN with Subquery<a class="copiable-link" href="#IN-_002f-NOT-IN-with-Subquery"> &para;</a></span></h4>
+<h4 class="subsubsection"><span>7.3.6.1 IN / NOT IN with Subquery<a class="copiable-link" href="#IN-_002f-NOT-IN-with-Subquery"> &para;</a></span></h4>
 
 <p>Use <code class="code">whereIn()</code> and <code class="code">whereNotIn()</code> with a nested
 <code class="code">QueryBuilder</code> or raw SQL:
@@ -678,7 +802,7 @@ String sql = new QueryBuilder(graph)
 
 </div>
 <div class="subsubsection-level-extent" id="EXISTS-_002f-NOT-EXISTS">
-<h4 class="subsubsection"><span>7.3.5.2 EXISTS / NOT EXISTS<a class="copiable-link" href="#EXISTS-_002f-NOT-EXISTS"> &para;</a></span></h4>
+<h4 class="subsubsection"><span>7.3.6.2 EXISTS / NOT EXISTS<a class="copiable-link" href="#EXISTS-_002f-NOT-EXISTS"> &para;</a></span></h4>
 
 <div class="example">
 <pre class="example-preformatted">QueryBuilder sub = new QueryBuilder(graph)
@@ -706,7 +830,7 @@ String sql = new QueryBuilder(graph)
 
 </div>
 <div class="subsubsection-level-extent" id="Subquery-Methods">
-<h4 class="subsubsection"><span>7.3.5.3 Subquery Methods<a class="copiable-link" href="#Subquery-Methods"> &para;</a></span></h4>
+<h4 class="subsubsection"><span>7.3.6.3 Subquery Methods<a class="copiable-link" href="#Subquery-Methods"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-whereIn"><span class="category-def">Method: </span><span><strong class="def-name">whereIn</strong> <var class="def-var-arguments">column subquery</var><a class="copiable-link" href="#index-whereIn"> &para;</a></span></dt>
@@ -754,7 +878,7 @@ in the correct positional order.
 </div>
 </div>
 <div class="subsection-level-extent" id="ORDER-BY">
-<h4 class="subsection"><span>7.3.6 ORDER BY<a class="copiable-link" href="#ORDER-BY"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.7 ORDER BY<a class="copiable-link" href="#ORDER-BY"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-orderBy"><span class="category-def">Method: </span><span><strong class="def-name">orderBy</strong> <var class="def-var-arguments">tableColumn</var><a class="copiable-link" href="#index-orderBy"> &para;</a></span></dt>
@@ -768,7 +892,7 @@ in the correct positional order.
 
 </div>
 <div class="subsection-level-extent" id="GROUP-BY-_002f-HAVING">
-<h4 class="subsection"><span>7.3.7 GROUP BY / HAVING<a class="copiable-link" href="#GROUP-BY-_002f-HAVING"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.8 GROUP BY / HAVING<a class="copiable-link" href="#GROUP-BY-_002f-HAVING"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-groupBy"><span class="category-def">Method: </span><span><strong class="def-name">groupBy</strong> <var class="def-var-arguments">tableColumn</var><a class="copiable-link" href="#index-groupBy"> &para;</a></span></dt>
@@ -782,7 +906,7 @@ in the correct positional order.
 
 </div>
 <div class="subsection-level-extent" id="Explicit-Joins">
-<h4 class="subsection"><span>7.3.8 Explicit Joins<a class="copiable-link" href="#Explicit-Joins"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.9 Explicit Joins<a class="copiable-link" href="#Explicit-Joins"> &para;</a></span></h4>
 
 <p>Explicit joins give the developer control over exactly which columns
 are used for a join.  They are necessary for self-joins, and useful
@@ -795,7 +919,7 @@ developer needs to select a specific one.
 <li><a href="#RIGHT-JOIN" accesskey="3">RIGHT JOIN</a></li>
 </ul>
 <div class="subsubsection-level-extent" id="INNER-JOIN">
-<h4 class="subsubsection"><span>7.3.8.1 INNER JOIN<a class="copiable-link" href="#INNER-JOIN"> &para;</a></span></h4>
+<h4 class="subsubsection"><span>7.3.9.1 INNER JOIN<a class="copiable-link" href="#INNER-JOIN"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-join"><span class="category-def">Method: </span><span><strong class="def-name">join</strong> <var class="def-var-arguments">fromTable fromColumn toTable toColumn</var><a class="copiable-link" href="#index-join"> &para;</a></span></dt>
@@ -814,7 +938,7 @@ developer needs to select a specific one.
 
 </div>
 <div class="subsubsection-level-extent" id="LEFT-JOIN">
-<h4 class="subsubsection"><span>7.3.8.2 LEFT JOIN<a class="copiable-link" href="#LEFT-JOIN"> &para;</a></span></h4>
+<h4 class="subsubsection"><span>7.3.9.2 LEFT JOIN<a class="copiable-link" href="#LEFT-JOIN"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-leftJoin"><span class="category-def">Method: </span><span><strong class="def-name">leftJoin</strong> <var class="def-var-arguments">fromTable fromColumn toTable toColumn</var><a class="copiable-link" href="#index-leftJoin"> &para;</a></span></dt>
@@ -833,7 +957,7 @@ developer needs to select a specific one.
 
 </div>
 <div class="subsubsection-level-extent" id="RIGHT-JOIN">
-<h4 class="subsubsection"><span>7.3.8.3 RIGHT JOIN<a class="copiable-link" href="#RIGHT-JOIN"> &para;</a></span></h4>
+<h4 class="subsubsection"><span>7.3.9.3 RIGHT JOIN<a class="copiable-link" href="#RIGHT-JOIN"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-rightJoin"><span class="category-def">Method: </span><span><strong class="def-name">rightJoin</strong> <var class="def-var-arguments">fromTable fromColumn toTable toColumn</var><a class="copiable-link" href="#index-rightJoin"> &para;</a></span></dt>
@@ -853,7 +977,7 @@ developer needs to select a specific one.
 </div>
 </div>
 <div class="subsection-level-extent" id="LIMIT">
-<h4 class="subsection"><span>7.3.9 LIMIT<a class="copiable-link" href="#LIMIT"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.10 LIMIT<a class="copiable-link" href="#LIMIT"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-limit"><span class="category-def">Method: </span><span><strong class="def-name">limit</strong> <var class="def-var-arguments">max</var><a class="copiable-link" href="#index-limit"> &para;</a></span></dt>
@@ -863,7 +987,7 @@ produce database-specific SQL.
 
 </div>
 <div class="subsection-level-extent" id="Common-Table-Expressions-_0028CTEs_0029">
-<h4 class="subsection"><span>7.3.10 Common Table Expressions (CTEs)<a class="copiable-link" href="#Common-Table-Expressions-_0028CTEs_0029"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.11 Common Table Expressions (CTEs)<a class="copiable-link" href="#Common-Table-Expressions-_0028CTEs_0029"> &para;</a></span></h4>
 
 <p>Use <code class="code">with()</code> to prepend CTE blocks to the query:
 </p>
@@ -926,7 +1050,7 @@ parameters in the final parameter list.
 </p>
 </div>
 <div class="subsection-level-extent" id="UNION">
-<h4 class="subsection"><span>7.3.11 UNION<a class="copiable-link" href="#UNION"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.12 UNION<a class="copiable-link" href="#UNION"> &para;</a></span></h4>
 
 <p>Combine multiple queries with <code class="code">union()</code> or <code class="code">unionAll()</code>:
 </p>
@@ -963,7 +1087,7 @@ correct positional order.
 </p>
 </div>
 <div class="subsection-level-extent" id="Build-and-Execute">
-<h4 class="subsection"><span>7.3.12 Build and Execute<a class="copiable-link" href="#Build-and-Execute"> &para;</a></span></h4>
+<h4 class="subsection"><span>7.3.13 Build and Execute<a class="copiable-link" href="#Build-and-Execute"> &para;</a></span></h4>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-build"><span class="category-def">Method: </span><span><strong class="def-name">build</strong><a class="copiable-link" href="#index-build"> &para;</a></span></dt>
@@ -986,9 +1110,12 @@ after <code class="code">build()</code>.
 </p></dd></dl>
 
 <dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-fetchAll"><span class="category-def">Method: </span><span><strong class="def-name">fetchAll</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-fetchAll"> &para;</a></span></dt>
+<dt class="deffn def-line" id="index-fetchAll"><span class="category-def">Method: </span><span><strong class="def-name">fetchAll</strong><a class="copiable-link" href="#index-fetchAll"> &para;</a></span></dt>
+<dt class="deffnx def-cmd-deffn def-line" id="index-fetchAll-1"><span class="category-def">Method: </span><span><strong class="def-name">fetchAll</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-fetchAll-1"> &para;</a></span></dt>
 <dd><p>Build and execute the query, returning all results as <code class="code">Record</code>
-objects.
+objects.  The no-argument form uses the stored connection (requires
+the builder to have been created with <code class="code">Connection.newQueryBuilder()</code>
+or <code class="code">new QueryBuilder(conn)</code>).
 </p>
 <p><strong class="strong">Returns:</strong> <code class="code">List&lt;Record&gt;</code>
 </p>
@@ -996,8 +1123,10 @@ objects.
 </p></dd></dl>
 
 <dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-fetchOne"><span class="category-def">Method: </span><span><strong class="def-name">fetchOne</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-fetchOne"> &para;</a></span></dt>
+<dt class="deffn def-line" id="index-fetchOne"><span class="category-def">Method: </span><span><strong class="def-name">fetchOne</strong><a class="copiable-link" href="#index-fetchOne"> &para;</a></span></dt>
+<dt class="deffnx def-cmd-deffn def-line" id="index-fetchOne-1"><span class="category-def">Method: </span><span><strong class="def-name">fetchOne</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-fetchOne-1"> &para;</a></span></dt>
 <dd><p>Build and execute the query, returning the first result or <code class="code">null</code>.
+The no-argument form uses the stored connection.
 </p>
 <p><strong class="strong">Returns:</strong> <code class="code">Record</code> or <code class="code">null</code>
 </p>
@@ -1005,10 +1134,25 @@ objects.
 </p></dd></dl>
 
 <dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-fetchAllJSON"><span class="category-def">Method: </span><span><strong class="def-name">fetchAllJSON</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-fetchAllJSON"> &para;</a></span></dt>
+<dt class="deffn def-line" id="index-fetchAllJSON"><span class="category-def">Method: </span><span><strong class="def-name">fetchAllJSON</strong><a class="copiable-link" href="#index-fetchAllJSON"> &para;</a></span></dt>
+<dt class="deffnx def-cmd-deffn def-line" id="index-fetchAllJSON-1"><span class="category-def">Method: </span><span><strong class="def-name">fetchAllJSON</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-fetchAllJSON-1"> &para;</a></span></dt>
 <dd><p>Build and execute the query, returning results as a <code class="code">JSONArray</code>.
+The no-argument form uses the stored connection.
 </p>
 <p><strong class="strong">Returns:</strong> <code class="code">JSONArray</code>
+</p>
+<p><strong class="strong">Throws:</strong> <code class="code">Exception</code> on database or query building errors
+</p></dd></dl>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-query"><span class="category-def">Method: </span><span><strong class="def-name">query</strong><a class="copiable-link" href="#index-query"> &para;</a></span></dt>
+<dt class="deffnx def-cmd-deffn def-line" id="index-query-1"><span class="category-def">Method: </span><span><strong class="def-name">query</strong> <var class="def-var-arguments">conn</var><a class="copiable-link" href="#index-query-1"> &para;</a></span></dt>
+<dd><p>Build and execute the query, returning a <code class="code">Cursor</code> for row-by-row
+iteration.  This is useful when a large number of records is possible
+and loading all into memory at once is unnecessary.
+The no-argument form uses the stored connection.
+</p>
+<p><strong class="strong">Returns:</strong> <code class="code">Cursor</code>
 </p>
 <p><strong class="strong">Throws:</strong> <code class="code">Exception</code> on database or query building errors
 </p></dd></dl>
@@ -1388,7 +1532,7 @@ explicit joins, aggregate helpers, build, and execute methods.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Back_002dend-API.html">Back-end API</a>, Up: <a href="index.html">Kiss Developer Manual (April 3, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Command-Line-Utility.html">Command Line Utility</a>, Previous: <a href="Back_002dend-API.html">Back-end API</a>, Up: <a href="index.html">Kiss Developer Manual (April 4, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

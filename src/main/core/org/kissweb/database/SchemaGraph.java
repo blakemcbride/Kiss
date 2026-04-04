@@ -37,6 +37,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Models a database schema as a graph where tables are nodes and foreign key
@@ -138,6 +139,11 @@ public class SchemaGraph {
             this.toColumns = Collections.unmodifiableList(toColumns);
         }
 
+        /**
+         * Return the child table name containing the foreign key column(s).
+         *
+         * @return the child table name
+         */
         public String getFromTable() {
             return fromTable;
         }
@@ -160,6 +166,11 @@ public class SchemaGraph {
             return fromColumns;
         }
 
+        /**
+         * Return the parent/referenced table name.
+         *
+         * @return the parent table name
+         */
         public String getToTable() {
             return toTable;
         }
@@ -249,6 +260,9 @@ public class SchemaGraph {
     // table name (lowercase) → list of edges incident on that table
     private final Map<String, List<Edge>> adjacency = new HashMap<>();
 
+    // Cache of schema name → SchemaGraph for the two-argument fromDatabase method
+    private static final ConcurrentHashMap<String, SchemaGraph> schemaCache = new ConcurrentHashMap<>();
+
     /**
      * Create an empty schema graph.  Use {@link #addForeignKey(String, String, String, String)}
      * or {@link #addForeignKey(String, String[], String, String[])} to populate it.
@@ -322,6 +336,54 @@ public class SchemaGraph {
         }
 
         return graph;
+    }
+
+    /**
+     * Build or retrieve a cached schema graph for the given schema name.
+     * On the first call for a given schema, this delegates to
+     * {@link #fromDatabase(Connection)} and caches the result.
+     * Subsequent calls with the same schema name return the cached instance
+     * without reading the database again.
+     * <br><br>
+     * This method is safe for use by multiple threads.  If two threads
+     * call this concurrently with the same schema name, the graph will be
+     * built once and the same instance returned to both callers.
+     *
+     * @param conn   a Kiss database connection
+     * @param schema a schema identifier used as the cache key (case-sensitive)
+     * @return a populated {@code SchemaGraph}, either newly built or from the cache
+     * @throws SQLException if the schema graph needs to be built and database metadata cannot be read
+     */
+    public static SchemaGraph fromDatabase(Connection conn, String schema) throws SQLException {
+        SchemaGraph cached = schemaCache.get(schema);
+        if (cached != null)
+            return cached;
+        synchronized (schemaCache) {
+            cached = schemaCache.get(schema);
+            if (cached != null)
+                return cached;
+            SchemaGraph graph = fromDatabase(conn);
+            schemaCache.put(schema, graph);
+            return graph;
+        }
+    }
+
+    /**
+     * Clear the internal schema cache used by {@link #fromDatabase(Connection, String)}.
+     * After calling this method, the next call to {@code fromDatabase(conn, schema)}
+     * will re-read the database metadata.
+     */
+    public static void clearSchemaCache() {
+        schemaCache.clear();
+    }
+
+    /**
+     * Remove a single entry from the internal schema cache.
+     *
+     * @param schema the schema identifier to remove
+     */
+    public static void clearSchemaCache(String schema) {
+        schemaCache.remove(schema);
     }
 
     /**

@@ -100,7 +100,7 @@ h2, h3, h4 {  /* subsection titles */
 Next: <a href="Introduction.html" accesskey="n" rel="next">Introduction</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
-<h1 class="top" id="Kiss-Developer-Manual-_0028_0029"><span>Kiss Developer Manual (April 3, 2026)<a class="copiable-link" href="#Kiss-Developer-Manual-_0028_0029"> &para;</a></span></h1>
+<h1 class="top" id="Kiss-Developer-Manual-_0028_0029"><span>Kiss Developer Manual (April 4, 2026)<a class="copiable-link" href="#Kiss-Developer-Manual-_0028_0029"> &para;</a></span></h1>
 
 
 
@@ -260,7 +260,8 @@ Next: <a href="Introduction.html" accesskey="n" rel="next">Introduction</a> &nbs
         <li><a id="toc-From-Live-Database-Metadata" href="SQL-Query-Generator.html#From-Live-Database-Metadata">7.1.1.1 From Live Database Metadata</a></li>
         <li><a id="toc-Programmatic-Declaration" href="SQL-Query-Generator.html#Programmatic-Declaration">7.1.1.2 Programmatic Declaration</a></li>
         <li><a id="toc-Hybrid" href="SQL-Query-Generator.html#Hybrid">7.1.1.3 Hybrid</a></li>
-        <li><a id="toc-Cached-_0028for-Fast-Startup_0029" href="SQL-Query-Generator.html#Cached-_0028for-Fast-Startup_0029">7.1.1.4 Cached (for Fast Startup)</a></li>
+        <li><a id="toc-Cached-per-Schema-_0028Thread_002dSafe_0029" href="SQL-Query-Generator.html#Cached-per-Schema-_0028Thread_002dSafe_0029">7.1.1.4 Cached per Schema (Thread-Safe)</a></li>
+        <li><a id="toc-Cached-_0028for-Fast-Startup_0029" href="SQL-Query-Generator.html#Cached-_0028for-Fast-Startup_0029">7.1.1.5 Cached (for Fast Startup)</a></li>
       </ul></li>
       <li><a id="toc-Building-and-Executing-a-Query" href="SQL-Query-Generator.html#Building-and-Executing-a-Query">7.1.2 Building and Executing a Query</a></li>
     </ul></li>
@@ -274,28 +275,29 @@ Next: <a href="Introduction.html" accesskey="n" rel="next">Introduction</a> &nbs
     </ul></li>
     <li><a id="toc-QueryBuilder-API" href="SQL-Query-Generator.html#QueryBuilder-API">7.3 QueryBuilder API</a>
     <ul class="toc-numbered-mark">
-      <li><a id="toc-SELECT" href="SQL-Query-Generator.html#SELECT">7.3.1 SELECT</a></li>
-      <li><a id="toc-Aggregate-Helpers" href="SQL-Query-Generator.html#Aggregate-Helpers">7.3.2 Aggregate Helpers</a></li>
-      <li><a id="toc-WHERE" href="SQL-Query-Generator.html#WHERE">7.3.3 WHERE</a></li>
-      <li><a id="toc-OR-_002f-AND-Grouping" href="SQL-Query-Generator.html#OR-_002f-AND-Grouping">7.3.4 OR / AND Grouping</a></li>
-      <li><a id="toc-Subqueries-in-WHERE" href="SQL-Query-Generator.html#Subqueries-in-WHERE">7.3.5 Subqueries in WHERE</a>
+      <li><a id="toc-Construction-1" href="SQL-Query-Generator.html#Construction-1">7.3.1 Construction</a></li>
+      <li><a id="toc-SELECT" href="SQL-Query-Generator.html#SELECT">7.3.2 SELECT</a></li>
+      <li><a id="toc-Aggregate-Helpers" href="SQL-Query-Generator.html#Aggregate-Helpers">7.3.3 Aggregate Helpers</a></li>
+      <li><a id="toc-WHERE" href="SQL-Query-Generator.html#WHERE">7.3.4 WHERE</a></li>
+      <li><a id="toc-OR-_002f-AND-Grouping" href="SQL-Query-Generator.html#OR-_002f-AND-Grouping">7.3.5 OR / AND Grouping</a></li>
+      <li><a id="toc-Subqueries-in-WHERE" href="SQL-Query-Generator.html#Subqueries-in-WHERE">7.3.6 Subqueries in WHERE</a>
       <ul class="toc-numbered-mark">
-        <li><a id="toc-IN-_002f-NOT-IN-with-Subquery" href="SQL-Query-Generator.html#IN-_002f-NOT-IN-with-Subquery">7.3.5.1 IN / NOT IN with Subquery</a></li>
-        <li><a id="toc-EXISTS-_002f-NOT-EXISTS" href="SQL-Query-Generator.html#EXISTS-_002f-NOT-EXISTS">7.3.5.2 EXISTS / NOT EXISTS</a></li>
-        <li><a id="toc-Subquery-Methods" href="SQL-Query-Generator.html#Subquery-Methods">7.3.5.3 Subquery Methods</a></li>
+        <li><a id="toc-IN-_002f-NOT-IN-with-Subquery" href="SQL-Query-Generator.html#IN-_002f-NOT-IN-with-Subquery">7.3.6.1 IN / NOT IN with Subquery</a></li>
+        <li><a id="toc-EXISTS-_002f-NOT-EXISTS" href="SQL-Query-Generator.html#EXISTS-_002f-NOT-EXISTS">7.3.6.2 EXISTS / NOT EXISTS</a></li>
+        <li><a id="toc-Subquery-Methods" href="SQL-Query-Generator.html#Subquery-Methods">7.3.6.3 Subquery Methods</a></li>
       </ul></li>
-      <li><a id="toc-ORDER-BY" href="SQL-Query-Generator.html#ORDER-BY">7.3.6 ORDER BY</a></li>
-      <li><a id="toc-GROUP-BY-_002f-HAVING" href="SQL-Query-Generator.html#GROUP-BY-_002f-HAVING">7.3.7 GROUP BY / HAVING</a></li>
-      <li><a id="toc-Explicit-Joins" href="SQL-Query-Generator.html#Explicit-Joins">7.3.8 Explicit Joins</a>
+      <li><a id="toc-ORDER-BY" href="SQL-Query-Generator.html#ORDER-BY">7.3.7 ORDER BY</a></li>
+      <li><a id="toc-GROUP-BY-_002f-HAVING" href="SQL-Query-Generator.html#GROUP-BY-_002f-HAVING">7.3.8 GROUP BY / HAVING</a></li>
+      <li><a id="toc-Explicit-Joins" href="SQL-Query-Generator.html#Explicit-Joins">7.3.9 Explicit Joins</a>
       <ul class="toc-numbered-mark">
-        <li><a id="toc-INNER-JOIN" href="SQL-Query-Generator.html#INNER-JOIN">7.3.8.1 INNER JOIN</a></li>
-        <li><a id="toc-LEFT-JOIN" href="SQL-Query-Generator.html#LEFT-JOIN">7.3.8.2 LEFT JOIN</a></li>
-        <li><a id="toc-RIGHT-JOIN" href="SQL-Query-Generator.html#RIGHT-JOIN">7.3.8.3 RIGHT JOIN</a></li>
+        <li><a id="toc-INNER-JOIN" href="SQL-Query-Generator.html#INNER-JOIN">7.3.9.1 INNER JOIN</a></li>
+        <li><a id="toc-LEFT-JOIN" href="SQL-Query-Generator.html#LEFT-JOIN">7.3.9.2 LEFT JOIN</a></li>
+        <li><a id="toc-RIGHT-JOIN" href="SQL-Query-Generator.html#RIGHT-JOIN">7.3.9.3 RIGHT JOIN</a></li>
       </ul></li>
-      <li><a id="toc-LIMIT" href="SQL-Query-Generator.html#LIMIT">7.3.9 LIMIT</a></li>
-      <li><a id="toc-Common-Table-Expressions-_0028CTEs_0029" href="SQL-Query-Generator.html#Common-Table-Expressions-_0028CTEs_0029">7.3.10 Common Table Expressions (CTEs)</a></li>
-      <li><a id="toc-UNION" href="SQL-Query-Generator.html#UNION">7.3.11 UNION</a></li>
-      <li><a id="toc-Build-and-Execute" href="SQL-Query-Generator.html#Build-and-Execute">7.3.12 Build and Execute</a></li>
+      <li><a id="toc-LIMIT" href="SQL-Query-Generator.html#LIMIT">7.3.10 LIMIT</a></li>
+      <li><a id="toc-Common-Table-Expressions-_0028CTEs_0029" href="SQL-Query-Generator.html#Common-Table-Expressions-_0028CTEs_0029">7.3.11 Common Table Expressions (CTEs)</a></li>
+      <li><a id="toc-UNION" href="SQL-Query-Generator.html#UNION">7.3.12 UNION</a></li>
+      <li><a id="toc-Build-and-Execute" href="SQL-Query-Generator.html#Build-and-Execute">7.3.13 Build and Execute</a></li>
     </ul></li>
     <li><a id="toc-Examples" href="SQL-Query-Generator.html#Examples">7.4 Examples</a>
     <ul class="toc-numbered-mark">
