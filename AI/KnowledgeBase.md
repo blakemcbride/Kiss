@@ -593,6 +593,24 @@ This layered architecture ensures:
   - `src/main/frontend/` - Application screens (except kiss/ subdirectory)
   - `src/main/precompiled/` - Shared utility classes
 
+### Coding Style
+- **If-statement bodies must never appear on the same line as the condition.** Always place the body on the next line (or in a block on the next line). This applies to all Java and Groovy code.
+  ```java
+  // WRONG
+  if (x == null) return;
+  if (c == '(') depth++;
+
+  // CORRECT
+  if (x == null)
+      return;
+  if (c == '(')
+      depth++;
+  // Also correct
+  if (x == null) {
+      return;
+  }
+  ```
+
 ### Communication Architecture
 - Backend and frontend communicate **only through JSON-RPC** (not REST, despite the `/rest` endpoint)
 - Backend never generates HTML or JavaScript

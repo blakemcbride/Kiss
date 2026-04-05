@@ -989,6 +989,127 @@ public class QueryBuilder {
     }
 
     /**
+     * Return a formatted, human-readable version of the built SQL for debugging.
+     * Major SQL clauses appear on separate lines with joins indented for clarity.
+     * Parameter values are appended at the end.
+     * <br><br>
+     * {@link #build()} is called automatically if it has not been called yet.
+     *
+     * @return formatted SQL string with parameter values
+     */
+    @Override
+    public String toString() {
+        if (builtSQL == null) {
+            try {
+                build();
+            } catch (SQLException e) {
+                return "QueryBuilder error: " + e.getMessage();
+            }
+        }
+
+        // Keywords to break on — longer matches first to avoid partial matches
+        String[][] breakpoints = {
+            {" FROM ",       ""},
+            {" LEFT JOIN ",  "    "},
+            {" RIGHT JOIN ", "    "},
+            {" JOIN ",       "    "},
+            {" WHERE ",      ""},
+            {" GROUP BY ",   ""},
+            {" HAVING ",     ""},
+            {" UNION ALL ",  ""},
+            {" UNION ",      ""},
+            {" ORDER BY ",   ""},
+        };
+
+        String sql = builtSQL;
+        String upper = sql.toUpperCase();
+        StringBuilder sb = new StringBuilder();
+        int pos = 0;
+
+        // Handle WITH (CTE) — put main SELECT on new line
+        int withIdx = findKeywordOutsideParens(upper, pos, "WITH ");
+        if (withIdx == 0) {
+            int mainSelect = findMainSelectAfterWith(sql, upper);
+            if (mainSelect > 0) {
+                sb.append(sql, 0, mainSelect).append("\n");
+                pos = mainSelect;
+            }
+        }
+
+        while (pos < sql.length()) {
+            // Find the earliest breakpoint keyword after current position
+            String matchedKw = null;
+            String matchedIndent = null;
+            int matchIdx = Integer.MAX_VALUE;
+
+            for (String[] bp : breakpoints) {
+                int idx = findKeywordOutsideParens(upper, pos, bp[0]);
+                if (idx >= 0 && idx < matchIdx) {
+                    matchIdx = idx;
+                    matchedKw = bp[0];
+                    matchedIndent = bp[1];
+                }
+            }
+
+            if (matchedKw == null) {
+                // No more keywords — append the rest
+                sb.append(sql, pos, sql.length());
+                break;
+            }
+
+            // Append text before the keyword
+            sb.append(sql, pos, matchIdx);
+            // Start keyword on new line with indentation
+            sb.append("\n").append(matchedIndent).append(matchedKw.trim()).append(" ");
+            pos = matchIdx + matchedKw.length();
+        }
+
+        // Append parameter values
+        if (parameters != null && !parameters.isEmpty()) {
+            sb.append("\n-- Parameters: ").append(parameters);
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * Find the position of the main SELECT keyword after a WITH clause,
+     * skipping any SELECT keywords inside CTE subqueries (within parentheses).
+     * Returns -1 if not found.
+     */
+    private static int findMainSelectAfterWith(String sql, String upper) {
+        int depth = 0;
+        for (int i = 0; i < sql.length() - 6; i++) {
+            char c = sql.charAt(i);
+            if (c == '(')
+                depth++;
+            else if (c == ')')
+                depth--;
+            else if (depth == 0 && i > 0 && upper.startsWith("SELECT ", i))
+                return i;
+        }
+        return -1;
+    }
+
+    /**
+     * Find the index of a keyword in the string starting from {@code from},
+     * but only when it appears outside of parentheses.  Returns -1 if not found.
+     */
+    private static int findKeywordOutsideParens(String upper, int from, String keyword) {
+        int depth = 0;
+        for (int i = from; i <= upper.length() - keyword.length(); i++) {
+            char c = upper.charAt(i);
+            if (c == '(')
+                depth++;
+            else if (c == ')')
+                depth--;
+            else if (depth == 0 && upper.startsWith(keyword, i))
+                return i;
+        }
+        return -1;
+    }
+
+    /**
      * Return the ordered list of parameter values for the {@code ?} placeholders
      * in the SQL produced by {@link #build()}.  Must be called after {@code build()}.
      *
