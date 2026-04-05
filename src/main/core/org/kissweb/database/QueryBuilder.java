@@ -798,8 +798,8 @@ public class QueryBuilder {
         }
         explicitJoins.add(new ExplicitJoin(
                 joinType,
-                fromTable.trim().toLowerCase(), fc,
-                toTable.trim().toLowerCase(), tc,
+                resolveAlias(fromTable.trim().toLowerCase()), fc,
+                resolveAlias(toTable.trim().toLowerCase()), tc,
                 alias != null ? alias.trim() : null));
         return this;
     }
@@ -987,7 +987,9 @@ public class QueryBuilder {
         // 5. Add explicit joins
         for (ExplicitJoin ej : explicitJoins) {
             String onCondition = buildExplicitOnCondition(ej);
-            joins.add(new JoinClause(ej.joinType, ej.toTable, ej.alias, onCondition));
+            // Use explicit join alias if provided, otherwise use table alias from alias()
+            String joinAlias = ej.alias != null ? ej.alias : getAlias(ej.toTable);
+            joins.add(new JoinClause(ej.joinType, ej.toTable, joinAlias, onCondition));
         }
 
         // 6. Assemble SQL
@@ -1523,8 +1525,10 @@ public class QueryBuilder {
      * Build the ON condition string for an explicit join.
      */
     private String buildExplicitOnCondition(ExplicitJoin ej) {
-        String fromRef = ej.fromTable;
-        String toRef = ej.alias != null ? ej.alias : ej.toTable;
+        // Use the explicit join alias if provided, otherwise use the table alias
+        // from alias(), otherwise fall back to the real table name
+        String fromRef = displayName(ej.fromTable);
+        String toRef = ej.alias != null ? ej.alias : displayName(ej.toTable);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < ej.fromColumns.length; i++) {
             if (i > 0)
