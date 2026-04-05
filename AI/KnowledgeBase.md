@@ -267,6 +267,239 @@ rec.addRecord();
 
 This pattern provides a cleaner, more maintainable approach to database record insertion compared to raw SQL INSERT statements.
 
+## SQL Query Generator
+
+The Kiss framework includes an automatic SQL query generator that determines join paths from the database schema. Given a set of tables referenced in SELECT, WHERE, ORDER BY, etc., it finds the shortest join path using BFS on foreign key relationships and produces the correct SQL.
+
+### Architecture
+
+Three classes in `org.kissweb.database`:
+
+- **SchemaGraph** — models tables as nodes and FK relationships as edges; finds join paths via BFS
+- **QueryBuilder** — fluent API to specify select/where/order and produce SQL
+- **SchemaGraph.Edge** — represents a single or composite foreign key relationship
+
+File locations:
+```
+src/main/core/org/kissweb/database/SchemaGraph.java
+src/main/core/org/kissweb/database/QueryBuilder.java
+src/test/core/org/kissweb/database/QueryBuilderTest.java   (108 tests)
+```
+
+### Quick Start
+
+```java
+// Build the schema graph (once at startup)
+SchemaGraph graph = SchemaGraph.fromDatabase(connection);
+
+// Optionally cache it to a file
+graph.saveToFile("schema-cache.txt");
+
+// On subsequent startups, load from cache instead
+SchemaGraph graph = SchemaGraph.loadFromFile("schema-cache.txt");
+```
+
+```java
+// Build and execute a query via Connection
+List<Record> records = conn.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .select("department.name AS dept_name")
+    .select("building.address")
+    .where("project.project_id = ?", projectId)
+    .where("employee.active = 'Y'")
+    .orderBy("employee.last_name")
+    .orderBy("employee.first_name")
+    .fetchAll();
+
+// Returns Kiss Record objects — use existing Record API
+for (Record r : records) {
+    String name = r.getString("first_name");
+    String dept = r.getString("dept_name");
+}
+```
+
+The system automatically generates:
+```sql
+SELECT employee.first_name, employee.last_name, department.name AS dept_name, building.address
+FROM project
+JOIN project_assignment ON project_assignment.project_id = project.project_id
+JOIN employee ON project_assignment.employee_id = employee.employee_id
+JOIN department ON employee.department_id = department.department_id
+JOIN building ON department.building_id = building.building_id
+WHERE project.project_id = ?
+  AND employee.active = 'Y'
+ORDER BY employee.last_name, employee.first_name
+```
+
+### SchemaGraph
+
+`SchemaGraph` models a database schema as a graph where tables are nodes and foreign key relationships are edges. Given a set of tables, it finds the shortest join path connecting them using BFS. All table and column names are case-insensitive (stored lowercase internally). After construction, a `SchemaGraph` is thread-safe for concurrent read operations.
+
+**Construction:**
+
+| Method | Description |
+|---|---|
+| `new SchemaGraph()` | Create empty graph for programmatic population |
+| `SchemaGraph.fromDatabase(Connection conn)` | Build graph from JDBC metadata (reads all tables and FKs) |
+| `SchemaGraph.fromDatabase(Connection conn, String schema)` | Build or retrieve cached graph for schema (thread-safe) |
+| `SchemaGraph.loadFromFile(String path)` | Load graph from a cache file |
+
+**Populating:**
+
+| Method | Description |
+|---|---|
+| `addTable(String tableName)` | Declare a table (optional — auto-created by `addForeignKey`) |
+| `addForeignKey(String fromTable, String fromColumn, String toTable, String toColumn)` | Declare a single-column FK |
+| `addForeignKey(String fromTable, String[] fromColumns, String toTable, String[] toColumns)` | Declare a composite (multi-column) FK |
+
+**Querying:**
+
+| Method | Description |
+|---|---|
+| `hasTable(String tableName)` | Check if a table exists in the graph |
+| `getTables()` | Return all table names (`Set<String>`) |
+| `getEdges(String tableName)` | Return all FK edges incident on a table |
+| `findJoinPath(Set<String> tables, String rootTable)` | Find shortest join path connecting all tables via BFS |
+
+**Caching:**
+
+| Method | Description |
+|---|---|
+| `saveToFile(String path)` | Write graph to a text file |
+| `loadFromFile(String path)` | Read graph from a text file |
+| `clearSchemaCache()` | Clear entire in-memory schema cache |
+| `clearSchemaCache(String schema)` | Remove one entry from in-memory schema cache |
+
+Cache file format:
+```
+# SchemaGraph cache v1
+TABLE employee
+TABLE department
+FK employee department_id department department_id
+FK order_line order_id,product_id order_product order_id,product_id
+```
+
+**Schema Loading Strategies:**
+
+1. **Automatic from JDBC metadata (recommended):** `SchemaGraph.fromDatabase(connection)` — Uses `DatabaseMetaData.getImportedKeys()` for each table. Works on all five supported databases.
+2. **Programmatic declaration:** Create `new SchemaGraph()` and call `addForeignKey()` manually.
+3. **Hybrid:** Load from database then add additional FKs programmatically.
+4. **Cached:** `SchemaGraph.loadFromFile("schema-cache.txt")`
+
+**Edge:** `SchemaGraph.Edge` represents a foreign key relationship (single or composite). Methods: `getFromTable()`, `getToTable()`, `getFromColumn()`, `getToColumn()`, `getFromColumns()`, `getToColumns()`, `isComposite()`, `buildOnCondition(fromAlias, toAlias)`.
+
+### QueryBuilder
+
+**Construction:**
+
+- **From Connection (recommended):** `conn.newQueryBuilder()` — creates a QueryBuilder using the connection's schema graph
+- **From Command:** `cmd.newQueryBuilder()` — for concurrent queries on the same connection
+- **From explicit SchemaGraph:** `new QueryBuilder(graph)` — pass connection explicitly to execute methods
+
+**SELECT:**
+
+| Method | Description |
+|---|---|
+| `select(String tableColumn)` | Add `table.column`, `table.column AS alias`, or `FUNC(table.column)` |
+| `select(String... tableColumns)` | Add multiple columns |
+| `distinct()` | Enable `SELECT DISTINCT` |
+
+**Aggregate Helpers:** `selectCount()`, `selectSum()`, `selectAvg()`, `selectMin()`, `selectMax()` — each with optional alias parameter.
+
+**WHERE:**
+
+| Method | Description |
+|---|---|
+| `where(String condition, Object... params)` | Add condition (multiple calls combined with AND) |
+
+**OR / AND Grouping:**
+
+| Method | Description |
+|---|---|
+| `startOr()` / `endOr()` | Begin/end an OR group — conditions inside are joined with OR |
+| `startAnd()` / `endAnd()` | Begin/end an AND group (useful inside OR groups) |
+
+Empty OR/AND groups are silently omitted. Example:
+```java
+conn.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .startOr()
+        .where("employee.department_id = ?", 10)
+        .where("employee.department_id = ?", 20)
+    .endOr()
+    .where("employee.active = 'Y'")
+    .fetchAll();
+// WHERE (employee.department_id = ? OR employee.department_id = ?) AND employee.active = 'Y'
+```
+
+**Subqueries:** `whereIn()`, `whereNotIn()`, `whereExists()`, `whereNotExists()` — each accepting either a QueryBuilder subquery or raw SQL with parameters.
+
+**ORDER BY:** `orderBy(tableColumn)` (ascending), `orderByDesc(tableColumn)` (descending).
+
+**GROUP BY / HAVING:** `groupBy(tableColumn)`, `having(condition, params...)`.
+
+**Explicit Joins:** `join()`, `leftJoin()`, `rightJoin()` — each with variants for single-column, composite, and aliased joins. Explicit join target tables are excluded from automatic join resolution. Required for self-joins and choosing a specific FK path when multiple exist.
+
+Self-join example:
+```java
+conn.newQueryBuilder()
+    .select("employee.first_name")
+    .select("mgr.first_name AS manager_name")
+    .join("employee", "manager_id", "employee", "employee_id", "mgr")
+    .fetchAll();
+```
+
+**CTEs (Common Table Expressions):** `with(name, rawSQL, params...)` or `with(name, QueryBuilder)`. CTE parameters appear before WHERE parameters in the final parameter list.
+
+**UNION:** `union(QueryBuilder)` (removes duplicates), `unionAll(QueryBuilder)` (keeps duplicates). ORDER BY and LIMIT on a UNION apply to the combined result.
+
+**LIMIT:** `limit(int max)` — database-adapted via `Connection.limit()`.
+
+**Build & Execute:** All execution methods come in three forms (no-arg using stored connection/command, explicit Connection, explicit Command):
+
+| Method | Description |
+|---|---|
+| `build()` | Generate SQL string; populates `getParameters()` |
+| `getParameters()` | Ordered `?` placeholder values (call after `build()`) |
+| `fetchAll()` | Execute and return `List<Record>` |
+| `fetchOne()` | Execute and return first `Record` or null |
+| `fetchAllJSON()` | Execute and return `JSONArray` |
+| `query()` | Execute and return `Cursor` |
+
+### Connection and Command Integration
+
+`Connection.newQueryBuilder()` creates a QueryBuilder using the connection's lazily-built schema graph. `Command.newQueryBuilder()` creates a QueryBuilder bound to a specific command for concurrent query scenarios.
+
+**When to use Connection vs Command:**
+- Use `conn.newQueryBuilder()` for isolated, one-shot queries (the common case)
+- Use `cmd.newQueryBuilder()` when iterating over one query's results while executing another on the same connection
+
+### How Join Path Finding Works
+
+1. Collect all distinct tables mentioned in the query (from SELECT, WHERE, ORDER BY, GROUP BY, HAVING)
+2. Pick the root table (first WHERE table, or first SELECT table)
+3. For each remaining table, run BFS from already-connected tables to find shortest path
+4. Merge overlapping paths. If any table is unreachable, throw `SQLException`
+
+Auto-discovered joins are always `INNER JOIN`. Explicit joins use the specified type.
+
+### Edge Cases and Limitations
+
+- Tables with no FK path: `build()` throws `SQLException`
+- Composite foreign keys: fully supported
+- Self-joins: supported via explicit `join()` with alias
+- Multiple FK paths between two tables: auto-join picks first found; use explicit `join()` to override
+- Schema-qualified table names: supported
+- FULL OUTER JOIN and INTERSECT/EXCEPT: not supported; use raw SQL
+
+### Performance
+
+- **SchemaGraph from DB:** ~1–3 seconds for 300 tables (one-time cost)
+- **SchemaGraph from cache:** sub-millisecond
+- **Path finding:** sub-millisecond for 300 nodes
+- **Memory:** <1 MB for 300 tables with ~500 FK relationships
+- **Thread safety:** SchemaGraph is safe for concurrent reads after construction
+
 ## Report & Export Capabilities
 
 - **PDF Reports**: Full-featured reports with Groff
