@@ -91,6 +91,7 @@ public class QueryBuilder {
 
     private final SchemaGraph graph;
     private Connection storedConn;  // optional, set by Connection-based constructor
+    private Command storedCmd;      // optional, set by Command-based constructor
     private final List<String> selectColumns = new ArrayList<>();
     private final List<String> orderByColumns = new ArrayList<>();
     private final List<String> groupByColumns = new ArrayList<>();
@@ -136,6 +137,29 @@ public class QueryBuilder {
     public QueryBuilder(Connection conn) throws SQLException {
         this.graph = conn.getSchemaGraph();
         this.storedConn = conn;
+        this.currentWhereGroup = rootWhereGroup;
+    }
+
+    /**
+     * Create a new query builder using the schema graph associated with
+     * the given command's connection.  The command is stored so that the
+     * no-argument {@link #fetchAll()}, {@link #fetchOne()}, and
+     * {@link #fetchAllJSON()} methods execute through this specific
+     * command instance rather than creating a new one.
+     * <br><br>
+     * This is useful when multiple queries must be active simultaneously
+     * on the same connection, each using its own command to avoid
+     * interference.
+     *
+     * @param cmd a Kiss database command
+     * @throws SQLException if the schema graph cannot be obtained from the command's connection
+     *
+     * @see Command#newQueryBuilder()
+     */
+    public QueryBuilder(Command cmd) throws SQLException {
+        this.graph = cmd.conn.getSchemaGraph();
+        this.storedConn = cmd.conn;
+        this.storedCmd = cmd;
         this.currentWhereGroup = rootWhereGroup;
     }
 
@@ -1020,53 +1044,104 @@ public class QueryBuilder {
     }
 
     /**
-     * Build and execute the query using the stored connection, returning
-     * all results as {@code Record} objects.
+     * Build and execute the query, returning all results as Records.
+     *
+     * @param cmd the database command
+     * @return list of records
+     * @throws Exception on database or query building errors
+     */
+    public List<Record> fetchAll(Command cmd) throws Exception {
+        String sql = build();
+        if (maxRows > 0)
+            sql = cmd.conn.limit(maxRows, sql);
+        return cmd.fetchAll(sql, parameters.toArray());
+    }
+
+    /**
+     * Build and execute the query, returning the first result or null.
+     *
+     * @param cmd the database command
+     * @return the first matching record, or null
+     * @throws Exception on database or query building errors
+     */
+    public Record fetchOne(Command cmd) throws Exception {
+        String sql = build();
+        sql = cmd.conn.limit(1, sql);
+        return cmd.fetchOne(sql, parameters.toArray());
+    }
+
+    /**
+     * Build and execute the query, returning results as a JSONArray.
+     *
+     * @param cmd the database command
+     * @return JSONArray of results
+     * @throws Exception on database or query building errors
+     */
+    public JSONArray fetchAllJSON(Command cmd) throws Exception {
+        String sql = build();
+        if (maxRows > 0)
+            sql = cmd.conn.limit(maxRows, sql);
+        return cmd.fetchAllJSON(sql, parameters.toArray());
+    }
+
+    /**
+     * Build and execute the query using the stored connection or command,
+     * returning all results as {@code Record} objects.
      * <br><br>
-     * This method requires that the builder was created with
-     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     * If the builder was created with a {@link Command} (via
+     * {@link #QueryBuilder(Command)} or {@link Command#newQueryBuilder()}),
+     * the query executes through that command.  Otherwise, the stored
+     * connection is used.
      *
      * @return list of matching records
      * @throws Exception on database or query building errors
-     * @throws IllegalStateException if no connection was stored
+     * @throws IllegalStateException if no connection or command was stored
      */
     public List<Record> fetchAll() throws Exception {
+        if (storedCmd != null)
+            return fetchAll(storedCmd);
         if (storedConn == null)
-            throw new IllegalStateException("No connection available — use fetchAll(Connection) or create the QueryBuilder with a Connection");
+            throw new IllegalStateException("No connection available — use fetchAll(Connection) or create the QueryBuilder with a Connection or Command");
         return fetchAll(storedConn);
     }
 
     /**
-     * Build and execute the query using the stored connection, returning
-     * the first result or null.
+     * Build and execute the query using the stored connection or command,
+     * returning the first result or null.
      * <br><br>
-     * This method requires that the builder was created with
-     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     * If the builder was created with a {@link Command}, the query
+     * executes through that command.  Otherwise, the stored connection
+     * is used.
      *
      * @return the first matching record, or null
      * @throws Exception on database or query building errors
-     * @throws IllegalStateException if no connection was stored
+     * @throws IllegalStateException if no connection or command was stored
      */
     public Record fetchOne() throws Exception {
+        if (storedCmd != null)
+            return fetchOne(storedCmd);
         if (storedConn == null)
-            throw new IllegalStateException("No connection available — use fetchOne(Connection) or create the QueryBuilder with a Connection");
+            throw new IllegalStateException("No connection available — use fetchOne(Connection) or create the QueryBuilder with a Connection or Command");
         return fetchOne(storedConn);
     }
 
     /**
-     * Build and execute the query using the stored connection, returning
-     * results as a {@code JSONArray}.
+     * Build and execute the query using the stored connection or command,
+     * returning results as a {@code JSONArray}.
      * <br><br>
-     * This method requires that the builder was created with
-     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     * If the builder was created with a {@link Command}, the query
+     * executes through that command.  Otherwise, the stored connection
+     * is used.
      *
      * @return JSONArray of results
      * @throws Exception on database or query building errors
-     * @throws IllegalStateException if no connection was stored
+     * @throws IllegalStateException if no connection or command was stored
      */
     public JSONArray fetchAllJSON() throws Exception {
+        if (storedCmd != null)
+            return fetchAllJSON(storedCmd);
         if (storedConn == null)
-            throw new IllegalStateException("No connection available — use fetchAllJSON(Connection) or create the QueryBuilder with a Connection");
+            throw new IllegalStateException("No connection available — use fetchAllJSON(Connection) or create the QueryBuilder with a Connection or Command");
         return fetchAllJSON(storedConn);
     }
 
@@ -1086,19 +1161,37 @@ public class QueryBuilder {
     }
 
     /**
-     * Build and execute the query using the stored connection, returning
-     * a {@code Cursor} for row-by-row iteration.
+     * Build and execute the query, returning a {@code Cursor} for
+     * row-by-row iteration.
+     *
+     * @param cmd the database command
+     * @return a Cursor over the result set
+     * @throws Exception on database or query building errors
+     */
+    public Cursor query(Command cmd) throws Exception {
+        String sql = build();
+        if (maxRows > 0)
+            sql = cmd.conn.limit(maxRows, sql);
+        return cmd.query(sql, parameters.toArray());
+    }
+
+    /**
+     * Build and execute the query using the stored connection or command,
+     * returning a {@code Cursor} for row-by-row iteration.
      * <br><br>
-     * This method requires that the builder was created with
-     * {@link #QueryBuilder(Connection)} or via {@link Connection#newQueryBuilder()}.
+     * If the builder was created with a {@link Command}, the query
+     * executes through that command.  Otherwise, the stored connection
+     * is used.
      *
      * @return a Cursor over the result set
      * @throws Exception on database or query building errors
-     * @throws IllegalStateException if no connection was stored
+     * @throws IllegalStateException if no connection or command was stored
      */
     public Cursor query() throws Exception {
+        if (storedCmd != null)
+            return query(storedCmd);
         if (storedConn == null)
-            throw new IllegalStateException("No connection available — use query(Connection) or create the QueryBuilder with a Connection");
+            throw new IllegalStateException("No connection available — use query(Connection) or create the QueryBuilder with a Connection or Command");
         return query(storedConn);
     }
 

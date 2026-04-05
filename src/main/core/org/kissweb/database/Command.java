@@ -496,6 +496,27 @@ public class Command implements AutoCloseable {
         return (Boolean) r.get("exists");
     }
 
+    /**
+     * Create a new {@link QueryBuilder} that uses this command's connection's
+     * {@link SchemaGraph} for automatic join resolution.  The command is
+     * stored in the builder so that the no-argument
+     * {@code fetchAll()}, {@code fetchOne()}, and {@code fetchAllJSON()}
+     * methods execute through this specific command instance.
+     * <br><br>
+     * This is useful when multiple queries must be active simultaneously
+     * on the same connection, each using its own command to avoid
+     * interference between simultaneously active result sets.
+     *
+     * @return a new QueryBuilder instance bound to this command
+     * @throws java.sql.SQLException if the schema graph cannot be obtained
+     *
+     * @see QueryBuilder
+     * @see Connection#newQueryBuilder()
+     */
+    public QueryBuilder newQueryBuilder() throws SQLException {
+        return new QueryBuilder(this);
+    }
+
     List<String> getPriColumns(Cursor c) {
         if (pcols == null  ||  pcols.isEmpty()) {
             if (pcols == null)
