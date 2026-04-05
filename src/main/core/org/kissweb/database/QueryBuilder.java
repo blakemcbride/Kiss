@@ -99,6 +99,9 @@ public class QueryBuilder {
     private final List<ExplicitJoin> explicitJoins = new ArrayList<>();
     private final List<CTE> ctes = new ArrayList<>();
     private final List<UnionClause> unions = new ArrayList<>();
+    private final Map<String, JoinType> joinTypeOverrides = new HashMap<>();
+    private final Map<String, String> aliasToTable = new HashMap<>();   // alias -> real table
+    private final Map<String, String> tableToAlias = new HashMap<>();   // real table -> alias
     private boolean distinct = false;
     private int maxRows = 0;
 
@@ -161,6 +164,68 @@ public class QueryBuilder {
         this.storedConn = cmd.conn;
         this.storedCmd = cmd;
         this.currentWhereGroup = rootWhereGroup;
+    }
+
+    // ---- TABLE ALIASES ---------------------------------------------------------
+
+    /**
+     * Define an alias for a table name.  Once defined, the alias can be used
+     * in place of the full table name in {@code select()}, {@code where()},
+     * {@code orderBy()}, and all other clause methods.  The builder resolves
+     * the alias to the real table name for join path finding, and emits
+     * {@code real_table alias} in the FROM and JOIN clauses so the database
+     * recognizes the short name.
+     * <br><br>
+     * Example:
+     * <pre>
+     *     db.newQueryBuilder()
+     *         .alias("employee", "e")
+     *         .alias("department", "d")
+     *         .select("e.first_name", "e.last_name", "d.name")
+     *         .where("e.active = ?", "Y")
+     *         .orderBy("e.last_name")
+     *         .fetchAll();
+     * </pre>
+     *
+     * @param tableName the real table name
+     * @param alias     the alias to use in query clauses
+     * @return this builder for chaining
+     */
+    public QueryBuilder alias(String tableName, String alias) {
+        aliasToTable.put(alias.toLowerCase(), tableName.toLowerCase());
+        tableToAlias.put(tableName.toLowerCase(), alias.toLowerCase());
+        return this;
+    }
+
+    /**
+     * Resolve a name that may be an alias to the real table name.
+     * Returns the input unchanged (lowercased) if it is not a known alias.
+     */
+    private String resolveAlias(String nameOrAlias) {
+        if (nameOrAlias == null)
+            return null;
+        String lower = nameOrAlias.toLowerCase();
+        return aliasToTable.getOrDefault(lower, lower);
+    }
+
+    /**
+     * Return the alias for a real table name, or null if no alias was defined.
+     */
+    private String getAlias(String tableName) {
+        if (tableName == null)
+            return null;
+        return tableToAlias.get(tableName.toLowerCase());
+    }
+
+    /**
+     * Return the display name for a table — its alias if one was defined,
+     * otherwise the table name itself.
+     */
+    private String displayName(String tableName) {
+        if (tableName == null)
+            return null;
+        String alias = tableToAlias.get(tableName.toLowerCase());
+        return alias != null ? alias : tableName;
     }
 
     // ---- SELECT ----------------------------------------------------------------
@@ -588,6 +653,40 @@ public class QueryBuilder {
         return addExplicitJoin(JoinType.INNER, fromTable, fromColumns, toTable, toColumns, alias);
     }
 
+    // ---- JOIN TYPE OVERRIDES ----------------------------------------------------
+
+    /**
+     * Override the join type to LEFT JOIN for an auto-discovered join to the
+     * specified table.  The foreign key path is still resolved automatically
+     * from the schema graph; only the join type changes.
+     * <br><br>
+     * The table may be specified by its real name or by an alias
+     * defined via {@link #alias(String, String)}.
+     *
+     * @param table the table (or alias) whose auto-join should use LEFT JOIN
+     * @return this builder for chaining
+     */
+    public QueryBuilder leftJoin(String table) {
+        joinTypeOverrides.put(resolveAlias(table.toLowerCase()), JoinType.LEFT);
+        return this;
+    }
+
+    /**
+     * Override the join type to RIGHT JOIN for an auto-discovered join to the
+     * specified table.  The foreign key path is still resolved automatically
+     * from the schema graph; only the join type changes.
+     * <br><br>
+     * The table may be specified by its real name or by an alias
+     * defined via {@link #alias(String, String)}.
+     *
+     * @param table the table (or alias) whose auto-join should use RIGHT JOIN
+     * @return this builder for chaining
+     */
+    public QueryBuilder rightJoin(String table) {
+        joinTypeOverrides.put(resolveAlias(table.toLowerCase()), JoinType.RIGHT);
+        return this;
+    }
+
     // ---- LEFT JOIN -------------------------------------------------------------
 
     /**
@@ -790,7 +889,7 @@ public class QueryBuilder {
         String firstSelectTable = null;
 
         for (String col : selectColumns) {
-            String table = extractTable(col);
+            String table = resolveExtractTable(col);
             if (table != null) {
                 referencedTables.add(table);
                 if (firstSelectTable == null)
@@ -802,19 +901,19 @@ public class QueryBuilder {
         firstWhereTable = collectTablesFromWhereTree(rootWhereGroup, referencedTables);
 
         for (String col : orderByColumns) {
-            String table = extractTable(col);
+            String table = resolveExtractTable(col);
             if (table != null)
                 referencedTables.add(table);
         }
 
         for (String col : groupByColumns) {
-            String table = extractTable(col);
+            String table = resolveExtractTable(col);
             if (table != null)
                 referencedTables.add(table);
         }
 
         for (WhereClause hc : havingClauses)
-            referencedTables.addAll(extractAllTables(hc.condition));
+            referencedTables.addAll(resolveExtractAllTables(hc.condition));
 
         // Collect explicit join aliases and toTables so we can exclude them
         // from auto-join resolution.  Explicit joins handle their own ON conditions,
@@ -928,6 +1027,9 @@ public class QueryBuilder {
 
         // FROM
         sql.append(" FROM ").append(rootTable);
+        String rootAlias = getAlias(rootTable);
+        if (rootAlias != null)
+            sql.append(" ").append(rootAlias);
 
         // JOINs
         for (JoinClause jc : joins) {
@@ -1327,6 +1429,7 @@ public class QueryBuilder {
     /**
      * Extract the first table name from an expression like "table.column",
      * "table.column AS alias", "COUNT(table.column)", etc.
+     * Does not resolve aliases — returns the raw name as written.
      */
     static String extractTable(String expr) {
         Matcher m = TABLE_DOT_COLUMN.matcher(expr);
@@ -1336,8 +1439,16 @@ public class QueryBuilder {
     }
 
     /**
+     * Extract the first table name from an expression, resolving any
+     * alias to the real table name.
+     */
+    private String resolveExtractTable(String expr) {
+        return resolveAlias(extractTable(expr));
+    }
+
+    /**
      * Extract all table names from an expression that may contain multiple
-     * table.column references.
+     * table.column references.  Does not resolve aliases.
      */
     static Set<String> extractAllTables(String expr) {
         Set<String> tables = new LinkedHashSet<>();
@@ -1346,6 +1457,18 @@ public class QueryBuilder {
         while (m.find())
             tables.add(m.group(1).toLowerCase());
         return tables;
+    }
+
+    /**
+     * Extract all table names from an expression, resolving any
+     * aliases to real table names.
+     */
+    private Set<String> resolveExtractAllTables(String expr) {
+        Set<String> raw = extractAllTables(expr);
+        Set<String> resolved = new LinkedHashSet<>();
+        for (String t : raw)
+            resolved.add(resolveAlias(t));
+        return resolved;
     }
 
     /**
@@ -1446,8 +1569,12 @@ public class QueryBuilder {
                 String neighbor = e.otherTable(current);
                 if (!visited.contains(neighbor)) {
                     visited.add(neighbor);
-                    String onCondition = e.buildOnCondition(null, null);
-                    result.add(new JoinClause(JoinType.INNER, neighbor, null, onCondition));
+                    String fromAlias = getAlias(e.getFromTable());
+                    String toAlias = getAlias(e.getToTable());
+                    String onCondition = e.buildOnCondition(fromAlias, toAlias);
+                    JoinType jt = joinTypeOverrides.getOrDefault(neighbor.toLowerCase(), JoinType.INNER);
+                    String neighborAlias = getAlias(neighbor);
+                    result.add(new JoinClause(jt, neighbor, neighborAlias, onCondition));
                     queue.add(neighbor);
                 }
             }
@@ -1466,20 +1593,20 @@ public class QueryBuilder {
         String firstTable = null;
         if (node instanceof WhereLeaf) {
             WhereLeaf leaf = (WhereLeaf) node;
-            Set<String> leafTables = extractAllTables(leaf.condition);
+            Set<String> leafTables = resolveExtractAllTables(leaf.condition);
             tables.addAll(leafTables);
             if (!leafTables.isEmpty())
                 firstTable = leafTables.iterator().next();
         } else if (node instanceof WhereSubquery) {
             WhereSubquery ws = (WhereSubquery) node;
-            Set<String> prefixTables = extractAllTables(ws.prefix);
+            Set<String> prefixTables = resolveExtractAllTables(ws.prefix);
             tables.addAll(prefixTables);
             if (!prefixTables.isEmpty())
                 firstTable = prefixTables.iterator().next();
             // Don't collect tables from the subquery itself — it's self-contained
         } else if (node instanceof WhereRawSubquery) {
             WhereRawSubquery wr = (WhereRawSubquery) node;
-            Set<String> rawTables = extractAllTables(wr.sql);
+            Set<String> rawTables = resolveExtractAllTables(wr.sql);
             tables.addAll(rawTables);
             if (!rawTables.isEmpty())
                 firstTable = rawTables.iterator().next();
