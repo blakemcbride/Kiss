@@ -77,7 +77,7 @@ public class Anthropic {
     /**
      * Overrides the Anthropic Messages API endpoint URL used by this class.
      *
-     * <p>This is a global (static) setting: changing the URL affects all current and future
+     * <p>This is a global setting: changing the URL affects all current and future
      * {@link Anthropic} instances created in this JVM.</p>
      *
      * <p>This is primarily intended for testing, proxies, gateways, or Anthropic-compatible
@@ -85,28 +85,24 @@ public class Anthropic {
      *
      * @param url the full URL to use for Messages API requests (for example,
      *            {@code https://api.anthropic.com/v1/messages})
-     * @return this {@link Anthropic} client to allow fluent call chaining
      */
-    public static Anthropic setUrl(String url) {
+    public static void setUrl(String url) {
         ANTHROPIC_URL = url;
-        return this;
     }
 
     /**
      * Overrides the Anthropic API version header value sent with requests.
      *
-     * <p>This is a global (static) setting: changing the version affects all current and future
+     * <p>This is a global setting: changing the version affects all current and future
      * {@link Anthropic} instances created in this JVM.</p>
      *
      * <p>The version is sent as the {@code anthropic-version} request header. Use this if you need
      * to pin to a specific API contract or test against a different version.</p>
      *
      * @param version the API version string to send (for example, {@code 2023-06-01})
-     * @return this {@link Anthropic} client to allow fluent call chaining
      */
-    public static Anthropic setVersion(String version) {
+    public static void setVersion(String version) {
         ANTHROPIC_VERSION = version;
-        return this;
     }
 
     /**

@@ -90,7 +90,7 @@ public class OpenAI {
     /**
      * Overrides the OpenAI Chat Completions endpoint URL used by this class.
      *
-     * <p>This is a global (static) setting: changing the URL affects all current and future
+     * <p>This is a global setting: changing the URL affects all current and future
      * {@link OpenAI} instances created in this JVM.</p>
      *
      * <p>This is primarily intended for testing, proxies, gateways, or OpenAI-compatible
@@ -98,11 +98,9 @@ public class OpenAI {
      *
      * @param url the full URL to use for chat completion requests (for example,
      *            {@code https://api.openai.com/v1/chat/completions})
-     * @return this {@link OpenAI} client to allow fluent call chaining
      */
-    public static OpenAI setUrl(String url) {
+    public static void setUrl(String url) {
         OPENAI_URL = url;
-        return this;
     }
 
     /**
