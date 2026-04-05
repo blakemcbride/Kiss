@@ -34,7 +34,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 4, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 5, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -488,6 +488,11 @@ named <em class="emph">OpenAI</em>.
     String result = chatGPT.send(&quot;Who is president Bush?&quot;)
 </pre></div>
 
+<p>The static method <code class="code">setUrl(String url)</code> can be used to override the
+default OpenAI endpoint URL.  This is useful for proxies, gateways, or
+OpenAI-compatible endpoints.  Since it is a global setting, changing the
+URL affects all instances.
+</p>
 <p>See that class for documentation.
 </p>
 </div>
@@ -511,7 +516,15 @@ named <em class="emph">Anthropic</em>.
 </pre></div>
 
 <p>The class also supports streaming responses and image inputs.
-See that class for documentation.
+</p>
+<p>The static method <code class="code">setUrl(String url)</code> can be used to override the
+default Anthropic endpoint URL.  This is useful for proxies, gateways, or
+Anthropic-compatible endpoints.  The static method
+<code class="code">setVersion(String version)</code> can be used to override the
+<code class="code">anthropic-version</code> request header value (e.g., <code class="code">2023-06-01</code>).
+Both are global settings that affect all instances.
+</p>
+<p>See that class for documentation.
 </p>
 </div>
 </div>
@@ -752,7 +765,7 @@ try {
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (April 4, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (April 5, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

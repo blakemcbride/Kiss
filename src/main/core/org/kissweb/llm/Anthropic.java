@@ -61,8 +61,8 @@ import java.nio.file.Paths;
  */
 public class Anthropic {
 
-    private static final String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
-    private static final String ANTHROPIC_VERSION = "2023-06-01";
+    private static String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
+    private static String ANTHROPIC_VERSION = "2023-06-01";
 
     private final String apiKey; // Your Anthropic API key
     private final String model;  // e.g. "claude-sonnet-4-20250514"
@@ -73,6 +73,41 @@ public class Anthropic {
 
     private JSONObject lastResponse;  // Full JSON of last non-stream call
     private final RestClient restClient; // Re-used HTTP helper
+
+    /**
+     * Overrides the Anthropic Messages API endpoint URL used by this class.
+     *
+     * <p>This is a global (static) setting: changing the URL affects all current and future
+     * {@link Anthropic} instances created in this JVM.</p>
+     *
+     * <p>This is primarily intended for testing, proxies, gateways, or Anthropic-compatible
+     * endpoints.</p>
+     *
+     * @param url the full URL to use for Messages API requests (for example,
+     *            {@code https://api.anthropic.com/v1/messages})
+     * @return this {@link Anthropic} client to allow fluent call chaining
+     */
+    public static Anthropic setUrl(String url) {
+        ANTHROPIC_URL = url;
+        return this;
+    }
+
+    /**
+     * Overrides the Anthropic API version header value sent with requests.
+     *
+     * <p>This is a global (static) setting: changing the version affects all current and future
+     * {@link Anthropic} instances created in this JVM.</p>
+     *
+     * <p>The version is sent as the {@code anthropic-version} request header. Use this if you need
+     * to pin to a specific API contract or test against a different version.</p>
+     *
+     * @param version the API version string to send (for example, {@code 2023-06-01})
+     * @return this {@link Anthropic} client to allow fluent call chaining
+     */
+    public static Anthropic setVersion(String version) {
+        ANTHROPIC_VERSION = version;
+        return this;
+    }
 
     /**
      * Creates a new Anthropic client instance.

@@ -71,7 +71,7 @@ import java.nio.file.Paths;
  */
 public class OpenAI {
 
-    private static final String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+    private static String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
     private final String apiKey; // Your API key
     private final String model; // e.g. "gpt-4o"
@@ -84,6 +84,26 @@ public class OpenAI {
 
     private JSONObject lastResponse; // Full JSON of last non-stream call
     private final RestClient restClient; // Re‑used HTTP helper
+
+
+
+    /**
+     * Overrides the OpenAI Chat Completions endpoint URL used by this class.
+     *
+     * <p>This is a global (static) setting: changing the URL affects all current and future
+     * {@link OpenAI} instances created in this JVM.</p>
+     *
+     * <p>This is primarily intended for testing, proxies, gateways, or OpenAI-compatible
+     * endpoints.</p>
+     *
+     * @param url the full URL to use for chat completion requests (for example,
+     *            {@code https://api.openai.com/v1/chat/completions})
+     * @return this {@link OpenAI} client to allow fluent call chaining
+     */
+    public static OpenAI setUrl(String url) {
+        OPENAI_URL = url;
+        return this;
+    }
 
     /**
      * Creates a new OpenAI client instance.

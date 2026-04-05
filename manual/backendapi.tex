@@ -415,6 +415,11 @@ Typical usage would look as follows:
     String result = chatGPT.send("Who is president Bush?")
 @end example
 
+The static method @code{setUrl(String url)} can be used to override the
+default OpenAI endpoint URL.  This is useful for proxies, gateways, or
+OpenAI-compatible endpoints.  Since it is a global setting, changing the
+URL affects all instances.
+
 See that class for documentation.
 
 @subsection Anthropic (Claude)
@@ -436,6 +441,14 @@ Typical usage would look as follows:
 @end example
 
 The class also supports streaming responses and image inputs.
+
+The static method @code{setUrl(String url)} can be used to override the
+default Anthropic endpoint URL.  This is useful for proxies, gateways, or
+Anthropic-compatible endpoints.  The static method
+@code{setVersion(String version)} can be used to override the
+@code{anthropic-version} request header value (e.g., @code{2023-06-01}).
+Both are global settings that affect all instances.
+
 See that class for documentation.
 
 @section Utilities
