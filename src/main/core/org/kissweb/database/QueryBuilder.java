@@ -1341,10 +1341,59 @@ public class QueryBuilder {
      */
     static Set<String> extractAllTables(String expr) {
         Set<String> tables = new LinkedHashSet<>();
-        Matcher m = TABLE_DOT_COLUMN.matcher(expr);
+        String cleaned = removeSubqueries(expr);
+        Matcher m = TABLE_DOT_COLUMN.matcher(cleaned);
         while (m.find())
             tables.add(m.group(1).toLowerCase());
         return tables;
+    }
+
+    /**
+     * Remove all parenthesized SELECT subqueries from {@code sql} before
+     * scanning for table.column references.  Table aliases used only inside a
+     * subquery (e.g. {@code mt2} in {@code (SELECT ... FROM message_to mt2 ...)})
+     * must not be mistaken for outer-query table references.
+     *
+     * <p>The scan is case-insensitive and handles nested parentheses correctly.
+     * Every {@code (SELECT ...)} block — at any nesting depth — is replaced with
+     * an empty string so that its contents are invisible to the caller's regex.
+     */
+    private static String removeSubqueries(String sql) {
+        if (sql == null || sql.isEmpty())
+            return sql;
+
+        // Pattern: an opening '(' optionally followed by whitespace then SELECT
+        Pattern subqueryStart = Pattern.compile("\\(\\s*SELECT\\b", Pattern.CASE_INSENSITIVE);
+
+        StringBuilder result = new StringBuilder(sql);
+        Matcher m = subqueryStart.matcher(result);
+
+        // Each removal shifts indices, so restart the search from the
+        // beginning after every removal.  In practice subqueries are rare
+        // and short, so the cost is negligible.
+        while (m.find()) {
+            int start = m.start();          // position of the opening '('
+            int depth = 1;
+            int i = m.end();               // first character after the '('...SELECT match
+            int len = result.length();
+
+            while (i < len && depth > 0) {
+                char c = result.charAt(i);
+                if (c == '(')
+                    depth++;
+                else if (c == ')')
+                    depth--;
+                i++;
+            }
+
+            // i now points one past the closing ')' that matched the opening '('
+            result.delete(start, i);
+
+            // Reset matcher against the modified string
+            m = subqueryStart.matcher(result);
+        }
+
+        return result.toString();
     }
 
     /**
