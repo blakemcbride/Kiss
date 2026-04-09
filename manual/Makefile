@@ -1,5 +1,5 @@
 
-TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex \
+TEXFILES= GettingStarted.tex intro.tex setup.tex orientation.tex developing.tex \
           backendapi.tex querybuilder.tex frontendapi.tex commandline.tex splitsystem.tex desktop.tex dist.tex
 
 
@@ -14,10 +14,10 @@ TEXFILES= Kiss.tex intro.tex setup.tex orientation.tex developing.tex \
 %.ps : %.dvi
 	dvips -T Letter -O 0in,-0.8in $*
 
-all: man/index.html jsdoc/index.html GroovyOverview.html # Kiss.pdf GroovyOverview.pdf
+all: man/index.html jsdoc/index.html GroovyOverview.html # GettingStarted.pdf GroovyOverview.pdf
 
 man/index.html :  $(TEXFILES)
-	makeinfo --html Kiss.tex -o man
+	makeinfo --html GettingStarted.tex -o man
 
 # -----------------------------------------------------------------------------
 # Find JSDoc executable (prefer local, fallback to PATH global)
@@ -53,10 +53,10 @@ jsdoc/index.html: $(JSDOC_SOURCES) conf.json JsDocHead.md
 .PHONY: jsdoc
 jsdoc: jsdoc/index.html
 
-Kiss.pdf : $(TEXFILES)
-	pdftex Kiss.tex
-	pdftex Kiss.tex
-	pdftex Kiss.tex
+GettingStarted.pdf : $(TEXFILES)
+	pdftex GettingStarted.tex
+	pdftex GettingStarted.tex
+	pdftex GettingStarted.tex
 
 GroovyOverview.html : GroovyOverview.tex
 	makeinfo --html --no-split GroovyOverview.tex
@@ -74,6 +74,6 @@ realclean: clean
 	rm -f *.dvi *.ps *.pdf
 
 
-updateserver: Kiss.pdf
-	scp Kiss.pdf root@blakemcbride.us://srv/www/blakemcbride.us/software/kiss
+updateserver: GettingStarted.pdf
+	scp GettingStarted.pdf root@blakemcbride.us://srv/www/blakemcbride.us/software/kiss
 
