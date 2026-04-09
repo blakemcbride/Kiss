@@ -22,7 +22,6 @@
 a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
 div.example {margin-left: 3.2em}
 span:hover a.copiable-link {visibility: visible}
-strong.def-name {font-family: monospace; font-weight: bold; font-size: larger}
 ul.mark-bullet {list-style-type: disc}
 -->
 </style>
@@ -34,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 5, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Developer Manual (April 8, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -113,7 +112,9 @@ API&rsquo;s may be broadly grouped as follows:
 </li></ol>
 
 <p>An overview of these APIs is contained in this chapter.  Detailed
-documentation is contained in the JavaDocs.  See <a class="xref" href="Orientation.html#javadoc">Creating JavaDocs</a>.
+documentation is contained in the JavaDocs (See <a class="xref" href="Orientation.html#javadoc">Creating
+JavaDocs</a>) and in the <em class="emph">Kiss</em> book, which provides comprehensive
+coverage with worked examples.
 </p>
 <ul class="mini-toc">
 <li><a href="#Database-API" accesskey="1">Database API</a></li>
@@ -404,47 +405,11 @@ to</em> the front-end.  The REST service should read the data passed in
 from <code class="code">injson</code>, perform any needed processes, and put the result
 into <code class="code">outjson</code> to be returned to the front-end.
 </p>
-<p>A modified version of a publicly available JSON Java package is
-included and used to access JSON from the front-end and create JSON to
-return to the front-end.  This package has many methods but only a few are
-commonly used.
+<p>The two main data types are <code class="code">JSONObject</code> and <code class="code">JSONArray</code>.
+Common methods include <code class="code">getString()</code>, <code class="code">getInt()</code>,
+<code class="code">getBoolean()</code>, <code class="code">getDouble()</code>, <code class="code">getJSONArray()</code>,
+<code class="code">has()</code>, and <code class="code">put()</code>.  See the JavaDocs for the complete API.
 </p>
-<p>There are two main data types of interest.  They are <code class="code">JSONObject</code> and
-<code class="code">JSONArray</code>.  They hold the JSON types indicated by their names.
-</p>
-<p>Command useful for getting data out of <code class="code">injson</code>:
-</p>
-<ul class="itemize mark-bullet">
-<li>JSONObject.has(String key)
-</li><li>JSONObject.getString(String key)
-</li><li>JSONObject.getBoolean(String key)
-</li><li>JSONObject.getInt(String key)
-</li><li>JSONObject.getLong(String key)
-</li><li>JSONObject.getDouble(String key)
-</li><li>JSONObject.getFloat(String key)
-</li><li>JSONObject.getJSONArray(String key)
-</li><li>JSONArray.length()
-</li><li>JSONArray.getString(int index)
-</li><li>JSONArray.getBoolean(int index)
-</li><li>JSONArray.getInt(int index)
-</li><li>JSONArray.getLong(int index)
-</li><li>JSONArray.getFloat(int index)
-</li><li>JSONArray.getDouble(int index)
-</li><li>JSONArray.getString(int index)
-</li><li>JSONArray.getJSONArray(int index)
-</li></ul>
-
-<p>Again, <code class="code">outjson</code> is supplied as a pre-initialized, but empty,
-<code class="code">JSONObject</code>.  It is up to the REST service code to populate it
-with the return data.  Useful JSON utilities include the following:
-</p>
-<ul class="itemize mark-bullet">
-<li>JSONObject.put(String label, Object data)
-</li><li>new JSONObject()
-</li><li>new JSONArray()
-</li><li>JSONArray.put(Object obj)
-</li></ul>
-
 </div>
 <div class="section-level-extent" id="Large-Language-Models">
 <h3 class="section"><span>6.4 Large Language Models<a class="copiable-link" href="#Large-Language-Models"> &para;</a></span></h3>
@@ -540,232 +505,39 @@ are documented in the JavaDocs.
 <div class="section-level-extent" id="Global-Logout-Handler">
 <h3 class="section"><span>6.6 Global Logout Handler<a class="copiable-link" href="#Global-Logout-Handler"> &para;</a></span></h3>
 
-<p>The <em class="emph">Kiss</em> framework provides a mechanism to execute custom code whenever a user logs out of the system. This is useful for cleanup tasks, logging, resource management, and other operations that should occur when a user&rsquo;s session ends.
+<p><em class="emph">Kiss</em> provides a mechanism to execute custom code whenever a user
+logs out (manually or due to inactivity timeout).  The handler is
+configured in <code class="code">KissInit.groovy</code> using
+<code class="code">UserCache.setLogoutHandler()</code>, which accepts a
+<code class="code">Consumer&lt;UserData&gt;</code>.
 </p>
-<ul class="mini-toc">
-<li><a href="#How-It-Works" accesskey="1">How It Works</a></li>
-<li><a href="#Setting-Up-a-Logout-Handler" accesskey="2">Setting Up a Logout Handler</a></li>
-<li><a href="#UserData-Object" accesskey="3">UserData Object</a></li>
-<li><a href="#Common-Use-Cases" accesskey="4">Common Use Cases</a></li>
-<li><a href="#When-the-Handler-is-Called" accesskey="5">When the Handler is Called</a></li>
-<li><a href="#Logging-Out-Users-from-the-Front_002dend" accesskey="6">Logging Out Users from the Front-end</a></li>
-<li><a href="#Error-Handling" accesskey="7">Error Handling</a></li>
-<li><a href="#Important-Notes" accesskey="8">Important Notes</a></li>
-<li><a href="#API-Reference" accesskey="9">API Reference</a></li>
-</ul>
-<div class="subsection-level-extent" id="How-It-Works">
-<h4 class="subsection"><span>6.6.1 How It Works<a class="copiable-link" href="#How-It-Works"> &para;</a></span></h4>
-
-<p>The logout handler is a <strong class="strong">global handler</strong> that applies to all users. When any user logs out (whether manually or due to inactivity timeout), the handler is called with the <code class="code">UserData</code> object for that user, allowing you to perform user-specific cleanup.
-</p>
-</div>
-<div class="subsection-level-extent" id="Setting-Up-a-Logout-Handler">
-<h4 class="subsection"><span>6.6.2 Setting Up a Logout Handler<a class="copiable-link" href="#Setting-Up-a-Logout-Handler"> &para;</a></span></h4>
-
-<p>The logout handler is configured in the <code class="code">init()</code> method of <code class="code">KissInit.groovy</code>, which is located at:
-</p>
-<div class="example">
-<pre class="example-preformatted">src/main/backend/KissInit.groovy
-</pre></div>
-
 <p>A basic example:
 </p>
 <div class="example">
-<pre class="example-preformatted">import org.kissweb.database.Connection
-import org.kissweb.restServer.MainServlet
-import org.kissweb.restServer.UserCache
-import org.kissweb.restServer.UserData
-import java.util.function.Consumer
-
-class KissInit {
-
-    static void init() {
-        MainServlet.readIniFile &quot;application.ini&quot;, &quot;main&quot;
-
-        // Set up global logout handler
-        UserCache.setLogoutHandler({ UserData ud -&gt;
-            println &quot;User ${ud.getUsername()} is logging out&quot;
-
-            // Add your custom cleanup code here
-        } as Consumer&lt;UserData&gt;)
-    }
-
-    static void init2(Connection db) {
-        // Database initialization code
-    }
-}
-</pre></div>
-
-</div>
-<div class="subsection-level-extent" id="UserData-Object">
-<h4 class="subsection"><span>6.6.3 UserData Object<a class="copiable-link" href="#UserData-Object"> &para;</a></span></h4>
-
-<p>When the logout handler is called, it receives a <code class="code">UserData</code> object with the following methods:
-</p>
-<dl class="table">
-<dt><code class="code">getUsername()</code></dt>
-<dd><p>Returns the username of the logging-out user (String).
-</p></dd>
-<dt><code class="code">getUserId()</code></dt>
-<dd><p>Returns the user ID object (typically an Integer).
-</p></dd>
-<dt><code class="code">getUuid()</code></dt>
-<dd><p>Returns the session UUID (String).
-</p></dd>
-<dt><code class="code">getLastAccessDate()</code></dt>
-<dd><p>Returns when the user last accessed the system (LocalDateTime).
-</p></dd>
-<dt><code class="code">getUserData(String key)</code></dt>
-<dd><p>Retrieves custom data stored for this user (Object).
-</p></dd>
-</dl>
-
-</div>
-<div class="subsection-level-extent" id="Common-Use-Cases">
-<h4 class="subsection"><span>6.6.4 Common Use Cases<a class="copiable-link" href="#Common-Use-Cases"> &para;</a></span></h4>
-
-<ul class="mini-toc">
-<li><a href="#Logging-Logout-Events" accesskey="1">Logging Logout Events</a></li>
-<li><a href="#Updating-Database-Logout-Timestamp" accesskey="2">Updating Database Logout Timestamp</a></li>
-<li><a href="#Cleaning-Up-User_002dSpecific-Resources" accesskey="3">Cleaning Up User-Specific Resources</a></li>
-</ul>
-<div class="subsubsection-level-extent" id="Logging-Logout-Events">
-<h4 class="subsubsection"><span>6.6.4.1 Logging Logout Events<a class="copiable-link" href="#Logging-Logout-Events"> &para;</a></span></h4>
-
-<div class="example">
 <pre class="example-preformatted">UserCache.setLogoutHandler({ UserData ud -&gt;
-    println &quot;LOGOUT: User ${ud.getUsername()} at ${LocalDateTime.now()}&quot;
+    println &quot;User ${ud.getUsername()} is logging out&quot;
 } as Consumer&lt;UserData&gt;)
 </pre></div>
 
-</div>
-<div class="subsubsection-level-extent" id="Updating-Database-Logout-Timestamp">
-<h4 class="subsubsection"><span>6.6.4.2 Updating Database Logout Timestamp<a class="copiable-link" href="#Updating-Database-Logout-Timestamp"> &para;</a></span></h4>
-
-<div class="example">
-<pre class="example-preformatted">UserCache.setLogoutHandler({ UserData ud -&gt;
-    Connection db = MainServlet.openNewConnection()
-    try {
-        db.execute(&quot;&quot;&quot;UPDATE users
-                      SET last_logout = CURRENT_TIMESTAMP
-                      WHERE user_id = ?&quot;&quot;&quot;,
-                   ud.getUserId())
-        db.commit()
-    } finally {
-        MainServlet.closeConnection(db)
-    }
-} as Consumer&lt;UserData&gt;)
-</pre></div>
-
-</div>
-<div class="subsubsection-level-extent" id="Cleaning-Up-User_002dSpecific-Resources">
-<h4 class="subsubsection"><span>6.6.4.3 Cleaning Up User-Specific Resources<a class="copiable-link" href="#Cleaning-Up-User_002dSpecific-Resources"> &para;</a></span></h4>
-
-<div class="example">
-<pre class="example-preformatted">UserCache.setLogoutHandler({ UserData ud -&gt;
-    // Close any user-specific resources
-    def userResource = ud.getUserData(&quot;UserResource&quot;)
-    if (userResource != null) {
-        userResource.close()
-    }
-
-    // Delete temporary files
-    def tempDir = new File(&quot;/tmp/user_${ud.getUserId()}&quot;)
-    if (tempDir.exists()) {
-        tempDir.deleteDir()
-    }
-} as Consumer&lt;UserData&gt;)
-</pre></div>
-
-</div>
-</div>
-<div class="subsection-level-extent" id="When-the-Handler-is-Called">
-<h4 class="subsection"><span>6.6.5 When the Handler is Called<a class="copiable-link" href="#When-the-Handler-is-Called"> &para;</a></span></h4>
-
-<p>The logout handler is invoked in the following scenarios:
+<p>The <code class="code">UserData</code> object provides methods such as
+<code class="code">getUsername()</code>, <code class="code">getUserId()</code>, <code class="code">getUuid()</code>, and
+<code class="code">getUserData(String key)</code>.  If you need database access in the
+handler, open a new connection with
+<code class="code">MainServlet.openNewConnection()</code> and close it in a
+<code class="code">finally</code> block.
 </p>
-<ol class="enumerate">
-<li> <strong class="strong">Manual Logout</strong>: When the user explicitly logs out by calling the Logout REST service.
-</li><li> <strong class="strong">Inactivity Timeout</strong>: When the user is automatically logged out due to inactivity (configured via <code class="code">UserInactiveSeconds</code> in <code class="code">application.ini</code>).
-</li><li> <strong class="strong">Session Termination</strong>: When the server removes stale sessions.
-</li></ol>
-
-</div>
-<div class="subsection-level-extent" id="Logging-Out-Users-from-the-Front_002dend">
-<h4 class="subsection"><span>6.6.6 Logging Out Users from the Front-end<a class="copiable-link" href="#Logging-Out-Users-from-the-Front_002dend"> &para;</a></span></h4>
-
-<p>To log out the current user from the front-end, use the <code class="code">Server.logout()</code> method:
+<p>To log out from the front-end, call <code class="code">Server.logout()</code>.
 </p>
-<div class="example">
-<pre class="example-preformatted">// In your front-end JavaScript
-Server.logout();
-</pre></div>
-
-<p>This will:
+<p>For detailed examples and usage patterns, see the <em class="emph">Kiss</em> book and
+the JavaDocs.
 </p>
-<ol class="enumerate">
-<li> Call the Logout REST service with the user&rsquo;s session UUID.
-</li><li> Trigger the global logout handler on the back-end.
-</li><li> Remove the user from the session cache.
-</li><li> Redirect to the login page.
-</li></ol>
 
-</div>
-<div class="subsection-level-extent" id="Error-Handling">
-<h4 class="subsection"><span>6.6.7 Error Handling<a class="copiable-link" href="#Error-Handling"> &para;</a></span></h4>
-
-<p>The framework automatically catches and logs any exceptions thrown by your logout handler. Even if your handler throws an exception, the user will still be logged out properly.
-</p>
-</div>
-<div class="subsection-level-extent" id="Important-Notes">
-<h4 class="subsection"><span>6.6.8 Important Notes<a class="copiable-link" href="#Important-Notes"> &para;</a></span></h4>
-
-<ol class="enumerate">
-<li> <strong class="strong">Global Handler</strong>: There is only ONE logout handler for the entire application. Setting a new handler replaces any previous handler.
-</li><li> <strong class="strong">Execution Context</strong>: The logout handler runs in the context of the thread that triggered the logout (could be a web request thread or the auto-purge thread).
-</li><li> <strong class="strong">Database Access</strong>: If you need database access in your handler, open a new connection and make sure to close it:
-<div class="example">
-<pre class="example-preformatted">Connection db = MainServlet.openNewConnection()
-try {
-    // Use db
-    db.commit()
-} finally {
-    MainServlet.closeConnection(db)
-}
-</pre></div>
-</li><li> <strong class="strong">Performance</strong>: Keep your logout handler fast. Long-running operations in the handler can delay logout processing and affect system performance.
-</li><li> <strong class="strong">Optional</strong>: The logout handler is completely optional. If you don&rsquo;t set one, users will still log out normally.
-</li></ol>
-
-</div>
-<div class="subsection-level-extent" id="API-Reference">
-<h4 class="subsection"><span>6.6.9 API Reference<a class="copiable-link" href="#API-Reference"> &para;</a></span></h4>
-
-<dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-UserCache_002esetLogoutHandler"><span class="category-def">Method: </span><span><strong class="def-name">UserCache.setLogoutHandler</strong> <var class="def-var-arguments">handler</var><a class="copiable-link" href="#index-UserCache_002esetLogoutHandler"> &para;</a></span></dt>
-<dd><p>Sets the global logout handler for the application.
-</p>
-<p><strong class="strong">Parameters:</strong>
-</p><ul class="itemize mark-bullet">
-<li><code class="code">handler</code> - A <code class="code">Consumer&lt;UserData&gt;</code> that will be called whenever any user logs out.
-</li></ul>
-
-<p><strong class="strong">Example:</strong>
-</p><div class="example">
-<pre class="example-preformatted">UserCache.setLogoutHandler({ UserData ud -&gt;
-    println &quot;User ${ud.getUsername()} logged out&quot;
-} as Consumer&lt;UserData&gt;)
-</pre></div>
-</dd></dl>
-
-
-</div>
 </div>
 </div>
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (April 5, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Developer Manual (April 8, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

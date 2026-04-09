@@ -56,6 +56,12 @@ within your browser to use the system.  After that, both the front-end
 and the back-end code can be changed while the system is running. No need for
 additional compiles or deploys.
 
+## Book
+
+For a comprehensive, tutorial-style guide, see
+[Kiss: A Complete Guide to the Web Application Framework](https://a.co/d/035V1VEl)
+by Blake McBride, available on Amazon.
+
 ## Documentation
 
 The system comes with (essentially) three manuals as follows:
