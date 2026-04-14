@@ -79,7 +79,6 @@ public class StartupListener implements ServletContextListener {
         java.util.logging.Logger.getLogger("org.apache.catalina.core.StandardWrapperValve").setLevel(java.util.logging.Level.SEVERE);
         java.util.logging.Logger.getLogger("org.apache.coyote.http2.Stream").setLevel(java.util.logging.Level.SEVERE);
         java.util.logging.Logger.getLogger("org.apache.catalina.connector").setLevel(java.util.logging.Level.SEVERE);
-        java.util.logging.Logger.getLogger("com.arahant.servlets.REST").setLevel(java.util.logging.Level.SEVERE);
 
         // 5. Suppress HTTP/2 parser warnings and disable parent handler inheritance
         // This completely silences HTTP/2 protocol validation warnings from malformed client requests
