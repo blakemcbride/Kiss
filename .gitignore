@@ -20,6 +20,8 @@ libs/pdfbox-*.jar
 libs/junit-*.jar
 libs/apiguardian*.jar
 libs/jakarta.*.jar
+libs/metadata-extractor-*.jar
+libs/xmpcore-*.jar
 
 
 # Gradle
