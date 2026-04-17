@@ -1386,7 +1386,7 @@ class Utils {
                     reject();
                 });
             }, function(err) {
-                console.log("loadPage: error loading " + pg);
+                console.log("loadPage: error loading " + page);
                 reject();
             });
         });

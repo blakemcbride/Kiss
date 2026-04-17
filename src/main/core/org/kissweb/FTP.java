@@ -184,23 +184,21 @@ public class FTP implements AutoCloseable {
 
         cmd("STOR " + remoteFileName, null);
 
-        final Socket dataSocket = new Socket();
-        final SocketAddress addr = new InetSocketAddress(ip2, port2);
-        dataSocket.connect(addr, 1000000000);
+        try (Socket dataSocket = new Socket()) {
+            final SocketAddress addr = new InetSocketAddress(ip2, port2);
+            dataSocket.connect(addr, 1000000000);
 
-        check("150 ", "125 ");
+            check("150 ", "125 ");
 
-        final BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(localFileName)));
-
-        final BufferedOutputStream bos = new BufferedOutputStream(dataSocket.getOutputStream());
-        final byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = bis.read(buffer)) != -1)
-            bos.write(buffer, 0, bytesRead);
-        bos.flush();
-        bos.close();
-        bis.close();
-        dataSocket.close();
+            try (BufferedInputStream bis = new BufferedInputStream(new FileInputStream(new File(localFileName)));
+                 BufferedOutputStream bos = new BufferedOutputStream(dataSocket.getOutputStream())) {
+                final byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = bis.read(buffer)) != -1)
+                    bos.write(buffer, 0, bytesRead);
+                bos.flush();
+            }
+        }
 
         check("226");
     }
@@ -241,25 +239,22 @@ public class FTP implements AutoCloseable {
 
         cmd("RETR " + remoteFileName);
 
-        final Socket dataSocket = new Socket();
-        final SocketAddress addr = new InetSocketAddress(ip2, port2);
-        dataSocket.connect(addr, 1000000000);
+        ArrayList<String> rtn;
+        try (Socket dataSocket = new Socket()) {
+            final SocketAddress addr = new InetSocketAddress(ip2, port2);
+            dataSocket.connect(addr, 1000000000);
 
-        ArrayList<String> rtn = check("150 ", "125 ");
-        
-//        if (true) return;
+            rtn = check("150 ", "125 ");
 
-        final BufferedInputStream bis = new BufferedInputStream(dataSocket.getInputStream());
-
-        final BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(localFileName)));
-        final byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = bis.read(buffer)) != -1)
-            bos.write(buffer, 0, bytesRead);
-        bos.flush();
-        bos.close();
-        bis.close();
-        dataSocket.close();
+            try (BufferedInputStream bis = new BufferedInputStream(dataSocket.getInputStream());
+                 BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(localFileName)))) {
+                final byte[] buffer = new byte[1024];
+                int bytesRead;
+                while ((bytesRead = bis.read(buffer)) != -1)
+                    bos.write(buffer, 0, bytesRead);
+                bos.flush();
+            }
+        }
 
         check(rtn, "226");
     }

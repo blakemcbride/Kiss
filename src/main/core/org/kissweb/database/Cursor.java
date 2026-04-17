@@ -300,9 +300,22 @@ public class Cursor implements AutoCloseable {
                 }
                 oos.writeInt(END_OF_CACHE);
             }
-            FileInputStream fis = new FileInputStream(cacheFile);
-            BufferedInputStream bis = new BufferedInputStream(fis);
-            cacheStream = new ObjectInputStream(bis);
+            FileInputStream fis = null;
+            BufferedInputStream bis = null;
+            try {
+                fis = new FileInputStream(cacheFile);
+                bis = new BufferedInputStream(fis);
+                cacheStream = new ObjectInputStream(bis);
+            } catch (IOException e) {
+                if (bis != null) {
+                    try { bis.close(); } catch (IOException ignore) {}
+                } else if (fis != null) {
+                    try { fis.close(); } catch (IOException ignore) {}
+                }
+                cacheFile.delete();
+                cacheFile = null;
+                throw e;
+            }
         }
         rset.close();
     }

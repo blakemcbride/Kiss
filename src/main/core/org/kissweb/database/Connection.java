@@ -847,7 +847,7 @@ public class Connection implements AutoCloseable {
         table = table.replaceAll("\\[", "");
         table = table.replaceAll("]", "");
         if (table.indexOf('.') >= 0) {
-            String[] parts = table.split(".");
+            String[] parts = table.split("\\.");
             schema = parts[parts.length - 2];
             table = parts[parts.length - 1];
         }
