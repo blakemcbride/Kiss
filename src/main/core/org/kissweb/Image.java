@@ -377,6 +377,8 @@ public class Image {
      * @return the transformed BufferedImage
      */
     public static BufferedImage applyExifOrientation(BufferedImage image, int orientation) {
+        if (image == null)
+            return null;
         if (orientation == 1 || orientation < 1 || orientation > 8) {
             return image;
         }
@@ -445,6 +447,8 @@ public class Image {
         }
 
         BufferedImage image = toBufferedImage(imageData);
+        if (image == null)
+            return imageData;
         BufferedImage transformed = applyExifOrientation(image, orientation);
         return toByteArray(transformed, format);
     }
