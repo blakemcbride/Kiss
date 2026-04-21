@@ -334,7 +334,10 @@ public class ProcessServlet implements Runnable {
                 injson.put(name, value);
             }
         } else {
-            try (BufferedReader br = request.getReader()) {
+            String charset = request.getCharacterEncoding();
+            if (charset == null || charset.isEmpty())
+                charset = "UTF-8";
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream(), charset))) {
                 String instr = br.lines().collect(Collectors.joining(System.lineSeparator()));
                 injson = new JSONObject(instr);
             } catch (UncheckedIOException uioe) {
