@@ -22,11 +22,14 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Utility class for image manipulation operations including resizing, rotating,
@@ -444,5 +447,159 @@ public class Image {
         BufferedImage image = toBufferedImage(imageData);
         BufferedImage transformed = applyExifOrientation(image, orientation);
         return toByteArray(transformed, format);
+    }
+
+    /**
+     * External tool that will be used to decode HEIC.  Resolved lazily on
+     * the first conversion call and cached for the life of the JVM.
+     */
+    private enum HeicTool {
+        SIPS,           // macOS built-in
+        HEIF_CONVERT,   // Linux: libheif-tools / libheif-examples
+        MAGICK,         // ImageMagick 7 (cross-platform, needs HEIC delegate)
+        FFMPEG,         // ffmpeg (cross-platform fallback)
+        NONE
+    }
+
+    private static HeicTool cachedHeicTool;
+
+    /**
+     * Convert HEIC image bytes to PNG image bytes.
+     *
+     * <p>HEIC decoding requires an HEVC decoder, which no pure-Java library
+     * provides at production quality.  This method therefore delegates to
+     * whichever external converter is available on the host's <code>PATH</code>.
+     * The first available tool from the following list is used:</p>
+     *
+     * <ol>
+     *   <li><code>sips</code> &mdash; macOS (built-in, no install needed)</li>
+     *   <li><code>heif-convert</code> &mdash; Linux (<code>libheif-tools</code>
+     *       or <code>libheif-examples</code> package)</li>
+     *   <li><code>magick</code> &mdash; ImageMagick 7 with the HEIC delegate
+     *       (typical Windows install path)</li>
+     *   <li><code>ffmpeg</code> &mdash; universal fallback; official prebuilt
+     *       binaries are available for Linux, macOS, and Windows</li>
+     * </ol>
+     *
+     * <p>The chosen tool is detected once per JVM and cached.</p>
+     *
+     * @param heicBytes raw HEIC file bytes
+     * @return PNG-encoded image bytes
+     * @throws IOException if the input is null, no converter is available on
+     *                     <code>PATH</code>, or conversion fails
+     */
+    public static byte[] convertHeicToPng(byte[] heicBytes) throws IOException {
+        if (heicBytes == null)
+            throw new IOException("HEIC input bytes are null");
+        File in = File.createTempFile("kiss-heic-", ".heic");
+        File out = File.createTempFile("kiss-heic-", ".png");
+        try {
+            Files.write(in.toPath(), heicBytes);
+            runHeicToPng(in.getAbsolutePath(), out.getAbsolutePath());
+            return Files.readAllBytes(out.toPath());
+        } finally {
+            in.delete();
+            out.delete();
+        }
+    }
+
+    /**
+     * Convert a HEIC file to a PNG file.
+     *
+     * <p>See {@link #convertHeicToPng(byte[])} for the tool-detection rules
+     * and the list of supported external converters.</p>
+     *
+     * @param heicPath path to the source HEIC file
+     * @param pngPath  path of the destination PNG file to create or overwrite
+     * @throws IOException if no converter is available or conversion fails
+     */
+    public static void convertHeicToPng(String heicPath, String pngPath) throws IOException {
+        runHeicToPng(heicPath, pngPath);
+    }
+
+    private static void runHeicToPng(String heicPath, String pngPath) throws IOException {
+        HeicTool tool = detectHeicTool();
+        String[] cmd;
+        switch (tool) {
+            case SIPS:
+                cmd = new String[] { "sips", "-s", "format", "png", heicPath, "--out", pngPath };
+                break;
+            case HEIF_CONVERT:
+                cmd = new String[] { "heif-convert", heicPath, pngPath };
+                break;
+            case MAGICK:
+                cmd = new String[] { "magick", heicPath, pngPath };
+                break;
+            case FFMPEG:
+                cmd = new String[] { "ffmpeg", "-y", "-i", heicPath, pngPath };
+                break;
+            default:
+                throw new IOException("No HEIC converter found on PATH. Install one of: "
+                        + "sips (macOS built-in), heif-convert (Linux libheif-tools), "
+                        + "ImageMagick 7 with HEIC delegate (magick), or ffmpeg.");
+        }
+        ProcessBuilder pb = new ProcessBuilder(cmd).redirectErrorStream(true);
+        Process p = pb.start();
+        byte[] output;
+        try (InputStream in = p.getInputStream()) {
+            output = readFully(in);
+        }
+        boolean done;
+        try {
+            done = p.waitFor(5, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            p.destroyForcibly();
+            throw new IOException("HEIC conversion interrupted", e);
+        }
+        if (!done) {
+            p.destroyForcibly();
+            throw new IOException("HEIC conversion timed out: " + cmd[0]);
+        }
+        if (p.exitValue() != 0)
+            throw new IOException("HEIC conversion failed (" + cmd[0] + " exit "
+                    + p.exitValue() + "): " + new String(output, StandardCharsets.UTF_8));
+    }
+
+    private static synchronized HeicTool detectHeicTool() {
+        if (cachedHeicTool != null)
+            return cachedHeicTool;
+        if (probeCommand("sips", "--version"))
+            cachedHeicTool = HeicTool.SIPS;
+        else if (probeCommand("heif-convert", "--version"))
+            cachedHeicTool = HeicTool.HEIF_CONVERT;
+        else if (probeCommand("magick", "-version"))
+            cachedHeicTool = HeicTool.MAGICK;
+        else if (probeCommand("ffmpeg", "-version"))
+            cachedHeicTool = HeicTool.FFMPEG;
+        else
+            cachedHeicTool = HeicTool.NONE;
+        return cachedHeicTool;
+    }
+
+    private static boolean probeCommand(String... args) {
+        try {
+            Process p = new ProcessBuilder(args).redirectErrorStream(true).start();
+            try (InputStream in = p.getInputStream()) {
+                readFully(in);
+            }
+            if (!p.waitFor(10, TimeUnit.SECONDS))
+                p.destroyForcibly();
+            return true;
+        } catch (IOException e) {
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    private static byte[] readFully(InputStream in) throws IOException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        byte[] buf = new byte[4096];
+        int n;
+        while ((n = in.read(buf)) > 0)
+            bos.write(buf, 0, n);
+        return bos.toByteArray();
     }
 }
