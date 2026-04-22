@@ -38,6 +38,7 @@ Utils.afterComponentsLoaded(function () {
     Utils.useComponent('CheckBox');
     Utils.useComponent('DateInput');
     Utils.useComponent('DropDown');
+    Utils.useComponent('DurationInput');
     Utils.useComponent('ListBox');
     Utils.useComponent('NumericInput');
     Utils.useComponent('PushButton');

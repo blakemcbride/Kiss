@@ -24,9 +24,15 @@
         if ($$('ctl-number').isError('Numeric'))
             return;
 
+        if ($$('ctl-duration').isError('Duration'))
+            return;
+
         const text_val = $$('ctl-text').getValue();
 
         const num_val = $$('ctl-number').getValue();
+
+        const duration_minutes = $$('ctl-duration').getValue();
+        const duration_hours = $$('ctl-duration').getHours();
 
 
         //  all tests passed

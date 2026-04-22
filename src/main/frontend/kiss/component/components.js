@@ -185,6 +185,57 @@ class components {
     static drop_down() {}
 
     /**
+     * This HTML tag, "duration-input", provides a control where the user can enter a duration as two integers separated by a colon.
+     * The first number is the number of hours and the second is the number of minutes (0-59).  If the user does not enter a colon,
+     * the value is treated as hours only with an implied <code>:00</code> for the minutes (so <code>3</code> means 3 hours, 0 minutes).
+     * The control allows only digits and a single colon.  This represents a duration, not a time of day.
+     * <br><br>
+     * The "value" of this control is the total number of minutes (an integer).  <code>getValue()</code> returns
+     * <code>0</code> when the field is blank or contains an invalid value.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    min="1:30"     </td><td>     the minimum duration allowed (also accepts a total-minutes integer)              </td></tr>
+     *     <tr><td>    max="8:00"     </td><td>     the maximum duration allowed (also accepts a total-minutes integer)               </td></tr>
+     *     <tr><td>    no-placeholder     </td><td>     do not display h:mm when field is empty  </td></tr>
+     *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
+     *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
+     * </table>
+     * <br>
+     * <strong>Content</strong>
+     * <br><br>
+     *     The <em>Content</em> represents the placeholder or what is shown as a prompt inside the control when there is no value.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    clear()     </td><td>     remove the value associated with the control               </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
+     *     <tr><td>    focus()     </td><td>     sets the focus (where the cursor is located) to this control              </td></tr>
+     *     <tr><td>    getHours()     </td><td>     returns the duration as a floating point number of hours (e.g. 2:15 returns 2.25)             </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the total number of minutes; <code>0</code> if blank or invalid             </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>     <code>true</code> if user changed control value     </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     <code>true</code> if control is disabled    </td></tr>
+     *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>     <code>true</code> if control is hidden (not visible)     </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     <code>true</code> if control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     <code>true</code> if control is visible (not hidden)    </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td>     execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code> whenever the user exits the control if the value changed, <code>fun</code> is passed the control value               </td></tr>
+     *     <tr><td>    onEnter(fun)      </td><td>  execute fun when enter key hit   </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>   sets control to read-only (or the reverse if the optional argument is <code>false</code>)   </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    sets control to read-write (or the reverse if the optional argument is <code>false</code>)      </td></tr>
+     *     <tr><td>    setHours(val)     </td><td>     sets the control value from a floating point number of hours (e.g. 2.25 displays as 2:15)             </td></tr>
+     *     <tr><td>    setMaxValue(val)     </td><td>     sets the maximum value the control will accept (accepts "h:mm" string or a total-minutes integer)             </td></tr>
+     *     <tr><td>    setMinValue(val)     </td><td>     sets the minimum value the control will accept (accepts "h:mm" string or a total-minutes integer)             </td></tr>
+     *     <tr><td>    setValue(val)     </td><td>     sets the control value from a total number of minutes              </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     * </table>
+     */
+    static duration_input() {}
+
+    /**
      * This HTML tag, "file-upload", adds functionality and a consistent and convenient facility uploading files and taking pictures with the camera.
      * <br>
      * Please note: When this control is used, you must use <code>Server.fileUploadSend()</code> rather than <code>Server.call()</code>.
