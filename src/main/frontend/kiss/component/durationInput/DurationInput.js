@@ -52,6 +52,7 @@
                     break;
             }
         }
+        nstyle += ' text-align: right;';
 
         nattrs += ' oninput="this.value=Component.DurationInput.$durationinput(this)"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
