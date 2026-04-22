@@ -240,11 +240,17 @@ class components {
      * The "value" of this control is the total number of minutes (an integer).  &lt;code>getValue()&lt;/code> returns
      * &lt;code>0&lt;/code> when the field is blank or contains an invalid value.
      * &lt;br>&lt;br>
+     * If the &lt;code>decimal-hours&lt;/code> attribute is set, the user enters and the control displays a decimal number of hours
+     * (e.g. &lt;code>1.25&lt;/code> means 1 hour 15 minutes) instead of &lt;code>H:MM&lt;/code>.  Only digits and at most one decimal point
+     * are accepted.  The JavaScript API is unchanged: &lt;code>getValue()&lt;/code> still returns the total number of minutes
+     * (so &lt;code>1.25&lt;/code> entered returns &lt;code>75&lt;/code>) and &lt;code>setValue(75)&lt;/code> displays &lt;code>1.25&lt;/code>.
+     * &lt;br>&lt;br>
      * &lt;table>
      *     &lt;tr>&lt;th align="left" style="padding-right: 100px;">Attribute&lt;/th>&lt;th align="left">Description&lt;/th>&lt;/tr>
-     *     &lt;tr>&lt;td>    min="1:30"     &lt;/td>&lt;td>     the minimum duration allowed (also accepts a total-minutes integer)              &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    max="8:00"     &lt;/td>&lt;td>     the maximum duration allowed (also accepts a total-minutes integer)               &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    no-placeholder     &lt;/td>&lt;td>     do not display h:mm when field is empty  &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    decimal-hours     &lt;/td>&lt;td>     accept and display the value as decimal hours (e.g. 1.25) instead of H:MM             &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    min="1:30"     &lt;/td>&lt;td>     the minimum duration allowed (also accepts a total-minutes integer or, in decimal-hours mode, a decimal-hours value such as &lt;code>"1.5"&lt;/code>)              &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    max="8:00"     &lt;/td>&lt;td>     the maximum duration allowed (also accepts a total-minutes integer or, in decimal-hours mode, a decimal-hours value such as &lt;code>"8.0"&lt;/code>)               &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    no-placeholder     &lt;/td>&lt;td>     do not display the format hint when field is empty  &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    required     &lt;/td>&lt;td>     an entry is required               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    size="20"     &lt;/td>&lt;td>     width of control in number of characters (default 20)              &lt;/td>&lt;/tr>
      * &lt;/table>

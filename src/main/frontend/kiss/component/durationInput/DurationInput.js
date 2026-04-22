@@ -11,8 +11,9 @@
     const processor = function (elm, attr, content) {
         let nstyle, originalValue;
         let required = false;
-        let min = null;
-        let max = null;
+        let decimalHours = false;
+        let minRaw = null;
+        let maxRaw = null;
         if (attr.style)
             nstyle = attr.style;
         else
@@ -28,16 +29,19 @@
                 // new attributes
 
                 case 'min':
-                    min = parseDuration(Utils.removeQuotes(attr[prop]));
+                    minRaw = Utils.removeQuotes(attr[prop]);
                     break;
                 case 'max':
-                    max = parseDuration(Utils.removeQuotes(attr[prop]));
+                    maxRaw = Utils.removeQuotes(attr[prop]);
                     break;
                 case 'required':
                     required = true;
                     break;
                 case 'no-placeholder':
                     placeholder = false;
+                    break;
+                case 'decimal-hours':
+                    decimalHours = true;
                     break;
 
                 // preexisting attributes
@@ -52,15 +56,19 @@
                     break;
             }
         }
+        let min = minRaw === null ? null : parseDuration(minRaw, decimalHours);
+        let max = maxRaw === null ? null : parseDuration(maxRaw, decimalHours);
         nstyle += ' text-align: right;';
 
         nattrs += ' oninput="this.value=Component.DurationInput.$durationinput(this)"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
+        if (decimalHours)
+            nattrs += ' data-duration-mode="decimal"';
 
         const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
             style: nstyle,
             attr: nattrs,
-            placeholder: content ? content.trim() : (placeholder ? 'h:mm' : '')
+            placeholder: content ? content.trim() : (placeholder ? (decimalHours ? 'h.hh' : 'h:mm') : '')
         });
         if (!newElm)
             return;
@@ -87,7 +95,7 @@
             const val = el.value.trim();
             if (!val)
                 return 0;
-            const m = parseDuration(val);
+            const m = parseDuration(val, decimalHours);
             return m === null ? 0 : m;
         };
 
@@ -99,10 +107,10 @@
                 return this;
             }
             if (typeof val === 'string') {
-                const parsed = parseDuration(val);
-                el.value = parsed === null ? '' : formatDuration(parsed);
+                const parsed = parseDuration(val, decimalHours);
+                el.value = parsed === null ? '' : formatDuration(parsed, decimalHours);
             } else
-                el.value = formatDuration(val);
+                el.value = formatDuration(val, decimalHours);
             originalValue = newElm.getValue();
             return this;
         };
@@ -122,12 +130,12 @@
             const val = el.value.trim();
             if (!val)
                 return;
-            const m = parseDuration(val);
+            const m = parseDuration(val, decimalHours);
             if (m === null) {
                 await Utils.showMessage('Error', 'Invalid duration.');
                 el.focus();
             } else
-                el.value = formatDuration(m);
+                el.value = formatDuration(m, decimalHours);
         });
 
         /**
@@ -144,12 +152,12 @@
         };
 
         newElm.setMinValue = function (val) {
-            min = typeof val === 'string' ? parseDuration(val) : val;
+            min = typeof val === 'string' ? parseDuration(val, decimalHours) : val;
             return this;
         };
 
         newElm.setMaxValue = function (val) {
-            max = typeof val === 'string' ? parseDuration(val) : val;
+            max = typeof val === 'string' ? parseDuration(val, decimalHours) : val;
             return this;
         };
 
@@ -237,7 +245,7 @@
                 changeKeyUpHandler = null;
             }
             changeKeyUpHandler = function (event) {
-                if (!/^[0-9:]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
+                if (!/^[0-9:.]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
                     return;
                 keyUpHandler(event);
                 if (fun && Utils.isChangeChar(event))
@@ -274,7 +282,7 @@
             }
             if (!raw)
                 return false;
-            const val = parseDuration(raw);
+            const val = parseDuration(raw, decimalHours);
             if (val === null) {
                 Utils.showMessage('Error', desc + ' is not a valid duration.').then(function () {
                     el.focus();
@@ -284,12 +292,12 @@
             if (min !== null && val < min || max !== null && val > max) {
                 let msg;
                 if ((min || min === 0) && (max || max === 0))
-                    msg = desc + ' must be between ' + formatDuration(min) +
-                        ' and ' + formatDuration(max) + '.';
+                    msg = desc + ' must be between ' + formatDuration(min, decimalHours) +
+                        ' and ' + formatDuration(max, decimalHours) + '.';
                 else if (min || min === 0)
-                    msg = desc + ' must be greater than or equal to ' + formatDuration(min) + '.';
+                    msg = desc + ' must be greater than or equal to ' + formatDuration(min, decimalHours) + '.';
                 else
-                    msg = desc + ' must be less than or equal to ' + formatDuration(max) + '.';
+                    msg = desc + ' must be less than or equal to ' + formatDuration(max, decimalHours) + '.';
                 Utils.showMessage('Error', msg).then(function () {
                     el.focus();
                 });
@@ -300,13 +308,22 @@
 
     };
 
-    // Parse a "H[:MM]" string into total minutes.  Returns null on invalid input or empty string.
-    function parseDuration(str) {
+    // Parse a duration string into total minutes.  When decimal is true, accepts decimal hours
+    // (e.g. "1.25" -> 75); otherwise accepts "H[:MM]".  Returns null on invalid input or empty string.
+    function parseDuration(str, decimal) {
         if (str === null || str === undefined)
             return null;
         str = String(str).trim();
         if (!str)
             return null;
+        if (decimal) {
+            if (!/^(\d+(\.\d*)?|\.\d+)$/.test(str))
+                return null;
+            const hours = parseFloat(str);
+            if (isNaN(hours))
+                return null;
+            return Math.round(hours * 60);
+        }
         if (!/^\d+(:\d{0,2})?$/.test(str))
             return null;
         const parts = str.split(':');
@@ -317,13 +334,16 @@
         return hours * 60 + minutes;
     }
 
-    // Format total minutes as "H:MM".  Returns '' for null/undefined.
-    function formatDuration(totalMinutes) {
+    // Format total minutes.  When decimal is true, formats as decimal hours with 2 decimal places
+    // (e.g. 75 -> "1.25"); otherwise formats as "H:MM".  Returns '' for null/undefined.
+    function formatDuration(totalMinutes, decimal) {
         if (totalMinutes === null || totalMinutes === undefined || totalMinutes === '')
             return '';
-        const n = Math.floor(Number(totalMinutes));
+        const n = Math.round(Number(totalMinutes));
         if (isNaN(n))
             return '';
+        if (decimal)
+            return (n / 60).toFixed(2);
         const h = Math.floor(n / 60);
         const m = n % 60;
         return h + ':' + (m < 10 ? '0' + m : m);
@@ -337,15 +357,18 @@
     Utils.newComponent(componentInfo);
 
     Component.DurationInput.$durationinput = function (elm) {
+        const decimal = elm.dataset.durationMode === 'decimal';
+        const sep = decimal ? '.' : ':';
+        const allowedRegex = decimal ? /[^0-9.]/g : /[^0-9:]/g;
         const val1 = elm.value.replace(/^\s+/, '');
-        const stripped = val1.replace(/[^0-9:]/g, '');  // only digits and colons
+        const stripped = val1.replace(allowedRegex, '');
         let beeped = stripped !== val1;
-        // Allow at most one colon
+        // Allow at most one separator
         let nc = 0;
         let result = '';
         for (let i = 0; i < stripped.length; i++) {
             const c = stripped.charAt(i);
-            if (c === ':') {
+            if (c === sep) {
                 if (nc === 0) {
                     nc++;
                     result += c;

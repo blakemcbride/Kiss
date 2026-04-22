@@ -603,11 +603,17 @@ The control allows only digits and a single colon.  This represents a duration, 
 The "value" of this control is the total number of minutes (an integer).  <code>getValue()</code> returns
 <code>0</code> when the field is blank or contains an invalid value.
 <br><br>
+If the <code>decimal-hours</code> attribute is set, the user enters and the control displays a decimal number of hours
+(e.g. <code>1.25</code> means 1 hour 15 minutes) instead of <code>H:MM</code>.  Only digits and at most one decimal point
+are accepted.  The JavaScript API is unchanged: <code>getValue()</code> still returns the total number of minutes
+(so <code>1.25</code> entered returns <code>75</code>) and <code>setValue(75)</code> displays <code>1.25</code>.
+<br><br>
 <table>
     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-    <tr><td>    min="1:30"     </td><td>     the minimum duration allowed (also accepts a total-minutes integer)              </td></tr>
-    <tr><td>    max="8:00"     </td><td>     the maximum duration allowed (also accepts a total-minutes integer)               </td></tr>
-    <tr><td>    no-placeholder     </td><td>     do not display h:mm when field is empty  </td></tr>
+    <tr><td>    decimal-hours     </td><td>     accept and display the value as decimal hours (e.g. 1.25) instead of H:MM             </td></tr>
+    <tr><td>    min="1:30"     </td><td>     the minimum duration allowed (also accepts a total-minutes integer or, in decimal-hours mode, a decimal-hours value such as <code>"1.5"</code>)              </td></tr>
+    <tr><td>    max="8:00"     </td><td>     the maximum duration allowed (also accepts a total-minutes integer or, in decimal-hours mode, a decimal-hours value such as <code>"8.0"</code>)               </td></tr>
+    <tr><td>    no-placeholder     </td><td>     do not display the format hint when field is empty  </td></tr>
     <tr><td>    required     </td><td>     an entry is required               </td></tr>
     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
 </table>
@@ -647,7 +653,7 @@ The "value" of this control is the total number of minutes (an integer).  <code>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line236">line 236</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line242">line 242</a>
     </li></ul></dd>
     
 
@@ -771,7 +777,7 @@ Please note: When this control is used, you must use <code>Server.fileUploadSend
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line280">line 280</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line286">line 286</a>
     </li></ul></dd>
     
 
@@ -908,7 +914,7 @@ being accessed.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line337">line 337</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line343">line 343</a>
     </li></ul></dd>
     
 
@@ -1032,7 +1038,7 @@ Also see the date-input tag.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line381">line 381</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line387">line 387</a>
     </li></ul></dd>
     
 
@@ -1161,7 +1167,7 @@ only accept numbers, can verify decimal places, and formats the number when the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line430">line 430</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line436">line 436</a>
     </li></ul></dd>
     
 
@@ -1257,7 +1263,7 @@ only accept numbers, can verify decimal places, and formats the number when the 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line446">line 446</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line452">line 452</a>
     </li></ul></dd>
     
 
@@ -1349,7 +1355,7 @@ should be used to define the respective parts of the popup window.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line458">line 458</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line464">line 464</a>
     </li></ul></dd>
     
 
@@ -1459,7 +1465,7 @@ should be used to define the respective parts of the popup window.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line488">line 488</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line494">line 494</a>
     </li></ul></dd>
     
 
@@ -1594,7 +1600,7 @@ same group name.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line543">line 543</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line549">line 549</a>
     </li></ul></dd>
     
 
@@ -1718,7 +1724,7 @@ same group name.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line630">line 630</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line636">line 636</a>
     </li></ul></dd>
     
 
@@ -1822,7 +1828,7 @@ used or the 'span' tag otherwise.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line654">line 654</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line660">line 660</a>
     </li></ul></dd>
     
 
@@ -1945,7 +1951,7 @@ Static HTML content can be used inside this control.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line586">line 586</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line592">line 592</a>
     </li></ul></dd>
     
 
@@ -2072,7 +2078,7 @@ The values this control interacts with is a plain integer in the form HHMM in a 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line701">line 701</a>
+        <a href="component_components.js.html">component/components.js</a>, <a href="component_components.js.html#line707">line 707</a>
     </li></ul></dd>
     
 

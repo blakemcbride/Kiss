@@ -193,11 +193,17 @@ class components {
      * The "value" of this control is the total number of minutes (an integer).  <code>getValue()</code> returns
      * <code>0</code> when the field is blank or contains an invalid value.
      * <br><br>
+     * If the <code>decimal-hours</code> attribute is set, the user enters and the control displays a decimal number of hours
+     * (e.g. <code>1.25</code> means 1 hour 15 minutes) instead of <code>H:MM</code>.  Only digits and at most one decimal point
+     * are accepted.  The JavaScript API is unchanged: <code>getValue()</code> still returns the total number of minutes
+     * (so <code>1.25</code> entered returns <code>75</code>) and <code>setValue(75)</code> displays <code>1.25</code>.
+     * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
-     *     <tr><td>    min="1:30"     </td><td>     the minimum duration allowed (also accepts a total-minutes integer)              </td></tr>
-     *     <tr><td>    max="8:00"     </td><td>     the maximum duration allowed (also accepts a total-minutes integer)               </td></tr>
-     *     <tr><td>    no-placeholder     </td><td>     do not display h:mm when field is empty  </td></tr>
+     *     <tr><td>    decimal-hours     </td><td>     accept and display the value as decimal hours (e.g. 1.25) instead of H:MM             </td></tr>
+     *     <tr><td>    min="1:30"     </td><td>     the minimum duration allowed (also accepts a total-minutes integer or, in decimal-hours mode, a decimal-hours value such as <code>"1.5"</code>)              </td></tr>
+     *     <tr><td>    max="8:00"     </td><td>     the maximum duration allowed (also accepts a total-minutes integer or, in decimal-hours mode, a decimal-hours value such as <code>"8.0"</code>)               </td></tr>
+     *     <tr><td>    no-placeholder     </td><td>     do not display the format hint when field is empty  </td></tr>
      *     <tr><td>    required     </td><td>     an entry is required               </td></tr>
      *     <tr><td>    size="20"     </td><td>     width of control in number of characters (default 20)              </td></tr>
      * </table>
