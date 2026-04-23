@@ -22,6 +22,7 @@ libs/apiguardian*.jar
 libs/jakarta.*.jar
 libs/metadata-extractor-*.jar
 libs/xmpcore-*.jar
+book
 
 
 # Gradle

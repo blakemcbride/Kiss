@@ -39,6 +39,7 @@ import org.kissweb.json.JSONObject;
 import org.kissweb.ArrayUtils;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.time.ZonedDateTime;
 import java.util.*;
@@ -707,7 +708,9 @@ public class Cursor implements AutoCloseable {
             return (Integer) obj;
         if (obj.getClass() == Short.class)
             return ((Short) obj).intValue();
-        throw new SQLException("column " + cname + " is not an integer or short");
+        if (obj instanceof BigDecimal)
+            return ((BigDecimal) obj).intValueExact();
+        throw new SQLException("column " + cname + " is not an integer or short or BigDecimal");
     }
 
     /**
@@ -730,7 +733,9 @@ public class Cursor implements AutoCloseable {
             return ((Integer) obj).longValue();
         if (obj.getClass() == Short.class)
             return ((Short) obj).longValue();
-        throw new SQLException("column " + cname + " is not a long or integer or short");
+        if (obj instanceof BigDecimal)
+            return ((BigDecimal) obj).longValueExact();
+        throw new SQLException("column " + cname + " is not a long or integer or short or BigDecimal");
     }
 
     /**
@@ -757,7 +762,9 @@ public class Cursor implements AutoCloseable {
             return ((Short) obj).floatValue();
         if (obj.getClass() == Long.class)
             return ((Long) obj).floatValue();
-        throw new SQLException("column " + cname + " is not a float or double or integer or short or long");
+        if (obj instanceof BigDecimal)
+            return ((BigDecimal) obj).floatValue();
+        throw new SQLException("column " + cname + " is not a float or double or integer or short or long or BigDecimal");
     }
 
     /**
@@ -784,7 +791,42 @@ public class Cursor implements AutoCloseable {
             return ((Short) obj).doubleValue();
         if (obj.getClass() == Long.class)
             return ((Long) obj).doubleValue();
-        throw new SQLException("column " + cname + " is not a float or double or integer or short or long");
+        if (obj instanceof BigDecimal)
+            return ((BigDecimal) obj).doubleValue();
+        throw new SQLException("column " + cname + " is not a float or double or integer or short or long or BigDecimal");
+    }
+
+    /**
+     * Return the <code>BigDecimal</code> value of the named column.
+     * A <code>null</code> is returned on <code>null</code> valued columns.
+     *
+     * @param cname the column name
+     * @return the column value as a BigDecimal, or null if the column value is null
+     * @throws SQLException if a database access error occurs or the value cannot be converted to BigDecimal
+     *
+     * @see Record#getBigDecimal(String)
+     */
+    public BigDecimal getBigDecimal(String cname) throws SQLException {
+        Object obj = get(cname);
+        if (obj == null)
+            return null;
+        if (obj instanceof BigDecimal)
+            return (BigDecimal) obj;
+        if (obj instanceof Double)
+            return BigDecimal.valueOf((Double) obj);
+        if (obj instanceof Float)
+            return BigDecimal.valueOf(((Float) obj).doubleValue());
+        if (obj instanceof Long)
+            return BigDecimal.valueOf((Long) obj);
+        if (obj instanceof Integer)
+            return BigDecimal.valueOf(((Integer) obj).longValue());
+        if (obj instanceof Short)
+            return BigDecimal.valueOf(((Short) obj).longValue());
+        if (obj instanceof java.math.BigInteger)
+            return new BigDecimal((java.math.BigInteger) obj);
+        if (obj instanceof String)
+            return new BigDecimal((String) obj);
+        throw new SQLException("column " + cname + " is not a BigDecimal or numeric type");
     }
 
     /**
