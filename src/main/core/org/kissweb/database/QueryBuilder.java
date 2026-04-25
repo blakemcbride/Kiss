@@ -1250,7 +1250,10 @@ public class QueryBuilder {
      */
     public Record fetchOne(Connection conn) throws Exception {
         String sql = build();
-        sql = conn.limit(1, sql);
+        // Do NOT call conn.limit() here.  Command.fetchOne() delegates to
+        // Command.query(true, 0, 1, sql, args), which already applies the
+        // database-specific LIMIT/TOP/FETCH clause via conn.limit().
+        // Pre-applying it here would produce duplicate clauses (e.g. "limit 1 limit 1").
         return conn.fetchOne(sql, parameters.toArray());
     }
 
@@ -1291,7 +1294,10 @@ public class QueryBuilder {
      */
     public Record fetchOne(Command cmd) throws Exception {
         String sql = build();
-        sql = cmd.conn.limit(1, sql);
+        // Do NOT call cmd.conn.limit() here.  Command.fetchOne() delegates to
+        // Command.query(true, 0, 1, sql, args), which already applies the
+        // database-specific LIMIT/TOP/FETCH clause via conn.limit().
+        // Pre-applying it here would produce duplicate clauses (e.g. "limit 1 limit 1").
         return cmd.fetchOne(sql, parameters.toArray());
     }
 
