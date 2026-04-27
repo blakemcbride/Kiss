@@ -14,12 +14,12 @@ KISS is a **Kiss Framework application** - a full-stack Java web framework desig
 - **Backend:** Java 17+, Groovy, ABCL (Lisp support)
 - **Frontend:** JavaScript/HTML/CSS with custom UI components (custom HTML tags)
 - **Database:** PostgreSQL, MySQL, MS SQL Server, Oracle, SQLite
-- **Build System:** Custom "bld" system (No Maven/Gradle required)
+- **Build System:** Custom "bld" system (Maven/Gradle not used)
 - **Server:** Tomcat 11.x (Jakarta EE 11, Servlet 6.1) - embedded
 
 ### Directory Structure
 ```
-Stack360Management/
+Kiss/
 ├── src/
 │   ├── main/
 │   │   ├── core/          # Core Java framework code (DO NOT MODIFY)
@@ -64,12 +64,13 @@ Stack360Management/
 ## Notable Features
 
 1. **Hot Reload Development**
-   - No recompilation needed during development
-   - Automatic compilation and loading of changed files
+   - No recompilation needed during development for backend service files
+   - Automatic compilation and loading applies **only to files under `src/main/backend/`**
+   - Files under `src/main/core/` and `src/main/precompiled/` are NOT dynamically loaded — they are compiled by the `bld` build and require a server restart to take effect
 
 2. **Multi-Language Services**
    - Write services in Java, Groovy, or Lisp
-   - Services auto-compile on change
+   - Services auto-compile on change (only when located under `src/main/backend/`)
 
 3. **Database Operations**
    - Simplified CRUD with Record/Connection pattern
@@ -197,10 +198,11 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
 - **Backend Log:** tomcat/logs/catalina.out
 
 ### Hot Reload
-- **No compilation needed during development** - The system detects application code changes and automatically compiles and loads them while running
-- Both backend and frontend code can be changed while the system is running
-- Backend services (Java/Groovy/Lisp) auto-compile on change
-- Frontend changes are immediately reflected
+- **Dynamic loading is limited to `src/main/backend/`** — Kiss does NOT dynamically load all source files. Only files under `src/main/backend/` are detected, compiled, and reloaded while the server is running.
+- Backend services (Java/Groovy/Lisp) under `src/main/backend/` auto-compile on change
+- Files under `src/main/core/` (framework code) and `src/main/precompiled/` (shared utilities) are compiled by `./bld` and require a server restart to pick up changes
+- Frontend files (under `src/main/frontend/`) are served as static assets — changes are immediately reflected on browser reload, but this is not "dynamic loading" by the server
+- Both backend services and frontend code can be changed while the system is running, subject to the scope above
 
 ## Key Libraries
 
