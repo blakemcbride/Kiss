@@ -256,6 +256,16 @@ public class DateTime {
     }
 
     /**
+     * Return the current date/time formatted according to the given pattern.
+     *
+     * @param pattern the format pattern (see {@link java.time.format.DateTimeFormatter})
+     * @return the formatted date/time string
+     */
+    public String format(String pattern) {
+        return DateTime.format(zdt, pattern);
+    }
+
+    /**
      * Return the current date and time as a string mm/dd/yyyy hh:mm AM/PM
      *
      * @return the formatted current date/time string

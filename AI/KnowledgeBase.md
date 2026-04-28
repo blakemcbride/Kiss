@@ -743,7 +743,8 @@ Wrapper around Java's ZonedDateTime for combined date/time operations:
 - `getIntDate()` - Get date portion as YYYYMMDD integer
 - `getIntTime()` - Get time portion as HHMM integer
 - `getDate()` - Convert back to Date object
-- `format()` - Format as "MM/dd/yyyy h:mm a"
+- `format()` - Format as "MM/dd/yyyy h:mm a" (instance, hard-coded pattern)
+- `format(String pattern)` - Format using caller-supplied pattern, e.g. `new DateTime().format("MM/dd/yyyy h:mm:ss a")`
 - `addDays(int)`, `addHours(int)`, `addMinutes(int)` - Date/time arithmetic
 
 **Common Pattern for Date to Time Conversion:**
