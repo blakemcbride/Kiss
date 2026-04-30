@@ -43,13 +43,13 @@ Be sure the JAVA_HOME and JRE_HOME environment variables are set correctly!
 
     git clone https://github.com/blakemcbride/Kiss.git
     cd Kiss
-    ./bld develop
+    ./bld -v develop
 
 ### Windows
 
     git clone https://github.com/blakemcbride/Kiss.git
     cd Kiss
-    bld develop
+    bld -v develop
 
 In either environment, you can then go to `http://localhost:8000`
 within your browser to use the system.  After that, both the front-end

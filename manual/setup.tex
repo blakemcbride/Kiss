@@ -93,9 +93,9 @@ you have an Internet connection
 After doing a @code{git clone}, all that is needed is the following:
 
 @example
-    ./bld  develop                      [Linux, macOS, BSD, etc.]
+    ./bld -v develop                      [Linux, macOS, BSD, etc.]
          -or-
-    bld  develop                        [Windows]
+    bld -v develop                        [Windows]
 @end example
 
 This will build the system, install Tomcat, deploy the app, and run
@@ -308,7 +308,7 @@ Once everything has been set up, you can easily build and run the system with th
 @example
 git clone https://github.com/blakemcbride/Kiss.git
 cd Kiss
-./bld develop (or "bld develop" under Windows)
+./bld -v develop (or "bld -v develop" under Windows)
 @end example
 
 Once the system is up, you can go to the following address with your browser: @code{http://localhost:8000}
