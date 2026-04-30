@@ -58,7 +58,7 @@ additional compiles or deploys.
 
 ## Book
 
-For a comprehensive, tutorial-style guide, see
+For a comprehensive user manual, see
 [Kiss: A Complete Guide to the Web Application Framework](https://a.co/d/035V1VEl)
 by Blake McBride, available on Amazon.
 
