@@ -67,9 +67,9 @@ by Blake McBride, available on Amazon.
 The system comes with (essentially) three manuals as follows:
 
 
-[User Manual (HTML)](https://blakemcbride.github.io/Kiss/manual/man)
+[Getting Started Manual (HTML)](https://blakemcbride.github.io/Kiss/manual/man)
 
-[User Manual (PDF)](https://blakemcbride.us/software/kiss/Kiss.pdf)
+[Getting Started Manual (PDF)](https://blakemcbride.us/software/kiss/GettingStarted.pdf)
 
 [Front-end API](https://blakemcbride.github.io/Kiss/manual/jsdoc)
 
