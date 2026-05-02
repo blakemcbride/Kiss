@@ -37,12 +37,17 @@ within your browser to use the system.  After that, both the front-end
 and the back-end code can be changed while the system is running. No need for
 additional compiles or deploys.
 
-## Integrating with External Systems
+## Integrations
+
+In addition to enabling the rapid development of web and desktop applications,
+KISS also provides the following integrations with external systems.
+
+### Integrating with External Systems
 
 * **REST Client** — make HTTP calls out to third-party APIs.
 * **REST Server** — accept inbound HTTP calls from external systems and webhooks.
 
-## LLM Integrations
+### LLM Integrations
 
 * **LLM Providers** — built-in support for OpenAI, Anthropic, and Ollama.
 * **MCP Server** — expose application tools to AI assistants via the Model Context Protocol.
