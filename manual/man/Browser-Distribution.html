@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Browser-Distribution">
 <div class="nav-panel">
 <p>
-Next: <a href="Desktop-Application.html" accesskey="n" rel="next">Desktop Applications</a>, Previous: <a href="Split-System.html" accesskey="p" rel="prev">Split System</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (April 30, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Desktop-Application.html" accesskey="n" rel="next">Desktop Applications</a>, Previous: <a href="Split-System.html" accesskey="p" rel="prev">Split System</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -98,7 +98,7 @@ h2, h3, h4 {  /* subsection titles */
 </style>
 
 
-<h2 class="chapter" id="Browser_002dBased-Distribution"><span>10 Browser-Based Distribution<a class="copiable-link" href="#Browser_002dBased-Distribution"> &para;</a></span></h2>
+<h2 class="chapter" id="Browser_002dBased-Distribution"><span>11 Browser-Based Distribution<a class="copiable-link" href="#Browser_002dBased-Distribution"> &para;</a></span></h2>
 
 <p>As an alternative to packaging a <em class="emph">Kiss</em> application as a desktop
 application with Electron, the application can be distributed as a
@@ -117,7 +117,7 @@ macOS, and Windows &mdash; a single package for all platforms.
 <li><a href="#Comparison-with-Desktop-Application" accesskey="5">Comparison with Desktop Application</a></li>
 </ul>
 <div class="section-level-extent" id="Prerequisites">
-<h3 class="section"><span>10.1 Prerequisites<a class="copiable-link" href="#Prerequisites"> &para;</a></span></h3>
+<h3 class="section"><span>11.1 Prerequisites<a class="copiable-link" href="#Prerequisites"> &para;</a></span></h3>
 
 <p>The target system must have the following installed:
 </p>
@@ -130,14 +130,14 @@ embedded Tomcat server.
 </p>
 </div>
 <div class="section-level-extent" id="Building-the-Distribution">
-<h3 class="section"><span>10.2 Building the Distribution<a class="copiable-link" href="#Building-the-Distribution"> &para;</a></span></h3>
+<h3 class="section"><span>11.2 Building the Distribution<a class="copiable-link" href="#Building-the-Distribution"> &para;</a></span></h3>
 
 <ul class="mini-toc">
 <li><a href="#Step-1_003a-Build-the-Application" accesskey="1">Step 1: Build the Application</a></li>
 <li><a href="#Step-2_003a-Create-the-Distribution" accesskey="2">Step 2: Create the Distribution</a></li>
 </ul>
 <div class="subsection-level-extent" id="Step-1_003a-Build-the-Application">
-<h4 class="subsection"><span>10.2.1 Step 1: Build the Application<a class="copiable-link" href="#Step-1_003a-Build-the-Application"> &para;</a></span></h4>
+<h4 class="subsection"><span>11.2.1 Step 1: Build the Application<a class="copiable-link" href="#Step-1_003a-Build-the-Application"> &para;</a></span></h4>
 
 <div class="example">
 <pre class="example-preformatted">./bld build              [Linux / macOS]
@@ -150,7 +150,7 @@ server.
 </p>
 </div>
 <div class="subsection-level-extent" id="Step-2_003a-Create-the-Distribution">
-<h4 class="subsection"><span>10.2.2 Step 2: Create the Distribution<a class="copiable-link" href="#Step-2_003a-Create-the-Distribution"> &para;</a></span></h4>
+<h4 class="subsection"><span>11.2.2 Step 2: Create the Distribution<a class="copiable-link" href="#Step-2_003a-Create-the-Distribution"> &para;</a></span></h4>
 
 <p>Run the distribution build script from the project root, passing the
 desired distribution name as an argument:
@@ -166,7 +166,7 @@ name inside the zip.
 </div>
 </div>
 <div class="section-level-extent" id="What-the-Distribution-Contains">
-<h3 class="section"><span>10.3 What the Distribution Contains<a class="copiable-link" href="#What-the-Distribution-Contains"> &para;</a></span></h3>
+<h3 class="section"><span>11.3 What the Distribution Contains<a class="copiable-link" href="#What-the-Distribution-Contains"> &para;</a></span></h3>
 
 <dl class="table">
 <dt><samp class="file">start.sh</samp></dt>
@@ -190,7 +190,7 @@ server, waits for it to be ready, and opens the default web browser.
 
 </div>
 <div class="section-level-extent" id="End-User-Instructions">
-<h3 class="section"><span>10.4 End User Instructions<a class="copiable-link" href="#End-User-Instructions"> &para;</a></span></h3>
+<h3 class="section"><span>11.4 End User Instructions<a class="copiable-link" href="#End-User-Instructions"> &para;</a></span></h3>
 
 <ol class="enumerate">
 <li> Install Java 17 or later if not already installed.
@@ -215,7 +215,7 @@ stop.bat                 [Windows]
 
 </div>
 <div class="section-level-extent" id="Comparison-with-Desktop-Application">
-<h3 class="section"><span>10.5 Comparison with Desktop Application<a class="copiable-link" href="#Comparison-with-Desktop-Application"> &para;</a></span></h3>
+<h3 class="section"><span>11.5 Comparison with Desktop Application<a class="copiable-link" href="#Comparison-with-Desktop-Application"> &para;</a></span></h3>
 
 <table class="multitable">
 <thead><tr><th width="40%">Feature</th><th width="30%">Browser Distribution</th><th width="30%">Electron Desktop</th></tr></thead>
@@ -235,7 +235,7 @@ stop.bat                 [Windows]
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Desktop-Application.html">Desktop Applications</a>, Previous: <a href="Split-System.html">Split System</a>, Up: <a href="index.html">Kiss Getting Started Guide (April 30, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Desktop-Application.html">Desktop Applications</a>, Previous: <a href="Split-System.html">Split System</a>, Up: <a href="index.html">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

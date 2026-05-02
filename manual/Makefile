@@ -1,6 +1,6 @@
 
 TEXFILES= GettingStarted.tex intro.tex setup.tex orientation.tex developing.tex \
-          backendapi.tex querybuilder.tex frontendapi.tex commandline.tex splitsystem.tex desktop.tex dist.tex
+          backendapi.tex querybuilder.tex frontendapi.tex commandline.tex external.tex splitsystem.tex desktop.tex dist.tex
 
 
 %.dvi : %.tex

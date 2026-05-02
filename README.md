@@ -8,28 +8,9 @@ build command-line utilities, and, in conjunction with
 [Electron](https://electronjs.org), desktop applications that are
 portable to Windows, macOS, and Linux.
 
-Please see the main web site for a more detailed description at
-[kissweb.org](https://kissweb.org)
+This project is in full release status (not a beta) and is used in production. Visit [kissweb.org](https://kissweb.org) for more details, or browse the source at [github.com/blakemcbride/Kiss](https://github.com/blakemcbride/Kiss).
 
-This project is in full release status and not a beta.  It is being used in production.  
-
-Home for the code is at:  [https://github.com/blakemcbride/Kiss](https://github.com/blakemcbride/Kiss)
-
-For build and usage instructions see the manual at `manual/man/index.html`
-Or, the user manual can be read online at [Kiss Online User Manual](https://blakemcbride.github.io/Kiss/manual/man)
-
-Public discussion and support is available at [Kiss Support](https://github.com/blakemcbride/Kiss/discussions)
-
-## Training Videos
-
-A 6-part training series on KISS is at:
-
-* [Part 1 - Introduction](https://youtu.be/FAnL7dpMld4)
-* [Part 2 - Setup & Configuration](https://youtu.be/xT-C-yQo0Ec)
-* [Part 3 - Web Services](https://youtu.be/9zRZcxMjoW0)
-* [Part 4 - Front-end](https://youtu.be/zMjrp-ft_Tc)
-* [Part 5 - Data Persistence](https://youtu.be/pS7DezhYpGo)
-* [Part 6 - Deployment](https://youtu.be/fGEzv7uuJCk)
+Public discussion and support is available at [Kiss Support](https://github.com/blakemcbride/Kiss/discussions).
 
 ## Quick Start
 
@@ -56,22 +37,33 @@ within your browser to use the system.  After that, both the front-end
 and the back-end code can be changed while the system is running. No need for
 additional compiles or deploys.
 
-## Book
+## Integrating with External Systems
 
-For a comprehensive user manual, see
-[Kiss: A Complete Guide to the Web Application Framework](https://a.co/d/035V1VEl)
-by Blake McBride, available on Amazon.
+* **REST Client** — make HTTP calls out to third-party APIs.
+* **REST Server** — accept inbound HTTP calls from external systems and webhooks.
+
+## LLM Integrations
+
+* **LLM Providers** — built-in support for OpenAI, Anthropic, and Ollama.
+* **MCP Server** — expose application tools to AI assistants via the Model Context Protocol.
+* **Embeddings Database** — vector storage for retrieval-augmented generation (RAG).
+
+## Training Videos
+
+A 6-part training series on KISS is at:
+
+* [Part 1 - Introduction](https://youtu.be/FAnL7dpMld4)
+* [Part 2 - Setup & Configuration](https://youtu.be/xT-C-yQo0Ec)
+* [Part 3 - Web Services](https://youtu.be/9zRZcxMjoW0)
+* [Part 4 - Front-end](https://youtu.be/zMjrp-ft_Tc)
+* [Part 5 - Data Persistence](https://youtu.be/pS7DezhYpGo)
+* [Part 6 - Deployment](https://youtu.be/fGEzv7uuJCk)
 
 ## Documentation
 
-The system comes with (essentially) three manuals as follows:
-
-
-[Getting Started Manual (HTML)](https://blakemcbride.github.io/Kiss/manual/man)
-
-[Getting Started Manual (PDF)](https://blakemcbride.us/software/kiss/GettingStarted.pdf)
-
-[Front-end API](https://blakemcbride.github.io/Kiss/manual/jsdoc)
+* [Getting Started Manual (HTML)](https://blakemcbride.github.io/Kiss/manual/man) — also available as a [PDF](https://blakemcbride.us/software/kiss/GettingStarted.pdf).
+* [Front-end API (JSDoc)](https://blakemcbride.github.io/Kiss/manual/jsdoc)
+* [Kiss: A Complete Guide to the Web Application Framework](https://a.co/d/035V1VEl) — a comprehensive book by Blake McBride, available on Amazon.
 
 The back-end JavaDoc must be built by you.  This can be done by typing:
 
