@@ -18,10 +18,10 @@ import java.io.IOException;
  * <br><br>
  * Sample REST server
  * <br><br>
- * Occasionally, it is necessary to have an external service call into your application. That's what this class handles.
+ * Occasionally, it is necessary to have an external client call into your application. That's what this class handles.
  * Kiss itself uses more advanced methodology with build in authentication.  See <code>org.kissweb.restServer</code>
  * <br><br>
- * This class handles a more straight forward / common methodology that would be expected by an external server calling
+ * This class handles a more straight forward / common methodology that would be expected by an external client calling
  * into your application.  You must create your own version of this file for each service.
  * <br><br>
  * (1) This class is essentially a template.  You would copy this class and edit it for your particular needs.
@@ -39,9 +39,9 @@ import java.io.IOException;
  */
 @WebServlet(urlPatterns="/myservice")
 @MultipartConfig
-public class RestServer extends RestServerBase {
+public class RestServerExample extends RestServerBase {
 
-    private static final Logger logger = LogManager.getLogger(RestServer.class);
+    private static final Logger logger = LogManager.getLogger(RestServerExample.class);
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
