@@ -72,6 +72,7 @@ public class StartupListener implements ServletContextListener {
 
         // 4. Suppress common client aborted/bad header/reset noise - set to SEVERE
         // These log messages are typically client-side issues and create unnecessary log clutter
+        java.util.logging.Logger.getLogger("org.apache.coyote.AbstractProcessor").setLevel(java.util.logging.Level.SEVERE);
         java.util.logging.Logger.getLogger("org.apache.coyote.http11.Http11Processor").setLevel(java.util.logging.Level.SEVERE);
         java.util.logging.Logger.getLogger("org.apache.coyote.http11.Http11InputBuffer").setLevel(java.util.logging.Level.SEVERE);
         java.util.logging.Logger.getLogger("org.apache.coyote.http2.Http2UpgradeHandler").setLevel(java.util.logging.Level.SEVERE);

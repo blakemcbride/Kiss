@@ -40,7 +40,7 @@ import jakarta.servlet.annotation.WebServlet;
  * (5) Since this is Java code under <code>precompiled</code>, after editing run
  * <code>./bld -v build</code> and restart the server.  Hot reload does not apply here.
  */
-@WebServlet(urlPatterns="/mcp")
+@WebServlet(urlPatterns="/mcp-example")
 public class MCPServerExample extends MCPServerBase {
 
     private static final Logger logger = LogManager.getLogger(MCPServerExample.class);
