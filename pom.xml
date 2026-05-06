@@ -6,11 +6,9 @@
   <!-- 
       This file is used to describe the system layout for an IDE and 
       to describe dependencies to GitHub. 
-      Kiss is built with its own build system called 'bld', but with
-      the maven-antrun-plugin below, you can replicate the old Ant tasks
-      directly in Maven (no build.xml or external Ant needed).
+      Kiss is built with its own build system called 'bld' and not with Maven.
       
-      To run this, use:  mvn antrun:run@TASK
+      If you must use Maven, use:  mvn antrun:run@TASK
       Replacing TASK with the task you wish to run.
       
       The only caviet is that you must build the builder before any of
