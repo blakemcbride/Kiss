@@ -103,6 +103,33 @@ MaxWorkerThreads = 30
 UserInactiveSeconds = 900
 ```
 
+### Secrets and External Configuration
+
+**All URLs, passwords, security keys, API keys, tokens, and user names must be kept in `src/main/backend/application.ini`.** Nothing of this kind should be hard-coded in source files (Java, Groovy, Lisp, JavaScript, HTML, or other configuration files). Whenever such a value is found outside `application.ini`, it must be moved into `application.ini` and accessed via the API below.
+
+**Retrieval API:** Values stored in `application.ini` are retrieved at runtime using the `getEnvironment` method on `MainServlet`, defined in `src/main/core/org/kissweb/restServer/MainServlet.java`:
+
+```groovy
+import org.kissweb.restServer.MainServlet
+
+String apiUrl     = MainServlet.getEnvironment("ExternalApiUrl")
+String apiKey     = MainServlet.getEnvironment("ExternalApiKey")
+String smtpUser   = MainServlet.getEnvironment("SmtpUser")
+String smtpPass   = MainServlet.getEnvironment("SmtpPassword")
+```
+
+**Rationale:**
+- Centralizes secrets so they can be rotated without code changes
+- Keeps credentials out of version control when `application.ini` is excluded from the repository
+- Avoids duplicating values across multiple files
+- Makes per-environment configuration (dev, staging, production) straightforward — only `application.ini` differs
+
+**Categories that must live in `application.ini`:**
+- URLs of external services (REST endpoints, SMTP servers, LDAP servers, third-party APIs, webhooks)
+- Passwords (database, SMTP, service accounts, third-party APIs)
+- Security keys, API keys, tokens, client secrets, encryption keys, signing keys
+- User names / account identifiers used by the application to authenticate to external systems
+
 ### Service Pattern Example
 Services follow a standard pattern as shown in `Crud.groovy`:
 ```groovy
