@@ -49,7 +49,28 @@ public class Tasks {
     final static String explodedDir = BUILDDIR + "/" + "exploded";
     final static String postgresqlJar = "postgresql-" + postgresqlVer + ".jar";
     final static String groovyJar = "groovy-" + groovyVer + ".jar";
-    final static String debugPort = "9000";
+    /**
+     * Network ports the embedded Tomcat and the front-end dev server bind
+     * to. All four default to Kiss's traditional values; each can be
+     * overridden on the bld command line so multiple Kiss instances can
+     * run side by side without colliding.
+     * <ul>
+     *   <li><code>-dp PORT</code> / <code>--debug-port=PORT</code>  — JDWP debug (default 9000)</li>
+     *   <li><code>-bp PORT</code> / <code>--backend-port=PORT</code>   — Tomcat HTTP (default 8080)</li>
+     *   <li><code>-sp PORT</code> / <code>--shutdown-port=PORT</code> — Tomcat shutdown signal (default 8005)</li>
+     *   <li><code>-fp PORT</code> / <code>--frontend-port=PORT</code> — develop()'s static-file server (default 8000)</li>
+     * </ul>
+     * The HTTP and shutdown ports are written into
+     * <code>tomcat/conf/server.xml</code> on every {@link #setupTomcat()};
+     * the debug port into <code>tomcat/bin/debug</code>; the front-end
+     * port into the SimpleWebServer command line. All four are re-applied
+     * on every <code>bld</code> invocation, so you can pick different
+     * values for each run with no manual cleanup.
+     */
+    static String debugPort    = "9000";
+    static String backendPort  = "8080";
+    static String shutdownPort = "8005";
+    static String frontendPort = "8000";
 
     /**
      * Main entry point for the build system.  It tells the build system what arguments were passed in
@@ -60,7 +81,83 @@ public class Tasks {
      * @throws InstantiationException if the class cannot be instantiated
      */
     public static void main(String[] args) throws Exception {
+        args = consumePortOptions(args);
         BuildUtils.build(args, Tasks.class, LIBS);
+    }
+
+    /**
+     * Pull port-override options out of <code>args</code> if present, set
+     * the corresponding static fields, and return the remaining arguments
+     * for normal task dispatch. Recognized flags (any position):
+     * <pre>
+     *   -dp PORT, --debug-port=PORT      JDWP   (default 9000)
+     *   -bp PORT, --backend-port=PORT    HTTP   (default 8080)
+     *   -sp PORT, --shutdown-port=PORT   Tomcat shutdown signal (default 8005)
+     *   -fp PORT, --frontend-port=PORT   develop()'s static server (default 8000)
+     * </pre>
+     * Non-numeric or out-of-range values are reported on stderr; the
+     * default is kept in that case.
+     */
+    private static String[] consumePortOptions(String[] args) {
+        java.util.List<String> out = new java.util.ArrayList<>(args.length);
+        for (int i = 0; i < args.length; i++) {
+            String a = args[i];
+            String[] pair = matchPortOption(a);
+            if (pair != null && pair[1] != null) {
+                setPort(pair[0], pair[1]);
+            } else if (pair != null) {
+                if (i + 1 < args.length) {
+                    setPort(pair[0], args[i + 1]);
+                    i++;
+                } else {
+                    System.err.println("missing value for " + a + "; ignoring");
+                }
+            } else {
+                out.add(a);
+            }
+        }
+        return out.toArray(new String[0]);
+    }
+
+    /**
+     * Match one arg against the port-option flags. Returns a 2-element
+     * array <code>{which, value}</code> on match, or <code>null</code>
+     * otherwise. <code>which</code> is one of "debug", "http", "shutdown",
+     * "frontend". <code>value</code> is the part after "=" for long-form
+     * options that include one, or <code>null</code> when the value is
+     * the next argument.
+     */
+    private static String[] matchPortOption(String a) {
+        if (a.equals("-dp") || a.equals("--debug-port"))     return new String[]{"debug",    null};
+        if (a.equals("-bp") || a.equals("--backend-port"))   return new String[]{"http",     null};
+        if (a.equals("-sp") || a.equals("--shutdown-port"))  return new String[]{"shutdown", null};
+        if (a.equals("-fp") || a.equals("--frontend-port"))  return new String[]{"frontend", null};
+        if (a.startsWith("--debug-port="))    return new String[]{"debug",    a.substring("--debug-port=".length())};
+        if (a.startsWith("--backend-port="))  return new String[]{"http",     a.substring("--backend-port=".length())};
+        if (a.startsWith("--shutdown-port=")) return new String[]{"shutdown", a.substring("--shutdown-port=".length())};
+        if (a.startsWith("--frontend-port=")) return new String[]{"frontend", a.substring("--frontend-port=".length())};
+        return null;
+    }
+
+    private static void setPort(String which, String value) {
+        int p;
+        try {
+            p = Integer.parseInt(value.trim());
+        } catch (NumberFormatException ignored) {
+            System.err.println(which + " port '" + value + "' is not a number; using default");
+            return;
+        }
+        if (p <= 0 || p >= 65536) {
+            System.err.println(which + " port '" + value + "' is out of range; using default");
+            return;
+        }
+        String s = Integer.toString(p);
+        switch (which) {
+            case "debug":    debugPort    = s; break;
+            case "http":     backendPort  = s; break;
+            case "shutdown": shutdownPort = s; break;
+            case "frontend": frontendPort = s; break;
+        }
     }
 
     /**
@@ -96,6 +193,12 @@ public class Tasks {
         println("libs                     download foreign jar files");
         println("setup-tomcat             set up tomcat");
         println("unit-tests               build the system for unit testing (KissUnitTest.jar)");
+        println("");
+        println("Options (any position):");
+        println("  -dp PORT, --debug-port=PORT       JDWP debug port (default 9000)");
+        println("  -bp PORT, --backend-port=PORT     development back-end port (default 8080)");
+        println("  -sp PORT, --shutdown-port=PORT    Tomcat shutdown port (default 8005)");
+        println("  -fp PORT, --frontend-port=PORT    development front-end port (default 8000)");
         println("");
     }
 
@@ -257,6 +360,9 @@ public class Tasks {
             rmTree("tomcat/webapps/ROOT");
             //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
         }
+        // Always re-stamp server.xml with the current backendPort / shutdownPort
+        // so the options take effect on each bld invocation.
+        rewriteServerXmlPorts();
         if (isWindows) {
             System.err.println("Setting up tomcat.  Please wait...");
             rm("tomcat\\conf\\tomcat-users.xml");
@@ -268,6 +374,12 @@ public class Tasks {
                     "              version=\"1.0\">\n" +
                     "  <user username=\"admin\" password=\"admin\" roles=\"tomcat,manager-script\" />\n" +
                     "</tomcat-users>\n");
+            // writeToFile is a no-op when the target exists, so explicitly
+            // remove the helper scripts first.  Without this, changes to
+            // debugPort (KISS_DEBUG_PORT) or to the current working directory
+            // would not propagate into the regenerated scripts.
+            rm("tomcat\\bin\\debug.cmd");
+            rm("tomcat\\bin\\stopdebug.cmd");
             writeToFile("tomcat\\bin\\debug.cmd", "@echo off\n" +
                     "cd " + getcwd() + "\\tomcat\\bin\n" +
                     "set JAVA_HOME=" + getJavaPathOnWindows() + "\n" +
@@ -290,6 +402,11 @@ public class Tasks {
                     "              version=\"1.0\">\n" +
                     "  <user username=\"admin\" password=\"admin\" roles=\"tomcat,manager-script\" />\n" +
                     "</tomcat-users>\n");
+            // writeToFile is a no-op when the target exists, so explicitly
+            // remove the debug helper first.  Without this, changes to
+            // debugPort (KISS_DEBUG_PORT) or to the current working directory
+            // would not propagate into the regenerated script.
+            rm("tomcat/bin/debug");
             writeToFile("tomcat/bin/debug", "#\n" +
                     "cd " + getcwd() + "/tomcat/bin\n" +
                     "export JPDA_ADDRESS=" + debugPort + "\n" +
@@ -302,6 +419,31 @@ public class Tasks {
             writeToFile("tomcat/bin/setenv.sh","export JAVA_OPTS=\"-Dorg.sqlite.lib.path=/usr/lib/amd64 -Dorg.sqlite.lib.name=libsqlite3.so\"\n");
         }
          */
+    }
+
+    /**
+     * Edit <code>tomcat/conf/server.xml</code> in place so the
+     * <code>&lt;Server&gt;</code> shutdown port and the HTTP/1.1
+     * <code>&lt;Connector&gt;</code> port match the currently configured
+     * values. Idempotent — repeated calls converge on the configured
+     * ports, regardless of what was in the file previously.
+     */
+    private static void rewriteServerXmlPorts() {
+        java.nio.file.Path p = java.nio.file.Paths.get("tomcat/conf/server.xml");
+        if (!java.nio.file.Files.exists(p))
+            return;   // tomcat not yet installed; setupTomcat runs again later
+        try {
+            String content = new String(java.nio.file.Files.readAllBytes(p), java.nio.charset.StandardCharsets.UTF_8);
+            String updated = content
+                    .replaceFirst("<Server port=\"\\d+\"",
+                                  "<Server port=\"" + shutdownPort + "\"")
+                    .replaceFirst("<Connector port=\"\\d+\" protocol=\"HTTP/1\\.1\"",
+                                  "<Connector port=\"" + backendPort + "\" protocol=\"HTTP/1.1\"");
+            if (!updated.equals(content))
+                java.nio.file.Files.write(p, updated.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        } catch (java.io.IOException e) {
+            System.err.println("warning: could not rewrite server.xml ports: " + e.getMessage());
+        }
     }
 
     /**
@@ -323,10 +465,10 @@ public class Tasks {
             runWait(true, "tomcat\\bin\\debug.cmd");
         else
             runWait(true, "tomcat/bin/debug");
-        proc = runBackground("java -jar SimpleWebServer.jar -d src/main/frontend");
+        proc = runBackground("java -jar SimpleWebServer.jar -d src/main/frontend -p " + frontendPort);
         println("***** SERVER IS RUNNING *****");
         println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out or via the view-log command");
-        println("You can browse to http://localhost:8000   (do not use port 8080)");
+        println("You can browse to http://localhost:" + frontendPort + "   (do not use port " + backendPort + ")");
         println("The app can also be debugged at port " + debugPort);
         println("hit any key to stop tomcat");
         readChar();
@@ -357,7 +499,6 @@ public class Tasks {
             runWait(true, "tomcat/bin/debug");
         println("***** SERVER IS RUNNING *****");
         println("Server log can be viewed at " + cwd() + "/tomcat/logs/catalina.out or via the view-log command");
-        println("You can browse to http://localhost:8000   (do not use port 8080)");
         println("The app can also be debugged at port " + debugPort);
         println("To stop the backend, type 'bld stop-backend'");
     }
