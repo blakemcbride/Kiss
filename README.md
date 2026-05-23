@@ -56,6 +56,7 @@ KISS also provides the following integrations with external systems.
 ### Security
 
 * **OAuth 2.1 Resource Server** — validate bearer tokens from any OAuth 2.1 / OpenID Connect authorization server (Auth0, Okta, Keycloak, etc.); MCP servers are automatically protected when configured.  See [OAuth.md](OAuth.md).
+* **OAuth 2.1 Authorization Server** — issue tokens to MCP clients (or any OAuth client) directly from Kiss: authorization endpoint with PKCE, token endpoint with refresh-token rotation, dynamic client registration (RFC 7591), and the RFC 8414 / JWKS discovery endpoints.  Persists keys, clients, and refresh tokens to a single ini file — no extra server required.  See [OAuth.md](OAuth.md).
 
 ## Training Videos
 

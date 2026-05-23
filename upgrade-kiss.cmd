@@ -46,7 +46,6 @@ robocopy . "%~1" SimpleWebServer.jar
 robocopy . "%~1" serve
 robocopy . "%~1" serve.cmd
 robocopy . "%~1" view-log
-robocopy . "%~1" KissChangeLog.txt
 
 pushd "%~1"
 del /f /q upgrade-* 2>nul

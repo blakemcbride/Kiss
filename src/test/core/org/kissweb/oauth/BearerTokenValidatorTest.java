@@ -80,12 +80,24 @@ class BearerTokenValidatorTest {
         server.start();
 
         // 4. Wire OAuth config to point at this mock authorization server.
+        //    Explicitly clear every OAuth key first so we don't inherit
+        //    state from another test class that may have run earlier in
+        //    the same JVM (e.g. AuthorizationServerTest sets OAuthJwksUri
+        //    to its own mock --- which would silently break this test
+        //    once that mock has shut down).
+        for (String key : new String[]{"OAuthJwksUri", "OAuthAsEnabled",
+                "OAuthAsIssuer", "OAuthAsIniFile", "OAuthAuthorizationServer",
+                "OAuthResourceIdentifier", "OAuthRequiredScopes",
+                "OAuthJwksCacheSeconds", "OAuthAllowedAlgorithms",
+                "OAuthClockSkewSeconds"})
+            MainServlet.putEnvironment(key, "");
         MainServlet.putEnvironment("OAuthAuthorizationServer", issuer);
         MainServlet.putEnvironment("OAuthResourceIdentifier",  RESOURCE_IDENTIFIER);
-        MainServlet.putEnvironment("OAuthRequiredScopes",      "");           // none by default
         MainServlet.putEnvironment("OAuthJwksCacheSeconds",    "3600");
         MainServlet.putEnvironment("OAuthAllowedAlgorithms",   "RS256");
         MainServlet.putEnvironment("OAuthClockSkewSeconds",    "60");
+        OAuthConfig.reset();
+        JwksCache.reset();
     }
 
     @AfterAll
@@ -253,10 +265,16 @@ class BearerTokenValidatorTest {
     @Test
     void tamperedSignature_rejected() {
         final String token = signToken(KID, keyPair, defaultClaims());
-        // Flip the last char of the signature.
-        final char last = token.charAt(token.length() - 1);
-        final char alt  = (last == 'a') ? 'b' : 'a';
-        final String tampered = token.substring(0, token.length() - 1) + alt;
+        // Flip a char in the middle of the signature segment.  Avoid the
+        // last position because base64url decoders can silently ignore
+        // padding bits of the trailing character, masking a tamper of
+        // the last char alone.
+        final int lastDot = token.lastIndexOf('.');
+        assertTrue(lastDot >= 0 && lastDot < token.length() - 5);
+        final int flipAt = lastDot + 5;     // safely inside the signature segment
+        final char orig  = token.charAt(flipAt);
+        final char alt   = (orig == 'a') ? 'b' : 'a';
+        final String tampered = token.substring(0, flipAt) + alt + token.substring(flipAt + 1);
 
         assertThrows(BearerTokenValidator.TokenValidationException.class,
                 () -> BearerTokenValidator.validate(tampered));

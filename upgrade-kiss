@@ -42,7 +42,6 @@ rsync -av SimpleWebServer.jar "$1"
 rsync -av serve "$1"
 rsync -av serve.cmd "$1"
 rsync -av view-log "$1"
-rsync -av KissChangeLog.txt "$1"
 rm -f "$1"/upgrade-*
 if [ ! -e "$1"/src/main/precompiled/Tasks.java ]; then
     mkdir -p "$1"/src/main/precompiled

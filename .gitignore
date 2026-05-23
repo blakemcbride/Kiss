@@ -23,6 +23,12 @@ libs/jakarta.*.jar
 libs/metadata-extractor-*.jar
 libs/xmpcore-*.jar
 book
+target
+# OAuth authorization-server persistent state (signing keys, registered
+# clients, refresh tokens).  Created at runtime in the deployed copy;
+# never check in.
+src/main/backend/oauth.ini
+src/main/backend/oauth.ini.tmp
 
 
 # Gradle

@@ -324,7 +324,11 @@ public class Tasks {
         libs();
         copyTree("src/main/frontend", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
-        copyTree("src/main/backend", explodedDir + "/WEB-INF/backend");
+        // Exclude oauth.ini --- it is the runtime persistence file for the
+        // OAuth authorization server.  It only exists in the deployed
+        // location; clobbering it from source would lose all registered
+        // clients, refresh tokens, and signing keys.
+        copyTreeRegex("src/main/backend", explodedDir + "/WEB-INF/backend", null, "oauth\\.ini");
         copyTree(LIBS, explodedDir + "/WEB-INF/lib");
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
         buildJava("src/test/core", explodedDir + "/WEB-INF/test-classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
