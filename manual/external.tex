@@ -60,3 +60,17 @@ via the Model Context Protocol.
 @item @emph{Embeddings Database} --- vector storage for
 retrieval-augmented generation (RAG).
 @end itemize
+
+@section Security
+
+@itemize @bullet
+@item @emph{OAuth 2.1 Resource Server} --- validate bearer tokens
+issued by any OAuth 2.1 / OpenID Connect authorization server (Auth0,
+Okta, Keycloak, Microsoft Entra, Google, etc.).  When configured,
+@code{MCPServerBase} subclasses automatically require valid tokens; no
+code change is needed.  Configuration lives in
+@code{application.ini}; the discovery document is published at
+@code{/.well-known/oauth-protected-resource}.  See @code{OAuth.md} at
+the repository root for the full how-to, and the @emph{Kiss} book for
+the in-depth treatment.
+@end itemize

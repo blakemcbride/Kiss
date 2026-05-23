@@ -53,6 +53,10 @@ KISS also provides the following integrations with external systems.
 * **MCP Server** — expose application tools to AI assistants via the Model Context Protocol.
 * **Embeddings Database** — vector storage for retrieval-augmented generation (RAG).
 
+### Security
+
+* **OAuth 2.1 Resource Server** — validate bearer tokens from any OAuth 2.1 / OpenID Connect authorization server (Auth0, Okta, Keycloak, etc.); MCP servers are automatically protected when configured.  See [OAuth.md](OAuth.md).
+
 ## Training Videos
 
 A 6-part training series on KISS is at:

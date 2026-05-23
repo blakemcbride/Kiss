@@ -4,6 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.kissweb.json.JSONArray;
 import org.kissweb.json.JSONObject;
+import org.kissweb.oauth.BearerTokenValidator;
+import org.kissweb.oauth.OAuthConfig;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -121,9 +123,24 @@ public abstract class MCPServerBase extends RestServerBase {
     // ====================================================================================
 
     /**
-     * Authenticate the request before any MCP method is dispatched.  The default implementation
-     * allows every request.  Override to require basic auth, a bearer token, etc.; if the request
-     * is rejected, the override should set an appropriate response status and return false.
+     * Authenticate the request before any MCP method is dispatched.
+     * <br><br>
+     * Default behavior:
+     * <ul>
+     *   <li>If OAuth 2.1 is configured (i.e. {@code OAuthAuthorizationServer} is set in
+     *       {@code application.ini}), validate the {@code Authorization: Bearer ...}
+     *       header via {@link BearerTokenValidator#requireBearerToken}.  On failure,
+     *       a 401 (or 403 for insufficient scope) with the RFC 6750 / RFC 9728
+     *       {@code WWW-Authenticate} challenge has already been written and this
+     *       method returns false.  On success the validated token is available to
+     *       tool methods via {@link BearerTokenValidator#currentToken}.</li>
+     *   <li>If OAuth is not configured, allow every request.</li>
+     * </ul>
+     * Override to use a different scheme (basic auth, custom token, mixed schemes,
+     * etc.) or to deliberately leave an MCP server unauthenticated even when OAuth
+     * is configured elsewhere ({@code return true;}).  Overrides that want to layer
+     * extra checks on top of the OAuth default can call {@code super.authenticate(...)}
+     * first.
      *
      * @param request the incoming request
      * @param response the response (use to set 401, etc., on rejection)
@@ -131,6 +148,8 @@ public abstract class MCPServerBase extends RestServerBase {
      * @throws IOException if writing to the response fails
      */
     protected boolean authenticate(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (OAuthConfig.get().isEnabled())
+            return BearerTokenValidator.requireBearerToken(request, response) != null;
         return true;
     }
 
@@ -172,6 +191,17 @@ public abstract class MCPServerBase extends RestServerBase {
 
     @Override
     protected final void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        try {
+            dispatch(request, response);
+        } finally {
+            // Servlet containers reuse threads --- clear any per-request
+            // OAuth token so it can't leak onto the next request that
+            // lands on this thread.
+            BearerTokenValidator.clearCurrentToken();
+        }
+    }
+
+    private void dispatch(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (!authenticate(request, response))
             return;
 

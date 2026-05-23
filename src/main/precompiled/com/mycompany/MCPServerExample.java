@@ -5,6 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.kissweb.MCPServerBase;
 import org.kissweb.json.JSONArray;
 import org.kissweb.json.JSONObject;
+// Uncomment if a tool method needs to read the validated OAuth token (see bottom of file).
+//import org.kissweb.oauth.BearerTokenValidator;
+//import org.kissweb.oauth.ValidatedToken;
 
 import jakarta.servlet.annotation.WebServlet;
 
@@ -32,10 +35,14 @@ import jakarta.servlet.annotation.WebServlet;
  * (3) Add or remove tools by editing {@link #listTools()} (the catalog the client sees) and
  * {@link #callTool(String, JSONObject)} (the dispatcher that runs them).  The two must stay in sync.
  * <br><br>
- * (4) If the endpoint should be authenticated, override
- * {@link MCPServerBase#authenticate(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)}
- * to call <code>basicAuthenticate</code> (inherited from <code>RestServerBase</code>) or any other
- * scheme.
+ * (4) Authentication is automatic when configured.  If
+ * <code>OAuthAuthorizationServer</code> is set in <code>application.ini</code>,
+ * every request to this endpoint is validated as an OAuth 2.1 bearer token
+ * with no code change required.  To use a different scheme (HTTP basic auth,
+ * a custom token, mixed schemes, or no auth at all) override
+ * {@link MCPServerBase#authenticate(jakarta.servlet.http.HttpServletRequest, jakarta.servlet.http.HttpServletResponse)}.
+ * See the comment at the bottom of this file for accessing the validated token
+ * from inside a tool method.
  * <br><br>
  * (5) Since this is Java code under <code>precompiled</code>, after editing run
  * <code>./bld -v build</code> and restart the server.  Hot reload does not apply here.
@@ -109,4 +116,36 @@ public class MCPServerExample extends MCPServerBase {
                 return toolError("Unknown tool: " + name);
         }
     }
+
+    // ====================================================================================
+    // OAuth 2.1 bearer-token authentication
+    // ====================================================================================
+    //
+    // To require an OAuth 2.1 access token on every call to this MCP server, set in
+    // application.ini:
+    //
+    //   OAuthAuthorizationServer = https://your-auth-server.example.com
+    //   OAuthResourceIdentifier  = https://your-mcp-server.example.com
+    //   OAuthRequiredScopes      = mcp:read mcp:write     # optional
+    //
+    // That's it --- the framework automatically validates the bearer token on every
+    // request to this servlet, and serves the RFC 9728 discovery document at
+    // /.well-known/oauth-protected-resource so MCP clients can bootstrap their auth.
+    // No code change to this file is required.
+    //
+    // From inside any tool method you can then read the validated token (uncomment
+    // the imports at the top of this file first):
+    //
+    //     ValidatedToken tok = BearerTokenValidator.currentToken();
+    //     String userId = tok.getSubject();
+    //     if (!tok.hasScope("mcp:write"))
+    //         return toolError("This tool requires the mcp:write scope.");
+    //
+    // To use a different auth scheme (HTTP basic, custom token, mixed schemes, or
+    // none even when OAuth is configured globally), override authenticate():
+    //
+    //     @Override
+    //     protected boolean authenticate(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    //         return basicAuthenticate(req, resp, "MyRealm", "user", "pass");
+    //     }
 }
