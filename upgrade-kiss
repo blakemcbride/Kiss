@@ -43,10 +43,33 @@ rsync -av serve "$1"
 rsync -av serve.cmd "$1"
 rsync -av view-log "$1"
 rm -f "$1"/upgrade-*
-if [ ! -e "$1"/src/main/precompiled/Tasks.java ]; then
-    mkdir -p "$1"/src/main/precompiled
-    cp src/main/precompiled/Tasks.java "$1"/src/main/precompiled/Tasks.java
-fi
-echo You will need to manually verify src/main/precompiled/Tasks.java
-echo by comparing the one in your git clone to the one in your application.
+
+# Files the framework owns but cannot safely sync because they are
+# typically customized per-application.  List them so the operator
+# can manually diff and merge any framework-side changes.
+MANUAL_MERGE_FILES=(
+    "src/main/precompiled/Tasks.java"
+)
+
+echo
+echo "============================================================"
+echo "                  MANUAL MERGE MAY BE REQUIRED"
+echo "============================================================"
+echo
+echo "The following file(s) live in your application but are framework-"
+echo "controlled.  Compare each one against the version in this Kiss"
+echo "clone and merge any framework-side changes into your copy:"
+echo
+for f in "${MANUAL_MERGE_FILES[@]}"; do
+    echo "    $f"
+done
+echo
+echo "Quick diff command (run from the Kiss clone):"
+echo
+for f in "${MANUAL_MERGE_FILES[@]}"; do
+    echo "    diff -u \"$1/$f\" $f"
+done
+echo
+echo "============================================================"
+echo
 

@@ -51,10 +51,25 @@ pushd "%~1"
 del /f /q upgrade-* 2>nul
 popd
 
-if not exist "%~1\src\main\precompiled\Tasks.java" (
-    mkdir "%~1\src\main\precompiled"
-    copy src\main\precompiled\Tasks.java "%~1\src\main\precompiled\Tasks.java"
-)
-echo You will need to manually verify src\main\precompiled\Tasks.java
-echo by comparing the one in your git clone to the one in your application.
+REM Files the framework owns but cannot safely sync because they are
+REM typically customized per-application.  List them so the operator
+REM can manually diff and merge any framework-side changes.
+
+echo.
+echo ============================================================
+echo                   MANUAL MERGE MAY BE REQUIRED
+echo ============================================================
+echo.
+echo The following file(s) live in your application but are framework-
+echo controlled.  Compare each one against the version in this Kiss
+echo clone and merge any framework-side changes into your copy:
+echo.
+echo     src\main\precompiled\Tasks.java
+echo.
+echo Quick diff command (run from the Kiss clone):
+echo.
+echo     fc "%~1\src\main\precompiled\Tasks.java" src\main\precompiled\Tasks.java
+echo.
+echo ============================================================
+echo.
 
