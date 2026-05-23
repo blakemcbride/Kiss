@@ -24,7 +24,7 @@ popd
 robocopy libs "%~1\libs" /E
 robocopy manual "%~1\manual" /E /MIR
 robocopy src\main\core "%~1\src\main\core" /E /MIR
-robocopy src\test "%~1\src\test" /E /MIR
+robocopy src\test\core "%~1\src\test\core" /E /MIR
 robocopy src\main\frontend\kiss "%~1\src\main\frontend\kiss" /E /MIR
 
 rmdir /S /Q "%~1\src\main\frontend\WEB-INF"
