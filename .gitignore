@@ -29,6 +29,7 @@ target
 # never check in.
 src/main/backend/oauth.ini
 src/main/backend/oauth.ini.tmp
+.mcp.json
 
 
 # Gradle
