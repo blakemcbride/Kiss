@@ -5,6 +5,8 @@ import org.kissweb.restServer.MainServlet;
 import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Class to deal with ini files.  These are text-based property files broken into sections.  Each section may have any number of key/value pairs.  You can also dispense with the sections if you only have one.
@@ -64,6 +66,30 @@ public class IniFile {
      */
     public HashMap<String,String> getSection(String section) {
         return sections.get(section);
+    }
+
+    /**
+     * Get the names of every section in the ini file.
+     * <br><br>
+     * The unnamed default section (the area before any <code>[section]</code>
+     * header) appears as <code>null</code> if it contains any keys.  The
+     * returned set is a snapshot; mutating it does not affect the file.
+     *
+     * @return a set of section names
+     */
+    public synchronized Set<String> getSectionNames() {
+        return new LinkedHashSet<>(sections.keySet());
+    }
+
+    /**
+     * Remove an entire section from the ini file.
+     * <br><br>
+     * Has no effect if the section does not exist.
+     *
+     * @param section the section to remove
+     */
+    public synchronized void removeSection(String section) {
+        sections.remove(section);
     }
 
     /**
