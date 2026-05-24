@@ -374,7 +374,7 @@ OAuthAsEnabled = true
 OAuthAsIssuer = https://myapp.example.com  # iss claim and metadata base URL
 
 # Optional (defaults shown)
-OAuthAsIniFile                = oauth.ini  # relative to applicationPath
+OAuthAsIniFile                = oauth.ini  # relative to applicationPath, or an absolute path
 OAuthAccessTokenTtlSeconds    = 3600       # 1 hour
 OAuthRefreshTokenTtlSeconds   = 2592000    # 30 days
 OAuthAuthCodeTtlSeconds       = 60         # 1 minute
@@ -385,6 +385,11 @@ OAuthKeyId                    = kiss-key-1 # JWT kid header
 ```
 
 If `OAuthAsIssuer` is not set, the value of `OAuthAuthorizationServer` (from the resource-server config) is used as a fallback — convenient when the AS and RS share the same canonical URL.
+
+`OAuthAsIniFile` accepts either form:
+
+- **Relative path** (default `oauth.ini`) — resolved against `MainServlet.getApplicationPath()`, i.e. the deployed `WEB-INF/backend/` directory or, in dev mode, `src/main/backend/`.  This colocates the runtime state file with `application.ini`.
+- **Absolute path** (e.g. `/var/lib/myapp/oauth.ini`) — used verbatim.  Useful for placing the runtime state file outside the deployed webapp tree so that a WAR redeploy cannot touch it.
 
 ## Required App Code: `UserAuthenticator`
 
@@ -568,7 +573,7 @@ Implementation note: rotation and revocation are both single disk writes (the wh
 
 ## Persistence Model (`oauth.ini`)
 
-The AS persists three kinds of long-lived state to a single ini file at `src/main/backend/oauth.ini` (deployed runtime location: `WEB-INF/backend/oauth.ini`):
+The AS persists three kinds of long-lived state to a single ini file.  The default location is `oauth.ini` in the application root — `src/main/backend/oauth.ini` in dev mode, `WEB-INF/backend/oauth.ini` in a deployed WAR.  Set `OAuthAsIniFile` to an absolute path to place the file outside the webapp tree (so a WAR redeploy cannot touch it).  The file's structure:
 
 ```ini
 [keys]
