@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,7 +14,42 @@ import java.util.Set;
  * <br><br>
  * The file can also have blank and comment lines.  Comment lines start with a semicolon, colon, hash, dash, or astrix.  Keys and values may be quoted with either single or double quotes.
  * <br><br>
- * This class is thread-safe.
+ * <h2>Thread safety (single JVM)</h2>
+ * Every public method that reads or writes shared state is
+ * <code>synchronized</code> on the {@link IniFile} instance, so any
+ * single call is atomic with respect to any other concurrent call on
+ * the same instance.  {@link #getSection(String)} returns a defensive
+ * copy of the section's contents, so iterating over the returned map
+ * cannot collide with a concurrent mutation through this instance.
+ * <br><br>
+ * <h3>Compound (multi-call) operations are not atomic by default</h3>
+ * The per-call atomicity above does NOT extend across two calls.  A
+ * sequence like ``read a value, decide based on it, then write it
+ * back'' will race with concurrent writers from other threads unless
+ * the caller serializes the sequence explicitly.  Wrap the sequence
+ * in a <code>synchronized</code> block on the {@link IniFile}
+ * instance --- this acquires the same monitor the per-method locks
+ * use, so the entire block is atomic with respect to every other
+ * synchronized method:
+ * <pre>
+ *     synchronized (ini) {
+ *         if (ini.get("clients", clientId) == null)
+ *             ini.put("clients", clientId, payload);
+ *     }
+ * </pre>
+ * The same pattern is required around any ``mutate then {@link #save()}''
+ * sequence where you need the on-disk file to reflect a particular
+ * batch of mutations atomically.
+ * <br><br>
+ * <h3>Limits</h3>
+ * <ul>
+ *   <li>This class is safe for concurrent access from multiple threads
+ *       within one JVM.</li>
+ *   <li>It is NOT safe across multiple JVMs / processes, or across two
+ *       {@link IniFile} instances pointing at the same file: there is
+ *       no file-level lock, only the in-JVM monitor.  Two concurrent
+ *       writers to the same path will silently last-writer-win.</li>
+ * </ul>
  * <br><br>
  * Files look as follows:
  * <pre>
@@ -43,13 +79,25 @@ public class IniFile {
 
     /**
      * Load an ini file from a disk file.
+     * <br><br>
+     * Path resolution mirrors {@link #save(String)}:
+     * <ul>
+     *   <li>An <em>absolute</em> path is used verbatim.  Useful for files
+     *       that must live outside the deployed web application (e.g.
+     *       runtime state that should survive a WAR redeploy).</li>
+     *   <li>A <em>relative</em> path is resolved against
+     *       {@link MainServlet#getApplicationPath()}, which is the
+     *       backend directory (the deployed {@code WEB-INF/backend/} or
+     *       its dev-mode equivalent {@code src/main/backend/}).</li>
+     * </ul>
      *
-     * @param fname the filename to load from
+     * @param fname the filename to load from --- absolute or relative
      * @return the loaded IniFile object or null if file doesn't exist
      * @throws IOException if an I/O error occurs while reading the file
      */
     public static IniFile load(String fname) throws IOException {
-        fname = MainServlet.getApplicationPath() + fname;
+        if (!new File(fname).isAbsolute())
+            fname = MainServlet.getApplicationPath() + fname;
         if (!(new java.io.File(fname)).exists())
             return null;
         IniFile ini = new IniFile();
@@ -60,12 +108,21 @@ public class IniFile {
 
     /**
      * Retrieve the section of the ini file as a map.
+     * <br><br>
+     * Returns a <em>defensive copy</em> of the section's contents.
+     * Mutating the returned map does not affect the {@link IniFile};
+     * use {@link #put(String, String, String)} (and its overloads) to
+     * change stored values.  Returning a copy also makes the result
+     * safe to iterate over while other threads concurrently mutate
+     * this instance.
      *
      * @param section the section to retrieve
-     * @return the section as a map, or null if the section doesn't exist
+     * @return a copy of the section's key/value pairs, or null if the
+     *         section doesn't exist
      */
-    public HashMap<String,String> getSection(String section) {
-        return sections.get(section);
+    public synchronized HashMap<String,String> getSection(String section) {
+        final Map<String,String> s = sections.get(section);
+        return s == null ? null : new HashMap<>(s);
     }
 
     /**
@@ -148,7 +205,7 @@ public class IniFile {
      *
      * @return the filename of the ini file
      */
-    public String getFilename() {
+    public synchronized String getFilename() {
         return filename;
     }
 
@@ -358,7 +415,7 @@ public class IniFile {
      *
      * @throws IOException if an I/O error occurs while writing the file
      */
-    public void save() throws IOException {
+    public synchronized void save() throws IOException {
         save(filename);
     }
 
