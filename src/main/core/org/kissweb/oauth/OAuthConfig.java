@@ -20,9 +20,9 @@ import java.util.Set;
  * Recognized keys:
  * <ul>
  *   <li>{@code OAuthAuthorizationServer} --- issuer URL of the authorization server (required to enable)</li>
- *   <li>{@code OAuthResourceIdentifier} --- canonical URL of this resource (the {@code aud} value tokens must carry; defaults to the authorization-server URL if absent, but real deployments should set this)</li>
+ *   <li>{@code OAuthResourceIdentifier} --- canonical URL of this resource (the {@code aud} value tokens must carry; defaults to the authorization-server URL, which is correct when this Kiss app is both the AS and the RS --- set explicitly only when the RS is hosted at a URL different from the AS)</li>
  *   <li>{@code OAuthRequiredScopes} --- comma- or space-separated list of scopes every token must carry (optional)</li>
- *   <li>{@code OAuthJwksUri} --- explicit JWKS URL; if absent, discovered from {@code <issuer>/.well-known/openid-configuration}</li>
+ *   <li>{@code OAuthJwksUri} --- explicit JWKS URL.  If absent, discovered from {@code <issuer>/.well-known/oauth-authorization-server} (RFC 8414, the OAuth 2.1 standard), falling back to {@code <issuer>/.well-known/openid-configuration} (OIDC) for OIDC-only authorization servers.</li>
  *   <li>{@code OAuthJwksCacheSeconds} --- TTL for cached keys, default 3600</li>
  *   <li>{@code OAuthAllowedAlgorithms} --- comma-separated list of acceptable JWS algorithms, default {@code RS256}</li>
  *   <li>{@code OAuthClockSkewSeconds} --- allowed clock skew when validating {@code exp}/{@code nbf}, default 60</li>

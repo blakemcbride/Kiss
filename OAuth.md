@@ -73,35 +73,41 @@ The framework also currently supports only **RSA** signing algorithms (RS256, RS
 
 ## Configuration
 
-All settings live in `src/main/backend/application.ini` and are read once at startup via `MainServlet.getEnvironment()`:
+All settings live in `src/main/backend/application.ini` and are read once at startup via `MainServlet.getEnvironment()`.  Only one key contains a URL; the rest default to that value or to discovery against it, so for the common single-Kiss-app AS+RS deployment the URL appears only once in the file:
 
 ```ini
 # Required to enable OAuth — issuer URL of the authorization server.
-OAuthAuthorizationServer = https://auth.example.com
+OAuthAuthorizationServer = https://myapp.example.com
 
-# Canonical URL of this resource server.  Tokens must carry this value
-# in their "aud" claim.  Real deployments should always set this.
-OAuthResourceIdentifier = https://mcp.myapp.com
+# Optional.  Canonical URL of this resource server (the "aud" value
+# tokens must carry).  Defaults to OAuthAuthorizationServer, which is
+# correct when this Kiss app is both AS and RS.  Set this explicitly
+# only when the RS is hosted at a URL different from the AS.
+# OAuthResourceIdentifier = https://myapp.example.com
 
 # Optional.  Comma- or space-separated scopes every token must carry.
 # Tokens missing any of these scopes get HTTP 403 with error="insufficient_scope".
-OAuthRequiredScopes = mcp:read mcp:write
+# OAuthRequiredScopes = mcp:read mcp:write
 
-# Optional.  Explicit JWKS URL.  If omitted, the framework discovers it from
-# <OAuthAuthorizationServer>/.well-known/openid-configuration
-OAuthJwksUri = https://auth.example.com/.well-known/jwks.json
+# Optional.  Explicit JWKS URL.  If omitted, the framework discovers
+# it from <OAuthAuthorizationServer>/.well-known/oauth-authorization-server
+# (RFC 8414, the OAuth 2.1 standard, which Kiss's own AS publishes),
+# falling back to <OAuthAuthorizationServer>/.well-known/openid-configuration
+# for OIDC-only authorization servers.  Set this only when neither
+# metadata document is published.
+# OAuthJwksUri = https://myapp.example.com/.well-known/jwks.json
 
 # Optional.  How long to cache JWKS keys before refetching, in seconds.
 # Default: 3600.
-OAuthJwksCacheSeconds = 3600
+# OAuthJwksCacheSeconds = 3600
 
 # Optional.  Comma-separated list of acceptable JWS algorithms.
 # Default: RS256.  Supported: RS256, RS384, RS512.
-OAuthAllowedAlgorithms = RS256
+# OAuthAllowedAlgorithms = RS256
 
 # Optional.  Allowed clock skew when validating exp/nbf, in seconds.
 # Default: 60.
-OAuthClockSkewSeconds = 60
+# OAuthClockSkewSeconds = 60
 ```
 
 If `OAuthAuthorizationServer` is **not** set, the OAuth subsystem is inert: the discovery endpoint returns 404, MCP servers accept all requests as before, and no JWKS fetch is ever attempted. There is zero runtime cost for applications that don't use OAuth.
@@ -173,13 +179,15 @@ The framework auto-registers `ProtectedResourceMetadataServlet` at `/.well-known
 
 ```json
 {
-  "resource": "https://mcp.myapp.com",
-  "authorization_servers": ["https://auth.example.com"],
+  "resource": "https://myapp.example.com",
+  "authorization_servers": ["https://myapp.example.com"],
   "bearer_methods_supported": ["header"],
   "scopes_supported": ["mcp:read", "mcp:write"],
   "resource_signing_alg_values_supported": ["RS256"]
 }
 ```
+
+(In a split deployment where the RS and AS live at different URLs, `resource` reflects this server's `OAuthResourceIdentifier` and `authorization_servers` reflects `OAuthAuthorizationServer`.)
 
 MCP clients call this endpoint when they receive a 401 with `WWW-Authenticate: Bearer ..., resource_metadata="..."` and use the returned `authorization_servers` value to start an OAuth flow.
 
@@ -251,13 +259,19 @@ The framework fetches the authorization server's JWKS lazily on the first reques
 
 This handles routine key rotation (issuer adds a new key, then later removes the old one) without the operator having to restart Kiss.
 
-If you have an explicit `OAuthJwksUri`, the framework uses it directly. Otherwise it fetches `<OAuthAuthorizationServer>/.well-known/openid-configuration` and reads the `jwks_uri` field. Both OpenID Connect Discovery and OAuth 2.0 Authorization Server Metadata (RFC 8414) use the same URL and field name, so this works against either kind of authorization server.
+If you have an explicit `OAuthJwksUri`, the framework uses it directly.  Otherwise it resolves the JWKS through a three-step waterfall against the issuer URL:
+
+1. **`<OAuthAuthorizationServer>/.well-known/oauth-authorization-server`** — the RFC 8414 OAuth Authorization Server Metadata document.  This is the OAuth 2.1 / MCP standard, and the path Kiss's own AS publishes, so this step succeeds for both Kiss-hosted AS and any third-party OAuth 2.1 server.
+2. **`<OAuthAuthorizationServer>/.well-known/openid-configuration`** — the OpenID Connect Discovery document.  Tried only when step 1 returns 404 (or returns a 2xx body that does not contain `jwks_uri`).  Kept as a fallback for OIDC-only authorization servers that do not publish RFC 8414.
+3. If neither metadata document publishes a `jwks_uri`, the resolver throws an `IOException` whose message names both URLs and points the operator at the `OAuthJwksUri` override.
+
+Hard failures during discovery — network errors, timeouts, HTTP 401/403, or 5xx — are surfaced as `IOException` with the specific status or cause, **not** silently masked by falling through to the next step (which would typically fail the same way against the same host and produce a misleading "tried everything" diagnostic).
 
 ---
 
 ## Security Considerations
 
-- **Always set `OAuthResourceIdentifier`** to your resource server's canonical URL. The validator rejects any token whose `aud` claim does not contain this value, which prevents token-substitution attacks where a token issued for a different resource gets replayed against yours. RFC 8707 (Resource Indicators) requires authorization servers to bind tokens to specific resources via the `aud` claim; Kiss enforces the resource side.
+- **Make sure `OAuthResourceIdentifier` reflects this resource server's canonical URL.** The validator rejects any token whose `aud` claim does not contain this value, which prevents token-substitution attacks where a token issued for a different resource gets replayed against yours. RFC 8707 (Resource Indicators) requires authorization servers to bind tokens to specific resources via the `aud` claim; Kiss enforces the resource side. When the AS and RS are the same Kiss app the default (which equals `OAuthAuthorizationServer`) is correct; set it explicitly only when the RS is hosted at a URL different from the AS.
 - **`alg=none` is always rejected**, even if you list `none` in `OAuthAllowedAlgorithms` (you can't — the dispatch only handles RSA algorithms). This avoids the classic JWT vulnerability where a forged unsigned token would otherwise be accepted.
 - **The token cache is keyed by SHA-256 of the token string.** Token bodies are not stored in the cache key, and the cache TTL is short (60 seconds), so a brief skew between "this token was valid" and "we know it was revoked" is possible. If your application needs immediate revocation, lower the cache TTL or call `BearerTokenValidator.validate()` directly with cache bypass logic (the cache is not exposed externally — re-validating the same token within 60 seconds simply uses the cached `ValidatedToken`, but the `exp` claim is re-checked on every cache hit).
 - **JWKS fetch failures fall back to 401.** A 5xx from the authorization server while validating a token surfaces to the client as 401 `invalid_token` rather than 5xx, to avoid leaking infrastructure details. The actual cause is logged at `error` level.
@@ -273,7 +287,13 @@ If you have an explicit `OAuthJwksUri`, the framework uses it directly. Otherwis
 Check that `OAuthAuthorizationServer` is uncommented in `application.ini` and that the server was restarted after the change. Configuration is read once at startup.
 
 **All requests get 401 `invalid_token` with "No JWKS key found for kid=...".**
-The authorization server is signing tokens with a key it has not published in its JWKS, or the JWKS URL the framework discovered is wrong. Check the catalina log for the "Fetching JWKS from ..." line and verify that URL serves the expected JWKS. Override with explicit `OAuthJwksUri` if discovery picks the wrong one.
+The authorization server is signing tokens with a key it has not published in its JWKS, or the JWKS URL the framework discovered is wrong. Check the catalina log for the `Looking for jwks_uri in ...` lines (one per discovery step actually attempted) and the eventual `Fetching JWKS from ...` line, and verify that URL serves the expected JWKS. Override with explicit `OAuthJwksUri` if neither metadata document points where you expect.
+
+**Server fails to start validating tokens with `IOException: Could not fetch OAuth metadata from .../.well-known/oauth-authorization-server`.**
+This is a hard failure on the RFC 8414 step (HTTP 401/403, 5xx, network unreachable, timeout) — *not* a "the doc is missing" condition.  Resolve it at the AS (the doc is genuinely unreachable or the AS is refusing the request) rather than treating it as a discovery problem.  Setting `OAuthJwksUri` bypasses discovery entirely if the AS won't be made to cooperate.
+
+**`IOException: Could not resolve JWKS URI for issuer ... Neither .../.well-known/oauth-authorization-server nor .../.well-known/openid-configuration published a jwks_uri.`**
+Both metadata documents were reachable (so neither is a network problem) but neither contained a `jwks_uri` — the AS is not publishing OAuth metadata in either standard form. Set `OAuthJwksUri` explicitly to the AS's JWKS endpoint.
 
 **All requests get 401 with "Token iss '...' does not match expected '...'".**
 The `OAuthAuthorizationServer` value in `application.ini` must match the `iss` claim in tokens exactly (modulo a trailing slash, which the validator normalizes). Some authorization servers add a path component to the issuer (e.g. Auth0 uses `https://tenant.auth0.com/`, Keycloak uses `https://kc.example/realms/myrealm`). Set `OAuthAuthorizationServer` to the exact `iss` value your tokens carry.
@@ -351,7 +371,7 @@ All keys go in `src/main/backend/application.ini`:
 ```ini
 # Required
 OAuthAsEnabled = true
-OAuthAsIssuer = https://mcp.myapp.com      # iss claim and metadata base URL
+OAuthAsIssuer = https://myapp.example.com  # iss claim and metadata base URL
 
 # Optional (defaults shown)
 OAuthAsIniFile                = oauth.ini  # relative to applicationPath
@@ -571,7 +591,7 @@ client_id         = <client_id>
 user_sub          = <subject>
 user_extra_claims = <base64 JSON>     # ride-along claims for access tokens
 scopes            = mcp:read mcp:write
-audience          = https://mcp.myapp.com
+audience          = https://myapp.example.com
 created_at        = 1747201234
 expires_at        = 1749793200
 rotated_to_jti    =                   # set when this token has been rotated

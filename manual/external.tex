@@ -65,12 +65,20 @@ retrieval-augmented generation (RAG).
 
 @itemize @bullet
 @item @emph{OAuth 2.1 Resource Server} --- validate bearer tokens
-issued by any OAuth 2.1 / OpenID Connect authorization server (Auth0,
-Okta, Keycloak, Microsoft Entra, Google, etc.).  When configured,
+issued either by this same Kiss app acting as the authorization server
+(see the next bullet) or by an external provider such as Auth0, Okta,
+Keycloak, Microsoft Entra, or Google.  When configured,
 @code{MCPServerBase} subclasses automatically require valid tokens; no
 code change is needed.  Configuration lives in
 @code{application.ini}; the discovery document is published at
-@code{/.well-known/oauth-protected-resource}.  See @code{OAuth.md} at
-the repository root for the full how-to, and the @emph{Kiss} book for
-the in-depth treatment.
+@code{/.well-known/oauth-protected-resource}.
+@item @emph{OAuth 2.1 Authorization Server} --- issue tokens directly
+from Kiss: authorization-code flow with mandatory PKCE, token endpoint
+with refresh-token rotation, dynamic client registration (RFC 7591),
+and the RFC 8414 metadata and JWKS endpoints.  Persists clients,
+refresh tokens, and signing keys to a single ini file --- no database
+required.  Enabled by a single @code{application.ini} key.
 @end itemize
+
+See @code{OAuth.md} at the repository root for the full how-to on both
+halves, and the @emph{Kiss} book for the in-depth treatment.

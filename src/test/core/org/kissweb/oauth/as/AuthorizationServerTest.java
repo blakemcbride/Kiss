@@ -54,6 +54,21 @@ class AuthorizationServerTest {
         tempDir = Files.createTempDirectory("kiss-oauth-as-");
         MainServlet.setApplicationPath(tempDir.toString() + "/");
 
+        // Clear every OAuth* key first so we don't inherit state from a
+        // test class that ran earlier in the same JVM (e.g.
+        // BearerTokenValidatorTest leaves OAuthRequiredScopes set when
+        // its last test happens to be one that mutates that value).
+        for (String key : new String[]{
+                "OAuthAuthorizationServer", "OAuthResourceIdentifier",
+                "OAuthJwksUri", "OAuthRequiredScopes", "OAuthJwksCacheSeconds",
+                "OAuthAllowedAlgorithms", "OAuthClockSkewSeconds",
+                "OAuthAsEnabled", "OAuthAsIssuer", "OAuthAsIniFile",
+                "OAuthAccessTokenTtlSeconds", "OAuthRefreshTokenTtlSeconds",
+                "OAuthAuthCodeTtlSeconds", "OAuthPruneIntervalSeconds",
+                "OAuthAllowDynamicRegistration", "OAuthSessionTtlSeconds",
+                "OAuthKeyId"})
+            MainServlet.putEnvironment(key, "");
+
         // AS config
         MainServlet.putEnvironment("OAuthAsEnabled",                  "true");
         MainServlet.putEnvironment("OAuthAsIssuer",                   ISSUER);
