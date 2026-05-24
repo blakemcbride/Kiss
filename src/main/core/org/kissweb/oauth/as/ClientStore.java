@@ -38,7 +38,10 @@ public final class ClientStore {
         loadAll();
     }
 
-    /** @return the singleton, loading from {@code oauth.ini} on first call */
+    /**
+     * Get the singleton instance.
+     * @return the singleton, loading from {@code oauth.ini} on first call
+     */
     public static ClientStore get() {
         ClientStore local = instance;
         if (local == null) {

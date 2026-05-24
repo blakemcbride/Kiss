@@ -63,28 +63,52 @@ public final class RegisteredClient {
         this.createdAtEpochSeconds = createdAtEpochSeconds;
     }
 
-    /** @return the client identifier */
+    /**
+     * Get the client identifier.
+     * @return the client identifier
+     */
     public String getClientId() { return clientId; }
 
-    /** @return SHA-256 hex of the client secret, or null for a public client */
+    /**
+     * Get the SHA-256 hex of the client secret.
+     * @return SHA-256 hex of the client secret, or null for a public client
+     */
     public String getClientSecretHash() { return clientSecretHash; }
 
-    /** @return human-readable client name (shown on consent) */
+    /**
+     * Get the human-readable client name (shown on consent).
+     * @return human-readable client name (shown on consent)
+     */
     public String getClientName() { return clientName; }
 
-    /** @return the allowed redirect URIs (exact-match list) */
+    /**
+     * Get the allowed redirect URIs (exact-match list).
+     * @return the allowed redirect URIs (exact-match list)
+     */
     public List<String> getRedirectUris() { return redirectUris; }
 
-    /** @return scopes this client is permitted to request */
+    /**
+     * Get the scopes this client is permitted to request.
+     * @return scopes this client is permitted to request
+     */
     public Set<String> getAllowedScopes() { return allowedScopes; }
 
-    /** @return grant types this client is permitted to use */
+    /**
+     * Get the grant types this client is permitted to use.
+     * @return grant types this client is permitted to use
+     */
     public Set<String> getAllowedGrantTypes() { return allowedGrantTypes; }
 
-    /** @return true if this is a public client (no client_secret) */
+    /**
+     * Check whether this is a public client (no client_secret).
+     * @return true if this is a public client (no client_secret)
+     */
     public boolean isPublicClient() { return publicClient; }
 
-    /** @return when the client was registered (Unix epoch seconds) */
+    /**
+     * Get when the client was registered (Unix epoch seconds).
+     * @return when the client was registered (Unix epoch seconds)
+     */
     public long getCreatedAtEpochSeconds() { return createdAtEpochSeconds; }
 
     /**

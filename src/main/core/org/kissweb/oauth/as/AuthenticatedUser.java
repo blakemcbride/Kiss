@@ -42,12 +42,20 @@ public final class AuthenticatedUser {
         this.extraClaims = extraClaims != null ? extraClaims : new JSONObject();
     }
 
-    /** @return the user's subject identifier */
+    /**
+     * Get the user's subject identifier.
+     *
+     * @return the user's subject identifier
+     */
     public String getSubject() {
         return subject;
     }
 
-    /** @return additional claims to embed in issued tokens; may be empty, never null */
+    /**
+     * Get the additional claims to embed in issued tokens.
+     *
+     * @return additional claims to embed in issued tokens; may be empty, never null
+     */
     public JSONObject getExtraClaims() {
         return extraClaims;
     }

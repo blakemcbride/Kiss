@@ -25,7 +25,10 @@ public final class AuthorizationCodeStore {
 
     private AuthorizationCodeStore() { }
 
-    /** @return the process-wide singleton */
+    /**
+     * Get the process-wide singleton.
+     * @return the process-wide singleton
+     */
     public static AuthorizationCodeStore get() {
         return INSTANCE;
     }
@@ -75,7 +78,10 @@ public final class AuthorizationCodeStore {
         return toRemove.size();
     }
 
-    /** @return the number of codes currently held (intended for tests/monitoring) */
+    /**
+     * Get the number of codes currently held (intended for tests/monitoring).
+     * @return the number of codes currently held (intended for tests/monitoring)
+     */
     public synchronized int size() {
         return codes.size();
     }

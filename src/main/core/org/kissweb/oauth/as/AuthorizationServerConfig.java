@@ -125,34 +125,64 @@ public final class AuthorizationServerConfig {
         instance = null;
     }
 
-    /** @return true if the AS is enabled (the {@code OAuthAsEnabled} key is true) */
+    /**
+     * Check whether the AS is enabled.
+     * @return true if the AS is enabled (the {@code OAuthAsEnabled} key is true)
+     */
     public boolean isEnabled() { return enabled; }
 
-    /** @return the canonical issuer URL announced by the AS */
+    /**
+     * Get the canonical issuer URL announced by the AS.
+     * @return the canonical issuer URL announced by the AS
+     */
     public String getIssuer() { return issuer; }
 
-    /** @return path to the persistent state file, relative to applicationPath */
+    /**
+     * Get the path to the persistent state file.
+     * @return path to the persistent state file, relative to applicationPath
+     */
     public String getIniFile() { return iniFile; }
 
-    /** @return lifetime of issued access tokens, in seconds */
+    /**
+     * Get the lifetime of issued access tokens, in seconds.
+     * @return lifetime of issued access tokens, in seconds
+     */
     public int getAccessTokenTtlSeconds() { return accessTokenTtlSeconds; }
 
-    /** @return lifetime of issued refresh tokens, in seconds */
+    /**
+     * Get the lifetime of issued refresh tokens, in seconds.
+     * @return lifetime of issued refresh tokens, in seconds
+     */
     public int getRefreshTokenTtlSeconds() { return refreshTokenTtlSeconds; }
 
-    /** @return lifetime of authorization codes, in seconds */
+    /**
+     * Get the lifetime of authorization codes, in seconds.
+     * @return lifetime of authorization codes, in seconds
+     */
     public int getAuthCodeTtlSeconds() { return authCodeTtlSeconds; }
 
-    /** @return minimum seconds between automatic prune sweeps */
+    /**
+     * Get the minimum seconds between automatic prune sweeps.
+     * @return minimum seconds between automatic prune sweeps
+     */
     public int getPruneIntervalSeconds() { return pruneIntervalSeconds; }
 
-    /** @return true if dynamic client registration is allowed (default true) */
+    /**
+     * Check whether dynamic client registration is allowed.
+     * @return true if dynamic client registration is allowed (default true)
+     */
     public boolean isAllowDynamicRegistration() { return allowDynamicRegistration; }
 
-    /** @return lifetime of the AS login session cookie, in seconds */
+    /**
+     * Get the lifetime of the AS login session cookie, in seconds.
+     * @return lifetime of the AS login session cookie, in seconds
+     */
     public int getSessionTtlSeconds() { return sessionTtlSeconds; }
 
-    /** @return the key id ({@code kid}) embedded in issued tokens */
+    /**
+     * Get the key id ({@code kid}) embedded in issued tokens.
+     * @return the key id ({@code kid}) embedded in issued tokens
+     */
     public String getKeyId() { return keyId; }
 
     // ------------------------------------------------------------------

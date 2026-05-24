@@ -63,34 +63,64 @@ public final class AuthorizationCode {
         this.expiresAtEpochSeconds = expiresAtEpochSeconds;
     }
 
-    /** @return the opaque code value */
+    /**
+     * Get the opaque code value.
+     * @return the opaque code value
+     */
     public String getCode() { return code; }
 
-    /** @return the client the code was issued to */
+    /**
+     * Get the client the code was issued to.
+     * @return the client the code was issued to
+     */
     public String getClientId() { return clientId; }
 
-    /** @return the authenticated user (subject + extra claims) */
+    /**
+     * Get the authenticated user (subject + extra claims).
+     * @return the authenticated user (subject + extra claims)
+     */
     public AuthenticatedUser getUser() { return user; }
 
-    /** @return the redirect URI the client supplied */
+    /**
+     * Get the redirect URI the client supplied.
+     * @return the redirect URI the client supplied
+     */
     public String getRedirectUri() { return redirectUri; }
 
-    /** @return the approved scopes */
+    /**
+     * Get the approved scopes.
+     * @return the approved scopes
+     */
     public Set<String> getScopes() { return scopes; }
 
-    /** @return the resource indicator (RFC 8707), or null */
+    /**
+     * Get the resource indicator (RFC 8707), or null.
+     * @return the resource indicator (RFC 8707), or null
+     */
     public String getAudience() { return audience; }
 
-    /** @return the PKCE code_challenge */
+    /**
+     * Get the PKCE code_challenge.
+     * @return the PKCE code_challenge
+     */
     public String getCodeChallenge() { return codeChallenge; }
 
-    /** @return the PKCE code_challenge_method (must be "S256") */
+    /**
+     * Get the PKCE code_challenge_method (must be "S256").
+     * @return the PKCE code_challenge_method (must be "S256")
+     */
     public String getCodeChallengeMethod() { return codeChallengeMethod; }
 
-    /** @return the OIDC nonce, or null */
+    /**
+     * Get the OIDC nonce, or null.
+     * @return the OIDC nonce, or null
+     */
     public String getNonce() { return nonce; }
 
-    /** @return expiry as Unix epoch seconds */
+    /**
+     * Get expiry as Unix epoch seconds.
+     * @return expiry as Unix epoch seconds
+     */
     public long getExpiresAtEpochSeconds() { return expiresAtEpochSeconds; }
 
     /**

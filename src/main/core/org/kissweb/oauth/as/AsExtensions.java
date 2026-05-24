@@ -36,6 +36,8 @@ public final class AsExtensions {
     }
 
     /**
+     * Return the registered {@link UserAuthenticator}.
+     *
      * @return the registered {@link UserAuthenticator}, or null if none
      *         has been registered (the AS will refuse to issue tokens
      *         in that state)
@@ -55,6 +57,8 @@ public final class AsExtensions {
     }
 
     /**
+     * Return the registered {@link ConsentProvider}.
+     *
      * @return the registered {@link ConsentProvider}; never null --- a
      *         no-op default is returned if the application has not
      *         registered one

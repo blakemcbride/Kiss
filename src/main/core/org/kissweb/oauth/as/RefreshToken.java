@@ -68,43 +68,82 @@ public final class RefreshToken {
         this.rotatedToJti          = rotatedToJti;
     }
 
-    /** @return extra claims to ride along on access tokens minted from this refresh token */
+    /**
+     * Get the extra claims to ride along on access tokens minted from this refresh token.
+     * @return extra claims to ride along on access tokens minted from this refresh token
+     */
     public JSONObject getUserExtraClaims() { return userExtraClaims; }
 
-    /** @return the {@link AuthenticatedUser} reconstituted from {@code userSubject} + {@code userExtraClaims} */
+    /**
+     * Reconstitute the {@link AuthenticatedUser} from {@code userSubject} + {@code userExtraClaims}.
+     * @return the {@link AuthenticatedUser} reconstituted from {@code userSubject} + {@code userExtraClaims}
+     */
     public AuthenticatedUser getUser() { return new AuthenticatedUser(userSubject, userExtraClaims); }
 
-    /** @return the token's unique id (also the secret value sent to the client) */
+    /**
+     * Get the token's unique id (also the secret value sent to the client).
+     * @return the token's unique id (also the secret value sent to the client)
+     */
     public String getJti() { return jti; }
 
-    /** @return the family id (constant across all rotations of the same logical session) */
+    /**
+     * Get the family id (constant across all rotations of the same logical session).
+     * @return the family id (constant across all rotations of the same logical session)
+     */
     public String getFamilyId() { return familyId; }
 
-    /** @return the client the token was issued to */
+    /**
+     * Get the client the token was issued to.
+     * @return the client the token was issued to
+     */
     public String getClientId() { return clientId; }
 
-    /** @return the user the token represents */
+    /**
+     * Get the user the token represents.
+     * @return the user the token represents
+     */
     public String getUserSubject() { return userSubject; }
 
-    /** @return scopes carried on access tokens minted from this refresh token */
+    /**
+     * Get scopes carried on access tokens minted from this refresh token.
+     * @return scopes carried on access tokens minted from this refresh token
+     */
     public Set<String> getScopes() { return scopes; }
 
-    /** @return the resource indicator access tokens will carry, or null */
+    /**
+     * Get the resource indicator access tokens will carry, or null.
+     * @return the resource indicator access tokens will carry, or null
+     */
     public String getAudience() { return audience; }
 
-    /** @return when the token was created (Unix epoch seconds) */
+    /**
+     * Get when the token was created (Unix epoch seconds).
+     * @return when the token was created (Unix epoch seconds)
+     */
     public long getCreatedAtEpochSeconds() { return createdAtEpochSeconds; }
 
-    /** @return when the token expires (Unix epoch seconds) */
+    /**
+     * Get when the token expires (Unix epoch seconds).
+     * @return when the token expires (Unix epoch seconds)
+     */
     public long getExpiresAtEpochSeconds() { return expiresAtEpochSeconds; }
 
-    /** @return null for a current token; the successor JTI for a rotated one */
+    /**
+     * Get the successor JTI for a rotated token.
+     * @return null for a current token; the successor JTI for a rotated one
+     */
     public String getRotatedToJti() { return rotatedToJti; }
 
-    /** @return true if this token has been rotated out (i.e. consumed by a successful refresh) */
+    /**
+     * Check whether this token has been rotated out.
+     * @return true if this token has been rotated out (i.e. consumed by a successful refresh)
+     */
     public boolean isRotated() { return rotatedToJti != null; }
 
-    /** @return true if the token's expiry is in the past */
+    /**
+     * Check whether the token has expired.
+     * @return true if the token's expiry is in the past
+     */
     public boolean isExpired() {
         return System.currentTimeMillis() / 1000L >= expiresAtEpochSeconds;
     }
