@@ -17,9 +17,14 @@ import org.kissweb.restServer.MainServlet;
  *       {@code issuer} field in the metadata document.  Defaults to
  *       the value of {@code OAuthAuthorizationServer} from the
  *       resource-server config, then to the empty string.</li>
- *   <li>{@code OAuthAsIniFile} --- path to the persistence file
- *       relative to the application root.  Default
- *       {@code WEB-INF/backend/oauth.ini}.</li>
+ *   <li>{@code OAuthAsIniFile} --- path to the persistence file.
+ *       Default {@code oauth.ini}, resolved against the application
+ *       root (the deployed {@code WEB-INF/backend/} directory, or its
+ *       dev-mode equivalent {@code src/main/backend/}).  May also be
+ *       given as an absolute path (e.g.
+ *       {@code /home/myapp/oauth.ini}), which is used verbatim ---
+ *       useful for placing the runtime state file outside the
+ *       deployed webapp so a WAR redeploy cannot clobber it.</li>
  *   <li>{@code OAuthAccessTokenTtlSeconds} --- lifetime of issued
  *       access tokens.  Default 3600 (one hour).</li>
  *   <li>{@code OAuthRefreshTokenTtlSeconds} --- lifetime of issued

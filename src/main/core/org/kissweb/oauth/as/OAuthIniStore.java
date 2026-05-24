@@ -76,12 +76,19 @@ public final class OAuthIniStore {
     }
 
     private static OAuthIniStore open() {
-        final String relative = AuthorizationServerConfig.get().getIniFile();
-        final String absolute = MainServlet.getApplicationPath() + relative;
+        // The configured value may be either relative (resolved against
+        // MainServlet.getApplicationPath(), the historical default) or
+        // absolute (used verbatim --- useful for placing the runtime
+        // state file outside the deployed webapp so a WAR redeploy
+        // cannot touch it).  IniFile.load() handles both forms; we
+        // mirror the same logic here so the logged path and the
+        // in-memory filename match what is actually on disk.
+        final String configured = AuthorizationServerConfig.get().getIniFile();
+        final String absolute = new File(configured).isAbsolute()
+                ? configured
+                : MainServlet.getApplicationPath() + configured;
         try {
-            // IniFile.load expects a path relative to applicationPath
-            // and prepends it itself --- so pass the relative path.
-            IniFile loaded = IniFile.load(relative);
+            IniFile loaded = IniFile.load(configured);
             if (loaded == null) {
                 logger.info("OAuth state file " + absolute + " does not exist; starting fresh");
                 loaded = new IniFile(absolute);

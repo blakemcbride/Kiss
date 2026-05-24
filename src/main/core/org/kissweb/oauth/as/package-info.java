@@ -14,12 +14,16 @@
  * <br><br>
  * <h2>Persistence</h2>
  * All long-lived state (signing keys, registered clients, refresh
- * tokens) is persisted to a single INI file (default
- * <code>src/main/backend/oauth.ini</code>, written at runtime to
- * <code>WEB-INF/backend/oauth.ini</code> in the deployed app).  Auth
- * codes live only in memory --- their TTL is 60 seconds and the cost of
- * losing them on restart is one user re-clicking ``Allow.''  Saves are
- * atomic (write to <code>oauth.ini.tmp</code>, then rename).
+ * tokens) is persisted to a single INI file.  The default location is
+ * <code>oauth.ini</code> in the application root (the deployed
+ * <code>WEB-INF/backend/</code> directory, or its dev-mode equivalent
+ * <code>src/main/backend/</code>).  An application that wants the file
+ * to survive WAR redeploys can set <code>OAuthAsIniFile</code> to an
+ * absolute path outside the webapp tree --- see
+ * {@link AuthorizationServerConfig}.  Auth codes live only in memory
+ * --- their TTL is 60 seconds and the cost of losing them on restart
+ * is one user re-clicking ``Allow.''  Saves are atomic (write to
+ * <code>oauth.ini.tmp</code>, then rename).
  * <br><br>
  * <h2>Two app-provided interfaces</h2>
  * Everything in this package is generic, but two pieces are necessarily
