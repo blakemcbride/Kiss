@@ -7,8 +7,9 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * Immutable representation of a refresh token.  Persisted to
- * {@code oauth.ini} as a {@code [refresh.<jti>]} section.
+ * Immutable representation of a refresh token.  Persisted as a row in
+ * the {@code oauth_refresh_tokens} table of the OAuth SQLite database,
+ * keyed by {@link #getJti}.
  * <br><br>
  * Refresh tokens are issued in \emph{families}: when a refresh token is
  * exchanged for a new access token, a new refresh token is issued in the

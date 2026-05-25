@@ -264,7 +264,8 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
   - `delete()` - Delete record
 - **Connection Methods**:
   - `execute(String sql, Object... args)` - Execute parameterized SQL statements (INSERT, UPDATE, DELETE)
-  - `exists(String sql, Object... args)` - Check if records exist
+  - `exists(String sql, Object... args)` - Check if records exist. Implemented as `fetchOne(sql, args) != null` so it routes through the framework's per-vendor `limit()` and works uniformly across all five supported databases. Pass a plain WHERE-clause query (do not pre-wrap with `SELECT EXISTS(...)` or pre-add `LIMIT`)
+  - `fetchCount(String sql, Object... args)` - Count rows that would be returned by the given select. Wraps the query as `SELECT COUNT(*) AS n FROM (...) tmp123`; the explicit `AS n` alias and bare table alias are portable across PostgreSQL, MySQL, SQLite, SQL Server, and Oracle
   - `fetchAllJSON(String sql, Object... args)` - Fetch results directly as JSON array
 - **Field Access Methods**:
   - `getString()` - Get string value

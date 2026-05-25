@@ -26,7 +26,13 @@ book
 target
 # OAuth authorization-server persistent state (signing keys, registered
 # clients, refresh tokens).  Created at runtime in the deployed copy;
-# never check in.
+# never check in.  oauth.db is the current SQLite database; the -journal,
+# -wal, and -shm files are SQLite's transactional sidecars.  oauth.ini is
+# the legacy ini file kept only for migration triggers.
+src/main/backend/oauth.db
+src/main/backend/oauth.db-journal
+src/main/backend/oauth.db-wal
+src/main/backend/oauth.db-shm
 src/main/backend/oauth.ini
 src/main/backend/oauth.ini.tmp
 .mcp.json

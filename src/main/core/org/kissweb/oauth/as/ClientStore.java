@@ -2,9 +2,11 @@ package org.kissweb.oauth.as;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.kissweb.IniFile;
+import org.kissweb.database.Connection;
+import org.kissweb.database.Record;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,31 +18,35 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Persistent store of {@link RegisteredClient}s.  Each client lives in a
- * separate {@code [client.<id>]} section of {@code oauth.ini}.  The
- * store loads every {@code client.*} section on construction and
- * thereafter maintains an in-memory cache that mirrors the on-disk
- * state; mutations write the cache change and call {@link OAuthIniStore#save()}.
+ * Persistent store of {@link RegisteredClient}s, backed by the
+ * {@code oauth_clients} table in the OAuth SQLite database.  The full
+ * client set is read into memory on construction and thereafter
+ * maintained as a cache that mirrors the on-disk state; mutations
+ * update the cache and execute a single {@code INSERT}/{@code DELETE}
+ * against the database.
+ * <br><br>
+ * The in-memory cache is retained because the client set is small
+ * (typically a handful of entries) and is read on every token
+ * validation --- pulling it out of memory keeps that hot path
+ * allocation-free.
  */
 public final class ClientStore {
 
     private static final Logger logger = LogManager.getLogger(ClientStore.class);
 
-    private static final String SECTION_PREFIX = "client.";
-
     private static volatile ClientStore instance;
 
-    private final OAuthIniStore                  store;
+    private final OAuthSqliteStore               store;
     private final Map<String, RegisteredClient>  byId = new LinkedHashMap<>();
 
-    private ClientStore(OAuthIniStore store) {
+    private ClientStore(OAuthSqliteStore store) {
         this.store = store;
         loadAll();
     }
 
     /**
      * Get the singleton instance.
-     * @return the singleton, loading from {@code oauth.ini} on first call
+     * @return the singleton, loading from the OAuth SQLite database on first call
      */
     public static ClientStore get() {
         ClientStore local = instance;
@@ -48,7 +54,7 @@ public final class ClientStore {
             synchronized (ClientStore.class) {
                 local = instance;
                 if (local == null) {
-                    local = new ClientStore(OAuthIniStore.get());
+                    local = new ClientStore(OAuthSqliteStore.get());
                     instance = local;
                 }
             }
@@ -65,13 +71,27 @@ public final class ClientStore {
      * Persist a newly-registered client.
      *
      * @param client the client to register
-     * @throws IOException if writing {@code oauth.ini} fails
+     * @throws IOException if writing to the database fails
      */
     public synchronized void register(RegisteredClient client) throws IOException {
-        byId.put(client.getClientId(), client);
         synchronized (store) {
-            writeSection(client);
-            store.save();
+            final Connection db = store.connection();
+            try {
+                final Record r = db.newRecord("oauth_clients");
+                r.set("client_id",           client.getClientId());
+                r.set("client_secret_hash",  client.getClientSecretHash());
+                r.set("client_name",         orEmpty(client.getClientName()));
+                r.set("redirect_uris",       joinSpaces(client.getRedirectUris()));
+                r.set("allowed_scopes",      joinSpaces(client.getAllowedScopes()));
+                r.set("allowed_grant_types", joinSpaces(client.getAllowedGrantTypes()));
+                r.set("created_at",          client.getCreatedAtEpochSeconds());
+                r.addRecord();
+                db.commit();
+            } catch (SQLException e) {
+                rollbackQuietly(db);
+                throw new IOException("Failed to register OAuth client " + client.getClientId(), e);
+            }
+            byId.put(client.getClientId(), client);
         }
         logger.info("Registered OAuth client " + client.getClientId() + " (" + client.getClientName() + ")");
     }
@@ -92,15 +112,21 @@ public final class ClientStore {
      * revoke them.
      *
      * @param clientId the client to remove
-     * @throws IOException if writing {@code oauth.ini} fails
+     * @throws IOException if writing to the database fails
      */
     public synchronized void remove(String clientId) throws IOException {
         if (clientId == null || !byId.containsKey(clientId))
             return;
-        byId.remove(clientId);
         synchronized (store) {
-            store.ini().removeSection(SECTION_PREFIX + clientId);
-            store.save();
+            final Connection db = store.connection();
+            try {
+                db.execute("DELETE FROM oauth_clients WHERE client_id = ?", clientId);
+                db.commit();
+            } catch (SQLException e) {
+                rollbackQuietly(db);
+                throw new IOException("Failed to remove OAuth client " + clientId, e);
+            }
+            byId.remove(clientId);
         }
         logger.info("Unregistered OAuth client " + clientId);
     }
@@ -118,47 +144,49 @@ public final class ClientStore {
 
     private void loadAll() {
         synchronized (store) {
-            final IniFile ini = store.ini();
-            for (String section : ini.getSectionNames()) {
-                if (section == null || !section.startsWith(SECTION_PREFIX))
-                    continue;
-                final String clientId = section.substring(SECTION_PREFIX.length());
-                final RegisteredClient c = readSection(ini, section, clientId);
-                if (c != null)
-                    byId.put(clientId, c);
+            final Connection db = store.connection();
+            try {
+                final List<Record> rows = db.fetchAll(
+                        "SELECT client_id, client_secret_hash, client_name, redirect_uris, " +
+                        "allowed_scopes, allowed_grant_types, created_at " +
+                        "FROM oauth_clients ORDER BY created_at");
+                for (Record r : rows) {
+                    final RegisteredClient c = fromRow(r);
+                    if (c != null)
+                        byId.put(c.getClientId(), c);
+                }
+            } catch (Exception e) {
+                throw new IllegalStateException("Failed to load OAuth clients from SQLite", e);
             }
         }
         if (!byId.isEmpty())
-            logger.info("Loaded " + byId.size() + " OAuth client(s) from " + AuthorizationServerConfig.get().getIniFile());
+            logger.info("Loaded " + byId.size() + " OAuth client(s) from " + store.getDbPath());
     }
 
-    private static RegisteredClient readSection(IniFile ini, String section, String clientId) {
+    private static RegisteredClient fromRow(Record r) {
         try {
-            final String secretHash = ini.get(section, "client_secret_hash");
-            final String name       = orEmpty(ini.get(section, "client_name"));
-            final List<String> uris = splitSpaces(ini.get(section, "redirect_uris"));
-            final Set<String> scopes = new LinkedHashSet<>(splitSpaces(ini.get(section, "allowed_scopes")));
-            final Set<String> grants = new LinkedHashSet<>(splitSpaces(ini.get(section, "allowed_grant_types")));
-            final Integer createdInt = ini.getInt(section, "created_at");
-            final long createdAt = createdInt == null ? 0L : createdInt.longValue();
+            final String clientId   = r.getString("client_id");
+            final String secretHash = r.getString("client_secret_hash");
+            final String name       = orEmpty(r.getString("client_name"));
+            final List<String> uris = splitSpaces(r.getString("redirect_uris"));
+            final Set<String> scopes = new LinkedHashSet<>(splitSpaces(r.getString("allowed_scopes")));
+            final Set<String> grants = new LinkedHashSet<>(splitSpaces(r.getString("allowed_grant_types")));
+            final Long created      = r.getLong("created_at");
+            final long createdAt    = created == null ? 0L : created;
             return new RegisteredClient(clientId,
                     (secretHash == null || secretHash.isEmpty()) ? null : secretHash,
                     name, uris, scopes, grants, createdAt);
-        } catch (RuntimeException e) {
-            logger.warn("Skipping unreadable client section [" + section + "]: " + e.getMessage());
+        } catch (Exception e) {
+            logger.warn("Skipping unreadable client row: " + e.getMessage());
             return null;
         }
     }
 
-    private static void writeSection(RegisteredClient c) {
-        final IniFile ini = OAuthIniStore.get().ini();
-        final String section = SECTION_PREFIX + c.getClientId();
-        ini.put(section, "client_secret_hash",  c.getClientSecretHash() == null ? "" : c.getClientSecretHash());
-        ini.put(section, "client_name",         c.getClientName() == null ? "" : c.getClientName());
-        ini.put(section, "redirect_uris",       joinSpaces(c.getRedirectUris()));
-        ini.put(section, "allowed_scopes",      joinSpaces(c.getAllowedScopes()));
-        ini.put(section, "allowed_grant_types", joinSpaces(c.getAllowedGrantTypes()));
-        ini.put(section, "created_at",          String.valueOf(c.getCreatedAtEpochSeconds()));
+    private static void rollbackQuietly(Connection db) {
+        try {
+            db.rollback();
+        } catch (SQLException ignored) {
+        }
     }
 
     private static List<String> splitSpaces(String s) {

@@ -17,14 +17,18 @@ import org.kissweb.restServer.MainServlet;
  *       {@code issuer} field in the metadata document.  Defaults to
  *       the value of {@code OAuthAuthorizationServer} from the
  *       resource-server config, then to the empty string.</li>
- *   <li>{@code OAuthAsIniFile} --- path to the persistence file.
- *       Default {@code oauth.ini}, resolved against the application
- *       root (the deployed {@code WEB-INF/backend/} directory, or its
- *       dev-mode equivalent {@code src/main/backend/}).  May also be
- *       given as an absolute path (e.g.
- *       {@code /home/myapp/oauth.ini}), which is used verbatim ---
- *       useful for placing the runtime state file outside the
- *       deployed webapp so a WAR redeploy cannot clobber it.</li>
+ *   <li>{@code OAuthAsSqliteFile} --- path to the SQLite database that
+ *       holds the AS's persistent state (signing keys, registered
+ *       clients, refresh tokens).  Default {@code oauth.db}, resolved
+ *       against the application root (the deployed
+ *       {@code WEB-INF/backend/} directory, or its dev-mode equivalent
+ *       {@code src/main/backend/}).  May also be given as an absolute
+ *       path (e.g. {@code /home/myapp/oauth.db}), which is used
+ *       verbatim --- useful for placing the runtime state file outside
+ *       the deployed webapp so a WAR redeploy cannot clobber it.  If
+ *       the file does not exist on startup it is created automatically;
+ *       its schema is materialized via {@code CREATE TABLE IF NOT EXISTS}
+ *       on every open.</li>
  *   <li>{@code OAuthAccessTokenTtlSeconds} --- lifetime of issued
  *       access tokens.  Default 3600 (one hour).</li>
  *   <li>{@code OAuthRefreshTokenTtlSeconds} --- lifetime of issued
@@ -53,20 +57,21 @@ public final class AuthorizationServerConfig {
     public static final String DEFAULT_ISSUER = "";
 
     /**
-     * Default location of the persistent state file, relative to
+     * Default location of the SQLite persistent state file, relative to
      * {@code MainServlet.getApplicationPath()}.  The application path
      * already points at the backend directory --- in dev mode that's
      * {@code src/main/backend/}, in a deployed WAR it's
      * {@code WEB-INF/backend/} --- so the file is colocated with
      * {@code application.ini}.
      */
-    public static final String DEFAULT_INI_FILE = "oauth.ini";
+    public static final String DEFAULT_SQLITE_FILE = "oauth.db";
 
     private static volatile AuthorizationServerConfig instance;
 
     private final boolean enabled;
     private final String  issuer;
-    private final String  iniFile;
+    private final String  sqliteFile;
+    private final String  iniFile;            // migration-only; null if unset
     private final int     accessTokenTtlSeconds;
     private final int     refreshTokenTtlSeconds;
     private final int     authCodeTtlSeconds;
@@ -83,8 +88,14 @@ public final class AuthorizationServerConfig {
             iss                       = getString("OAuthAuthorizationServer");
         this.issuer                   = iss == null ? DEFAULT_ISSUER : trimTrailingSlash(iss);
 
+        final String sqlite           = getString("OAuthAsSqliteFile");
+        this.sqliteFile               = sqlite == null || sqlite.isEmpty() ? DEFAULT_SQLITE_FILE : sqlite;
+
+        // OAuthAsIniFile: drives the one-shot ini-to-SQLite migration.
+        // Null when unset; never defaulted, so the migration trigger
+        // requires an explicit setting from the operator.
         final String ini              = getString("OAuthAsIniFile");
-        this.iniFile                  = ini == null || ini.isEmpty() ? DEFAULT_INI_FILE : ini;
+        this.iniFile                  = (ini == null || ini.isEmpty()) ? null : ini;
 
         this.accessTokenTtlSeconds    = getInt("OAuthAccessTokenTtlSeconds",  3_600);
         this.refreshTokenTtlSeconds   = getInt("OAuthRefreshTokenTtlSeconds", 30 * 24 * 3_600);
@@ -138,8 +149,22 @@ public final class AuthorizationServerConfig {
     public String getIssuer() { return issuer; }
 
     /**
-     * Get the path to the persistent state file.
-     * @return path to the persistent state file, relative to applicationPath
+     * Get the path to the SQLite persistent state file.  May be absolute
+     * (used verbatim) or relative (resolved against
+     * {@code MainServlet.getApplicationPath()}).  Never null --- defaults
+     * to {@link #DEFAULT_SQLITE_FILE}.
+     *
+     * @return path to the SQLite state file
+     */
+    public String getSqliteFile() { return sqliteFile; }
+
+    /**
+     * Get the configured ini-file path used by the one-shot
+     * ini-to-SQLite migration on startup.  Returns null when
+     * {@code OAuthAsIniFile} is not set, in which case no migration is
+     * attempted.
+     *
+     * @return the ini file path, or null if not configured
      */
     public String getIniFile() { return iniFile; }
 

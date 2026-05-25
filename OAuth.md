@@ -6,7 +6,7 @@ This document is a reference for a developer already familiar with OAuth 2.1.  F
 
 > **Resource server** — Part 1, validates tokens issued by any RFC 8414 / OpenID Connect compliant authorization server (Auth0, Okta, Keycloak, Entra, Google, or your own Kiss-hosted AS).
 >
-> **Authorization server** — Part 2, runs the authorization-code flow with mandatory PKCE, the token endpoint with refresh-token rotation, dynamic client registration, the discovery endpoint, and the JWKS endpoint.  Persists all long-lived state to a single ini file — no database required.
+> **Authorization server** — Part 2, runs the authorization-code flow with mandatory PKCE, the token endpoint with refresh-token rotation, dynamic client registration, the discovery endpoint, and the JWKS endpoint.  Persists all long-lived state to a private SQLite database that is independent of the application's main database — no shared schema, no shared connection pool, no operator setup beyond pointing at a file path.
 
 ---
 
@@ -35,7 +35,7 @@ This document is a reference for a developer already familiar with OAuth 2.1.  F
 - [The Authorization Code Flow End-to-End](#the-authorization-code-flow-end-to-end)
 - [Dynamic Client Registration](#dynamic-client-registration)
 - [Refresh-Token Rotation and Reuse Detection](#refresh-token-rotation-and-reuse-detection)
-- [Persistence Model (oauth.ini)](#persistence-model-oauthini)
+- [Persistence Model (oauth.db)](#persistence-model-oauthdb)
 - [AS Security Considerations](#as-security-considerations)
 - [AS Limitations and Omissions](#as-limitations-and-omissions)
 - [AS API Reference](#as-api-reference)
@@ -374,7 +374,7 @@ OAuthAsEnabled = true
 OAuthAsIssuer = https://myapp.example.com  # iss claim and metadata base URL
 
 # Optional (defaults shown)
-OAuthAsIniFile                = oauth.ini  # relative to applicationPath, or an absolute path
+OAuthAsSqliteFile             = oauth.db   # relative to applicationPath, or an absolute path
 OAuthAccessTokenTtlSeconds    = 3600       # 1 hour
 OAuthRefreshTokenTtlSeconds   = 2592000    # 30 days
 OAuthAuthCodeTtlSeconds       = 60         # 1 minute
@@ -386,10 +386,12 @@ OAuthKeyId                    = kiss-key-1 # JWT kid header
 
 If `OAuthAsIssuer` is not set, the value of `OAuthAuthorizationServer` (from the resource-server config) is used as a fallback — convenient when the AS and RS share the same canonical URL.
 
-`OAuthAsIniFile` accepts either form:
+`OAuthAsSqliteFile` accepts either form:
 
-- **Relative path** (default `oauth.ini`) — resolved against `MainServlet.getApplicationPath()`, i.e. the deployed `WEB-INF/backend/` directory or, in dev mode, `src/main/backend/`.  This colocates the runtime state file with `application.ini`.
-- **Absolute path** (e.g. `/var/lib/myapp/oauth.ini`) — used verbatim.  Useful for placing the runtime state file outside the deployed webapp tree so that a WAR redeploy cannot touch it.
+- **Relative path** (default `oauth.db`) — resolved against `MainServlet.getApplicationPath()`, i.e. the deployed `WEB-INF/backend/` directory or, in dev mode, `src/main/backend/`.  This colocates the runtime state file with `application.ini`.
+- **Absolute path** (e.g. `/var/lib/myapp/oauth.db`) — used verbatim.  Useful for placing the runtime state file outside the deployed webapp tree so that a WAR redeploy cannot touch it.
+
+The file is created and its schema initialized automatically on first startup; no setup tool is needed.
 
 ## Required App Code: `UserAuthenticator`
 
@@ -548,7 +550,7 @@ Subsequent `/authorize` requests from the same browser within the session window
 
 ## Dynamic Client Registration
 
-DCR is enabled by default because the MCP spec requires it.  Anyone reachable from your AS can register; the response includes a fresh `client_id` and, for confidential clients, a `client_secret`.  Registered clients persist across restarts via `oauth.ini`.
+DCR is enabled by default because the MCP spec requires it.  Anyone reachable from your AS can register; the response includes a fresh `client_id` and, for confidential clients, a `client_secret`.  Registered clients persist across restarts in the AS's SQLite database (`oauth.db` by default).
 
 For production, consider whether to:
 
@@ -565,54 +567,38 @@ Every successful `refresh_token` grant:
 2. Marks the old refresh token as **rotated**, pointing at the successor.
 3. Returns the new pair (access + refresh) to the client.
 
-If a **rotated** refresh token is ever presented again — which an honest client never does, because it has already moved to the successor — the AS treats this as evidence of token theft and **revokes the entire family**.  Every refresh token in the family is deleted from `oauth.ini`; the next refresh attempt by anyone in the family (including the legitimate client) returns `invalid_grant`.  The legitimate user has to re-authenticate.
+If a **rotated** refresh token is ever presented again — which an honest client never does, because it has already moved to the successor — the AS treats this as evidence of token theft and **revokes the entire family**.  Every refresh token in the family is deleted from the AS database; the next refresh attempt by anyone in the family (including the legitimate client) returns `invalid_grant`.  The legitimate user has to re-authenticate.
 
 This is the OAuth 2.1 stolen-refresh-token detection mechanism described in RFC 6749bis §6.1.  It does not prevent the initial theft, but it bounds the damage: the attacker cannot keep refreshing indefinitely without the legitimate client noticing the next time it tries.
 
-Implementation note: rotation and revocation are both single disk writes (the whole `oauth.ini` is rewritten atomically) and complete in milliseconds at MCP-scale traffic.
+Implementation note: rotation issues two writes (mark the old token rotated; insert the successor) inside one SQLite transaction so the on-disk state is never observed mid-rotation.  Family revocation is a single indexed `DELETE`.
 
-## Persistence Model (`oauth.ini`)
+## Persistence Model (`oauth.db`)
 
-The AS persists three kinds of long-lived state to a single ini file.  The default location is `oauth.ini` in the application root — `src/main/backend/oauth.ini` in dev mode, `WEB-INF/backend/oauth.ini` in a deployed WAR.  Set `OAuthAsIniFile` to an absolute path to place the file outside the webapp tree (so a WAR redeploy cannot touch it).  The file's structure:
+The AS persists three kinds of long-lived state in a SQLite database that is **separate from the application's main database** — its own file, its own JDBC connection, no shared connection pool or schema.  The default location is `oauth.db` in the application root (`src/main/backend/oauth.db` in dev mode, `WEB-INF/backend/oauth.db` in a deployed WAR).  Set `OAuthAsSqliteFile` to an absolute path to place the file outside the webapp tree so a WAR redeploy cannot touch it.
 
-```ini
-[keys]
-current_kid     = kiss-key-1
-current_private = <base64 PKCS#8>
-current_public  = <base64 X.509>
-created_at      = 1747200000
+The schema is materialized via `CREATE TABLE IF NOT EXISTS` on every open, so a fresh install creates the file automatically.  The tables are:
 
-[client.<id>]
-client_secret_hash  = sha256:<hex>   # empty for public clients
-client_name         = Claude Desktop
-redirect_uris       = http://localhost:54545/cb
-allowed_scopes      = mcp:read mcp:write
-allowed_grant_types = authorization_code refresh_token
-created_at          = 1747201234
-
-[refresh.<jti>]
-family_id         = <uuid>
-client_id         = <client_id>
-user_sub          = <subject>
-user_extra_claims = <base64 JSON>     # ride-along claims for access tokens
-scopes            = mcp:read mcp:write
-audience          = https://myapp.example.com
-created_at        = 1747201234
-expires_at        = 1749793200
-rotated_to_jti    =                   # set when this token has been rotated
-```
+| Table                  | Purpose                                                                                           |
+|------------------------|---------------------------------------------------------------------------------------------------|
+| `oauth_keys`           | Signing keypair(s): `kid` (PK), `private_key` (base64 PKCS#8), `public_key` (base64 X.509), `created_at`. |
+| `oauth_clients`        | Registered clients: `client_id` (PK), `client_secret_hash` (SHA-256, null for public clients), `client_name`, `redirect_uris` (space-joined), `allowed_scopes` (space-joined), `allowed_grant_types` (space-joined), `created_at`. |
+| `oauth_refresh_tokens` | Refresh tokens: `jti` (PK), `family_id` (indexed), `client_id`, `user_sub`, `user_extra_claims` (base64 JSON), `scopes` (space-joined), `audience`, `created_at`, `expires_at` (indexed), `rotated_to_jti` (null for active, set for rotated). |
+| `oauth_meta`           | Schema bookkeeping: `meta_key` (PK), `meta_value`.  Currently holds `schema_version=1`.            |
 
 Authorization codes (60-s TTL) live in memory only — too short-lived to be worth persisting.
 
-**Saves are atomic.**  `OAuthIniStore.save()` writes to `oauth.ini.tmp`, then atomically renames onto `oauth.ini`.  A crash mid-write leaves the previous file intact.
+**Transactions.**  Every mutating operation commits as a normal SQLite transaction.  Refresh-token rotation issues both writes (mark the old token, insert the successor) inside one transaction.
 
-**Pruning is lazy.**  Every OAuth endpoint call checks the in-memory `last_pruned_at` timestamp; if `OAuthPruneIntervalSeconds` has elapsed, it removes expired refresh tokens and codes and saves once.  The timestamp is in memory only — restart re-prunes immediately, which is desirable.
+**Pruning is lazy.**  Every OAuth endpoint call checks the in-memory `last_pruned_at` timestamp; if `OAuthPruneIntervalSeconds` has elapsed, it issues `DELETE WHERE expires_at <= ?` for refresh tokens and drops expired in-memory codes.  The `expires_at` column is indexed so the sweep is cheap regardless of table size.  The throttle timestamp is in memory only — a restart re-prunes immediately, which is desirable.
 
-**Build safety.**  `./bld build` excludes `oauth.ini` from the source-tree copy.  An accidental `oauth.ini` in `src/main/backend/` will never overwrite the deployed runtime file.
+**Build safety.**  `./bld build` excludes `oauth.db` from the source-tree copy.  An accidental `oauth.db` in `src/main/backend/` will never overwrite the deployed runtime file.
 
-**Concurrency.**  Single-process only.  Two Kiss JVMs writing to the same `oauth.ini` will clobber each other.  For HA, swap in DB-backed implementations of `ClientStore` and `RefreshTokenStore` (interfaces TBD).
+**Concurrency.**  Single-process only.  SQLite serializes writers internally, and the Kiss `Connection` is shared across threads under a JVM-wide monitor on `OAuthSqliteStore`.  Two Kiss JVMs writing to the same `oauth.db` will fail with SQLite's standard `database is locked` error rather than silently corrupting state.  For HA, run a single AS instance behind a load balancer, or fork the store implementations to point at a shared server-class database (`oauth.db` is just a SQLite file — the higher-level store classes can be rewritten to talk to PostgreSQL etc.).
 
-**Scale.**  Each registered client is ~500 bytes; each active refresh token is ~300 bytes.  10K active refresh tokens ≈ 3 MB file.  Beyond that the per-call rewrite cost becomes noticeable — but you're well past MCP server territory by then.
+**Scale.**  Per-row overhead is well under a kilobyte; tens of thousands of active refresh tokens fit comfortably in a single-MB file with sub-millisecond point lookups.
+
+**Inspection.**  Operators with the `sqlite3` CLI can inspect the file in place: `sqlite3 /path/to/oauth.db '.tables'`, `sqlite3 /path/to/oauth.db 'SELECT client_id, client_name FROM oauth_clients;'`, etc.  Take a copy first if the AS is running.
 
 ## AS Security Considerations
 
@@ -635,10 +621,10 @@ The framework deliberately ships a minimal-but-spec-compliant AS.  Out of scope 
 - **RFC 9449 DPoP** (proof-of-possession tokens).  All issued tokens are bearer tokens.
 - **RFC 8705 mTLS** client authentication / token binding.
 - **RFC 7592** DCR management endpoint (update/delete a registered client via HTTP).  Use `ClientStore` from Java code.
-- **RFC 7009 revocation** and **RFC 7662 introspection** endpoints.  Revocation can be done by deleting the refresh token from `oauth.ini` (or by calling `RefreshTokenStore.revokeFamily()` from Java); introspection is generally unnecessary when access tokens are JWTs that resource servers can validate locally.
+- **RFC 7009 revocation** and **RFC 7662 introspection** endpoints.  Revocation can be done by deleting the refresh token from `oauth.db` (or by calling `RefreshTokenStore.revokeFamily()` from Java); introspection is generally unnecessary when access tokens are JWTs that resource servers can validate locally.
 - **OpenID Connect.**  No `openid` scope handling, no ID tokens, no userinfo endpoint.  The framework is OAuth 2.1 only; if you need OIDC, layer it on top or run a separate OIDC server.
 - **Multi-tenancy / realms.**  Single AS per Kiss instance.
-- **Database-backed storage.**  In-memory + `oauth.ini` only.  Implementing DB-backed alternatives is straightforward but requires changing the stores' singletons to a swap-in mechanism.
+- **Shared/clustered AS storage.**  The AS backs onto a private SQLite file (`oauth.db`).  This is intentional — the AS does not couple to the application's main database, and operators do not need to provision a schema.  For a multi-instance HA deployment, swap in alternative implementations of `ClientStore`, `RefreshTokenStore`, and `KeyManager` that talk to a shared server-class database; the rest of the AS code does not need to change.
 
 ## AS API Reference
 
@@ -647,10 +633,10 @@ All classes live in `org.kissweb.oauth.as`:
 | Class                                  | Purpose                                                                  |
 |----------------------------------------|--------------------------------------------------------------------------|
 | `AuthorizationServerConfig`            | Reads AS config from `application.ini`. Lazy singleton.                  |
-| `OAuthIniStore`                        | Wraps `IniFile` with atomic save + in-memory prune-throttle timestamp.   |
-| `KeyManager`                           | Generates/persists the RSA signing keypair; builds the JWKS document.    |
-| `ClientStore`                          | CRUD for `RegisteredClient`s in `oauth.ini`.                             |
-| `RefreshTokenStore`                    | CRUD for `RefreshToken`s; handles rotation and family revocation.        |
+| `OAuthSqliteStore`                     | Opens (and initializes the schema of) the AS's private SQLite database; provides the shared JDBC connection and the prune-throttle timestamp. |
+| `KeyManager`                           | Generates/persists the RSA signing keypair in `oauth_keys`; builds the JWKS document. |
+| `ClientStore`                          | CRUD for `RegisteredClient`s in `oauth_clients`.                         |
+| `RefreshTokenStore`                    | CRUD for `RefreshToken`s in `oauth_refresh_tokens`; handles rotation and family revocation. |
 | `AuthorizationCodeStore`               | In-memory single-use codes with TTL expiry.                              |
 | `TokenIssuer`                          | Builds and signs RS256 JWTs per RFC 9068; generates random opaque tokens.|
 | `PkceValidator`                        | RFC 7636 S256 verifier.                                                  |

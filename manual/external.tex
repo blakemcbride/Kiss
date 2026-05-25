@@ -76,8 +76,10 @@ code change is needed.  Configuration lives in
 from Kiss: authorization-code flow with mandatory PKCE, token endpoint
 with refresh-token rotation, dynamic client registration (RFC 7591),
 and the RFC 8414 metadata and JWKS endpoints.  Persists clients,
-refresh tokens, and signing keys to a single ini file --- no database
-required.  Enabled by a single @code{application.ini} key.
+refresh tokens, and signing keys to a private SQLite database that is
+independent of the application's main database --- no shared schema,
+no operator setup beyond pointing at a file path.  Enabled by a single
+@code{application.ini} key.
 @end itemize
 
 See @code{OAuth.md} at the repository root for the full how-to on both

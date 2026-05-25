@@ -424,7 +424,7 @@ public class AuthorizationServlet extends HttpServlet {
     // ==================================================================
 
     static void prune() {
-        final OAuthIniStore store = OAuthIniStore.get();
+        final OAuthSqliteStore store = OAuthSqliteStore.get();
         if (!store.tryStartPrune())
             return;
         try {

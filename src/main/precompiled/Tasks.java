@@ -324,11 +324,15 @@ public class Tasks {
         libs();
         copyTree("src/main/frontend", explodedDir);
         writeToFile(explodedDir + "/META-INF/MANIFEST.MF", "Manifest-Version: 1.0\n");
-        // Exclude oauth.ini --- it is the runtime persistence file for the
-        // OAuth authorization server.  It only exists in the deployed
-        // location; clobbering it from source would lose all registered
-        // clients, refresh tokens, and signing keys.
-        copyTreeRegex("src/main/backend", explodedDir + "/WEB-INF/backend", null, "oauth\\.ini");
+        // Exclude oauth.db (and SQLite's transactional sidecar files) ---
+        // these are the runtime persistence files for the OAuth
+        // authorization server.  They only exist in the deployed
+        // location; clobbering them from source would lose all registered
+        // clients, refresh tokens, and signing keys.  The legacy oauth.ini
+        // is excluded for the same reason (any leftover file from a
+        // pre-SQLite deployment).
+        copyTreeRegex("src/main/backend", explodedDir + "/WEB-INF/backend", null,
+                "oauth\\.(db|ini)(-(journal|wal|shm))?");
         copyTree(LIBS, explodedDir + "/WEB-INF/lib");
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
         buildJava("src/test/core", explodedDir + "/WEB-INF/test-classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
@@ -634,7 +638,7 @@ public class Tasks {
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/postgresql/postgresql/" + postgresqlVer + "/" + postgresqlJar);
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-api/1.7.30/slf4j-api-1.7.30.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/slf4j/slf4j-simple/1.7.30/slf4j-simple-1.7.30.jar");
-        dep.add(LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.47.1.0/sqlite-jdbc-3.47.1.0.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.53.1.0/sqlite-jdbc-3.53.1.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox/3.0.5/pdfbox-3.0.5.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/pdfbox/fontbox/3.0.5/fontbox-3.0.5.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/pdfbox/pdfbox-io/3.0.5/pdfbox-io-3.0.5.jar");

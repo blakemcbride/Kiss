@@ -28,7 +28,7 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.7.11'
     implementation 'org.slf4j:slf4j-api:1.7.30'
     implementation 'org.slf4j:slf4j-simple:1.7.30'
-    implementation 'org.xerial:sqlite-jdbc:3.47.1.0'
+    implementation 'org.xerial:sqlite-jdbc:3.53.1.0'
     implementation 'org.webjars.bower:jquery:3.6.3'
     implementation 'cljsjs:ag-grid-community:34.0.1'
     implementation 'org.apache.pdfbox:pdfbox:3.0.5'

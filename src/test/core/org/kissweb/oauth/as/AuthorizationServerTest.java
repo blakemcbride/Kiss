@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.kissweb.IniFile;
 import org.kissweb.json.JSONObject;
 import org.kissweb.oauth.BearerTokenValidator;
 import org.kissweb.oauth.JwksCache;
@@ -42,7 +43,7 @@ class AuthorizationServerTest {
 
     private static final String ISSUER             = "https://test-as.example";
     private static final String RESOURCE           = "https://mcp.example.test";
-    private static final String INI_FILE_RELATIVE  = "oauth.ini";
+    private static final String DB_FILE_RELATIVE   = "oauth.db";
 
     private static Path        tempDir;
     /** Local HTTP server that publishes the AS's JWKS so the resource-server validator can fetch it. */
@@ -62,7 +63,7 @@ class AuthorizationServerTest {
                 "OAuthAuthorizationServer", "OAuthResourceIdentifier",
                 "OAuthJwksUri", "OAuthRequiredScopes", "OAuthJwksCacheSeconds",
                 "OAuthAllowedAlgorithms", "OAuthClockSkewSeconds",
-                "OAuthAsEnabled", "OAuthAsIssuer", "OAuthAsIniFile",
+                "OAuthAsEnabled", "OAuthAsIssuer", "OAuthAsSqliteFile", "OAuthAsIniFile",
                 "OAuthAccessTokenTtlSeconds", "OAuthRefreshTokenTtlSeconds",
                 "OAuthAuthCodeTtlSeconds", "OAuthPruneIntervalSeconds",
                 "OAuthAllowDynamicRegistration", "OAuthSessionTtlSeconds",
@@ -72,7 +73,7 @@ class AuthorizationServerTest {
         // AS config
         MainServlet.putEnvironment("OAuthAsEnabled",                  "true");
         MainServlet.putEnvironment("OAuthAsIssuer",                   ISSUER);
-        MainServlet.putEnvironment("OAuthAsIniFile",                  INI_FILE_RELATIVE);
+        MainServlet.putEnvironment("OAuthAsSqliteFile",               DB_FILE_RELATIVE);
         MainServlet.putEnvironment("OAuthAccessTokenTtlSeconds",      "3600");
         MainServlet.putEnvironment("OAuthRefreshTokenTtlSeconds",     "1209600");
         MainServlet.putEnvironment("OAuthAuthCodeTtlSeconds",         "60");
@@ -114,20 +115,25 @@ class AuthorizationServerTest {
 
     @BeforeEach
     void freshState() throws IOException {
-        // Wipe the oauth.ini file so each test starts clean.
-        final File ini = new File(tempDir.toFile(), INI_FILE_RELATIVE);
-        if (ini.exists())
-            ini.delete();
-        final File iniTmp = new File(tempDir.toFile(), INI_FILE_RELATIVE + ".tmp");
-        if (iniTmp.exists())
-            iniTmp.delete();
+        // Wipe the oauth.db file so each test starts clean.  Singletons
+        // must be reset before the file delete so any open SQLite
+        // handle is closed first (Windows in particular will refuse to
+        // delete an open file).
         AuthorizationServerConfig.reset();
-        OAuthIniStore.reset();
         KeyManager.reset();
         ClientStore.reset();
         RefreshTokenStore.reset();
+        OAuthSqliteStore.reset();
         OAuthConfig.reset();
         JwksCache.reset();
+        // Re-clear the legacy ini key in case a migration test set it.
+        MainServlet.putEnvironment("OAuthAsIniFile", "");
+        final File db = new File(tempDir.toFile(), DB_FILE_RELATIVE);
+        if (db.exists())
+            db.delete();
+        final File legacyIni = new File(tempDir.toFile(), "oauth.ini");
+        if (legacyIni.exists())
+            legacyIni.delete();
     }
 
     // ==================================================================
@@ -143,7 +149,7 @@ class AuthorizationServerTest {
 
         // Now reset singletons and reload from disk --- should be the same key.
         KeyManager.reset();
-        OAuthIniStore.reset();
+        OAuthSqliteStore.reset();
         final KeyManager reloaded = KeyManager.get();
         assertEquals(firstKid, reloaded.getKid());
         assertEquals(first.getPublicKey(), reloaded.getPublicKey());
@@ -221,7 +227,7 @@ class AuthorizationServerTest {
 
         // Reload from disk.
         ClientStore.reset();
-        OAuthIniStore.reset();
+        OAuthSqliteStore.reset();
         final RegisteredClient reloaded = ClientStore.get().get("client-A");
         assertNotNull(reloaded);
         assertEquals("Test Client", reloaded.getClientName());
@@ -322,12 +328,64 @@ class AuthorizationServerTest {
 
         // Reload from disk.
         RefreshTokenStore.reset();
-        OAuthIniStore.reset();
+        OAuthSqliteStore.reset();
         final RefreshToken reloaded = RefreshTokenStore.get().get("rt-X");
         assertNotNull(reloaded);
         assertEquals("user-2",            reloaded.getUserSubject());
         assertEquals("bob@example.com",   reloaded.getUserExtraClaims().getString("email"));
         assertEquals("admins users",      reloaded.getUserExtraClaims().getString("groups"));
+    }
+
+    // ==================================================================
+    // One-shot ini -> SQLite migration
+    // ==================================================================
+
+    @Test
+    void iniMigration_importsClientsAndTokens_thenDeletesIniFile() throws Exception {
+        // Build a populated oauth.ini in the temp dir.
+        final String legacyIniName = "oauth.ini";
+        final File legacyIni = new File(tempDir.toFile(), legacyIniName);
+        final IniFile ini = new IniFile(legacyIni.getAbsolutePath());
+        ini.put("client.legacy-client", "client_secret_hash",  "sha256:legacy");
+        ini.put("client.legacy-client", "client_name",         "Legacy Client");
+        ini.put("client.legacy-client", "redirect_uris",       "http://localhost/cb");
+        ini.put("client.legacy-client", "allowed_scopes",      "mcp:read mcp:write");
+        ini.put("client.legacy-client", "allowed_grant_types", "authorization_code refresh_token");
+        ini.put("client.legacy-client", "created_at",          "1700000000");
+        ini.put("refresh.legacy-rt", "family_id",         "fam-legacy");
+        ini.put("refresh.legacy-rt", "client_id",         "legacy-client");
+        ini.put("refresh.legacy-rt", "user_sub",          "user-legacy");
+        ini.put("refresh.legacy-rt", "user_extra_claims", "");
+        ini.put("refresh.legacy-rt", "scopes",            "mcp:read");
+        ini.put("refresh.legacy-rt", "audience",          "");
+        ini.put("refresh.legacy-rt", "created_at",        "1700000000");
+        ini.put("refresh.legacy-rt", "expires_at",        String.valueOf(System.currentTimeMillis() / 1000L + 86400));
+        ini.put("refresh.legacy-rt", "rotated_to_jti",    "");
+        ini.save();
+        assertTrue(legacyIni.exists(), "precondition: legacy ini file written");
+
+        // Configure the migration trigger and re-read AS config.
+        MainServlet.putEnvironment("OAuthAsIniFile", legacyIniName);
+        AuthorizationServerConfig.reset();
+
+        // First call into any store opens the SQLite DB and runs the
+        // migration as part of OAuthSqliteStore.open().
+        final RegisteredClient migratedClient = ClientStore.get().get("legacy-client");
+        assertNotNull(migratedClient,            "client should be imported");
+        assertEquals("Legacy Client",            migratedClient.getClientName());
+        assertEquals("sha256:legacy",            migratedClient.getClientSecretHash());
+        assertTrue(migratedClient.hasRedirectUri("http://localhost/cb"));
+        assertTrue(migratedClient.getAllowedScopes().contains("mcp:read"));
+        assertTrue(migratedClient.getAllowedScopes().contains("mcp:write"));
+
+        final RefreshToken migratedToken = RefreshTokenStore.get().get("legacy-rt");
+        assertNotNull(migratedToken,             "refresh token should be imported");
+        assertEquals("fam-legacy",               migratedToken.getFamilyId());
+        assertEquals("legacy-client",            migratedToken.getClientId());
+        assertEquals("user-legacy",              migratedToken.getUserSubject());
+
+        assertFalse(legacyIni.exists(),
+                "ini file should be deleted after a successful migration");
     }
 
     // ==================================================================

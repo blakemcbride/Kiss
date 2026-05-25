@@ -2,11 +2,11 @@ package org.kissweb.oauth.as;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.kissweb.IniFile;
+import org.kissweb.database.Connection;
+import org.kissweb.database.Record;
 import org.kissweb.json.JSONArray;
 import org.kissweb.json.JSONObject;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -23,23 +23,23 @@ import java.util.Base64;
 
 /**
  * Manages the RSA keypair the authorization server uses to sign access
- * tokens.  Generated on first startup (RSA-2048) and persisted to the
- * {@code [keys]} section of {@code oauth.ini} as base64-encoded PKCS#8
- * (private) and X.509 (public) blobs.  Subsequent startups reload from
- * the file, so issued tokens remain verifiable across restarts.
+ * tokens.  Generated on first startup (RSA-2048) and persisted in the
+ * {@code oauth_keys} table of the OAuth SQLite database as
+ * base64-encoded PKCS#8 (private) and X.509 (public) blobs.
+ * Subsequent startups reload from the database, so issued tokens
+ * remain verifiable across restarts.
  * <br><br>
  * Currently maintains a single ``current'' key.  Key rotation
  * (generating a new key while keeping the previous one valid for the
  * duration of any outstanding tokens) is a planned extension --- the
- * JWKS endpoint already publishes a {@link JSONArray} so rotation
- * requires adding a {@code previous} key slot without changing the
- * external interface.
+ * JWKS endpoint already publishes a {@link JSONArray} and the
+ * underlying table is keyed by {@code kid}, so rotation requires
+ * inserting an additional row and selecting both for JWKS without
+ * changing the external interface.
  */
 public final class KeyManager {
 
     private static final Logger logger = LogManager.getLogger(KeyManager.class);
-
-    private static final String SECTION = "keys";
 
     private static volatile KeyManager instance;
 
@@ -77,37 +77,47 @@ public final class KeyManager {
     }
 
     private static KeyManager load() {
-        final OAuthIniStore store = OAuthIniStore.get();
-        final String wantedKid = AuthorizationServerConfig.get().getKeyId();
+        final OAuthSqliteStore store = OAuthSqliteStore.get();
         synchronized (store) {
-            final IniFile ini = store.ini();
-            final String storedKid     = ini.get(SECTION, "current_kid");
-            final String storedPrivate = ini.get(SECTION, "current_private");
-            final String storedPublic  = ini.get(SECTION, "current_public");
-
-            if (storedKid != null && storedPrivate != null && storedPublic != null) {
-                try {
-                    final KeyPair kp = decodeKeyPair(storedPrivate, storedPublic);
-                    logger.info("Loaded OAuth AS signing key kid=" + storedKid);
-                    return new KeyManager(storedKid, kp);
-                } catch (Exception e) {
-                    logger.error("Stored AS signing key is unreadable; generating a new one", e);
-                }
-            }
-
-            // No usable key on file --- generate and persist a fresh one.
-            final KeyPair kp = generate();
-            ini.put(SECTION, "current_kid",      wantedKid);
-            ini.put(SECTION, "current_private",  Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded()));
-            ini.put(SECTION, "current_public",   Base64.getEncoder().encodeToString(kp.getPublic().getEncoded()));
-            ini.put(SECTION, "created_at",       String.valueOf(System.currentTimeMillis() / 1000L));
+            final Connection db = store.connection();
+            // Pick the most recently created row, in case rotation ever
+            // ends up writing multiple --- today there is at most one.
+            // fetchOne() automatically applies a LIMIT 1, so it must not
+            // appear in the SQL itself.
             try {
-                store.save();
-            } catch (IOException e) {
-                throw new IllegalStateException("Unable to save freshly-generated AS signing key", e);
+                final Record row = db.fetchOne(
+                        "SELECT kid, private_key, public_key FROM oauth_keys " +
+                        "ORDER BY created_at DESC");
+                if (row != null) {
+                    final String storedKid     = row.getString("kid");
+                    final String storedPrivate = row.getString("private_key");
+                    final String storedPublic  = row.getString("public_key");
+                    try {
+                        final KeyPair kp = decodeKeyPair(storedPrivate, storedPublic);
+                        logger.info("Loaded OAuth AS signing key kid=" + storedKid);
+                        return new KeyManager(storedKid, kp);
+                    } catch (Exception e) {
+                        logger.error("Stored AS signing key is unreadable; generating a new one", e);
+                        // Fall through to generation, but first remove the unreadable row.
+                        db.execute("DELETE FROM oauth_keys WHERE kid = ?", storedKid);
+                    }
+                }
+
+                // No usable key on file --- generate and persist a fresh one.
+                final String wantedKid = AuthorizationServerConfig.get().getKeyId();
+                final KeyPair kp = generate();
+                final Record r = db.newRecord("oauth_keys");
+                r.set("kid",         wantedKid);
+                r.set("private_key", Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded()));
+                r.set("public_key",  Base64.getEncoder().encodeToString(kp.getPublic().getEncoded()));
+                r.set("created_at",  System.currentTimeMillis() / 1000L);
+                r.addRecord();
+                db.commit();
+                logger.info("Generated and persisted new OAuth AS signing key kid=" + wantedKid);
+                return new KeyManager(wantedKid, kp);
+            } catch (Exception e) {
+                throw new IllegalStateException("Unable to load or generate AS signing key", e);
             }
-            logger.info("Generated and persisted new OAuth AS signing key kid=" + wantedKid);
-            return new KeyManager(wantedKid, kp);
         }
     }
 

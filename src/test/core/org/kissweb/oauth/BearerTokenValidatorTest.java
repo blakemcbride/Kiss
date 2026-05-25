@@ -86,7 +86,8 @@ class BearerTokenValidatorTest {
         //    to its own mock --- which would silently break this test
         //    once that mock has shut down).
         for (String key : new String[]{"OAuthJwksUri", "OAuthAsEnabled",
-                "OAuthAsIssuer", "OAuthAsIniFile", "OAuthAuthorizationServer",
+                "OAuthAsIssuer", "OAuthAsSqliteFile", "OAuthAsIniFile",
+                "OAuthAuthorizationServer",
                 "OAuthResourceIdentifier", "OAuthRequiredScopes",
                 "OAuthJwksCacheSeconds", "OAuthAllowedAlgorithms",
                 "OAuthClockSkewSeconds"})
