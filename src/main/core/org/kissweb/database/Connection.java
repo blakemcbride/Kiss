@@ -621,6 +621,14 @@ public class Connection implements AutoCloseable {
 
     /**
      * Returns <code>true</code> if there are any records matching the given SQL statement and <code>false</code> otherwise.
+     * <br><br>
+     * The check is implemented as a plain {@link #fetchOne fetchOne} of the
+     * caller's query --- {@code fetchOne} already appends {@code LIMIT 1}
+     * (per dialect), so the engine can short-circuit after the first
+     * matching row.  This avoids relying on {@code SELECT EXISTS(...)},
+     * which is portable in SQL but produces a column whose default name
+     * (and value type --- {@link Boolean} versus {@link Integer}) varies
+     * across JDBC drivers and so cannot be read back uniformly.
      *
      * @param sql the SQL query to test for existence
      * @param args the parameter values for the SQL statement
@@ -628,8 +636,7 @@ public class Connection implements AutoCloseable {
      * @throws Exception if a database access error occurs
      */
     public boolean exists(String sql, Object... args) throws Exception {
-        Record r = fetchOne("select exists (" + sql + ")", args);
-        return (Boolean) r.get("exists");
+        return fetchOne(sql, args) != null;
     }
 
     /**
@@ -638,24 +645,25 @@ public class Connection implements AutoCloseable {
      * <br><br>
      * On the other hand, this method executes a costly SQL query so should be used only when necessary.
      * This would mainly be in conjunction with paging.
-     * 
+     * <br><br>
+     * Implementation note: the caller's query is wrapped as
+     * {@code SELECT COUNT(*) AS n FROM (...) tmp123}.  The explicit
+     * {@code AS n} alias keeps the result column name portable across
+     * drivers (some return {@code count}, others {@code count(*)}), and
+     * the table alias is written without the {@code AS} keyword because
+     * Oracle rejects {@code AS} on derived-table aliases.
+     *
      * @param sql the SQL query to count
      * @param args the parameter values for the SQL statement
      * @return the total number of records that would be returned
      * @throws Exception if a database access error occurs
-     * @see #fetchAll(int, int, String, Object...) 
+     * @see #fetchAll(int, int, String, Object...)
      */
     public long fetchCount(String sql, Object ... args) throws Exception {
         try (Command cmd = newCommand()) {
-            sql = "select count(*) from (" + sql + ") as tmp123";
-            /*
-            String lsql = sql.toLowerCase();
-            int b = lsql.indexOf(" from ");
-            int e = lsql.lastIndexOf(" order by ");
-            sql = "select count(*)" + sql.substring(b, e);
-             */
+            sql = "select count(*) as n from (" + sql + ") tmp123";
             Record rec = cmd.fetchOne(sql, args);
-            return rec.getLong("count");
+            return rec.getLong("n");
         }
     }
 

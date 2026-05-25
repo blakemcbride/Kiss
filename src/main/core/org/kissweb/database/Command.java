@@ -485,6 +485,12 @@ public class Command implements AutoCloseable {
 
     /**
      * Returns <code>true</code> if there are any records matching the given SQL statement and <code>false</code> otherwise.
+     * <br><br>
+     * Implemented as a plain {@link #fetchOne fetchOne} of the caller's
+     * query.  See {@link Connection#exists(String, Object...)} for the
+     * rationale (uniform behavior across JDBC drivers regardless of how
+     * each one names and types the column produced by
+     * {@code SELECT EXISTS(...)}).
      *
      * @param sql SQL statement with ? parameters
      * @param args the parameter values
@@ -492,8 +498,7 @@ public class Command implements AutoCloseable {
      * @throws Exception if database access error occurs
      */
     public boolean exists(String sql, Object... args) throws Exception {
-        Record r = fetchOne("select exists (" + sql + ")", args);
-        return (Boolean) r.get("exists");
+        return fetchOne(sql, args) != null;
     }
 
     /**
