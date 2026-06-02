@@ -956,11 +956,14 @@ Utils.makeDraggable(
 ```
 
 **Implementation Details:**
-- Supports both mouse and touch events (mobile compatible)
+- Uses the Pointer Events API (`pointerdown`/`pointermove`/`pointerup`/`pointercancel`) so mouse, touch, and pen input are all handled by a single code path
+- Calls `header.setPointerCapture(e.pointerId)` on `pointerdown` so all subsequent move/up events are delivered to the header element even when the pointer crosses into a child iframe; without capture, crossing into an iframe causes the parent document to lose mouse events and the drag "sticks" after the button is released
+- `setPointerCapture` is guarded (`if (header.setPointerCapture)`) for safety, though all target browsers (Chrome, Firefox, Safari, Edge) support it
+- Sets `header.style.touchAction = 'none'` to suppress browser pan/scroll gestures while dragging on touch devices (replaces the old `touchstart` `e.preventDefault()` approach)
 - Sets cursor style to 'all-scroll' on header
-- Stores handler references for proper cleanup
-- Touch event listeners are explicitly marked as `{ passive: false }` because the touchstart handler calls `preventDefault()` to prevent page scrolling during drag operations
-- This prevents Chrome's "Added non-passive event listener to a scroll-blocking event" warning while maintaining proper drag functionality on mobile devices
+- Stores per-drag handler references and removes them in `endDrag` (called on both `pointerup` and `pointercancel`) to prevent listener accumulation across repeated drags
+- Calls `header.releasePointerCapture(e.pointerId)` in `endDrag` to cleanly release capture
+- Guards `isPrimary` so multi-touch sequences (second finger down) do not start a second drag
 
 ## Script Loading Order
 

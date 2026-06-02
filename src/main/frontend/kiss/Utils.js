@@ -1507,69 +1507,80 @@ class Utils {
     /**
      * This makes a window draggable.
      *
-     * @param header DOM element
-     * @param content DOM element
+     * Uses the Pointer Events API with setPointerCapture so that all
+     * pointermove/pointerup events are delivered to the header element even
+     * when the cursor crosses into a child iframe (e.g. a CKEditor editable
+     * area).  Without capture, dragging over an iframe causes the parent
+     * document to stop receiving mouse events and the drag "sticks".
+     *
+     * Pointer Events unify mouse, touch, and pen input, so separate touch
+     * handlers are no longer needed.  The touch-action CSS property is set to
+     * 'none' on the header to suppress the browser's default pan/scroll
+     * gesture while a drag is in progress, mirroring the preventDefault()
+     * that the old touchstart handler used.
+     *
+     * @param header DOM element  – the drag handle (title bar)
+     * @param content DOM element – the element to reposition while dragging
      */
     static makeDraggable(header, content) {
-        // Store handler references for cleanup
-        let mouseMoveHandler = null;
-        let mouseUpHandler = null;
-        let touchMoveHandler = null;
-        let touchEndHandler = null;
+        // Per-drag handler references stored so they can be removed cleanly
+        // after each drag ends, preventing listener accumulation.
+        let pointerMoveHandler = null;
+        let pointerUpHandler = null;
+        let pointerCancelHandler = null;
+        let activeDragPointerId = null;
 
-        function handle_mousedown(e) {
+        // Suppress browser pan/scroll on touch so dragging the title bar does
+        // not also scroll the page (replaces the old touchstart preventDefault).
+        header.style.touchAction = 'none';
+
+        function handle_pointerdown(e) {
+            // Only respond to primary pointer button (left mouse, first touch, pen tip).
+            if (!e.isPrimary)
+                return;
+
             const drag = {};
-
             drag.pageX0 = e.pageX;
             drag.pageY0 = e.pageY;
             drag.elem = content;
             drag.offset0 = DOMUtils.offset(content);
 
-            mouseMoveHandler = function(e) {
-                const left = drag.offset0.left + (e.pageX - drag.pageX0);
-                const top = drag.offset0.top + (e.pageY - drag.pageY0);
+            activeDragPointerId = e.pointerId;
+
+            // Capture the pointer on the header so all subsequent
+            // pointermove/pointerup events are routed here regardless of
+            // which element (including a child iframe) the pointer is over.
+            if (header.setPointerCapture)
+                header.setPointerCapture(e.pointerId);
+
+            pointerMoveHandler = function(ev) {
+                const left = drag.offset0.left + (ev.pageX - drag.pageX0);
+                const top  = drag.offset0.top  + (ev.pageY - drag.pageY0);
                 DOMUtils.setOffset(drag.elem, {top: top, left: left});
             };
 
-            mouseUpHandler = function(e) {
-                document.body.removeEventListener('mousemove', mouseMoveHandler);
-                document.body.removeEventListener('mouseup', mouseUpHandler);
-            };
+            function endDrag(ev) {
+                header.removeEventListener('pointermove', pointerMoveHandler);
+                header.removeEventListener('pointerup',     pointerUpHandler);
+                header.removeEventListener('pointercancel', pointerCancelHandler);
+                pointerMoveHandler   = null;
+                pointerUpHandler     = null;
+                pointerCancelHandler = null;
+                activeDragPointerId  = null;
+                if (header.releasePointerCapture && ev && ev.pointerId != null)
+                    header.releasePointerCapture(ev.pointerId);
+            }
 
-            document.body.addEventListener('mouseup', mouseUpHandler);
-            document.body.addEventListener('mousemove', mouseMoveHandler);
-        }
+            pointerUpHandler     = endDrag;
+            pointerCancelHandler = endDrag;
 
-        // for mobile devices
-        function handle_touchstart(e) {
-            const drag = {};
-
-            e.preventDefault();
-
-            drag.pageX0 = e.touches[0].pageX;
-            drag.pageY0 = e.touches[0].pageY;
-
-            drag.elem = content;
-            drag.offset0 = DOMUtils.offset(content);
-
-            touchMoveHandler = function(e) {
-                const left = drag.offset0.left + (e.touches[0].pageX - drag.pageX0);
-                const top = drag.offset0.top + (e.touches[0].pageY - drag.pageY0);
-                DOMUtils.setOffset(drag.elem, {top: top, left: left});
-            };
-
-            touchEndHandler = function(e) {
-                document.body.removeEventListener('touchmove', touchMoveHandler);
-                document.body.removeEventListener('touchend', touchEndHandler);
-            };
-
-            document.body.addEventListener('touchmove', touchMoveHandler, { passive: false });
-            document.body.addEventListener('touchend', touchEndHandler, { passive: false });
+            header.addEventListener('pointermove',   pointerMoveHandler);
+            header.addEventListener('pointerup',     pointerUpHandler);
+            header.addEventListener('pointercancel', pointerCancelHandler);
         }
 
         header.style.cursor = 'all-scroll';
-        header.addEventListener('mousedown', handle_mousedown);
-        header.addEventListener('touchstart', handle_touchstart, { passive: false });
+        header.addEventListener('pointerdown', handle_pointerdown);
     }
 
     /**
