@@ -101,11 +101,8 @@ public class AuthorizationServlet extends HttpServlet {
         final String audience     = request.getParameter("resource");           // RFC 8707
         final String nonce        = request.getParameter("nonce");
 
-        if (!"code".equals(responseType)) {
-            redirectError(response, redirectUri, state, "unsupported_response_type",
-                    "Only response_type=code is supported");
-            return;
-        }
+        // Validate client_id and redirect_uri BEFORE anything that redirects back to the
+        // client, so we never redirect to an unvalidated (attacker-supplied) redirect_uri.
         if (clientId == null || clientId.isEmpty()) {
             renderInfo(response, HttpServletResponse.SC_BAD_REQUEST, "Bad Request",
                     "client_id is required");
@@ -123,6 +120,11 @@ public class AuthorizationServlet extends HttpServlet {
             return;
         }
         // From here on, errors can be reported by redirecting back to the client.
+        if (!"code".equals(responseType)) {
+            redirectError(response, redirectUri, state, "unsupported_response_type",
+                    "Only response_type=code is supported");
+            return;
+        }
         if (!client.getAllowedGrantTypes().contains("authorization_code")) {
             redirectError(response, redirectUri, state, "unauthorized_client",
                     "Client is not allowed to use authorization_code grant");
