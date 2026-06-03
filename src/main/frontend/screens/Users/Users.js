@@ -9,7 +9,6 @@
 
     const columnDefs = [
         {headerName: 'User Name', field: 'userName', width: 40 },
-        {headerName: 'Password', field: 'userPassword', width: 40 },
         {headerName: 'Active', field: 'userActive', width: 20 }
     ];
     const grid = new AGGrid('users-grid', columnDefs, 'id');
@@ -69,14 +68,13 @@
         const row = grid.getSelectedRow();
         $$('users-popup-title').setValue('Edit User');
         $$('users-user-name').setValue(row.userName);
-        $$('users-password').setValue(row.userPassword);
+        // The password is never sent to the client; leave it blank to keep the existing one.
+        $$('users-password').clear();
         $$('users-active').setValue(row.userActive);
         Utils.popup_open('users-edit-popup', 'users-user-name');
 
         $$('users-ok').onclick(async () => {
             if ($$('users-user-name').isError('User Name'))
-                return;
-            if ($$('users-password').isError('Password'))
                 return;
             const data = {
                 id: row.id,

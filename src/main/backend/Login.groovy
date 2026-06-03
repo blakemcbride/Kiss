@@ -4,11 +4,27 @@ import org.kissweb.database.Record
 import org.kissweb.restServer.ProcessServlet
 import org.kissweb.restServer.UserCache
 import org.kissweb.restServer.UserData
+import org.kissweb.PasswordHash
 
 /**
- * This module handles user authentication.  Passwords can be stored as plain text or as SHA256 hashes.
+ * This module handles user authentication.  Passwords are stored as salted PBKDF2 hashes
+ * (see {@link org.kissweb.PasswordHash}).  Legacy plain-text and 64-character SHA-256 values
+ * are still accepted so pre-existing accounts continue to work until their password is next changed.
  */
 class Login {
+
+    /**
+     * Verify a candidate password against the stored value, accepting the current PBKDF2 hash format
+     * as well as legacy plain-text and SHA-256 values.
+     */
+    private static boolean passwordMatches(String stored, String entered) {
+        if (PasswordHash.isHashed(stored))
+            return PasswordHash.verify(entered, stored)
+        // Legacy formats (pre-hashing): 64-character SHA-256 hex, or plain text.
+        if (stored.length() == 64)
+            return stored.equals(entered.sha256())
+        return stored.equals(entered)
+    }
 
     /**
      * Validate a user's login name and password.  May also associate user specific data.
@@ -26,11 +42,8 @@ class Login {
         String pw = rec.getString("user_password")
         if (pw == null)
             return null;
-        if (pw.length() == 64) {
-            if (!pw.equals(password.sha256()))
-                return null
-        } else if (!pw.equals(password))
-                return null
+        if (!passwordMatches(pw, password))
+            return null
         UserData ud = UserCache.newUser(user, password, (Integer) rec.getInt("user_id"))
 //        ud.putUserData("abc", 5)    add any user specific data to save on the back-end
 //        outjson.put("user_type", "xxx")    data sent back to the front-end
@@ -54,11 +67,6 @@ class Login {
         String pw = rec.getString("user_password")
         if (pw == null)
             return false;
-        if (pw.length() == 64) {
-            if (!pw.equals(ud.getPassword().sha256()))
-                return false
-        } else if (!pw.equals(ud.getPassword()))
-            return false
-        return true
+        return passwordMatches(pw, ud.getPassword())
     }
 }

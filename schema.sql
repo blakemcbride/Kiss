@@ -2,12 +2,13 @@
 CREATE TABLE users (
     user_id serial NOT NULL PRIMARY KEY,
     user_name character varying(20) NOT NULL UNIQUE,
-    user_password character varying(64) NOT NULL,
+    user_password character varying(255) NOT NULL,
     user_active character(1) NOT NULL,
     CONSTRAINT users_active_chk CHECK (((user_active = 'Y') OR (user_active = 'N')))
 );
 
-INSERT INTO users (user_name, user_password, user_active) VALUES ('kiss', 'password', 'Y');
+-- Password is the PBKDF2 hash of 'password' (see org.kissweb.PasswordHash). Login name: kiss
+INSERT INTO users (user_name, user_password, user_active) VALUES ('kiss', 'pbkdf2$600000$XXxhRHyyeLvk3AfmOhTYhA$ZX/GcXFZJaj94VBbxu3zTVTwdVy7CxfxXfK/irpetUI', 'Y');
 
 
 -- The following is only used for the SQL demo on the "SQL Access" screen

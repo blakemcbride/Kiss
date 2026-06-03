@@ -5,6 +5,7 @@ import org.kissweb.json.JSONObject
 import org.kissweb.database.Connection
 import org.kissweb.database.Record
 import org.kissweb.restServer.ProcessServlet
+import org.kissweb.PasswordHash
 
 /**
  * Users service for CRUD operations on the users table.
@@ -19,13 +20,13 @@ class Users {
             outjson.put("nodb", true)
             return
         }
-        List<Record> recs = db.fetchAll("select * from users order by user_name")
+        // Never return the password column to the client.
+        List<Record> recs = db.fetchAll("select user_id, user_name, user_active from users order by user_name")
         JSONArray rows = new JSONArray()
         for (Record rec : recs) {
             JSONObject row = new JSONObject()
             row.put("id", rec.getInt("user_id"))
             row.put("userName", rec.getString("user_name"))
-            row.put("userPassword", rec.getString("user_password"))
             row.put("userActive", rec.getString("user_active"))
             rows.put(row)
         }
@@ -38,7 +39,7 @@ class Users {
     void addRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         Record rec = db.newRecord("users")
         rec.set("user_name", injson.getString("userName"))
-        rec.set("user_password", injson.getString("userPassword"))
+        rec.set("user_password", PasswordHash.hash(injson.getString("userPassword")))
         rec.set("user_active", injson.getString("userActive"))
         rec.addRecord()
     }
@@ -49,7 +50,11 @@ class Users {
     void updateRecord(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {
         Record rec = db.fetchOne("select * from users where user_id=?", injson.getInt("id"))
         rec.set("user_name", injson.getString("userName"))
-        rec.set("user_password", injson.getString("userPassword"))
+        // Only change the password when a new (non-empty) one is supplied; a blank field
+        // leaves the existing password unchanged (the client never receives the old value).
+        String userPassword = injson.getString("userPassword")
+        if (userPassword != null && !userPassword.isEmpty())
+            rec.set("user_password", PasswordHash.hash(userPassword))
         rec.set("user_active", injson.getString("userActive"))
         rec.update()
     }
