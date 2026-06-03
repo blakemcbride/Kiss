@@ -1,18 +1,31 @@
 package org.kissweb;
 
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Random;
 
 /**
- * This class provides the ability to encrypt/decrypt strings and byte arrays with very strong (AES) encryption.
+ * This class provides the ability to encrypt/decrypt strings and byte arrays with strong (AES) encryption.
  * <br><br>
- * Each instance of this class maintains its own Cipher, making it thread-safe when each thread uses
- * its own instance. For concurrent operations, create a separate Crypto instance for each operation.
+ * Values are encrypted with AES in GCM mode (authenticated encryption) using a random per-message nonce,
+ * and the key is derived from the password (and optional salt) with PBKDF2.  The output is a self-describing,
+ * versioned container so that the format can evolve without breaking previously-encrypted data.
+ * <br><br>
+ * <b>Backward compatibility:</b> Data produced by older versions of this class (unauthenticated AES/ECB)
+ * is still readable.  Decryption auto-detects the legacy format and decrypts it with the original algorithm.
+ * New encryptions always use the current (GCM) format.  Note that a peer still running the older code cannot
+ * decrypt values produced by this version.
+ * <br><br>
+ * Each encrypt/decrypt operation creates its own {@link Cipher}, so a single instance may be shared across
+ * threads.
  * <br><br>
  * <b>Usage Example:</b>
  * <pre>
@@ -29,7 +42,7 @@ import java.util.Random;
  * String encrypted = crypto.encrypt("mySalt", "Hello World");
  * String decrypted = crypto.decrypt("mySalt", encrypted);
  *
- * // With random salt (salt is prepended to encrypted value)
+ * // With random salt (salt is embedded in the encrypted value)
  * String encrypted = crypto.encryptWithRandomSalt("Hello World");
  * String decrypted = crypto.decryptWithRandomSalt(encrypted);
  * </pre>
@@ -39,16 +52,36 @@ import java.util.Random;
  */
 public final class Crypto {
 
-    private static final String ALGORITHM = "AES";
-    private static final Random random = new Random();
+    private static final String KEY_ALGORITHM = "AES";
+    // Legacy transform (AES/ECB/PKCS5Padding) — retained ONLY to decrypt data written by older versions.
+    private static final String LEGACY_TRANSFORM = "AES";
+    private static final String GCM_TRANSFORM = "AES/GCM/NoPadding";
 
-    private final Cipher cipher;
+    private static final int GCM_NONCE_BYTES = 12;
+    private static final int GCM_TAG_BITS = 128;
+    private static final int PBKDF2_ITERATIONS = 65_536;
+    private static final int PBKDF2_KEY_BITS = 256;
+    private static final int RANDOM_SALT_BYTES = 16;
+
+    // Fixed PBKDF2 salt used when the caller supplies no salt (PBKDF2 requires a non-empty salt).
+    private static final byte[] DEFAULT_KDF_SALT =
+            {0x4B, 0x69, 0x73, 0x73, 0x43, 0x72, 0x79, 0x70, 0x74, 0x6F, 0x53, 0x61, 0x6C, 0x74, 0x21, 0x00};
+
+    // 8-byte magic prefixing every binary (byte[]) container.  The leading 0x00 cannot begin a legacy
+    // random-salt blob (those start with an ASCII Base64 character), making format detection unambiguous.
+    private static final byte[] MAGIC = {0x00, 0x4B, 0x43, 0x52, 0x59, 0x50, 0x54, 0x01};
+    private static final byte VERSION_1 = 1;
+
+    // Prefix on every String container.  '$' is not in the Base64 alphabet, so it can never begin
+    // a legacy String value, making format detection unambiguous.
+    private static final String TEXT_PREFIX = "$KC1$";
+
+    private static final SecureRandom secureRandom = new SecureRandom();
+
     private final String password;
 
     /**
      * Create a new Crypto instance with the specified password.
-     * <br><br>
-     * The password can be any size greater than 0 but only a max of the first 32 bytes will be used.
      *
      * @param password the password to use for encryption/decryption
      * @throws IllegalArgumentException if password is null or empty
@@ -58,18 +91,10 @@ public final class Crypto {
             throw new IllegalArgumentException("Password cannot be null or empty");
         }
         this.password = password;
-        try {
-            this.cipher = Cipher.getInstance(ALGORITHM);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-            throw new RuntimeException("Failed to initialize cipher", e);
-        }
     }
 
     /**
      * Encrypt a string utilizing the passed in salt.
-     * <br><br>
-     * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
-     * 32 bytes are used.
      *
      * @param salt the salt or null
      * @param valueToEnc the string value to encrypt
@@ -77,10 +102,9 @@ public final class Crypto {
      * @throws Exception if encryption fails
      */
     public String encrypt(String salt, String valueToEnc) throws Exception {
-        final Key key = generateKey(salt, password);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        final byte[] encValue = cipher.doFinal(valueToEnc.getBytes());
-        return Base64.encode(encValue);
+        final byte[] saltBytes = salt == null ? null : salt.getBytes(StandardCharsets.UTF_8);
+        final byte[] container = encryptToContainer(saltBytes, valueToEnc.getBytes(StandardCharsets.UTF_8));
+        return TEXT_PREFIX + Base64.encode(container);
     }
 
     /**
@@ -98,19 +122,18 @@ public final class Crypto {
      * Encrypt with a random salt.
      *
      * @param valueToEnc the string value to encrypt
-     * @return the salt prepended to the encrypted string encoded in Base64
+     * @return the encrypted string (the salt is embedded), encoded in Base64
      * @throws Exception if encryption fails
      */
     public String encryptWithRandomSalt(String valueToEnc) throws Exception {
-        final String salt = createSalt();
-        return salt + encrypt(salt, valueToEnc);
+        final byte[] salt = new byte[RANDOM_SALT_BYTES];
+        secureRandom.nextBytes(salt);
+        final byte[] container = encryptToContainer(salt, valueToEnc.getBytes(StandardCharsets.UTF_8));
+        return TEXT_PREFIX + Base64.encode(container);
     }
 
     /**
      * Encrypt a byte array utilizing the passed in salt.
-     * <br><br>
-     * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
-     * 32 bytes are used.
      *
      * @param salt the salt or null
      * @param valueToEnc the byte array to encrypt
@@ -118,9 +141,8 @@ public final class Crypto {
      * @throws Exception if encryption fails
      */
     public byte[] encrypt(String salt, byte[] valueToEnc) throws Exception {
-        final Key key = generateKey(salt, password);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        return cipher.doFinal(valueToEnc);
+        final byte[] saltBytes = salt == null ? null : salt.getBytes(StandardCharsets.UTF_8);
+        return encryptToContainer(saltBytes, valueToEnc);
     }
 
     /**
@@ -138,23 +160,17 @@ public final class Crypto {
      * Encrypt with a random salt.
      *
      * @param valueToEnc the byte array to encrypt
-     * @return the salt prepended to the encrypted byte array
+     * @return the encrypted byte array (the salt is embedded)
      * @throws Exception if encryption fails
      */
     public byte[] encryptWithRandomSalt(byte[] valueToEnc) throws Exception {
-        final String salt = createSalt();
-        final byte[] ba = encrypt(salt, valueToEnc);
-        final byte[] salta = salt.getBytes();
-        final byte[] na = Arrays.copyOf(salta, salta.length + ba.length);
-        System.arraycopy(ba, 0, na, salta.length, ba.length);
-        return na;
+        final byte[] salt = new byte[RANDOM_SALT_BYTES];
+        secureRandom.nextBytes(salt);
+        return encryptToContainer(salt, valueToEnc);
     }
 
     /**
      * Decrypt a string utilizing the passed in salt.
-     * <br><br>
-     * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
-     * 32 bytes are used.
      *
      * @param salt the salt or null
      * @param encryptedValue the Base64 encoded encrypted string
@@ -162,11 +178,12 @@ public final class Crypto {
      * @throws Exception if decryption fails
      */
     public String decrypt(String salt, String encryptedValue) throws Exception {
-        final Key key = generateKey(salt, password);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        final byte[] decodedValue = Base64.decode(encryptedValue);
-        final byte[] decValue = cipher.doFinal(decodedValue);
-        return new String(decValue);
+        if (encryptedValue != null && encryptedValue.startsWith(TEXT_PREFIX)) {
+            final byte[] container = Base64.decode(encryptedValue.substring(TEXT_PREFIX.length()));
+            return new String(decryptContainer(container), StandardCharsets.UTF_8);
+        }
+        // Legacy format: Base64(AES/ECB)
+        return new String(legacyDecrypt(salt, Base64.decode(encryptedValue)));
     }
 
     /**
@@ -183,21 +200,23 @@ public final class Crypto {
     /**
      * Decrypt a string that was encrypted with random salt.
      *
-     * @param encryptedValue the salt prepended encrypted string
+     * @param encryptedValue the encrypted string
      * @return the decrypted string
      * @throws Exception if decryption fails
      */
     public String decryptWithRandomSalt(String encryptedValue) throws Exception {
+        if (encryptedValue.startsWith(TEXT_PREFIX)) {
+            final byte[] container = Base64.decode(encryptedValue.substring(TEXT_PREFIX.length()));
+            return new String(decryptContainer(container), StandardCharsets.UTF_8);
+        }
+        // Legacy format: 11-character salt prepended to Base64(AES/ECB)
         final String salt = encryptedValue.substring(0, 11);
-        encryptedValue = encryptedValue.substring(11);
-        return decrypt(salt, encryptedValue);
+        final String enc = encryptedValue.substring(11);
+        return decrypt(salt, enc);
     }
 
     /**
      * Decrypt a byte array utilizing the passed in salt.
-     * <br><br>
-     * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
-     * 32 bytes are used.
      *
      * @param salt the salt or null
      * @param encryptedValue the encrypted byte array
@@ -205,9 +224,10 @@ public final class Crypto {
      * @throws Exception if decryption fails
      */
     public byte[] decrypt(String salt, byte[] encryptedValue) throws Exception {
-        final Key key = generateKey(salt, password);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        return cipher.doFinal(encryptedValue);
+        if (hasMagic(encryptedValue))
+            return decryptContainer(encryptedValue);
+        // Legacy format: raw AES/ECB ciphertext
+        return legacyDecrypt(salt, encryptedValue);
     }
 
     /**
@@ -224,25 +244,106 @@ public final class Crypto {
     /**
      * Decrypt a byte array that was encrypted with random salt.
      *
-     * @param encryptedValue the salt prepended encrypted byte array
+     * @param encryptedValue the encrypted byte array
      * @return the decrypted byte array
      * @throws Exception if decryption fails
      */
     public byte[] decryptWithRandomSalt(byte[] encryptedValue) throws Exception {
+        if (hasMagic(encryptedValue))
+            return decryptContainer(encryptedValue);
+        // Legacy format: 11-byte salt prepended to AES/ECB ciphertext
         final String salt = new String(Arrays.copyOfRange(encryptedValue, 0, 11));
-        encryptedValue = Arrays.copyOfRange(encryptedValue, 11, encryptedValue.length);
-        return decrypt(salt, encryptedValue);
+        final byte[] enc = Arrays.copyOfRange(encryptedValue, 11, encryptedValue.length);
+        return legacyDecrypt(salt, enc);
+    }
+
+    // ==================================================================
+    // Current (versioned, authenticated) format
+    // ==================================================================
+
+    /**
+     * Encrypt to a self-describing container:
+     * MAGIC(8) | VERSION(1) | saltLen(2, big-endian) | salt | nonce(12) | GCM ciphertext+tag
+     */
+    private byte[] encryptToContainer(byte[] saltBytes, byte[] plaintext) throws Exception {
+        if (saltBytes == null)
+            saltBytes = new byte[0];
+        if (saltBytes.length > 0xFFFF)
+            saltBytes = Arrays.copyOf(saltBytes, 0xFFFF);
+        final SecretKey key = deriveKey(saltBytes);
+        final byte[] nonce = new byte[GCM_NONCE_BYTES];
+        secureRandom.nextBytes(nonce);
+        final Cipher c = Cipher.getInstance(GCM_TRANSFORM);
+        c.init(Cipher.ENCRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BITS, nonce));
+        final byte[] ct = c.doFinal(plaintext);
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(MAGIC);
+        out.write(VERSION_1);
+        out.write((saltBytes.length >>> 8) & 0xFF);
+        out.write(saltBytes.length & 0xFF);
+        out.write(saltBytes);
+        out.write(nonce);
+        out.write(ct);
+        return out.toByteArray();
+    }
+
+    private byte[] decryptContainer(byte[] container) throws Exception {
+        int pos = MAGIC.length;
+        final byte version = container[pos++];
+        if (version != VERSION_1)
+            throw new IllegalArgumentException("Unsupported Crypto format version: " + version);
+        final int saltLen = ((container[pos++] & 0xFF) << 8) | (container[pos++] & 0xFF);
+        final byte[] saltBytes = Arrays.copyOfRange(container, pos, pos + saltLen);
+        pos += saltLen;
+        final byte[] nonce = Arrays.copyOfRange(container, pos, pos + GCM_NONCE_BYTES);
+        pos += GCM_NONCE_BYTES;
+        final byte[] ct = Arrays.copyOfRange(container, pos, container.length);
+
+        final SecretKey key = deriveKey(saltBytes);
+        final Cipher c = Cipher.getInstance(GCM_TRANSFORM);
+        c.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(GCM_TAG_BITS, nonce));
+        return c.doFinal(ct);
     }
 
     /**
-     * Take a salt and password of any size and produce an encryption key.
-     * <br><br>
-     * While <code>salt</code> and <code>password</code> can be any size, they are added together and only the first
-     * 32 bytes are used.
-     *
-     * @param salt null or something unique to the item being encrypted
-     * @param password the password (can be any length but max of the first 32 characters are used)
-     * @return the encryption key
+     * Derive a 256-bit AES key from the password and salt using PBKDF2.
+     */
+    private SecretKey deriveKey(byte[] saltBytes) throws Exception {
+        final byte[] effectiveSalt = (saltBytes == null || saltBytes.length == 0) ? DEFAULT_KDF_SALT : saltBytes;
+        final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), effectiveSalt, PBKDF2_ITERATIONS, PBKDF2_KEY_BITS);
+        try {
+            final SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+            final byte[] keyBytes = skf.generateSecret(spec).getEncoded();
+            return new SecretKeySpec(keyBytes, KEY_ALGORITHM);
+        } finally {
+            spec.clearPassword();
+        }
+    }
+
+    private static boolean hasMagic(byte[] data) {
+        if (data == null || data.length < MAGIC.length + 1)
+            return false;
+        for (int i = 0; i < MAGIC.length; i++)
+            if (data[i] != MAGIC[i])
+                return false;
+        return true;
+    }
+
+    // ==================================================================
+    // Legacy format (decrypt-only) — kept for backward compatibility
+    // ==================================================================
+
+    private byte[] legacyDecrypt(String salt, byte[] encryptedBytes) throws Exception {
+        final Key key = generateKey(salt, password);
+        final Cipher c = Cipher.getInstance(LEGACY_TRANSFORM);
+        c.init(Cipher.DECRYPT_MODE, key);
+        return c.doFinal(encryptedBytes);
+    }
+
+    /**
+     * Reproduce the original (legacy) key derivation: the first 32 bytes of salt+password, wrapped.
+     * Used only to decrypt data written by older versions of this class.
      */
     private static Key generateKey(String salt, String password) {
         int i = 0;
@@ -268,38 +369,7 @@ public final class Crypto {
                     j = 0;
             }
         }
-        return new SecretKeySpec(bytes, ALGORITHM);
-    }
-
-    /**
-     * Convert a long value to byte array.
-     *
-     * @param data the long value to convert
-     * @return the byte array representation
-     */
-    private static byte[] longtoBytes(long data) {
-        return new byte[]{
-                (byte) ((data >> 56) & 0xff),
-                (byte) ((data >> 48) & 0xff),
-                (byte) ((data >> 40) & 0xff),
-                (byte) ((data >> 32) & 0xff),
-                (byte) ((data >> 24) & 0xff),
-                (byte) ((data >> 16) & 0xff),
-                (byte) ((data >> 8) & 0xff),
-                (byte) (data & 0xff),
-        };
-    }
-
-    /**
-     * Create a random salt.
-     * It is always 11 bytes long.
-     *
-     * @return a random salt string
-     */
-    private static String createSalt() {
-        final long rl = random.nextLong();
-        final byte[] ba = longtoBytes(rl);
-        return Base64.encode(ba);
+        return new SecretKeySpec(bytes, KEY_ALGORITHM);
     }
 
     /**
