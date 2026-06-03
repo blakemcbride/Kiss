@@ -252,6 +252,37 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
 - Configurable user inactivity timeout
 - UUID-based session tracking
 
+### Password Storage (org.kissweb.PasswordHash)
+
+`org.kissweb.PasswordHash` is the framework utility for storing user passwords. Passwords must be stored using this class — never as plain text, and never with reversible encryption.
+
+**Hashed, not encrypted.** Passwords are hashed one-way with PBKDF2-HMAC-SHA256 and a random per-password salt. There is intentionally no way to recover the original password; authentication only ever *verifies* a candidate. (For reversible encryption of arbitrary data, use `org.kissweb.Crypto` instead — it is the wrong tool for passwords.)
+
+**API (all static):**
+
+| Method | Description |
+|---|---|
+| `String hash(String password)` | Hash a plain-text password for storage |
+| `boolean verify(String password, String stored)` | Constant-time verify a candidate against a stored hash |
+| `boolean isHashed(String stored)` | True if a stored value is in the PasswordHash format (vs. a legacy/plain value) |
+
+**Stored format** is a self-describing string so the work factor can be raised over time without invalidating existing hashes:
+```
+pbkdf2$<iterations>$<Base64(salt)>$<Base64(hash)>
+```
+Defaults: 600,000 iterations, 16-byte salt, 256-bit derived key. The encoded value is ~80 characters, so the storage column must be at least `varchar(255)`.
+
+**Usage:**
+```groovy
+import org.kissweb.PasswordHash
+
+// When setting or changing a password:
+rec.set("user_password", PasswordHash.hash(plainTextPassword))
+
+// When authenticating:
+boolean ok = PasswordHash.verify(enteredPassword, rec.getString("user_password"))
+```
+
 ## Database Features
 
 - **Record API**: Simplified database operations
@@ -1130,4 +1161,4 @@ None currently documented.
 
 ---
 
-*Last Updated: 2026-02-04*
+*Last Updated: 2026-06-03*
