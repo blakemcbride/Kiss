@@ -70,6 +70,12 @@ public class XML {
     public static Document parse(String in) {
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            // Harden against XXE: disallow DTDs and external entity resolution.
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbf.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            dbf.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
             DocumentBuilder db = dbf.newDocumentBuilder();
             InputSource is = new InputSource(new StringReader(in));
             return db.parse(is);
