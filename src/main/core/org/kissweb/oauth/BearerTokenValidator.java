@@ -273,9 +273,21 @@ public final class BearerTokenValidator {
 
     private static void checkAudience(JSONObject payload, OAuthConfig cfg) throws TokenValidationException {
         final ValidatedToken probe = new ValidatedToken(payload);
-        if (!probe.getAudience().contains(cfg.getResourceIdentifier()))
-            throw new TokenValidationException("Token aud does not include resource identifier '"
-                    + cfg.getResourceIdentifier() + "'");
+        // Compare audiences with a trailing slash trimmed on both sides, the
+        // same normalization checkIssuer() applies.  RFC 3986 canonicalizes a
+        // URI whose authority has an empty path to a single "/" path, so a
+        // client that treats the resource indicator as a URI (e.g. it
+        // discovers "https://host" from the protected-resource metadata and
+        // normalizes it) will present aud="https://host/", while a client
+        // that sends the value verbatim presents aud="https://host".  Both
+        // denote the same resource; an exact match would reject one of them.
+        final String expected = trimTrailingSlash(cfg.getResourceIdentifier());
+        for (String aud : probe.getAudience()) {
+            if (java.util.Objects.equals(expected, trimTrailingSlash(aud)))
+                return;
+        }
+        throw new TokenValidationException("Token aud does not include resource identifier '"
+                + cfg.getResourceIdentifier() + "'");
     }
 
     private static void checkTimeClaims(JSONObject payload, OAuthConfig cfg) throws TokenValidationException {
@@ -354,6 +366,8 @@ public final class BearerTokenValidator {
     }
 
     private static String trimTrailingSlash(String s) {
+        if (s == null)
+            return null;
         while (s.endsWith("/"))
             s = s.substring(0, s.length() - 1);
         return s;

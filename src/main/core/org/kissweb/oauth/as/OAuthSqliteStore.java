@@ -34,9 +34,13 @@ import java.sql.SQLException;
  *   <li>The schema is materialized via {@code CREATE TABLE IF NOT
  *       EXISTS} on every open --- safe both for a fresh database and
  *       an existing one with the current schema.</li>
- *   <li>If {@code OAuthAsIniFile} is configured and points at an
+ *   <li>The legacy ini import runs <em>only when the SQLite file did
+ *       not already exist</em> (i.e. it was just created).  In that
+ *       case, if {@code OAuthAsIniFile} is configured and points at an
  *       existing file, {@link OAuthIniMigration#runIfNeeded} imports
- *       that file into SQLite once and deletes it.</li>
+ *       that file into SQLite and deletes it.  Once the SQLite store
+ *       exists it is the sole source of truth and {@code OAuthAsIniFile}
+ *       is ignored entirely.</li>
  * </ol>
  * <h2>Concurrency</h2>
  * One instance per JVM.  All access funnels through {@link #get()};
@@ -121,8 +125,14 @@ public final class OAuthSqliteStore {
             else
                 logger.info("Created and initialized OAuth state SQLite database at " + absolutePath);
 
-            // One-shot import from the legacy ini file, if configured and present.
-            OAuthIniMigration.runIfNeeded(conn, cfg);
+            // One-shot import from the legacy ini file --- ONLY when the
+            // SQLite database did not already exist.  Once the SQLite store
+            // is present we trust it as the sole source of truth and ignore
+            // OAuthAsIniFile entirely; re-running the import against a
+            // populated database would collide on its unique keys, fail the
+            // open, and take the whole authorization server down.
+            if (!preexisting)
+                OAuthIniMigration.runIfNeeded(conn, cfg);
 
             return new OAuthSqliteStore(absolutePath, conn);
         } catch (Exception e) {

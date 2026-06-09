@@ -16,9 +16,11 @@ import java.nio.file.Path;
  * the SQLite database used by the OAuth authorization server, then
  * deletes the ini file so the migration cannot run a second time.
  * <br><br>
- * The migration runs at most once per JVM, at the end of
- * {@link OAuthSqliteStore#get()}'s open sequence.  It does nothing if
- * either of these is not true:
+ * The caller ({@link OAuthSqliteStore}) only invokes this when the
+ * SQLite database was just created --- never when it already existed ---
+ * so an established SQLite store is the sole source of truth and the ini
+ * file is ignored.  Given that, the migration runs at most once ever.  It
+ * additionally does nothing if either of these is not true:
  * <ul>
  *   <li>{@code OAuthAsIniFile} is configured in {@code application.ini}.</li>
  *   <li>The referenced ini file actually exists on disk.</li>
