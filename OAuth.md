@@ -1,12 +1,14 @@
 # OAuth 2.1 Support in Kiss
 
-Kiss ships with both halves of OAuth 2.1: a **resource server** that validates incoming bearer tokens, and an **authorization server** that issues them.  The two run independently or together — a Kiss-based MCP server typically runs both in the same JVM, validating its own tokens.
+Kiss ships with all three OAuth 2.1 roles: a **resource server** that validates incoming bearer tokens, an **authorization server** that issues them, and a **client** (relying party) that obtains tokens from a remote server and presents them on outbound calls.  The roles run independently or together — a Kiss-based MCP server typically runs the resource and authorization servers in the same JVM, validating its own tokens, while the client role lets a Kiss app consume *other* OAuth-protected servers.
 
 This document is a reference for a developer already familiar with OAuth 2.1.  For a slower, worked-example treatment, see the chapters on OAuth in the Kiss book.
 
 > **Resource server** — Part 1, validates tokens issued by any RFC 8414 / OpenID Connect compliant authorization server (Auth0, Okta, Keycloak, Entra, Google, or your own Kiss-hosted AS).
 >
 > **Authorization server** — Part 2, runs the authorization-code flow with mandatory PKCE, the token endpoint with refresh-token rotation, dynamic client registration, the discovery endpoint, and the JWKS endpoint.  Persists all long-lived state to a private SQLite database that is independent of the application's main database — no shared schema, no shared connection pool, no operator setup beyond pointing at a file path.
+>
+> **Client** — Part 3, drives the authorization-code + PKCE flow *against a remote* OAuth 2.1 server, performing discovery and (when needed) dynamic client registration, capturing the redirect at a built-in callback servlet, and refreshing access tokens automatically.  Supports multiple remote providers, each configured in `application.ini`.  Persists its cached registrations and tokens in the **same** `oauth.db` the authorization server uses.
 
 ---
 
@@ -39,6 +41,17 @@ This document is a reference for a developer already familiar with OAuth 2.1.  F
 - [AS Security Considerations](#as-security-considerations)
 - [AS Limitations and Omissions](#as-limitations-and-omissions)
 - [AS API Reference](#as-api-reference)
+
+**Part 3 — Client (obtaining tokens from a remote server)**
+- [Client Overview](#client-overview)
+- [Client Configuration](#client-configuration)
+- [Using the Client from App Code](#using-the-client-from-app-code)
+- [The Client Flow End-to-End](#the-client-flow-end-to-end)
+- [Token Refresh and Rotation](#token-refresh-and-rotation)
+- [Client Persistence (shared oauth.db)](#client-persistence-shared-oauthdb)
+- [Client Security Considerations](#client-security-considerations)
+- [Client Limitations](#client-limitations)
+- [Client API Reference](#client-api-reference)
 
 ---
 
@@ -588,6 +601,8 @@ The schema is materialized via `CREATE TABLE IF NOT EXISTS` on every open, so a 
 
 Authorization codes (60-s TTL) live in memory only — too short-lived to be worth persisting.
 
+When the **client** role (Part 3) is used, it persists its own state in this same `oauth.db` file, reusing `OAuthSqliteStore`'s connection and lock rather than opening a second database.  Its tables (`oauth_client_discovery`, `oauth_client_registration`, `oauth_client_tokens`) are created on first client use and sit alongside the AS tables above; see [Client Persistence](#client-persistence-shared-oauthdb).  These tables are absent until the client is actually used.
+
 **Transactions.**  Every mutating operation commits as a normal SQLite transaction.  Refresh-token rotation issues both writes (mark the old token, insert the successor) inside one transaction.
 
 **Pruning is lazy.**  Every OAuth endpoint call checks the in-memory `last_pruned_at` timestamp; if `OAuthPruneIntervalSeconds` has elapsed, it issues `DELETE WHERE expires_at <= ?` for refresh tokens and drops expired in-memory codes.  The `expires_at` column is indexed so the sweep is cheap regardless of table size.  The throttle timestamp is in memory only — a restart re-prunes immediately, which is desirable.
@@ -682,4 +697,162 @@ store.register(client);              // DCR or programmatic
 RegisteredClient c = store.get(id);
 store.remove(id);
 Collection<RegisteredClient> all = store.all();
+```
+
+---
+
+# Part 3 — Client (Relying Party)
+
+## Client Overview
+
+The client role lets a Kiss application act as a **client of a remote** OAuth 2.1-protected server: it obtains access tokens via the authorization-code + PKCE flow, refreshes them, and makes them available for outbound calls (typically as an `Authorization: Bearer ...` header).  It is the inverse of the resource/authorization-server roles — here Kiss *consumes* a remote server's tokens rather than validating or issuing its own.
+
+When at least one client provider is configured, the framework:
+
+1. **Discovers** the remote authorization server from the resource URL (RFC 9728 protected-resource metadata → RFC 8414 / OpenID Connect metadata), caching the endpoints.
+2. **Registers** the client — using a pre-configured `client_id`, or via RFC 7591 Dynamic Client Registration (as a public, PKCE-only client) when none is configured — caching the result.
+3. **Drives the authorization-code + PKCE flow**: builds the authorization URL, captures the redirect at a built-in callback servlet (`/oauth/client/callback`), and exchanges the code for tokens.
+4. **Refreshes** access tokens automatically, single-flight per provider, honoring refresh-token rotation.
+
+Everything is **inert** until a provider is configured: with no `[OAuthClient *]` section, the callback servlet returns 404, no database is touched, and no network call is made.
+
+The role is generic — it has no knowledge of what the remote server does (MCP, a plain REST API, anything else).
+
+## Client Configuration
+
+Each remote server is declared in its own section named `[OAuthClient <name>]`, where `<name>` is your label (used in code and to key the stored state).  Multiple providers are supported — one section each.  Unlike the resource/AS keys (which live in `[main]`), these are their own sections, read directly from `application.ini` by `OAuthClientConfig` (the framework's flat environment only carries `[main]`).
+
+```ini
+[OAuthClient myprovider]
+Url          = https://remote.example.com/mcp   ; remote resource/server URL (required)
+Scopes       = mcp:read mcp:write               ; space- or comma-separated (optional)
+ClientId     =                                  ; blank => Dynamic Client Registration (RFC 7591)
+ClientSecret =                                  ; only if pre-registered + confidential
+```
+
+Optional `[main]` keys (defaults shown):
+
+```ini
+# Base URL used to build the redirect_uri (<base>/oauth/client/callback).
+# If unset, it is derived from the request that starts the flow.  The
+# remote server must accept this redirect_uri (registered automatically
+# when using Dynamic Client Registration).
+# OAuthClientRedirectBaseUrl = http://localhost:8080
+
+# Treat an access token as expired this many seconds before its real
+# expiry, so a refresh happens slightly early.  Default 60.
+# OAuthClientRefreshSkewSeconds = 60
+
+# The ini file the [OAuthClient *] sections are read from.  Default
+# application.ini.  Exists mainly so tests can point at a fixture.
+# OAuthClientConfigFile = application.ini
+```
+
+There is no client state-file key: cached registrations and tokens go into the same `oauth.db` the authorization server uses (see [Client Persistence](#client-persistence-shared-oauthdb)).
+
+## Using the Client from App Code
+
+```java
+import org.kissweb.oauth.client.OAuthClient;
+import org.kissweb.oauth.client.OAuthAuthorizationRequiredException;
+
+OAuthClient client = OAuthClient.forProvider("myprovider");
+
+// Before making outbound calls, ensure we are authorized:
+if (!client.isAuthorized()) {
+    // Send the browser to this URL to log in / consent.  The base URL
+    // becomes <base>/oauth/client/callback; pass null to use
+    // OAuthClientRedirectBaseUrl from application.ini.
+    String authorizeUrl = client.beginAuthorization("http://localhost:8080");
+    // ... redirect the browser to authorizeUrl ...
+}
+
+// On every outbound call — discovers, registers, and refreshes as needed:
+try {
+    String token = client.getAccessToken();
+    JSONObject headers = new JSONObject();
+    headers.put("Authorization", "Bearer " + token);
+    // ... call the remote API with RestClient ...
+} catch (OAuthAuthorizationRequiredException e) {
+    // No usable token and none obtainable without a fresh login —
+    // kick off beginAuthorization() again.
+}
+```
+
+`getAccessToken()` returns a currently-valid access token, refreshing transparently when the cached one is expired.  When no token is held and none can be minted without interactive login, it throws `OAuthAuthorizationRequiredException` (a normal control-flow signal, not an error).  `clearTokens()` discards stored tokens for the provider (logout) while keeping the cached discovery and registration.
+
+## The Client Flow End-to-End
+
+1. App calls `client.beginAuthorization(base)`.  The framework resolves discovery (cached), ensures a client registration (configured `ClientId` or DCR, cached), generates a PKCE verifier/challenge and a random `state`, records them in the in-memory `PendingAuthorization` registry, and returns the authorization URL — `response_type=code`, `client_id`, `redirect_uri=<base>/oauth/client/callback`, `scope`, `state`, `code_challenge`, `code_challenge_method=S256`, and `resource=<provider Url>` (RFC 8707 audience binding).
+2. The browser visits the remote `authorization_endpoint`; the user logs in and consents.
+3. The remote server 302-redirects to `/oauth/client/callback?code=…&state=…`.
+4. `OAuthCallbackServlet` validates `state` against the pending registry (CSRF protection; the entry is single-use and short-lived), then calls `OAuthClient.completeAuthorization`, which `POST`s to the remote `token_endpoint` with `grant_type=authorization_code`, the code, the matching `redirect_uri`, the `client_id`, and the PKCE `code_verifier`.  The returned tokens are persisted.  The servlet renders a small "you may close this window" page.
+5. Subsequent `client.getAccessToken()` calls return the stored access token, refreshing it when needed.
+
+## Token Refresh and Rotation
+
+When `getAccessToken()` finds the access token expired (within `OAuthClientRefreshSkewSeconds` of expiry), it performs a `refresh_token` grant, **single-flight per provider** — concurrent callers for the same provider serialize on a per-provider lock, and a thread that wakes after another has already refreshed simply uses the fresh token.
+
+The client **honors refresh-token rotation**: if the token response includes a new `refresh_token`, it replaces the stored one; if it does not, the existing refresh token is kept.  If the remote server rejects the refresh with `invalid_grant` (e.g. the refresh token was revoked or its family was invalidated by the AS's reuse detection), the client deletes the stored tokens and throws `OAuthAuthorizationRequiredException`, so the next attempt starts a fresh login.
+
+## Client Persistence (shared `oauth.db`)
+
+The client does **not** open its own database.  It persists into the same SQLite file the authorization server uses (`oauth.db` by default; configured by `OAuthAsSqliteFile`), reusing `OAuthSqliteStore`'s single JDBC connection and JVM-wide monitor.  All access goes through the Kiss `org.kissweb.database` API (no raw JDBC).
+
+Three tables, keyed by provider name, are created lazily (`CREATE TABLE IF NOT EXISTS`) on first client use and sit alongside the AS tables:
+
+| Table                        | Purpose                                                                                  |
+|------------------------------|------------------------------------------------------------------------------------------|
+| `oauth_client_discovery`     | Cached endpoints: `provider` (PK), `issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, `fetched_at`. |
+| `oauth_client_registration`  | Cached client identity: `provider` (PK), `client_id`, `client_secret` (null for public), `redirect_uri`, `created_at`. |
+| `oauth_client_tokens`        | Current token set: `provider` (PK), `access_token`, `refresh_token`, `token_type`, `scope`, `expires_at`, `created_at`. |
+
+The in-flight `PendingAuthorization` (state + PKCE verifier during a single login) is held in memory only — single-use and short-lived (10-minute TTL), so it is not worth persisting.
+
+Because the client shares the AS's file and lock, the concurrency, build-safety, and inspection notes in the AS [Persistence Model](#persistence-model-oauthdb) apply equally.  A client-only deployment (no AS) still uses `oauth.db`; the AS tables are created but remain empty.
+
+## Client Security Considerations
+
+- **PKCE is mandatory** (S256).  DCR registers a public client (`token_endpoint_auth_method=none`) whose security rests on PKCE.
+- **`state` is a CSRF token.**  The callback proceeds only when the returned `state` matches a pending, unexpired, single-use entry.
+- **Redirect capture is a framework servlet** at `/oauth/client/callback`.  The remote server must accept that `redirect_uri`; DCR registers it automatically, otherwise whitelist it when you pre-register the client.
+- **Audience binding.**  Each authorization and token request carries `resource=<provider Url>` (RFC 8707) so the issued token's audience is bound to the intended remote server.
+- **Token storage.**  Access and refresh tokens are stored at rest in `oauth.db` (unencrypted, like the AS's refresh tokens).  Protect the file with filesystem permissions and place it outside the webapp tree in production (`OAuthAsSqliteFile`).
+- **HTTPS in production.**  Tokens and the authorization code are bearer credentials in transit.
+
+## Client Limitations
+
+- **Redirect capture is via the callback servlet only.**  The RFC 8252 loopback-listener pattern (for CLI/desktop tools with no web server) is not implemented; it can be added later behind the same API.
+- **Protected-resource discovery uses the origin-root well-known path** (`<origin>/.well-known/oauth-protected-resource`); RFC 9728 path-based insertion is not implemented.  If no protected-resource document is published, the provider URL's origin is treated as the issuer and RFC 8414 / OIDC discovery is attempted directly.
+- **Discovery is cached indefinitely** (re-fetched only when absent) — there is no TTL-based refresh of endpoint metadata.
+- **Single-process**, sharing the AS's `oauth.db` concurrency model.
+- **RSA-only / bearer tokens**, consistent with the rest of the Kiss OAuth support; no DPoP or mTLS.
+
+## Client API Reference
+
+All classes live in `org.kissweb.oauth.client`:
+
+| Class                                  | Purpose                                                                  |
+|----------------------------------------|--------------------------------------------------------------------------|
+| `OAuthClient`                          | Facade: `forProvider`, `beginAuthorization`, `isAuthorized`, `getAccessToken`, `clearTokens`. |
+| `OAuthClientConfig`                    | Reads `[OAuthClient *]` sections + client `[main]` keys. Lazy singleton. |
+| `OAuthClientProvider`                  | Immutable parsed provider (name, url, scopes, optional client id/secret).|
+| `OAuthMetadataDiscovery`               | RFC 9728 → RFC 8414 / OIDC endpoint discovery via `RestClient`.          |
+| `DynamicClientRegistration`            | RFC 7591 registration of a public client.                               |
+| `Pkce`                                 | Client-side S256 verifier/challenge generator.                          |
+| `OAuthClientStore`                     | Persists discovery, registration, and tokens into the shared `oauth.db`.|
+| `PendingAuthorization`                 | In-memory, single-use state + PKCE verifier for an in-flight login.      |
+| `OAuthCallbackServlet`                 | `/oauth/client/callback` — validates state, exchanges code for tokens.   |
+| `DiscoveryMetadata`, `ClientRegistration`, `TokenSet` | Immutable value records.                                  |
+| `OAuthClientException`                 | Unrecoverable client error (discovery/registration/token failure).      |
+| `OAuthAuthorizationRequiredException`  | Signal that interactive login is required.                              |
+
+### Quick reference: `OAuthClient`
+
+```java
+OAuthClient client = OAuthClient.forProvider("myprovider");
+String url   = client.beginAuthorization(baseUrl);  // null baseUrl => OAuthClientRedirectBaseUrl
+boolean ok   = client.isAuthorized();
+String token = client.getAccessToken();             // refreshes as needed; may throw OAuthAuthorizationRequiredException
+client.clearTokens();                               // logout
 ```

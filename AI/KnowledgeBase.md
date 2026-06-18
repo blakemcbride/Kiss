@@ -103,6 +103,12 @@ MaxWorkerThreads = 30
 UserInactiveSeconds = 900
 ```
 
+`application.ini` supports named `[section]`s. `MainServlet.readIniFile("application.ini", "main")` (called from `KissInit.groovy`) flattens only the `[main]` section into the global environment read by `MainServlet.getEnvironment(key)`. Other sections are not in that flat map; read them directly with `IniFile.load("application.ini")` and `get(section, key)` / `getSectionNames()` (this is how the OAuth client reads its `[OAuthClient *]` sections).
+
+### Ini File Path Resolution (org.kissweb.IniFile)
+
+`IniFile.load(String)` and `IniFile.save(String)` resolve a filename the **same** way (a single shared rule): an absolute path is used verbatim; a relative path is resolved against `MainServlet.getApplicationPath()` (the backend directory), or against the current working directory when the application path is not set (null/empty). A file written with a given relative name is therefore read back with that same name. (Constructing `new IniFile(fname)` followed by no-arg `save()` writes to whatever path was supplied/loaded.)
+
 ### Secrets and External Configuration
 
 **All URLs, passwords, security keys, API keys, tokens, and user names must be kept in `src/main/backend/application.ini`.** Nothing of this kind should be hard-coded in source files (Java, Groovy, Lisp, JavaScript, HTML, or other configuration files). Whenever such a value is found outside `application.ini`, it must be moved into `application.ini` and accessed via the API below.
@@ -282,6 +288,34 @@ rec.set("user_password", PasswordHash.hash(plainTextPassword))
 // When authenticating:
 boolean ok = PasswordHash.verify(enteredPassword, rec.getString("user_password"))
 ```
+
+### OAuth 2.1 (`org.kissweb.oauth`)
+
+Kiss implements all three OAuth 2.1 roles. Each is inert unless configured (no runtime cost, no files created). Full reference: `OAuth.md`.
+
+- **Resource server** (`org.kissweb.oauth`) — validates *incoming* bearer tokens (JWTs) and publishes the RFC 9728 protected-resource discovery document. Enabled by setting `OAuthAuthorizationServer` in `application.ini`; every `MCPServerBase` subclass then requires a valid token automatically. Holds no persistent state (JWKS is cached in memory).
+- **Authorization server** (`org.kissweb.oauth.as`) — *issues* tokens: authorization-code flow with mandatory PKCE (S256), token endpoint with refresh-token rotation + reuse detection, RFC 7591 dynamic client registration, RFC 8414 metadata, and JWKS. Enabled with `OAuthAsEnabled = true`. The app must register an `org.kissweb.oauth.as.UserAuthenticator` (in `KissInit.groovy`). Persists keys/clients/refresh-tokens to a private SQLite database (`oauth.db` by default; `OAuthAsSqliteFile`), separate from the application's main database.
+- **Client / relying party** (`org.kissweb.oauth.client`) — *obtains* tokens from a *remote* OAuth 2.1 server and presents them on outbound calls. Drives the authorization-code + PKCE flow with automatic discovery (RFC 9728 → RFC 8414 / OIDC) and DCR when no `ClientId` is configured; captures the redirect at the built-in `/oauth/client/callback` servlet; refreshes access tokens automatically (single-flight per provider, honoring rotation). Supports **multiple providers**, each declared in its own `application.ini` section:
+
+  ```ini
+  [OAuthClient myprovider]
+  Url          = https://remote.example.com/mcp   ; required
+  Scopes       = mcp:read mcp:write               ; optional
+  ClientId     =                                  ; blank => Dynamic Client Registration
+  ClientSecret =                                  ; only if pre-registered + confidential
+  ```
+
+  Usage:
+  ```java
+  import org.kissweb.oauth.client.OAuthClient
+  OAuthClient client = OAuthClient.forProvider("myprovider")
+  if (!client.isAuthorized())
+      redirectBrowserTo(client.beginAuthorization("http://localhost:8080"))
+  String token = client.getAccessToken()   // discovers, registers, and refreshes as needed
+  ```
+  `getAccessToken()` throws `OAuthAuthorizationRequiredException` when an interactive login is needed.
+
+**Shared database:** the client persists its cached discovery, registration, and tokens in the **same** `oauth.db` the authorization server uses (reusing `OAuthSqliteStore`'s connection and lock) — there is no separate client database. All `oauth.db` access (AS and client) goes through the Kiss `org.kissweb.database` API, never raw JDBC.
 
 ## Database Features
 
@@ -1161,4 +1195,4 @@ None currently documented.
 
 ---
 
-*Last Updated: 2026-06-03*
+*Last Updated: 2026-06-18*

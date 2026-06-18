@@ -2,6 +2,7 @@ package org.kissweb;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.kissweb.restServer.MainServlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -96,17 +97,25 @@ class IniFileTest {
 
      @Test
      void testSaveAndLoadIniFile() throws IOException {
-         iniFile.put("section1", "key1", "value1");
-         iniFile.put("section1", "key2", "value2");
-         iniFile.save(testFilename);
+         // Use a relative filename and pin the application path to empty so
+         // both save and load resolve it against the current working
+         // directory --- independent of any application path another test
+         // left set.  Restored afterward so this test does not leak state.
+         final String priorAppPath = MainServlet.getApplicationPath();
+         MainServlet.setApplicationPath("");
+         try {
+             iniFile.put("section1", "key1", "value1");
+             iniFile.put("section1", "key2", "value2");
+             iniFile.save(testFilename);
 
-         IniFile loadedIniFile = IniFile.load(testFilename);
-         assertNotNull(loadedIniFile);
-         assertEquals("value1", loadedIniFile.get("section1", "key1"));
-         assertEquals("value2", loadedIniFile.get("section1", "key2"));
-
-         // Clean up
-         new File(testFilename).delete();
+             IniFile loadedIniFile = IniFile.load(testFilename);
+             assertNotNull(loadedIniFile);
+             assertEquals("value1", loadedIniFile.get("section1", "key1"));
+             assertEquals("value2", loadedIniFile.get("section1", "key2"));
+         } finally {
+             new File(testFilename).delete();
+             MainServlet.setApplicationPath(priorAppPath);
+         }
      }
 
      @Test

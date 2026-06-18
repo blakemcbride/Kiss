@@ -80,7 +80,19 @@ refresh tokens, and signing keys to a private SQLite database that is
 independent of the application's main database --- no shared schema,
 no operator setup beyond pointing at a file path.  Enabled by a single
 @code{application.ini} key.
+@item @emph{OAuth 2.1 Client} --- obtain tokens from a @emph{remote}
+OAuth 2.1 server and present them on outbound calls.  Kiss drives the
+authorization-code + PKCE flow with automatic discovery (RFC 9728 ->
+RFC 8414 / OpenID Connect) and dynamic client registration when no
+@code{ClientId} is configured, captures the redirect at a built-in
+callback servlet, and refreshes access tokens automatically.  Multiple
+remote providers are supported, each declared in its own
+@code{[OAuthClient @var{name}]} section of @code{application.ini}.
+Cached registrations and tokens are stored in the same @code{oauth.db}
+the authorization server uses.
 @end itemize
 
-See @code{OAuth.md} at the repository root for the full how-to on both
-halves, and the @emph{Kiss} book for the in-depth treatment.
+Each of the three roles is inert until configured and runs
+independently or together.  See @code{OAuth.md} at the repository root
+for the full how-to on all three, and the @emph{Kiss} book for the
+in-depth treatment.

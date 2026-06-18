@@ -80,7 +80,8 @@ public class IniFile {
     /**
      * Load an ini file from a disk file.
      * <br><br>
-     * Path resolution mirrors {@link #save(String)}:
+     * Path resolution is identical to {@link #save(String)} (both delegate
+     * to {@link #resolvePath(String)}):
      * <ul>
      *   <li>An <em>absolute</em> path is used verbatim.  Useful for files
      *       that must live outside the deployed web application (e.g.
@@ -88,7 +89,9 @@ public class IniFile {
      *   <li>A <em>relative</em> path is resolved against
      *       {@link MainServlet#getApplicationPath()}, which is the
      *       backend directory (the deployed {@code WEB-INF/backend/} or
-     *       its dev-mode equivalent {@code src/main/backend/}).</li>
+     *       its dev-mode equivalent {@code src/main/backend/}).  When the
+     *       application path is not set (null or empty), a relative path is
+     *       resolved against the current working directory.</li>
      * </ul>
      *
      * @param fname the filename to load from --- absolute or relative
@@ -96,14 +99,35 @@ public class IniFile {
      * @throws IOException if an I/O error occurs while reading the file
      */
     public static IniFile load(String fname) throws IOException {
-        if (!new File(fname).isAbsolute())
-            fname = MainServlet.getApplicationPath() + fname;
+        fname = resolvePath(fname);
         if (!(new java.io.File(fname)).exists())
             return null;
         IniFile ini = new IniFile();
         ini.filename = fname;
         ini.parse(fname);
         return ini;
+    }
+
+    /**
+     * Resolve a filename to the location {@link #load(String)} and
+     * {@link #save(String)} actually read from and write to, so the two
+     * are always consistent:
+     * <ul>
+     *   <li>an absolute path is returned verbatim;</li>
+     *   <li>a relative path is prefixed with
+     *       {@link MainServlet#getApplicationPath()}, or with nothing (so
+     *       it resolves against the current working directory) when the
+     *       application path is null or empty.</li>
+     * </ul>
+     *
+     * @param fname the filename, absolute or relative
+     * @return the resolved filename
+     */
+    private static String resolvePath(String fname) {
+        if (new File(fname).isAbsolute())
+            return fname;
+        final String base = MainServlet.getApplicationPath();
+        return (base == null ? "" : base) + fname;
     }
 
     /**
@@ -391,12 +415,20 @@ public class IniFile {
 
     /**
      * Save the in-memory ini file to the specified file.
+     * <br><br>
+     * Path resolution is identical to {@link #load(String)} (both delegate
+     * to {@link #resolvePath(String)}): an absolute path is used verbatim;
+     * a relative path is resolved against
+     * {@link MainServlet#getApplicationPath()}, or against the current
+     * working directory when the application path is not set.  This means a
+     * file written with a given relative name is read back with the same
+     * relative name.
      *
-     * @param fname the filename to save to
+     * @param fname the filename to save to --- absolute or relative
      * @throws IOException if an I/O error occurs while writing the file
      */
     public synchronized void save(String fname) throws IOException {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(fname))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(resolvePath(fname)))) {
             for (String section : sections.keySet()) {
                 if (section == null && sections.get(section).isEmpty())
                     continue;
