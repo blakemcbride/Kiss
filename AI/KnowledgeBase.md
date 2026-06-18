@@ -87,7 +87,7 @@ Kiss/
    - Automatic file management
 
 6. **LLM Integration**
-   - Ollama integration ready
+   - Ollama integration ready (`org.kissweb.llm.Ollama`) — single-prompt `send()` (`/api/generate`) plus multi-turn, role-structured `chat(messages)` / `chat(messages, tools)` (`/api/chat`), which gives correct per-model chat templating, explicit system/user/assistant roles, and a `tools` hook for function calling
    - OpenAI API support
 
 7. **Desktop Support**
@@ -311,11 +311,66 @@ Kiss implements all three OAuth 2.1 roles. Each is inert unless configured (no r
   OAuthClient client = OAuthClient.forProvider("myprovider")
   if (!client.isAuthorized())
       redirectBrowserTo(client.beginAuthorization("http://localhost:8080"))
-  String token = client.getAccessToken()   // discovers, registers, and refreshes as needed
+  String token = client.getAccessToken()   // refreshes as needed (discovery/registration happen in beginAuthorization)
   ```
   `getAccessToken()` throws `OAuthAuthorizationRequiredException` when an interactive login is needed.
 
 **Shared database:** the client persists its cached discovery, registration, and tokens in the **same** `oauth.db` the authorization server uses (reusing `OAuthSqliteStore`'s connection and lock) — there is no separate client database. All `oauth.db` access (AS and client) goes through the Kiss `org.kissweb.database` API, never raw JDBC.
+
+## Model Context Protocol (MCP)
+
+MCP is the open protocol AI assistants use to talk to external tools and data. Kiss provides app-neutral base classes for both sides of the protocol — exposing tools to an AI assistant (server) and consuming a remote MCP server's tools (client). Both speak JSON-RPC 2.0 over HTTP (`PROTOCOL_VERSION = "2025-06-18"`), interoperate directly with each other, and share the same JSON-RPC error-code constants. Each side intentionally leaves the same features unimplemented (resources, prompts, sampling, server-initiated requests, SSE/`text/event-stream` streaming, and `Mcp-Session-Id` session management) — each can be added incrementally.
+
+### Server (`org.kissweb.MCPServerBase`)
+
+Base class for **serving** an MCP endpoint. Handles the JSON-RPC envelope, the `initialize` handshake, `ping`, notifications, and dispatch to `tools/list` / `tools/call`. Extends `RestServerBase`, so a subclass is registered with a `@WebServlet` annotation (no `web.xml`) and **must reside under `src/main/precompiled/`** (discovered by annotation scanning at startup; no hot reload — run `./bld -v build` and restart after edits).
+
+Required hooks: `getServerName()`, `getServerVersion()`, `listTools()` (the tool catalog), `callTool(String, JSONObject)` (execute a tool). Optional hooks: `authenticate(...)` (default: validate an OAuth 2.1 bearer token when `OAuthAuthorizationServer` is configured, otherwise allow all), `getCapabilities()`, `dispatchExtension(...)`. Static helpers: `textBlock`, `toolResult`, `toolError`, `buildSchema`.
+
+Tool-specific failures should be returned with `toolError(...)` (`isError: true`) — which the model sees and can react to — rather than thrown (a thrown exception becomes a JSON-RPC internal error the model does not see). Template: `com.mycompany.MCPServerExample` (`urlPatterns="/mcp-example"`).
+
+### Client (`org.kissweb.MCPClientBase`)
+
+Base class for **consuming** a remote MCP server — the mirror image of `MCPServerBase`. Handles the client side of the same wire protocol: the `initialize` handshake plus `notifications/initialized`, `ping`, and `tools/list` / `tools/call` requests, over HTTP via `RestClient`. Unlike the server, it is core framework code under `src/main/core/` and is used by **instantiating or subclassing it from a backend service** — there is no servlet registration.
+
+The `initialize` handshake runs **lazily** on the first request, so callers can go straight to `listTools()` / `callTool(...)` (or call `initialize()` explicitly to inspect the server's capabilities first).
+
+| Member | Description |
+|---|---|
+| `getServerUrl()` | **Required** hook — full URL of the remote MCP endpoint (per Kiss convention, read from `application.ini`) |
+| `getClientName()` / `getClientVersion()` | Optional — `clientInfo` sent during initialize (defaults provided) |
+| `getOAuthProviderName()` | Optional — name of an `[OAuthClient <name>]` provider to obtain bearer tokens from (default: none) |
+| `applyAuthentication(JSONObject headers)` | Optional — attach auth headers per request (default: OAuth bearer when a provider is set; override for basic auth, a static API token, etc.) |
+| `getClientCapabilities()` | Optional — client capabilities sent during initialize (default: none) |
+| `setTimeouts(connect, request)` | Connect / request timeouts (defaults 30 s / 60 s) |
+| `initialize()` | Run (once) the handshake; returns the server's `initialize` result |
+| `listTools()` | Fetch the tool catalog as a `JSONArray` (auto-follows `nextCursor` pagination) |
+| `callTool(name, args)` | Call a tool; returns the raw result object (inspect with `isError` / `textOf`) |
+| `callToolText(name, args)` | Call a tool and return its concatenated text; throws `MCPClientException` if `isError` |
+| `ping()` | Liveness check |
+| `call(method, params)` / `notify(method, params)` | Generic JSON-RPC request / notification for methods without a wrapper |
+| `getServerInfo()` / `getServerCapabilities()` / `getNegotiatedProtocolVersion()` | Populated by the handshake |
+| `isError(result)` / `textOf(result)` (static) | Read a `tools/call` result — error flag, and `text` content blocks joined with newlines |
+
+**Authentication is the symmetric counterpart of the server's:** the server *validates* incoming bearer tokens (resource-server role); the client *obtains* them via the existing `OAuthClient` (relying-party role). Set `getOAuthProviderName()` to a configured provider and every request carries a transparently-refreshed `Authorization: Bearer …`. When an interactive login is required, `OAuthAuthorizationRequiredException` propagates out of the call — kick off `OAuthClient.beginAuthorization(...)` rather than treat it as an error.
+
+Failures throw `MCPClientBase.MCPClientException` (a `RuntimeException`) — JSON-RPC errors from the server, non-2xx HTTP, unparseable bodies, or transport failures; `getCode()` carries the JSON-RPC error code when present (else `0`). A *tool* failure the model is meant to see arrives instead as `isError: true` in the result, not as this exception.
+
+Template: `com.mycompany.MCPClientExample`.
+
+```java
+import org.kissweb.MCPClientBase
+import org.kissweb.restServer.MainServlet
+
+class MyMcpClient extends MCPClientBase {
+    protected String getServerUrl()         { return MainServlet.getEnvironment("RemoteMcpUrl") }
+    protected String getOAuthProviderName() { return "myprovider" }   // optional
+}
+
+MyMcpClient client = new MyMcpClient()
+JSONArray tools = client.listTools()                                  // runs initialize on first call
+String reply = client.callToolText("echo", new JSONObject().put("message", "hi"))
+```
 
 ## Database Features
 
@@ -635,7 +690,7 @@ The framework provides custom HTML components that should be used:
 - `<date-input>` - Date picker
 - `<time-input>` - Time picker
 - `<numeric-input>` - Number input
-- `<checkbox>` - Checkbox control
+- `<check-box>` - Checkbox control
 - `<radio-button>` - Radio button
 - `<list-box>` - List selection
 - `<file-upload>` - File upload control

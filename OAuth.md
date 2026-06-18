@@ -767,7 +767,7 @@ if (!client.isAuthorized()) {
     // ... redirect the browser to authorizeUrl ...
 }
 
-// On every outbound call — discovers, registers, and refreshes as needed:
+// On every outbound call — refreshes the access token as needed (discovery and registration happened in beginAuthorization):
 try {
     String token = client.getAccessToken();
     JSONObject headers = new JSONObject();

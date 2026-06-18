@@ -9,6 +9,7 @@ import org.kissweb.RestClient;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -104,6 +105,82 @@ public class Ollama {
         for (int i = 0; i < len ; i++)
             sb.append(ja.getJSONObject(i).getString("response"));
         return sb.toString();
+    }
+
+    /**
+     * Send a multi-turn conversation to the Ollama server and receive the assistant's reply,
+     * using the previously selected model.
+     * <br><br>
+     * This posts to Ollama's <code>/api/chat</code> endpoint with a structured
+     * <code>messages</code> array, rather than to <code>/api/generate</code> with a hand-built
+     * prompt string (as {@link #send(String)} does).  The chat endpoint is the better design:
+     * <ul>
+     *   <li><b>Correct chat templating.</b> Each instruct model ships its own chat template with
+     *       special tokens (Llama&nbsp;3's <code>&lt;|start_header_id|&gt;</code>, Mistral's
+     *       <code>[INST]…[/INST]</code>, etc.).  <code>/api/chat</code> applies the model's
+     *       registered template automatically, so role separation and instruction-following are
+     *       not degraded by emitting a format the model was not trained on.</li>
+     *   <li><b>Clean role separation.</b> System / user / assistant become explicit fields rather
+     *       than text the model must parse out of one blob.</li>
+     *   <li><b>Tool-calling foundation.</b> <code>/api/chat</code> is also where Ollama exposes the
+     *       <code>tools</code> parameter for function calling (see
+     *       {@link #chat(List, JSONArray)}), which an agentic tool-calling loop requires.</li>
+     * </ul>
+     *
+     * @param messages the conversation, in order.  Each element is a map describing one message;
+     *                 it must contain a <code>"role"</code> (typically <code>"system"</code>,
+     *                 <code>"user"</code>, or <code>"assistant"</code>) and <code>"content"</code>.
+     *                 Any additional keys are passed through to Ollama unchanged.
+     * @return the assistant message's content, or an empty string if the response carried no message
+     * @throws Exception if model is not set or communication fails
+     */
+    public String chat(List<Map<String, String>> messages) throws Exception {
+        return chat(messages, null);
+    }
+
+    /**
+     * Send a multi-turn conversation to the Ollama server, optionally advertising tools the model
+     * may call, and receive the assistant's reply using the previously selected model.
+     * <br><br>
+     * This is the tool-calling form of {@link #chat(List)}.  When <code>tools</code> is non-null and
+     * non-empty it is included as the <code>tools</code> parameter of the <code>/api/chat</code>
+     * request, enabling function calling.  When the model elects to call a tool, the assistant
+     * message's <code>content</code> is typically empty and the tool calls appear under the
+     * message's <code>tool_calls</code> field; use {@link #getResponseString()} to inspect the full
+     * raw response in that case.
+     *
+     * @param messages the conversation, in order (see {@link #chat(List)} for the map format)
+     * @param tools a JSON array of tool/function descriptors to advertise to the model, or null for none
+     * @return the assistant message's content, or an empty string if the response carried no message content
+     * @throws Exception if model is not set or communication fails
+     */
+    public String chat(List<Map<String, String>> messages, JSONArray tools) throws Exception {
+        if (model == null || model.isEmpty())
+            throw new Exception("Model not set");
+        restClient = new RestClient();
+        JSONArray messageArray = new JSONArray();
+        if (messages != null) {
+            for (Map<String, String> message : messages) {
+                JSONObject msg = new JSONObject();
+                for (Map.Entry<String, String> entry : message.entrySet())
+                    msg.put(entry.getKey(), entry.getValue());
+                messageArray.put(msg);
+            }
+        }
+        JSONObject body = new JSONObject();
+        body.put("model", model);
+        body.put("messages", messageArray);
+        body.put("stream", false);
+        if (tools != null && tools.length() > 0)
+            body.put("tools", tools);
+        String str = restClient.strCall("POST", URL + "chat", body.toString());
+        if (str == null)
+            return null;
+        JSONObject responseJson = new JSONObject(str);
+        JSONObject message = responseJson.getJSONObject("message");
+        if (message == null)
+            return "";
+        return message.getString("content", "");
     }
 
     /**

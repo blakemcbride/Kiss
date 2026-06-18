@@ -336,6 +336,11 @@ See @uref{https://ollama.com} for information about installing the @emph{Ollama}
 @item
 The @emph{Kiss} class @code{org.kissweb.llm.Ollama} implements the interface.
 @item
+It supports both single-prompt generation (@code{send}) and multi-turn,
+role-structured conversations via Ollama's @code{/api/chat} endpoint
+(@code{chat}); the latter applies each model's own chat template and exposes
+a @code{tools} parameter for function calling.
+@item
 @emph{Kiss} comes with a complete demo of this functionality.
 @end itemize
 

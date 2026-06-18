@@ -51,6 +51,7 @@ KISS also provides the following integrations with external systems.
 
 * **LLM Providers** — built-in support for OpenAI, Anthropic, and Ollama.
 * **MCP Server** — expose application tools to AI assistants via the Model Context Protocol.
+* **MCP Client** — consume tools from a remote MCP server, with optional OAuth 2.1 authentication.
 * **Embeddings Database** — vector storage for retrieval-augmented generation (RAG).
 
 ### Security
