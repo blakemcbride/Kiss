@@ -526,6 +526,7 @@ public abstract class MCPClientBase {
      */
     public static class MCPClientException extends RuntimeException {
 
+        /** The JSON-RPC error code associated with this failure, or {@code 0} if none. */
         private final int code;
 
         /**

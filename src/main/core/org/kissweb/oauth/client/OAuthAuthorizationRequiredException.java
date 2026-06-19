@@ -13,6 +13,7 @@ package org.kissweb.oauth.client;
  */
 public class OAuthAuthorizationRequiredException extends RuntimeException {
 
+    /** The name of the provider that requires interactive authorization. */
     private final String provider;
 
     /**
