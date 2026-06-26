@@ -6,6 +6,16 @@
 <head>
     <title>Kiss Application</title>
     <meta charset="UTF-8">
+
+    <!--
+        Content-Security-Policy is delivered as an HTTP response header by
+        SecurityHeadersFilter (org.kissweb.restServer), NOT here.  The Report-Only
+        form used during rollout is invalid in a <meta> tag (browsers ignore it),
+        and a header is also the single source of truth for production/Electron.
+        Validate the policy by browsing the app via the Tomcat origin
+        (http://localhost:8080); the dev static server on :8000 cannot set headers.
+    -->
+
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -44,120 +54,14 @@
 
     </style>
 
-    <script>
-
-        const SystemInfo = {};
-
-        // The following parameters must be set in a production system
-        SystemInfo.softwareVersion = "EDIT-1";  // used to uniquely identify a version of the system
-        SystemInfo.releaseDate = "EDIT-2";
-        SystemInfo.controlCache = false;  // normally true but use false during debugging EDIT-3
-        // The following is only set on a production system that has the front-end and back-end separated
-        //SystemInfo.backendUrl = 'https://[YOUR-URL]/[back-end]]';
-
-        /**
-         * Load a JavaScript file
-         */
-        function getScript(url) {
-            return new Promise(function (resolve, reject) {
-                const head = document.getElementsByTagName("head")[0];
-                const script = document.createElement("script");
-                script.type = "text/javascript";
-                script.src = url + (SystemInfo.controlCache ? '?ver=' + SystemInfo.softwareVersion : '');
-
-                // Handle Script loading
-                {
-                    let done = false;
-
-                    // Attach handlers for all browsers
-                    script.onload = script.onreadystatechange = function () {
-                        if (!done && (!this.readyState ||  this.readyState === "loaded" || this.readyState === "complete")) {
-                            done = true;
-                            // Handle memory leak in IE
-                            script.onload = script.onreadystatechange = null;
-                            resolve();
-                        } else {
-                            console.log("getScript:  error loading " + url);
-                            reject();
-                        }
-                    };
-                    script.onerror = function () {
-                        console.log("getScript: error loading " + url);
-                        reject();
-                    };
-                }
-                head.appendChild(script);
-            });
-        }
-
-        /**
-         * Load several script files in parallel.  Returns a promise that resolves when *every* script finished loading;
-         * rejects as soon as the first one fails.
-         *
-         * @param {string[]} urls – one or more absolute/relative URLs.
-         * @return {Promise<void>} – resolves when *every* script finished loading;
-         *                           rejects as soon as the first one fails.
-         */
-        function getScripts(urls) {
-            return Promise.all(urls.map(getScript));
-        }
-
-        function getURLParameter(sParam) {
-            const urlArgs = window.location.search.substring(1);
-            const argArray = urlArgs.split('&');
-            for (let i = 0; i < argArray.length; i++)  {
-                let param = argArray[i].split('=');
-                if (param[0] === sParam)
-                    return param[1];
-            }
-            return undefined;
-        }
-
-        function startup() {
-
-            async function loadUtils() {
-                // Load DOMUtils first (must complete before Utils.js)
-                await getScript("kiss/DOMUtils.js");
-                // Load remaining scripts in parallel
-                await getScripts([
-                    "kiss/Utils.js",
-                    "kiss/DateUtils.js",
-                    "kiss/DateTimeUtils.js",
-                    "kiss/TimeUtils.js",
-                    "kiss/NumberUtils.js",
-                    "kiss/Server.js",
-                    "kiss/AGGrid.js",
-                    "kiss/Editor.js",
-                    "kiss/MutableString.js"
-                ]);
-                getScript("index.js");
-            }
-
-            if (SystemInfo.controlCache) {
-                const now = getURLParameter("now");
-                let urlArgs = window.location.search.substring(1);
-                if (now) {
-                    const diff = Math.abs(((new Date()).getTime() - Number(now)) / 1000);
-                    if (diff > 30) {
-                        window.onbeforeunload = null;
-                        urlArgs = urlArgs.replaceAll(/now=[^&]*&*/g, '');
-                        window.location.href = 'index.html?now=' + (new Date()).getTime() + (urlArgs ? '&' + urlArgs : '');
-                    } else {
-                        loadUtils();
-                    }
-                } else {
-                    window.onbeforeunload = null;
-                    window.location.href = 'index.html?now=' + (new Date()).getTime() + (urlArgs ? '&' + urlArgs : '');
-                }
-            } else
-                loadUtils();
-        }
-
-    </script>
+    <!-- Per-deployment configuration, then the framework bootstrap loader.
+         Externalized from an inline <script> so the page runs under a strict CSP. -->
+    <script src="SystemInfo.js"></script>
+    <script src="kiss/bootstrap.js"></script>
 
 </head>
 
-<body onload="startup()">
+<body>
 
 <script src="lib/ag-grid-community.min.noStyle.js?nocache=20250711"></script>
 <script src="lib/ckeditor.js?nocache=20230813"></script>

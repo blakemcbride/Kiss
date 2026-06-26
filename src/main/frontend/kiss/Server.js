@@ -1,4 +1,4 @@
-/* global Utils */
+/* global Utils, AppState */
 
 /**
  * Created by Blake McBride on 9/24/16.
@@ -25,7 +25,17 @@ class Server {
 
     // internal
     static setUUID(uuid) {
-        Server.uuid = uuid;
+        AppState.set('_uuid', uuid);
+    }
+
+    /**
+     * The current session token (UUID).  Persisted through AppState so it
+     * survives page navigation/reload according to SystemInfo.stateStore.
+     *
+     * @returns {string}
+     */
+    static get uuid() {
+        return AppState.get('_uuid') || '';
     }
 
     /**
@@ -51,7 +61,7 @@ class Server {
             }
         }
 
-        Server.uuid = '';
+        AppState.clear();
         location.reload();
     }
 

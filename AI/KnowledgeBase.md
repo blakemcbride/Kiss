@@ -317,6 +317,36 @@ Kiss implements all three OAuth 2.1 roles. Each is inert unless configured (no r
 
 **Shared database:** the client persists its cached discovery, registration, and tokens in the **same** `oauth.db` the authorization server uses (reusing `OAuthSqliteStore`'s connection and lock) — there is no separate client database. All `oauth.db` access (AS and client) goes through the Kiss `org.kissweb.database` API, never raw JDBC.
 
+### Client-Side State Persistence (`AppState`)
+
+`src/main/frontend/kiss/AppState.js` is the framework's single client-side state store. It holds arbitrary front-end state that must survive page navigation and reload; the session token is not special — it is the reserved entry `_uuid` stored alongside everything else. It is the **only** module permitted to access `window.localStorage` / `window.sessionStorage` directly (the same layering rule DOMUtils applies to the DOM).
+
+The backing store is chosen once at startup from `SystemInfo.stateStore` (in `src/main/frontend/SystemInfo.js`):
+
+| Value | Backing store | Behavior |
+|---|---|---|
+| `'local'` (default) | localStorage | survives reload, new tabs, and Electron restarts; shared across tabs of the origin |
+| `'session'` | sessionStorage | survives reload; per-tab; cleared on tab close |
+| `'memory'` | in-memory only | classic single-page behavior; lost on reload |
+
+If Web Storage is unavailable (private mode, disabled, quota), `AppState` falls back to in-memory so the app still runs. Keys are namespaced (`kiss.`) so `clear()` removes only Kiss state. Values are JSON-serialized (no `Date`/`Map`/functions survive). Under `'local'`, a `storage`-event listener implements cross-tab logout: when another tab removes `_uuid`, this tab reloads (override via `AppState.onExternalClear(fn)`).
+
+API (all static): `init()`, `set(key, value)` (`undefined` removes), `get(key)`, `has(key)`, `remove(key)`, `keys()`, `clear()`, `backend()`, `onExternalClear(handler)`.
+
+`Server.js` consumes it: `Server.setUUID()` writes `_uuid` through `AppState`, the `Server.uuid` getter reads it, and `Server.logout()` calls `AppState.clear()`. The bootstrap (`src/main/frontend/kiss/bootstrap.js`) loads `AppState.js` and calls `AppState.init()` before `Server.js`.
+
+**Boot/login is unchanged by this** — `index.js` still loads the login page on startup. Using a persisted `_uuid` to resume a session (skip login, deep-link to a page) is the routing layer's job; `AppState` only exposes the value.
+
+### Browser Security: CSP and Security Headers
+
+The entire Content-Security-Policy is delivered as an **HTTP response header** by `SecurityHeadersFilter` (`src/main/core/org/kissweb/restServer/SecurityHeadersFilter.java`). It self-registers via a `@WebFilter("/*")` annotation (no `web.xml` entry, the same way `MCPServerBase` servlets use `@WebServlet`), so it ships entirely inside the application WAR and needs no servlet-container configuration. CSP is **not** delivered via a `<meta>` tag: the `Content-Security-Policy-Report-Only` form used during rollout is invalid in a meta tag (browsers ignore it), and a header is the single source of truth for the production/Electron deployments (all served by Tomcat).
+
+- The XSS-relevant policy is the constant `SecurityHeadersFilter.CONTENT_SECURITY_POLICY` (`script-src 'self'`, `object-src 'none'`, `style-src 'self' 'unsafe-inline'` for CKEditor/AG-Grid, `img-src 'self' data: blob:` for `binaryCall` images, `connect-src 'self' http://localhost:8080` for cross-origin dev, etc.). A separated production back-end must be added to `connect-src`.
+- It **ships report-only**: the filter's `CSP_REPORT_ONLY` flag is `true`, sending `Content-Security-Policy-Report-Only` (violations logged, nothing blocked). After validating every screen with no console violations, set `CSP_REPORT_ONLY = false` to enforce. **Validate by browsing the app via the Tomcat origin `http://localhost:8080`** — the dev static server on `:8000` (a prebuilt `SimpleWebServer.jar`) cannot set headers, and `file://` has no server, so those contexts receive no CSP.
+- The filter always also sends the header-only protections: `Content-Security-Policy: frame-ancestors 'none'` + `X-Frame-Options: DENY` (clickjacking, enforced regardless of rollout phase), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and `Strict-Transport-Security` (only when `request.isSecure()`).
+
+A strict `script-src 'self'` requires no inline scripts: the former inline bootstrap in `index.html` was split into `SystemInfo.js` (per-deployment config, edited there) + `kiss/bootstrap.js` (the `getScript`/`getScripts`/`startup` loader), and the inline `body onload` was replaced by a `load` listener in `bootstrap.js`. Inline `<style>` is still allowed via `style-src 'unsafe-inline'`.
+
 ## Model Context Protocol (MCP)
 
 MCP is the open protocol AI assistants use to talk to external tools and data. Kiss provides app-neutral base classes for both sides of the protocol — exposing tools to an AI assistant (server) and consuming a remote MCP server's tools (client). Both speak JSON-RPC 2.0 over HTTP (`PROTOCOL_VERSION = "2025-06-18"`), interoperate directly with each other, and share the same JSON-RPC error-code constants. Each side intentionally leaves the same features unimplemented (resources, prompts, sampling, server-initiated requests, SSE/`text/event-stream` streaming, and `Mcp-Session-Id` session management) — each can be added incrementally.
