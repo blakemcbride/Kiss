@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Front_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="Back_002dend-API.html" accesskey="n" rel="next">Back-end API</a>, Previous: <a href="Developing.html" accesskey="p" rel="prev">Developing</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Back_002dend-API.html" accesskey="n" rel="next">Back-end API</a>, Previous: <a href="Developing.html" accesskey="p" rel="prev">Developing</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -140,8 +140,11 @@ the need for the other to change.  In other words, they are minimally dependent 
 <li><a href="#Modal-Popup-Windows" accesskey="3">Modal Popup Windows</a></li>
 <li><a href="#File-Uploads" accesskey="4">File Uploads</a></li>
 <li><a href="#Utilities" accesskey="5">Utilities</a></li>
-<li><a href="#Controlling-Browser-Cache-1" accesskey="6">Controlling Browser Cache</a></li>
-<li><a href="#Additional-Resources" accesskey="7">Additional Resources</a></li>
+<li><a href="#Client_002dSide-State-Persistence" accesskey="6">Client-Side State Persistence</a></li>
+<li><a href="#Client_002dSide-Routing" accesskey="7">Client-Side Routing</a></li>
+<li><a href="#Controlling-Browser-Cache-1" accesskey="8">Controlling Browser Cache</a></li>
+<li><a href="#Browser-Security" accesskey="9">Browser Security</a></li>
+<li><a href="#Additional-Resources">Additional Resources</a></li>
 </ul>
 <div class="section-level-extent" id="Calling-REST-Services">
 <h3 class="section"><span>5.1 Calling REST Services<a class="copiable-link" href="#Calling-REST-Services"> &para;</a></span></h3>
@@ -311,8 +314,54 @@ These utilities are located under the <code class="code">src/main/frontend/kiss<
 are documented in the front-end API documentation.
 </p>
 </div>
+<div class="section-level-extent" id="Client_002dSide-State-Persistence">
+<h3 class="section"><span>5.6 Client-Side State Persistence<a class="copiable-link" href="#Client_002dSide-State-Persistence"> &para;</a></span></h3>
+
+<p>Application state that must survive page navigation and browser reloads
+is kept in a single client-side store named <code class="code">AppState</code>.  The login
+token is not treated specially; it is simply one reserved entry stored
+alongside any other front-end state.  <code class="code">AppState</code> is the only part
+of the system that accesses the browser&rsquo;s <em class="emph">Web Storage</em> directly.
+</p>
+<p>By default each browser tab is its own isolated session: state survives
+a reload but is not shared between tabs, so two tabs never overwrite each
+other&rsquo;s data and a new tab requires its own login.  This behavior is
+configurable (per-tab, shared across all tabs, or in-memory only).  Data
+passed between screens (<code class="code">Utils.saveData</code> and <code class="code">Utils.getData</code>)
+is also kept in <code class="code">AppState</code>, so it too survives a reload.
+</p>
+<p>Because the token persists, a reloaded or deep-linked page resumes the
+existing session automatically.  When the back-end is restarted, however,
+its in-memory sessions are gone; <em class="emph">Kiss</em> detects this and asks the
+user to log in again rather than resuming onto a dead session.
+</p>
+</div>
+<div class="section-level-extent" id="Client_002dSide-Routing">
+<h3 class="section"><span>5.7 Client-Side Routing<a class="copiable-link" href="#Client_002dSide-Routing"> &para;</a></span></h3>
+
+<p><em class="emph">Kiss</em> gives each screen its own URL through a hash-based router
+(<code class="code">Router</code>).  Because routing happens entirely in the browser by way
+of the URL hash (for example <code class="code">#/customer/123</code>), it requires no
+server-side URL rewriting and behaves identically on the development
+server, <code class="code">file://</code>, <em class="emph">Tomcat</em>, and <em class="emph">Electron</em>.  Each screen
+becomes deep-linkable and bookmarkable, and the browser Back and Forward
+buttons navigate between screens.
+</p>
+<p>Routes are declared in the application file
+<code class="code">src/main/frontend/routes.js</code>.  A route may carry path parameters
+(for example <code class="code">:id</code>) that the target screen can read.  Screens that
+need no special handling require no entry at all: with file-based
+fallback enabled, a URL matching no declared route is loaded as a screen
+of the same name from a configured root directory.
+</p>
+<p>Routes that require a logged-in user (the default) are guarded.  A deep
+link followed while logged out is redirected to the login screen,
+carrying the requested location, so that after authenticating the user
+lands on the page they originally requested.
+</p>
+</div>
 <div class="section-level-extent" id="Controlling-Browser-Cache-1">
-<h3 class="section"><span>5.6 Controlling Browser Cache<a class="copiable-link" href="#Controlling-Browser-Cache-1"> &para;</a></span></h3>
+<h3 class="section"><span>5.8 Controlling Browser Cache<a class="copiable-link" href="#Controlling-Browser-Cache-1"> &para;</a></span></h3>
 
 <p>Browsers have a mind of their own in terms of deciding when to use
 their cache for a file and when to download a new one.  This can cause
@@ -321,23 +370,46 @@ being old from the browser cache, and others are freshly downloaded.
 The old and new files don&rsquo;t agree with each other and all sorts of
 errors occur.
 </p>
-<p><em class="emph">Kiss</em> includes a facility to assure that all files are
-downloaded afresh whenever the application changes while still taking
-maximal advantage of the browser cache when the files have not
-changed.  The only cost for this capability is the requirement
-that the <code class="code">index.html</code> file <em class="emph">always</em> gets loaded afresh.
-To that end, <em class="emph">Kiss</em> has code to ignore browser cache and always load
-<code class="code">index.html</code> afresh.
+<p><em class="emph">Kiss</em> includes a facility that forces every downloaded file to be
+re-fetched whenever the application is upgraded, while still taking
+maximal advantage of the browser cache when the files have not changed.
+It is driven by a single version number and requires no server
+configuration, so it works on the development server, <code class="code">file://</code>,
+<em class="emph">Tomcat</em>, and <em class="emph">Electron</em> alike.
 </p>
-<p><code class="code">index.html</code> contains two variables named <code class="code">SystemInfo.softwareVersion</code> and <code class="code">SystemInfo.controlCache</code>.
-Assuming <code class="code">SystemInfo.controlCache</code> is <code class="code">true</code>, <em class="emph">Kiss</em> has code that forces the browser
-to reload all files whenever <code class="code">SystemInfo.softwareVersion</code> changes.  After the code is re-loaded,
-the browser cache will work as normal to maximally cache the files until the next
-<code class="code">SystemInfo.softwareVersion</code> change.
+<p>The version lives in <code class="code">index.html</code>, which is the one file <em class="emph">Kiss</em>
+keeps perpetually fresh.  Because <code class="code">index.html</code> is always current,
+its version is always current, and every other file the application
+downloads is requested with that version appended &ndash; so a single change
+to the version forces all of them to be re-downloaded.  Once the new
+files are loaded, the browser cache works as normal until the next
+version change.  When a production <code class="code">WAR</code> is built, <em class="emph">Kiss</em>
+stamps a fresh version automatically, so every release force-refreshes
+all clients with no manual step.  During development the mechanism is
+turned off, so edited files are seen immediately on reload.
+</p>
+</div>
+<div class="section-level-extent" id="Browser-Security">
+<h3 class="section"><span>5.9 Browser Security<a class="copiable-link" href="#Browser-Security"> &para;</a></span></h3>
+
+<p><em class="emph">Kiss</em> delivers a <em class="emph">Content-Security-Policy</em> together with a set
+of standard security response headers (clickjacking protection,
+<code class="code">X-Content-Type-Options</code>, <code class="code">Referrer-Policy</code>, and, over HTTPS,
+<code class="code">Strict-Transport-Security</code>) on every response.  The
+Content-Security-Policy restricts where the page may load scripts,
+styles, images, and network connections from, which closes off the most
+common cross-site-scripting attacks.
+</p>
+<p>These headers are added by a filter that ships inside the application
+<code class="code">WAR</code> and registers itself automatically, so no servlet-container
+(<em class="emph">Tomcat</em>) configuration is required.  The supplied policy already
+accommodates the <em class="emph">Kiss</em> front-end; an application that introduces a
+new external origin (for example a separated production back-end) adjusts
+the policy in one place.
 </p>
 </div>
 <div class="section-level-extent" id="Additional-Resources">
-<h3 class="section"><span>5.7 Additional Resources<a class="copiable-link" href="#Additional-Resources"> &para;</a></span></h3>
+<h3 class="section"><span>5.10 Additional Resources<a class="copiable-link" href="#Additional-Resources"> &para;</a></span></h3>
 
 <p>Although not a part of the <em class="emph">Kiss</em> system, there are some very
 valuable technologies and libraries that have been used with
@@ -367,7 +439,7 @@ book.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Back_002dend-API.html">Back-end API</a>, Previous: <a href="Developing.html">Developing</a>, Up: <a href="index.html">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Back_002dend-API.html">Back-end API</a>, Previous: <a href="Developing.html">Developing</a>, Up: <a href="index.html">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

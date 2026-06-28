@@ -32,7 +32,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="External-Integrations">
 <div class="nav-panel">
 <p>
-Next: <a href="Split-System.html" accesskey="n" rel="next">Split System</a>, Previous: <a href="Command-Line-Utility.html" accesskey="p" rel="prev">Command Line Utility</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Split-System.html" accesskey="n" rel="next">Split System</a>, Previous: <a href="Command-Line-Utility.html" accesskey="p" rel="prev">Command Line Utility</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -109,6 +109,7 @@ book.
 <ul class="mini-toc">
 <li><a href="#Integrating-With-External-Systems" accesskey="1">Integrating With External Systems</a></li>
 <li><a href="#LLM-Integration" accesskey="2">LLM Integration</a></li>
+<li><a href="#Security" accesskey="3">Security</a></li>
 </ul>
 <div class="section-level-extent" id="Integrating-With-External-Systems">
 <h3 class="section"><span>9.1 Integrating With External Systems<a class="copiable-link" href="#Integrating-With-External-Systems"> &para;</a></span></h3>
@@ -129,17 +130,57 @@ JSON-RPC protocol.
 and Ollama.
 </li><li><em class="emph">MCP Server</em> &mdash; expose application tools to AI assistants
 via the Model Context Protocol.
+</li><li><em class="emph">MCP Client</em> &mdash; consume tools from a remote MCP server,
+with optional OAuth 2.1 authentication.
 </li><li><em class="emph">Embeddings Database</em> &mdash; vector storage for
 retrieval-augmented generation (RAG).
 </li></ul>
 
+</div>
+<div class="section-level-extent" id="Security">
+<h3 class="section"><span>9.3 Security<a class="copiable-link" href="#Security"> &para;</a></span></h3>
+
+<ul class="itemize mark-bullet">
+<li><em class="emph">OAuth 2.1 Resource Server</em> &mdash; validate bearer tokens
+issued either by this same Kiss app acting as the authorization server
+(see the next bullet) or by an external provider such as Auth0, Okta,
+Keycloak, Microsoft Entra, or Google.  When configured,
+<code class="code">MCPServerBase</code> subclasses automatically require valid tokens; no
+code change is needed.  Configuration lives in
+<code class="code">application.ini</code>; the discovery document is published at
+<code class="code">/.well-known/oauth-protected-resource</code>.
+</li><li><em class="emph">OAuth 2.1 Authorization Server</em> &mdash; issue tokens directly
+from Kiss: authorization-code flow with mandatory PKCE, token endpoint
+with refresh-token rotation, dynamic client registration (RFC 7591),
+and the RFC 8414 metadata and JWKS endpoints.  Persists clients,
+refresh tokens, and signing keys to a private SQLite database that is
+independent of the application&rsquo;s main database &mdash; no shared schema,
+no operator setup beyond pointing at a file path.  Enabled by a single
+<code class="code">application.ini</code> key.
+</li><li><em class="emph">OAuth 2.1 Client</em> &mdash; obtain tokens from a <em class="emph">remote</em>
+OAuth 2.1 server and present them on outbound calls.  Kiss drives the
+authorization-code + PKCE flow with automatic discovery (RFC 9728 -&gt;
+RFC 8414 / OpenID Connect) and dynamic client registration when no
+<code class="code">ClientId</code> is configured, captures the redirect at a built-in
+callback servlet, and refreshes access tokens automatically.  Multiple
+remote providers are supported, each declared in its own
+<code class="code">[OAuthClient <var class="var">name</var>]</code> section of <code class="code">application.ini</code>.
+Cached registrations and tokens are stored in the same <code class="code">oauth.db</code>
+the authorization server uses.
+</li></ul>
+
+<p>Each of the three roles is inert until configured and runs
+independently or together.  See <code class="code">OAuth.md</code> at the repository root
+for the full how-to on all three, and the <em class="emph">Kiss</em> book for the
+in-depth treatment.
+</p>
 
 </div>
 </div>
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Split-System.html">Split System</a>, Previous: <a href="Command-Line-Utility.html">Command Line Utility</a>, Up: <a href="index.html">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Split-System.html">Split System</a>, Previous: <a href="Command-Line-Utility.html">Command Line Utility</a>, Up: <a href="index.html">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -299,9 +299,18 @@ the <code class="code">application.ini</code> file.
 This code resides in a single file and can and has been used by
 alternative front-ends such as <em class="emph">Angular</em> and <code class="code">React</code>.
 </p>
-<p>There is no need to handle authentication.  <em class="emph">Kiss</em> handles that
-automatically.  So, when your web method is called, you know who
-they are and that they have been authenticated.
+<p>There is normally no need to handle authentication.  <em class="emph">Kiss</em> handles
+that automatically: the caller&rsquo;s session is validated before your method
+runs, so an invalid or expired session is rejected for you and your
+method is reached only by an authenticated user.
+</p>
+<p>A service may, however, opt out of that automatic check and be invoked
+whether or not the caller is logged in &ndash; the &ldquo;call the service first,
+then let it decide&rdquo; model.  Such a service inspects the request (for
+example with <code class="code">servlet.isLoggedIn()</code>) and either returns a public
+response or demands a login itself (<code class="code">servlet.requireLogin()</code>), which
+routes the front-end to the login screen exactly as an expired session
+would.
 </p>
 </div>
 <div class="subsection-level-extent" id="Defining-Remote-Services">
@@ -429,6 +438,13 @@ Common methods include <code class="code">getString()</code>, <code class="code"
 <ul class="itemize mark-bullet">
 <li>See <a class="uref" href="https://ollama.com">https://ollama.com</a> for information about installing the <em class="emph">Ollama</em> server.
 </li><li>The <em class="emph">Kiss</em> class <code class="code">org.kissweb.llm.Ollama</code> implements the interface.
+</li><li>It supports both single-prompt generation (<code class="code">send</code>) and multi-turn,
+role-structured conversations via Ollama&rsquo;s <code class="code">/api/chat</code> endpoint
+(<code class="code">chat</code>); the latter applies each model&rsquo;s own chat template and exposes
+a <code class="code">tools</code> parameter for function calling.
+</li><li>Both <code class="code">send</code> and <code class="code">chat</code> have streaming variants that accept a
+callback and deliver the model&rsquo;s reply token-by-token as it is generated,
+while also returning the complete assembled text.
 </li><li><em class="emph">Kiss</em> comes with a complete demo of this functionality.
 </li></ul>
 
@@ -537,7 +553,7 @@ the JavaDocs.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

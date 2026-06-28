@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Orientation">
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -303,28 +303,26 @@ is loaded.
 <div class="section-level-extent" id="Controlling-Browser-Cache">
 <h3 class="section"><span>3.5 Controlling Browser Cache<a class="copiable-link" href="#Controlling-Browser-Cache"> &para;</a></span></h3>
 
-<p>As discussed previously, the user&rsquo;s browser cache can be controlled from the file
-<code class="code">src/main/frontend/index.html</code>. In that file, you will see two lines
-that look as follows:
+<p>As discussed previously, the user&rsquo;s browser cache is controlled from the
+file <code class="code">src/main/frontend/index.html</code>.  That file carries a version
+number and a flag that turns cache control on or off:
 </p>
 <div class="example">
-<pre class="example-preformatted">SystemInfo.softwareVersion = &quot;1&quot;;  // version of the entire system
-SystemInfo.controlCache = false;   // normally true but use false during
-                            // debugging
+<pre class="example-preformatted">&lt;meta name=&quot;kiss-version&quot; content=&quot;...&quot;&gt;
+&lt;meta name=&quot;kiss-cache-control&quot; content=&quot;false&quot;&gt;
 </pre></div>
 
-<p>If <code class="code">SystemInfo.controlCache</code> is set to <code class="code">true</code>, each time <code class="code">SystemInfo.softwareVersion</code>
-is incremented, all users starting the application will be forced to
-load new code from the server and not use their browser&rsquo;s cache.  Once
-they download the new version, normal browser cache activity will
-occur.
+<p>When cache control is on, each time the version changes every user
+starting the application is forced to download fresh code rather than use
+the browser cache; once the new version is loaded, normal browser caching
+resumes.  A production <code class="code">WAR</code> stamps a fresh version automatically, so
+each release force-refreshes all clients with no manual step.
 </p>
-<p>Users using the system when front-end files are changed will not get
-the updated files until they log out and back into the system.  In a
-development environment with browser cache disabled, the developer
-will see all screen changes upon reload, regardless of the variable settings.
-In fact, it is better to set <code class="code">SystemInfo.controlCache</code> to <code class="code">false</code>
-in a development environment to avoid a needless duplicate load of <code class="code">index.html</code>.
+<p>During development the flag is left <code class="code">false</code>, both so that edited
+files are seen immediately on reload and to avoid a needless duplicate
+load of <code class="code">index.html</code>.  The mechanism, and the reason <code class="code">index.html</code>
+itself is always loaded afresh, is described further in the Front-end API
+chapter.
 </p>
 
 <a class="anchor" id="javadoc"></a></div>
@@ -382,7 +380,7 @@ example shows the same code in all of the supported languages.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Getting Started Guide (May 2, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 
