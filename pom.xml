@@ -1,0 +1,710 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <!-- 
+      This file is used to describe the system layout for an IDE and 
+      to describe dependencies to GitHub. 
+      Kiss is built with its own build system called 'bld' and not with Maven.
+      
+      If you must use Maven, use:  mvn antrun:run@TASK
+      Replacing TASK with the task you wish to run.
+      
+      The only caviet is that you must build the builder before any of
+      this will work.  This is done by running:  mvn antrun:run@builder
+  -->
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.kissweb</groupId>
+  <artifactId>KISS</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+
+  <name>Kiss Web Development Framework</name>
+  <url>https://kissweb.org</url>
+
+  <dependencies>
+    <!-- Your existing dependencies remain unchanged -->
+
+    <!-- https://mvnrepository.com/artifact/com.mchange/c3p0 -->
+    <dependency>
+      <groupId>com.mchange</groupId>
+      <artifactId>c3p0</artifactId>
+      <version>0.12.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.groovy/groovy-all -->
+    <dependency>
+      <groupId>org.apache.groovy</groupId>
+      <artifactId>groovy</artifactId>
+      <version>4.0.28</version>
+    </dependency>
+
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.1.0</version>
+    </dependency>
+
+
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.25.4</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.25.4</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.mchange/mchange-commons-java -->
+    <dependency>
+      <groupId>com.mchange</groupId>
+      <artifactId>mchange-commons-java</artifactId>
+      <version>0.4.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
+    <dependency>
+      <groupId>com.microsoft.sqlserver</groupId>
+      <artifactId>mssql-jdbc</artifactId>
+      <version>12.4.2.jre8</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.7.11</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.30</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.7.30</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc -->
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.53.1.0</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.webjars.bower/jquery -->
+    <dependency>
+      <groupId>org.webjars.bower</groupId>
+      <artifactId>jquery</artifactId>
+      <version>3.6.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>3.0.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>fontbox</artifactId>
+      <version>3.0.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox-io</artifactId>
+      <version>3.0.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.drewnoakes</groupId>
+      <artifactId>metadata-extractor</artifactId>
+      <version>2.19.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.oracle.ojdbc</groupId>
+      <artifactId>ojdbc10</artifactId>
+      <version>19.3.0.0</version>
+    </dependency>
+
+    <!-- JUnit for your tests -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>5.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>5.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-params</artifactId>
+      <version>5.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-console</artifactId>
+      <version>1.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-console-standalone</artifactId>
+      <version>1.11.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apiguardian</groupId>
+      <artifactId>apiguardian-api</artifactId>
+      <version>1.1.2</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- System-scoped dependencies (your local libs) -->
+    <dependency>
+      <groupId>org.abcl</groupId>
+      <artifactId>abcl</artifactId>
+      <version>1.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/abcl.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.27.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/commons-compress-1.27.1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.16.1</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/commons-io-2.16.1.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.18.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/commons-lang3-3.18.0.jar</systemPath>
+    </dependency>
+    <dependency>
+      <!-- Oracle removes mysql drivers from public downloads -->
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>9.2.0</version>
+      <scope>system</scope>
+      <systemPath>${project.basedir}/libs/mysql-connector-java-9.2.0.jar</systemPath>
+    </dependency>
+
+  </dependencies>
+
+
+  <build>
+    <plugins>
+
+      <!-- 1) Add multiple source roots (core, precompiled, backend) -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.4.0</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>src/main/core</source>
+                <source>src/main/precompiled</source>
+                <source>src/main/backend</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 2) Copy src/main/backend files as-is (not compiled) into target/backend -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.3.1</version>
+        <executions>
+          <execution>
+            <id>copy-backend-files</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/backend</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/backend</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 3) Enforce system dependencies are not normally allowed, but we allow them. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>enforce-no-system-dependencies</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireNoSystemDependencies>
+                  <fail>false</fail>
+                  <message>System scoped dependencies inside the project directory are allowed.</message>
+                </requireNoSystemDependencies>
+              </rules>
+              <fail>false</fail>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+
+      <!-- 
+          4) Replicate your old Ant tasks with maven-antrun-plugin.
+             - "builder" runs at generate-sources to compile Tasks.java 
+               and org/kissweb/BuildUtils.java.
+             - All other tasks ("start-backend", "stop-backend", etc.) 
+               are bound to <phase>none</phase>, so you explicitly run them with:
+                 mvn antrun:run@start-backend
+                 mvn antrun:run@stop-backend
+                 ... etc.
+       -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+
+          <!-- ========== builder ========== -->
+          <execution>
+            <id>builder</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <!-- Replicate Ant: mkdir -->
+                <mkdir dir="work/exploded/WEB-INF/classes"/>
+                <!-- Replicate Ant: javac -->
+                <javac includeantruntime="false"
+                       srcdir="src/main/core"
+                       destdir="work/exploded/WEB-INF/classes"
+                       includes="org/kissweb/BuildUtils.java"
+                       classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar"/>
+                <javac includeantruntime="false"
+                       srcdir="src/main/precompiled"
+                       destdir="work/exploded/WEB-INF/classes"
+                       includes="Tasks.java"
+                       classpath="libs/commons-compress-1.27.1.jar:libs/commons-io-2.16.1.jar"/>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== start-backend ========== -->
+          <execution>
+            <id>start-backend</id>
+            <!-- set phase to 'none' so it doesn't auto-run -->
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <!-- The second arg is the "target name." -->
+                  <arg value="start-backend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== stop-backend ========== -->
+          <execution>
+            <id>stop-backend</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="stop-backend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== start-frontend ========== -->
+          <execution>
+            <id>start-frontend</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="start-frontend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== stop-frontend ========== -->
+          <execution>
+            <id>stop-frontend</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="stop-frontend"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== build ========== -->
+          <execution>
+            <id>build</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="build"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== war ========== -->
+          <execution>
+            <id>war</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="war"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== clean ========== -->
+          <execution>
+            <id>clean</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="clean"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== realclean ========== -->
+          <execution>
+            <id>realclean</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="realclean"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== ideclean ========== -->
+          <execution>
+            <id>ideclean</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="ideclean"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== jar ========== -->
+          <execution>
+            <id>jar</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="jar"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== javadoc ========== -->
+          <execution>
+            <id>javadoc</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="javadoc"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== kisscmd ========== -->
+          <execution>
+            <id>kisscmd</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="kisscmd"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== KissGP ========== -->
+          <execution>
+            <id>KissGP</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="KissGP"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== libs ========== -->
+          <execution>
+            <id>libs</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="libs"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== setup-tomcat ========== -->
+          <execution>
+            <id>setup-tomcat</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="setup-tomcat"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+          <!-- ========== unit-tests ========== -->
+          <execution>
+            <id>unit-tests</id>
+            <phase>none</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <java classname="Tasks" fork="true" dir=".">
+                  <classpath>
+                    <pathelement location="work/exploded/WEB-INF/classes"/>
+                    <pathelement location="libs/commons-compress-1.27.1.jar"/>
+                    <pathelement location="libs/commons-io-2.16.1.jar"/>
+                    <pathelement location="libs/commons-lang3-3.18.0.jar"/>
+                  </classpath>
+                  <arg value="unit-tests"/>
+                </java>
+              </target>
+            </configuration>
+          </execution>
+
+        </executions>
+      </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>16</source>
+                <target>16</target>
+            </configuration>
+        </plugin>
+
+    </plugins>
+  </build>
+</project>
+
