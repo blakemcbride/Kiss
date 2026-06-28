@@ -231,6 +231,48 @@ These utilities are located under the @code{src/main/frontend/kiss} directory an
 @code{DateTimeUtils.js}, @code{DateUtils.js}, @code{TimeUtils.js}, @code{Utils.js}, etc.  These utilities
 are documented in the front-end API documentation.
 
+@section Client-Side State Persistence
+
+Application state that must survive page navigation and browser reloads
+is kept in a single client-side store named @code{AppState}.  The login
+token is not treated specially; it is simply one reserved entry stored
+alongside any other front-end state.  @code{AppState} is the only part
+of the system that accesses the browser's @emph{Web Storage} directly.
+
+By default each browser tab is its own isolated session: state survives
+a reload but is not shared between tabs, so two tabs never overwrite each
+other's data and a new tab requires its own login.  This behavior is
+configurable (per-tab, shared across all tabs, or in-memory only).  Data
+passed between screens (@code{Utils.saveData} and @code{Utils.getData})
+is also kept in @code{AppState}, so it too survives a reload.
+
+Because the token persists, a reloaded or deep-linked page resumes the
+existing session automatically.  When the back-end is restarted, however,
+its in-memory sessions are gone; @emph{Kiss} detects this and asks the
+user to log in again rather than resuming onto a dead session.
+
+@section Client-Side Routing
+
+@emph{Kiss} gives each screen its own URL through a hash-based router
+(@code{Router}).  Because routing happens entirely in the browser by way
+of the URL hash (for example @code{#/customer/123}), it requires no
+server-side URL rewriting and behaves identically on the development
+server, @code{file://}, @emph{Tomcat}, and @emph{Electron}.  Each screen
+becomes deep-linkable and bookmarkable, and the browser Back and Forward
+buttons navigate between screens.
+
+Routes are declared in the application file
+@code{src/main/frontend/routes.js}.  A route may carry path parameters
+(for example @code{:id}) that the target screen can read.  Screens that
+need no special handling require no entry at all: with file-based
+fallback enabled, a URL matching no declared route is loaded as a screen
+of the same name from a configured root directory.
+
+Routes that require a logged-in user (the default) are guarded.  A deep
+link followed while logged out is redirected to the login screen,
+carrying the requested location, so that after authenticating the user
+lands on the page they originally requested.
+
 @section Controlling Browser Cache
 
 Browsers have a mind of their own in terms of deciding when to use
@@ -240,19 +282,40 @@ being old from the browser cache, and others are freshly downloaded.
 The old and new files don't agree with each other and all sorts of
 errors occur.
 
-@emph{Kiss} includes a facility to assure that all files are
-downloaded afresh whenever the application changes while still taking
-maximal advantage of the browser cache when the files have not
-changed.  The only cost for this capability is the requirement
-that the @code{index.html} file @emph{always} gets loaded afresh.
-To that end, @emph{Kiss} has code to ignore browser cache and always load
-@code{index.html} afresh.
+@emph{Kiss} includes a facility that forces every downloaded file to be
+re-fetched whenever the application is upgraded, while still taking
+maximal advantage of the browser cache when the files have not changed.
+It is driven by a single version number and requires no server
+configuration, so it works on the development server, @code{file://},
+@emph{Tomcat}, and @emph{Electron} alike.
 
-@code{index.html} contains two variables named @code{SystemInfo.softwareVersion} and @code{SystemInfo.controlCache}.
-Assuming @code{SystemInfo.controlCache} is @code{true}, @emph{Kiss} has code that forces the browser
-to reload all files whenever @code{SystemInfo.softwareVersion} changes.  After the code is re-loaded,
-the browser cache will work as normal to maximally cache the files until the next
-@code{SystemInfo.softwareVersion} change.
+The version lives in @code{index.html}, which is the one file @emph{Kiss}
+keeps perpetually fresh.  Because @code{index.html} is always current,
+its version is always current, and every other file the application
+downloads is requested with that version appended -- so a single change
+to the version forces all of them to be re-downloaded.  Once the new
+files are loaded, the browser cache works as normal until the next
+version change.  When a production @code{WAR} is built, @emph{Kiss}
+stamps a fresh version automatically, so every release force-refreshes
+all clients with no manual step.  During development the mechanism is
+turned off, so edited files are seen immediately on reload.
+
+@section Browser Security
+
+@emph{Kiss} delivers a @emph{Content-Security-Policy} together with a set
+of standard security response headers (clickjacking protection,
+@code{X-Content-Type-Options}, @code{Referrer-Policy}, and, over HTTPS,
+@code{Strict-Transport-Security}) on every response.  The
+Content-Security-Policy restricts where the page may load scripts,
+styles, images, and network connections from, which closes off the most
+common cross-site-scripting attacks.
+
+These headers are added by a filter that ships inside the application
+@code{WAR} and registers itself automatically, so no servlet-container
+(@emph{Tomcat}) configuration is required.  The supplied policy already
+accommodates the @emph{Kiss} front-end; an application that introduces a
+new external origin (for example a separated production back-end) adjusts
+the policy in one place.
 
 @section Additional Resources
 

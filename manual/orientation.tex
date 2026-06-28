@@ -210,28 +210,26 @@ is loaded.
 
 @section Controlling Browser Cache
 
-As discussed previously, the user's browser cache can be controlled from the file
-@code{src/main/frontend/index.html}. In that file, you will see two lines
-that look as follows:
+As discussed previously, the user's browser cache is controlled from the
+file @code{src/main/frontend/index.html}.  That file carries a version
+number and a flag that turns cache control on or off:
 
 @example
-SystemInfo.softwareVersion = "1";  // version of the entire system
-SystemInfo.controlCache = false;   // normally true but use false during
-                            // debugging
+<meta name="kiss-version" content="...">
+<meta name="kiss-cache-control" content="false">
 @end example
 
-If @code{SystemInfo.controlCache} is set to @code{true}, each time @code{SystemInfo.softwareVersion}
-is incremented, all users starting the application will be forced to
-load new code from the server and not use their browser's cache.  Once
-they download the new version, normal browser cache activity will
-occur.
+When cache control is on, each time the version changes every user
+starting the application is forced to download fresh code rather than use
+the browser cache; once the new version is loaded, normal browser caching
+resumes.  A production @code{WAR} stamps a fresh version automatically, so
+each release force-refreshes all clients with no manual step.
 
-Users using the system when front-end files are changed will not get
-the updated files until they log out and back into the system.  In a
-development environment with browser cache disabled, the developer
-will see all screen changes upon reload, regardless of the variable settings.
-In fact, it is better to set @code{SystemInfo.controlCache} to @code{false}
-in a development environment to avoid a needless duplicate load of @code{index.html}.
+During development the flag is left @code{false}, both so that edited
+files are seen immediately on reload and to avoid a needless duplicate
+load of @code{index.html}.  The mechanism, and the reason @code{index.html}
+itself is always loaded afresh, is described further in the Front-end API
+chapter.
 
 
 @anchor{javadoc} 

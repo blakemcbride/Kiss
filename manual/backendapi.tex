@@ -221,9 +221,18 @@ the @code{application.ini} file.
 This code resides in a single file and can and has been used by
 alternative front-ends such as @emph{Angular} and @code{React}.
 
-There is no need to handle authentication.  @emph{Kiss} handles that
-automatically.  So, when your web method is called, you know who
-they are and that they have been authenticated.
+There is normally no need to handle authentication.  @emph{Kiss} handles
+that automatically: the caller's session is validated before your method
+runs, so an invalid or expired session is rejected for you and your
+method is reached only by an authenticated user.
+
+A service may, however, opt out of that automatic check and be invoked
+whether or not the caller is logged in -- the ``call the service first,
+then let it decide'' model.  Such a service inspects the request (for
+example with @code{servlet.isLoggedIn()}) and either returns a public
+response or demands a login itself (@code{servlet.requireLogin()}), which
+routes the front-end to the login screen exactly as an expired session
+would.
 
 @subsection Defining Remote Services
 
@@ -340,6 +349,10 @@ It supports both single-prompt generation (@code{send}) and multi-turn,
 role-structured conversations via Ollama's @code{/api/chat} endpoint
 (@code{chat}); the latter applies each model's own chat template and exposes
 a @code{tools} parameter for function calling.
+@item
+Both @code{send} and @code{chat} have streaming variants that accept a
+callback and deliver the model's reply token-by-token as it is generated,
+while also returning the complete assembled text.
 @item
 @emph{Kiss} comes with a complete demo of this functionality.
 @end itemize
