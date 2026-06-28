@@ -60,6 +60,15 @@ KISS also provides the following integrations with external systems.
 * **OAuth 2.1 Authorization Server** — issue tokens to MCP clients (or any OAuth client) directly from Kiss: authorization endpoint with PKCE, token endpoint with refresh-token rotation, dynamic client registration (RFC 7591), and the RFC 8414 / JWKS discovery endpoints.  Persists keys, clients, and refresh tokens to a private SQLite database independent of the application's main database — no shared schema or operator setup required.  See [OAuth.md](OAuth.md).
 * **OAuth 2.1 Client** — consume a remote OAuth 2.1-protected server from Kiss: drives the authorization-code + PKCE flow, with automatic server discovery (RFC 9728 / RFC 8414), dynamic client registration when needed, a built-in redirect callback, and transparent access-token refresh with rotation.  Supports multiple remote providers configured in `application.ini`, and shares the authorization server's SQLite database.  See [OAuth.md](OAuth.md).
 
+## Front-End
+
+The KISS front-end is a single-page-application framework that includes:
+
+* **Client-Side Routing** — every screen has its own deep-linkable, bookmarkable URL, with working browser Back/Forward navigation.  Routing is hash-based, so it needs no server-side URL rewriting and behaves identically on the development server, `file://`, Tomcat, and Electron.
+* **Unified State Persistence** — a single client-side store keeps front-end state (including the session token) across navigation and reload, per browser tab by default.
+* **Automatic Cache-Busting** — a single version bump force-refreshes every downloaded file on a new release, with no server configuration.
+* **Browser Security (CSP)** — a Content-Security-Policy and the standard security headers are delivered by a self-registering filter that ships inside the WAR, requiring no servlet-container configuration.
+
 ## Training Videos
 
 A 6-part training series on KISS is at:
