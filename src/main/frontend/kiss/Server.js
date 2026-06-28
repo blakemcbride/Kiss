@@ -1,4 +1,4 @@
-/* global Utils, AppState */
+/* global Utils, AppState, Router, DOMUtils */
 
 /**
  * Created by Blake McBride on 9/24/16.
@@ -38,6 +38,55 @@ class Server {
         return AppState.get('_uuid') || '';
     }
 
+    // internal: the server boot id seen when this session was established
+    static setBootId(id) {
+        AppState.set('_bootId', id);
+    }
+
+    static getBootId() {
+        return AppState.get('_bootId');
+    }
+
+    /**
+     * Drop the persisted session so a fresh login is required.  Called by the login
+     * screen, so that returning to it (e.g. via the browser Back button) does not leave
+     * the user silently logged in — a real re-login is required to proceed.
+     * <br><br>
+     * Synchronous and non-navigating (the login screen is already showing).  Clearing the
+     * client token is what forces re-authentication; the back-end session is left to
+     * expire on its own (it is unusable once the token is gone).
+     */
+    static clearSession() {
+        AppState.clear();
+    }
+
+    /**
+     * Detect a back-end restart at startup.  If a session is persisted but the server's
+     * boot id has changed since that session was established, the back end was rebooted —
+     * drop the stale session so the user is forced to re-login instead of resuming onto a
+     * dead session.  Call once at startup, before routing begins.
+     */
+    static async verifyServerInstance() {
+        if (!Server.uuid)
+            return;   // no persisted session to protect
+        const stored = Server.getBootId();
+        let res;
+        try {
+            res = await Server.call('', 'LoginRequired', {});   // unauthenticated; returns _BootId
+        } catch (err) {
+            return;   // transient error — let the normal flow handle it
+        }
+        const current = res ? res._BootId : null;
+        if (!current)
+            return;
+        if (stored && stored !== current) {
+            AppState.clear();   // stale session from a previous server instance
+            await Utils.showMessage('Notice', 'The server was restarted.  Please log in again.');
+        } else if (!stored) {
+            Server.setBootId(current);
+        }
+    }
+
     /**
      * Logs out the current user and reloads the page.
      * <br><br>
@@ -45,7 +94,7 @@ class Server {
      * then performs a full page reload to clear all context and return to the login screen.
      *
      */
-    static async logout() {
+    static async logout(captureReturn = false) {
         Utils.suspendDepth = 0;
         document.body.style.cursor = 'default';
         Utils.cleanup();  //  clean up any context information
@@ -62,7 +111,12 @@ class Server {
         }
 
         AppState.clear();
-        location.reload();
+        //  Return to the login screen.  Use the router when active (no full reload);
+        //  fall back to a reload for apps that don't use the router.
+        if (typeof Router !== 'undefined' && Router.isStarted())
+            Router.gotoLogin(captureReturn);
+        else
+            location.reload();
     }
 
     /**
@@ -115,7 +169,7 @@ class Server {
                 if (!res._Success)
                     if (res._ErrorCode === 2) {
                         await Utils.showMessage('Error', res._ErrorMessage);
-                        Server.logout();
+                        Server.logout(true);
                     } else
                         await Utils.showMessage('Error', res._ErrorMessage);
                 resolve(res);
@@ -204,7 +258,7 @@ class Server {
                 if (!ret._Success)
                     if (ret._ErrorCode === 2) {
                         await Utils.showMessage('Error', ret._ErrorMessage);
-                        Server.logout();
+                        Server.logout(true);
                     } else
                         await Utils.showMessage('Error', ret._ErrorMessage);
                 ret._data = bytes.slice(i, bytes.length);
@@ -303,7 +357,7 @@ class Server {
                             await Utils.showMessage("Information", successMessage);
                     } else if (res._ErrorCode === 2) {
                         await Utils.showMessage("Error", res._ErrorMessage);
-                        Server.logout();
+                        Server.logout(true);
                     } else
                         await Utils.showMessage("Error", res._ErrorMessage);
                     resolve(res);
@@ -341,7 +395,7 @@ class Server {
                 for (let i = 0; i < ret.length; i++)
                     if (!ret[i]._Success) {
                         if (ret[i]._ErrorCode === 2)
-                            Server.logout();
+                            Server.logout(true);
                         resolve(true);  //  error
                         return;
                     }
@@ -396,7 +450,7 @@ class Server {
         if (now - Server.timeLastCall > Server.maxInactiveSeconds) {
             DOMUtils.preventNavigation(false);  //  disable back button protection
             await Utils.showMessage("Warning", "Auto logout due to inactivity.  Please re-login.");
-            Server.logout();
+            Server.logout(true);
         } else
             Server.timeLastCall = now;
     }

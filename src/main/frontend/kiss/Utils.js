@@ -1,4 +1,4 @@
-/* global getScript, AGGrid, Server, DateTimeUtils */
+/* global getScript, AGGrid, Server, DateTimeUtils, AppState */
 
 /**
  * Created by Blake McBride on 1/20/16.
@@ -1312,9 +1312,9 @@ class Utils {
         return new Promise(async function (resolve, reject) {
             let response;
             try {
-                response = await fetch(url + (SystemInfo.controlCache ? '?ver=' + SystemInfo.softwareVersion : ''), {
+                response = await fetch((typeof window.cacheBust === 'function' ? window.cacheBust(url) : url), {
                     method: 'GET',
-                    cache: SystemInfo.controlCache ? 'default' : 'no-store',
+                    cache: window.KissCacheOn ? 'default' : 'no-store',
                     headers: {
                         'Content-type': 'text/plain'
                     }
@@ -1326,13 +1326,36 @@ class Utils {
                 return;
             }
             try {
-                let r = await response.text();
+                let r = Utils.cacheBustHtmlResources(await response.text());
                 resolve(r);
             } catch (err) {
                 console.log(err.message);
                 console.log(err.stack);
                 reject(err);
             }
+        });
+    };
+
+    /**
+     * Append the cache-busting version to relative <code>&lt;img src&gt;</code> URLs in a
+     * block of HTML, so images in a loaded screen refresh on a version bump.  The rewrite
+     * is done on the HTML text before insertion (so the browser never fetches the un-busted
+     * URL).  Absolute, protocol-relative, data:, and already-busted URLs are left alone.
+     * No-op when cache control is off.
+     * <br><br>
+     * Note: <code>background-image:url()</code> inside CSS is not reachable this way — those
+     * refresh when their stylesheet is re-fetched.
+     *
+     * @param {string} html
+     * @returns {string}
+     */
+    static cacheBustHtmlResources(html) {
+        if (typeof window.cacheBust !== 'function' || !window.KissCacheOn)
+            return html;
+        return html.replace(/(<img\b[^>]*?\bsrc\s*=\s*["'])([^"']+)(["'])/gi, function (match, pre, url, post) {
+            if (/^(data:|https?:|\/\/)/i.test(url) || url.indexOf('ver=') >= 0)
+                return match;
+            return pre + window.cacheBust(url) + post;
         });
     };
 
@@ -2034,7 +2057,14 @@ class Utils {
         Utils.clearAllEnterContexts();
         Utils.newEnterContext();
         Utils.globalEnterHandler(null);
+        //  Hide any popups still open so a new screen doesn't leave an orphaned,
+        //  un-closeable popup behind (its close-tracking stack is reset just below;
+        //  without hiding it here, its Close button would pop an empty stack and do nothing).
+        if (typeof DOMUtils !== 'undefined')
+            for (const ctx of Utils.popup_context)
+                DOMUtils.hide(ctx.id);
         Utils.popup_context = [];
+        Utils.popup_zindex = 10;
         const ctl = document.activeElement;   // remove any focus
         if (ctl && ctl !== document.body)
             ctl.blur();
@@ -2265,6 +2295,11 @@ class Utils {
 
     /**
      * Save an application global data item associated with a key.
+     * <br><br>
+     * Backed by {@link AppState}, so per the configured store it survives page navigation
+     * and reload and is scoped per-tab (default).  The value must be JSON-serializable
+     * (no functions, DOM nodes, Dates, etc.); a non-serializable value falls back to
+     * in-memory for that key and will not survive a reload.
      *
      * @param {string} key
      * @param {*} val
@@ -2273,7 +2308,7 @@ class Utils {
      * @see Utils.getAndEraseData
      */
     static saveData(key, val) {
-        Utils.globalData[key] = val;
+        AppState.set('data.' + key, val);
     };
 
     /**
@@ -2286,7 +2321,7 @@ class Utils {
      * @see Utils.getAndEraseData
      */
     static getData(key) {
-        return Utils.globalData[key];
+        return AppState.get('data.' + key);
     };
 
     /**
@@ -2299,8 +2334,8 @@ class Utils {
      * @see Utils.getData
      */
     static getAndEraseData(key) {
-        const r = Utils.globalData[key];
-        delete Utils.globalData[key];
+        const r = AppState.get('data.' + key);
+        AppState.remove('data.' + key);
         return r;
     };
 
@@ -2474,8 +2509,6 @@ Utils.lastScreenLoaded = {};  //  current stackframe
 
 // This is used to prevent button clicks when there is an active web service call
 Utils.suspendDepth = 0;  // when > 0 suspend buttons
-
-Utils.globalData = {};
 
 /**
  * This is a stack for the <code>Utils.waitMessage</code> method.

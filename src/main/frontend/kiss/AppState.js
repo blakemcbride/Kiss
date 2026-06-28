@@ -8,16 +8,17 @@
  * A single, simple place to keep arbitrary front-end state that needs to
  * survive page navigation and reloads.  The session token is not treated
  * specially; it is just the reserved entry <code>_uuid</code> stored alongside
- * any other application state.  Because everything lives in one store, logout
- * (and cross-tab logout) is a single {@link AppState.clear} call.
+ * any other application state.  Because everything lives in one store, logout is
+ * a single {@link AppState.clear} call.
  * <br><br>
  * The backing store is selected once at startup from
  * <code>SystemInfo.stateStore</code>:
  * <ul>
+ *   <li><code>'session'</code> — sessionStorage: survives reload, <b>per-tab</b>,
+ *       cleared when the tab closes (default).  Each tab is its own isolated
+ *       session, so two tabs never clobber each other's state.</li>
  *   <li><code>'local'</code>   — localStorage: survives reload, new tabs, and
- *       Electron restarts; shared across tabs of the same origin (default).</li>
- *   <li><code>'session'</code> — sessionStorage: survives reload, per-tab,
- *       cleared when the tab closes.</li>
+ *       Electron restarts; <b>shared</b> across tabs of the same origin.</li>
  *   <li><code>'memory'</code>  — in-memory only: lost on reload (the framework's
  *       classic single-page behavior).</li>
  * </ul>
@@ -43,18 +44,15 @@ class AppState {
     /** In-memory map: the 'memory' backend, and the per-key fallback when a Web Storage write fails. */
     static #mem = new Map();
 
-    /** Optional handler invoked when another tab clears the session ('local' backend). */
-    static #externalClearHandler = null;
-
     /**
      * Select the backing store from <code>SystemInfo.stateStore</code> and probe it.
      * Called once by the bootstrap before any other AppState use.
      */
     static init() {
-        let requested = (typeof SystemInfo !== 'undefined' && SystemInfo.stateStore) ? SystemInfo.stateStore : 'local';
+        let requested = (typeof SystemInfo !== 'undefined' && SystemInfo.stateStore) ? SystemInfo.stateStore : 'session';
         requested = ('' + requested).toLowerCase();
         if (requested !== 'session' && requested !== 'local' && requested !== 'memory')
-            requested = 'local';
+            requested = 'session';
 
         if (requested === 'memory') {
             AppState.#backend = 'memory';
@@ -70,19 +68,6 @@ class AppState {
             console.log('AppState: Web Storage unavailable; falling back to in-memory state.');
             AppState.#backend = 'memory';
             AppState.#store = null;
-        }
-
-        //  Cross-tab logout: when another tab removes _uuid, this tab reacts.
-        //  storage events only fire in *other* documents, so there is no self-loop.
-        if (AppState.#backend === 'local') {
-            window.addEventListener('storage', function (e) {
-                if (e.key === AppState.#PREFIX + '_uuid' && e.oldValue !== null && e.newValue === null) {
-                    if (AppState.#externalClearHandler)
-                        AppState.#externalClearHandler();
-                    else
-                        window.location.reload();
-                }
-            });
         }
     }
 
@@ -104,17 +89,6 @@ class AppState {
      */
     static backend() {
         return AppState.#backend;
-    }
-
-    /**
-     * Register a callback to run when another tab clears the session (the
-     * <code>_uuid</code> key is removed elsewhere).  Only fires under the 'local'
-     * backend.  When no handler is registered the page reloads.
-     *
-     * @param {Function} handler
-     */
-    static onExternalClear(handler) {
-        AppState.#externalClearHandler = handler;
     }
 
     /**

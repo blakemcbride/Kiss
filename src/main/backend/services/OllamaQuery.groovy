@@ -15,9 +15,6 @@ class OllamaQuery {
         String response = server.send(prompt)
         outjson.put("textResponse", response)
         outjson.put("htmlResponse", Ollama.toHtml(response))
-
-        double [][] embeddings = server.getEmbeddings(prompt)
-        int x = 1
     }
 
     void isOllamaUp(JSONObject injson, JSONObject outjson, Connection db, ProcessServlet servlet) {

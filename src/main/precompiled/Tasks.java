@@ -348,10 +348,57 @@ public class Tasks {
      */
     public static void war() {
         buildSystem();
+        stampVersion();
         copyForce("src/main/core/WEB-INF/web-secure.xml", explodedDir + "/WEB-INF/web.xml");
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
         copyForce("src/main/core/WEB-INF/web-unsafe.xml", explodedDir + "/WEB-INF/web.xml");
+        // Un-stamp the staged frontend files.  stampVersion() rewrote these in place
+        // (production cache-busting); the WAR has already captured the stamped copies.
+        // copyTree() in a later buildSystem() is mtime-incremental and would NOT overwrite
+        // the newer stamped files with the older source, so without this restore a
+        // subsequent 'develop' would silently run with production busting (stale ?ver,
+        // double index.html load).  copyForce overwrites regardless of mtime.  Mirrors
+        // the web.xml secure->jar->unsafe swap above.
+        copyForce("src/main/frontend/index.html",   explodedDir + "/index.html");
+        copyForce("src/main/frontend/SystemInfo.js", explodedDir + "/SystemInfo.js");
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
+    }
+
+    /**
+     * Stamp production cache-busting values into the WAR's frontend copies.
+     * <br><br>
+     * Sets a fresh software version (a new UUID) and the current release date, and turns
+     * cache control on, so every WAR forces clients to download the new code.  The version
+     * and cache-control flag live in <code>index.html</code> (<code>kiss-version</code> /
+     * <code>kiss-cache-control</code> meta tags — the only perpetually-fresh file); the
+     * release date lives in <code>SystemInfo.js</code>.
+     * <br><br>
+     * Operates on the staged copies in <code>explodedDir</code> only, so the source files
+     * keep their EDIT placeholders.  Modifies only the meta values, not the bootstrap
+     * kernel, so the CSP hash is unaffected.
+     */
+    private static void stampVersion() {
+        final String uuid = java.util.UUID.randomUUID().toString();
+        final String date = java.time.LocalDate.now().toString();
+        try {
+            final java.nio.file.Path idx = java.nio.file.Paths.get(explodedDir, "index.html");
+            String html = java.nio.file.Files.readString(idx);
+            html = html.replaceAll("(name=\"kiss-version\"\\s+content=\")[^\"]*(\")",
+                    "$1" + java.util.regex.Matcher.quoteReplacement(uuid) + "$2");
+            html = html.replaceAll("(name=\"kiss-cache-control\"\\s+content=\")[^\"]*(\")",
+                    "$1true$2");
+            java.nio.file.Files.writeString(idx, html);
+
+            final java.nio.file.Path si = java.nio.file.Paths.get(explodedDir, "SystemInfo.js");
+            String js = java.nio.file.Files.readString(si);
+            js = js.replaceAll("(SystemInfo\\.releaseDate\\s*=\\s*\")[^\"]*(\")",
+                    "$1" + java.util.regex.Matcher.quoteReplacement(date) + "$2");
+            java.nio.file.Files.writeString(si, js);
+
+            println("WAR stamped: kiss-version=" + uuid + ", releaseDate=" + date + ", cache-control=true");
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to stamp version into WAR frontend files", e);
+        }
     }
 
     private static void deployWar() {

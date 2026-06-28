@@ -701,6 +701,7 @@ public class ProcessServlet implements Runnable {
                 DB.commit();
             outjson.put("_Success", true);
             outjson.put("_ErrorCode", 0);  // success
+            outjson.put("_BootId", MainServlet.getBootId());
             response.setStatus(200);
             if (!isBinaryReturn) {
                 response.setContentType("application/json");
@@ -740,6 +741,14 @@ public class ProcessServlet implements Runnable {
      * @param e the exception that caused the error, or null if none
      */
     void errorReturn(HttpServletResponse response, String msg, Throwable e) {
+        //  A service that ran without authentication can signal it needs a logged-in user
+        //  by throwing LoginRequiredException (via requireLogin()).  Route that to the
+        //  standard "not logged in" response (_ErrorCode = 2) regardless of which service
+        //  runner caught and forwarded it here.
+        if (containsLoginRequired(e)) {
+            loginFailure(response, e);
+            return;
+        }
         int errorCode;
         if (e instanceof ServerException)
             errorCode = ((ServerException) e).getErrorCode();
@@ -806,6 +815,7 @@ public class ProcessServlet implements Runnable {
         outjson.put("_Success", false);
         outjson.put("_ErrorMessage", msg);
         outjson.put("_ErrorCode", 2);  // login failure
+        outjson.put("_BootId", MainServlet.getBootId());
         try {
             out.print(outjson.toString());
             out.flush();
@@ -832,7 +842,7 @@ public class ProcessServlet implements Runnable {
     /**
      * Get all user data.
      *
-     * @return the UserData instance for the current user
+     * @return the UserData instance for the current user, or null if not logged in
      */
     public UserData getUserData() {
         return ud;
@@ -842,10 +852,57 @@ public class ProcessServlet implements Runnable {
      * Get a specific user data element.
      *
      * @param key the key for the user data element
-     * @return the user data element, or null if not found
+     * @return the user data element, or null if not found (or not logged in)
      */
     public Object getUserData(String key) {
-        return ud.getUserData(key);
+        return ud == null ? null : ud.getUserData(key);
+    }
+
+    /**
+     * Whether the current request is from a logged-in user.
+     * <br><br>
+     * Useful in a service registered with
+     * {@link MainServlet#allowWithoutAuthentication(String, String)}, which runs whether
+     * or not the caller is authenticated: branch on this to do one thing when logged in
+     * and another when not.
+     *
+     * @return true if a valid user session is associated with this request
+     *
+     * @see #requireLogin()
+     */
+    public boolean isLoggedIn() {
+        return ud != null;
+    }
+
+    /**
+     * Require a logged-in user for the remainder of this service call.
+     * <br><br>
+     * Intended for a service registered with
+     * {@link MainServlet#allowWithoutAuthentication(String, String)} that, after some
+     * unauthenticated work, decides it needs an authenticated user.  When no user is
+     * logged in this aborts the call with the standard "not logged in" response
+     * (<code>_ErrorCode = 2</code>), the same response a normally-protected method
+     * produces, so the front-end routes the user to login.
+     *
+     * @see #isLoggedIn()
+     */
+    public void requireLogin() {
+        if (ud == null)
+            throw new LoginRequiredException("Login required.");
+    }
+
+    /**
+     * True if a LoginRequiredException appears anywhere in the cause chain.  Service
+     * runners wrap the thrown exception (e.g. in InvocationTargetException) and forward
+     * it to errorReturn, so the chain is walked rather than checking the top type.
+     */
+    private static boolean containsLoginRequired(Throwable e) {
+        while (e != null) {
+            if (e instanceof LoginRequiredException)
+                return true;
+            e = e.getCause();
+        }
+        return false;
     }
 
     /**

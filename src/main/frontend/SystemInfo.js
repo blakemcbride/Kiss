@@ -5,24 +5,28 @@
 /**
  * Application / deployment configuration for the Kiss front-end.
  *
- * This file was split out of index.html so the page can run under a strict
- * Content-Security-Policy (no inline scripts).  Per-deployment values are
- * edited here (search for "EDIT").
+ * NOTE: the cache-busting values — the software version and the cache-control flag —
+ * are NOT here.  They live in index.html as <meta name="kiss-version"> and
+ * <meta name="kiss-cache-control">, because index.html is the only file kept
+ * perpetually fresh (via the ?now redirect).  bootstrap.js mirrors them back onto
+ * SystemInfo.softwareVersion / SystemInfo.controlCache after this file loads, so existing
+ * references keep working.
+ *
+ * Per-deployment values below are edited here (search for "EDIT").
  */
 
 const SystemInfo = {};
 
-// The following parameters must be set in a production system
-SystemInfo.softwareVersion = "EDIT-1";  // used to uniquely identify a version of the system
 SystemInfo.releaseDate = "EDIT-2";
-SystemInfo.controlCache = false;  // normally true but use false during debugging EDIT-3
 
 // Where the front-end keeps state (incl. the session token) between pages/reloads:
-//   'local'   - localStorage  (survives reload, new tabs, Electron restarts; shared across tabs)  [default]
-//   'session' - sessionStorage (survives reload; per-tab; cleared on tab close)
-//   'memory'  - in-memory only (classic single-page behavior; lost on reload)
-SystemInfo.stateStore = 'local';  // EDIT-4
+//   'session' - sessionStorage (survives reload; PER-TAB; cleared on tab close)  [default]
+//   'local'   - localStorage   (survives reload, new tabs, Electron restarts; SHARED across tabs)
+//   'memory'  - in-memory only  (classic single-page behavior; lost on reload)
+// Per-tab ('session') is the default: each tab is its own isolated session, so two tabs
+// never clobber each other's state, and a new tab requires its own login.
+SystemInfo.stateStore = 'session';  // EDIT-4
 
 // The following is only set on a production system that has the front-end and back-end separated.
-// When set, also add this origin to the connect-src of the CSP <meta> tag in index.html.
+// When set, also add this origin to the connect-src of the CSP in SecurityHeadersFilter.
 //SystemInfo.backendUrl = 'https://[YOUR-URL]/[back-end]';

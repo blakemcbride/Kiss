@@ -21,13 +21,15 @@ import java.io.IOException;
  * single source of truth for the production/Electron deployments (all served by
  * this Tomcat). The XSS-relevant directives therefore live here.
  * <br><br>
- * <b>Rollout:</b> {@link #CSP_REPORT_ONLY} ships <code>true</code>, so the policy
- * is sent as <code>Content-Security-Policy-Report-Only</code> — violations are
- * reported to the browser console but nothing is blocked. Exercise every screen
- * (CKEditor, AG-Grid, file upload, binary images, login/logout); when the console
- * shows no CSP violations, set {@link #CSP_REPORT_ONLY} to <code>false</code> to
- * enforce. Because the dev static server on port 8000 does not set headers,
- * validate by browsing the app through the Tomcat origin (http://localhost:8080).
+ * <b>Rollout:</b> {@link #CSP_REPORT_ONLY} now ships <code>false</code>, so the
+ * XSS policy is <em>enforced</em> (sent as <code>Content-Security-Policy</code>) —
+ * violations are blocked, not merely reported. To re-validate after changing the
+ * policy, set it back to <code>true</code>: the policy is then sent as
+ * <code>Content-Security-Policy-Report-Only</code> (violations reported to the
+ * console, nothing blocked); exercise every screen (CKEditor, AG-Grid, file upload,
+ * binary images, login/logout) and confirm the console is clean before enforcing
+ * again. Because the dev static server on port 8000 does not set headers, validate
+ * by browsing the app through the Tomcat origin (http://localhost:8080).
  * <br><br>
  * Self-registering via {@code @WebFilter} annotation scanning (no
  * <code>web.xml</code> entry), so it ships entirely inside the application WAR
@@ -48,7 +50,9 @@ public class SecurityHeadersFilter implements Filter {
      */
     public static final String CONTENT_SECURITY_POLICY =
             "default-src 'self'; " +
-            "script-src 'self'; " +
+            //  The one allowed inline script is the byte-stable bootstrap kernel in index.html.
+            //  If that kernel is ever edited, recompute this hash.
+            "script-src 'self' 'sha256-UYq8cr4RRNrskmgjIOyb5l/e3bGfSfsURPG1l8Oha4U='; " +
             "style-src 'self' 'unsafe-inline'; " +
             "img-src 'self' data: blob:; " +
             "font-src 'self' data:; " +
@@ -63,7 +67,14 @@ public class SecurityHeadersFilter implements Filter {
      * nothing). <code>false</code> &rArr; enforce it. Flip to <code>false</code>
      * once the browser console is free of CSP violations.
      */
-    private static final boolean CSP_REPORT_ONLY = true;
+    private static final boolean CSP_REPORT_ONLY = false;
+
+    /**
+     * Master switch. Set to <code>false</code> to emit no security headers at
+     * all (the filter becomes a pass-through). Useful for A/B isolating whether
+     * these headers are responsible for some observed behavior.
+     */
+    private static final boolean ENABLED = true;
 
     /**
      * Default constructor.
@@ -74,7 +85,7 @@ public class SecurityHeadersFilter implements Filter {
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
-        if (res instanceof HttpServletResponse) {
+        if (ENABLED && res instanceof HttpServletResponse) {
             final HttpServletResponse response = (HttpServletResponse) res;
 
             //  Don't let the browser guess content types.

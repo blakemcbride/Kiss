@@ -7,10 +7,17 @@ import org.kissweb.json.JSONObject;
 import org.kissweb.RestClient;
 
 import java.io.*;
+import java.net.URI;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Provides an interface to the Ollama AI server.
@@ -97,14 +104,40 @@ public class Ollama {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
         restClient = new RestClient();
-        String str = restClient.strCall("POST", URL + "generate", new JSONObject().put("model", model).put("prompt", prompt).toString());
-        str = str.replaceAll("\\}\\{", "},{");
-        JSONArray ja = new JSONArray("[" + str + "]");
-        StringBuilder sb = new StringBuilder();
-        final int len = ja.length();
-        for (int i = 0; i < len ; i++)
-            sb.append(ja.getJSONObject(i).getString("response"));
-        return sb.toString();
+        //  Request a non-streaming response so Ollama returns a single JSON object.  Without
+        //  "stream": false, /api/generate streams newline-delimited JSON ({...}\n{...}\n...),
+        //  which is not a parseable single document.
+        String str = restClient.strCall("POST", URL + "generate",
+                new JSONObject().put("model", model).put("prompt", prompt).put("stream", false).toString());
+        if (str == null)
+            return "";
+        JSONObject responseJson = new JSONObject(str);
+        return responseJson.getString("response", "");
+    }
+
+    /**
+     * Streaming form of {@link #send(String)}: POST to <code>/api/generate</code> with
+     * <code>stream:true</code> and hand each response chunk to <code>onToken</code> as the model
+     * produces it.
+     * <br><br>
+     * The complete text is also assembled and returned, so a caller that wants both the live
+     * stream and the final string needs only this one call.  For a simple, non-streaming call use
+     * {@link #send(String)}.
+     *
+     * @param prompt the text prompt to send
+     * @param onToken receives each text chunk, in order, as it arrives; may be <code>null</code> to
+     *                only assemble and return the result
+     * @return the complete response text
+     * @throws Exception if model is not set or communication fails
+     */
+    public String send(String prompt, Consumer<String> onToken) throws Exception {
+        if (model == null || model.isEmpty())
+            throw new Exception("Model not set");
+        JSONObject body = new JSONObject();
+        body.put("model", model);
+        body.put("prompt", prompt);
+        body.put("stream", true);
+        return streamRequest("generate", body, o -> o.getString("response", ""), onToken);
     }
 
     /**
@@ -135,7 +168,7 @@ public class Ollama {
      * @throws Exception if model is not set or communication fails
      */
     public String chat(List<Map<String, String>> messages) throws Exception {
-        return chat(messages, null);
+        return chat(messages, (JSONArray) null);
     }
 
     /**
@@ -158,18 +191,9 @@ public class Ollama {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
         restClient = new RestClient();
-        JSONArray messageArray = new JSONArray();
-        if (messages != null) {
-            for (Map<String, String> message : messages) {
-                JSONObject msg = new JSONObject();
-                for (Map.Entry<String, String> entry : message.entrySet())
-                    msg.put(entry.getKey(), entry.getValue());
-                messageArray.put(msg);
-            }
-        }
         JSONObject body = new JSONObject();
         body.put("model", model);
-        body.put("messages", messageArray);
+        body.put("messages", toMessageArray(messages));
         body.put("stream", false);
         if (tools != null && tools.length() > 0)
             body.put("tools", tools);
@@ -181,6 +205,101 @@ public class Ollama {
         if (message == null)
             return "";
         return message.getString("content", "");
+    }
+
+    /**
+     * Streaming form of {@link #chat(List)}: POST to <code>/api/chat</code> with
+     * <code>stream:true</code> and hand each assistant content chunk to <code>onToken</code> as it
+     * arrives, returning the full assembled reply.
+     * <br><br>
+     * Like {@link #send(String, Consumer)}, the complete reply is returned as well, so one call
+     * serves both the live token stream and the final text.  For a non-streaming call use
+     * {@link #chat(List)}.
+     *
+     * @param messages the conversation, in order (see {@link #chat(List)} for the map format)
+     * @param onToken receives each content chunk, in order, as it arrives; may be <code>null</code>
+     * @return the complete assistant reply text
+     * @throws Exception if model is not set or communication fails
+     */
+    public String chat(List<Map<String, String>> messages, Consumer<String> onToken) throws Exception {
+        if (model == null || model.isEmpty())
+            throw new Exception("Model not set");
+        JSONObject body = new JSONObject();
+        body.put("model", model);
+        body.put("messages", toMessageArray(messages));
+        body.put("stream", true);
+        return streamRequest("chat", body, o -> {
+            JSONObject m = o.getJSONObject("message", false);
+            return m == null ? "" : m.getString("content", "");
+        }, onToken);
+    }
+
+    /**
+     * Build the <code>/api/chat</code> messages array from the caller's list of role/content maps.
+     * Any keys beyond role and content are passed through to Ollama unchanged.
+     *
+     * @param messages the conversation, in order (may be null → empty array)
+     * @return the JSON messages array
+     */
+    private static JSONArray toMessageArray(List<Map<String, String>> messages) {
+        JSONArray messageArray = new JSONArray();
+        if (messages != null) {
+            for (Map<String, String> message : messages) {
+                JSONObject msg = new JSONObject();
+                for (Map.Entry<String, String> entry : message.entrySet())
+                    msg.put(entry.getKey(), entry.getValue());
+                messageArray.put(msg);
+            }
+        }
+        return messageArray;
+    }
+
+    /**
+     * Shared engine for the streaming (<code>stream:true</code>) endpoints.  Opens the request,
+     * reads Ollama's newline-delimited JSON response one object per line, hands each non-empty text
+     * chunk to <code>onToken</code> as it arrives, and returns the full concatenated text once the
+     * <code>"done"</code> marker is seen.  Non-JSON keep-alive lines are skipped.
+     *
+     * @param endpoint the API endpoint name, e.g. "generate" or "chat"
+     * @param body the request body (must already contain <code>"stream": true</code>)
+     * @param chunk extracts the incremental text from one streamed object (returns "" when none)
+     * @param onToken receives each non-empty chunk in arrival order; may be <code>null</code>
+     * @return the complete assembled text
+     * @throws IOException if the communication fails, or the server reports an error
+     */
+    private String streamRequest(String endpoint, JSONObject body, Function<JSONObject, String> chunk,
+                                 Consumer<String> onToken) throws IOException {
+        final HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(URL + endpoint))
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .build();
+        restClient = new RestClient();
+        final HttpResponse<Stream<String>> resp = restClient.streamCall(req, HttpResponse.BodyHandlers.ofLines());
+        final StringBuilder full = new StringBuilder();
+        final Iterator<String> it = resp.body().iterator();
+        while (it.hasNext()) {
+            final String line = it.next();
+            if (line.isEmpty())
+                continue;
+            final JSONObject o;
+            try {
+                o = new JSONObject(line);
+            } catch (RuntimeException e) {
+                continue;   // skip any non-JSON keep-alive line
+            }
+            if (o.has("error"))
+                throw new IOException("Ollama error: " + o.getString("error", ""));
+            final String c = chunk.apply(o);
+            if (c != null && !c.isEmpty()) {
+                full.append(c);
+                if (onToken != null)
+                    onToken.accept(c);
+            }
+            if (o.getBoolean("done", false))
+                break;
+        }
+        return full.toString();
     }
 
     /**

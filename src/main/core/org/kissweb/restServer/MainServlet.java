@@ -54,6 +54,7 @@ public class MainServlet extends HttpServlet {
     private static boolean hasDatabase;              // determined by application.ini
     private static Cron cron;
     private static final Set<String> allowedWithoutAuthentication = new HashSet<>();
+    private static final String bootId = java.util.UUID.randomUUID().toString();  // unique per server start
     private static final Hashtable<String,Object> environment = new Hashtable<>();  // general application-specific values
     /** True if running on Linux. */
     public static boolean isLinux = false;
@@ -629,6 +630,17 @@ public class MainServlet extends HttpServlet {
 
     static boolean shouldAllowWithoutAuthentication(String className, String methodName) {
         return allowedWithoutAuthentication.contains(className + ":" + methodName);
+    }
+
+    /**
+     * A unique id generated once each time the server starts.  It is returned to the
+     * front-end (as <code>_BootId</code>); the front-end records it and forces a re-login
+     * when it changes, so a back-end restart invalidates persisted client sessions.
+     *
+     * @return the server boot id
+     */
+    public static String getBootId() {
+        return bootId;
     }
 
     /**

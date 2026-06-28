@@ -1,9 +1,9 @@
 
-/* global Utils, Server */
+/* global Utils, Server, Router, SystemInfo */
 
 'use strict';
 
-Utils.afterComponentsLoaded(function () {
+Utils.afterComponentsLoaded(async function () {
     if (SystemInfo.backendUrl) {
         // explicit backend URL
         Server.setURL(SystemInfo.backendUrl);
@@ -21,15 +21,20 @@ Utils.afterComponentsLoaded(function () {
 
     Utils.forceASCII = false;  // Force all text entry to ASCII (see Utils.forceASCII)
 
-    const screenPixels = screen.height * screen.width;
-    if (screenPixels < 600000)
-        Utils.loadPage("mobile/login");
-    /*
-    else if (screenPixels < 1000000)
-        Utils.loadPage("tablet/login");
-    */
-    else
-        Utils.loadPage('login');
+    //  If the back end was restarted since this browser's session was established,
+    //  drop the stale persisted session so the user is forced to re-login (rather than
+    //  resuming onto a dead session).  Must complete before routing/resume begins.
+    //  Guarded so a hiccup here can never block the app from starting.
+    try {
+        await Server.verifyServerInstance();
+    } catch (e) {
+        console.log('verifyServerInstance failed:', e);
+    }
+
+    //  Begin hash-based routing.  Routes are declared in routes.js; the current
+    //  hash is dispatched now (deep-linking and, when a session token persists in
+    //  AppState, session resume).  Unauthenticated routes redirect to /login.
+    Router.start();
 });
 
 

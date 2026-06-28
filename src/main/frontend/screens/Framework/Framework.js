@@ -1,48 +1,46 @@
 
-/* global $$, Utils, Server */
+/* global $$, Utils, Server, Router */
 
 'use strict';
 
 (async function () {
 
-    const screenArea = 'app-screen-area';
-
+    //  Navigation goes through the router so each screen has its own URL (deep-linkable,
+    //  Back/Forward navigate between them).  loadPage cleanup happens inside the router.
     $$('rest-services').onclick(function () {
-        Utils.cleanup();  //  clean up any context information
-        Utils.loadPage('screens/RestServices/RestServices', screenArea, 'input-1');
+        Router.go('/rest-services');
     });
 
     $$('controls').onclick(function () {
-        Utils.cleanup();  //  clean up any context information
-        Utils.loadPage('screens/Controls/Controls', screenArea, 'ctl-text');
+        Router.go('/controls');
     });
 
     $$('crud').onclick(function () {
-        Utils.cleanup();  //  clean up any context information
-        Utils.loadPage('screens/CRUD/CRUD', screenArea);
+        Router.go('/crud');
     });
 
     $$('users').onclick(function () {
-        Utils.cleanup();  //  clean up any context information
-        Utils.loadPage('screens/Users/Users', screenArea);
+        Router.go('/users');
     });
 
     $$('file-upload').onclick(function () {
-        Utils.cleanup();  //  clean up any context information
-        Utils.loadPage('screens/FileUploadScreen/FileUploadScreen', screenArea);
+        Router.go('/file-upload');
     });
 
     $$('ai').onclick(function () {
-        Utils.cleanup();  //  clean up any context information
-        Utils.loadPage('screens/Ollama/Ollama', screenArea);
+        Router.go('/ai');
     });
 
     $$('logout').onclick(function () {
         Server.logout();
     });
 
-    // show the startup message
-    Utils.popup_open('intro-popup');
+    // show the startup message once per browser session (the shell reloads when you
+    // return to the home route, and we don't want the intro popping up every time)
+    if (!window.__kissIntroShown) {
+        window.__kissIntroShown = true;
+        Utils.popup_open('intro-popup');
+    }
     $$('close-intro').onclick(function () {
         Utils.popup_close();
     });

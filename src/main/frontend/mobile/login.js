@@ -1,9 +1,13 @@
 
-/* global $$, DOMUtils, Server, Utils */
+/* global $$, Server, Router */
 
 'use strict';
 
 (function () {
+
+    //  Reaching the login screen ends any existing session so a fresh login is required
+    //  (e.g. when the user backs into it from inside the app).
+    Server.clearSession();
 
     async function login() {
         if ($$('username').isError('Username'))
@@ -18,12 +22,10 @@
         const res = await Server.call('', 'Login', data);
         if (res._Success) {
             Server.setUUID(res.uuid);
-            DOMUtils.preventNavigation(true, function() {
-                Utils.yesNo('Confirm', 'Are you sure you want to logout?', function() {
-                    Server.logout();
-                });
-            });
-            Utils.loadPage('mobile/page1');
+            Server.setBootId(res._BootId);   //  record the server instance this session belongs to
+            //  '/' resolves to mobile/page1 on a small screen.  go() (push) so the
+            //  browser Back button returns to the login screen.
+            Router.go(Router.returnTarget());
         } else {
             $$('password').clear().focus();
         }
