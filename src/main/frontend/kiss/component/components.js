@@ -90,6 +90,70 @@ class components {
     static check_box() {}
 
     /**
+     * This HTML tag, "combo-box", is the equivalent of the Microsoft Windows combobox control.  It is a drop-down list
+     * that <em>also</em> allows the user to type in a value that is not in the list (free entry).  Like a Windows combobox,
+     * the drop-down arrow always reopens the complete list regardless of what has been typed (unlike the native HTML
+     * <code>datalist</code>, which filters itself away once the typed text matches no option).
+     * <br><br>
+     * Each list item has a <em>label</em> (the text shown, typed, and selected by the user) and an optional underlying
+     * <em>value</em> and arbitrary associated <em>data</em>.  When the user types text that is not in the list,
+     * <code>getValue()</code> returns that typed text as-is.  When the user selects (or types) a known list item,
+     * <code>getValue()</code> returns that item's underlying value.  When <code>add</code> is called with only one argument,
+     * the value and the label are the same (a plain string list).
+     * <br><br>
+     * Unlike <code>drop-down</code>, <code>clear()</code> here empties the entered/selected text (the typical expectation
+     * for a control the user types into); use <code>clearList()</code> to remove the suggestion list.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    placeholder="text"     </td><td>     text shown in the control when it is empty (standard HTML attribute, passed through)               </td></tr>
+     *     <tr><td>    required     </td><td>     an entry (selected or typed) is required               </td></tr>
+     * </table>
+     * <br>
+     * <strong>Content</strong>
+     * <br><br>
+     *     The <em>Content</em> represents the HTML that would normally be inside an HTML <code>datalist</code> element — i.e.
+     *     a static list of <code>&lt;option value="..."&gt;</code> suggestions.  This would only be used in cases of a static
+     *     list.  List contents that depend on data would use the <code>add</code> / <code>addItems</code> / <code>fill</code> methods.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    add(val [, lbl, data])     </td><td>     add a new list item.  <code>val</code> is the underlying value, <code>lbl</code> is the text shown in the list (defaults to <code>val</code> if omitted), and <code>data</code> represents optional and arbitrary data associated to the item               </td></tr>
+     *     <tr><td>    addItems(items, valField, lblField [, dataField]) </td><td>  used to add an array of items at one time. <code>items</code> is the array of items to add.  <code>valField</code> and <code>lblField</code> are the names of the fields in the array.  <code>lblField</code> can also be a function that formats the label.  It is passed the row in <code>items</code>. <code>dataField</code> is the name of a field whose data is stored along with the item.  If null, the whole item is stored. </td></tr>
+     *     <tr><td>    clear()     </td><td>     clear the entered/selected text (the suggestion list is left intact)               </td></tr>
+     *     <tr><td>    clearList()     </td><td>     remove all items from the suggestion list               </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
+     *     <tr><td>    fill(selectedItem, items, valField, labelField [, dataField]) </td><td>   clear the list and fill it, then select/show the item whose value is <code>selectedItem</code> (or clear the entry if none) </td></tr>
+     *     <tr><td>    focus()     </td><td>    sets focus on the control        </td></tr>
+     *     <tr><td>    getAllData()     </td><td>     returns the map of all label-to-data associations             </td></tr>
+     *     <tr><td>    getAllLabels()     </td><td>     returns an array of all the suggestion labels             </td></tr>
+     *     <tr><td>    getData()     </td><td>     returns the data associated to the currently shown item (or <code>undefined</code> for a free entry)              </td></tr>
+     *     <tr><td>    getLabel()     </td><td>     same as <code>getText()</code>             </td></tr>
+     *     <tr><td>    getText()     </td><td>     returns the text currently shown in the control (the label), whether a list item or free entry             </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the underlying value of the shown item, or the typed text itself when it is a free entry not in the list   </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>     <code>true</code> if the user changed the value      </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>     <code>true</code> if control is disabled      </td></tr>
+     *     <tr><td>    isError(desc)     </td><td>     used for error checking. If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    isHidden()     </td><td>     <code>true</code> if control is hidden (not visible)      </td></tr>
+     *     <tr><td>    isReadOnly()     </td><td>     <code>true</code> if control is read-only     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>     <code>true</code> if control is visible (not hidden)      </td></tr>
+     *     <tr><td>    onCChange(fun)     </td><td> execute <code>fun</code> immediately when the value is changed by the user, <code>fun</code> is passed the control value    </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun</code> whenever the user commits a change (selection or leaving the field after editing). <code>fun</code> is called as <code>fun(value, text, data)</code>              </td></tr>
+     *     <tr><td>    onEnter(fun)      </td><td>  execute <code>fun</code> when the enter key is hit   </td></tr>
+     *     <tr><td>    readOnly([flg])     </td><td>    make control read-only (or the reverse if the optional argument is <code>false</code>)      </td></tr>
+     *     <tr><td>    readWrite([flg])     </td><td>    make control read-write (or the reverse if the optional argument is <code>false</code>)      </td></tr>
+     *     <tr><td>    setText(val)     </td><td>     set the text shown in the control directly (treats <code>val</code> as the displayed label)             </td></tr>
+     *     <tr><td>    setValue(val)     </td><td>     show the list item whose underlying value is <code>val</code>; if none matches, <code>val</code> is shown as free text             </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    size()     </td><td>    returns the number of items in the suggestion list              </td></tr>
+     *     <tr><td>    triggerGlobalChange(flg)     </td><td>    Default <code>true</code>.  If <code>false</code> then control changes will not trigger a global control change.  See <code>Utils.someControlValueChanged()</code>   </td></tr>
+     * </table>
+     */
+    static combo_box() {}
+
+    /**
      * This HTML tag, "date-input", adds functionality and a consistent and convenient API for user date input.
      * This control is custom and doesn't use the native browser date input offering the advantage of a significantly smaller width requirements.  Also see native-date-input tag.
      * <br><br>
