@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +32,10 @@ public class Ollama {
     private String URL = "http://localhost:11434/api/";
     private String model = null;
     private RestClient restClient;
+    /** Request timeout, in seconds, for generation calls (send/chat).  LLM generations can be
+     *  much slower than a normal REST call, so this defaults far higher than RestClient's default.
+     *  Tunable via {@link #setTimeoutSeconds(int)}. */
+    private int requestTimeoutSeconds = 300;
 
     /**
      * Create a new Ollama client using the default local server.
@@ -58,6 +63,31 @@ public class Ollama {
     public Ollama(String url, String model) {
         this.URL = (url.endsWith("/") ? url : url + "/") + "api/";
         this.model = model;
+    }
+
+    /**
+     * Set the request timeout, in seconds, used for generation calls (send/chat, both blocking and
+     * streaming).  An LLM generation can take far longer than a normal REST call, so the default is
+     * 5 minutes; raise it for very long generations.  Values &le; 0 are ignored.
+     *
+     * @param seconds the request timeout in seconds
+     */
+    public void setTimeoutSeconds(int seconds) {
+        if (seconds > 0)
+            requestTimeoutSeconds = seconds;
+    }
+
+    /**
+     * Create a RestClient configured with the generation request timeout (see
+     * {@link #setTimeoutSeconds(int)}), so a slow generation is not cut off by RestClient's much
+     * shorter default request timeout.
+     *
+     * @return a configured RestClient
+     */
+    private RestClient newRestClient() {
+        RestClient rc = new RestClient();
+        rc.setTimeouts(Duration.ofSeconds(30), Duration.ofSeconds(requestTimeoutSeconds));
+        return rc;
     }
 
     /**
@@ -103,7 +133,7 @@ public class Ollama {
     public String send(String prompt) throws Exception {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
-        restClient = new RestClient();
+        restClient = newRestClient();
         //  Request a non-streaming response so Ollama returns a single JSON object.  Without
         //  "stream": false, /api/generate streams newline-delimited JSON ({...}\n{...}\n...),
         //  which is not a parseable single document.
@@ -190,7 +220,7 @@ public class Ollama {
     public String chat(List<Map<String, String>> messages, JSONArray tools) throws Exception {
         if (model == null || model.isEmpty())
             throw new Exception("Model not set");
-        restClient = new RestClient();
+        restClient = newRestClient();
         JSONObject body = new JSONObject();
         body.put("model", model);
         body.put("messages", toMessageArray(messages));
@@ -274,7 +304,7 @@ public class Ollama {
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .build();
-        restClient = new RestClient();
+        restClient = newRestClient();
         final HttpResponse<Stream<String>> resp = restClient.streamCall(req, HttpResponse.BodyHandlers.ofLines());
         final StringBuilder full = new StringBuilder();
         final Iterator<String> it = resp.body().iterator();

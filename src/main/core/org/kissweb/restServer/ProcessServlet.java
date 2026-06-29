@@ -506,6 +506,22 @@ public class ProcessServlet implements Runnable {
     }
 
     /**
+     * Set the async timeout for the current request, in milliseconds.  A value of zero or less
+     * means no timeout (the request may run to completion however long it takes).
+     * <br><br>
+     * Call this from a long-running service (for example one that waits on a slow LLM generation)
+     * before the work begins.  Without it, the servlet container's default async timeout (typically
+     * 30 seconds) applies, and a longer call is severed mid-flight -- which the front-end surfaces as
+     * a generic "Error communicating with the server" message.  Normal requests need not call this;
+     * they keep the default timeout as a safety net.
+     *
+     * @param ms the timeout in milliseconds; zero or less means no timeout
+     */
+    public void setTimeout(long ms) {
+        asyncContext.setTimeout(ms);
+    }
+
+    /**
      * Initiates streaming mode for this request. Once streaming mode is enabled,
      * the service can send data incrementally to the front-end without buffering
      * the entire response.
