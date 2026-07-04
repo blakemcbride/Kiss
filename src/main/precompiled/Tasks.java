@@ -250,8 +250,12 @@ public class Tasks {
     private static void jar(boolean unitTest) {
         libs();
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
-        if (unitTest)
+        if (unitTest) {
+            // Tests may reference precompiled classes — build those first so they
+            // are on the classpath (and in the jar) when src/test/core compiles.
+            buildJava("src/main/precompiled", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
             buildJava("src/test/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
+        }
         rm(explodedDir + "/WEB-INF/lib/jakarta.servlet-api-4.0.1.jar");
         createJar(explodedDir + "/WEB-INF/classes", BUILDDIR + "/Kiss.jar");
         //println("Kiss.jar has been created in the " + BUILDDIR + " directory");
@@ -335,8 +339,11 @@ public class Tasks {
                 "oauth\\.(db|ini)(-(journal|wal|shm))?");
         copyTree(LIBS, explodedDir + "/WEB-INF/lib");
         buildJava("src/main/core", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, null);
-        buildJava("src/test/core", explodedDir + "/WEB-INF/test-classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
+        // Precompiled must be built before the tests: unit tests may reference
+        // precompiled classes, so those classes must already be on the classpath
+        // when src/test/core is compiled.
         buildJava("src/main/precompiled", explodedDir + "/WEB-INF/classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
+        buildJava("src/test/core", explodedDir + "/WEB-INF/test-classes", localLibs, foreignLibs, explodedDir + "/WEB-INF/classes");
         rm(explodedDir + "/WEB-INF/lib/jakarta.servlet-api-4.0.1.jar");
         copyRegex("src/main/core/org/kissweb/lisp", explodedDir + "/WEB-INF/classes/org/kissweb/lisp", ".*\\.lisp", null, false);
         copy("src/main/core/log4j2.xml", explodedDir + "/WEB-INF/classes");
