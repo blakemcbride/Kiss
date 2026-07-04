@@ -9,6 +9,32 @@
 		<listener-class>org.kissweb.restServer.StartupListener</listener-class>
 	</listener>
 
+	<!--  When Tomcat sits behind a TLS-terminating reverse proxy (nginx, Apache, etc.),
+	      the proxy forwards requests over plain http, so Tomcat would otherwise believe
+	      the request scheme is http while the browser's Origin header says https.  That
+	      mismatch defeats the CorsFilter's same-origin detection below, and every API
+	      call would get a 403.  RemoteIpFilter restores the original scheme/port from
+	      the X-Forwarded-Proto header, which the proxy must send (standard practice):
+	          nginx:   proxy_set_header X-Forwarded-Proto $scheme;
+	          Apache:  RequestHeader set X-Forwarded-Proto "https"
+	      The header is trusted only when the request arrives from a loopback or
+	      private (RFC 1918) address — the internalProxies default — so outside clients
+	      cannot spoof it.  Deployments not behind a proxy are unaffected.  This filter
+	      must be mapped BEFORE the CorsFilter.  -->
+	<filter>
+		<filter-name>RemoteIpFilter</filter-name>
+		<filter-class>org.apache.catalina.filters.RemoteIpFilter</filter-class>
+		<async-supported>true</async-supported>
+		<init-param>
+			<param-name>protocolHeader</param-name>
+			<param-value>X-Forwarded-Proto</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>RemoteIpFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
 	<!--  Allow CORS on localhost for development  -->
 	<filter>
 		<filter-name>CorsFilter</filter-name>
