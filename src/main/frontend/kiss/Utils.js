@@ -2245,7 +2245,7 @@ class Utils {
                 resolve(null);
             };
             if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(getPos, handleError);
+                navigator.geolocation.getCurrentPosition(getPos, handleError, {timeout: 10000, maximumAge: 0, enableHighAccuracy: false});
             } else
                 resolve(null);
         });
