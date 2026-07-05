@@ -15,6 +15,7 @@
         let show_zero = false;
         let required = false;
         let min = 0;
+        let minExplicit = false;  // true once an explicit min="..." attribute has been processed
         let max = null;
         let enterFunction = null;
         let comma = true;
@@ -40,6 +41,7 @@
                     break;
                 case 'min':
                     min = Number(Utils.removeQuotes(attr[prop]));
+                    minExplicit = true;
                     break;
                 case 'max':
                     max = Number(Utils.removeQuotes(attr[prop]));
@@ -51,7 +53,8 @@
                     required = true;
                     break;
                 case 'money':
-                    min = 0;
+                    if (!minExplicit)  // an explicit min="..." attribute always wins, regardless of attribute order
+                        min = 0;
                     dollar = true;
                     dp = 2;
                     break;
