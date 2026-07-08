@@ -54,7 +54,19 @@ class AGGrid {
      * @returns {AGGrid}
      */
     show() {
+        if (this.gridInstantiated)
+            return this;
+
         const self = this;
+        function setGridReady(api) {
+            if (!api || !self.gridOptions)
+                return;
+            self.gridOptions.api = api;
+            if (self.data && self.data.length > 0) {
+                api.setGridOption('rowData', self.data);
+                self.data = [];
+            }
+        }
         this.gridOptions = {
             columnDefs: this.columns,
             rowData: this.data || [],
@@ -78,14 +90,7 @@ class AGGrid {
             },
             getRowStyle: this.rowStyleFun,
             onGridReady: function (params) {
-                // Store the api reference
-                self.gridOptions.api = params.api;
-                
-                // Set any data that was added before the grid was ready
-                if (self.data && self.data.length > 0) {
-                    params.api.setGridOption('rowData', self.data);
-                    self.data = [];  // Clear internal data after setting to grid
-                }
+                setGridReady(params.api);
                 
                 if (self.suppressHorizontalScroll) {
                     if (self.gridElement.offsetParent != null)
@@ -144,8 +149,9 @@ class AGGrid {
             }
             // Add theme class for styling
             eGridDiv.classList.add('ag-theme-quartz');
-            agGrid.createGrid(eGridDiv, this.gridOptions);
+            const api = agGrid.createGrid(eGridDiv, this.gridOptions);
             this.gridInstantiated = true;
+            setGridReady(api);
         }
         if (!AGGrid.gridContext.length)
             AGGrid.newGridContext();
@@ -154,7 +160,7 @@ class AGGrid {
     }
 
     resizeColumns() {
-        if (this.gridElement.offsetParent != null && this.gridInstantiated)
+        if (this.gridElement.offsetParent != null && this.gridInstantiated && this.gridOptions && this.gridOptions.api)
             this.gridOptions.api.sizeColumnsToFit();
         return this;
     }
@@ -567,7 +573,7 @@ class AGGrid {
     sizeColumnsToFit() {
         if (this.gridOptions === undefined)
             console.error("Grid options not found. Make sure the grid is built using the 'build' method.");
-        else
+        else if (this.gridOptions.api)
             this.gridOptions.api.sizeColumnsToFit();
         return this;
     }
@@ -744,4 +750,3 @@ AGGrid.gridContext = [];        //  An array of arrays.  The outer array represe
                                 //  Basically, each context (except the first) represents a popup.
                                 //  The first represents the current screen.
                                 //  Each inner array contains an array of grids in that context.
-

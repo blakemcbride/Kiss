@@ -190,6 +190,52 @@ class Server {
     }
 
     /**
+     * Evoke a back-end REST service without changing the global cursor / busy count.
+     * Use this for lightweight background searches where the UI owns any loading
+     * indication and the whole app should not look blocked.  Unlike {@link Server.call},
+     * transport/parse failures do not raise the framework error popup — the caller gets
+     * a <code>{_Success:false}</code> result to handle quietly.
+     *
+     * @param cls
+     * @param meth
+     * @param injson
+     * @returns {Promise<*>}
+     *
+     * @see Server.call
+     */
+    static async callQuiet(cls, meth, injson=null) {
+        Server.checkTime();
+        const path = "rest";
+        if (!injson)
+            injson = {};
+        else
+            injson = { ...injson };
+        injson._uuid = Server.uuid;
+        injson._method = meth;
+        injson._class = cls;
+
+        try {
+            const response = await fetch(Server.url + '/' + path, {
+                method: 'POST',
+                cache: 'no-store',
+                body: JSON.stringify(injson),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const res = await response.json();
+            if (!res._Success && res._ErrorCode === 2) {
+                await Utils.showMessage('Error', res._ErrorMessage);
+                Server.logout(true);
+            }
+            return res;
+        } catch (err) {
+            console.log("Server communication error (quiet): " + cls + "." + meth + "(): " + err.message);
+            return {_Success: false, _ErrorMessage: Server.errorMessage};
+        }
+    }
+
+    /**
      * Perform a binary call.  JSON is sent and JSON is returned.
      * However, a new element will be in the returned json called '_data'.
      * _data will contain the binary data.

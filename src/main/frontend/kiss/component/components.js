@@ -528,6 +528,212 @@ class components {
     static popup() {}
 
     /**
+     * This HTML tag, "menu-button", creates a button that opens a keyboard-accessible dropdown menu.
+     * <br><br>
+     * Menu content is declared with child <code>menu-item</code>, <code>menu-separator</code>, and optional
+     * <code>menu-trigger</code> tags.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    label="Menu"     </td><td>     trigger text when no <code>menu-trigger</code> is supplied     </td></tr>
+     *     <tr><td>    align="start"     </td><td>     menu alignment: start or end     </td></tr>
+     *     <tr><td>    placement="bottom"     </td><td>     menu placement: bottom or top     </td></tr>
+     *     <tr><td>    disabled     </td><td>     disables the trigger     </td></tr>
+     *     <tr><td>    close-on-select="false"     </td><td>     leaves the menu open after selection     </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    open() / close() / toggle()     </td><td>     controls menu visibility     </td></tr>
+     *     <tr><td>    isOpen()     </td><td>     returns whether the menu is visible     </td></tr>
+     *     <tr><td>    onselect(fun)     </td><td>     receives <code>(value, label, itemElement)</code> when a menu item is chosen     </td></tr>
+     *     <tr><td>    getValue() / setValue(val)     </td><td>     gets or stores the current selected value     </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     disables the trigger (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     enables the trigger (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    focus()     </td><td>     sets focus on the trigger     </td></tr>
+     * </table>
+     */
+    static menu_button() {}
+
+    /**
+     * This HTML tag, "panel-card", creates a generic card or panel surface.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    as="section"     </td><td>     rendered element: div, section, article, aside, main, header, or footer     </td></tr>
+     *     <tr><td>    no-pad     </td><td>     removes default padding     </td></tr>
+     *     <tr><td>    hover     </td><td>     adds a hover elevation state     </td></tr>
+     *     <tr><td>    interactive     </td><td>     adds button-like focus and click affordances     </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    onclick(fun)     </td><td>     registers a click handler (used with the <code>interactive</code> attribute)     </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control is hidden (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control is shown (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    <code>true</code> if the control is hidden     </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    <code>true</code> if the control is visible     </td></tr>
+     * </table>
+     */
+    static panel_card() {}
+
+    /**
+     * This HTML tag, "section-title", creates a reusable section heading row with optional supporting text and actions.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    title="Title"     </td><td>     heading text     </td></tr>
+     *     <tr><td>    subtitle="Description"     </td><td>     secondary text under the heading     </td></tr>
+     *     <tr><td>    eyebrow="Label"     </td><td>     small label above the heading     </td></tr>
+     *     <tr><td>    level="2"     </td><td>     heading level from 1 to 6     </td></tr>
+     * </table>
+     * Child content is rendered as the action area when title attributes are supplied.
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    setTitle(text)     </td><td>     updates the heading text     </td></tr>
+     *     <tr><td>    setSubtitle(text)     </td><td>     updates the secondary text under the heading     </td></tr>
+     * </table>
+     */
+    static section_title() {}
+
+    /**
+     * This HTML tag, "segmented-control", creates a segmented tab/button selector.
+     * <br><br>
+     * Options are declared with child <code>segment value="...">Label</code> tags.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    value="id"     </td><td>     selected segment value     </td></tr>
+     *     <tr><td>    equal     </td><td>     segments share equal width     </td></tr>
+     *     <tr><td>    disabled     </td><td>     disables all segments     </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    getValue() / setValue(val [, silent])     </td><td>     reads or selects a segment     </td></tr>
+     *     <tr><td>    onchange(fun)     </td><td>     receives <code>(value, label, itemElement)</code> when selection changes     </td></tr>
+     *     <tr><td>    fill(items, selectedItem [, valField, labelField])     </td><td>     replaces all segments from an array     </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     disables all segments (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     enables all segments (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     * </table>
+     */
+    static segmented_control() {}
+
+    /**
+     * This HTML tag, "search-input", creates a search field with a built-in clear button and optional result list.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    placeholder="Search..."     </td><td>     placeholder text     </td></tr>
+     *     <tr><td>    value="text"     </td><td>     initial value     </td></tr>
+     *     <tr><td>    maxlength="100"     </td><td>     maximum input length     </td></tr>
+     *     <tr><td>    disabled     </td><td>     disables the field     </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    getValue() / setValue(val) / clear()     </td><td>     manages the search text     </td></tr>
+     *     <tr><td>    oninput(fun) / onsearch(fun) / onclear(fun)     </td><td>     registers field callbacks     </td></tr>
+     *     <tr><td>    setResults(items [, options])     </td><td>     displays selectable results. Options include valueField, labelField, descriptionField, and metaField.     </td></tr>
+     *     <tr><td>    onselect(fun)     </td><td>     receives <code>(value, label, item, element)</code> when a result is chosen     </td></tr>
+     *     <tr><td>    showResults() / hideResults()     </td><td>     shows or hides the result list     </td></tr>
+     *     <tr><td>    focus()     </td><td>     sets focus on the search field     </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     disables the field (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     enables the field (or the reverse if the optional argument is <code>false</code>)     </td></tr>
+     * </table>
+     */
+    static search_input() {}
+
+    /**
+     * This HTML tag, "accordion", creates a reusable disclosure group.
+     * <br><br>
+     * Sections are declared with child <code>accordion-item title="..." value="...">Content</code> tags.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    single     </td><td>     allows only one section open at a time     </td></tr>
+     *     <tr><td>    persist-key="key"     </td><td>     stores open sections in localStorage     </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    open(value) / close(value) / toggle(value)     </td><td>     controls a section     </td></tr>
+     *     <tr><td>    getOpenValues() / setOpen(values)     </td><td>     reads or sets all open sections     </td></tr>
+     *     <tr><td>    onchange(fun)     </td><td>     receives <code>(value, open, openValues)</code> when a section changes     </td></tr>
+     * </table>
+     */
+    static accordion() {}
+
+    /**
+     * This HTML tag, "badge-chip", creates a small status badge or chip.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    tone="neutral"     </td><td>     neutral, accent, info, success, warning, error, or danger     </td></tr>
+     *     <tr><td>    size="md"     </td><td>     sm, md, or lg     </td></tr>
+     *     <tr><td>    icon="✓"     </td><td>     optional leading icon text     </td></tr>
+     *     <tr><td>    dot     </td><td>     shows a leading status dot     </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    getValue() / setValue(text)     </td><td>     reads or replaces the badge label text     </td></tr>
+     *     <tr><td>    setTone(tone)     </td><td>     changes the tone (neutral, accent, info, success, warning, error, or danger)     </td></tr>
+     * </table>
+     */
+    static badge_chip() {}
+
+    /**
+     * This HTML tag, "avatar-badge", creates a generic avatar from initials or an image.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    name="Jane Doe"     </td><td>     name used for initials and label     </td></tr>
+     *     <tr><td>    src="image.png"     </td><td>     optional image URL     </td></tr>
+     *     <tr><td>    size="40px"     </td><td>     avatar size     </td></tr>
+     *     <tr><td>    tone="neutral"     </td><td>     neutral, accent, success, warning, error, or danger     </td></tr>
+     *     <tr><td>    status="online"     </td><td>     optional status dot: online, away, busy, or error     </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    setName(name)     </td><td>     updates the name used for initials and label     </td></tr>
+     *     <tr><td>    setSrc(url)     </td><td>     sets or replaces the avatar image     </td></tr>
+     *     <tr><td>    setStatus(status)     </td><td>     updates the status dot (online, away, busy, or error)     </td></tr>
+     * </table>
+     */
+    static avatar_badge() {}
+
+    /**
+     * This HTML tag, "toast", defines a reusable non-modal notification region.  Toasts may also be shown without
+     * an explicit tag by calling <code>Utils.toast(message [, options])</code> or one of
+     * <code>Utils.toast.success()</code>, <code>Utils.toast.info()</code>, <code>Utils.toast.warning()</code>, or
+     * <code>Utils.toast.error()</code>.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    position="top-center"     </td><td>     one of top-left, top-center, top-right, bottom-left, bottom-center, or bottom-right. Top positions sit below <code>.app-nav</code> when present.     </td></tr>
+     *     <tr><td>    type="info"     </td><td>     default toast type: info, success, warning, or error     </td></tr>
+     *     <tr><td>    duration="3000"     </td><td>     milliseconds before a toast closes; use 0 to keep it open until dismissed     </td></tr>
+     *     <tr><td>    time="3000"     </td><td>     alias for duration     </td></tr>
+     *     <tr><td>    auto-dismiss="false"     </td><td>     keep the toast open until it is dismissed manually     </td></tr>
+     *     <tr><td>    manual     </td><td>     keep the toast open until it is dismissed manually     </td></tr>
+     *     <tr><td>    max-visible="3"     </td><td>     maximum number of visible toasts in this region     </td></tr>
+     *     <tr><td>    no-dismiss     </td><td>     hide the dismiss button     </td></tr>
+     * </table>
+     * <br>
+     * <strong>Content</strong>
+     * <br><br>
+     *     If content is supplied, it is shown as an initial toast.
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
+     *     <tr><td>    show(message [, options])     </td><td>     displays a toast message and returns an object with <code>close()</code>     </td></tr>
+     *     <tr><td>    success(message [, options])     </td><td>     displays a success toast     </td></tr>
+     *     <tr><td>    info(message [, options])     </td><td>     displays an informational toast     </td></tr>
+     *     <tr><td>    warning(message [, options])     </td><td>     displays a warning toast     </td></tr>
+     *     <tr><td>    error(message [, options])     </td><td>     displays an error toast     </td></tr>
+     *     <tr><td>    manual(message [, options])     </td><td>     displays a toast that stays visible until dismissed     </td></tr>
+     *     <tr><td>    clear()     </td><td>     closes all toasts in this region     </td></tr>
+     *     <tr><td>    configure(options)     </td><td>     updates default type, position, duration, maxVisible, or dismissible values     </td></tr>
+     * </table>
+     */
+    static toast() {}
+
+    /**
      * This HTML tag, "push-button", adds functionality and a consistent and convenient API to the HTML provided button input.
      * <br><br>
      *     No new attributes are defined.

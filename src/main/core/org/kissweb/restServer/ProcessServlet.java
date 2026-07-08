@@ -375,12 +375,13 @@ public class ProcessServlet implements Runnable {
                         }
                     }
                     response.setContentType("application/json");
+                    response.setCharacterEncoding(StandardCharsets.UTF_8.name());
                     response.setStatus(200);
                     JSONObject errorJson = new JSONObject();
                     errorJson.put("_Success", false);
                     errorJson.put("_ErrorMessage", "Invalid JSON format");
                     errorJson.put("_ErrorCode", -1);
-                    out.print(errorJson.toString());
+                    writeJsonText(errorJson.toString());
                     out.flush();
                     out.close();
                     asyncContext.complete();
@@ -697,6 +698,10 @@ public class ProcessServlet implements Runnable {
         }
     }
 
+    private void writeJsonText(String text) throws IOException {
+        out.write(text.getBytes(StandardCharsets.UTF_8));
+    }
+
     /**
      * Returns a successful response to the front-end.
      *
@@ -721,10 +726,11 @@ public class ProcessServlet implements Runnable {
             response.setStatus(200);
             if (!isBinaryReturn) {
                 response.setContentType("application/json");
-                out.print(outjson.toString());
+                response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+                writeJsonText(outjson.toString());
             } else {
                 response.setContentType("application/octet-stream");
-                out.print(outjson.toString() + "\003");
+                writeJsonText(outjson.toString() + "\003");
                 if (binaryData != null) {
                     out.write(binaryData);
                     binaryData = null;
@@ -785,6 +791,7 @@ public class ProcessServlet implements Runnable {
                 }
             }
             response.setContentType("application/json");
+            response.setCharacterEncoding(StandardCharsets.UTF_8.name());
             response.setStatus(200);
             JSONObject outjson = new JSONObject();
             outjson.put("_Success", false);
@@ -792,7 +799,7 @@ public class ProcessServlet implements Runnable {
             outjson.put("_ErrorCode", errorCode);
             if (!(e instanceof UserException))
                 log_error(msg, e);
-            out.print(outjson.toString());
+            writeJsonText(outjson.toString());
             out.flush();
             out.close();  //  this causes the second response
         } catch (Exception ignored) {
@@ -826,6 +833,7 @@ public class ProcessServlet implements Runnable {
         }
         // Note: closeSession() is now handled in the outer run() finally block
         response.setContentType("application/json");
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setStatus(200);
         JSONObject outjson = new JSONObject();
         outjson.put("_Success", false);
@@ -833,7 +841,7 @@ public class ProcessServlet implements Runnable {
         outjson.put("_ErrorCode", 2);  // login failure
         outjson.put("_BootId", MainServlet.getBootId());
         try {
-            out.print(outjson.toString());
+            writeJsonText(outjson.toString());
             out.flush();
             out.close();  //  this causes the second response
         } catch (IOException ignore) {
