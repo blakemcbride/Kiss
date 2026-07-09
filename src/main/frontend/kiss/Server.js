@@ -26,6 +26,10 @@ class Server {
     // internal
     static setUUID(uuid) {
         AppState.set('_uuid', uuid);
+        if (uuid) {
+            Server.logoutInProgress = false;
+            Server.sessionExpiredPromise = null;
+        }
     }
 
     /**
@@ -94,16 +98,32 @@ class Server {
      * then performs a full page reload to clear all context and return to the login screen.
      *
      */
-    static async logout(captureReturn = false) {
+    static async logout(captureReturn = false, skipBackend = false) {
+        if (Server.logoutInProgress)
+            return;
+        Server.logoutInProgress = true;
         Utils.suspendDepth = 0;
-        document.body.style.cursor = 'default';
+        document.body.style.cursor = '';
         Utils.cleanup();  //  clean up any context information
         DOMUtils.preventNavigation(false);  //  disable back button protection
 
-        // Call backend Logout service if we have a valid UUID
-        if (Server.uuid) {
+        // Call backend Logout service if we have a valid UUID.  This intentionally
+        // avoids Server.call(), because logout may run while the session is already
+        // expired and should never show another framework error popup.
+        if (!skipBackend && Server.uuid) {
             try {
-                await Server.call('', 'Logout', {});
+                await fetch(Server.url + '/rest', {
+                    method: 'POST',
+                    cache: 'no-store',
+                    body: JSON.stringify({
+                        _uuid: Server.uuid,
+                        _method: 'Logout',
+                        _class: ''
+                    }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
             } catch (err) {
                 // Ignore errors - we're logging out anyway
                 console.log('Logout service call failed:', err);
@@ -119,6 +139,17 @@ class Server {
             location.reload();
     }
 
+    static async handleSessionExpired(message, title = 'Error') {
+        if (Server.sessionExpiredPromise)
+            return Server.sessionExpiredPromise;
+        Server.sessionExpiredPromise = (async () => {
+            DOMUtils.preventNavigation(false);
+            await Utils.showMessage(title, message || 'You have been logged out. Please log in again.');
+            await Server.logout(true, true);
+        })();
+        return Server.sessionExpiredPromise;
+    }
+
     /**
      * Evoke a back-end REST service.
      * <br><br>
@@ -131,7 +162,8 @@ class Server {
      * @returns data returned from the back-end
      */
     static async call(cls, meth, injson=null) {
-        Server.checkTime();
+        if (!await Server.checkTime())
+            return {_Success: false, _ErrorCode: 2, _ErrorMessage: Server.sessionExpiredMessage};
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
@@ -168,8 +200,7 @@ class Server {
                 Server.decCount();
                 if (!res._Success)
                     if (res._ErrorCode === 2) {
-                        await Utils.showMessage('Error', res._ErrorMessage);
-                        Server.logout(true);
+                        await Server.handleSessionExpired(res._ErrorMessage);
                     } else
                         await Utils.showMessage('Error', res._ErrorMessage);
                 resolve(res);
@@ -190,7 +221,7 @@ class Server {
     }
 
     /**
-     * Evoke a back-end REST service without changing the global cursor / busy count.
+     * Evoke a back-end REST service without changing the global busy count.
      * Use this for lightweight background searches where the UI owns any loading
      * indication and the whole app should not look blocked.  Unlike {@link Server.call},
      * transport/parse failures do not raise the framework error popup — the caller gets
@@ -204,7 +235,8 @@ class Server {
      * @see Server.call
      */
     static async callQuiet(cls, meth, injson=null) {
-        Server.checkTime();
+        if (!await Server.checkTime())
+            return {_Success: false, _ErrorCode: 2, _ErrorMessage: Server.sessionExpiredMessage};
         const path = "rest";
         if (!injson)
             injson = {};
@@ -225,8 +257,7 @@ class Server {
             });
             const res = await response.json();
             if (!res._Success && res._ErrorCode === 2) {
-                await Utils.showMessage('Error', res._ErrorMessage);
-                Server.logout(true);
+                await Server.handleSessionExpired(res._ErrorMessage);
             }
             return res;
         } catch (err) {
@@ -250,7 +281,8 @@ class Server {
      * @see Utils.toBase64
      */
     static async binaryCall(cls, meth, injson=null) {
-        Server.checkTime();
+        if (!await Server.checkTime())
+            return {_Success: false, _ErrorCode: 2, _ErrorMessage: Server.sessionExpiredMessage};
         const path = "rest";  // path to servlet
         if (!injson)
             injson = {};
@@ -303,8 +335,7 @@ class Server {
                 const ret = JSON.parse(json);
                 if (!ret._Success)
                     if (ret._ErrorCode === 2) {
-                        await Utils.showMessage('Error', ret._ErrorMessage);
-                        Server.logout(true);
+                        await Server.handleSessionExpired(ret._ErrorMessage);
                     } else
                         await Utils.showMessage('Error', ret._ErrorMessage);
                 ret._data = bytes.slice(i, bytes.length);
@@ -325,13 +356,21 @@ class Server {
     }
 
     static incCount() {
-        if (++Utils.suspendDepth === 1)
-            document.body.style.cursor = 'wait';
+        Utils.suspendDepth++;
+        Server.clearBusyCursor();
     }
 
     static decCount() {
-        if (--Utils.suspendDepth === 0)
-            document.body.style.cursor = 'default';
+        if (Utils.suspendDepth > 0)
+            Utils.suspendDepth--;
+        else
+            Utils.suspendDepth = 0;
+        Server.clearBusyCursor();
+    }
+
+    static clearBusyCursor() {
+        if (document.body && (document.body.style.cursor === 'wait' || document.body.style.cursor === 'progress'))
+            document.body.style.cursor = '';
     }
 
     /**
@@ -350,8 +389,9 @@ class Server {
      * @see Utils.getFileUploadCount
      * @see Utils.getFileUploadFormData
      */
-    static fileUploadSend(cls, meth, fd, injson=null, waitMsg, successMessage) {
-        Server.checkTime();
+    static async fileUploadSend(cls, meth, fd, injson=null, waitMsg, successMessage) {
+        if (!await Server.checkTime())
+            return {_Success: false, _ErrorCode: 2, _ErrorMessage: Server.sessionExpiredMessage};
         return new Promise(function (resolve, reject) {
             if (typeof fd === 'string')
                 fd = $$(fd).getFormData();
@@ -402,8 +442,7 @@ class Server {
                         if (successMessage)
                             await Utils.showMessage("Information", successMessage);
                     } else if (res._ErrorCode === 2) {
-                        await Utils.showMessage("Error", res._ErrorMessage);
-                        Server.logout(true);
+                        await Server.handleSessionExpired(res._ErrorMessage);
                     } else
                         await Utils.showMessage("Error", res._ErrorMessage);
                     resolve(res);
@@ -433,15 +472,16 @@ class Server {
      * <br><br>
      * The return value is <code>false</code> if all the web services complete and <code>true</code> if there is an error.
      */
-    static callAll(pa /*, ... each subsequent arg is a function to handle the result of the next promise in pa */) {
-        Server.checkTime();
+    static async callAll(pa /*, ... each subsequent arg is a function to handle the result of the next promise in pa */) {
+        if (!await Server.checkTime())
+            return true;
         const args = arguments;
         return new Promise(function (resolve, reject) {
             Promise.all(pa).then(function (ret) {
                 for (let i = 0; i < ret.length; i++)
                     if (!ret[i]._Success) {
                         if (ret[i]._ErrorCode === 2)
-                            Server.logout(true);
+                            Server.handleSessionExpired(ret[i]._ErrorMessage);
                         resolve(true);  //  error
                         return;
                     }
@@ -490,23 +530,22 @@ class Server {
     }
 
     static async checkTime() {
-        if (!Server.maxInactiveSeconds)
-            return;
+        if (Server.logoutInProgress || !Server.maxInactiveSeconds)
+            return true;
         const now = (new Date()).getTime() / 1000;
         if (now - Server.timeLastCall > Server.maxInactiveSeconds) {
-            DOMUtils.preventNavigation(false);  //  disable back button protection
-            await Utils.showMessage("Warning", "Auto logout due to inactivity.  Please re-login.");
-            Server.logout(true);
-        } else
-            Server.timeLastCall = now;
+            await Server.handleSessionExpired(Server.sessionExpiredMessage, 'Warning');
+            return false;
+        }
+        Server.timeLastCall = now;
+        return true;
     }
 }
 
     // class variables
 Server.errorMessage = 'Error communicating with the server.';
+Server.sessionExpiredMessage = 'You have been logged out due to inactivity. Please log in again.';
 Server.timeLastCall;
 Server.maxInactiveSeconds = 0;  // max number of seconds between calls or zero for no max (or auto logout)
-
-
-
-
+Server.logoutInProgress = false;
+Server.sessionExpiredPromise = null;

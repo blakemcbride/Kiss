@@ -5,6 +5,39 @@
 
 **CRITICAL: Kiss is a generic, application-neutral framework. All changes to Kiss core code, configuration options, documentation, and comments must remain completely free of references to any specific application, third-party product, or proprietary technology. Never reference specific application names, specific non-SQL databases, or any application-specific concepts in framework code or documentation. Use generic terms such as "alternative data store" rather than naming specific products.**
 
+### Keeping Generic Code Generic (operational checklist)
+
+The CRITICAL rule above is easy to state and easy to violate in practice. Apply these operational rules whenever a change would touch generic framework code.
+
+**Generic (framework) — application-neutral; treat as read-only, change only when unavoidable and only generically:**
+- `src/main/frontend/kiss/**` — frontend framework and components
+- `src/main/core/**` — core Java framework
+- `src/main/precompiled/**` — shared utilities (an application may add its own utility classes here, but must not alter framework-owned ones)
+- `AI/KnowledgeBase.md` — this document: the generic Kiss-framework reference (see "Documentation and where knowledge lives" below)
+
+**Application-specific — the normal work area; all app code, values, and branding go here:**
+- `src/main/backend/**` — services and business logic
+- `src/main/frontend/**` except `kiss/` — application screens, application theme CSS, application JavaScript
+- `src/main/backend/application.ini` — all secrets, URLs, keys, and per-deployment config
+- `AI/ApplicationDetails.md` — this application's own notes (per application; never shared)
+
+**Documentation and where knowledge lives.** This file, `AI/KnowledgeBase.md`, is the generic Kiss-framework reference. It is itself a shared framework artifact: it must read **identically for every Kiss application** (kept in sync with the canonical framework repository) and must contain **only** generic, application-neutral material. Application-specific notes — anything that names or is tuned to one application — belong in that application's `AI/ApplicationDetails.md`, which is never shared. When generic framework knowledge or code first appears inside an application, **upstream it**: move the code into the framework tree and the documentation into this file, so every application benefits and the shared artifacts stay in sync; keep only the application-specific remainder in the app.
+
+**Rules for any change that does touch a generic file:**
+1. No application-specific references — no application, product, or company names, and no application-domain concepts, in code, comments, documentation, or identifiers. Use neutral generic terms.
+2. No brand-specific values baked in — colors, logos, copy, fonts, URLs, or dimensions tuned to one application. (For example, never hardcode a brand color such as `rgba(r, g, b)` inside a framework component.)
+3. No secrets or environment literals — URLs, API keys, passwords, and tokens belong in `application.ini`, read via `MainServlet.getEnvironment()`.
+4. Parameterize instead of hardcoding — expose application-specific values as CSS custom properties, configuration keys, or override hooks WITH NEUTRAL DEFAULTS in the framework; the application supplies its specifics from the application layer (application theme CSS, `application.ini`). Example: the framework reads a `--glow-color` CSS variable with a neutral default, and the application sets its own brand color in its theme file.
+5. The change must be a generic capability any Kiss application could use — never something that only makes sense for one application.
+6. When a component's behavior or API changes, update its documentation in `src/main/frontend/kiss/component/components.js` in the same change.
+
+**Before committing, self-check the diff of every generic file:**
+- Grep it for the application's name and for any brand color/value — there must be ZERO matches in generic files.
+- Confirm the change would make sense in a brand-new, unrelated Kiss application.
+- In the commit message / PR description, explicitly list every generic framework file you changed and why, so it can be reviewed and synchronized across the framework and its applications.
+
+If a change seems to require application-specific behavior inside a generic file: stop, move it to the application layer instead, or ask.
+
 ## Overview
 KISS is a **Kiss Framework application** - a full-stack Java web framework designed for rapid business application development. It includes both front-end and back-end already integrated and running as a basic example application. The framework emphasizes simplicity, productivity, and the ability to make changes while the system is running without requiring compilation or restarts.
 
@@ -276,6 +309,20 @@ A method registered with `MainServlet.allowWithoutAuthentication("package/Class"
 The front-end completes the loop: any `_ErrorCode = 2` triggers `Server.logout(true)`, which clears `AppState` and routes to `/login` **carrying the current location as the `return`** — so after re-authenticating, the user lands back on the page they were on (session-expiry resume). An intentional logout (`Server.logout()`) goes to `/login` without a return. See [Client-Side Routing](#client-side-routing-router).
 
 **Server-restart detection (boot id).** Sessions live in the in-memory `UserCache`, so a back-end restart invalidates them all — but the *client's* token persists in `AppState`, so without help the browser would resume onto a dead session. To prevent that, `MainServlet.getBootId()` returns a UUID generated once per server start; it's included in every response as `_BootId`. The front-end records it at login (`Server.setBootId` from the `Login` response) and, at startup before routing, `Server.verifyServerInstance()` makes one unauthenticated `LoginRequired` call and compares: if the boot id changed, the back end was restarted, so it clears the persisted session and forces a clean re-login (no resume) with a "server was restarted" notice. A restart while the app is open is still caught on the next call by the normal `_ErrorCode = 2` path.
+
+### CORS and Reverse Proxies (web-secure.xml / web-unsafe.xml)
+
+Kiss ships two web.xml variants in `src/main/core/WEB-INF/`:
+- `web-unsafe.xml` — deployed by `buildSystem()` for development; `cors.allowed.origins = *` (needed because the dev frontend `:8000` and backend `:8080` are different origins)
+- `web-secure.xml` — swapped in by `./bld war` for the production WAR; keeps a localhost-only allow-list (`http://localhost:8000,http://localhost:63342`)
+
+**No per-deployment CORS configuration is needed in production.** In the normal single-WAR deployment, frontend and backend are same-origin. Browsers still send an `Origin` header on every POST (the Fetch spec attaches it to all non-GET requests, even same-origin ones), so Tomcat's CorsFilter engages — but it classifies the request as NOT_CORS via `RequestUtil.isSameOrigin()` and never consults the allow-list. The localhost allow-list in `web-secure.xml` is therefore harmless in production; it only blocks genuinely foreign origins.
+
+**TLS-terminating reverse proxies would break same-origin detection** — the proxy forwards over plain http, so Tomcat would believe the scheme is http while the browser's `Origin` says https; the mismatch misclassifies every API call as cross-origin and CorsFilter returns 403. For this reason `web-secure.xml` includes Tomcat's `RemoteIpFilter`, mapped BEFORE the CorsFilter, with `protocolHeader = X-Forwarded-Proto`. It restores the original scheme/port and trusts the header only from loopback/private (RFC 1918) source addresses (the `internalProxies` default), so outside clients cannot spoof it. The proxy must send `X-Forwarded-Proto` and pass `Host` through — standard reverse-proxy practice. Deployments not behind a proxy are unaffected.
+
+**Split deployments are the one true cross-origin case.** If the frontend is served from a different origin than the backend (`SystemInfo.backendUrl` set), the frontend origin must be added to `cors.allowed.origins` in `web-secure.xml` by hand — no same-origin bypass can apply there.
+
+(An earlier `AllowedOrigins` application.ini key that the build stamped into the deployed web.xml was removed in favor of the RemoteIpFilter approach — it required per-deployment configuration for what the server can determine automatically.)
 
 ### Password Storage (org.kissweb.PasswordHash)
 
@@ -1320,8 +1367,26 @@ Do not use `width: 100%` on input controls (textbox-input, text-input, etc.). Th
 
 ## Known Issues & Solutions
 
-None currently documented.
+### Empty `application.ini` values must be quoted (`Key = ""`, not `Key =`)
+
+`MainServlet.getEnvironment` is backed by a `java.util.Hashtable`, which throws
+`NullPointerException` on a null value. `IniFile.parse` calls `unquote` on each value,
+and `unquote("")` returns **null** (an unquoted empty string), whereas `unquote("\"\"")`
+returns an empty string. So a bare `Key =` line yields a null that `MainServlet.readIniFile`
+tries to `Hashtable.put`, throwing an NPE that aborts `KissInit.init()` — after which the
+database is never configured and every service receives a null `Connection` (`db`).
+
+Symptom: at startup `* * * Error executing KissInit.groovy` with a bare
+`java.lang.NullPointerException`, and services fail with `Cannot invoke method ... on null
+object` (db is null) even though logins appear to "succeed" (the no-database fallback
+accepts any credentials).
+
+Fix: always give empty config keys an explicit empty-quoted value:
+```ini
+ServicePassword = ""    # correct
+# ServicePassword =     # WRONG: parses to null -> Hashtable NPE
+```
 
 ---
 
-*Last Updated: 2026-06-18*
+*Last Updated: 2026-07-09*

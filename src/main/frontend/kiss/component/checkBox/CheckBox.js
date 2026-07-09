@@ -45,7 +45,7 @@
             }
         }
 
-        const newElm = Utils.replaceHTML(id, elm, '<div style="{style}" class="{class}"><input type="checkbox" {attr} id="{id}"><label for="{id}" style="margin-left: 4px;">{content}</label></div>', {
+        const newElm = Utils.replaceHTML(id, elm, '<div style="{style}" class="kiss-check-box {class}"><input type="checkbox" {attr} id="{id}"><label for="{id}">{content}</label></div>', {
             style: nStyle,
             class: cls,
             attr: nAttrs,
@@ -184,5 +184,4 @@
 
     Utils.newComponent(componentInfo);
 })();
-
 

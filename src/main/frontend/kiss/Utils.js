@@ -107,6 +107,120 @@ function $$(id) {
  * General utilities class
  */
 class Utils {
+    static modalCloseDuration() {
+        const raw = getComputedStyle(document.documentElement).getPropertyValue('--modal-close-dur').trim();
+        if (!raw)
+            return 150;
+        if (raw.endsWith('ms'))
+            return parseFloat(raw) || 150;
+        if (raw.endsWith('s'))
+            return (parseFloat(raw) || 0.15) * 1000;
+        return parseFloat(raw) || 150;
+    }
+
+    static modalPrefersReducedMotion() {
+        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    }
+
+    static modal_open(modal, content) {
+        if (!modal)
+            return;
+        if (modal.__kissModalBackdropCloseTimer) {
+            clearTimeout(modal.__kissModalBackdropCloseTimer);
+            modal.__kissModalBackdropCloseTimer = null;
+        }
+        if (modal.__kissModalBackdropOpenFrame) {
+            cancelAnimationFrame(modal.__kissModalBackdropOpenFrame);
+            modal.__kissModalBackdropOpenFrame = null;
+        }
+        modal.classList.add('t-modal-backdrop');
+        modal.classList.remove('is-open', 'is-closing');
+        if (content) {
+            if (content.__kissModalCloseTimer) {
+                clearTimeout(content.__kissModalCloseTimer);
+                content.__kissModalCloseTimer = null;
+            }
+            if (content.__kissModalOpenFrame) {
+                cancelAnimationFrame(content.__kissModalOpenFrame);
+                content.__kissModalOpenFrame = null;
+            }
+            content.classList.add('t-modal');
+            content.classList.remove('is-open', 'is-closing');
+        }
+        DOMUtils.show(modal);
+        if (!content)
+            return;
+        const openFrame = requestAnimationFrame(function () {
+            modal.__kissModalBackdropOpenFrame = null;
+            content.__kissModalOpenFrame = null;
+            modal.classList.add('is-open');
+            content.classList.add('is-open');
+        });
+        modal.__kissModalBackdropOpenFrame = openFrame;
+        content.__kissModalOpenFrame = openFrame;
+    }
+
+    static modal_close(modal, content, done = null, immediate = false) {
+        if (!modal) {
+            if (done)
+                done();
+            return;
+        }
+        if (!content || immediate || Utils.modalPrefersReducedMotion()) {
+            if (modal.__kissModalBackdropCloseTimer) {
+                clearTimeout(modal.__kissModalBackdropCloseTimer);
+                modal.__kissModalBackdropCloseTimer = null;
+            }
+            if (modal.__kissModalBackdropOpenFrame) {
+                cancelAnimationFrame(modal.__kissModalBackdropOpenFrame);
+                modal.__kissModalBackdropOpenFrame = null;
+            }
+            modal.classList.remove('is-open', 'is-closing');
+            if (content) {
+                if (content.__kissModalCloseTimer) {
+                    clearTimeout(content.__kissModalCloseTimer);
+                    content.__kissModalCloseTimer = null;
+                }
+                if (content.__kissModalOpenFrame) {
+                    cancelAnimationFrame(content.__kissModalOpenFrame);
+                    content.__kissModalOpenFrame = null;
+                }
+                content.classList.remove('is-open', 'is-closing');
+            }
+            DOMUtils.hide(modal);
+            if (done)
+                done();
+            return;
+        }
+        if (content.__kissModalCloseTimer)
+            clearTimeout(content.__kissModalCloseTimer);
+        if (content.__kissModalOpenFrame) {
+            cancelAnimationFrame(content.__kissModalOpenFrame);
+            content.__kissModalOpenFrame = null;
+        }
+        if (modal.__kissModalBackdropOpenFrame) {
+            cancelAnimationFrame(modal.__kissModalBackdropOpenFrame);
+            modal.__kissModalBackdropOpenFrame = null;
+        }
+        if (modal.__kissModalBackdropCloseTimer)
+            clearTimeout(modal.__kissModalBackdropCloseTimer);
+        modal.classList.remove('is-open');
+        modal.classList.add('is-closing');
+        content.classList.remove('is-open');
+        content.classList.add('is-closing');
+        const closeTimer = setTimeout(function () {
+            modal.__kissModalBackdropCloseTimer = null;
+            content.__kissModalCloseTimer = null;
+            modal.classList.remove('is-closing');
+            content.classList.remove('is-closing');
+            DOMUtils.hide(modal);
+            if (done)
+                done();
+        }, Utils.modalCloseDuration());
+        modal.__kissModalBackdropCloseTimer = closeTimer;
+        content.__kissModalCloseTimer = closeTimer;
+    }
+
     /**
      * Display a popup window with a message to the user.  The user will click "Ok" when they have read the message.
      * If the title is 'Error' the popup will appear in red.
@@ -161,11 +275,14 @@ class Utils {
                     Utils.errorFunction();
             } else
                 header.style.backgroundColor = '#6495ed';
+            let ended = false;
             function endfun() {
-                DOMUtils.hide(modal);
-                resolve();
+                if (ended)
+                    return;
+                ended = true;
+                Utils.modal_close(modal, content, resolve);
             }
-            DOMUtils.show(modal);
+            Utils.modal_open(modal, content);
             let waitForKeyUp = false;
 
             // Remove old handlers and add new ones
@@ -240,37 +357,40 @@ class Utils {
 
             DOMUtils.getElement('yesno-header').textContent = title;
             DOMUtils.getElement('yesno-message').textContent = message;
-            DOMUtils.show(modal);
+            const content = DOMUtils.getElement('yesno-popup-content');
+            Utils.modal_open(modal, content);
+            let ended = false;
+            function finish(value, callback) {
+                if (ended)
+                    return;
+                ended = true;
+                Utils.modal_close(modal, content, function () {
+                    if (callback)
+                        callback();
+                    resolve(value);
+                });
+            }
 
             // Remove old handlers by cloning and add new ones
             const span = DOMUtils.getElement('yesno-close-btn');
             const newSpan = span.cloneNode(true);
             span.parentNode.replaceChild(newSpan, span);
             newSpan.addEventListener('click', function () {
-                DOMUtils.hide(modal);
-                if (noFun)
-                    noFun();
-                resolve(false);
+                finish(false, noFun);
             });
 
             const yesBtn = DOMUtils.getElement('yesno-yes');
             const newYesBtn = yesBtn.cloneNode(true);
             yesBtn.parentNode.replaceChild(newYesBtn, yesBtn);
             newYesBtn.addEventListener('click', function () {
-                DOMUtils.hide(modal);
-                if (yesFun)
-                    yesFun();
-                resolve(true);
+                finish(true, yesFun);
             });
 
             const noBtn = DOMUtils.getElement('yesno-no');
             const newNoBtn = noBtn.cloneNode(true);
             noBtn.parentNode.replaceChild(newNoBtn, noBtn);
             newNoBtn.addEventListener('click', function () {
-                DOMUtils.hide(modal);
-                if (noFun)
-                    noFun();
-                resolve(false);
+                finish(false, noFun);
             });
         });
     }
@@ -310,7 +430,7 @@ class Utils {
         const content = DOMUtils.getElement('wait-msg-content');
         this.makeDraggable(content, content);
         DOMUtils.getElement('wmsg-message').textContent = message;
-        DOMUtils.show(modal);
+        Utils.modal_open(modal, content);
     }
 
     /**
@@ -321,7 +441,7 @@ class Utils {
         Utils.waitMessageStack.pop();
         const modal = DOMUtils.getElement('wmsg-modal');
         if (!Utils.waitMessageStack.length)
-            DOMUtils.hide(modal);
+            Utils.modal_close(modal, DOMUtils.getElement('wait-msg-content'));
         else
             DOMUtils.getElement('wmsg-message').textContent = Utils.waitMessageStack[Utils.waitMessageStack.length-1];
     }
@@ -1359,6 +1479,18 @@ class Utils {
         });
     };
 
+    static nextPaint() {
+        return new Promise(function (resolve) {
+            if (typeof window.requestAnimationFrame !== 'function') {
+                setTimeout(resolve, 0);
+                return;
+            }
+            window.requestAnimationFrame(function () {
+                window.requestAnimationFrame(resolve);
+            });
+        });
+    }
+
     /**
      * Loads a new HTML/JS page.  The new page will replace the body of the current page.
      * Also, the loaded code is processed for custom tags / components.
@@ -1396,7 +1528,9 @@ class Utils {
                     document.body.innerHTML = text;
                 Utils.rescan();  // does all the tag replacement
                 window.scrollTo(0, 0);
-                getScript(page + '.js').then(function () {
+                Utils.nextPaint().then(function () {
+                    return getScript(page + '.js');
+                }).then(function () {
                     if (initialFocus) {
                         const ctl = $$(initialFocus);
                         if (ctl)
@@ -1410,6 +1544,49 @@ class Utils {
                 });
             }, function(err) {
                 console.log("loadPage: error loading " + page);
+                reject();
+            });
+        });
+    }
+
+    /**
+     * Load a page fragment into an existing screen without running full-screen cleanup.
+     *
+     * Use this for embedded panels that live inside the current route. Unlike loadPage(),
+     * this does not reset AGGrid/Editor/enter-key contexts or lastScreenLoaded, so parent
+     * screen controls remain alive while the fragment initializes.
+     *
+     * @param {string} page path to the page to be loaded
+     * @param {string} tag ID of the container to fill
+     * @param {string} initialFocus optional, ID of control to set initial focus on
+     */
+    static loadPageFragment(page, tag, initialFocus = null) {
+        return new Promise(function (resolve, reject) {
+            Utils.getHTML(page + '.html').then(function (text) {
+                const element = DOMUtils.getElement(tag);
+                if (!element) {
+                    console.log("loadPageFragment: can't find target " + tag);
+                    reject();
+                    return;
+                }
+                element.innerHTML = text;
+                Utils.rescan();
+                Utils.nextPaint().then(function () {
+                    return getScript(page + '.js');
+                }).then(function () {
+                    if (initialFocus) {
+                        const ctl = $$(initialFocus);
+                        if (ctl)
+                            ctl.focus();
+                        else
+                            console.log("loadPageFragment: can't set focus to unknown field " + initialFocus);
+                    }
+                    resolve();
+                }, function () {
+                    reject();
+                });
+            }, function () {
+                console.log("loadPageFragment: error loading " + page);
                 reject();
             });
         });
@@ -1544,8 +1721,23 @@ class Utils {
      *
      * @param header DOM element  – the drag handle (title bar)
      * @param content DOM element – the element to reposition while dragging
+     * @param enabled whether dragging should be enabled
      */
-    static makeDraggable(header, content) {
+    static makeDraggable(header, content, enabled = true) {
+        if (!header || !content)
+            return;
+
+        if (header.__kissDragCleanup) {
+            header.__kissDragCleanup();
+            header.__kissDragCleanup = null;
+        }
+
+        header.style.touchAction = '';
+        header.style.cursor = '';
+
+        if (!enabled)
+            return;
+
         // Per-drag handler references stored so they can be removed cleanly
         // after each drag ends, preventing listener accumulation.
         let pointerMoveHandler = null;
@@ -1561,6 +1753,10 @@ class Utils {
             // Only respond to primary pointer button (left mouse, first touch, pen tip).
             if (!e.isPrimary)
                 return;
+            if (e.button != null && e.button !== 0)
+                return;
+            if (e.target && e.target.closest('button, input, textarea, select, a, [role="button"], [contenteditable="true"], push-button, text-input, check-box, radio-button, menu-button, .popup-no-drag'))
+                return;
 
             const drag = {};
             drag.pageX0 = e.pageX;
@@ -1569,6 +1765,7 @@ class Utils {
             drag.offset0 = DOMUtils.offset(content);
 
             activeDragPointerId = e.pointerId;
+            e.preventDefault();
 
             // Capture the pointer on the header so all subsequent
             // pointermove/pointerup events are routed here regardless of
@@ -1604,6 +1801,21 @@ class Utils {
 
         header.style.cursor = 'all-scroll';
         header.addEventListener('pointerdown', handle_pointerdown);
+        header.__kissDragCleanup = function() {
+            header.removeEventListener('pointerdown', handle_pointerdown);
+            if (pointerMoveHandler)
+                header.removeEventListener('pointermove', pointerMoveHandler);
+            if (pointerUpHandler)
+                header.removeEventListener('pointerup', pointerUpHandler);
+            if (pointerCancelHandler)
+                header.removeEventListener('pointercancel', pointerCancelHandler);
+            header.style.touchAction = '';
+            header.style.cursor = '';
+            pointerMoveHandler = null;
+            pointerUpHandler = null;
+            pointerCancelHandler = null;
+            activeDragPointerId = null;
+        };
     }
 
     /**
@@ -1636,7 +1848,7 @@ class Utils {
             const prior_w = DOMUtils.getElement(prior_id);
             const prior_content = prior_w.firstElementChild;
             prior_offset = DOMUtils.offset(prior_content);
-            Utils.popup_close();
+            Utils.popup_close(null, true);
         }
 
         let content;
@@ -1683,11 +1895,14 @@ class Utils {
             body = both_parts[1];
         }
 
-        DOMUtils.show(w);
+        Utils.modal_open(w, content);
         if (prior_offset)
             DOMUtils.setOffset(content, prior_offset);
 
-        this.makeDraggable(header, content);
+        const draggableAttr = w.getAttribute('data-popup-draggable');
+        const draggable = draggableAttr == null || draggableAttr !== 'false';
+        content.classList.toggle('popup-not-draggable', !draggable);
+        this.makeDraggable(header, content, draggable);
 
         if (focus_ctl) {
             const fctl = DOMUtils.getElement(focus_ctl);
@@ -1739,7 +1954,7 @@ class Utils {
      *
      * @see Utils.popup_open
      */
-    static popup_close(id = null) {
+    static popup_close(id = null, immediate = false) {
         const context = Utils.popup_context.pop();
         if (!context) {
             console.log('popup_close called without an active popup');
@@ -1753,7 +1968,9 @@ class Utils {
         if (typeof Editor !== 'undefined')
             Editor.popEditorContext();
         Utils.popEnterContext();
-        DOMUtils.hide(context.id);
+        const popup = DOMUtils.getElement(context.id);
+        const content = popup ? popup.firstElementChild : null;
+        Utils.modal_close(popup, content, null, immediate);
         Utils.globalEnterHandler(context.globalEnterHandler);
         Utils.popup_zindex -= 2;
         if (Utils.popup_zindex < 10)

@@ -216,7 +216,7 @@
         entry.element.classList.add('is-leaving');
         window.setTimeout(function () {
             removeElement(entry.element);
-        }, 180);
+        }, 220);
         return this;
     };
 
@@ -246,7 +246,16 @@
 
         icon.className = 'kiss-toast-icon';
         icon.setAttribute('aria-hidden', 'true');
-        icon.appendChild(createSvgIcon(opts.type));
+        if (opts.type === 'success') {
+            const successCheck = document.createElement('span');
+            successCheck.className = 't-success-check';
+            successCheck.setAttribute('data-state', 'out');
+            successCheck.setAttribute('aria-hidden', 'true');
+            successCheck.appendChild(createSvgIcon(opts.type));
+            icon.appendChild(successCheck);
+        } else {
+            icon.appendChild(createSvgIcon(opts.type));
+        }
         toast.appendChild(icon);
 
         body.className = 'kiss-toast-body';
@@ -281,8 +290,12 @@
         this.trim(opts.maxVisible);
 
         window.requestAnimationFrame(function () {
-            if (!entry.closed)
+            if (!entry.closed) {
                 toast.classList.add('is-visible');
+                const successCheck = toast.querySelector('.t-success-check');
+                if (successCheck)
+                    successCheck.setAttribute('data-state', 'in');
+            }
         });
 
         if (opts.duration > 0) {

@@ -9,10 +9,21 @@
 
 (function () {
 
+    function escapeAttr(val) {
+        return String(val == null ? '' : val)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
     const processor = function (elm, attr, content) {
         let nstyle;
         let height = null;
         let width = null;
+        let draggable = null;
+        let closeButton = false;
+        let closeLabel = 'Close';
         if (attr.style)
             nstyle = attr.style;
         else
@@ -29,6 +40,17 @@
                 case 'width':
                     width = Utils.removeQuotes(attr[prop]);
                     break;
+                case 'draggable':
+                    draggable = Utils.removeQuotes(attr[prop]);
+                    break;
+                case 'close-button':
+                case 'closeButton':
+                    closeButton = String(Utils.removeQuotes(attr[prop])).toLowerCase() !== 'false';
+                    break;
+                case 'close-label':
+                case 'closeLabel':
+                    closeLabel = Utils.removeQuotes(attr[prop]) || closeLabel;
+                    break;
 
 
                 // preexisting attributes
@@ -44,9 +66,18 @@
             }
         }
 
+        if (draggable != null)
+            nattrs += ' data-popup-draggable="' + (String(draggable).toLowerCase() === 'false' ? 'false' : 'true') + '"';
+        if (closeButton)
+            nattrs += ' data-popup-close-button="true"';
         nattrs += ' hidden';
         nstyle = 'height: ' + height + '; width: ' + width + '; ' + nstyle;
 
+        if (closeButton) {
+            const closeMarkup = '<button type="button" class="popup-icon-close" data-popup-close ' +
+                    'aria-label="' + escapeAttr(closeLabel) + '">&times;</button>';
+            content = content.replace(/<\/popup-title>/, closeMarkup + '</popup-title>');
+        }
         content = content.replace(/<popup-title/, '<div').replace(/<\/popup-title>/, '</div>');
         content = content.replace(/<popup-body/, '<div').replace(/<\/popup-body>/, '</div>');
 
@@ -64,6 +95,13 @@
     };
     Utils.newComponent(componentInfo);
 
+    document.addEventListener('click', function (evt) {
+        const closeBtn = evt.target.closest('[data-popup-close]');
+        if (!closeBtn || closeBtn.disabled)
+            return;
+        evt.preventDefault();
+        const popup = closeBtn.closest('.popup-background');
+        Utils.popup_close(popup ? popup.id : null);
+    });
+
 })();
-
-

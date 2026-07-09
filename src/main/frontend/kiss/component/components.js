@@ -523,6 +523,9 @@ class components {
      *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
      *     <tr><td>    height="400px"     </td><td>     sets the height of the body of the popup window   </td></tr>
      *     <tr><td>    width="200px"     </td><td>     sets the width of the body of the popup window     </td></tr>
+     *     <tr><td>    draggable="false"     </td><td>     disables title-bar dragging for the popup     </td></tr>
+     *     <tr><td>    close-button="true"     </td><td>     adds a standard title-bar close button     </td></tr>
+     *     <tr><td>    close-label="Close"     </td><td>     aria label for the standard close button     </td></tr>
      * </table>
      */
     static popup() {}
