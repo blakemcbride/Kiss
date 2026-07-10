@@ -143,11 +143,11 @@
             '<div id="{id}" class="{class}" style="{style}" {attr}>' +
                 '<div id="{id}-control" class="kiss-search-control t-clear{valueClass}">' +
                     '<span class="kiss-search-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>' +
-                    '<input id="{id}-input" class="kiss-search-field" type="text" value="{value}" placeholder="{placeholder}" autocomplete="{autocomplete}" spellcheck="{spellcheck}" aria-label="{ariaLabel}" aria-controls="{id}-results" aria-autocomplete="list"{maxAttr}{required}{disabled}>' +
+                    '<input id="{id}-input" class="kiss-search-field" type="search" name="{id}-search" value="{value}" placeholder="{placeholder}" autocomplete="{autocomplete}" autocorrect="off" autocapitalize="off" spellcheck="{spellcheck}" aria-label="{ariaLabel}" aria-controls="{id}-results" aria-autocomplete="list" data-1p-ignore data-lpignore="true" data-form-type="other"{maxAttr}{required}{disabled}>' +
                     '<div id="{id}-mirror" class="t-clear-mirror kiss-search-mirror" aria-hidden="true">{value}</div>' +
                     '<div id="{id}-placeholder" class="t-clear-placeholder kiss-search-placeholder" aria-hidden="true">{placeholder}</div>' +
                     '<div id="{id}-glow" class="t-clear-glow" aria-hidden="true"></div>' +
-                    '<button type="button" id="{id}-clear" class="kiss-search-clear t-clear-btn" aria-label="{clearLabel}" title="{clearLabel}"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>' +
+                    '<button type="button" id="{id}-clear" class="kiss-search-clear t-clear-btn" aria-label="{clearLabel}"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>' +
                 '</div>' +
                 '<div id="{id}-results" class="kiss-search-results" role="listbox" hidden></div>' +
             '</div>', {

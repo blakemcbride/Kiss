@@ -827,6 +827,18 @@ div.vert-input label:after { content: ":"; }
     border: 0;
     outline: 0;
     font: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+/* Hide the native type="search" decorations so only the custom clear button shows */
+.kiss-search-field::-webkit-search-decoration,
+.kiss-search-field::-webkit-search-cancel-button,
+.kiss-search-field::-webkit-search-results-button,
+.kiss-search-field::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
 }
 
 .t-clear {

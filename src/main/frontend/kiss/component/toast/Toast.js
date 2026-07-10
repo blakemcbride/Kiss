@@ -275,7 +275,6 @@
             close.type = 'button';
             close.className = 'kiss-toast-close';
             close.setAttribute('aria-label', 'Dismiss notification');
-            close.setAttribute('title', 'Dismiss');
             close.textContent = 'x';
             close.addEventListener('click', (e) => {
                 e.preventDefault();
