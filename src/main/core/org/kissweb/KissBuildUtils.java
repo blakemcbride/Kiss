@@ -286,8 +286,14 @@ public class KissBuildUtils {
      * <code>&lt;Connector&gt;</code> port match the currently configured
      * values. Idempotent — repeated calls converge on the configured
      * ports, regardless of what was in the file previously.
+     * <br><br>
+     * Called automatically by {@link #installTomcat}.  An application with
+     * its own Tomcat setup procedure can call it directly (after assigning
+     * {@link #backendPort} / {@link #shutdownPort}) so that a freshly
+     * extracted stock <code>server.xml</code> is always re-stamped with the
+     * application's ports.
      */
-    private static void rewriteServerXmlPorts() {
+    public static void rewriteServerXmlPorts() {
         java.nio.file.Path p = java.nio.file.Paths.get("tomcat/conf/server.xml");
         if (!java.nio.file.Files.exists(p))
             return;   // tomcat not yet installed; installTomcat runs again later
