@@ -137,9 +137,23 @@ public class BuildUtils {
                 case "-h":
                 case "--help":
                     println("Use: bld  list-tasks         to get a list of tasks");
-                    println("Use: bld  [-v]  <task>       to execute the task");
+                    println("Use: bld  [option]... <task> to execute the task");
                     println("Use: bld  help               this message");
                     println("Use: bld  version            display version of bld");
+                    println("");
+                    println("Options:");
+                    println("  -v, --verbose                     verbose output (must precede the task)");
+                    println("  -h, --help                        same as help");
+                    println("  --version                         same as version");
+                    //  Like listTasks above, the tasks class may supply an optional
+                    //  listOptions method that documents any additional options it
+                    //  consumes before task dispatch.
+                    try {
+                        Method listOptionsMethod = tasksClass.getMethod("listOptions");
+                        listOptionsMethod.invoke(null);
+                    } catch (Exception e) {
+                        // ignore
+                    }
                     break;
                 case "-v":
                 case "--verbose":

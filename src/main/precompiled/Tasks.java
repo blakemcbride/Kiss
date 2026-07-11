@@ -103,11 +103,20 @@ public class Tasks {
         println("unit-tests               build the system for unit testing (KissUnitTest.jar)");
         println("");
         println("Options (any position):");
-        println("  -dp PORT, --debug-port=PORT       JDWP debug port (default 9000)");
-        println("  -bp PORT, --backend-port=PORT     development back-end port (default 8080)");
-        println("  -sp PORT, --shutdown-port=PORT    Tomcat shutdown port (default 8005)");
-        println("  -fp PORT, --frontend-port=PORT    development front-end port (default 8000)");
+        printPortOptions();
         println("");
+    }
+
+    /**
+     * Display the options consumed before task dispatch (the port overrides).
+     * It is called by the build system as part of the 'help' output.
+     * <br><br>
+     * The build system expects this method to be named listOptions.
+     *
+     * @see BuildUtils#build
+     */
+    public static void listOptions() {
+        printPortOptions();
     }
 
     /**

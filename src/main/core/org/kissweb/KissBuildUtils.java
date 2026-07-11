@@ -122,6 +122,18 @@ public class KissBuildUtils {
         return null;
     }
 
+    /**
+     * Print the port-override option lines documented in
+     * {@link #consumePortOptions}.  Shared by the <code>help</code> and
+     * <code>list-tasks</code> output so the two cannot drift apart.
+     */
+    public static void printPortOptions() {
+        println("  -dp PORT, --debug-port=PORT       JDWP debug port (default 9000)");
+        println("  -bp PORT, --backend-port=PORT     development back-end port (default 8080)");
+        println("  -sp PORT, --shutdown-port=PORT    Tomcat shutdown port (default 8005)");
+        println("  -fp PORT, --frontend-port=PORT    development front-end port (default 8000)");
+    }
+
     private static void setPort(String which, String value) {
         int p;
         try {
