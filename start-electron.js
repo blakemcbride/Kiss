@@ -3,6 +3,11 @@
 
 const devMode = false;
 
+//  The back end of this application's development port block:
+//  Tasks.java portBase + 1 (default base 8000 -> back end 8001).
+//  Keep in sync with portBase in src/main/precompiled/Tasks.java.
+const backendUrl = 'http://localhost:8001';
+
 const {app, BrowserWindow, globalShortcut, Menu} = require('electron');
 const path = require('path');
 const { spawn, execSync } = require('child_process');
@@ -43,7 +48,7 @@ function createWindow() {
             },
         });
 
-        mainWindow.loadURL('http://localhost:8080');
+        mainWindow.loadURL(backendUrl);
         mainWindow.webContents.openDevTools();
 
         globalShortcut.register('CommandOrControl+R', () => {
@@ -59,7 +64,7 @@ function createWindow() {
             },
         });
 
-        mainWindow.loadURL('http://localhost:8080');
+        mainWindow.loadURL(backendUrl);
     }
 
     mainWindow.on('closed', () => {
@@ -97,7 +102,7 @@ app.on('ready', () => {
     });
 
     // Wait for the backend to be ready before opening the window
-    waitForBackend('http://localhost:8080', 60000)
+    waitForBackend(backendUrl, 60000)
         .then(() => {
             createWindow();
         })
