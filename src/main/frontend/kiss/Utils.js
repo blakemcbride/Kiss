@@ -2112,14 +2112,13 @@ class Utils {
         let path;
         if (url.charAt(0) !== '/')
             url = '/' + url;
-        if (window.location.href.search("localhost:8000") !== -1 ||
-            window.location.href.search("localhost:8001") !== -1 ||
-            window.location.href.search("localhost:8002") !== -1 ||
-            window.location.href.search("localhost:63342") !== -1 ||
-            window.location.href.search("localhost:63340") !== -1) // if debugging with a local server
-            path = "http://localhost:8080" + url;
-        else {
-            const server = Server.url;
+        const server = Server.url ? Server.url : '';
+        if (server && !server.startsWith(window.location.origin)) {
+            //  The back end is a different origin than this page (dual-server
+            //  development, Electron, or a split deployment) - open the full
+            //  back-end URL
+            path = server + url;
+        } else {
             let ns = 0;  //  number of slashes
             let ts = 0;  //  index of third slash
             for (let i=0 ; i < server.length ; i++)

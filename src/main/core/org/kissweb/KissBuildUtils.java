@@ -41,8 +41,11 @@ public class KissBuildUtils {
 
     /**
      * Network ports the embedded Tomcat and the front-end dev server bind
-     * to. All four default to Kiss's traditional values; each can be
-     * overridden on the bld command line so multiple Kiss instances can
+     * to. Normally all four are assigned as one consecutive block by
+     * {@link #setPortBase}, called from <code>Tasks.main()</code> with the
+     * application's <code>portBase</code> (the initializers below are only
+     * the fallback if an application never calls it); each can additionally
+     * be overridden on the bld command line so multiple Kiss instances can
      * run side by side without colliding.
      * <ul>
      *   <li><code>-dp PORT</code> / <code>--debug-port=PORT</code>  — JDWP debug (default 9000)</li>
@@ -64,6 +67,38 @@ public class KissBuildUtils {
     public static String shutdownPort = "8005";
     /** Front-end dev server port (see {@link #debugPort} for the option syntax). */
     public static String frontendPort = "8000";
+
+    /**
+     * Assign all four development ports as one consecutive block starting at
+     * <code>basePort</code>:
+     * <pre>
+     *   basePort + 0  — front-end static server (the URL you browse to)
+     *   basePort + 1  — Tomcat HTTP (backend)
+     *   basePort + 2  — Tomcat shutdown
+     *   basePort + 3  — JDWP debug
+     * </pre>
+     * Called from <code>Tasks.main()</code> (with the application's
+     * <code>portBase</code>), <b>before</b> {@link #consumePortOptions}, so each
+     * application claims its own non-clashing port block and multiple Kiss
+     * applications can run in development mode simultaneously.  Because the
+     * command-line port options are parsed afterward, <code>-dp/-bp/-sp/-fp</code>
+     * still override the individual ports.
+     * <br><br>
+     * The front end relies on this convention to find the back end in
+     * development: a page served by the front-end static server calls the
+     * back end at its own port + 1 (see <code>index.js</code>), so no
+     * front-end configuration is needed when the base changes.
+     *
+     * @param basePort the first port of the block (1 to 65532)
+     */
+    public static void setPortBase(int basePort) {
+        if (basePort <= 0 || basePort > 65532)
+            throw new IllegalArgumentException("setPortBase: base port " + basePort + " must be between 1 and 65532");
+        frontendPort = Integer.toString(basePort);
+        backendPort  = Integer.toString(basePort + 1);
+        shutdownPort = Integer.toString(basePort + 2);
+        debugPort    = Integer.toString(basePort + 3);
+    }
 
     /**
      * Pull port-override options out of <code>args</code> if present, set
@@ -126,12 +161,14 @@ public class KissBuildUtils {
      * Print the port-override option lines documented in
      * {@link #consumePortOptions}.  Shared by the <code>help</code> and
      * <code>list-tasks</code> output so the two cannot drift apart.
+     * The defaults shown are the live field values, so an application that
+     * claims its own block via {@link #setPortBase} displays its real ports.
      */
     public static void printPortOptions() {
-        println("  -dp PORT, --debug-port=PORT       JDWP debug port (default 9000)");
-        println("  -bp PORT, --backend-port=PORT     development back-end port (default 8080)");
-        println("  -sp PORT, --shutdown-port=PORT    Tomcat shutdown port (default 8005)");
-        println("  -fp PORT, --frontend-port=PORT    development front-end port (default 8000)");
+        println("  -dp PORT, --debug-port=PORT       JDWP debug port (default " + debugPort + ")");
+        println("  -bp PORT, --backend-port=PORT     development back-end port (default " + backendPort + ")");
+        println("  -sp PORT, --shutdown-port=PORT    Tomcat shutdown port (default " + shutdownPort + ")");
+        println("  -fp PORT, --frontend-port=PORT    development front-end port (default " + frontendPort + ")");
     }
 
     private static void setPort(String which, String value) {
@@ -336,6 +373,33 @@ public class KissBuildUtils {
             println("WAR stamped: kiss-version=" + uuid + ", releaseDate=" + date + ", cache-control=true");
         } catch (java.io.IOException e) {
             throw new RuntimeException("Failed to stamp version into WAR frontend files", e);
+        }
+        //  A WAR is always served by the back end itself.
+        stampSameOriginBackend(explodedDir);
+    }
+
+    /**
+     * Mark a deployed copy of the front end as served by the back end itself:
+     * sets <code>SystemInfo.sameOriginBackend = true</code> in the copy's
+     * <code>SystemInfo.js</code>.  The front end then calls the back end at
+     * the page's own origin instead of applying the development port-block
+     * convention.  Applied to every copy Tomcat serves — the production WAR
+     * staging (via {@link #stampVersion}) and the development
+     * <code>tomcat/webapps/ROOT</code> (from the develop / start-backend
+     * tasks).  The source copy, which the front-end dev server serves, is
+     * never stamped.
+     *
+     * @param dir the directory containing the deployed SystemInfo.js
+     */
+    public static void stampSameOriginBackend(String dir) {
+        try {
+            final java.nio.file.Path si = java.nio.file.Paths.get(dir, "SystemInfo.js");
+            String js = java.nio.file.Files.readString(si);
+            String updated = js.replaceAll("(SystemInfo\\.sameOriginBackend\\s*=\\s*)[^;]*(;)", "$1true$2");
+            if (!updated.equals(js))
+                java.nio.file.Files.writeString(si, updated);
+        } catch (java.io.IOException e) {
+            throw new RuntimeException("Failed to stamp sameOriginBackend into " + dir + "/SystemInfo.js", e);
         }
     }
 

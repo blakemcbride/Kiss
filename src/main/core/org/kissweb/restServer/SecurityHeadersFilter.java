@@ -28,8 +28,9 @@ import java.io.IOException;
  * <code>Content-Security-Policy-Report-Only</code> (violations reported to the
  * console, nothing blocked); exercise every screen (CKEditor, AG-Grid, file upload,
  * binary images, login/logout) and confirm the console is clean before enforcing
- * again. Because the dev static server on port 8000 does not set headers, validate
- * by browsing the app through the Tomcat origin (http://localhost:8080).
+ * again. Because the dev static server does not set headers, validate
+ * by browsing the app through the Tomcat origin (the application's back-end
+ * port, e.g. http://localhost:8001 with the default port block).
  * <br><br>
  * Self-registering via {@code @WebFilter} annotation scanning (no
  * <code>web.xml</code> entry), so it ships entirely inside the application WAR
@@ -44,9 +45,11 @@ public class SecurityHeadersFilter implements Filter {
      * The XSS-relevant Content-Security-Policy.
      * <br><br>
      * <code>style-src 'unsafe-inline'</code> is required by CKEditor / AG-Grid;
-     * <code>img-src data: blob:</code> by {@code Server.binaryCall} images;
-     * <code>connect-src</code> lists the development back-end. For a separated
-     * production back-end, add that origin to <code>connect-src</code>.
+     * <code>img-src data: blob:</code> by {@code Server.binaryCall} images.
+     * Pages this filter covers are served by the back end itself, so
+     * <code>connect-src 'self'</code> suffices (the dev static server sends no
+     * headers at all). For a separated production back-end, add that origin to
+     * <code>connect-src</code>.
      */
     public static final String CONTENT_SECURITY_POLICY =
             "default-src 'self'; " +
@@ -56,7 +59,7 @@ public class SecurityHeadersFilter implements Filter {
             "style-src 'self' 'unsafe-inline'; " +
             "img-src 'self' data: blob:; " +
             "font-src 'self' data:; " +
-            "connect-src 'self' http://localhost:8080; " +
+            "connect-src 'self'; " +
             "object-src 'none'; " +
             "base-uri 'self'; " +
             "form-action 'self'";

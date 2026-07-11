@@ -7,12 +7,21 @@ Utils.afterComponentsLoaded(async function () {
     if (SystemInfo.backendUrl) {
         // explicit backend URL
         Server.setURL(SystemInfo.backendUrl);
+    } else if (SystemInfo.sameOriginBackend) {
+        //  This copy was stamped by the build system because it is served by
+        //  the back end itself (dev Tomcat ROOT or production WAR) - same origin
+        let url = Utils.getAppUrl();
+        Server.setURL(url);
     } else if (window.location.protocol === "file:") {
-        //  electron desktop frontend
-        Server.setURL('http://localhost:8080');
+        //  Electron desktop frontend.  The back end is one above the port
+        //  block base in Tasks.java (default base 8000 -> back end 8001);
+        //  set SystemInfo.backendUrl instead if this application differs.
+        Server.setURL('http://localhost:8001');
     } else if (window.location.protocol === "http:" && window.location.port >= 8000) {
-        //  Development environment
-        Server.setURL('http://' + window.location.hostname + ':8080');
+        //  Development environment: this page came from the front-end static
+        //  server.  Under the Kiss port-block convention (see setPortBase in
+        //  Tasks.java) the back end runs one port above the front end.
+        Server.setURL('http://' + window.location.hostname + ':' + (Number(window.location.port) + 1));
     } else {
         //  Production environment with front-end & back-end as one unit
         let url = Utils.getAppUrl();

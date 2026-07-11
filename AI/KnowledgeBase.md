@@ -225,7 +225,8 @@ bootstrap scripts:
   because it is also used as part of a generic build system unrelated to Kiss.
 - `src/main/core/org/kissweb/KissBuildUtils.java` — build procedures common to
   every Kiss application: the four development ports and the `-dp/-bp/-sp/-fp`
-  option parsing (`consumePortOptions`), Tomcat install and port stamping
+  option parsing (`consumePortOptions`), single-call port-block assignment
+  (`setPortBase`), Tomcat install and port stamping
   (`installTomcat(version)`), `shutdownTomcat()`, WAR cache-busting stamping
   (`stampVersion(explodedDir)`), `getTomcatPath()`, and `stopFrontendServer()`.
 - `src/main/precompiled/Tasks.java` — this application's build tasks and
@@ -234,6 +235,32 @@ bootstrap scripts:
 When generic build functionality accumulates in `Tasks.java`, upstream it into
 `KissBuildUtils.java` (Kiss-wide) or `BuildUtils.java` (universally generic) —
 never Kiss/Tomcat-specific code into `BuildUtils.java`.
+
+**Development port block.** All four development ports come from a single
+variable at the top of `Tasks.java` — `private static int portBase = 8000;` —
+which `Tasks.main()` always passes to `setPortBase` (before
+`consumePortOptions`, so the `-dp/-bp/-sp/-fp` options still override
+individual ports). The block is consecutive: **frontend = portBase, backend =
+portBase+1, shutdown = portBase+2, debug = portBase+3** (default 8000 →
+8000/8001/8002/8003). Give each Kiss application a unique `portBase` and they
+all run in development mode simultaneously without port clashes. `bld help`
+shows the live values.
+
+The front end finds the back end with no configuration:
+
+- A page served by the front-end dev server calls the back end at **its own
+  port + 1** (the block convention; see `index.js`).
+- Copies served by Tomcat itself are stamped `SystemInfo.sameOriginBackend =
+  true` (`KissBuildUtils.stampSameOriginBackend`, applied to the WAR staging by
+  `stampVersion` and to `tomcat/webapps/ROOT` by develop/start-backend), so
+  those pages call the back end at the page's own origin — this makes browsing
+  the Tomcat origin directly, and any production port, work for any base. The
+  source `SystemInfo.js` ships `false` and is never stamped.
+- `SystemInfo.backendUrl`, when set, overrides everything (split deployments,
+  or when the `-fp`/`-bp` flags break the +1 convention).
+- Electron (`file://`) defaults to `http://localhost:8001` (the default
+  block's back end); applications with a different base set
+  `SystemInfo.backendUrl`.
 
 ## Documentation System
 
@@ -303,9 +330,12 @@ All compiled classes go to `work/exploded/WEB-INF/classes/`
 ## Development Environment
 
 ### URLs
-- **Frontend (Development):** http://localhost:8000
-- **Backend (Development):** http://localhost:8080
+- **Frontend (Development):** http://localhost:8000 (portBase)
+- **Backend (Development):** http://localhost:8001 (portBase+1)
 - **Backend Log:** tomcat/logs/catalina.out
+
+These are the defaults of the development port block (`portBase = 8000` in
+`Tasks.java`; see "Build System Architecture").
 
 ### Hot Reload
 - **Dynamic loading is limited to `src/main/backend/`** — Kiss does NOT dynamically load all source files. Only files under `src/main/backend/` are detected, compiled, and reloaded while the server is running.
@@ -357,7 +387,7 @@ The front-end completes the loop: any `_ErrorCode = 2` triggers `Server.logout(t
 ### CORS and Reverse Proxies (web-secure.xml / web-unsafe.xml)
 
 Kiss ships two web.xml variants in `src/main/core/WEB-INF/`:
-- `web-unsafe.xml` — deployed by `buildSystem()` for development; `cors.allowed.origins = *` (needed because the dev frontend `:8000` and backend `:8080` are different origins)
+- `web-unsafe.xml` — deployed by `buildSystem()` for development; `cors.allowed.origins = *` (needed because the dev frontend `:8000` and backend `:8001` are different origins)
 - `web-secure.xml` — swapped in by `./bld war` for the production WAR; keeps a localhost-only allow-list (`http://localhost:8000,http://localhost:63342`)
 
 **No per-deployment CORS configuration is needed in production.** In the normal single-WAR deployment, frontend and backend are same-origin. Browsers still send an `Origin` header on every POST (the Fetch spec attaches it to all non-GET requests, even same-origin ones), so Tomcat's CorsFilter engages — but it classifies the request as NOT_CORS via `RequestUtil.isSameOrigin()` and never consults the allow-list. The localhost allow-list in `web-secure.xml` is therefore harmless in production; it only blocks genuinely foreign origins.
@@ -420,7 +450,7 @@ Kiss implements all three OAuth 2.1 roles. Each is inert unless configured (no r
   import org.kissweb.oauth.client.OAuthClient
   OAuthClient client = OAuthClient.forProvider("myprovider")
   if (!client.isAuthorized())
-      redirectBrowserTo(client.beginAuthorization("http://localhost:8080"))
+      redirectBrowserTo(client.beginAuthorization("http://localhost:8001"))
   String token = client.getAccessToken()   // refreshes as needed (discovery/registration happen in beginAuthorization)
   ```
   `getAccessToken()` throws `OAuthAuthorizationRequiredException` when an interactive login is needed.
@@ -469,8 +499,8 @@ Login/logout integration: `login.js` calls `Router.replace(Router.query().return
 
 The entire Content-Security-Policy is delivered as an **HTTP response header** by `SecurityHeadersFilter` (`src/main/core/org/kissweb/restServer/SecurityHeadersFilter.java`). It self-registers via a `@WebFilter("/*")` annotation (no `web.xml` entry, the same way `MCPServerBase` servlets use `@WebServlet`), so it ships entirely inside the application WAR and needs no servlet-container configuration. CSP is **not** delivered via a `<meta>` tag: the `Content-Security-Policy-Report-Only` form used during rollout is invalid in a meta tag (browsers ignore it), and a header is the single source of truth for the production/Electron deployments (all served by Tomcat).
 
-- The XSS-relevant policy is the constant `SecurityHeadersFilter.CONTENT_SECURITY_POLICY` (`script-src 'self'`, `object-src 'none'`, `style-src 'self' 'unsafe-inline'` for CKEditor/AG-Grid, `img-src 'self' data: blob:` for `binaryCall` images, `connect-src 'self' http://localhost:8080` for cross-origin dev, etc.). A separated production back-end must be added to `connect-src`.
-- It **ships enforcing**: the filter's `CSP_REPORT_ONLY` flag is `false`, sending the XSS policy as `Content-Security-Policy` (violations are blocked, not merely logged). To re-validate after a policy change, set `CSP_REPORT_ONLY = true` to return to `Content-Security-Policy-Report-Only` (violations logged, nothing blocked), exercise every screen until the console is clean, then flip back. **Validate by browsing the app via the Tomcat origin `http://localhost:8080`** — the dev static server on `:8000` (a prebuilt `SimpleWebServer.jar`) cannot set headers, and `file://` has no server, so those contexts receive no CSP.
+- The XSS-relevant policy is the constant `SecurityHeadersFilter.CONTENT_SECURITY_POLICY` (`script-src 'self'`, `object-src 'none'`, `style-src 'self' 'unsafe-inline'` for CKEditor/AG-Grid, `img-src 'self' data: blob:` for `binaryCall` images, `connect-src 'self'` — pages this filter covers are always served by the back end itself, etc.). A separated production back-end must be added to `connect-src`.
+- It **ships enforcing**: the filter's `CSP_REPORT_ONLY` flag is `false`, sending the XSS policy as `Content-Security-Policy` (violations are blocked, not merely logged). To re-validate after a policy change, set `CSP_REPORT_ONLY = true` to return to `Content-Security-Policy-Report-Only` (violations logged, nothing blocked), exercise every screen until the console is clean, then flip back. **Validate by browsing the app via the Tomcat origin (the back-end port, `http://localhost:8001` with the default port block)** — the dev static server (a prebuilt `SimpleWebServer.jar`) cannot set headers, and `file://` has no server, so those contexts receive no CSP.
 - The filter always also sends the header-only protections: `Content-Security-Policy: frame-ancestors 'none'` + `X-Frame-Options: DENY` (clickjacking, enforced regardless of rollout phase), `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and `Strict-Transport-Security` (only when `request.isSecure()`).
 
 The CSP allows **one** inline script: the byte-stable bootstrap kernel in `index.html`, pinned by a `'sha256-…'` in `script-src` (everything else is external, served under `'self'`). Inline `<style>` is allowed via `style-src 'unsafe-inline'`. The kernel carries no per-deployment values, so its hash is stable; if it is ever edited, recompute the hash and update `SecurityHeadersFilter`.

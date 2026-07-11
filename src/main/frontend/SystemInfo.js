@@ -30,3 +30,11 @@ SystemInfo.stateStore = 'session';  // EDIT-4
 // The following is only set on a production system that has the front-end and back-end separated.
 // When set, also add this origin to the connect-src of the CSP in SecurityHeadersFilter.
 //SystemInfo.backendUrl = 'https://[YOUR-URL]/[back-end]';
+
+// True when this copy of the front-end is served by the back end itself (same
+// origin).  The source ships false; the build system stamps true into the
+// copies Tomcat serves (the development webapps/ROOT and the production WAR).
+// When false and the page came from a local dev port, index.js assumes the
+// Kiss port-block convention (back end = this port + 1).  An explicit
+// SystemInfo.backendUrl overrides everything.
+SystemInfo.sameOriginBackend = false;  // stamped by the build system - do not edit

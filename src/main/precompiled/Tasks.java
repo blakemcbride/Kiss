@@ -39,6 +39,16 @@ import static org.kissweb.KissBuildUtils.*;
  */
 public class Tasks {
 
+    /**
+     * The base of this application's development port block.  Give each Kiss
+     * application a unique base and they can all run in development mode at
+     * the same time without port clashes.  The four ports are consecutive:
+     * front end = portBase, back end = portBase+1, Tomcat shutdown =
+     * portBase+2, JDWP debug = portBase+3.  The -dp/-bp/-sp/-fp command-line
+     * options still override individual ports.
+     */
+    private static int portBase = 8000;
+
     // Things that change semi-often
     final static String groovyVer = "4.0.28";
     final static String postgresqlVer = "42.7.11";
@@ -64,6 +74,7 @@ public class Tasks {
      * @throws InstantiationException if the class cannot be instantiated
      */
     public static void main(String[] args) throws Exception {
+        setPortBase(portBase);
         args = consumePortOptions(args);
         BuildUtils.build(args, Tasks.class, LIBS);
     }
@@ -314,6 +325,7 @@ public class Tasks {
         buildSystem();
         setupTomcat();
         copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
+        stampSameOriginBackend("tomcat/webapps/ROOT");
         if (isWindows)
             runWait(true, "tomcat\\bin\\debug.cmd");
         else
@@ -342,6 +354,7 @@ public class Tasks {
         buildSystem();
         setupTomcat();
         copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
+        stampSameOriginBackend("tomcat/webapps/ROOT");
         if (isWindows)
             runWait(true, "tomcat\\bin\\debug.cmd");
         else

@@ -49,7 +49,7 @@
  * OAuthClient client = OAuthClient.forProvider("ownsona");
  * if (!client.isAuthorized()) {
  *     // Send the browser to this URL to log in / consent:
- *     String authorizeUrl = client.beginAuthorization("http://localhost:8080");
+ *     String authorizeUrl = client.beginAuthorization("http://localhost:8001");
  *     ...
  * }
  * // Later, on every outbound call:
