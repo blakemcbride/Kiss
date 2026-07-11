@@ -208,7 +208,7 @@ public class MainServlet extends HttpServlet {
                     makeDatabaseConnection();
                 } catch (PropertyVetoException | SQLException | ClassNotFoundException e) {
                     logger.error(e);
-                    //System.exit(-1);  // This kills tomcat which you do not want to do on a production system
+                    databaseConnectionFatal(e);
                     throw new RuntimeException("Initialization failed", e);
                 }
                 logger.info("* * * Database " + databaseName + " opened successfully");
@@ -237,6 +237,35 @@ public class MainServlet extends HttpServlet {
         }
 
         Configurator.setLevel(logger, level);
+    }
+
+    /**
+     * A database is configured but cannot be reached at startup.  Nothing in the
+     * application can work in this state, so this logs an unmistakable banner
+     * naming the database and the underlying error.  The caller then throws,
+     * which aborts this web application's deployment; the servlet container
+     * itself is left running so other applications it hosts are unaffected.
+     */
+    private static void databaseConnectionFatal(Exception e) {
+        String host = (String) environment.get("DatabaseHost");
+        Integer port = getEnvironmentInt("DatabasePort");
+        String msg = "\n" +
+                "**********************************************************************\n" +
+                "*  FATAL: cannot connect to the configured database.\n" +
+                "*\n" +
+                "*      " + e.getMessage() + "\n" +
+                "*\n" +
+                "*      Database: " + host + (port == null ? "" : ":" + port) + ":" + databaseName + "\n" +
+                "*\n" +
+                "*  The application cannot run without its configured database.\n" +
+                "*  Verify that the database server is running, that the database\n" +
+                "*  exists, and that the Database* settings in application.ini are\n" +
+                "*  correct; then restart.\n" +
+                "*\n" +
+                "*  THIS APPLICATION HAS BEEN DISABLED.  The servlet container\n" +
+                "*  itself has been left running.\n" +
+                "**********************************************************************";
+        logger.fatal(msg);
     }
 
     /**

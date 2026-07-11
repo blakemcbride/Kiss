@@ -5,6 +5,8 @@ set SRC1=src\main\precompiled\Tasks.java
 set CLASS1=work\exploded\WEB-INF\classes\Tasks.class
 set SRC2=src\main\core\org\kissweb\BuildUtils.java
 set CLASS2=work\exploded\WEB-INF\classes\org\kissweb\BuildUtils.class
+set SRC3=src\main\core\org\kissweb\KissBuildUtils.java
+set CLASS3=work\exploded\WEB-INF\classes\org\kissweb\KissBuildUtils.class
 
 rem Compare timestamps
 set BUILD=false
@@ -16,12 +18,16 @@ for %%F in ("%SRC2%") do set SRC2_TIME=%%~tF
 for %%F in ("%CLASS2%") do set CLASS2_TIME=%%~tF
 if "%SRC2_TIME%" GTR "%CLASS2_TIME%" set BUILD=true
 
+for %%F in ("%SRC3%") do set SRC3_TIME=%%~tF
+for %%F in ("%CLASS3%") do set CLASS3_TIME=%%~tF
+if "%SRC3_TIME%" GTR "%CLASS3_TIME%" set BUILD=true
+
 if "%BUILD%"=="true" (
     echo Building the builder
     if not exist work\exploded\WEB-INF\classes (
         mkdir work\exploded\WEB-INF\classes
     )
-    javac -cp "libs\commons-compress-1.27.1.jar;libs\commons-io-2.16.1.jar;libs\commons-lang3-3.18.0.jar" %SRC1% %SRC2% -d work\exploded\WEB-INF\classes
+    javac -cp "libs\commons-compress-1.27.1.jar;libs\commons-io-2.16.1.jar;libs\commons-lang3-3.18.0.jar" %SRC1% %SRC2% %SRC3% -d work\exploded\WEB-INF\classes
 )
 
 java -cp "work\exploded\WEB-INF\classes;libs\commons-compress-1.27.1.jar;libs\commons-io-2.16.1.jar;libs\commons-lang3-3.18.0.jar" -Dsun.security.pkcs11.enable-solaris=false Tasks %*

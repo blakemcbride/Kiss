@@ -142,6 +142,24 @@ UserInactiveSeconds = 900
 
 `IniFile.load(String)` and `IniFile.save(String)` resolve a filename the **same** way (a single shared rule): an absolute path is used verbatim; a relative path is resolved against `MainServlet.getApplicationPath()` (the backend directory), or against the current working directory when the application path is not set (null/empty). A file written with a given relative name is therefore read back with that same name. (Constructing `new IniFile(fname)` followed by no-arg `save()` writes to whatever path was supplied/loaded.)
 
+### Database Connection Failure at Startup
+
+When a database **is** configured in `application.ini` but cannot be reached at
+startup (server down, database dropped/nonexistent, bad credentials), Kiss
+logs an unmistakable multi-line FATAL banner naming the database and the
+underlying error, and then fails this web application's deployment. The
+servlet container (Tomcat) itself is deliberately left running — a bad
+database must never take down the container or other applications it hosts on
+a production system. Note that with the context disabled, requests get a bare
+404/503 with no application headers, which browsers may misreport (e.g. as a
+CORS policy failure) — the banner in `tomcat/logs/catalina.out` is where the
+real cause is found. Running with **no** database configured remains supported
+and is unaffected.
+
+Implementation: `MainServlet.databaseConnectionFatal()` (logs the banner),
+invoked from the `makeDatabaseConnection()` failure path in
+`initializeSystem()`, which then throws to abort the context.
+
 ### Secrets and External Configuration
 
 **All URLs, passwords, security keys, API keys, tokens, and user names must be kept in `src/main/backend/application.ini`.** Nothing of this kind should be hard-coded in source files (Java, Groovy, Lisp, JavaScript, HTML, or other configuration files). Whenever such a value is found outside `application.ini`, it must be moved into `application.ini` and accessed via the API below.
@@ -185,11 +203,37 @@ class ServiceName {
 ## Development Commands
 
 - `./bld develop` - Start both frontend and backend development servers
+
+  `develop` (on keypress) and `stop-backend` stop Tomcat by sending the
+  SHUTDOWN command directly to the configured shutdown port. If Tomcat is not
+  running — e.g. it crashed or was never started — they print one clear line
+  pointing at `tomcat/logs/catalina.out` instead of a SEVERE stack trace (with
+  a single 2-second retry in case Tomcat was still starting).
 - `./bld -v build` - Build the application (compiles all Java files including precompiled directory)
 - `./bld war` - Create WAR file for deployment
 - `./bld -v test` - Run unit tests
 - `./bld clean` - Clean build artifacts
 - `./bld javadoc` - Generate JavaDoc documentation
+
+### Build System Architecture
+
+The `bld` system is three Java files, compiled together by the `bld` / `bld.cmd`
+bootstrap scripts:
+
+- `src/main/core/org/kissweb/BuildUtils.java` — fully generic build utilities
+  (compile, jar, download, copy, run). Contains nothing Kiss- or Tomcat-specific,
+  because it is also used as part of a generic build system unrelated to Kiss.
+- `src/main/core/org/kissweb/KissBuildUtils.java` — build procedures common to
+  every Kiss application: the four development ports and the `-dp/-bp/-sp/-fp`
+  option parsing (`consumePortOptions`), Tomcat install and port stamping
+  (`installTomcat(version)`), `shutdownTomcat()`, WAR cache-busting stamping
+  (`stampVersion(explodedDir)`), `getTomcatPath()`, and `stopFrontendServer()`.
+- `src/main/precompiled/Tasks.java` — this application's build tasks and
+  dependency lists only (per-application; not shared).
+
+When generic build functionality accumulates in `Tasks.java`, upstream it into
+`KissBuildUtils.java` (Kiss-wide) or `BuildUtils.java` (universally generic) —
+never Kiss/Tomcat-specific code into `BuildUtils.java`.
 
 ## Documentation System
 
@@ -1389,4 +1433,4 @@ ServicePassword = ""    # correct
 
 ---
 
-*Last Updated: 2026-07-09*
+*Last Updated: 2026-07-10*

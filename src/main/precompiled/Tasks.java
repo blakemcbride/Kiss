@@ -14,10 +14,11 @@
  * minimum steps necessary to rebuild a system are actually executed.  So, this 
  * build system runs as fast as the others.
  *
- * There are two classes as follows:
+ * The build system is made up of three classes as follows:
  *
- *     BuildUtils -  the generic utilities needed to build
- *     Tasks      -  the application-specific build procedures (or tasks)
+ *     BuildUtils     -  the generic build utilities (usable outside Kiss)
+ *     KissBuildUtils -  build procedures common to all Kiss-framework applications
+ *     Tasks          -  the application-specific build procedures (or tasks)
  *
  *    Non-private instance methods with no parameters are considered tasks.
  */
@@ -25,6 +26,7 @@
 import org.kissweb.BuildUtils;
 
 import static org.kissweb.BuildUtils.*;
+import static org.kissweb.KissBuildUtils.*;
 
 /**
  * This class contains the tasks that are executed by the build system.
@@ -44,37 +46,18 @@ public class Tasks {
     final static String LIBS = "libs";  // compile time location
     final static ForeignDependencies foreignLibs = buildForeignDependencies();
     final static LocalDependencies localLibs = buildLocalDependencies();
-    final static String tomcatTarFile = "apache-tomcat-" + tomcatVer + ".tar.gz";
     final static String BUILDDIR = "work";
     final static String explodedDir = BUILDDIR + "/" + "exploded";
     final static String postgresqlJar = "postgresql-" + postgresqlVer + ".jar";
     final static String groovyJar = "groovy-" + groovyVer + ".jar";
-    /**
-     * Network ports the embedded Tomcat and the front-end dev server bind
-     * to. All four default to Kiss's traditional values; each can be
-     * overridden on the bld command line so multiple Kiss instances can
-     * run side by side without colliding.
-     * <ul>
-     *   <li><code>-dp PORT</code> / <code>--debug-port=PORT</code>  — JDWP debug (default 9000)</li>
-     *   <li><code>-bp PORT</code> / <code>--backend-port=PORT</code>   — Tomcat HTTP (default 8080)</li>
-     *   <li><code>-sp PORT</code> / <code>--shutdown-port=PORT</code> — Tomcat shutdown signal (default 8005)</li>
-     *   <li><code>-fp PORT</code> / <code>--frontend-port=PORT</code> — develop()'s static-file server (default 8000)</li>
-     * </ul>
-     * The HTTP and shutdown ports are written into
-     * <code>tomcat/conf/server.xml</code> on every {@link #setupTomcat()};
-     * the debug port into <code>tomcat/bin/debug</code>; the front-end
-     * port into the SimpleWebServer command line. All four are re-applied
-     * on every <code>bld</code> invocation, so you can pick different
-     * values for each run with no manual cleanup.
-     */
-    static String debugPort    = "9000";
-    static String backendPort  = "8080";
-    static String shutdownPort = "8005";
-    static String frontendPort = "8000";
 
     /**
      * Main entry point for the build system.  It tells the build system what arguments were passed in
      * and what class contains all the tasks.
+     * <br><br>
+     * Port-override options (<code>-dp/-bp/-sp/-fp</code>; see
+     * <code>KissBuildUtils.consumePortOptions</code>) are consumed here
+     * before normal task dispatch.
      *
      * @param args the arguments to the program
      * @throws Exception if exception is thrown
@@ -83,81 +66,6 @@ public class Tasks {
     public static void main(String[] args) throws Exception {
         args = consumePortOptions(args);
         BuildUtils.build(args, Tasks.class, LIBS);
-    }
-
-    /**
-     * Pull port-override options out of <code>args</code> if present, set
-     * the corresponding static fields, and return the remaining arguments
-     * for normal task dispatch. Recognized flags (any position):
-     * <pre>
-     *   -dp PORT, --debug-port=PORT      JDWP   (default 9000)
-     *   -bp PORT, --backend-port=PORT    HTTP   (default 8080)
-     *   -sp PORT, --shutdown-port=PORT   Tomcat shutdown signal (default 8005)
-     *   -fp PORT, --frontend-port=PORT   develop()'s static server (default 8000)
-     * </pre>
-     * Non-numeric or out-of-range values are reported on stderr; the
-     * default is kept in that case.
-     */
-    private static String[] consumePortOptions(String[] args) {
-        java.util.List<String> out = new java.util.ArrayList<>(args.length);
-        for (int i = 0; i < args.length; i++) {
-            String a = args[i];
-            String[] pair = matchPortOption(a);
-            if (pair != null && pair[1] != null) {
-                setPort(pair[0], pair[1]);
-            } else if (pair != null) {
-                if (i + 1 < args.length) {
-                    setPort(pair[0], args[i + 1]);
-                    i++;
-                } else {
-                    System.err.println("missing value for " + a + "; ignoring");
-                }
-            } else {
-                out.add(a);
-            }
-        }
-        return out.toArray(new String[0]);
-    }
-
-    /**
-     * Match one arg against the port-option flags. Returns a 2-element
-     * array <code>{which, value}</code> on match, or <code>null</code>
-     * otherwise. <code>which</code> is one of "debug", "http", "shutdown",
-     * "frontend". <code>value</code> is the part after "=" for long-form
-     * options that include one, or <code>null</code> when the value is
-     * the next argument.
-     */
-    private static String[] matchPortOption(String a) {
-        if (a.equals("-dp") || a.equals("--debug-port"))     return new String[]{"debug",    null};
-        if (a.equals("-bp") || a.equals("--backend-port"))   return new String[]{"http",     null};
-        if (a.equals("-sp") || a.equals("--shutdown-port"))  return new String[]{"shutdown", null};
-        if (a.equals("-fp") || a.equals("--frontend-port"))  return new String[]{"frontend", null};
-        if (a.startsWith("--debug-port="))    return new String[]{"debug",    a.substring("--debug-port=".length())};
-        if (a.startsWith("--backend-port="))  return new String[]{"http",     a.substring("--backend-port=".length())};
-        if (a.startsWith("--shutdown-port=")) return new String[]{"shutdown", a.substring("--shutdown-port=".length())};
-        if (a.startsWith("--frontend-port=")) return new String[]{"frontend", a.substring("--frontend-port=".length())};
-        return null;
-    }
-
-    private static void setPort(String which, String value) {
-        int p;
-        try {
-            p = Integer.parseInt(value.trim());
-        } catch (NumberFormatException ignored) {
-            System.err.println(which + " port '" + value + "' is not a number; using default");
-            return;
-        }
-        if (p <= 0 || p >= 65536) {
-            System.err.println(which + " port '" + value + "' is out of range; using default");
-            return;
-        }
-        String s = Integer.toString(p);
-        switch (which) {
-            case "debug":    debugPort    = s; break;
-            case "http":     backendPort  = s; break;
-            case "shutdown": shutdownPort = s; break;
-            case "frontend": frontendPort = s; break;
-        }
     }
 
     /**
@@ -355,7 +263,7 @@ public class Tasks {
      */
     public static void war() {
         buildSystem();
-        stampVersion();
+        stampVersion(explodedDir);
         copyForce("src/main/core/WEB-INF/web-secure.xml", explodedDir + "/WEB-INF/web.xml");
         createJar(explodedDir, BUILDDIR + "/Kiss.war");
         copyForce("src/main/core/WEB-INF/web-unsafe.xml", explodedDir + "/WEB-INF/web.xml");
@@ -371,43 +279,6 @@ public class Tasks {
         //println("Kiss.war has been created in the " + BUILDDIR + " directory");
     }
 
-    /**
-     * Stamp production cache-busting values into the WAR's frontend copies.
-     * <br><br>
-     * Sets a fresh software version (a new UUID) and the current release date, and turns
-     * cache control on, so every WAR forces clients to download the new code.  The version
-     * and cache-control flag live in <code>index.html</code> (<code>kiss-version</code> /
-     * <code>kiss-cache-control</code> meta tags — the only perpetually-fresh file); the
-     * release date lives in <code>SystemInfo.js</code>.
-     * <br><br>
-     * Operates on the staged copies in <code>explodedDir</code> only, so the source files
-     * keep their EDIT placeholders.  Modifies only the meta values, not the bootstrap
-     * kernel, so the CSP hash is unaffected.
-     */
-    private static void stampVersion() {
-        final String uuid = java.util.UUID.randomUUID().toString();
-        final String date = java.time.LocalDate.now().toString();
-        try {
-            final java.nio.file.Path idx = java.nio.file.Paths.get(explodedDir, "index.html");
-            String html = java.nio.file.Files.readString(idx);
-            html = html.replaceAll("(name=\"kiss-version\"\\s+content=\")[^\"]*(\")",
-                    "$1" + java.util.regex.Matcher.quoteReplacement(uuid) + "$2");
-            html = html.replaceAll("(name=\"kiss-cache-control\"\\s+content=\")[^\"]*(\")",
-                    "$1true$2");
-            java.nio.file.Files.writeString(idx, html);
-
-            final java.nio.file.Path si = java.nio.file.Paths.get(explodedDir, "SystemInfo.js");
-            String js = java.nio.file.Files.readString(si);
-            js = js.replaceAll("(SystemInfo\\.releaseDate\\s*=\\s*\")[^\"]*(\")",
-                    "$1" + java.util.regex.Matcher.quoteReplacement(date) + "$2");
-            java.nio.file.Files.writeString(si, js);
-
-            println("WAR stamped: kiss-version=" + uuid + ", releaseDate=" + date + ", cache-control=true");
-        } catch (java.io.IOException e) {
-            throw new RuntimeException("Failed to stamp version into WAR frontend files", e);
-        }
-    }
-
     private static void deployWar() {
         copy(BUILDDIR + "/Kiss.war", "tomcat/webapps/ROOT.war");
     }
@@ -416,96 +287,7 @@ public class Tasks {
      * Unpack and install tomcat
      */
     public static void setupTomcat() {
-        if (!exists("tomcat/bin/startup.sh")) {
-            download(tomcatTarFile, ".", "https://archive.apache.org/dist/tomcat/tomcat-11/v" + tomcatVer + "/bin/apache-tomcat-" + tomcatVer + ".tar.gz");
-            gunzip(tomcatTarFile, "tomcat", 1);
-            rmTree("tomcat/webapps/ROOT");
-            //run("tar xf apache-tomcat-9.0.31.tar.gz --one-top-level=tomcat --strip-components=1");
-        }
-        // Always re-stamp server.xml with the current backendPort / shutdownPort
-        // so the options take effect on each bld invocation.
-        rewriteServerXmlPorts();
-        if (isWindows) {
-            System.err.println("Setting up tomcat.  Please wait...");
-            rm("tomcat\\conf\\tomcat-users.xml");
-            // The following is needed by NetBeans
-            writeToFile("tomcat\\conf\\tomcat-users.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<tomcat-users xmlns=\"http://tomcat.apache.org/xml\"\n" +
-                    "              xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                    "              xsi:schemaLocation=\"http://tomcat.apache.org/xml tomcat-users.xsd\"\n" +
-                    "              version=\"1.0\">\n" +
-                    "  <user username=\"admin\" password=\"admin\" roles=\"tomcat,manager-script\" />\n" +
-                    "</tomcat-users>\n");
-            // writeToFile is a no-op when the target exists, so explicitly
-            // remove the helper scripts first.  Without this, changes to
-            // debugPort (KISS_DEBUG_PORT) or to the current working directory
-            // would not propagate into the regenerated scripts.
-            rm("tomcat\\bin\\debug.cmd");
-            rm("tomcat\\bin\\stopdebug.cmd");
-            writeToFile("tomcat\\bin\\debug.cmd", "@echo off\n" +
-                    "cd " + getcwd() + "\\tomcat\\bin\n" +
-                    "set JAVA_HOME=" + getJavaPathOnWindows() + "\n" +
-                    "set CATALINA_HOME=" + getTomcatPath() + "\n" +
-                    "set JPDA_ADDRESS=" + debugPort + "\n" +
-                    "set JPDA_TRANSPORT=dt_socket\n" +
-                    "catalina.bat jpda start\n");
-            writeToFile("tomcat\\bin\\stopdebug.cmd", "@echo off\n" +
-                    "cd " + getcwd() + "\\tomcat\\bin\n" +
-                    "set JAVA_HOME=" + getJavaPathOnWindows() + "\n" +
-                    "set CATALINA_HOME=" + getTomcatPath() + "\n" +
-                    "shutdown.bat\n");
-        } else {
-            rm("tomcat/conf/tomcat-users.xml");
-            // The following is needed by NetBeans
-            writeToFile("tomcat/conf/tomcat-users.xml", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                    "<tomcat-users xmlns=\"http://tomcat.apache.org/xml\"\n" +
-                    "              xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
-                    "              xsi:schemaLocation=\"http://tomcat.apache.org/xml tomcat-users.xsd\"\n" +
-                    "              version=\"1.0\">\n" +
-                    "  <user username=\"admin\" password=\"admin\" roles=\"tomcat,manager-script\" />\n" +
-                    "</tomcat-users>\n");
-            // writeToFile is a no-op when the target exists, so explicitly
-            // remove the debug helper first.  Without this, changes to
-            // debugPort (KISS_DEBUG_PORT) or to the current working directory
-            // would not propagate into the regenerated script.
-            rm("tomcat/bin/debug");
-            writeToFile("tomcat/bin/debug", "#\n" +
-                    "cd " + getcwd() + "/tomcat/bin\n" +
-                    "export JPDA_ADDRESS=" + debugPort + "\n" +
-                    "export JPDA_TRANSPORT=dt_socket\n" +
-                    "./catalina.sh jpda start\n");
-            makeExecutable("tomcat/bin/debug");
-        }
-        /* The SQLite jar file doesn't correctly support this.
-        if (isSunOS) {
-            writeToFile("tomcat/bin/setenv.sh","export JAVA_OPTS=\"-Dorg.sqlite.lib.path=/usr/lib/amd64 -Dorg.sqlite.lib.name=libsqlite3.so\"\n");
-        }
-         */
-    }
-
-    /**
-     * Edit <code>tomcat/conf/server.xml</code> in place so the
-     * <code>&lt;Server&gt;</code> shutdown port and the HTTP/1.1
-     * <code>&lt;Connector&gt;</code> port match the currently configured
-     * values. Idempotent — repeated calls converge on the configured
-     * ports, regardless of what was in the file previously.
-     */
-    private static void rewriteServerXmlPorts() {
-        java.nio.file.Path p = java.nio.file.Paths.get("tomcat/conf/server.xml");
-        if (!java.nio.file.Files.exists(p))
-            return;   // tomcat not yet installed; setupTomcat runs again later
-        try {
-            String content = new String(java.nio.file.Files.readAllBytes(p), java.nio.charset.StandardCharsets.UTF_8);
-            String updated = content
-                    .replaceFirst("<Server port=\"\\d+\"",
-                                  "<Server port=\"" + shutdownPort + "\"")
-                    .replaceFirst("<Connector port=\"\\d+\" protocol=\"HTTP/1\\.1\"",
-                                  "<Connector port=\"" + backendPort + "\" protocol=\"HTTP/1.1\"");
-            if (!updated.equals(content))
-                java.nio.file.Files.write(p, updated.getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        } catch (java.io.IOException e) {
-            System.err.println("warning: could not rewrite server.xml ports: " + e.getMessage());
-        }
+        installTomcat(tomcatVer);
     }
 
     /**
@@ -534,11 +316,7 @@ public class Tasks {
         println("The app can also be debugged at port " + debugPort);
         println("hit any key to stop tomcat");
         readChar();
-        println("shutting down tomcat");
-        if (isWindows)
-            runWait(true, "tomcat\\bin\\stopdebug.cmd");
-        else
-            runWait(true, "tomcat/bin/shutdown.sh");
+        shutdownTomcat();
         killProcess(proc);
     }
 
@@ -569,18 +347,14 @@ public class Tasks {
      * Stop the backend development server
      */
     public static void stopBackend() {
-        println("shutting down tomcat");
-        if (isWindows)
-            runWait(true, "tomcat\\bin\\stopdebug.cmd");
-        else
-            runWait(true, "tomcat/bin/shutdown.sh");
+        shutdownTomcat();
     }
 
     /**
      * Start the frontend development server.
      */
     public static void startFrontend() {
-        runBackground("java -jar SimpleWebServer.jar -d src/main/frontend");
+        runBackground("java -jar SimpleWebServer.jar -d src/main/frontend -p " + frontendPort);
         println("To stop the frontend, type 'bld stop-frontend'");
     }
 
