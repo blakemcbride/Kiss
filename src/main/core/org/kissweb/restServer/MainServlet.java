@@ -297,6 +297,41 @@ public class MainServlet extends HttpServlet {
         return db;
     }
 
+    /** Application-registered hook that prepares each request's database connection (see {@link RequestConnectionPreparer}). */
+    private static RequestConnectionPreparer requestConnectionPreparer;
+
+    /**
+     * Register an application hook that prepares the per-request database connection
+     * after authentication and before the web service method executes, and clears
+     * per-request connection state when the connection is closed.  Typically called
+     * from <code>KissInit.groovy</code>.  See {@link RequestConnectionPreparer} for
+     * the contract and the multi-tenant use case.
+     *
+     * @param preparer the hook, or null to remove a previously registered hook
+     */
+    public static void setRequestConnectionPreparer(RequestConnectionPreparer preparer) {
+        requestConnectionPreparer = preparer;
+    }
+
+    /**
+     * Get the registered request-connection preparer.
+     *
+     * @return the registered hook, or null when none is registered
+     */
+    public static RequestConnectionPreparer getRequestConnectionPreparer() {
+        return requestConnectionPreparer;
+    }
+
+    private static void releaseRequestConnection(Connection db) {
+        if (requestConnectionPreparer != null  &&  db != null  &&  db.isOpen()) {
+            try {
+                requestConnectionPreparer.release(db);
+            } catch (Exception e) {
+                logger.error("RequestConnectionPreparer.release failed", e);
+            }
+        }
+    }
+
     /**
      * Closes a connection to the database opened with openNewConnection.
      * Commits or rolls back the transaction according to the success parameter.
@@ -305,6 +340,7 @@ public class MainServlet extends HttpServlet {
      * @see #closeConnection(Connection db, boolean success)
      */
     public static void closeConnection(Connection db) {
+        releaseRequestConnection(db);
         if (db != null &&  db.isOpen()) {
             java.sql.Connection sconn = null;
             try {
@@ -331,6 +367,7 @@ public class MainServlet extends HttpServlet {
      * @see #closeConnection(Connection db)
      */
     public static void closeConnection(Connection db, boolean success) {
+        releaseRequestConnection(db);
         boolean doClose = true;
         try {
             if (db != null && db.isOpen()) {

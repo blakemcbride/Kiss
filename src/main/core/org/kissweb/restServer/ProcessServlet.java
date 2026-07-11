@@ -467,6 +467,19 @@ public class ProcessServlet implements Runnable {
             }
         }
 
+        //  Let a registered application hook prepare the request's connection (e.g. select a
+        //  per-tenant schema) now that authentication has completed.  A failure aborts the
+        //  request before any service code runs.
+        RequestConnectionPreparer preparer = MainServlet.getRequestConnectionPreparer();
+        if (preparer != null  &&  DB != null) {
+            try {
+                preparer.prepare(DB, ud);
+            } catch (Exception e) {
+                errorReturn(response, "Unable to prepare the database connection for this request", e);
+                return;
+            }
+        }
+
         res = (new GroovyService()).tryGroovy(this, response, _className, _method, injson, outjson);
         if (res == ProcessServlet.ExecutionReturn.Error)
             return;

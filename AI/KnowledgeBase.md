@@ -382,6 +382,21 @@ A method registered with `MainServlet.allowWithoutAuthentication("package/Class"
 
 The front-end completes the loop: any `_ErrorCode = 2` triggers `Server.logout(true)`, which clears `AppState` and routes to `/login` **carrying the current location as the `return`** — so after re-authenticating, the user lands back on the page they were on (session-expiry resume). An intentional logout (`Server.logout()`) goes to `/login` without a return. See [Client-Side Routing](#client-side-routing-router).
 
+### Per-Request Connection Preparation (RequestConnectionPreparer)
+
+`org.kissweb.restServer.RequestConnectionPreparer` is an application-registered
+hook for preparing each REST request's database connection. Register with
+`MainServlet.setRequestConnectionPreparer(...)` (typically from
+`KissInit.groovy`). `prepare(db, userData)` runs after authentication and
+before the service method (userData is null for allowed-without-authentication
+calls with no session); if it throws, the request aborts before any service
+code runs (fail-closed). `release(db)` runs when the request connection is
+closed, before it returns to the pool, to clear any per-connection state.
+Typical use: multi-tenant applications selecting a per-tenant schema (e.g.
+PostgreSQL `search_path`) so every web service stays tenant-neutral.
+Connections obtained outside the request path (cron, `openNewConnection`) are
+not passed to `prepare`.
+
 **Server-restart detection (boot id).** Sessions live in the in-memory `UserCache`, so a back-end restart invalidates them all — but the *client's* token persists in `AppState`, so without help the browser would resume onto a dead session. To prevent that, `MainServlet.getBootId()` returns a UUID generated once per server start; it's included in every response as `_BootId`. The front-end records it at login (`Server.setBootId` from the `Login` response) and, at startup before routing, `Server.verifyServerInstance()` makes one unauthenticated `LoginRequired` call and compares: if the boot id changed, the back end was restarted, so it clears the persisted session and forces a clean re-login (no resume) with a "server was restarted" notice. A restart while the app is open is still caught on the next call by the normal `_ErrorCode = 2` path.
 
 ### CORS and Reverse Proxies (web-secure.xml / web-unsafe.xml)
