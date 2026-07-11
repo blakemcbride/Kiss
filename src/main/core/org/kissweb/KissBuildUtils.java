@@ -364,11 +364,14 @@ public class KissBuildUtils {
                     "$1true$2");
             java.nio.file.Files.writeString(idx, html);
 
+            //  Applications predating SystemInfo.js simply have nothing to stamp there.
             final java.nio.file.Path si = java.nio.file.Paths.get(explodedDir, "SystemInfo.js");
-            String js = java.nio.file.Files.readString(si);
-            js = js.replaceAll("(SystemInfo\\.releaseDate\\s*=\\s*\")[^\"]*(\")",
-                    "$1" + java.util.regex.Matcher.quoteReplacement(date) + "$2");
-            java.nio.file.Files.writeString(si, js);
+            if (java.nio.file.Files.exists(si)) {
+                String js = java.nio.file.Files.readString(si);
+                js = js.replaceAll("(SystemInfo\\.releaseDate\\s*=\\s*\")[^\"]*(\")",
+                        "$1" + java.util.regex.Matcher.quoteReplacement(date) + "$2");
+                java.nio.file.Files.writeString(si, js);
+            }
 
             println("WAR stamped: kiss-version=" + uuid + ", releaseDate=" + date + ", cache-control=true");
         } catch (java.io.IOException e) {
@@ -394,6 +397,10 @@ public class KissBuildUtils {
     public static void stampSameOriginBackend(String dir) {
         try {
             final java.nio.file.Path si = java.nio.file.Paths.get(dir, "SystemInfo.js");
+            //  Applications without a SystemInfo.js (no front end, or one predating
+            //  it) have nothing to stamp.
+            if (!java.nio.file.Files.exists(si))
+                return;
             String js = java.nio.file.Files.readString(si);
             String updated = js.replaceAll("(SystemInfo\\.sameOriginBackend\\s*=\\s*)[^;]*(;)", "$1true$2");
             if (!updated.equals(js))
