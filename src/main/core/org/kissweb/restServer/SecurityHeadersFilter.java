@@ -55,7 +55,7 @@ public class SecurityHeadersFilter implements Filter {
             "default-src 'self'; " +
             //  The one allowed inline script is the byte-stable bootstrap kernel in index.html.
             //  If that kernel is ever edited, recompute this hash.
-            "script-src 'self' 'sha256-UYq8cr4RRNrskmgjIOyb5l/e3bGfSfsURPG1l8Oha4U='; " +
+            "script-src 'self' 'sha256-JaGBSNrOPztIc2kSDoiyDCHVqjcvVQSMYv5X2fO3RCE='; " +
             "style-src 'self' 'unsafe-inline'; " +
             "img-src 'self' data: blob:; " +
             "font-src 'self' data:; " +

@@ -346,10 +346,10 @@ public class KissBuildUtils {
     /**
      * Stamp production cache-busting values into the WAR's frontend copies.
      * <br><br>
-     * Sets a fresh software version (a new UUID) and the current release date, and turns
-     * cache control on, so every WAR forces clients to download the new code.  The version
-     * and cache-control flag live in <code>index.html</code> (<code>kiss-version</code> /
-     * <code>kiss-cache-control</code> meta tags — the only perpetually-fresh file); the
+     * Sets a fresh application version (a new UUID) and the current release date, and switches
+     * the application mode to production, so every WAR forces clients to download the new code.
+     * The version and mode live in <code>index.html</code> (<code>app-version</code> /
+     * <code>app-mode</code> meta tags — the only perpetually-fresh file); the
      * release date lives in <code>SystemInfo.js</code>.
      * <br><br>
      * Operates on the staged copies in <code>explodedDir</code> only, so the source files
@@ -364,10 +364,10 @@ public class KissBuildUtils {
         try {
             final java.nio.file.Path idx = java.nio.file.Paths.get(explodedDir, "index.html");
             String html = java.nio.file.Files.readString(idx);
-            html = html.replaceAll("(name=\"kiss-version\"\\s+content=\")[^\"]*(\")",
+            html = html.replaceAll("(name=\"app-version\"\\s+content=\")[^\"]*(\")",
                     "$1" + java.util.regex.Matcher.quoteReplacement(uuid) + "$2");
-            html = html.replaceAll("(name=\"kiss-cache-control\"\\s+content=\")[^\"]*(\")",
-                    "$1true$2");
+            html = html.replaceAll("(name=\"app-mode\"\\s+content=\")[^\"]*(\")",
+                    "$1production$2");
             java.nio.file.Files.writeString(idx, html);
 
             //  Applications predating SystemInfo.js simply have nothing to stamp there.
@@ -379,7 +379,7 @@ public class KissBuildUtils {
                 java.nio.file.Files.writeString(si, js);
             }
 
-            println("WAR stamped: kiss-version=" + uuid + ", releaseDate=" + date + ", cache-control=true");
+            println("WAR stamped: app-version=" + uuid + ", releaseDate=" + date + ", app-mode=production");
         } catch (java.io.IOException e) {
             throw new RuntimeException("Failed to stamp version into WAR frontend files", e);
         }

@@ -212,23 +212,29 @@ is loaded.
 
 As discussed previously, the user's browser cache is controlled from the
 file @code{src/main/frontend/index.html}.  That file carries a version
-number and a flag that turns cache control on or off:
+number and the application mode:
 
 @example
-<meta name="kiss-version" content="...">
-<meta name="kiss-cache-control" content="false">
+<meta name="app-version" content="...">
+<meta name="app-mode" content="development">
 @end example
 
-When cache control is on, each time the version changes every user
-starting the application is forced to download fresh code rather than use
-the browser cache; once the new version is loaded, normal browser caching
-resumes.  A production @code{WAR} stamps a fresh version automatically, so
-each release force-refreshes all clients with no manual step.
+The version is the version of the application built on @emph{Kiss} (not
+of the @emph{Kiss} framework itself), and the mode is either
+@code{development} or @code{production}.
 
-During development the flag is left @code{false}, both so that edited
-files are seen immediately on reload and to avoid a needless duplicate
-load of @code{index.html}.  The mechanism, and the reason @code{index.html}
-itself is always loaded afresh, is described further in the Front-end API
+In @code{production} mode, each time the version changes every user
+starting the application is forced to download fresh code rather than
+use the browser cache; once the new version is loaded, normal browser
+caching resumes.  A production @code{WAR} stamps a fresh version and
+the @code{production} mode automatically, so each release
+force-refreshes all clients with no manual step.
+
+In @code{development} mode (the source default), every file is instead
+loaded with a fresh per-page-load token, so edited files are always
+seen on a plain reload and nothing is ever served stale from the
+cache.  The mechanism, and the reason @code{index.html} itself is
+always loaded afresh, is described further in the Front-end API
 chapter.
 
 

@@ -1470,7 +1470,9 @@ class Utils {
      * @returns {string}
      */
     static cacheBustHtmlResources(html) {
-        if (typeof window.cacheBust !== 'function' || !window.KissCacheOn)
+        //  window.cacheBust busts in both modes (release version in production, a per-load
+        //  token in development), so rewrite <img> URLs whenever it is available.
+        if (typeof window.cacheBust !== 'function')
             return html;
         return html.replace(/(<img\b[^>]*?\bsrc\s*=\s*["'])([^"']+)(["'])/gi, function (match, pre, url, post) {
             if (/^(data:|https?:|\/\/)/i.test(url) || url.indexOf('ver=') >= 0)

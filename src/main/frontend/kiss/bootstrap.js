@@ -9,7 +9,7 @@
  * Loaded (version-busted) by the byte-stable kernel in index.html, which has already
  * ensured index.html is fresh (?now) and defined window.cacheBust().  This file loads every
  * other downloaded resource — stylesheets, third-party libraries, framework and
- * application JavaScript — through window.cacheBust(), so a single kiss-version bump in
+ * application JavaScript — through window.cacheBust(), so a single app-version bump in
  * index.html force-refreshes all of them.
  *
  * Defines the global script loaders used throughout the framework
@@ -17,7 +17,8 @@
  */
 
 /**
- * Append the cache-busting version to a URL (no-op when cache control is off).
+ * Append the cache-busting token to a URL (the app-version in production, a per-page-load
+ * timestamp in development).
  */
 function cacheBustUrl(url) {
     return (typeof window.cacheBust === 'function') ? window.cacheBust(url) : url;

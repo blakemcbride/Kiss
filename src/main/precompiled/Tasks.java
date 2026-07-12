@@ -317,6 +317,20 @@ public class Tasks {
     }
 
     /**
+     * Remove a previously deployed production WAR from the local tomcat.
+     * <br><br>
+     * 'build' deploys the production WAR (web-secure.xml, stamped cache-busting) as
+     * tomcat/webapps/ROOT.war.  If it is left there, tomcat re-explodes it over the ROOT
+     * directory at startup, replacing the development tree copied there by
+     * develop/start-backend — most visibly web.xml, whose production CORS allow-list
+     * rejects the cross-origin development front-end.  Development runs from the exploded
+     * tree, so the dev-run tasks remove the WAR before starting tomcat.
+     */
+    private static void removeDeployedWar() {
+        rm("tomcat/webapps/ROOT.war");
+    }
+
+    /**
      * Unpack and install tomcat
      */
     public static void setupTomcat() {
@@ -337,6 +351,7 @@ public class Tasks {
         Process proc;
         buildSystem();
         setupTomcat();
+        removeDeployedWar();
         copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
         stampSameOriginBackend("tomcat/webapps/ROOT");
         if (isWindows)
@@ -366,6 +381,7 @@ public class Tasks {
     public static void startBackend() {
         buildSystem();
         setupTomcat();
+        removeDeployedWar();
         copyTree(BUILDDIR + "/exploded", "tomcat/webapps/ROOT");
         stampSameOriginBackend("tomcat/webapps/ROOT");
         if (isWindows)

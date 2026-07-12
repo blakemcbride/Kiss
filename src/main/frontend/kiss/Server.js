@@ -92,11 +92,19 @@ class Server {
     }
 
     /**
-     * Logs out the current user and reloads the page.
+     * Log the current user out and return to the login screen via a full page reload.
      * <br><br>
-     * This calls the backend Logout service to properly terminate the session,
-     * then performs a full page reload to clear all context and return to the login screen.
+     * Calls the back-end <code>Logout</code> service to terminate the session (unless
+     * <code>skipBackend</code>), clears the persisted client state, then reloads a fresh
+     * <code>index.html</code> (kept uncached by the bootstrap kernel).  Reloading re-boots the
+     * app on the latest cache-busted code, so an open tab automatically picks up a new release
+     * after a redeploy — a redeploy invalidates the session, which routes through here.  Any
+     * session-expiry resume target is carried into the reloaded login route.
      *
+     * @param {boolean} [captureReturn=false] remember the current location as the login
+     *        <code>return</code> so the user resumes there after re-authenticating
+     * @param {boolean} [skipBackend=false] skip the back-end <code>Logout</code> call (used when
+     *        the session is already known to be gone, e.g. from the session-expiry path)
      */
     static async logout(captureReturn = false, skipBackend = false) {
         if (Server.logoutInProgress)
@@ -131,12 +139,15 @@ class Server {
         }
 
         AppState.clear();
-        //  Return to the login screen.  Use the router when active (no full reload);
-        //  fall back to a reload for apps that don't use the router.
+        //  Force a full page reload of a fresh index.html (the kernel's own always-fresh
+        //  entry URL) so the tab re-boots on the latest cache-busted code — this is how an
+        //  open tab picks up a new release after a redeploy.  When the router is active,
+        //  land on the login route; Router.loginHash owns that route's form and carries
+        //  any session-expiry resume target.
+        let target = 'index.html?now=' + Date.now();
         if (typeof Router !== 'undefined' && Router.isStarted())
-            Router.gotoLogin(captureReturn);
-        else
-            location.reload();
+            target += Router.loginHash(captureReturn);
+        window.location.href = target;
     }
 
     static async handleSessionExpired(message, title = 'Error') {

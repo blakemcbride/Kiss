@@ -15,11 +15,14 @@
         is always fresh, and every other file the app downloads is loaded with ?ver=<version>
         so a single bump force-refreshes all of them.
 
-        On each release: bump kiss-version.  During development: set kiss-cache-control to
-        "false" to disable busting (no ?ver, no ?now).
+        On each release: bump app-version (the version of the application, not of the Kiss
+        framework).  app-mode is "development" or "production".  In production, files are
+        busted with the app-version, so the browser caches everything until the version
+        changes.  In development, files are busted with a fresh per-page-load timestamp,
+        so nothing is cached and a plain reload always fetches fresh files.
     -->
-    <meta name="kiss-version" content="EDIT-1">
-    <meta name="kiss-cache-control" content="false">  <!-- normally true in production; false during development -->
+    <meta name="app-version" content="EDIT-1">
+    <meta name="app-mode" content="development">  <!-- the WAR build stamps "production" -->
 
     <!--
         Content-Security-Policy is delivered as an HTTP response header by
@@ -73,31 +76,34 @@
                 var m = document.querySelector('meta[name="' + n + '"]');
                 return m ? m.getAttribute('content') : '';
             }
-            var ver = meta('kiss-version');
-            var cacheOn = meta('kiss-cache-control') === 'true';
+            var ver = meta('app-version');
+            var cacheOn = meta('app-mode') === 'production';
             window.KissVersion = ver;
             window.KissCacheOn = cacheOn;
+            //  Cache-bust token: the release version in production (stable across a release),
+            //  or a fresh per-page-load timestamp in development so nothing is ever served
+            //  from cache — a plain reload always re-fetches every file.
+            var token = cacheOn ? ver : String(Date.now());
+            window.KissBustToken = token;
             window.cacheBust = function (url) {
-                if (!cacheOn)
-                    return url;
-                return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'ver=' + ver;
+                return url + (url.indexOf('?') >= 0 ? '&' : '?') + 'ver=' + token;
             };
-            if (cacheOn) {
-                var now = null, s = window.location.search;
-                if (s) {
-                    var parts = s.substring(1).split('&');
-                    for (var i = 0; i < parts.length; i++) {
-                        var kv = parts[i].split('=');
-                        if (kv[0] === 'now')
-                            now = kv[1];
-                    }
+            //  Keep index.html itself uncached via a ?now redirect (both modes) so the
+            //  version/meta and this kernel are always fresh on reload.
+            var now = null, s = window.location.search;
+            if (s) {
+                var parts = s.substring(1).split('&');
+                for (var i = 0; i < parts.length; i++) {
+                    var kv = parts[i].split('=');
+                    if (kv[0] === 'now')
+                        now = kv[1];
                 }
-                if (!(now && Math.abs((Date.now() - Number(now)) / 1000) <= 30)) {
-                    window.onbeforeunload = null;
-                    var args = s ? s.substring(1).replace(/now=[^&]*&*/g, '') : '';
-                    window.location.href = 'index.html?now=' + Date.now() + (args ? '&' + args : '') + window.location.hash;
-                    return;
-                }
+            }
+            if (!(now && Math.abs((Date.now() - Number(now)) / 1000) <= 30)) {
+                window.onbeforeunload = null;
+                var args = s ? s.substring(1).replace(/now=[^&]*&*/g, '') : '';
+                window.location.href = 'index.html?now=' + Date.now() + (args ? '&' + args : '') + window.location.hash;
+                return;
             }
             var b = document.createElement('script');
             b.src = window.cacheBust('kiss/bootstrap.js');

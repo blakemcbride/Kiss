@@ -789,12 +789,33 @@ const DOMUtils = {
     /**
      * Fetch HTML content from URL
      * Replacement for $.get()
+     * <br><br>
+     * Participates in Kiss cache busting: a relative URL is fetched with the standard
+     * cache-bust token (the app-version in production, a per-page-load timestamp in
+     * development), so the content refreshes on the same schedule as every other file.
+     * The rewrite is conservative: pre-existing query arguments are preserved (the token
+     * is appended), a #fragment stays in place, and URLs that are absolute (http:, https:,
+     * //), data:, blob:, or that already carry a ver= argument are left untouched.
+     * Outside a kernel-booted page (no window.cacheBust), behavior is unchanged.
      * @param {string} url - URL to fetch
      * @param {Function} successCallback - Callback for success
      * @param {Function} [errorCallback] - Callback for error
      */
     fetchHTML: (url, successCallback, errorCallback) => {
-        fetch(url)
+        let fetchUrl = url;
+        const options = {};
+        if (typeof window.cacheBust === 'function' && typeof url === 'string'
+                && !/^(data:|blob:|https?:|\/\/)/i.test(url)) {
+            //  Split off any #fragment so the token lands in the query string, not the hash.
+            const hashIdx = url.indexOf('#');
+            const base = hashIdx >= 0 ? url.substring(0, hashIdx) : url;
+            const frag = hashIdx >= 0 ? url.substring(hashIdx) : '';
+            if (base && !/[?&]ver=/.test(base))
+                fetchUrl = window.cacheBust(base) + frag;
+            //  Mirror Utils.getHTML: never serve from cache in development.
+            options.cache = window.KissCacheOn ? 'default' : 'no-store';
+        }
+        fetch(fetchUrl, options)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);

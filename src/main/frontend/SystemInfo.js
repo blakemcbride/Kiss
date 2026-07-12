@@ -5,9 +5,9 @@
 /**
  * Application / deployment configuration for the Kiss front-end.
  *
- * NOTE: the cache-busting values — the software version and the cache-control flag —
- * are NOT here.  They live in index.html as <meta name="kiss-version"> and
- * <meta name="kiss-cache-control">, because index.html is the only file kept
+ * NOTE: the cache-busting values — the application version and the application mode —
+ * are NOT here.  They live in index.html as <meta name="app-version"> and
+ * <meta name="app-mode">, because index.html is the only file kept
  * perpetually fresh (via the ?now redirect).  bootstrap.js mirrors them back onto
  * SystemInfo.softwareVersion / SystemInfo.controlCache after this file loads, so existing
  * references keep working.

@@ -173,6 +173,27 @@ class Router {
     }
 
     /**
+     * The location hash for the login route, e.g. <code>#/login</code>.  When
+     * <code>captureReturn</code> is true and the app is not already on the login screen,
+     * the current location is carried as the login <code>return</code> argument
+     * (<code>#/login?return=...</code>) so the user lands back where they were after
+     * authenticating (session-expiry resume).  This is the single place the login
+     * route's URL form is defined; used by {@link Router.gotoLogin} and by
+     * <code>Server.logout</code>'s full page reload.
+     *
+     * @param {boolean} captureReturn
+     * @returns {string} the hash, including the leading '#'
+     */
+    static loginHash(captureReturn) {
+        if (captureReturn) {
+            const cur = window.location.hash;   // includes leading '#'
+            if (cur && cur.indexOf('#/login') !== 0)
+                return '#/login?return=' + encodeURIComponent(cur);
+        }
+        return '#/login';
+    }
+
+    /**
      * Navigate to the login screen.  When <code>captureReturn</code> is true the
      * current location is remembered as the login <code>return</code> so the user
      * lands back where they were after authenticating (used for session-expiry).
@@ -180,14 +201,7 @@ class Router {
      * @param {boolean} captureReturn
      */
     static gotoLogin(captureReturn) {
-        if (captureReturn) {
-            const cur = window.location.hash;   // includes leading '#'
-            if (cur && cur.indexOf('#/login') !== 0) {
-                Router.go('/login?return=' + encodeURIComponent(cur));
-                return;
-            }
-        }
-        Router.go('/login');
+        Router.go(Router.loginHash(captureReturn).substring(1));
     }
 
     /**
