@@ -235,6 +235,19 @@ public class Tasks {
         unJar(workDir, BUILDDIR + "/Kiss.jar");
         unJar(workDir, "libs/" + postgresqlJar);
 
+        // Kiss core (src/main/core) has depended on Log4j 2.x for logging (Cron, PDF, MCPServerBase,
+        // RestServerBase, Crypto, ...) since well before unit tests existed for any of those classes.
+        // Bundle it here so a test that touches any such class can actually initialize it - without
+        // this, running KissUnitTest.jar throws NoClassDefFoundError on org.apache.logging.log4j.LogManager
+        // the first time a test loads a core class with a static Logger field.
+        unJar(workDir, "libs/log4j-api-2.25.4.jar");
+        unJar(workDir, "libs/log4j-core-2.25.4.jar");
+
+        // Several oauth/* classes under test implement/reference jakarta.servlet types (they are
+        // normally run inside Tomcat, which provides this API) - bundle it here too so those classes
+        // can be loaded standalone, outside a servlet container.
+        unJar(workDir, "libs/jakarta.servlet-api-6.1.0.jar");
+
         // jUnit stuff
         unJar(workDir, "libs/junit-jupiter-engine-5.11.0.jar");
         unJar(workDir, "libs/junit-jupiter-api-5.11.0.jar");
