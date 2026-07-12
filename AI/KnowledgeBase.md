@@ -211,7 +211,18 @@ class ServiceName {
   a single 2-second retry in case Tomcat was still starting).
 - `./bld -v build` - Build the application (compiles all Java files including precompiled directory)
 - `./bld war` - Create WAR file for deployment
-- `./bld -v test` - Run unit tests
+- `./bld -v unit-tests` - Build `work/KissUnitTest.jar`, a self-contained JUnit 5 console-launcher jar
+  (Kiss core + precompiled + test classes + JUnit + Log4j + jakarta.servlet-api, all unpacked and
+  re-jarred together with a `Main-Class: org.junit.platform.console.ConsoleLauncher` manifest). There is
+  no separate `test` task - `unit-tests` only builds the jar; run the tests with:
+  ```
+  java -jar work/KissUnitTest.jar --scan-class-path=work/KissUnitTest.jar
+  ```
+  The explicit `--scan-class-path=work/KissUnitTest.jar` argument is required. `java -jar` sets the
+  running JVM's classpath to just that one jar, but a bare `--scan-class-path` (no argument) scans the
+  JVM's classpath *entries* looking for directories/jars to open separately - it does not also imply
+  "scan the jar this launcher is itself running from." Pointing it explicitly at the jar makes the
+  launcher open and scan that jar's own classes.
 - `./bld clean` - Clean build artifacts
 - `./bld javadoc` - Generate JavaDoc documentation
 
@@ -413,11 +424,80 @@ Kiss ships two web.xml variants in `src/main/core/WEB-INF/`:
 
 (An earlier `AllowedOrigins` application.ini key that the build stamped into the deployed web.xml was removed in favor of the RemoteIpFilter approach — it required per-deployment configuration for what the server can determine automatically.)
 
+### Crypto, Hashing, and MACs — which class to use
+
+Kiss provides four separate, flatly-namespaced classes for everything crypto-shaped, deliberately kept
+distinct rather than merged behind one facade (a facade would put a reversible-encryption call and a
+one-way-hash call one method name apart, which is exactly the ambiguity that invites misuse - e.g.
+someone "just encrypting a password reversibly"). Pick by what you actually need:
+
+| Need | Use |
+|---|---|
+| Recover the original value later (reversible) | `org.kissweb.Crypto` |
+| Store a user's password (never recoverable) | `org.kissweb.PasswordHash` |
+| A plain content fingerprint/digest, no secret key | `org.kissweb.Hash` |
+| A keyed digest/MAC, or a deterministic "blind index" for equality search over an encrypted column | `org.kissweb.Hmac` |
+
+Two small shared utilities support all four: `org.kissweb.ConstantTime` (timing-safe byte-array
+comparison) and `org.kissweb.RandomUtil` (shared `SecureRandom`-backed helpers).
+
+### Reversible Encryption (org.kissweb.Crypto)
+
+`org.kissweb.Crypto` is the framework utility for reversible encryption of strings and byte arrays — data that a legitimate caller must later be able to recover in plaintext (e.g. a value another system needs verbatim). It is the wrong tool for passwords; use `org.kissweb.PasswordHash` for those (see below), since passwords must never be recoverable.
+
+**Algorithm.** AES-GCM (`AES/GCM/NoPadding`), an authenticated cipher (AEAD): every ciphertext carries a 128-bit integrity tag, so tampering or corruption is detected on decrypt rather than silently producing garbage plaintext. Each encrypt call generates a fresh random 12-byte nonce from `SecureRandom` — nonces are never reused, which GCM requires for its security guarantees. Per-value non-determinism (the same plaintext encrypting to different ciphertext each time) comes solely from this nonce, regardless of which key-sourcing path below is used.
+
+**Two ways to supply the key:**
+- **Password-based** (`new Crypto(password)`, `Crypto.deriveOnce(password, salt)`): the AES key is derived from a human-choosable password (and optional salt) via `PBKDF2WithHmacSHA256` (65,536 iterations, 256-bit derived key) — container format `VERSION_1`. PBKDF2 exists to slow down brute-forcing a *low-entropy* secret; it makes sense for an actual password, not for a machine-generated key.
+- **Raw key** (`Crypto.fromKey(byte[])`, `Crypto.fromKeyBase64(String)`): the caller supplies an already high-entropy 256-bit key directly — no PBKDF2, no salt, no per-call KDF cost — container format `VERSION_2`. **This is the recommended path for bulk/high-volume field encryption** (e.g. a master key sourced once from `application.ini` and reused for many rows): applying PBKDF2 to a key that already has nothing for it to usefully slow down only adds latency, and doing it *per row* rather than once is the single most common misuse of this class in practice. Use `Crypto.generateKey()` / `Crypto.generateKeyBase64()` to provision a fresh key. A `VERSION_2` value can only be decrypted by a `fromKey`/`fromKeyBase64`-constructed instance (a password-based instance throws `IllegalStateException`, since there is no password/derivation involved).
+
+**Key-derivation caching.** For password-based instances, the PBKDF2-derived key for a given (password, salt) pair is computed at most once per instance and memoized for every later encrypt/decrypt call with that same salt — no construction path re-derives the key on every call. `Crypto.deriveOnce(password, salt)` additionally computes that derivation *eagerly*, at construction, rather than lazily on first use — useful when a caller wants the one-time PBKDF2 cost to land at a predictable point (e.g. once at the start of a batch) rather than on whichever row happens to run first. Its output is byte-for-byte `VERSION_1`-compatible with (and decryptable by) a plain `new Crypto(password)` instance — it changes only *when* PBKDF2 runs, not the format or the key. A caller who can instead source a genuinely high-entropy key should prefer `fromKey`, which removes the PBKDF2 cost entirely rather than just relocating it.
+
+**`DEFAULT_KDF_SALT` fallback.** When a password-based encrypt/decrypt call supplies no salt, PBKDF2 (which requires a non-empty salt) falls back to a fixed, built-in salt. This remains fully supported for decryption and is unaffected by anything above, but it is a **compatibility fallback for pre-existing callers only** — new code should supply an explicit salt, or (better) a per-value random salt via `encryptWithRandomSalt`, or (better still) use `fromKey`/`fromKeyBase64` where salt/KDF do not apply at all. The first time any `Crypto` instance in a JVM falls back to `DEFAULT_KDF_SALT`, a one-time `WARN` is logged (Log4j) as a nudge to migrate — it never throws and never changes what gets decrypted.
+
+**Self-describing versioned container.** Every value produced by the current format encodes everything decryption needs: `MAGIC(8) | VERSION(1) | saltLen(2) | salt | nonce(12) | ciphertext+tag`. String outputs are additionally prefixed `$KC1$` and Base64-encoded; byte-array outputs carry the same container with a leading `0x00` magic byte. `VERSION_1` (password/PBKDF2) and `VERSION_2` (raw key, `saltLen` always 0) share this same envelope shape; the versioning leaves room for the container format to evolve further without breaking data already at rest.
+
+**Backward compatibility.** Older data written before the AES-GCM rework (plain `AES/ECB/PKCS5Padding` with a homegrown salt+password key derivation) is still transparently decryptable — decryption auto-detects the legacy format (absence of the `$KC1$` prefix / magic bytes) and falls back to the legacy path. All *new* encryptions always use one of the current AES-GCM formats; there is no way to opt back into the legacy format. Data produced via `fromKey`/`fromKeyBase64` (`VERSION_2`) cannot be read by code that predates that feature.
+
+**API:**
+
+| Method | Description |
+|---|---|
+| `new Crypto(String password)` | Password-based instance (throws if null/empty); PBKDF2-derived key, `VERSION_1` |
+| `Crypto.deriveOnce(String password, String salt)` | Same as above, but the PBKDF2 derivation for `salt` runs immediately at construction instead of lazily |
+| `Crypto.fromKey(byte[] key256)` / `Crypto.fromKeyBase64(String base64Key256)` | Raw-key instance, no PBKDF2/salt, `VERSION_2`; key must be exactly 256 bits (32 bytes) |
+| `Crypto.generateKey()` / `Crypto.generateKeyBase64()` | Generate a fresh random 256-bit key, for provisioning a `fromKey` master key |
+| `String encrypt(String valueToEnc)` / `String encrypt(String salt, String valueToEnc)` | Encrypt a string, no salt or caller-supplied salt (ignored in raw-key mode); returns Base64 |
+| `String encryptWithRandomSalt(String valueToEnc)` | Encrypt a string with a fresh random salt embedded in the output (recommended when no natural salt exists) |
+| `String decrypt(String encryptedValue)` / `String decrypt(String salt, String encryptedValue)` / `String decryptWithRandomSalt(String encryptedValue)` | Corresponding decrypt calls (must match how the value was encrypted) |
+| `byte[] encrypt(byte[] valueToEnc)` / `byte[] encrypt(String salt, byte[] valueToEnc)` / `byte[] encryptWithRandomSalt(byte[] valueToEnc)` | Byte-array equivalents |
+| `byte[] decrypt(byte[] encryptedValue)` / `byte[] decrypt(String salt, byte[] encryptedValue)` / `byte[] decryptWithRandomSalt(byte[] encryptedValue)` | Byte-array equivalents |
+
+A single `Crypto` instance is safe to share/reuse across threads (each call creates its own `Cipher`; the key-derivation cache is a `ConcurrentHashMap`).
+
+**Usage:**
+```java
+import org.kissweb.Crypto
+
+// Password-based (low-volume / human passphrase)
+Crypto crypto = new Crypto(masterKeyFromApplicationIni)   // never hardcode the password/key
+String enc = crypto.encryptWithRandomSalt(plainTextValue)  // store 'enc'
+String plain = crypto.decryptWithRandomSalt(enc)           // recover later
+
+// Raw key (recommended for bulk/high-volume field encryption)
+String key = Crypto.generateKeyBase64()          // provision once, store in application.ini
+Crypto fast = Crypto.fromKeyBase64(keyFromApplicationIni)
+String enc2 = fast.encryptWithRandomSalt(plainTextValue)
+String plain2 = fast.decryptWithRandomSalt(enc2)
+```
+
+The password/key passed to `Crypto` is itself a secret and must come from `application.ini` (see "Secrets and External Configuration" above), never a literal in source.
+
 ### Password Storage (org.kissweb.PasswordHash)
 
 `org.kissweb.PasswordHash` is the framework utility for storing user passwords. Passwords must be stored using this class — never as plain text, and never with reversible encryption.
 
-**Hashed, not encrypted.** Passwords are hashed one-way with PBKDF2-HMAC-SHA256 and a random per-password salt. There is intentionally no way to recover the original password; authentication only ever *verifies* a candidate. (For reversible encryption of arbitrary data, use `org.kissweb.Crypto` instead — it is the wrong tool for passwords.)
+**Hashed, not encrypted.** Passwords are hashed one-way with PBKDF2-HMAC-SHA256 (600,000 iterations, the OWASP 2023 floor) and a random per-password salt. There is intentionally no way to recover the original password; authentication only ever *verifies* a candidate, in constant time via `org.kissweb.ConstantTime`. (For reversible encryption of arbitrary data, use `org.kissweb.Crypto` instead — it is the wrong tool for passwords.) PBKDF2-HMAC-SHA256 remains the framework's only supported algorithm — Argon2id was evaluated and deliberately not added, to keep Kiss dependency-free (pure JDK) for every application; `needsRehash` below is nonetheless structured so a second, stronger algorithm could be added later as an additional recognized prefix without changing any caller-visible signature.
 
 **API (all static):**
 
@@ -426,6 +506,7 @@ Kiss ships two web.xml variants in `src/main/core/WEB-INF/`:
 | `String hash(String password)` | Hash a plain-text password for storage |
 | `boolean verify(String password, String stored)` | Constant-time verify a candidate against a stored hash |
 | `boolean isHashed(String stored)` | True if a stored value is in the PasswordHash format (vs. a legacy/plain value) |
+| `boolean needsRehash(String stored)` | True if `stored` should be re-hashed and re-saved (e.g. it was hashed at a lower iteration count than the current default, or isn't even in this format at all) |
 
 **Stored format** is a self-describing string so the work factor can be raised over time without invalidating existing hashes:
 ```
@@ -433,7 +514,7 @@ pbkdf2$<iterations>$<Base64(salt)>$<Base64(hash)>
 ```
 Defaults: 600,000 iterations, 16-byte salt, 256-bit derived key. The encoded value is ~80 characters, so the storage column must be at least `varchar(255)`.
 
-**Usage:**
+**Usage — the standard "verify, then opportunistically rehash" pattern:**
 ```groovy
 import org.kissweb.PasswordHash
 
@@ -442,7 +523,85 @@ rec.set("user_password", PasswordHash.hash(plainTextPassword))
 
 // When authenticating:
 boolean ok = PasswordHash.verify(enteredPassword, rec.getString("user_password"))
+if (ok && PasswordHash.needsRehash(rec.getString("user_password")))
+    rec.set("user_password", PasswordHash.hash(enteredPassword))   // upgrade the work factor in place
 ```
+`needsRehash` lets every stored password gradually migrate up to the current work factor as users log in successfully, with no bulk migration required.
+
+### General-Purpose Hashing (org.kissweb.Hash)
+
+`org.kissweb.Hash` provides unkeyed cryptographic digests — SHA-256/384/512 and their SHA-3
+counterparts — for content fingerprints, dedup/change detection, checksums, and cache keys, where the
+input is not secret and speed is a feature, not a liability. Pure JDK: `MessageDigest` has supported
+SHA-3 natively since Java 9, so no external dependency is needed for any algorithm here. **Never use
+`Hash` for passwords** (use `PasswordHash`) **or for anything needing a secret key/proof-of-origin**
+(use `Hmac`) — a plain digest has neither property.
+
+**API (all static):** for each of `sha256`/`sha384`/`sha512`/`sha3_256`/`sha3_512`, three forms exist —
+`byte[] <algo>(byte[] data)` / `<algo>(String data)` (UTF-8), `String <algo>Hex(...)` (lowercase hex),
+and `String <algo>Base64(...)` (standard Base64) — plus streaming/file helpers:
+
+| Method | Description |
+|---|---|
+| `hash(InputStream in, String algorithm)` | Digest a stream in fixed-size chunks (does not load the whole input into memory); caller closes the stream |
+| `hashFile(File file, String algorithm)` / `hashFileHex(File file, String algorithm)` | Digest a file's content, streamed |
+
+**Usage:**
+```java
+import org.kissweb.Hash
+
+byte[] digest = Hash.sha256("some content")
+String hex     = Hash.sha256Hex("some content")
+String b64     = Hash.sha256Base64("some content")
+String fileSha = Hash.hashFileHex(new File("upload.bin"), "SHA-256")
+```
+
+### Keyed Digests / HMAC and the Blind-Index Pattern (org.kissweb.Hmac)
+
+`org.kissweb.Hmac` provides HMAC-SHA256/384/512 (pure JDK, `javax.crypto.Mac` — no dependency). Unlike
+`Hash`, every digest here is parameterized by a secret key: only someone holding the key can produce or
+verify a matching tag for a given message. API shape mirrors `Hash`: `byte[] hmacSha256(byte[] key,
+byte[]|String message)` plus `hmacSha256Hex`/`hmacSha256Base64` (and the `384`/`512` variants). SHA-256
+is the default/recommended algorithm for new work; 384/512 are available when needed.
+
+**The blind-index pattern.** `Crypto`'s AES-GCM is deliberately non-deterministic (a fresh random nonce
+every call), which is exactly what makes it safe — but it also means `WHERE encrypted_column = ?` cannot
+work directly against it. A **blind index** restores equality lookup: store a deterministic, keyed HMAC
+of the (normalized) plaintext alongside the encrypted column, and query against that instead:
+```java
+// write path
+row.encryptedValue = Crypto.fromKey(fieldEncryptionKey).encryptWithRandomSalt(value)   // reversible, for display/export
+row.blindIndex      = Hmac.hmacSha256Hex(fieldIndexKey, normalize(value))              // deterministic, for lookup only
+
+// read path — an indexed equality lookup with no decryption of any row
+String candidateIndex = Hmac.hmacSha256Hex(fieldIndexKey, normalize(candidateValue))
+// ... SELECT ... WHERE blind_index = candidateIndex ...
+```
+Two responsibilities stay with the caller, not `Hmac`, because they are application/data-shape decisions:
+- **Key separation** — `fieldIndexKey` must be a *different* key from `fieldEncryptionKey`. Never reuse
+  one secret for two primitives; each is its own `application.ini` entry.
+- **Normalization** — normalize the plaintext before hashing (trim whitespace, strip punctuation, fix
+  case, etc., as appropriate) so formatting variance doesn't defeat equality lookup. What "normalized"
+  means is inherently specific to the value being indexed.
+
+**Usage:**
+```java
+import org.kissweb.Hmac
+
+byte[] mac = Hmac.hmacSha256(secretKey, "message to authenticate")
+String hex = Hmac.hmacSha256Hex(secretKey, "message to authenticate")
+```
+
+### Constant-Time Comparison (org.kissweb.ConstantTime) and Shared Randomness (org.kissweb.RandomUtil)
+
+`org.kissweb.ConstantTime.equals(byte[] a, byte[] b)` compares two byte arrays without an early return on
+the first differing byte, so its running time depends only on array length, not content — use it (rather
+than `Arrays.equals`/`String.equals`) whenever comparing a MAC, hash, or blind-index value against an
+expected value. `PasswordHash` uses it internally for hash verification.
+
+`org.kissweb.RandomUtil` provides `randomBytes(int n)` and `randomAlphaNumeric(int len)` backed by one
+shared `SecureRandom` instance, so new code needing random key material or tokens has one obvious place
+to get it rather than instantiating another `SecureRandom`.
 
 ### OAuth 2.1 (`org.kissweb.oauth`)
 
@@ -1478,4 +1637,4 @@ ServicePassword = ""    # correct
 
 ---
 
-*Last Updated: 2026-07-10*
+*Last Updated: 2026-07-12*

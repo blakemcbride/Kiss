@@ -10,15 +10,23 @@ import java.util.Base64;
  * <br><br>
  * Passwords are <b>hashed, not encrypted</b> — there is intentionally no way to recover the original
  * password.  Authentication verifies a candidate password by re-deriving the hash with the stored salt
- * and comparing in constant time.  (To reversibly encrypt arbitrary data, use {@link Crypto} instead;
- * reversible encryption is the wrong tool for password storage.)
+ * and comparing in constant time (via {@link ConstantTime#equals(byte[], byte[])}).  (To reversibly
+ * encrypt arbitrary data, use {@link Crypto} instead; reversible encryption is the wrong tool for
+ * password storage.)
  * <br><br>
  * The stored value is a self-describing string:
  * <pre>
  *     pbkdf2$&lt;iterations&gt;$&lt;Base64(salt)&gt;$&lt;Base64(hash)&gt;
  * </pre>
  * The iteration count and salt are embedded, so the work factor can be raised over time without
- * invalidating existing hashes.
+ * invalidating existing hashes. {@link #needsRehash(String)} tells the caller when a stored hash was
+ * produced with a weaker (older) iteration count than this class's current default, so the standard
+ * "verify, then re-hash-and-save if needed" pattern can gradually migrate every stored password up to
+ * the current work factor as users log in, with no bulk migration required. The class is structured so
+ * that a stronger algorithm could be added as a second recognized prefix in the future (dispatching
+ * inside {@link #verify(String, String)}/{@link #isHashed(String)}/{@link #needsRehash(String)} on which
+ * prefix a stored value has) without changing any caller-visible signature; today PBKDF2-HMAC-SHA256 is
+ * the only supported algorithm.
  * <br><br>
  * <b>Usage Example:</b>
  * <pre>
@@ -27,6 +35,8 @@ import java.util.Base64;
  *
  * // When authenticating:
  * boolean ok = PasswordHash.verify(enteredPassword, stored);
+ * if (ok &amp;&amp; PasswordHash.needsRehash(stored))
+ *     saveNewHash(PasswordHash.hash(enteredPassword));    // opportunistically upgrade the work factor
  * </pre>
  */
 public final class PasswordHash {
@@ -75,7 +85,7 @@ public final class PasswordHash {
             final byte[] salt = dec.decode(parts[2]);
             final byte[] expected = dec.decode(parts[3]);
             final byte[] actual = pbkdf2(password.toCharArray(), salt, iterations);
-            return constantTimeEquals(expected, actual);
+            return ConstantTime.equals(expected, actual);
         } catch (RuntimeException e) {
             return false;
         }
@@ -92,6 +102,36 @@ public final class PasswordHash {
         return stored != null && stored.startsWith(PREFIX);
     }
 
+    /**
+     * Determine whether a stored hash should be re-hashed and re-saved - typically on next successful
+     * login - because it no longer reflects this class's current work-factor default (or, were a second,
+     * stronger algorithm ever added, because it is on the older/weaker of the two). Purely advisory: it
+     * never invalidates {@code stored} and has no bearing on {@link #verify(String, String)}, which keeps
+     * verifying any value it always could. See the class documentation for the standard
+     * "verify, then re-hash-and-save if needed" pattern.
+     * <br><br>
+     * A value that is not even in this class's format at all (fails {@link #isHashed(String)} - null,
+     * a legacy plain-text value, or something else entirely) is treated as needing a rehash too, since it
+     * certainly does not reflect the current default.
+     *
+     * @param stored a stored password value (normally one already confirmed valid by {@link #verify})
+     * @return true if {@code stored} should be replaced with a fresh {@link #hash(String)} on next
+     *         successful verify
+     */
+    public static boolean needsRehash(String stored) {
+        if (!isHashed(stored))
+            return true;
+        final String[] parts = stored.split("\\$");
+        if (parts.length != 4)
+            return true;
+        try {
+            final int iterations = Integer.parseInt(parts[1]);
+            return iterations < ITERATIONS;
+        } catch (NumberFormatException e) {
+            return true;
+        }
+    }
+
     private static byte[] pbkdf2(char[] password, byte[] salt, int iterations) {
         final PBEKeySpec spec = new PBEKeySpec(password, salt, iterations, KEY_BITS);
         try {
@@ -102,14 +142,5 @@ public final class PasswordHash {
         } finally {
             spec.clearPassword();
         }
-    }
-
-    private static boolean constantTimeEquals(byte[] a, byte[] b) {
-        if (a.length != b.length)
-            return false;
-        int result = 0;
-        for (int i = 0; i < a.length; i++)
-            result |= a[i] ^ b[i];
-        return result == 0;
     }
 }
