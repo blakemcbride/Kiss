@@ -69,6 +69,9 @@ public class SecurityHeadersFilter implements Filter {
      * <code>Content-Security-Policy-Report-Only</code> (log violations, block
      * nothing). <code>false</code> &rArr; enforce it. Flip to <code>false</code>
      * once the browser console is free of CSP violations.
+     * <br><br>
+     * May be overridden per deployment with <code>CspReportOnly = true</code>
+     * in <code>application.ini</code>.
      */
     private static final boolean CSP_REPORT_ONLY = false;
 
@@ -76,6 +79,11 @@ public class SecurityHeadersFilter implements Filter {
      * Master switch. Set to <code>false</code> to emit no security headers at
      * all (the filter becomes a pass-through). Useful for A/B isolating whether
      * these headers are responsible for some observed behavior.
+     * <br><br>
+     * May be overridden per deployment with <code>SecurityHeaders = false</code>
+     * in <code>application.ini</code> — for example, an application whose front
+     * end predates the byte-stable bootstrap kernel (whose hash the CSP pins)
+     * and would otherwise be blocked by the inline-script policy.
      */
     private static final boolean ENABLED = true;
 
@@ -85,10 +93,17 @@ public class SecurityHeadersFilter implements Filter {
     public SecurityHeadersFilter() {
     }
 
+    private static boolean iniOverride(String key, boolean compiledDefault) {
+        String v = (String) MainServlet.getEnvironment(key);
+        if (v == null || v.isEmpty())
+            return compiledDefault;
+        return !"false".equalsIgnoreCase(v);
+    }
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
-        if (ENABLED && res instanceof HttpServletResponse) {
+        if (iniOverride("SecurityHeaders", ENABLED) && res instanceof HttpServletResponse) {
             final HttpServletResponse response = (HttpServletResponse) res;
 
             //  Don't let the browser guess content types.
@@ -102,7 +117,8 @@ public class SecurityHeadersFilter implements Filter {
             response.setHeader("X-Frame-Options", "DENY");
 
             //  The XSS policy: report-only during rollout, enforcing afterward.
-            response.addHeader(CSP_REPORT_ONLY ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy",
+            response.addHeader(iniOverride("CspReportOnly", CSP_REPORT_ONLY)
+                               ? "Content-Security-Policy-Report-Only" : "Content-Security-Policy",
                                CONTENT_SECURITY_POLICY);
 
             //  HSTS only over HTTPS; never on plain-http dev (e.g. http://localhost).
