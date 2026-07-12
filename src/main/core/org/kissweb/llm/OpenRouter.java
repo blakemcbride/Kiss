@@ -16,24 +16,34 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 /**
- * Client for interacting with Anthropic's Claude API.
+ * Client for interacting with the OpenRouter API.
  *
- * <p>This class provides a simple interface for sending chat completion requests to Anthropic's
- * Messages API, supporting both text and image inputs as well as streaming responses.
+ * <p>OpenRouter (<a href="https://openrouter.ai">openrouter.ai</a>) is a cloud gateway that
+ * provides access to models from many providers (OpenAI, Anthropic, Google, Meta, Mistral,
+ * and others) through a single, OpenAI-compatible chat completions API and a single API key.
+ * Models are identified with a {@code provider/model} string (for example,
+ * {@code "openai/gpt-4o"}, {@code "anthropic/claude-sonnet-4"},
+ * {@code "meta-llama/llama-3.1-70b-instruct"}).</p>
+ *
+ * <p>This class provides a simple interface for sending chat completion requests through
+ * OpenRouter, supporting both text and image inputs as well as streaming responses.
  * It handles authentication, request construction, and response parsing.</p>
  *
  * <h2>Features</h2>
  * <ul>
+ *   <li>Access to many model providers through one API key</li>
  *   <li>Text and multimodal (text + image) chat completions</li>
  *   <li>Streaming and non-streaming response modes</li>
- *   <li>Configurable generation parameters (temperature, top-p sampling, max tokens)</li>
+ *   <li>Model fallback routing (alternate models tried automatically if the primary fails)</li>
+ *   <li>Unified reasoning-effort control across providers that support reasoning</li>
+ *   <li>Configurable generation parameters (temperature, top-p sampling)</li>
  *   <li>Built-in retry logic and timeout handling</li>
  * </ul>
  *
  * <h2>Basic Usage Example</h2>
  * <pre>{@code
  * // Initialize the client
- * Anthropic ai = new Anthropic("your-api-key", "claude-sonnet-4-20250514");
+ * OpenRouter ai = new OpenRouter("your-api-key", "openai/gpt-4o");
  *
  * // Simple text query
  * String response = ai.send("What is the capital of France?");
@@ -51,26 +61,32 @@ import java.nio.file.Paths;
  *
  * <h2>Advanced Configuration</h2>
  * <pre>{@code
- * Anthropic ai = new Anthropic(apiKey, "claude-haiku-4-20250514");
- * ai.setTemperature(0.9f);  // More creative responses
- * ai.setSampling(0.95f);    // Broader vocabulary selection
- * ai.setMaxTokens(8192);    // Longer responses
+ * OpenRouter ai = new OpenRouter(apiKey, "anthropic/claude-sonnet-4");
+ * ai.setTemperature(0.9f);   // More creative responses
+ * ai.setSampling(0.95f);     // Broader vocabulary selection
+ * ai.setReasoningEffort("high");  // Enable reasoning on models that support it
+ * ai.setFallbackModels("openai/gpt-4o", "meta-llama/llama-3.1-70b-instruct");
+ * ai.setSiteUrl("https://example.com");  // Optional attribution headers
+ * ai.setSiteName("My Application");
  * }</pre>
  *
  * @author Kiss Web Development Framework
  * @see RestClient
  */
-public class Anthropic {
+public class OpenRouter {
 
-    private static String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
-    private static String ANTHROPIC_VERSION = "2023-06-01";
+    private static String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
 
-    private final String apiKey; // Your Anthropic API key
-    private final String model;  // e.g. "claude-sonnet-4-20250514"
+    private final String apiKey; // Your OpenRouter API key
+    private final String model;  // e.g. "openai/gpt-4o"
 
     private float temperature = 0.7f; // Generation randomness
     private float topP = 0.7f;        // Nucleus sampling
-    private int maxTokens = 4096;     // Required by Anthropic API
+    private String reasoningEffort;   // When set, request reasoning ("low", "medium", "high")
+    private String imageDetail = "auto"; // "low", "high", "auto"
+    private String siteUrl;           // Optional HTTP-Referer attribution header
+    private String siteName;          // Optional X-Title attribution header
+    private String[] fallbackModels;  // Optional alternate models tried in order
 
     private JSONObject lastResponse;  // Full JSON of last non-stream call
     private int lastHttpStatus;       // HTTP status of the last call
@@ -78,44 +94,30 @@ public class Anthropic {
     private final RestClient restClient; // Re-used HTTP helper
 
     /**
-     * Overrides the Anthropic Messages API endpoint URL used by this class.
+     * Overrides the OpenRouter Chat Completions endpoint URL used by this class.
      *
      * <p>This is a global setting: changing the URL affects all current and future
-     * {@link Anthropic} instances created in this JVM.</p>
+     * {@link OpenRouter} instances created in this JVM.</p>
      *
-     * <p>This is primarily intended for testing, proxies, gateways, or Anthropic-compatible
-     * endpoints.</p>
+     * <p>This is primarily intended for testing, proxies, or gateways.</p>
      *
-     * @param url the full URL to use for Messages API requests (for example,
-     *            {@code https://api.anthropic.com/v1/messages})
+     * @param url the full URL to use for chat completion requests (for example,
+     *            {@code https://openrouter.ai/api/v1/chat/completions})
      */
     public static void setUrl(String url) {
-        ANTHROPIC_URL = url;
+        OPENROUTER_URL = url;
     }
 
     /**
-     * Overrides the Anthropic API version header value sent with requests.
+     * Creates a new OpenRouter client instance.
      *
-     * <p>This is a global setting: changing the version affects all current and future
-     * {@link Anthropic} instances created in this JVM.</p>
-     *
-     * <p>The version is sent as the {@code anthropic-version} request header. Use this if you need
-     * to pin to a specific API contract or test against a different version.</p>
-     *
-     * @param version the API version string to send (for example, {@code 2023-06-01})
-     */
-    public static void setVersion(String version) {
-        ANTHROPIC_VERSION = version;
-    }
-
-    /**
-     * Creates a new Anthropic client instance.
-     *
-     * @param apiKey Your Anthropic API key for authentication
-     * @param model  The model identifier (e.g., "claude-sonnet-4-20250514", "claude-haiku-4-20250514")
+     * @param apiKey Your OpenRouter API key for authentication
+     * @param model  The model identifier in {@code provider/model} form
+     *               (e.g., "openai/gpt-4o", "anthropic/claude-sonnet-4",
+     *               "meta-llama/llama-3.1-70b-instruct")
      * @throws NullPointerException if apiKey or model is null
      */
-    public Anthropic(String apiKey, String model) {
+    public OpenRouter(String apiKey, String model) {
         this.apiKey = apiKey;
         this.model = model;
 
@@ -136,11 +138,12 @@ public class Anthropic {
      * the output more focused and deterministic, while higher values make it more
      * diverse and creative.</p>
      *
-     * @param temperature Value between 0.0 and 1.0 (default: 0.7)
+     * @param temperature Value between 0.0 and 2.0 (default: 0.7)
      *                    <ul>
      *                      <li>0.0-0.3: Very focused, deterministic responses</li>
      *                      <li>0.4-0.7: Balanced creativity and coherence</li>
      *                      <li>0.8-1.0: More creative and varied responses</li>
+     *                      <li>1.1-2.0: Highly creative but potentially less coherent</li>
      *                    </ul>
      */
     public void setTemperature(float temperature) {
@@ -167,15 +170,80 @@ public class Anthropic {
     }
 
     /**
-     * Sets the maximum number of tokens to generate in the response.
+     * Sets the reasoning effort level for models that support reasoning.
      *
-     * <p>Anthropic's API requires an explicit max_tokens value. Setting this higher
-     * allows for longer responses but may increase latency and cost.</p>
+     * <p>OpenRouter normalizes reasoning control across providers: when an effort level
+     * is set, it is sent as OpenRouter's unified {@code reasoning} parameter and translated
+     * to each provider's native mechanism. It is ignored by models that do not support
+     * reasoning. When not set (the default), no reasoning parameter is sent.</p>
      *
-     * @param maxTokens The maximum tokens to generate (default: 4096)
+     * @param effort The reasoning effort level, or {@code null} to disable:
+     *               <ul>
+     *                 <li>"low" - Quick reasoning, faster responses</li>
+     *                 <li>"medium" - Balanced reasoning and speed</li>
+     *                 <li>"high" - Thorough reasoning, slower but more accurate</li>
+     *               </ul>
      */
-    public void setMaxTokens(int maxTokens) {
-        this.maxTokens = maxTokens;
+    public void setReasoningEffort(String effort) {
+        this.reasoningEffort = effort;
+    }
+
+    /**
+     * Sets the detail level for image analysis.
+     *
+     * <p>Controls how the model processes images. Higher detail levels provide
+     * better accuracy but consume more tokens and may be slower.</p>
+     *
+     * @param detail The image processing detail level:
+     *               <ul>
+     *                 <li>"low" - Faster processing, lower token usage</li>
+     *                 <li>"high" - Better accuracy, higher token usage</li>
+     *                 <li>"auto" - Model automatically chooses based on image (default)</li>
+     *               </ul>
+     */
+    public void setImageDetail(String detail) {
+        this.imageDetail = detail;
+    }
+
+    /**
+     * Sets alternate models for OpenRouter's fallback routing.
+     *
+     * <p>When set, the list is sent as OpenRouter's {@code models} parameter: if the
+     * primary model (given in the constructor) is unavailable or the request to it
+     * fails, OpenRouter automatically retries with each alternate model in order.
+     * When not set (the default), only the primary model is used.</p>
+     *
+     * @param models Alternate model identifiers to try in order (e.g., "openai/gpt-4o",
+     *               "meta-llama/llama-3.1-70b-instruct"); pass no arguments to clear
+     */
+    public void setFallbackModels(String... models) {
+        this.fallbackModels = (models == null || models.length == 0) ? null : models;
+    }
+
+    /**
+     * Sets the URL of your application, sent as the optional {@code HTTP-Referer} header.
+     *
+     * <p>OpenRouter uses this header (together with {@link #setSiteName}) to attribute
+     * requests to your application in its usage statistics and rankings. It is entirely
+     * optional and has no effect on request processing.</p>
+     *
+     * @param url Your application's URL, or {@code null} to omit the header (default)
+     */
+    public void setSiteUrl(String url) {
+        this.siteUrl = url;
+    }
+
+    /**
+     * Sets the name of your application, sent as the optional {@code X-Title} header.
+     *
+     * <p>OpenRouter uses this header (together with {@link #setSiteUrl}) to attribute
+     * requests to your application in its usage statistics and rankings. It is entirely
+     * optional and has no effect on request processing.</p>
+     *
+     * @param name Your application's name, or {@code null} to omit the header (default)
+     */
+    public void setSiteName(String name) {
+        this.siteName = name;
     }
 
     /* ----------------------------------------------------------------------
@@ -263,15 +331,18 @@ public class Anthropic {
                        Consumer<String> onToken,
                        Runnable onDone) throws Exception {
 
-        JSONObject body = buildMessagesBody(query, imagePath);
+        JSONObject body = buildChatBody(query, imagePath);
 
-        HttpRequest req = HttpRequest.newBuilder(URI.create(ANTHROPIC_URL))
-                .header("x-api-key", apiKey)
-                .header("anthropic-version", ANTHROPIC_VERSION)
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(OPENROUTER_URL))
+                .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .timeout(Duration.ofMinutes(10))
-                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
-                .build();
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()));
+        if (siteUrl != null && !siteUrl.isEmpty())
+            builder.header("HTTP-Referer", siteUrl);
+        if (siteName != null && !siteName.isEmpty())
+            builder.header("X-Title", siteName);
+        HttpRequest req = builder.build();
 
         lastHttpStatus = 0;
         lastErrorBody = null;
@@ -283,42 +354,46 @@ public class Anthropic {
         if (lastHttpStatus / 100 != 2) {
             // Errors arrive as a plain JSON body, not an SSE stream
             lastErrorBody = resp.body().collect(Collectors.joining("\n"));
-            throw new Exception("Anthropic request failed with HTTP " + lastHttpStatus + ": " + lastErrorBody);
+            throw new Exception("OpenRouter request failed with HTTP " + lastHttpStatus + ": " + lastErrorBody);
         }
 
         final boolean[] doneFired = {false};
 
+// OpenRouter interleaves SSE comment lines (": OPENROUTER PROCESSING") as keep-alives;
+// the "data: " filter skips them.
         resp.body()
                 .filter(line -> line.startsWith("data: "))
                 .map(line -> line.substring(6).trim())
                 .forEach(payload -> {
-                    if (payload.startsWith("{")) {
-                        JSONObject event = new JSONObject(payload);
-                        String type = event.has("type") ? event.getString("type") : "";
-                        if ("error".equals(type)) {
-                            // A failure can also be reported mid-stream as an SSE error event
-                            lastErrorBody = event.has("error") ? event.getJSONObject("error").toString() : payload;
-                            throw new RuntimeException("Anthropic returned an error: " + lastErrorBody);
+                    if ("[DONE]".equals(payload)) {
+                        if (!doneFired[0]) {
+                            doneFired[0] = true;
+                            onDone.run();
                         }
-                        if ("content_block_delta".equals(type)) {
-                            JSONObject delta = event.has("delta") ? event.getJSONObject("delta") : null;
-                            if (delta != null && "text_delta".equals(delta.has("type") ? delta.getString("type") : "")) {
-                                String text = delta.has("text") ? delta.getString("text") : "";
-                                if (!text.isEmpty()) onToken.accept(text);
-                            }
-                        } else if ("message_stop".equals(type)) {
-                            if (!doneFired[0]) {
-                                doneFired[0] = true;
-                                onDone.run();
-                            }
+                        return;
+                    }
+                    if (payload.startsWith("{")) {
+                        JSONObject chunk = new JSONObject(payload);
+                        if (chunk.has("error")) {
+                            // A failure can also be reported mid-stream as an SSE error event
+                            lastErrorBody = chunk.getJSONObject("error").toString();
+                            throw new RuntimeException("OpenRouter returned an error: " + lastErrorBody);
+                        }
+                        JSONArray choices = chunk.has("choices") ? chunk.getJSONArray("choices") : null;
+                        if (choices == null || choices.length() == 0)
+                            return; // e.g. a final usage-only chunk
+                        JSONObject delta = choices.getJSONObject(0).getJSONObject("delta");
+                        if (delta.has("content") && !delta.isNull("content")) {
+                            String text = delta.getString("content");
+                            if (!text.isEmpty())
+                                onToken.accept(text);
                         }
                     }
                 });
 
-// Ensure onDone is always called even if message_stop event was not received
-        if (!doneFired[0]) {
+// Ensure onDone is always called even if the [DONE] sentinel was not received
+        if (!doneFired[0])
             onDone.run();
-        }
     }
 
     /**
@@ -354,24 +429,9 @@ public class Anthropic {
     /**
      * Returns the complete JSON response from the last non-streaming API call.
      *
-     * <p>Useful for debugging or accessing additional metadata such as token usage.
-     * Returns {@code null} for streaming calls or if no non-streaming call has been
-     * made yet.</p>
-     *
-     * <b>Response Structure Example:</b>
-     * <pre>{@code
-     * {
-     *   "id": "msg_...",
-     *   "type": "message",
-     *   "role": "assistant",
-     *   "model": "claude-sonnet-4-20250514",
-     *   "usage": {
-     *     "input_tokens": 25,
-     *     "output_tokens": 50
-     *   },
-     *   "content": [{"type": "text", "text": "..."}]
-     * }
-     * }</pre>
+     * <p>Useful for debugging or accessing additional metadata not included in the
+     * simplified response. Returns {@code null} for streaming calls or if no
+     * non-streaming call has been made yet.</p>
      *
      * @return The full JSON response object, or {@code null} if not available
      * @see #getResponseCode() for HTTP status code
@@ -389,9 +449,10 @@ public class Anthropic {
      *   <li>200 - Success</li>
      *   <li>400 - Bad request (invalid parameters)</li>
      *   <li>401 - Invalid API key</li>
+     *   <li>402 - Insufficient credits</li>
      *   <li>429 - Rate limit exceeded</li>
-     *   <li>500 - Server error</li>
-     *   <li>529 - Overloaded</li>
+     *   <li>502 - The selected model/provider is down or returned an invalid response</li>
+     *   <li>503 - No available provider meets the request's requirements</li>
      * </ul>
      *
      * @return The HTTP status code from the most recent API call, or 0 if no call has been made
@@ -401,15 +462,15 @@ public class Anthropic {
     }
 
     /**
-     * Returns the raw response string from the last API call.
+     * Returns the raw error body from the last failed API call.
      *
-     * <p>Provides access to the complete HTTP response body as received from the server.
-     * When a call fails (non-2xx HTTP status, or an error event received mid-stream),
-     * the raw error text is retained here; the same text is also included in the
-     * thrown exception's message.</p>
+     * <p>When a call fails (non-2xx HTTP status, or an error event received mid-stream),
+     * the raw error text returned by OpenRouter is retained here for debugging.
+     * The same text is also included in the thrown exception's message.</p>
      *
-     * @return The raw response text, or {@code null} if no response is available
-     * @see #getLastFullResponse() for parsed JSON response
+     * @return The raw error text from the last failed call, or {@code null} if the
+     *         last call succeeded or no call has been made
+     * @see #getResponseCode() for HTTP status code
      */
     public String getResponseString() {
         return lastErrorBody != null ? lastErrorBody : restClient.getResponseString();
@@ -420,7 +481,7 @@ public class Anthropic {
      * ---------------------------------------------------------------------- */
 
     /**
-     * Builds the JSON request body for the Anthropic Messages API call.
+     * Builds the JSON request body for chat completion API calls.
      *
      * <p>Constructs a properly formatted request including model selection,
      * generation parameters, and message content with optional image data.
@@ -431,15 +492,25 @@ public class Anthropic {
      * @return A JSONObject containing the complete request body
      * @throws Exception if image file cannot be read or encoded
      */
-    private JSONObject buildMessagesBody(String query, String imagePath) throws Exception {
+    private JSONObject buildChatBody(String query,
+                                     String imagePath) throws Exception {
         JSONObject body = new JSONObject()
                 .put("model", model)
-                .put("max_tokens", maxTokens)
+                .put("stream", true)
                 .put("temperature", temperature)
-                .put("top_p", topP)
-                .put("stream", true);
+                .put("top_p", topP);
 
-// Assemble user message content array
+        if (reasoningEffort != null && !reasoningEffort.isEmpty())
+            body.put("reasoning", new JSONObject().put("effort", reasoningEffort));
+
+        if (fallbackModels != null) {
+            JSONArray models = new JSONArray();
+            for (String m : fallbackModels)
+                models.put(m);
+            body.put("models", models);
+        }
+
+// Assemble user message content
         JSONArray contentArray = new JSONArray()
                 .put(new JSONObject()
                         .put("type", "text")
@@ -447,18 +518,22 @@ public class Anthropic {
 
         if (imagePath != null) {
             byte[] imageBytes = Files.readAllBytes(Paths.get(imagePath));
-            String base64Data = Base64.getEncoder().encodeToString(imageBytes);
-            String mediaType = detectMediaType(imagePath);
+            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
+            String imageDataUrl = "data:" + detectMediaType(imagePath) + ";base64," + base64Image;
+
+            JSONObject imageObj = new JSONObject().put("url", imageDataUrl);
+            if (imageDetail != null && !imageDetail.isEmpty())
+                imageObj.put("detail", imageDetail); // Only include if caller supplied
 
             contentArray.put(new JSONObject()
-                    .put("type", "image")
-                    .put("source", new JSONObject()
-                            .put("type", "base64")
-                            .put("media_type", mediaType)
-                            .put("data", base64Data)));
+                    .put("type", "image_url")
+                    .put("image_url", imageObj));
         }
 
         JSONArray messages = new JSONArray()
+                .put(new JSONObject()
+                        .put("role", "system")
+                        .put("content", "You are a helpful assistant."))
                 .put(new JSONObject()
                         .put("role", "user")
                         .put("content", contentArray));

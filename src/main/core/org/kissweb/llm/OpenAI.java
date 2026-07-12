@@ -10,6 +10,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -83,6 +84,8 @@ public class OpenAI {
     private String imageDetail = "auto"; // "low", "high", "auto"
 
     private JSONObject lastResponse; // Full JSON of last non-stream call
+    private int lastHttpStatus;      // HTTP status of the last streaming call
+    private String lastErrorBody;    // Raw error body of the last failed call, else null
     private final RestClient restClient; // Re‑used HTTP helper
 
 
@@ -296,21 +299,51 @@ public class OpenAI {
                 .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                 .build();
 
+        lastHttpStatus = 0;
+        lastErrorBody = null;
+
         HttpResponse<Stream<String>> resp =
                 restClient.streamCall(req, HttpResponse.BodyHandlers.ofLines());
+
+        lastHttpStatus = resp.statusCode();
+        if (lastHttpStatus / 100 != 2) {
+            // Errors arrive as a plain JSON body, not an SSE stream
+            lastErrorBody = resp.body().collect(Collectors.joining("\n"));
+            throw new Exception("OpenAI request failed with HTTP " + lastHttpStatus + ": " + lastErrorBody);
+        }
+
+        final boolean[] doneFired = {false};
 
         resp.body()
                 .filter(line -> line.startsWith("data: "))
                 .map(line -> line.substring(6).trim())
                 .forEach(payload -> {
-                    if ("[DONE]".equals(payload)) { onDone.run(); return; }
+                    if ("[DONE]".equals(payload)) {
+                        if (!doneFired[0]) {
+                            doneFired[0] = true;
+                            onDone.run();
+                        }
+                        return;
+                    }
                     if (payload.startsWith("{")) {
-                        JSONObject delta = new JSONObject(payload)
-                                .getJSONArray("choices").getJSONObject(0)
-                                .getJSONObject("delta");
-                        if (delta.has("content")) onToken.accept(delta.getString("content"));
+                        JSONObject chunk = new JSONObject(payload);
+                        if (chunk.has("error")) {
+                            // A failure can also be reported mid-stream as an SSE error event
+                            lastErrorBody = chunk.getJSONObject("error").toString();
+                            throw new RuntimeException("OpenAI returned an error: " + lastErrorBody);
+                        }
+                        JSONArray choices = chunk.has("choices") ? chunk.getJSONArray("choices") : null;
+                        if (choices == null || choices.length() == 0)
+                            return; // e.g. a final usage-only chunk
+                        JSONObject delta = choices.getJSONObject(0).getJSONObject("delta");
+                        if (delta.has("content") && !delta.isNull("content"))
+                            onToken.accept(delta.getString("content"));
                     }
                 });
+
+// Ensure onDone is always called even if the [DONE] sentinel was not received
+        if (!doneFired[0])
+            onDone.run();
     }
 
     /**
@@ -379,6 +412,9 @@ public class OpenAI {
      * @throws RuntimeException if the embeddings array is empty or malformed
      */
     public double[] getEmbeddings(String text) throws Exception {
+        lastHttpStatus = 0;
+        lastErrorBody = null;
+
         JSONObject request = new JSONObject()
                 .put("input", text)
                 .put("model", model);
@@ -446,20 +482,22 @@ public class OpenAI {
      * @return The HTTP status code from the most recent API call, or 0 if no call has been made
      */
     public int getResponseCode() {
-        return restClient.getResponseCode();
+        return lastHttpStatus != 0 ? lastHttpStatus : restClient.getResponseCode();
     }
-    
+
     /**
      * Returns the raw response string from the last API call.
-     * 
+     *
      * <p>Provides access to the complete HTTP response body as received from the server.
-     * Useful for debugging when response parsing fails or for accessing error details.</p>
-     * 
+     * When a call fails (non-2xx HTTP status, or an error event received mid-stream),
+     * the raw error text is retained here; the same text is also included in the
+     * thrown exception's message.</p>
+     *
      * @return The raw response text, or {@code null} if no response is available
      * @see #getLastFullResponse() for parsed JSON response
      */
     public String getResponseString() {
-        return restClient.getResponseString();
+        return lastErrorBody != null ? lastErrorBody : restClient.getResponseString();
     }
 
     /* ----------------------------------------------------------------------

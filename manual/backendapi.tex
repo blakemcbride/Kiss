@@ -333,7 +333,7 @@ Common methods include @code{getString()}, @code{getInt()},
 
 @section Large Language Models
 
-@emph{Kiss} provides a high-level interface to the @emph{Ollama} large language model (LLM), the @emph{OpenAI} (chatGPT) server, and the @emph{Anthropic} (Claude) server. This makes it easy for you to add LLM features to your application.
+@emph{Kiss} provides a high-level interface to the @emph{Ollama} large language model (LLM), the @emph{OpenAI} (chatGPT) server, the @emph{Anthropic} (Claude) server, and the @emph{OpenRouter} multi-provider gateway. This makes it easy for you to add LLM features to your application.
 
 @subsection Ollama
 
@@ -409,6 +409,39 @@ Anthropic-compatible endpoints.  The static method
 @code{setVersion(String version)} can be used to override the
 @code{anthropic-version} request header value (e.g., @code{2023-06-01}).
 Both are global settings that affect all instances.
+
+See that class for documentation.
+
+@subsection OpenRouter
+
+@emph{OpenRouter} (@uref{https://openrouter.ai}) is a cloud gateway
+that provides access to models from many providers (OpenAI, Anthropic,
+Google, Meta, Mistral, and others) through a single, OpenAI-compatible
+API and a single API key.  In order to use it, you must have an
+OpenRouter account and API Key.  Models are identified with a
+@code{provider/model} string.
+
+The single @emph{KISS} class that interfaces with @emph{OpenRouter} is
+named @emph{OpenRouter}.
+
+Typical usage would look as follows:
+
+@example
+    String apiKey = "xxxxxxxxxxxxxxx";
+    OpenRouter ai = new OpenRouter(apiKey, "openai/gpt-4o");
+    String result = ai.send("Who is president Bush?");
+@end example
+
+The class also supports streaming responses and image inputs.
+Optional setters cover OpenRouter-specific features: model fallback
+routing (@code{setFallbackModels}), unified reasoning-effort control
+(@code{setReasoningEffort}), and application attribution headers
+(@code{setSiteUrl}, @code{setSiteName}).
+
+The static method @code{setUrl(String url)} can be used to override the
+default OpenRouter endpoint URL.  This is useful for proxies or
+gateways.  Since it is a global setting, changing the URL affects all
+instances.
 
 See that class for documentation.
 
