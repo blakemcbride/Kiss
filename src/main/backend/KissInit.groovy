@@ -16,19 +16,13 @@ class KissInit {
         // Example of how to specify a method that is allowed without authentication
     //    MainServlet.allowWithoutAuthentication("services.MyGroovyService", "addNumbers")
 
-        // Set up a global logout handler that runs whenever any user logs out
-        // This can be used for cleanup tasks like logging, closing resources, etc.
-        UserCache.setLogoutHandler({ UserData ud ->
-            // Example: Log the logout event
-            println "User ${ud.getUsername()} (ID: ${ud.getUserId()}) is logging out"
-
-            // Add any custom cleanup code here
-            // Examples:
-            // - Close user-specific resources
-            // - Update database logout timestamp
-            // - Send notifications
-            // - Clean up temporary files
-        } as Consumer<UserData>)
+        // Example of how to set up a global logout handler that runs whenever any
+        // user logs out.  This can be used for cleanup tasks such as closing
+        // user-specific resources, updating a database logout timestamp, sending
+        // notifications, or removing temporary files.
+    //    UserCache.setLogoutHandler({ UserData ud ->
+    //        // Add any custom cleanup code here
+    //    } as Consumer<UserData>)
 
     }
 
