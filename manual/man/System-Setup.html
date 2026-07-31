@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="System-Setup">
 <div class="nav-panel">
 <p>
-Next: <a href="Orientation.html" accesskey="n" rel="next">Orientation</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Orientation.html" accesskey="n" rel="next">Orientation</a>, Previous: <a href="Introduction.html" accesskey="p" rel="prev">Introduction</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (July 31, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -151,7 +151,17 @@ However, <em class="emph">Kiss</em> is <em class="emph">not</em> a Maven project
 list of dependencies.  Unfortunately, this file sometimes confuses IDEs
 into interpreting the existence of that file as the project being a
 <em class="emph">Maven</em> project.  Therefore, in some instances, it is a good idea
-to delete that file prior to IDE configuration.
+to delete that file prior to IDE configuration.  Deleting it is safe;
+the build simply skips it.
+</p>
+<p>Because no build reads that dependency list, a hand-maintained copy of it
+would quietly fall behind the list the build actually uses, leaving
+<em class="emph">GitHub</em> reporting against versions the system no longer has.  The
+list is therefore generated: everything between the
+<code class="code">BEGIN GENERATED DEPENDENCIES</code> and <code class="code">END GENERATED DEPENDENCIES</code>
+markers is written by the build.  Dependencies are edited in
+<code class="code">buildForeignDependencies()</code> in <code class="code">src/main/precompiled/Tasks.java</code>,
+never in <code class="code">pom.xml</code>.  The rest of <code class="code">pom.xml</code> is maintained by hand.
 </p>
 <p>The <code class="code">build.xml</code> file is also not used by the <em class="emph">Kiss</em> system per se.
 It is an integration with <em class="emph">ant</em> for IDE integration.
@@ -562,7 +572,17 @@ are unneeded.
 </p></dd>
 <dt><code class="code">libs</code></dt>
 <dd><p>This task is only required if you intend to use your IDE to build the
-remainder of the system.  It installs the required dependencies.
+remainder of the system.  It installs the required dependencies.  It also
+deletes superseded versions of those dependencies, so changing a version in
+<code class="code">Tasks.java</code> does not leave the old JAR behind where both would land on
+the class path.  JAR files you supplied yourself are never touched.  Finally,
+it runs the <code class="code">pom</code> task described next.
+</p></dd>
+<dt><code class="code">pom</code></dt>
+<dd><p>This rewrites the dependency list in <code class="code">pom.xml</code> from the dependencies the
+build actually uses, so the two cannot fall out of step.  It normally runs as
+part of <code class="code">libs</code>, and rewrites the file only when its content would
+actually change.  See the note about <code class="code">pom.xml</code> earlier in this chapter.
 </p></dd>
 <dt><code class="code">develop</code></dt>
 <dd><p>This will cause the entire system to build (not repeating unnecessary
@@ -719,10 +739,9 @@ custom tasks or modified existing tasks.  Be sure to check
 </p></li><li><code class="code">libs</code>
 
 <p>The upgrade process installs new or updated JAR files that are part of
-the <em class="emph">Kiss</em> system.  However, you may have added
-application-specific JAR files.  After the upgrade, be sure to manually delete any
-outdated JAR files that come with <em class="emph">Kiss</em> that have been upgraded
-by this process.
+the <em class="emph">Kiss</em> system.  Superseded versions of those files are removed
+automatically, so there is nothing to clean up by hand.  JAR files you
+added yourself are left alone, and remain your responsibility.
 </p></li></ul>
 
 
@@ -751,7 +770,7 @@ Framework</em>, available on Amazon.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Orientation.html">Orientation</a>, Previous: <a href="Introduction.html">Introduction</a>, Up: <a href="index.html">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Orientation.html">Orientation</a>, Previous: <a href="Introduction.html">Introduction</a>, Up: <a href="index.html">Kiss Getting Started Guide (July 31, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 

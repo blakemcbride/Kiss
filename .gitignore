@@ -166,3 +166,7 @@ src/main/frontend/lib/jquery*
 
 /build/
 manual/asciidoc/
+
+node_modules/
+package-lock.json
+

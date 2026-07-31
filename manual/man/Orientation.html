@@ -32,7 +32,7 @@ span:hover a.copiable-link {visibility: visible}
 <div class="chapter-level-extent" id="Orientation">
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html" accesskey="n" rel="next">Developing</a>, Previous: <a href="System-Setup.html" accesskey="p" rel="prev">System Setup</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (July 31, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -305,23 +305,29 @@ is loaded.
 
 <p>As discussed previously, the user&rsquo;s browser cache is controlled from the
 file <code class="code">src/main/frontend/index.html</code>.  That file carries a version
-number and a flag that turns cache control on or off:
+number and the application mode:
 </p>
 <div class="example">
-<pre class="example-preformatted">&lt;meta name=&quot;kiss-version&quot; content=&quot;...&quot;&gt;
-&lt;meta name=&quot;kiss-cache-control&quot; content=&quot;false&quot;&gt;
+<pre class="example-preformatted">&lt;meta name=&quot;app-version&quot; content=&quot;...&quot;&gt;
+&lt;meta name=&quot;app-mode&quot; content=&quot;development&quot;&gt;
 </pre></div>
 
-<p>When cache control is on, each time the version changes every user
-starting the application is forced to download fresh code rather than use
-the browser cache; once the new version is loaded, normal browser caching
-resumes.  A production <code class="code">WAR</code> stamps a fresh version automatically, so
-each release force-refreshes all clients with no manual step.
+<p>The version is the version of the application built on <em class="emph">Kiss</em> (not
+of the <em class="emph">Kiss</em> framework itself), and the mode is either
+<code class="code">development</code> or <code class="code">production</code>.
 </p>
-<p>During development the flag is left <code class="code">false</code>, both so that edited
-files are seen immediately on reload and to avoid a needless duplicate
-load of <code class="code">index.html</code>.  The mechanism, and the reason <code class="code">index.html</code>
-itself is always loaded afresh, is described further in the Front-end API
+<p>In <code class="code">production</code> mode, each time the version changes every user
+starting the application is forced to download fresh code rather than
+use the browser cache; once the new version is loaded, normal browser
+caching resumes.  A production <code class="code">WAR</code> stamps a fresh version and
+the <code class="code">production</code> mode automatically, so each release
+force-refreshes all clients with no manual step.
+</p>
+<p>In <code class="code">development</code> mode (the source default), every file is instead
+loaded with a fresh per-page-load token, so edited files are always
+seen on a plain reload and nothing is ever served stale from the
+cache.  The mechanism, and the reason <code class="code">index.html</code> itself is
+always loaded afresh, is described further in the Front-end API
 chapter.
 </p>
 
@@ -380,7 +386,7 @@ example shows the same code in all of the supported languages.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Getting Started Guide (June 28, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="Developing.html">Developing</a>, Previous: <a href="System-Setup.html">System Setup</a>, Up: <a href="index.html">Kiss Getting Started Guide (July 31, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 
