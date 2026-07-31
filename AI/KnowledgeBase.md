@@ -258,6 +258,17 @@ When generic build functionality accumulates in `Tasks.java`, upstream it into
 `KissBuildUtils.java` (Kiss-wide) or `BuildUtils.java` (universally generic) —
 never Kiss/Tomcat-specific code into `BuildUtils.java`.
 
+**Foreign dependency pruning.** `downloadAll` (`BuildUtils`) removes superseded
+versions of the dependencies it manages, so changing a version in `Tasks.java`
+drops the old jar instead of leaving both on the classpath — where which one wins
+is arbitrary and the resulting failure appears far from its cause. A file is
+removed only when its artifact name is *exactly* a current dependency's, it
+carries a version, and it is not the wanted file. The exact match keeps sibling
+artifacts independent (`pdfbox` never matches `pdfbox-io`, `log4j-api` never
+matches `log4j-core`), and files belonging to artifacts that are not dependencies
+are never touched. The download cache is deliberately not pruned, so a reverted
+version is restored without re-downloading.
+
 **Development port block.** All four development ports come from a single
 variable at the top of `Tasks.java` — `private static int portBase = 8000;` —
 which `Tasks.main()` always passes to `setPortBase` (before
@@ -369,9 +380,10 @@ These are the defaults of the development port block (`portBase = 8000` in
 ## Key Libraries
 
 ### Backend Dependencies
-- Groovy 4.0.26 - Dynamic language support
-- C3P0 0.11.2 - Database connection pooling
-- Log4j 2.25.3 - Logging framework (log4j 2.x API)
+- Groovy 4.0.28 - Dynamic language support
+- C3P0 0.14.1 - Database connection pooling (requires a matching
+  mchange-commons-java; see "Foreign dependency pruning")
+- Log4j 2.25.4 - Logging framework (log4j 2.x API)
 - PDFBox 3.0.5 - PDF generation
 - Database drivers for PostgreSQL, MySQL, SQLite, MS SQL, Oracle
 
@@ -1650,4 +1662,4 @@ ServicePassword = ""    # correct
 
 ---
 
-*Last Updated: 2026-07-12*
+*Last Updated: 2026-07-31*

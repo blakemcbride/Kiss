@@ -34,6 +34,10 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
@@ -278,12 +282,123 @@ public class BuildUtils {
 
     /**
      * Downloads all foreign dependencies specified in the dependency collection.
+     * <p>
+     * Once everything is downloaded, files left over from earlier versions of those
+     * same dependencies are removed; see
+     * {@link #pruneSupersededVersions(ForeignDependencies)}.
      *
      * @param deps the foreign dependencies to download
      */
     public static void downloadAll(ForeignDependencies deps) {
         for (ForeignDependency dep : deps.getDependencies())
             download(dep.filename, dep.targetPath, dep.source);
+        pruneSupersededVersions(deps);
+    }
+
+    /**
+     * Removes files left over from earlier versions of the given foreign dependencies.
+     * <p>
+     * Changing a dependency's version downloads the new file but leaves the file holding
+     * the previous version sitting in the target directory.  Both versions then end up on
+     * the classpath and which one wins is arbitrary, which produces failures far removed
+     * from their cause.  This removes those superseded files.
+     * <p>
+     * A file is removed only when all of the following hold:
+     * <ul>
+     *     <li>it sits in the same target directory as a current dependency,</li>
+     *     <li>its artifact name is <em>exactly</em> that dependency's artifact name,</li>
+     *     <li>it carries a version, meaning the artifact name is followed by {@code -}
+     *         and a digit,</li>
+     *     <li>it has the same extension, and</li>
+     *     <li>it is not itself one of the current dependencies.</li>
+     * </ul>
+     * Requiring the artifact name to match exactly is what keeps sibling artifacts that
+     * share a prefix independent of one another.  {@code pdfbox} does not match
+     * {@code pdfbox-io-3.0.5.jar}, and {@code junit-jupiter} does not match
+     * {@code junit-jupiter-api-5.11.0.jar}, because in each case the text following the
+     * prefix is another name rather than a version.  Files belonging to artifacts that
+     * are not listed as dependencies at all are never considered.
+     *
+     * @param deps the current set of foreign dependencies
+     */
+    public static void pruneSupersededVersions(ForeignDependencies deps) {
+        //  The files wanted in each target directory.  A directory can hold several
+        //  dependencies, so all of them must be known before anything is removed.
+        final Map<String, Set<String>> wanted = new HashMap<>();
+        for (ForeignDependency dep : deps.getDependencies())
+            wanted.computeIfAbsent(dep.targetPath, k -> new HashSet<>()).add(dep.filename);
+
+        for (ForeignDependency dep : deps.getDependencies()) {
+            final String artifact = artifactName(dep.filename);
+            if (artifact == null)
+                continue;   //  unversioned name; nothing can be known to supersede it
+            final String ext = fileExtension(dep.filename);
+            final File[] files = (new File(dep.targetPath)).listFiles();
+            if (files == null)
+                continue;
+            final Set<String> keep = wanted.get(dep.targetPath);
+            for (File file : files) {
+                if (!file.isFile())
+                    continue;
+                final String name = file.getName();
+                if (keep.contains(name))
+                    continue;   //  a currently wanted file
+                if (!name.endsWith(ext))
+                    continue;
+                if (!isVersionOf(name, artifact))
+                    continue;
+                println("removing superseded " + dep.targetPath + File.separator + name);
+                if (!file.delete())
+                    throw new RuntimeException("error deleting superseded file " + file.getAbsolutePath());
+            }
+        }
+    }
+
+    /**
+     * Returns the artifact portion of a versioned file name, which is everything ahead of
+     * the last {@code -} that is followed by a digit.  This is the usual
+     * {@code artifact-version.ext} repository convention.  Scanning for the <em>last</em>
+     * such separator is what allows an artifact name to itself end in a digit, as in
+     * {@code commons-lang3-3.18.0.jar}.
+     *
+     * @param filename the file name to examine
+     * @return the artifact name, or null when the name carries no recognizable version
+     */
+    private static String artifactName(String filename) {
+        int idx = -1;
+        for (int i = 0; i < filename.length() - 1; i++)
+            if (filename.charAt(i) == '-'  &&  Character.isDigit(filename.charAt(i + 1)))
+                idx = i;
+        if (idx <= 0)
+            return null;
+        return filename.substring(0, idx);
+    }
+
+    /**
+     * Determines whether a file name is a versioned instance of the given artifact, that
+     * is, the artifact name followed by {@code -} and a digit.
+     *
+     * @param filename the file name to test
+     * @param artifact the artifact name to test against
+     * @return true if filename is a versioned instance of artifact
+     */
+    private static boolean isVersionOf(String filename, String artifact) {
+        if (!filename.startsWith(artifact))
+            return false;
+        if (filename.length() < artifact.length() + 2)
+            return false;
+        return filename.charAt(artifact.length()) == '-'  &&  Character.isDigit(filename.charAt(artifact.length() + 1));
+    }
+
+    /**
+     * Returns the extension of a file name, including the leading period.
+     *
+     * @param filename the file name to examine
+     * @return the extension, or an empty string when there is none
+     */
+    private static String fileExtension(String filename) {
+        final int dot = filename.lastIndexOf('.');
+        return dot < 0 ? "" : filename.substring(dot);
     }
 
     /**
