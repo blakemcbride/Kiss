@@ -32,8 +32,10 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -399,6 +401,202 @@ public class BuildUtils {
     private static String fileExtension(String filename) {
         final int dot = filename.lastIndexOf('.');
         return dot < 0 ? "" : filename.substring(dot);
+    }
+
+    /**
+     * Parses the coordinates out of a URL that addresses a Maven-layout repository, in which
+     * an artifact lives at {@code <group path>/<artifact>/<version>/<artifact>-<version>.<ext>}.
+     * <p>
+     * A {@code maven2} path segment, which the central repository uses as its root, is dropped
+     * from the group when present.  The file name is required to agree with the artifact and
+     * version taken from the path; a URL that does not follow the layout yields null rather than
+     * invented coordinates, so URLs pointing at a CDN or any other non-repository source are
+     * simply passed over.
+     *
+     * @param url the URL to parse
+     * @return {@code {groupId, artifactId, version}}, or null when the URL is not Maven-layout
+     */
+    public static String[] mavenCoordinatesFromUrl(String url) {
+        if (url == null)
+            return null;
+        int start = url.indexOf("://");
+        start = start < 0 ? 0 : start + 3;
+        final int host = url.indexOf('/', start);
+        if (host < 0)
+            return null;
+        final String[] seg = url.substring(host + 1).split("/");
+        if (seg.length < 4)
+            return null;
+        final String filename = seg[seg.length - 1];
+        final String version = seg[seg.length - 2];
+        final String artifact = seg[seg.length - 3];
+        if (!filename.startsWith(artifact + "-" + version))
+            return null;    //  not the Maven layout; do not guess
+        final StringBuilder group = new StringBuilder();
+        for (int i = 0; i < seg.length - 3; i++) {
+            if (i == 0  &&  "maven2".equals(seg[i]))
+                continue;   //  repository root, not part of the group
+            if (group.length() > 0)
+                group.append('.');
+            group.append(seg[i]);
+        }
+        if (group.length() == 0)
+            return null;
+        return new String[] { group.toString(), artifact, version };
+    }
+
+    /**
+     * Builds the body of a Maven POM's {@code <dependencies>} element and writes it into an
+     * existing POM between a pair of marker comments.
+     * <p>
+     * The point is to keep a POM's dependency list from drifting away from the list the build
+     * actually uses.  A POM that merely describes a project to an IDE or to a repository scanner
+     * is never exercised by the build, so nothing catches it when it falls behind, and a stale
+     * entry there is reported against the project as though it were real.  Deriving the element
+     * from the same {@link ForeignDependencies} the build downloads removes the second copy that
+     * would otherwise have to be maintained by hand.
+     * <p>
+     * Only the marked region is touched, so hand-maintained parts of the POM, such as the
+     * {@code <build>} element, are left exactly as they are.  The file is rewritten only when
+     * the generated text actually differs from what is already there, which keeps repeated
+     * builds from disturbing its timestamp.
+     * <p>
+     * Entries appear in the order they were added, so regenerating an unchanged project
+     * reproduces the file byte for byte.
+     */
+    public static class MavenDependencies {
+        /** Entries as {groupId, artifactId, version, systemPath}; systemPath null unless system-scoped. */
+        private final ArrayList<String[]> entries = new ArrayList<>();
+        /** Artifact ids to emit with test scope. */
+        private final Set<String> testScoped = new HashSet<>();
+
+        /**
+         * Creates an empty dependency set.
+         */
+        public MavenDependencies() {
+        }
+
+        /**
+         * Names the artifacts that are needed only to compile and run tests.  Scope is applied
+         * when the element is generated, so this may be called before or after the artifacts
+         * themselves are added.
+         *
+         * @param artifactIds the artifact ids to mark as test-scoped
+         * @return this, for chaining
+         */
+        public MavenDependencies testScope(String... artifactIds) {
+            Collections.addAll(testScoped, artifactIds);
+            return this;
+        }
+
+        /**
+         * Adds every foreign dependency whose source URL addresses a Maven-layout repository.
+         * Dependencies whose URLs are not Maven-layout are skipped, since no coordinates can be
+         * derived from them.
+         *
+         * @param deps the foreign dependencies to add
+         * @return this, for chaining
+         */
+        public MavenDependencies add(ForeignDependencies deps) {
+            for (ForeignDependency dep : deps.getDependencies()) {
+                final String[] gav = mavenCoordinatesFromUrl(dep.source);
+                if (gav != null)
+                    entries.add(new String[] { gav[0], gav[1], gav[2], null });
+            }
+            return this;
+        }
+
+        /**
+         * Adds a single dependency resolved from a repository.  Use for an artifact the build
+         * does not itself download but the POM should still describe.
+         *
+         * @param groupId the group id
+         * @param artifactId the artifact id
+         * @param version the version
+         * @return this, for chaining
+         */
+        public MavenDependencies add(String groupId, String artifactId, String version) {
+            entries.add(new String[] { groupId, artifactId, version, null });
+            return this;
+        }
+
+        /**
+         * Adds a dependency supplied as a local file rather than resolved from a repository,
+         * emitted with system scope and the given path.
+         *
+         * @param groupId the group id
+         * @param artifactId the artifact id
+         * @param version the version
+         * @param systemPath the path to the file, as it should appear in the POM
+         * @return this, for chaining
+         */
+        public MavenDependencies addSystem(String groupId, String artifactId, String version, String systemPath) {
+            entries.add(new String[] { groupId, artifactId, version, systemPath });
+            return this;
+        }
+
+        /**
+         * Generates the {@code <dependency>} elements.
+         *
+         * @param indent the indentation to place before each {@code <dependency>} element
+         * @return the generated XML, one element per dependency
+         */
+        public String toXml(String indent) {
+            final String in2 = indent + "  ";
+            final StringBuilder sb = new StringBuilder();
+            for (String[] e : entries) {
+                sb.append(indent).append("<dependency>\n");
+                sb.append(in2).append("<groupId>").append(e[0]).append("</groupId>\n");
+                sb.append(in2).append("<artifactId>").append(e[1]).append("</artifactId>\n");
+                sb.append(in2).append("<version>").append(e[2]).append("</version>\n");
+                if (e[3] != null) {
+                    sb.append(in2).append("<scope>system</scope>\n");
+                    sb.append(in2).append("<systemPath>").append(e[3]).append("</systemPath>\n");
+                } else if (testScoped.contains(e[1]))
+                    sb.append(in2).append("<scope>test</scope>\n");
+                sb.append(indent).append("</dependency>\n");
+            }
+            return sb.toString();
+        }
+
+        /**
+         * Writes the generated elements into a POM, replacing whatever currently sits between
+         * the two marker comments.  The markers themselves are preserved.
+         *
+         * @param pomFile the POM to update
+         * @param beginMarker the marker line that opens the generated region
+         * @param endMarker the marker line that closes the generated region
+         * @return true if the file was changed, false if it was already up to date
+         */
+        public boolean writeInto(String pomFile, String beginMarker, String endMarker) {
+            final String content;
+            try {
+                content = new String(Files.readAllBytes(Paths.get(pomFile)), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                throw new RuntimeException("MavenDependencies:  error reading " + pomFile);
+            }
+            final int begin = content.indexOf(beginMarker);
+            if (begin < 0)
+                throw new RuntimeException("missing generated-region begin marker in " + pomFile + ": " + beginMarker);
+            final int end = content.indexOf(endMarker, begin + beginMarker.length());
+            if (end < 0)
+                throw new RuntimeException("missing generated-region end marker in " + pomFile + ": " + endMarker);
+            //  Indent the generated elements to match the indentation of the end marker.
+            int ls = content.lastIndexOf('\n', end);
+            final String indent = content.substring(ls + 1, end);
+            final String updated = content.substring(0, begin + beginMarker.length()) + "\n"
+                                 + toXml(indent)
+                                 + indent + content.substring(end);
+            if (updated.equals(content))
+                return false;   //  already correct; leave the file (and its timestamp) alone
+            try {
+                Files.write(Paths.get(pomFile), updated.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException("MavenDependencies:  error writing " + pomFile);
+            }
+            println("regenerated dependencies in " + pomFile);
+            return true;
+        }
     }
 
     /**

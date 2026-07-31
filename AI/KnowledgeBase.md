@@ -258,6 +258,18 @@ When generic build functionality accumulates in `Tasks.java`, upstream it into
 `KissBuildUtils.java` (Kiss-wide) or `BuildUtils.java` (universally generic) —
 never Kiss/Tomcat-specific code into `BuildUtils.java`.
 
+**`pom.xml` is generated.** Maven does not build Kiss; `pom.xml` only describes the
+project to an IDE and to repository scanners. Because nothing exercises it, a
+hand-maintained dependency list there falls behind silently, and stale entries are
+still reported against the project as real. The `pom` task therefore rewrites
+everything between the `BEGIN/END GENERATED DEPENDENCIES` markers from the same
+`ForeignDependencies` the build downloads — **edit dependencies in `Tasks.java`, never
+in `pom.xml`**. It runs as part of `libs` (so any build re-syncs it) and rewrites only
+when content actually changes. Everything outside the markers, including the whole
+`<build>` section, stays hand-maintained. The generic half (`MavenDependencies`,
+`mavenCoordinatesFromUrl`) lives in `BuildUtils`; `Tasks.java` supplies only
+application data — test-scoped artifact names and the locally supplied jars.
+
 **Foreign dependency pruning.** `downloadAll` (`BuildUtils`) removes superseded
 versions of the dependencies it manages, so changing a version in `Tasks.java`
 drops the old jar instead of leaving both on the classpath — where which one wins

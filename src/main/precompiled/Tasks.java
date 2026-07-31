@@ -53,6 +53,20 @@ public class Tasks {
     final static String groovyVer = "4.0.28";
     final static String postgresqlVer = "42.7.12";
     final static String tomcatVer = "11.0.12";
+
+    //  Jars shipped with this application rather than downloaded.  The versions are
+    //  named here because pom.xml describes them to the IDE by path.
+    final static String abclVer = "1.0";
+    final static String commonsCompressVer = "1.27.1";
+    final static String commonsIoVer = "2.16.1";
+    final static String commonsLang3Ver = "3.18.0";
+    final static String mysqlConnectorVer = "9.2.0";
+    final static String jqueryVer = "3.6.3";
+
+    //  Bounds of the machine-written region of pom.xml.  See the pom task.
+    final static String POM_FILE = "pom.xml";
+    final static String POM_BEGIN = "<!-- BEGIN GENERATED DEPENDENCIES -->";
+    final static String POM_END = "<!-- END GENERATED DEPENDENCIES -->";
     final static String LIBS = "libs";  // compile time location
     final static ForeignDependencies foreignLibs = buildForeignDependencies();
     final static LocalDependencies localLibs = buildLocalDependencies();
@@ -169,6 +183,48 @@ public class Tasks {
      */
     public static void libs() {
         downloadAll(foreignLibs);
+        pom();
+    }
+
+    /**
+     * Rewrite the dependency list in pom.xml from the dependencies this build actually
+     * uses, so the two cannot drift apart.
+     * <br><br>
+     * Maven does not build Kiss; pom.xml exists to describe the project to an IDE and to
+     * repository scanners.  Nothing exercises it, so when it was maintained by hand it
+     * quietly fell behind, and entries that no build had used for some time were still
+     * reported against the project as though they were real.  Everything between the
+     * markers is therefore machine-written from {@link #foreignLibs} and the locally
+     * supplied jars named above; the rest of the file, including the whole build element,
+     * is left alone.
+     * <br><br>
+     * This runs as part of libs, so an ordinary build keeps pom.xml current.  The file is
+     * rewritten only when its content actually changes.
+     */
+    public static void pom() {
+        if (!exists(POM_FILE))
+            return;
+        final String libPath = "${project.basedir}/" + LIBS;
+        new MavenDependencies()
+                .testScope("junit-jupiter", "junit-jupiter-api", "junit-jupiter-engine",
+                           "junit-jupiter-params", "junit-platform-console",
+                           "junit-platform-console-standalone", "apiguardian-api")
+                .add(foreignLibs)
+                //  Shipped with the front end rather than downloaded, but described here so
+                //  its version is visible to repository scanners along with everything else.
+                .add("org.webjars.bower", "jquery", jqueryVer)
+                .addSystem("org.abcl", "abcl", abclVer, libPath + "/abcl.jar")
+                .addSystem("org.apache.commons", "commons-compress", commonsCompressVer,
+                           libPath + "/commons-compress-" + commonsCompressVer + ".jar")
+                .addSystem("commons-io", "commons-io", commonsIoVer,
+                           libPath + "/commons-io-" + commonsIoVer + ".jar")
+                .addSystem("org.apache.commons", "commons-lang3", commonsLang3Ver,
+                           libPath + "/commons-lang3-" + commonsLang3Ver + ".jar")
+                //  Oracle removes MySQL drivers from public downloads, so this one is not
+                //  downloaded by the build and must be supplied by hand.
+                .addSystem("mysql", "mysql-connector-java", mysqlConnectorVer,
+                           libPath + "/mysql-connector-java-" + mysqlConnectorVer + ".jar")
+                .writeInto(POM_FILE, POM_BEGIN, POM_END);
     }
 
     /**
