@@ -33,7 +33,7 @@ ul.mark-bullet {list-style-type: disc}
 <div class="chapter-level-extent" id="Back_002dend-API">
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (July 31, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html" accesskey="n" rel="next">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html" accesskey="p" rel="prev">Front-end API</a>, Up: <a href="index.html" accesskey="u" rel="up">Kiss Getting Started Guide (August 1, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 <hr>
 
@@ -470,10 +470,21 @@ named <em class="emph">OpenAI</em>.
     String result = chatGPT.send(&quot;Who is president Bush?&quot;)
 </pre></div>
 
+<p><em class="emph">OpenAI</em> serves models through two different endpoints: the
+long-standing chat completions endpoint, and the newer responses
+endpoint.  Some models are available only on the latter.  By default
+this requires no attention: a request goes to chat completions, and if
+the provider reports that the model requires the responses endpoint, the
+same request is transparently re-sent there and that choice is
+remembered for that model.  The method <code class="code">setApi(Api)</code> pins one
+endpoint explicitly, which is useful when pointing the class at a
+gateway that implements only one of them.
+</p>
 <p>The static method <code class="code">setUrl(String url)</code> can be used to override the
-default OpenAI endpoint URL.  This is useful for proxies, gateways, or
-OpenAI-compatible endpoints.  Since it is a global setting, changing the
-URL affects all instances.
+default OpenAI chat completions endpoint URL, and
+<code class="code">setResponsesUrl(String url)</code> the responses endpoint URL.  These
+are useful for proxies, gateways, or OpenAI-compatible endpoints.  Since
+they are global settings, changing them affects all instances.
 </p>
 <p>See that class for documentation.
 </p>
@@ -589,7 +600,7 @@ the JavaDocs.
 <hr>
 <div class="nav-panel">
 <p>
-Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Getting Started Guide (July 31, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
+Next: <a href="SQL-Query-Generator.html">SQL Query Generator</a>, Previous: <a href="Front_002dend-API.html">Front-end API</a>, Up: <a href="index.html">Kiss Getting Started Guide (August 1, 2026)</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</p>
 </div>
 
 
