@@ -376,10 +376,21 @@ Typical usage would look as follows:
     String result = chatGPT.send("Who is president Bush?")
 @end example
 
+@emph{OpenAI} serves models through two different endpoints: the
+long-standing chat completions endpoint, and the newer responses
+endpoint.  Some models are available only on the latter.  By default
+this requires no attention: a request goes to chat completions, and if
+the provider reports that the model requires the responses endpoint, the
+same request is transparently re-sent there and that choice is
+remembered for that model.  The method @code{setApi(Api)} pins one
+endpoint explicitly, which is useful when pointing the class at a
+gateway that implements only one of them.
+
 The static method @code{setUrl(String url)} can be used to override the
-default OpenAI endpoint URL.  This is useful for proxies, gateways, or
-OpenAI-compatible endpoints.  Since it is a global setting, changing the
-URL affects all instances.
+default OpenAI chat completions endpoint URL, and
+@code{setResponsesUrl(String url)} the responses endpoint URL.  These
+are useful for proxies, gateways, or OpenAI-compatible endpoints.  Since
+they are global settings, changing them affects all instances.
 
 See that class for documentation.
 

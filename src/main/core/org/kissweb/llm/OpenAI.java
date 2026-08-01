@@ -9,6 +9,8 @@ import java.net.http.HttpResponse;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,13 +68,41 @@ import java.nio.file.Paths;
  * reasoning.setReasoningEffort("high"); // More thorough reasoning
  * String result = reasoning.send("Solve this complex problem...");
  * }</pre>
- * 
+ *
+ * <h2>Chat Completions vs. Responses</h2>
+ * <p>The provider serves models through two different endpoints: the long-standing
+ * chat completions endpoint, and the newer responses endpoint.  Some models are
+ * available only on the latter, and answer a chat completions request with an HTTP 404
+ * saying so.  By default this class handles that automatically ({@link Api#AUTO}): a
+ * request goes to chat completions, and if the provider reports that the model requires
+ * the responses endpoint, the same request is transparently re-sent there and the
+ * choice is remembered for that model for the life of the JVM.  Callers that know which
+ * endpoint they want can pin it with {@link #setApi(Api)}.</p>
+ *
  * @author Kiss Web Development Framework
  * @see RestClient
  */
 public class OpenAI {
 
     private static String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+    private static String OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+
+    /**
+     * Which of the provider's two APIs a request is sent to.
+     *
+     * @see #setApi(Api)
+     */
+    public enum Api {
+        /** Use chat completions, falling back to responses when the model requires it (default). */
+        AUTO,
+        /** Always use the chat completions endpoint. */
+        CHAT_COMPLETIONS,
+        /** Always use the responses endpoint. */
+        RESPONSES
+    }
+
+    /** Models the provider has told us are served only by the responses endpoint. */
+    private static final Set<String> RESPONSES_ONLY_MODELS = ConcurrentHashMap.newKeySet();
 
     private final String apiKey; // Your API key
     private final String model; // e.g. "gpt-4o"
@@ -82,6 +112,7 @@ public class OpenAI {
     private float topP = 0.7f; // Nucleus sampling
     private String reasoningEffort = "medium"; // Extra signal for reasoning models
     private String imageDetail = "auto"; // "low", "high", "auto"
+    private Api api = Api.AUTO; // Which endpoint to use
 
     private JSONObject lastResponse; // Full JSON of last non-stream call
     private int lastHttpStatus;      // HTTP status of the last streaming call
@@ -104,6 +135,22 @@ public class OpenAI {
      */
     public static void setUrl(String url) {
         OPENAI_URL = url;
+    }
+
+    /**
+     * Overrides the Responses endpoint URL used by this class.
+     *
+     * <p>This is a global setting: changing the URL affects all current and future
+     * {@link OpenAI} instances created in this JVM.</p>
+     *
+     * <p>This is primarily intended for testing, proxies, gateways, or compatible
+     * endpoints.</p>
+     *
+     * @param url the full URL to use for responses requests (for example,
+     *            {@code https://api.openai.com/v1/responses})
+     */
+    public static void setResponsesUrl(String url) {
+        OPENAI_RESPONSES_URL = url;
     }
 
     /**
@@ -204,6 +251,22 @@ public class OpenAI {
         this.imageDetail = detail;
     }
 
+    /**
+     * Selects which of the provider's two APIs this instance sends requests to.
+     *
+     * <p>The default, {@link Api#AUTO}, needs no configuration: requests go to the chat
+     * completions endpoint, and when the provider answers that the model is served only
+     * by the responses endpoint, the request is transparently re-sent there and that
+     * model is remembered so later requests go straight to it.  Pin the value only when
+     * a particular endpoint is required (for example, when pointing this class at a
+     * gateway that implements just one of them).</p>
+     *
+     * @param api the API to use; {@code null} is treated as {@link Api#AUTO}
+     */
+    public void setApi(Api api) {
+        this.api = api == null ? Api.AUTO : api;
+    }
+
     /* ----------------------------------------------------------------------
      * Public helpers – ONE send, ONE stream
      * ---------------------------------------------------------------------- */
@@ -284,11 +347,56 @@ public class OpenAI {
      * @throws Exception if the API request fails, the image cannot be read, or streaming fails
      * @throws NullPointerException if query, onToken, or onDone is null
      * @see #stream(String, Consumer, Runnable) for text-only streaming
+     * @see #setApi(Api) for choosing the endpoint explicitly
      */
     public void stream(String query,
                        String imagePath,
                        Consumer<String> onToken,
                        Runnable onDone) throws Exception {
+
+        Api use = api;
+        if (use == Api.AUTO)
+            use = RESPONSES_ONLY_MODELS.contains(model) ? Api.RESPONSES : Api.CHAT_COMPLETIONS;
+
+        if (use == Api.RESPONSES) {
+            streamResponses(query, imagePath, onToken, onDone);
+            return;
+        }
+
+        try {
+            streamChatCompletions(query, imagePath, onToken, onDone);
+        } catch (Exception e) {
+            if (api != Api.AUTO  ||  !modelRequiresResponsesApi())
+                throw e;
+            // The model exists but is served only by the responses endpoint.  Nothing has
+            // been delivered to the caller yet (the failure is the HTTP status of the
+            // request itself), so the call can simply be re-sent to the other endpoint.
+            RESPONSES_ONLY_MODELS.add(model);
+            streamResponses(query, imagePath, onToken, onDone);
+        }
+    }
+
+    /**
+     * Whether the last failed request failed because the model is served only by the
+     * responses endpoint (the provider reports this as a 404 naming that endpoint).
+     */
+    private boolean modelRequiresResponsesApi() {
+        return lastHttpStatus == 404  &&  lastErrorBody != null  &&  lastErrorBody.contains("/responses");
+    }
+
+    /**
+     * Streams a request through the chat completions endpoint.
+     *
+     * @param query     the text prompt
+     * @param imagePath optional path to an image file to include, or {@code null}
+     * @param onToken   callback invoked for each response token
+     * @param onDone    callback invoked when the response is complete
+     * @throws Exception if the request fails, the image cannot be read, or streaming fails
+     */
+    private void streamChatCompletions(String query,
+                                       String imagePath,
+                                       Consumer<String> onToken,
+                                       Runnable onDone) throws Exception {
 
         JSONObject body = buildChatBody(query, imagePath);
 
@@ -342,6 +450,92 @@ public class OpenAI {
                 });
 
 // Ensure onDone is always called even if the [DONE] sentinel was not received
+        if (!doneFired[0])
+            onDone.run();
+    }
+
+    /**
+     * Streams a request through the responses endpoint.
+     *
+     * <p>The responses endpoint reports its progress as a sequence of typed events rather
+     * than as message deltas; only the output-text deltas are passed to {@code onToken},
+     * so callers see the same token stream either endpoint is used.</p>
+     *
+     * @param query     the text prompt
+     * @param imagePath optional path to an image file to include, or {@code null}
+     * @param onToken   callback invoked for each response token
+     * @param onDone    callback invoked when the response is complete
+     * @throws Exception if the request fails, the image cannot be read, or streaming fails
+     */
+    private void streamResponses(String query,
+                                 String imagePath,
+                                 Consumer<String> onToken,
+                                 Runnable onDone) throws Exception {
+
+        JSONObject body = buildResponsesBody(query, imagePath);
+
+        HttpRequest req = HttpRequest.newBuilder(URI.create(OPENAI_RESPONSES_URL))
+                .header("Authorization", "Bearer " + apiKey)
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofMinutes(10))
+                .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
+                .build();
+
+        lastHttpStatus = 0;
+        lastErrorBody = null;
+
+        HttpResponse<Stream<String>> resp =
+                restClient.streamCall(req, HttpResponse.BodyHandlers.ofLines());
+
+        lastHttpStatus = resp.statusCode();
+        if (lastHttpStatus / 100 != 2) {
+            // Errors arrive as a plain JSON body, not an SSE stream
+            lastErrorBody = resp.body().collect(Collectors.joining("\n"));
+            throw new Exception("OpenAI request failed with HTTP " + lastHttpStatus + ": " + lastErrorBody);
+        }
+
+        final boolean[] doneFired = {false};
+
+        resp.body()
+                .filter(line -> line.startsWith("data: "))
+                .map(line -> line.substring(6).trim())
+                .forEach(payload -> {
+                    if ("[DONE]".equals(payload)) {
+                        if (!doneFired[0]) {
+                            doneFired[0] = true;
+                            onDone.run();
+                        }
+                        return;
+                    }
+                    if (!payload.startsWith("{"))
+                        return;
+                    JSONObject event = new JSONObject(payload);
+                    String type = event.getString("type", "");
+                    switch (type) {
+                        case "response.output_text.delta":
+                            if (event.has("delta") && !event.isNull("delta"))
+                                onToken.accept(event.getString("delta"));
+                            break;
+                        case "response.completed":
+                        case "response.incomplete":
+                            // Incomplete means the answer was cut short (for example by a
+                            // token limit); whatever was produced has already been delivered.
+                            if (!doneFired[0]) {
+                                doneFired[0] = true;
+                                onDone.run();
+                            }
+                            break;
+                        case "response.failed":
+                        case "error":
+                            // A failure can also be reported mid-stream as an SSE error event
+                            lastErrorBody = payload;
+                            throw new RuntimeException("OpenAI returned an error: " + lastErrorBody);
+                        default:
+                            break; // progress events carrying nothing the caller needs
+                    }
+                });
+
+// Ensure onDone is always called even if no completion event was received
         if (!doneFired[0])
             onDone.run();
     }
@@ -535,11 +729,7 @@ public class OpenAI {
                         .put("text", query));
 
         if (imagePath != null) {
-            byte[] imageBytes = Files.readAllBytes(Paths.get(imagePath));
-            String base64Image = Base64.getEncoder().encodeToString(imageBytes);
-            String imageDataUrl = "data:image/jpeg;base64," + base64Image;
-
-            JSONObject imageObj = new JSONObject().put("url", imageDataUrl);
+            JSONObject imageObj = new JSONObject().put("url", imageDataUrl(imagePath));
             if (imageDetail != null && !imageDetail.isEmpty()) {
                 imageObj.put("detail", imageDetail); // Only include if caller supplied
             }
@@ -559,5 +749,66 @@ public class OpenAI {
 
         body.put("messages", messages);
         return body;
+    }
+
+    /**
+     * Builds the JSON request body for responses endpoint calls.
+     *
+     * <p>Carries the same content as {@link #buildChatBody} in the shape that endpoint
+     * expects: the system message becomes the top-level instructions, the prompt becomes
+     * typed input content, and the reasoning effort moves into its own object.</p>
+     *
+     * @param query     The user's text prompt
+     * @param imagePath Optional path to an image file to include
+     * @return A JSONObject containing the complete request body
+     * @throws Exception if image file cannot be read or encoded
+     */
+    private JSONObject buildResponsesBody(String query,
+                                          String imagePath) throws Exception {
+        JSONObject body = new JSONObject()
+                .put("model", model)
+                .put("stream", true)
+                .put("instructions", "You are a helpful assistant.");
+
+        if (reasoningModel) {
+            body.put("reasoning", new JSONObject().put("effort", reasoningEffort));
+        } else {
+            body.put("temperature", temperature)
+                    .put("top_p", topP);
+        }
+
+// Assemble user message content
+        JSONArray contentArray = new JSONArray()
+                .put(new JSONObject()
+                        .put("type", "input_text")
+                        .put("text", query));
+
+        if (imagePath != null) {
+            JSONObject imageObj = new JSONObject()
+                    .put("type", "input_image")
+                    .put("image_url", imageDataUrl(imagePath));
+            if (imageDetail != null && !imageDetail.isEmpty()) {
+                imageObj.put("detail", imageDetail); // Only include if caller supplied
+            }
+            contentArray.put(imageObj);
+        }
+
+        body.put("input", new JSONArray()
+                .put(new JSONObject()
+                        .put("role", "user")
+                        .put("content", contentArray)));
+        return body;
+    }
+
+    /**
+     * Reads an image file and encodes it as a data URL for inclusion in a request.
+     *
+     * @param imagePath path to the image file
+     * @return the image as a {@code data:} URL
+     * @throws Exception if the file cannot be read
+     */
+    private String imageDataUrl(String imagePath) throws Exception {
+        byte[] imageBytes = Files.readAllBytes(Paths.get(imagePath));
+        return "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
     }
 }
