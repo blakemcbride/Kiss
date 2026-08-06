@@ -1106,6 +1106,7 @@ The framework provides custom HTML components that should be used:
 - `<radio-button>` - Radio button
 - `<list-box>` - List selection
 - `<file-upload>` - File upload control
+- `<search-input>` - Search field with a built-in clear button and optional result list
 
 ### Frontend Utilities
 - **Server.call()** - Make JSON-RPC calls to backend services
@@ -1120,6 +1121,15 @@ The framework provides custom HTML components that should be used:
 ### Grid Column Configuration
 - Column widths can be specified as pixels (e.g., `width: 200`)
 - Custom cell renderers supported (e.g., for formatting Yes/No display)
+
+### Design Tokens (`--kiss-ui-*` CSS Custom Properties)
+
+`kiss/Utils.css` declares a `:root { --kiss-ui-bg, --kiss-ui-soft-bg, --kiss-ui-ink, --kiss-ui-muted, --kiss-ui-ring, --kiss-ui-ring-strong, --kiss-ui-accent(-soft), --kiss-ui-success/warning/error(-soft), --kiss-ui-radius, --kiss-ui-shadow(-hover) }` block, and every one of the component-library controls (`panel-card`, `menu-button`, `section-title`, `segmented-control`, `search-input`, `accordion`, `badge-chip`, `avatar`, `toast`) reads its colors/surfaces through `var(--kiss-ui-*)` rather than hardcoding them. Because `kiss/Utils.css` is unconditionally loaded by `bootstrap.js` (`addStylesheet("kiss/Utils.css")`) for every stock Kiss app — before any application CSS runs — these tokens are always defined with sane, fully opaque light-theme defaults. **A brand-new Kiss application that supplies zero application-specific CSS renders every one of these components correctly out of the box**; no application theme file is required to make them legible/opaque. There is no separate `theme/default-theme.css` (or similar) file in the framework itself — all of it lives in `Utils.css`'s own `:root` block. A `kiss/` tree that lacks this block, or lacks `Utils.css` entirely, predates or has drifted from the current component library and needs to be re-synced from the framework source rather than patched locally.
+
+**Pattern for components that read these tokens:**
+- Rely on the `:root` guarantee as the *primary* mechanism — don't redefine or duplicate `--kiss-ui-*` values in component-specific CSS.
+- Give `var(--kiss-ui-*, <literal-default>)` an inline fallback on any declaration where an unexpectedly-missing token would break **function** rather than mere appearance — chiefly an overlay/popover's own background (it must stay opaque so page content underneath can never show through) and text that must stay legible against it. Purely decorative uses (hover tints, ring/shadow accents) don't need an inline fallback, since the framework-wide `:root` guarantee already covers them; adding one to every declaration is needless duplication.
+- When one rule reads a token to control an element's appearance in its default state, and a *different* rule hardcodes an equivalent literal for another state of the same element (e.g. default vs. `:focus-within`/`:hover`), route both through the same `var(--token, literal)` so the two states can never silently diverge if the token is later re-themed — a hardcoded literal alongside a themed variable is a latent inconsistency even when the two currently render identically.
 
 ## Framework Philosophy
 

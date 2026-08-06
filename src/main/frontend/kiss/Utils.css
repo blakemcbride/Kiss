@@ -788,7 +788,7 @@ div.vert-input label:after { content: ":"; }
     min-height: 42px;
     --kiss-search-text-offset: 40px;
     overflow: hidden;
-    background: var(--kiss-ui-bg);
+    background: var(--kiss-ui-bg, #fff);
     border-radius: 12px;
     box-shadow: var(--kiss-ui-shadow);
     transition-property: box-shadow, background-color;
@@ -797,7 +797,7 @@ div.vert-input label:after { content: ":"; }
 }
 
 .kiss-search-input:focus-within .kiss-search-control {
-    background: #fff;
+    background: var(--kiss-ui-bg, #fff);
     box-shadow:
         0 0 0 1px rgba(37, 99, 235, 0.28),
         0 0 0 4px rgba(37, 99, 235, 0.10),
@@ -957,7 +957,7 @@ div.vert-input label:after { content: ":"; }
     max-height: 320px;
     padding: 6px;
     overflow: auto;
-    background: var(--kiss-ui-bg);
+    background: var(--kiss-ui-bg, #fff);
     border-radius: 12px;
     box-shadow:
         0 0 0 1px var(--kiss-ui-ring),
