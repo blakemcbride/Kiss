@@ -27,7 +27,7 @@ The CRITICAL rule above is easy to state and easy to violate in practice. Apply 
 1. No application-specific references — no application, product, or company names, and no application-domain concepts, in code, comments, documentation, or identifiers. Use neutral generic terms.
 2. No brand-specific values baked in — colors, logos, copy, fonts, URLs, or dimensions tuned to one application. (For example, never hardcode a brand color such as `rgba(r, g, b)` inside a framework component.)
 3. No secrets or environment literals — URLs, API keys, passwords, and tokens belong in `application.ini`, read via `MainServlet.getEnvironment()`.
-4. Parameterize instead of hardcoding — expose application-specific values as CSS custom properties, configuration keys, or override hooks WITH NEUTRAL DEFAULTS in the framework; the application supplies its specifics from the application layer (application theme CSS, `application.ini`). Example: the framework reads a `--glow-color` CSS variable with a neutral default, and the application sets its own brand color in its theme file.
+4. Parameterize instead of hardcoding — expose application-specific values as CSS custom properties, configuration keys, or override hooks WITH NEUTRAL DEFAULTS in the framework; the application supplies its specifics from the application layer (application theme CSS, `application.ini`). Example: the framework reads a `--kiss-glow-color` CSS variable with a neutral default, and the application sets its own brand color in its theme file.
 5. The change must be a generic capability any Kiss application could use — never something that only makes sense for one application.
 6. When a component's behavior or API changes, update its documentation in `src/main/frontend/kiss/component/components.js` in the same change.
 
@@ -457,7 +457,7 @@ Kiss ships two web.xml variants in `src/main/core/WEB-INF/`:
 
 **Split deployments are the one true cross-origin case.** If the frontend is served from a different origin than the backend (`SystemInfo.backendUrl` set), the frontend origin must be added to `cors.allowed.origins` in `web-secure.xml` by hand — no same-origin bypass can apply there.
 
-(An earlier `AllowedOrigins` application.ini key that the build stamped into the deployed web.xml was removed in favor of the RemoteIpFilter approach — it required per-deployment configuration for what the server can determine automatically.)
+There is no `application.ini` key for CORS origins. Scheme/port recovery behind a proxy is handled by `RemoteIpFilter` automatically, so the only case needing configuration is the split deployment above.
 
 ### Crypto, Hashing, and MACs — which class to use
 
@@ -492,7 +492,7 @@ comparison) and `org.kissweb.RandomUtil` (shared `SecureRandom`-backed helpers).
 
 **Self-describing versioned container.** Every value produced by the current format encodes everything decryption needs: `MAGIC(8) | VERSION(1) | saltLen(2) | salt | nonce(12) | ciphertext+tag`. String outputs are additionally prefixed `$KC1$` and Base64-encoded; byte-array outputs carry the same container with a leading `0x00` magic byte. `VERSION_1` (password/PBKDF2) and `VERSION_2` (raw key, `saltLen` always 0) share this same envelope shape; the versioning leaves room for the container format to evolve further without breaking data already at rest.
 
-**Backward compatibility.** Older data written before the AES-GCM rework (plain `AES/ECB/PKCS5Padding` with a homegrown salt+password key derivation) is still transparently decryptable — decryption auto-detects the legacy format (absence of the `$KC1$` prefix / magic bytes) and falls back to the legacy path. All *new* encryptions always use one of the current AES-GCM formats; there is no way to opt back into the legacy format. Data produced via `fromKey`/`fromKeyBase64` (`VERSION_2`) cannot be read by code that predates that feature.
+**Reads a second, older container format.** Decryption also accepts values in an older format — plain `AES/ECB/PKCS5Padding` with a salt+password key derivation — detected by the absence of the `$KC1$` prefix / magic bytes, in which case decryption falls back to that path. This is a read-only capability: every encryption produces one of the AES-GCM formats above, and there is no way to select the older one. A `VERSION_2` (`fromKey`/`fromKeyBase64`) value requires a Kiss build that supports raw-key mode.
 
 **API:**
 
@@ -532,7 +532,7 @@ The password/key passed to `Crypto` is itself a secret and must come from `appli
 
 `org.kissweb.PasswordHash` is the framework utility for storing user passwords. Passwords must be stored using this class — never as plain text, and never with reversible encryption.
 
-**Hashed, not encrypted.** Passwords are hashed one-way with PBKDF2-HMAC-SHA256 (600,000 iterations, the OWASP 2023 floor) and a random per-password salt. There is intentionally no way to recover the original password; authentication only ever *verifies* a candidate, in constant time via `org.kissweb.ConstantTime`. (For reversible encryption of arbitrary data, use `org.kissweb.Crypto` instead — it is the wrong tool for passwords.) PBKDF2-HMAC-SHA256 remains the framework's only supported algorithm — Argon2id was evaluated and deliberately not added, to keep Kiss dependency-free (pure JDK) for every application; `needsRehash` below is nonetheless structured so a second, stronger algorithm could be added later as an additional recognized prefix without changing any caller-visible signature.
+**Hashed, not encrypted.** Passwords are hashed one-way with PBKDF2-HMAC-SHA256 (600,000 iterations, the OWASP 2023 floor) and a random per-password salt. There is intentionally no way to recover the original password; authentication only ever *verifies* a candidate, in constant time via `org.kissweb.ConstantTime`. (For reversible encryption of arbitrary data, use `org.kissweb.Crypto` instead — it is the wrong tool for passwords.) PBKDF2-HMAC-SHA256 is the framework's only supported algorithm, so that Kiss stays dependency-free (pure JDK) for every application — which is why Argon2id is not offered. `needsRehash` below is nonetheless structured so a second, stronger algorithm can be added as an additional recognized prefix without changing any caller-visible signature.
 
 **API (all static):**
 
@@ -682,7 +682,7 @@ Per-tab (`'session'`) is the default. Consequence: a new browser tab starts with
 
 API (all static): `init()`, `set(key, value)` (`undefined` removes), `get(key)`, `has(key)`, `remove(key)`, `keys()`, `clear()`, `backend()`.
 
-**Cross-screen app data** — `Utils.saveData(key, val)` / `getData(key)` / `getAndEraseData(key)` are backed by `AppState` (under a `data.` sub-namespace, so they can't collide with `_uuid`/`_bootId`). So data passed between screens now survives reload and is per-tab — the old in-memory `Utils.globalData` (which a router-driven reload would wipe) is gone.
+**Cross-screen app data** — `Utils.saveData(key, val)` / `getData(key)` / `getAndEraseData(key)` are backed by `AppState` (under a `data.` sub-namespace, so they can't collide with `_uuid`/`_bootId`). Data passed between screens therefore survives reload and is per-tab, which matters because a router-driven reload would wipe anything held only in memory.
 
 `Server.js` consumes it: `Server.setUUID()` writes `_uuid` through `AppState`, the `Server.uuid` getter reads it, and `Server.logout()` calls `AppState.clear()`. The bootstrap (`src/main/frontend/kiss/bootstrap.js`) loads `AppState.js` and calls `AppState.init()` before `Server.js`.
 
@@ -702,7 +702,7 @@ API (all static): `add`, `setDefault`, `setScreenRoot`, `start`, `isStarted`, `g
 
 Dispatch (on `start` and every `hashchange`): match the route → if `auth !== false` and `AppState.get('_uuid')` is absent, `replace('/login?return=<hash>')` → otherwise ensure the shell occupies the body (if any), then `loadPage` the screen. **Session resume** falls out of this: a deep link with a persisted `_uuid` loads straight through, validated lazily by the first `/rest` call (a stale session returns `_ErrorCode 2` → `Server.logout()` → login with a return-URL).
 
-Login/logout integration: `login.js` calls `Router.replace(Router.query().return || '/')` on success (so Back doesn't return to login); `Server.logout()` performs a full page reload of a fresh `index.html`, landing on the login route via `Router.loginHash(captureReturn)` — the single place the login route's URL form (`#/login`, `#/login?return=...`) is defined, also used by `Router.gotoLogin` (see the boot-id section: the reload is what lets an open tab pick up a new release). The old global `DOMUtils.preventNavigation` back-button blocker was retired from the login screens — Back now navigates between screens (the intended behavior); `preventNavigation` remains available as an opt-in per-screen unsaved-changes guard.
+Login/logout integration: `login.js` calls `Router.replace(Router.query().return || '/')` on success (so Back doesn't return to login); `Server.logout()` performs a full page reload of a fresh `index.html`, landing on the login route via `Router.loginHash(captureReturn)` — the single place the login route's URL form (`#/login`, `#/login?return=...`) is defined, also used by `Router.gotoLogin` (see the boot-id section: the reload is what lets an open tab pick up a new release). The login screens install no back-button blocker: Back navigates between screens, which is the intended behavior under routing. `DOMUtils.preventNavigation` is an opt-in per-screen unsaved-changes guard and should not be applied globally.
 
 ### Browser Security: CSP and Security Headers
 
@@ -1107,6 +1107,7 @@ The framework provides custom HTML components that should be used:
 - `<list-box>` - List selection
 - `<file-upload>` - File upload control
 - `<search-input>` - Search field with a built-in clear button and optional result list
+- `<smart-chooser>` - Select that auto-switches to a chooser-button + async selection function when its item count is too large for a usable drop-down (also handles zero/one-item cases); low-level and high-level (`setup`/`run`) APIs; the chooser button's appearance (`.btn-smart-chooser`) is not styled by the framework and must be supplied by the application
 
 ### Frontend Utilities
 - **Server.call()** - Make JSON-RPC calls to backend services
@@ -1130,6 +1131,65 @@ The framework provides custom HTML components that should be used:
 - Rely on the `:root` guarantee as the *primary* mechanism — don't redefine or duplicate `--kiss-ui-*` values in component-specific CSS.
 - Give `var(--kiss-ui-*, <literal-default>)` an inline fallback on any declaration where an unexpectedly-missing token would break **function** rather than mere appearance — chiefly an overlay/popover's own background (it must stay opaque so page content underneath can never show through) and text that must stay legible against it. Purely decorative uses (hover tints, ring/shadow accents) don't need an inline fallback, since the framework-wide `:root` guarantee already covers them; adding one to every declaration is needless duplication.
 - When one rule reads a token to control an element's appearance in its default state, and a *different* rule hardcodes an equivalent literal for another state of the same element (e.g. default vs. `:focus-within`/`:hover`), route both through the same `var(--token, literal)` so the two states can never silently diverge if the token is later re-themed — a hardcoded literal alongside a themed variable is a latent inconsistency even when the two currently render identically.
+
+### Starter Theme (`starter-theme.css`) and Utils.css Namespace Cleanliness
+
+`Kiss/src/main/frontend/kiss/starter-theme.css` is opinionated default styling for **bare, unnamespaced HTML
+elements** — plain `input[type=...]`, `textarea`, `label`, and similar raw-markup
+selectors with no `kiss-` class and no `--kiss-` custom property involved. It is loaded
+by `bootstrap.js`'s `loadUtils()` via `addStylesheet("kiss/starter-theme.css")`,
+immediately before `addStylesheet("kiss/Utils.css")`, so a stock application with no
+CSS of its own still gets sensible-looking plain form controls out of the box. Because
+it has no namespace, it also restyles whatever raw markup the host application writes —
+so unlike the rest of the framework's default styling, **an application that owns its
+own input styling may simply stop linking this file** (or override it with a
+later-loaded application stylesheet) without losing anything else Kiss provides.
+
+This split reflects a firm rule for `kiss/Utils.css` itself: **`Utils.css` is
+namespace-clean** — every selector it declares is `kiss-`-prefixed (or scoped under a
+`kiss-`-prefixed class/component), and every custom property it declares is
+`--kiss-`-prefixed (the `--kiss-ui-*` design tokens above, plus any component-internal
+animation/timing tokens a control needs, e.g. a toast or input-clear effect). A `:root`
+block is inherently global, so an unprefixed custom property declared there squats on
+the host application's custom-property namespace — an app that happens to define its
+own same-named variable would silently collide with the framework's. Bare-element
+styling — anything that would restyle raw HTML with no `kiss-` involvement at all —
+belongs in `starter-theme.css`, never in `Utils.css`. When adding new framework CSS,
+classify it this way before deciding which file it goes in.
+
+**`@keyframes` names are global too.** A `@keyframes` identifier lives in the same
+global namespace as a class name (CSS has no scoping mechanism for either), so it is
+just as capable of colliding with a host application's own animation of the same name.
+Every `@keyframes` a component defines must therefore also carry the `kiss-` prefix
+(e.g. `kiss-check-fade`), and every `animation` / `animation-name` declaration that
+plays it must be updated to match — a mismatch silently animates nothing rather than
+throwing, so it is easy to miss without grepping for the old name after a rename. If a
+component's `animation-name` ever refers to a `@keyframes` block that has been removed
+or commented out, prefer deleting the dead `animation-*` declaration over leaving a
+dangling reference (including the stray global name it introduces) or "fixing" it by
+reviving a previously-disabled animation — the latter is a behavior change, not a
+namespace cleanup.
+
+**Bare state-modifier classes (`has-value`, `is-open`, `is-active`, `is-leaving`, etc.)
+and `data-*` styling-hook attributes are allowed to stay unprefixed, but only as long as
+every CSS selector that reads them compounds them with a `kiss-`-prefixed class** (e.g.
+`.kiss-search-control.has-value`, `.kiss-menu-button.is-open`, never a bare `.has-value`
+or `[data-state]` rule on its own). Under that discipline an application's own unrelated
+`.has-value`/`.is-open`/etc. class cannot match a Kiss selector, because the compound
+requires the Kiss base class too — so the collision risk is theoretical, not real, and
+these are intentionally left unprefixed rather than becoming `kiss-has-value` etc. If a
+future rule is ever written that matches one of these state classes standalone (no
+compounded `kiss-` class in the same selector), that selector becomes a real global leak
+and should be fixed at that point — audit for this whenever adding a new state-modifier
+class.
+
+**An app-facing class that predates the `kiss-` convention may be relocated instead of
+renamed** when application authors are expected to write it by hand in their own markup
+(as opposed to a class only ever emitted by framework component JavaScript). Renaming a
+class an application's existing HTML already references would silently unstyle that
+markup on upgrade; moving the rule to `starter-theme.css` (unnamespaced by design, and
+safe for an application to stop linking) preserves compatibility while still keeping
+`Utils.css` itself namespace-clean.
 
 ## Framework Philosophy
 
@@ -1475,7 +1535,7 @@ Utils.yesNo('Title', 'Question text', yesFun, noFun);
 - Creates modal DOM structure if it doesn't exist (id: `yesno-modal`)
 - Dialog is draggable via `Utils.makeDraggable()`
 - Mobile-responsive: adjusts width based on screen size
-- Uses custom CSS classes: `msg-modal`, `msg-modal-content`, `msg-modal-header`, etc.
+- Uses custom CSS classes: `kiss-msg-modal`, `kiss-msg-modal-content`, `kiss-msg-modal-header`, etc.
 
 ### Utils.makeDraggable() - Draggable Windows
 Makes a window or dialog draggable by the header/title bar.
@@ -1501,7 +1561,7 @@ Utils.makeDraggable(
 - Uses the Pointer Events API (`pointerdown`/`pointermove`/`pointerup`/`pointercancel`) so mouse, touch, and pen input are all handled by a single code path
 - Calls `header.setPointerCapture(e.pointerId)` on `pointerdown` so all subsequent move/up events are delivered to the header element even when the pointer crosses into a child iframe; without capture, crossing into an iframe causes the parent document to lose mouse events and the drag "sticks" after the button is released
 - `setPointerCapture` is guarded (`if (header.setPointerCapture)`) for safety, though all target browsers (Chrome, Firefox, Safari, Edge) support it
-- Sets `header.style.touchAction = 'none'` to suppress browser pan/scroll gestures while dragging on touch devices (replaces the old `touchstart` `e.preventDefault()` approach)
+- Sets `header.style.touchAction = 'none'` to suppress browser pan/scroll gestures while dragging on touch devices — this is the mechanism to use, not a `touchstart` `e.preventDefault()` handler
 - Sets cursor style to 'all-scroll' on header
 - Stores per-drag handler references and removes them in `endDrag` (called on both `pointerup` and `pointercancel`) to prevent listener accumulation across repeated drags
 - Calls `header.releasePointerCapture(e.pointerId)` in `endDrag` to cleanly release capture
@@ -1581,7 +1641,7 @@ The `Utils.popup_open()` function requires popups to have exactly TWO direct chi
 ```html
 <!-- WRONG: Single wrapper div causes "Cannot set properties of undefined" error -->
 <popup id="my-popup">
-    <div class="popup-content">
+    <div class="kiss-popup-content">
         <!-- This single wrapper div breaks the popup -->
     </div>
 </popup>

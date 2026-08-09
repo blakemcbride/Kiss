@@ -100,7 +100,7 @@
         if (!closeBtn || closeBtn.disabled)
             return;
         evt.preventDefault();
-        const popup = closeBtn.closest('.popup-background');
+        const popup = closeBtn.closest('.kiss-popup-background');
         Utils.popup_close(popup ? popup.id : null);
     });
 

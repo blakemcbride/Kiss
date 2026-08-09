@@ -248,7 +248,7 @@
         icon.setAttribute('aria-hidden', 'true');
         if (opts.type === 'success') {
             const successCheck = document.createElement('span');
-            successCheck.className = 't-success-check';
+            successCheck.className = 'kiss-success-check';
             successCheck.setAttribute('data-state', 'out');
             successCheck.setAttribute('aria-hidden', 'true');
             successCheck.appendChild(createSvgIcon(opts.type));
@@ -291,7 +291,7 @@
         window.requestAnimationFrame(function () {
             if (!entry.closed) {
                 toast.classList.add('is-visible');
-                const successCheck = toast.querySelector('.t-success-check');
+                const successCheck = toast.querySelector('.kiss-success-check');
                 if (successCheck)
                     successCheck.setAttribute('data-state', 'in');
             }

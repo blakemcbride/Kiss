@@ -979,4 +979,85 @@ class components {
      */
     static time_input() {}
 
+    /**
+     * This HTML tag, "smart-chooser", is a <code>select</code>-like control that automatically avoids
+     * unusably long drop-down lists. Depending on how many items it is given (compared to a caller-supplied
+     * threshold), it renders as one of:
+     * <ul>
+     *     <li>a normal HTML <code>select</code> drop-down (few enough items), or</li>
+     *     <li>a disabled/read-only text field paired with a small chooser button that invokes a caller-supplied
+     *     asynchronous selection function (typically a search popup) when there are too many items for a
+     *     drop-down, or</li>
+     *     <li>a disabled text field showing the single available choice (exactly one item and selection isn't
+     *     forced), or</li>
+     *     <li>a disabled text field reading "(nothing to select)" (zero items and selection isn't forced).</li>
+     * </ul>
+     * The control can be driven at either of two levels: the <em>low-level</em> API builds the list/chooser
+     * manually (similar to <code>drop-down</code>), while the <em>high-level</em> API (<code>setup</code> /
+     * <code>setupItems</code> / <code>setupSelectFunction</code> / <code>setupDefault</code> / <code>run</code>)
+     * decides which of the four presentations above to use automatically from the item count.
+     * <br><br>
+     * <strong>The chooser button needs application-supplied styling.</strong> The framework emits the button
+     * with class <code>btn-smart-chooser</code> (and a <code>:disabled</code> state) but ships no default
+     * appearance or icon for it — the hosting application must supply that CSS (and any icon asset it
+     * references).
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 100px;">Attribute</th><th align="left">Description</th></tr>
+     *     <tr><td>    required     </td><td>     a selection is required               </td></tr>
+     *     <tr><td>    disabled     </td><td>     disables the control               </td></tr>
+     *     <tr><td>    default-option="label"     </td><td>     what is shown before the user makes a selection (drop-down presentation only)               </td></tr>
+     *     <tr><td>    inside-width="n"     </td><td>     sets the control's inner width, in pixels               </td></tr>
+     *     <tr><td>    outside-width="n"     </td><td>     sets the control's outer (including padding) width, in pixels               </td></tr>
+     * </table>
+     * <br>
+     * <strong>Content</strong>
+     * <br><br>
+     *     The <em>Content</em> represents the HTML that would normally be inside an HTML <code>select</code>
+     *     element (used only for a static list; data-driven lists use <code>add</code> / <code>addItems</code>).
+     * <br><br>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API (low-level)</th><th align="left">Description</th></tr>
+     *     <tr><td>    add(val, label, data)     </td><td>     add one item to the drop-down list               </td></tr>
+     *     <tr><td>    addItems(items, valField, labelField, dataField)     </td><td>     add an array of items at once; <code>labelField</code> can be a field name or a function that formats the label from the item               </td></tr>
+     *     <tr><td>    useDropdown([items, valField, labelField, dataField])     </td><td>     force the drop-down presentation, optionally filling it              </td></tr>
+     *     <tr><td>    forceSelect([title])     </td><td>     force the chooser-button (search) presentation, showing <code>title</code> (default "(choose)") until a value is set              </td></tr>
+     *     <tr><td>    nothingToSelect()     </td><td>     force the "(nothing to select)" disabled presentation              </td></tr>
+     *     <tr><td>    singleValue(val, label, data)     </td><td>     force the single-disabled-value presentation showing the one given item              </td></tr>
+     *     <tr><td>    setSelectFunction(fun)     </td><td>     sets the (must be <code>async</code>) function run when the chooser button is clicked; its resolved value is passed to the caller's own handling, not consumed automatically — see the high-level API for the common wiring pattern               </td></tr>
+     *     <tr><td>    setForceSelection([flg])     </td><td>     when <code>true</code>, forces the chooser-button presentation even for item counts that would otherwise use a drop-down               </td></tr>
+     *     <tr><td>    setForceDropDown([flg])     </td><td>     when <code>true</code>, allows the drop-down presentation even above the normal item-count threshold               </td></tr>
+     *     <tr><td>    clear()     </td><td>     resets the control's list/value back to its initial (empty) state               </td></tr>
+     *     <tr><td>    reset()     </td><td>     restores the control to the original underlying element and clears it (undoes a prior <code>forceSelect</code>)              </td></tr>
+     *     <tr><td>    setValue(val, label, data)     </td><td>     selects <code>val</code>; in the drop-down presentation the item is added first if not already present              </td></tr>
+     *     <tr><td>    getValue()     </td><td>     returns the underlying value of the current selection             </td></tr>
+     *     <tr><td>    getIntValue()     </td><td>     returns the current value as a number (0 if empty)             </td></tr>
+     *     <tr><td>    getLabel()     </td><td>     returns the label text currently shown             </td></tr>
+     *     <tr><td>    getData()     </td><td>     returns the data associated with the current selection             </td></tr>
+     *     <tr><td>    size()     </td><td>     returns the number of items in the drop-down list             </td></tr>
+     *     <tr><td>    disable([flg])     </td><td>     the control remains visible but inactive (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    enable([flg])     </td><td>     the control is set to visible and enabled (or the reverse if the optional argument is <code>false</code>)              </td></tr>
+     *     <tr><td>    focus()     </td><td>     sets focus on the control            </td></tr>
+     *     <tr><td>    hide([flg])     </td><td>     the control (and its chooser button) is hidden (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    show([flg])     </td><td>     the control (and its chooser button) is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>
+     *     <tr><td>    isDirty()     </td><td>    <code>true</code> if the user changed its value (drop-down presentation only)     </td></tr>
+     *     <tr><td>    isDisabled()     </td><td>    <code>true</code> if the control is disabled     </td></tr>
+     *     <tr><td>    isHidden()     </td><td>    <code>true</code> if the control is hidden (not visible)    </td></tr>
+     *     <tr><td>    isVisible()     </td><td>    <code>true</code> if the control is visible (not hidden)     </td></tr>
+     *     <tr><td>    isReadOnly() / readOnly([flg]) / readWrite([flg])     </td><td>    read-only state (drop-down presentation only)     </td></tr>
+     *     <tr><td>    isError(desc)     </td><td>     used for error checking (only meaningful with <code>required</code>). If error, display error message and return <code>true</code>.  <code>desc</code> is a description of the user field.               </td></tr>
+     *     <tr><td>    onChange(fun)     </td><td>     execute <code>fun(val, label, data)</code> whenever the drop-down selection changes               </td></tr>
+     *     <tr><td>    triggerGlobalChange(flg)     </td><td>    Default <code>true</code>.  If <code>false</code> then control changes will not trigger a global control change.  See <code>Utils.someControlValueChanged()</code>   </td></tr>
+     * </table>
+     * <table>
+     *     <tr><th align="left" style="padding-right: 120px;">API (high-level convenience wrapper)</th><th align="left">Description</th></tr>
+     *     <tr><td>    setup(maxNumberInDropDown, addChooseOption)     </td><td>     first call; <code>maxNumberInDropDown</code> is the item-count threshold that decides drop-down vs. chooser-button, <code>addChooseOption</code> (boolean or label string) adds a blank "(choose)" first option to the drop-down               </td></tr>
+     *     <tr><td>    setupItems(items, valField, labelField, dataField)     </td><td>     supplies the candidate item array and its field names (<code>labelField</code> can be a formatting function)               </td></tr>
+     *     <tr><td>    setupSelectFunction(selectFunction, valField, labelField, dataField)     </td><td>     supplies the <code>async</code> function used for the chooser-button presentation, plus the field names to read from its resolved item               </td></tr>
+     *     <tr><td>    setupDefault(defaultValue, defaultLabel, defaultData)     </td><td>     supplies the initially-selected value               </td></tr>
+     *     <tr><td>    testMode([flg])     </td><td>     forces both the drop-down and the chooser button to be shown/enabled together (for exercising both paths during testing)               </td></tr>
+     *     <tr><td>    run()     </td><td>     builds the control from everything supplied to <code>setup*</code> above, automatically choosing the drop-down, chooser-button, single-value, or nothing-to-select presentation               </td></tr>
+     * </table>
+     */
+    static smart_chooser() {}
 }

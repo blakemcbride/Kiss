@@ -1,0 +1,57 @@
+/*
+ * starter-theme.css
+ *
+ * Opinionated default styling for raw HTML form elements (input, textarea,
+ * label, ...). This file is loaded by default so a stock Kiss application's
+ * plain form markup looks reasonable out of the box, with no application
+ * CSS required.
+ *
+ * Nothing in this file is namespaced to Kiss (no "kiss-" class prefix, no
+ * scoping selector) - it styles bare element selectors directly, which is
+ * exactly why it is kept separate from Utils.css rather than living inside
+ * it: Utils.css is namespace-clean (kiss-owned selectors and custom
+ * properties only), while these rules necessarily restyle whatever raw
+ * markup the host application writes.
+ *
+ * An application that owns its own input styling is free to stop linking
+ * this file (or override it with a later-loaded application stylesheet)
+ * without affecting anything else Kiss provides.
+ */
+/* button { height: 25px; position: relative;} */
+input[type=text] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+input[type=password] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+input[type=number] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+input[type=date] { 
+    height: 20px; 
+    border-radius: 5px; 
+    padding-left: 3px; 
+    padding-right: 3px; 
+    padding-top: 0;
+    padding-bottom: 0;
+}
+textarea { border-radius: 5px; padding-left: 3px; padding-right: 3px; }
+
+
+label { margin-right: 8px; }
+/* input[type=button] { border-radius: 5px; } */
+
+/*
+ * div.vert-input is a layout helper that application authors write by hand in
+ * their own HTML (unlike everything else Kiss's kiss/Utils.css provides,
+ * which is emitted by framework components) - it is not renamed to a
+ * "kiss-" prefix because doing so would break markup application code
+ * already wrote. It stays unnamespaced for the same reason the rest of this
+ * file is: it restyles a class name the host application spells itself, so
+ * it belongs with the other app-facing, non-namespaced styling rather than
+ * in the namespace-clean kiss/Utils.css.
+ */
+div.vert-input {
+    display:grid;
+    grid-template-columns: max-content max-content;
+    grid-column-gap:5px;
+    grid-row-gap: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+div.vert-input label       { text-align:right; }
+div.vert-input label:after { content: ":"; }

@@ -96,6 +96,7 @@ async function loadUtils() {
     // Stylesheets
     addStylesheet("normalize.css");
     addStylesheet("normalize2.css");
+    addStylesheet("kiss/starter-theme.css");
     addStylesheet("kiss/Utils.css");
     addStylesheet("kiss/ag-grid-custom.css");
 

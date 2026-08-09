@@ -141,12 +141,12 @@
         const maxAttr = maxlength ? ' maxlength="' + esc(maxlength) + '"' : '';
         const newElm = Utils.replaceHTML(id, elm,
             '<div id="{id}" class="{class}" style="{style}" {attr}>' +
-                '<div id="{id}-control" class="kiss-search-control t-clear{valueClass}">' +
+                '<div id="{id}-control" class="kiss-search-control kiss-clear{valueClass}">' +
                     '<span class="kiss-search-icon" aria-hidden="true"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>' +
                     '<input id="{id}-input" class="kiss-search-field" type="search" name="{id}-search" value="{value}" placeholder="{placeholder}" autocomplete="{autocomplete}" autocorrect="off" autocapitalize="off" spellcheck="{spellcheck}" aria-label="{ariaLabel}" aria-controls="{id}-results" aria-autocomplete="list" data-1p-ignore data-lpignore="true" data-form-type="other"{maxAttr}{required}{disabled}>' +
-                    '<div id="{id}-mirror" class="t-clear-mirror kiss-search-mirror" aria-hidden="true">{value}</div>' +
-                    '<div id="{id}-placeholder" class="t-clear-placeholder kiss-search-placeholder" aria-hidden="true">{placeholder}</div>' +
-                    '<div id="{id}-glow" class="t-clear-glow" aria-hidden="true"></div>' +
+                    '<div id="{id}-mirror" class="kiss-clear-mirror kiss-search-mirror" aria-hidden="true">{value}</div>' +
+                    '<div id="{id}-placeholder" class="kiss-clear-placeholder kiss-search-placeholder" aria-hidden="true">{placeholder}</div>' +
+                    '<div id="{id}-glow" class="kiss-clear-glow" aria-hidden="true"></div>' +
                     '<button type="button" id="{id}-clear" class="kiss-search-clear t-clear-btn" aria-label="{clearLabel}"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4.5 4.5 11.5 11.5M11.5 4.5 4.5 11.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>' +
                 '</div>' +
                 '<div id="{id}-results" class="kiss-search-results" role="listbox" hidden></div>' +
@@ -239,17 +239,17 @@
             if (!previousValue || prefersReducedMotion())
                 return;
 
-            const dur = cssMs('--clear-dur', 1000);
-            const outDur = cssMs('--clear-out-dur', 400);
-            const inDur = cssMs('--clear-in-dur', 400);
-            const outFly = cssNumber('--clear-out-fly', 12);
-            const inFly = cssNumber('--clear-in-fly', 12);
-            const blur = cssNumber('--clear-blur', 2);
-            const glowDelay = cssMs('--glow-delay', 50);
-            const glowPeakAt = clamp(cssNumber('--glow-peak-at', 0.15), 0.01, 0.99);
-            const glowOpacity = cssNumber('--glow-opacity', 0.85);
-            const glowSpread = cssNumber('--glow-spread', 1.5);
-            const glowColor = cssString('--glow-color', '100, 116, 139');
+            const dur = cssMs('--kiss-clear-dur', 1000);
+            const outDur = cssMs('--kiss-clear-out-dur', 400);
+            const inDur = cssMs('--kiss-clear-in-dur', 400);
+            const outFly = cssNumber('--kiss-clear-out-fly', 12);
+            const inFly = cssNumber('--kiss-clear-in-fly', 12);
+            const blur = cssNumber('--kiss-clear-blur', 2);
+            const glowDelay = cssMs('--kiss-glow-delay', 50);
+            const glowPeakAt = clamp(cssNumber('--kiss-glow-peak-at', 0.15), 0.01, 0.99);
+            const glowOpacity = cssNumber('--kiss-glow-opacity', 0.85);
+            const glowSpread = cssNumber('--kiss-glow-spread', 1.5);
+            const glowColor = cssString('--kiss-glow-color', '100, 116, 139');
             const rects = wordRects(previousValue);
             const start = performance.now();
 

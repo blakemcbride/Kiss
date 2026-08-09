@@ -1,35 +1,5 @@
-/* button { height: 25px; position: relative;} */
-input[type=text] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
-input[type=password] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
-input[type=number] { height: 20px; border-radius: 5px; padding-left: 3px; padding-right: 3px; }
-input[type=date] { 
-    height: 20px; 
-    border-radius: 5px; 
-    padding-left: 3px; 
-    padding-right: 3px; 
-    padding-top: 0;
-    padding-bottom: 0;
-}
-textarea { border-radius: 5px; padding-left: 3px; padding-right: 3px; }
-
-
-label { margin-right: 8px; }
-/* input[type=button] { border-radius: 5px; } */
-
-div.vert-input {
-    display:grid;
-    grid-template-columns: max-content max-content;
-    grid-column-gap:5px;
-    grid-row-gap: 10px;
-    margin-top: 10px;
-    margin-left: 10px;
-}
-div.vert-input label       { text-align:right; }
-div.vert-input label:after { content: ":"; }
-
-
 /* The Modal (background) */
-.msg-modal {
+.kiss-msg-modal {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 19000; /* Sit on top */
@@ -43,7 +13,7 @@ div.vert-input label:after { content: ":"; }
 }
 
 /* Modal Content */
-.msg-modal-content {
+.kiss-msg-modal-content {
     z-index: 19002; /* Sit on top */
     position: relative;
     background-color: white;
@@ -53,15 +23,11 @@ div.vert-input label:after { content: ":"; }
     /*display: inline-block; */
     width: 400px;
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
-    -webkit-animation-name: animatetop;
-    -webkit-animation-duration: 0.4s;
-    animation-name: animatetop;
-    animation-duration: 0.4s;
     border-radius: 4px;
 }
 
 /* Wait Modal Content (animation sometimes causes message not to show) */
-.wmsg-modal-content {
+.kiss-wmsg-modal-content {
     z-index: 19001; /* Sit on top */
     position: relative;
     background-color: white;
@@ -74,21 +40,8 @@ div.vert-input label:after { content: ":"; }
     border-radius: 4px;
 }
 
-/* Add Animation */
-/*
-@-webkit-keyframes animatetop {
-    from {top:-300px; opacity:0}
-    to {top:0; opacity:1}
-}
-
-@keyframes animatetop {
-    from {top:-300px; opacity:0}
-    to {top:0; opacity:1}
-}
-*/
-
 /* The Close Button */
-.msg-close {
+.kiss-msg-close {
     color: black;
     float: right;
     font-size: 28px;
@@ -98,14 +51,14 @@ div.vert-input label:after { content: ":"; }
     margin-top: -4px;
 }
 
-.msg-close:hover,
-.msg-close:focus {
+.kiss-msg-close:hover,
+.kiss-msg-close:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
 }
 
-.msg-modal-header {
+.kiss-msg-modal-header {
     /* padding: 2px 16px; */
     padding-left: 10px;
     background-color: #6495ed;
@@ -118,18 +71,18 @@ div.vert-input label:after { content: ":"; }
     border-top-right-radius: 4px;
 }
 
-.msg-modal-body {
+.kiss-msg-modal-body {
     padding: 2px 16px;
     margin-top: 10px;
     font-size: 16px;
 }
 
-.msg-modal-footer {
+.kiss-msg-modal-footer {
     display: flex;
     justify-content: center;
 }
 
-.popup-background {
+.kiss-popup-background {
     position: fixed;
     left: 0;
     top: 0;
@@ -139,7 +92,7 @@ div.vert-input label:after { content: ":"; }
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
 
-.popup-content {
+.kiss-popup-content {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -150,7 +103,7 @@ div.vert-input label:after { content: ":"; }
     transform: translate(-50%, -50%);
 }
 
-.popup-header {
+.kiss-popup-header {
     font-weight: bold;
     font-size: 12px;
     color: black;
@@ -161,7 +114,7 @@ div.vert-input label:after { content: ":"; }
     line-height: 1;
 }
 
-.popup-body {
+.kiss-popup-body {
     padding: 6px;
 }
 
@@ -214,33 +167,33 @@ div.vert-input label:after { content: ":"; }
 }
 
 :root {
-    --check-opacity-dur: 500ms;
-    --check-rotate-dur: 500ms;
-    --check-rotate-from: 80deg;
-    --check-bob-dur: 500ms;
-    --check-y-amount: 40px;
-    --check-blur-dur: 500ms;
-    --check-blur-from: 10px;
-    --check-path-dur: 500ms;
-    --check-path-delay: 80ms;
-    --check-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-    --check-ease-opacity: cubic-bezier(0.22, 1, 0.36, 1);
-    --check-ease-rotate: cubic-bezier(0.22, 1, 0.36, 1);
-    --check-ease-bob: cubic-bezier(0.34, 1.35, 0.64, 1);
-    --check-ease-path: cubic-bezier(0.22, 1, 0.36, 1);
-    --clear-dur: 1000ms;
-    --clear-out-dur: 400ms;
-    --clear-in-dur: 400ms;
-    --clear-out-fly: 12px;
-    --clear-in-fly: 12px;
-    --clear-out-ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --clear-in-ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --clear-blur: 2px;
-    --glow-delay: 50ms;
-    --glow-peak-at: 0.15;
-    --glow-opacity: 0;
-    --glow-spread: 1.5;
-    --glow-color: 100, 116, 139;
+    --kiss-check-opacity-dur: 500ms;
+    --kiss-check-rotate-dur: 500ms;
+    --kiss-check-rotate-from: 80deg;
+    --kiss-check-bob-dur: 500ms;
+    --kiss-check-y-amount: 40px;
+    --kiss-check-blur-dur: 500ms;
+    --kiss-check-blur-from: 10px;
+    --kiss-check-path-dur: 500ms;
+    --kiss-check-path-delay: 80ms;
+    --kiss-check-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --kiss-check-ease-opacity: cubic-bezier(0.22, 1, 0.36, 1);
+    --kiss-check-ease-rotate: cubic-bezier(0.22, 1, 0.36, 1);
+    --kiss-check-ease-bob: cubic-bezier(0.34, 1.35, 0.64, 1);
+    --kiss-check-ease-path: cubic-bezier(0.22, 1, 0.36, 1);
+    --kiss-clear-dur: 1000ms;
+    --kiss-clear-out-dur: 400ms;
+    --kiss-clear-in-dur: 400ms;
+    --kiss-clear-out-fly: 12px;
+    --kiss-clear-in-fly: 12px;
+    --kiss-clear-out-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --kiss-clear-in-ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --kiss-clear-blur: 2px;
+    --kiss-glow-delay: 50ms;
+    --kiss-glow-peak-at: 0.15;
+    --kiss-glow-opacity: 0;
+    --kiss-glow-spread: 1.5;
+    --kiss-glow-color: 100, 116, 139;
 }
 
 .kiss-toast {
@@ -307,9 +260,9 @@ div.vert-input label:after { content: ":"; }
 
 .kiss-toast-success.is-visible {
     animation:
-        t-check-fade var(--check-opacity-dur) var(--check-ease-opacity) forwards,
-        t-check-blur var(--check-blur-dur) var(--check-ease-out) forwards,
-        t-check-bob var(--check-bob-dur) var(--check-ease-bob) forwards;
+        kiss-check-fade var(--kiss-check-opacity-dur) var(--kiss-check-ease-opacity) forwards,
+        kiss-check-blur var(--kiss-check-blur-dur) var(--kiss-check-ease-out) forwards,
+        kiss-check-bob var(--kiss-check-bob-dur) var(--kiss-check-ease-bob) forwards;
 }
 
 .kiss-toast-success.is-leaving {
@@ -351,47 +304,47 @@ div.vert-input label:after { content: ":"; }
     display: block;
 }
 
-.t-success-check {
+.kiss-success-check {
     display: inline-block;
     transform-origin: center;
     opacity: 1;
 }
 
-.t-success-check svg {
+.kiss-success-check svg {
     display: block;
     overflow: visible;
 }
 
-.t-success-check svg path {
+.kiss-success-check svg path {
     stroke-dasharray: 20;
     stroke-dashoffset: 20;
 }
 
-.t-success-check[data-state="in"] svg path {
-    animation: t-check-draw var(--check-path-dur) var(--check-ease-path) var(--check-path-delay, 0ms) forwards;
+.kiss-success-check[data-state="in"] svg path {
+    animation: kiss-check-draw var(--kiss-check-path-dur) var(--kiss-check-ease-path) var(--kiss-check-path-delay, 0ms) forwards;
 }
 
-@keyframes t-check-fade {
+@keyframes kiss-check-fade {
     from { opacity: 0; }
     to { opacity: 1; }
 }
 
-@keyframes t-check-rotate {
-    from { transform: rotate(var(--check-rotate-from)); }
+@keyframes kiss-check-rotate {
+    from { transform: rotate(var(--kiss-check-rotate-from)); }
     to { transform: rotate(0deg); }
 }
 
-@keyframes t-check-blur {
-    from { filter: blur(var(--check-blur-from)); }
+@keyframes kiss-check-blur {
+    from { filter: blur(var(--kiss-check-blur-from)); }
     to { filter: blur(0); }
 }
 
-@keyframes t-check-bob {
-    from { translate: 0 var(--check-y-amount); }
+@keyframes kiss-check-bob {
+    from { translate: 0 var(--kiss-check-y-amount); }
     to { translate: 0 0; }
 }
 
-@keyframes t-check-draw {
+@keyframes kiss-check-draw {
     to { stroke-dashoffset: 0; }
 }
 
@@ -465,17 +418,17 @@ div.vert-input label:after { content: ":"; }
         animation: none !important;
     }
 
-    .t-success-check {
+    .kiss-success-check {
         animation: none !important;
         opacity: 1;
     }
 
-    .t-success-check svg path {
+    .kiss-success-check svg path {
         animation: none !important;
         stroke-dashoffset: 0 !important;
     }
 
-    .t-clear-glow {
+    .kiss-clear-glow {
         opacity: 0 !important;
     }
 }
@@ -841,13 +794,13 @@ div.vert-input label:after { content: ":"; }
     display: none;
 }
 
-.t-clear {
+.kiss-clear {
     position: relative;
     overflow: hidden;
 }
 
-.t-clear-mirror,
-.t-clear-placeholder {
+.kiss-clear-mirror,
+.kiss-clear-placeholder {
     position: absolute;
     inset: 0;
     display: flex;
@@ -858,29 +811,29 @@ div.vert-input label:after { content: ":"; }
     pointer-events: none;
 }
 
-.t-clear-mirror {
+.kiss-clear-mirror {
     opacity: 0;
 }
 
-.t-clear-placeholder {
+.kiss-clear-placeholder {
     opacity: 0;
 }
 
-.t-clear.has-value .t-clear-mirror,
-.t-clear.is-clearing .t-clear-mirror {
+.kiss-clear.has-value .kiss-clear-mirror,
+.kiss-clear.is-clearing .kiss-clear-mirror {
     opacity: 1;
 }
 
-.t-clear.has-value > input,
-.t-clear.is-clearing > input {
+.kiss-clear.has-value > input,
+.kiss-clear.is-clearing > input {
     -webkit-text-fill-color: transparent;
 }
 
-.t-clear.has-value .t-clear-placeholder {
+.kiss-clear.has-value .kiss-clear-placeholder {
     opacity: 0;
 }
 
-.t-clear-glow {
+.kiss-clear-glow {
     position: absolute;
     inset: 0;
     z-index: 3;
@@ -904,8 +857,8 @@ div.vert-input label:after { content: ":"; }
     color: color-mix(in srgb, var(--kiss-ui-muted), transparent 18%);
 }
 
-.kiss-search-control.t-clear.has-value > .kiss-search-field::placeholder,
-.kiss-search-control.t-clear.is-clearing > .kiss-search-field::placeholder {
+.kiss-search-control.kiss-clear.has-value > .kiss-search-field::placeholder,
+.kiss-search-control.kiss-clear.is-clearing > .kiss-search-field::placeholder {
     color: transparent !important;
 }
 

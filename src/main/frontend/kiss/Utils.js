@@ -236,17 +236,17 @@ class Utils {
             let modal = DOMUtils.getElement('msg-modal');
             if (!modal) {
                 DOMUtils.append(document.body,
-                    '<div id="msg-modal" class="msg-modal">' +
+                    '<div id="msg-modal" class="kiss-msg-modal">' +
                     '  <!-- Modal content -->' +
-                    '  <div class="msg-modal-content" id="msg-modal-content-tab">' +
-                    '    <div class="msg-modal-header" id="msg-modal-header-tab">' +
-                    '      <span id="msg-close-btn" class="msg-close">&times;</span>' +
+                    '  <div class="kiss-msg-modal-content" id="msg-modal-content-tab">' +
+                    '    <div class="kiss-msg-modal-header" id="msg-modal-header-tab">' +
+                    '      <span id="msg-close-btn" class="kiss-msg-close">&times;</span>' +
                     '      <p id="msg-header" style="margin-top: 2px;">Modal Header</p>' +
                     '    </div>' +
-                    '    <div class="msg-modal-body">' +
+                    '    <div class="kiss-msg-modal-body">' +
                     '      <p id="msg-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
                     '    </div>' +
-                    '    <div class="msg-modal-footer">' +
+                    '    <div class="kiss-msg-modal-footer">' +
                     '      <input type="button" value="Ok" id="message-ok" style="margin-top: 5px; margin-bottom: 10px;">' +
                     '    </div>' +
                     '  </div>' +
@@ -329,17 +329,17 @@ class Utils {
             let modal = DOMUtils.getElement('yesno-modal');
             if (!modal) {
                 DOMUtils.append(document.body,
-                    '<div id="yesno-modal" class="msg-modal">' +
+                    '<div id="yesno-modal" class="kiss-msg-modal">' +
                     '  <!-- Modal content -->' +
-                    '  <div class="msg-modal-content" id="yesno-popup-content">' +
-                    '    <div class="msg-modal-header" id="yesno-popup-header">' +
-                    '      <span id="yesno-close-btn" class="msg-close">&times;</span>' +
+                    '  <div class="kiss-msg-modal-content" id="yesno-popup-content">' +
+                    '    <div class="kiss-msg-modal-header" id="yesno-popup-header">' +
+                    '      <span id="yesno-close-btn" class="kiss-msg-close">&times;</span>' +
                     '      <p id="yesno-header" style="margin-top: 2px;">Modal Header</p>' +
                     '    </div>' +
-                    '    <div class="msg-modal-body">' +
+                    '    <div class="kiss-msg-modal-body">' +
                     '      <p id="yesno-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
                     '    </div>' +
-                    '    <div class="msg-modal-footer">' +
+                    '    <div class="kiss-msg-modal-footer">' +
                     '      <input type="button" value="Yes" id="yesno-yes" style="margin-top: 5px; margin-bottom: 10px;">' +
                     '      <input type="button" value="No" id="yesno-no" style="margin-top: 5px; margin-bottom: 10px; margin-left: 10px;">' +
                     '    </div>' +
@@ -411,10 +411,10 @@ class Utils {
         let modal = DOMUtils.getElement('wmsg-modal');
         if (!modal) {
             DOMUtils.append(document.body,
-                '<div id="wmsg-modal" class="msg-modal">' +
+                '<div id="wmsg-modal" class="kiss-msg-modal">' +
                 '  <!-- Modal content -->' +
-                '  <div class="wmsg-modal-content" id="wait-msg-content">' +
-                '    <div class="msg-modal-body">' +
+                '  <div class="kiss-wmsg-modal-content" id="wait-msg-content">' +
+                '    <div class="kiss-msg-modal-body">' +
                 '      <p id="wmsg-message" style="margin-top: 5px, margin-bottom: 5px;"></p>' +
                 '    </div>' +
                 '  </div>' +
@@ -1867,24 +1867,24 @@ class Utils {
         if (typeof Editor !== 'undefined')
             Editor.newEditorContext();
         Utils.newEnterContext();
-        if (!DOMUtils.hasClass(w, 'popup-background')) {
+        if (!DOMUtils.hasClass(w, 'kiss-popup-background')) {
             let width = getComputedStyle(w).width;
             let height = getComputedStyle(w).height;
-            DOMUtils.addClass(w, 'popup-background');
+            DOMUtils.addClass(w, 'kiss-popup-background');
             w.style.zIndex = Utils.popup_zindex++;
             w.style.width = '100%';
             w.style.height = '100%';
             // wrapInner equivalent
             content = DOMUtils.wrapInner(w, 'div');
-            DOMUtils.addClass(content, 'popup-content');
+            DOMUtils.addClass(content, 'kiss-popup-content');
             content.style.zIndex = Utils.popup_zindex++;
             content.id = id + '--width';
 
             both_parts = DOMUtils.children(content);
             header = both_parts[0];
-            DOMUtils.addClass(header, 'popup-header');
+            DOMUtils.addClass(header, 'kiss-popup-header');
             body = both_parts[1];
-            DOMUtils.addClass(body, 'popup-body');
+            DOMUtils.addClass(body, 'kiss-popup-body');
             body.id = id + '--height';
             content.style.width = width;
             body.style.height = height;
