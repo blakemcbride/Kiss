@@ -355,6 +355,46 @@ manual/
   BuildUtils.runShell(exportCmd)
   ```
 
+### Connection Pool Sizing
+
+Pool sizes are derived from **`MaxWorkerThreads`**, not from the CPU count, and default to:
+
+| Setting | Default | Meaning |
+|---|---|---|
+| `DatabaseMinPoolSize` | 1 | permanent floor, held open even while idle |
+| `DatabaseInitialPoolSize` | = minimum | opened at startup |
+| `DatabaseMaxPoolSize` | `MaxWorkerThreads + 5` | ceiling |
+| `DatabaseAcquireIncrement` | 2 | connections added at a time when growing |
+
+**Why worker threads and not cores.** `QueueManager` runs a fixed thread pool of
+`MaxWorkerThreads`, and each in-flight service holds exactly one connection for its
+duration. That is the real ceiling on simultaneous checkouts — a pool larger than it
+contains connections no request can ever check out. An earlier version sized from
+`Runtime.availableProcessors()` (`min = cores`, `initial = cores * 2`,
+`max = cores * 4`), which on a 32-core machine asked for 128 connections and pre-opened
+64 before any demand existed.
+
+Sizing from CPU count is wrong twice over: it over-provisions badly on a many-core
+machine, and it derives a limit on a **shared** resource — the database server's
+`max_connections` — from a property of one client. Two applications each sizing
+themselves that way will sum past the server's limit without either knowing the other
+exists. PostgreSQL's default `max_connections` is 100, of which 3 are reserved for
+superusers, so two such applications on one 32-core host cannot both start.
+
+**`minPoolSize` is the value that matters most for a shared server.** `maxPoolSize` is
+only reached under load, but the minimum is a permanent floor held open while the
+application sits idle. Keeping it at 1 means the pool grows on demand and shrinks back
+after `DatabaseMaxIdleTime`, costing one connect on the first request after a quiet
+period and nothing else.
+
+**Startup advisory.** When the database is PostgreSQL, the framework reads the server's
+`max_connections` at startup and logs a `WARN` if this application's `DatabaseMaxPoolSize`
+is 25% or more of it. No per-application formula can prevent several applications from
+collectively exhausting a shared server, because each sizes itself in isolation; the
+framework can at least say so on the day the configuration is set rather than leaving it
+to be discovered when some other application mysteriously cannot connect. The check is
+advisory — a server that will not answer never prevents startup.
+
 ### Database Connection Settings
 - Access database configuration via `MainServlet.getEnvironment()`:
   ```groovy

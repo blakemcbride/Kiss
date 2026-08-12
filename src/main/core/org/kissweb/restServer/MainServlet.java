@@ -501,12 +501,42 @@ public class MainServlet extends HttpServlet {
 
             cpds.setDriverClass(Connection.getDriverName(connectionType));
 
-            // Configure connection pool sizes based on CPU count - can be overridden in application.ini
-            int cores = Runtime.getRuntime().availableProcessors();
-            int minPoolSize = getEnvironmentInt("DatabaseMinPoolSize", Math.max(2, cores));
-            int initialPoolSize = getEnvironmentInt("DatabaseInitialPoolSize", Math.max(minPoolSize, cores * 2));
+            //
+            // Connection pool sizing.  All four values can be overridden in
+            // application.ini.
+            //
+            // These are derived from MaxWorkerThreads rather than from the CPU
+            // count, because the number of worker threads is what actually
+            // bounds how many connections can be held at once: QueueManager runs
+            // a fixed thread pool of that size, and each in-flight service holds
+            // exactly one connection for its duration.  A pool larger than that
+            // contains connections no request can ever check out.
+            //
+            // Sizing from CPU count is doubly wrong.  It over-provisions badly
+            // on a many-core machine -- on 32 cores the previous formula asked
+            // for 128 connections and pre-opened 64 -- and it derives a limit on
+            // a SHARED resource (the database server's max_connections) from a
+            // property of one client.  Two applications each sizing themselves
+            // that way will happily sum past the server's limit without either
+            // knowing the other exists.
+            //
+            // minPoolSize is 1, not the worker count: it is a permanent floor,
+            // held open even while the application is completely idle.  The pool
+            // grows on demand and shrinks back after maxIdleTime, so a low
+            // minimum costs one connect on the first request after a quiet
+            // period and nothing else.
+            //
+            int workers = getEnvironmentInt("MaxWorkerThreads", 30);
+            int minPoolSize = getEnvironmentInt("DatabaseMinPoolSize", 1);
+            int initialPoolSize = getEnvironmentInt("DatabaseInitialPoolSize", minPoolSize);
             int maxPoolSize = getEnvironmentInt("DatabaseMaxPoolSize", defaultMaxPoolSize());
-            int acquireIncrement = getEnvironmentInt("DatabaseAcquireIncrement", Math.max(2, cores / 2));
+            // Small steps: the pool should follow demand, not leap ahead of it.
+            int acquireIncrement = getEnvironmentInt("DatabaseAcquireIncrement", 2);
+
+            if (initialPoolSize < minPoolSize)
+                initialPoolSize = minPoolSize;
+            if (maxPoolSize < minPoolSize)
+                maxPoolSize = minPoolSize;
             
             cpds.setMinPoolSize(minPoolSize);
             cpds.setInitialPoolSize(initialPoolSize);
@@ -531,21 +561,83 @@ public class MainServlet extends HttpServlet {
             cpds.setUnreturnedConnectionTimeout(getEnvironmentInt("DatabaseUnreturnedTimeout", 60));
             cpds.setDebugUnreturnedConnectionStackTraces(getEnvironmentBoolean("DatabaseDebugStackTraces", isUnderIDE()));
             
-            logger.info("C3P0 pool configured (CPU cores=" + cores + "): min=" + minPoolSize + ", initial=" + initialPoolSize + ", max=" + maxPoolSize + ", increment=" + acquireIncrement);
+            logger.info("C3P0 pool configured (worker threads=" + workers + "): min=" + minPoolSize
+                    + ", initial=" + initialPoolSize + ", max=" + maxPoolSize
+                    + ", increment=" + acquireIncrement);
+
+            //  Advisory only, and it doubles as proof that the pool itself works
+            //  before any request depends on it.
+            try (java.sql.Connection probe = cpds.getConnection()) {
+                warnIfPoolIsLargeShareOfServer(probe, connectionType, maxPoolSize);
+            } catch (SQLException e) {
+                logger.debug("could not obtain a pool connection for the startup check: " + e.getMessage());
+            }
         }
         Configurator.setLevel(logger, level);
     }
 
+    /**
+     * The default maximum pool size.
+     * <br><br>
+     * Derived from MaxWorkerThreads, which is the real ceiling on simultaneous
+     * checkouts, plus a small allowance for connections taken outside the
+     * request path -- cron tasks and explicit openNewConnection() callers.
+     * <br><br>
+     * Overridable with DatabaseMaxPoolSize in application.ini, or the
+     * db.maxPoolSize system property.
+     *
+     * @return the default maximum pool size
+     */
     private static int defaultMaxPoolSize() {
-        // Default max pool size based on CPU cores
-        // Formula: cores * 4 with a minimum of 20 connections
-        // This provides good throughput for most database workloads
-        // Can be overridden with DatabaseMaxPoolSize in application.ini
-        int cores = Runtime.getRuntime().availableProcessors();
-        int calculated = cores * 4;
+        int workers = getEnvironmentInt("MaxWorkerThreads", 30);
+        int calculated = workers + 5;
         return Integer.parseInt(
                 System.getProperty("db.maxPoolSize",
-                        String.valueOf(Math.max(20, calculated))));
+                        String.valueOf(Math.max(5, calculated))));
+    }
+
+    /**
+     * Warn when this application's pool is a large share of what the database
+     * server can serve in total.
+     * <br><br>
+     * No per-application sizing formula can prevent several applications from
+     * collectively exhausting a shared server, because each sizes itself in
+     * isolation.  What the framework can do is notice at startup and say so --
+     * turning "some other application mysteriously cannot connect at 3am" into
+     * one line in the log on the day the configuration was set.
+     *
+     * @param con a live connection to the database
+     * @param type the database vendor in use
+     * @param maxPoolSize this application's configured maximum
+     */
+    private static void warnIfPoolIsLargeShareOfServer(java.sql.Connection con,
+                                                       Connection.ConnectionType type,
+                                                       int maxPoolSize) {
+        try {
+            //  PostgreSQL only.  Other vendors express their limits differently
+            //  and a wrong warning is worse than none.
+            if (type != Connection.ConnectionType.PostgreSQL)
+                return;
+            try (java.sql.Statement st = con.createStatement();
+                 java.sql.ResultSet rs = st.executeQuery("show max_connections")) {
+                if (!rs.next())
+                    return;
+                int serverMax = Integer.parseInt(rs.getString(1).trim());
+                if (serverMax <= 0)
+                    return;
+                int percent = (maxPoolSize * 100) / serverMax;
+                if (percent >= 25) {
+                    logger.warn("DatabaseMaxPoolSize (" + maxPoolSize + ") is " + percent
+                            + "% of this database server's max_connections (" + serverMax + "). "
+                            + "If other applications share this server they may be unable to connect. "
+                            + "Lower DatabaseMaxPoolSize in application.ini, or raise max_connections.");
+                }
+            }
+        } catch (Exception e) {
+            //  Purely advisory.  A server that will not answer the question must
+            //  never prevent the application from starting.
+            logger.debug("could not check the server's max_connections: " + e.getMessage());
+        }
     }
     
     private static int getEnvironmentInt(String key, int defaultValue) {
