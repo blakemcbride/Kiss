@@ -37,9 +37,10 @@ src/main/backend/oauth.ini
 src/main/backend/oauth.ini.tmp
 .mcp.json
 
-# Per-developer, machine-local AI assistant instructions.  Private to each
-# working copy; never check in.
+# Per-developer, machine-local AI assistant instructions and settings.
+# Private to each working copy; never check in.
 CLAUDE.local.md
+.claude/settings.local.json
 
 
 # Gradle
