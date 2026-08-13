@@ -366,6 +366,15 @@ Pool sizes are derived from **`MaxWorkerThreads`**, not from the CPU count, and 
 | `DatabaseMaxPoolSize` | `MaxWorkerThreads + 5` | ceiling |
 | `DatabaseAcquireIncrement` | 2 | connections added at a time when growing |
 
+**`DatabaseMaxPoolSize` override precedence.** Three levels, highest first: the
+`DatabaseMaxPoolSize` application.ini setting; the `db.maxPoolSize` JVM system
+property; the calculated `MaxWorkerThreads + 5` default. The ini setting is read
+first, so the system property (and the calculated default) is only evaluated when
+the ini key is absent or unparseable -- not on every startup. A malformed integer
+at either level (the ini value or the system property) logs a WARN naming the key
+and the rejected value and falls back to the next level down; it never prevents
+startup.
+
 **Why worker threads and not cores.** `QueueManager` runs a fixed thread pool of
 `MaxWorkerThreads`, and each in-flight service holds exactly one connection for its
 duration. That is the real ceiling on simultaneous checkouts — a pool larger than it

@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Set;
+import java.util.function.IntSupplier;
 
 
 /**
@@ -529,7 +530,17 @@ public class MainServlet extends HttpServlet {
             int workers = getEnvironmentInt("MaxWorkerThreads", 30);
             int minPoolSize = getEnvironmentInt("DatabaseMinPoolSize", 1);
             int initialPoolSize = getEnvironmentInt("DatabaseInitialPoolSize", minPoolSize);
-            int maxPoolSize = getEnvironmentInt("DatabaseMaxPoolSize", defaultMaxPoolSize());
+            // Effective precedence, highest first:
+            //   1. DatabaseMaxPoolSize  -- application.ini setting
+            //   2. db.maxPoolSize       -- JVM system property (see defaultMaxPoolSize())
+            //   3. MaxWorkerThreads + 5 -- the calculated default (see defaultMaxPoolSize())
+            // The ini value is read first so defaultMaxPoolSize() -- and the
+            // db.maxPoolSize property it reads -- is only evaluated when
+            // DatabaseMaxPoolSize is absent or unparseable, not on every startup.
+            Object maxPoolSizeIniValue = environment.get("DatabaseMaxPoolSize");
+            int maxPoolSize = maxPoolSizeIniValue == null
+                    ? defaultMaxPoolSize()
+                    : parseIntOrWarn("DatabaseMaxPoolSize", maxPoolSizeIniValue.toString(), MainServlet::defaultMaxPoolSize);
             // Small steps: the pool should follow demand, not leap ahead of it.
             int acquireIncrement = getEnvironmentInt("DatabaseAcquireIncrement", 2);
 
@@ -577,23 +588,29 @@ public class MainServlet extends HttpServlet {
     }
 
     /**
-     * The default maximum pool size.
+     * The default maximum pool size, used when DatabaseMaxPoolSize is absent
+     * or unparseable in application.ini (see that call site for the full
+     * three-level override precedence).
      * <br><br>
      * Derived from MaxWorkerThreads, which is the real ceiling on simultaneous
      * checkouts, plus a small allowance for connections taken outside the
      * request path -- cron tasks and explicit openNewConnection() callers.
      * <br><br>
-     * Overridable with DatabaseMaxPoolSize in application.ini, or the
-     * db.maxPoolSize system property.
+     * Overridable with the db.maxPoolSize system property.  A malformed
+     * db.maxPoolSize logs a WARN naming the property and the rejected value,
+     * and falls back to the calculated default rather than preventing
+     * startup.
      *
      * @return the default maximum pool size
      */
     private static int defaultMaxPoolSize() {
         int workers = getEnvironmentInt("MaxWorkerThreads", 30);
         int calculated = workers + 5;
-        return Integer.parseInt(
-                System.getProperty("db.maxPoolSize",
-                        String.valueOf(Math.max(5, calculated))));
+        int fallback = Math.max(5, calculated);
+        String prop = System.getProperty("db.maxPoolSize");
+        if (prop == null)
+            return fallback;
+        return parseIntOrWarn("db.maxPoolSize", prop, fallback);
     }
 
     /**
@@ -644,12 +661,28 @@ public class MainServlet extends HttpServlet {
         Object val = environment.get(key);
         if (val == null)
             return defaultValue;
+        return parseIntOrWarn(key, val.toString(), defaultValue);
+    }
+
+    /**
+     * Parses val as an integer.  If it cannot be parsed, logs a WARN naming
+     * key and the rejected value and returns the fallback supplied by
+     * defaultSupplier -- which is only invoked when the parse actually
+     * fails, so a fallback that is itself expensive (or reads other
+     * configuration) is not computed on the common, successfully-parsed
+     * path.
+     */
+    private static int parseIntOrWarn(String key, String val, IntSupplier defaultSupplier) {
         try {
-            return Integer.parseInt(val.toString());
+            return Integer.parseInt(val);
         } catch (NumberFormatException e) {
             logger.warn("Invalid integer value for " + key + ": " + val);
-            return defaultValue;
+            return defaultSupplier.getAsInt();
         }
+    }
+
+    private static int parseIntOrWarn(String key, String val, int defaultValue) {
+        return parseIntOrWarn(key, val, () -> defaultValue);
     }
     
     private static boolean getEnvironmentBoolean(String key, boolean defaultValue) {
