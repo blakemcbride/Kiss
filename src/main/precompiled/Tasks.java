@@ -296,8 +296,8 @@ public class Tasks {
         // Bundle it here so a test that touches any such class can actually initialize it - without
         // this, running KissUnitTest.jar throws NoClassDefFoundError on org.apache.logging.log4j.LogManager
         // the first time a test loads a core class with a static Logger field.
-        unJar(workDir, "libs/log4j-api-2.25.4.jar");
-        unJar(workDir, "libs/log4j-core-2.25.4.jar");
+        unJar(workDir, "libs/log4j-api-2.26.1.jar");
+        unJar(workDir, "libs/log4j-core-2.26.1.jar");
 
         // Several oauth/* classes under test implement/reference jakarta.servlet types (they are
         // normally run inside Tomcat, which provides this API) - bundle it here too so those classes
@@ -516,6 +516,7 @@ public class Tasks {
         rmRegex(LIBS, "groovy-.*\\.jar");
         rmRegex(LIBS, "postgresql-.*\\.jar");
         rmRegex(LIBS, "sqlite-jdbc-.*\\.jar");
+        rmRegex(LIBS, "log4j-.*\\.jar");
 
         /* libraries that don't have their version number in the file name
            must be removed from cache.
@@ -563,8 +564,8 @@ public class Tasks {
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/c3p0/0.14.1/c3p0-0.14.1.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/groovy/groovy/" + groovyVer + "/" + groovyJar);
         dep.add(LIBS, "https://repo1.maven.org/maven2/jakarta/servlet/jakarta.servlet-api/6.1.0/jakarta.servlet-api-6.1.0.jar");
-        dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.25.4/log4j-core-2.25.4.jar");
-        dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.25.4/log4j-api-2.25.4.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.26.1/log4j-core-2.26.1.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.26.1/log4j-api-2.26.1.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.6.1/mchange-commons-java-0.6.1.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre8/mssql-jdbc-12.4.2.jre8.jar");
         // Oracle has removed these files from their public repository
