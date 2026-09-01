@@ -1141,7 +1141,7 @@ The file `Kiss/src/main/frontend/kiss/component/components.js` serves as the JSD
 ### Custom HTML Tags
 The framework provides custom HTML components that should be used:
 - `<text-input>` - Text input field
-- `<drop-down>` - Dropdown select
+- `<drop-down>` - Dropdown select; type-to-filter: while focused, typing narrows the list to labels containing the typed text (matched anywhere, case-insensitive), Backspace edits the sequence, Escape erases it and restores the full list and prior selection; the index-based API always sees the complete list
 - `<combo-box>` - Editable dropdown (Windows-style combobox; pick from the list or type free text)
 - `<push-button>` - Button element
 - `<popup>` - Modal dialog
@@ -1793,4 +1793,4 @@ ServicePassword = ""    # correct
 
 ---
 
-*Last Updated: 2026-08-01*
+*Last Updated: 2026-09-01*

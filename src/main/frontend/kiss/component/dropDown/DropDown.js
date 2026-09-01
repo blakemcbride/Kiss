@@ -67,9 +67,141 @@
         };
         DOMUtils.on(el, 'change', changeHandler);
 
+        //--  Type-to-filter
+        //
+        //  While the control has focus, typed characters accumulate in filterText and the list
+        //  is narrowed to the options whose label contains that text (case-insensitive, anywhere
+        //  in the label).  Non-matching options are detached from the select and re-attached, in
+        //  their original order, as the filter is relaxed or ended.  While a filter is active,
+        //  allOptions holds every option in its original order and is what the index-based API
+        //  works against, so the filter never changes what the API reports; the only thing it
+        //  changes is the selected value.
+
+        let filterText = '';
+        let allOptions = null;      // every option, original order; non-null only while a filter is active
+        let preFilterValue = null;  // the value when typing began (Escape returns to it)
+        let lastValue = null;       // the last value the control actually had (used while the narrowed list is empty)
+
+        const opts = function () {
+            return allOptions ? allOptions : el.options;
+        };
+
+        // The logical current value.  When the narrowed list is empty nothing is selected,
+        // so report the last value the control actually had.
+        const currentValue = function () {
+            return allOptions && el.selectedIndex < 0 ? lastValue : el.value;
+        };
+
+        const logicalSelectedIndex = function () {
+            if (!allOptions)
+                return el.selectedIndex;
+            if (el.selectedIndex >= 0)
+                return allOptions.indexOf(el.options[el.selectedIndex]);
+            for (let i = 0; i < allOptions.length; i++)
+                if (allOptions[i].value === lastValue)
+                    return i;
+            return -1;
+        };
+
+        const restoreAllOptions = function () {
+            el.innerHTML = '';
+            for (let i = 0; i < allOptions.length; i++)
+                el.appendChild(allOptions[i]);
+        };
+
+        // Erase the typed sequence and restore the full list, keeping the current selection.
+        const endFilter = function () {
+            filterText = '';
+            if (!allOptions)
+                return;
+            const val = currentValue();
+            restoreAllOptions();
+            el.value = val;
+            allOptions = null;
+            preFilterValue = null;
+            lastValue = null;
+        };
+
+        // Escape:  erase the typed sequence, restore the full list, and return to the
+        // selection that was current before typing began.
+        const cancelFilter = function () {
+            filterText = '';
+            if (!allOptions)
+                return;
+            const before = currentValue();
+            restoreAllOptions();
+            el.value = preFilterValue;
+            allOptions = null;
+            preFilterValue = null;
+            lastValue = null;
+            if (el.value !== before)
+                DOMUtils.trigger(el, 'change');
+        };
+
+        const applyFilter = function () {
+            if (!filterText) {
+                endFilter();
+                return;
+            }
+            if (!allOptions) {
+                allOptions = Array.from(el.options);
+                preFilterValue = el.value;
+                lastValue = el.value;
+            }
+            const before = currentValue();
+            const needle = filterText.toLowerCase();
+            el.innerHTML = '';
+            for (let i = 0; i < allOptions.length; i++)
+                if (allOptions[i].text.toLowerCase().indexOf(needle) !== -1)
+                    el.appendChild(allOptions[i]);
+            if (!el.options.length)
+                return;                   // nothing matches; lastValue still holds the last real selection
+            el.value = before;            // keep the current selection if it survived the filter ...
+            if (el.selectedIndex < 0)
+                el.selectedIndex = 0;     // ... otherwise select the first match
+            lastValue = el.value;
+            if (el.value !== before)
+                DOMUtils.trigger(el, 'change');
+        };
+
+        DOMUtils.on(el, 'keydown', function (e) {
+            if (e.ctrlKey || e.altKey || e.metaKey || e.isComposing || el.multiple)
+                return;
+            if (e.key === 'Escape') {
+                if (filterText) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cancelFilter();
+                }
+                return;
+            }
+            if (e.key === 'Backspace') {
+                if (filterText) {
+                    e.preventDefault();
+                    filterText = filterText.slice(0, -1);
+                    applyFilter();
+                }
+                return;
+            }
+            if (e.key.length !== 1)
+                return;                   // arrows, Tab, Enter, function keys, etc.
+            if (e.key === ' ' && !filterText)
+                return;                   // a leading space keeps its native meaning (opens the list)
+            if (!opts().length)
+                return;
+            e.preventDefault();           // suppress the browser's own first-letter type-ahead
+            filterText += e.key;
+            applyFilter();
+        });
+
+        DOMUtils.on(el, 'blur', function () {
+            endFilter();
+        });
+
         //--
 
         newElm.clear = function () {
+            endFilter();
             el.innerHTML = '';
             if (default_option)
                 newElm.add('', default_option);
@@ -79,6 +211,7 @@
         };
 
         newElm.add = function (val, label, data) {
+            endFilter();
             if (typeof val === "number")
                 keyIsNumber = true;
             const option = document.createElement('option');
@@ -92,6 +225,7 @@
         };
 
         newElm.addItems = function (items, valField, labelField, dataField) {
+            endFilter();
             items = Utils.assureArray(items);
             const len = items.length;
             for (let i=0 ; i < len ; i++) {
@@ -120,13 +254,15 @@
         };
 
         newElm.size = function () {
-            return el.options.length;
+            return opts().length;
         };
 
         newElm.getValue = function (row) {
-            if (row !== 0 && !row)
-                return keyIsNumber ? Number(el.value) : el.value;
-            const v = el.options[row].value;
+            if (row !== 0 && !row) {
+                const v = currentValue();
+                return keyIsNumber ? Number(v) : v;
+            }
+            const v = opts()[row].value;
             return keyIsNumber ? Number(v) : v;
         };
 
@@ -141,6 +277,7 @@
         };
 
         newElm.setValue = function (val, row) {
+            endFilter();
             if (row !== 0 && !row) {
                 el.value = val;
                 originalValue = el.value;
@@ -157,19 +294,23 @@
         };
 
         newElm.getLabel = function (row) {
-            if (row !== 0 && !row)
-                return el.options[el.selectedIndex].text;
-            return el.options[row].text;
+            if (row !== 0 && !row) {
+                const option = opts()[logicalSelectedIndex()];
+                return option ? option.text : '';
+            }
+            return opts()[row].text;
         };
 
         newElm.getAllLabels = function () {
             const r = [];
-            for (let i = 0; i < el.options.length; i++)
-                r.push(el.options[i].text);
+            const o = opts();
+            for (let i = 0; i < o.length; i++)
+                r.push(o[i].text);
             return r;
         };
 
         newElm.setLabel = function (lbl, row) {
+            endFilter();
             if (row !== 0 && !row)
                 el.options[el.selectedIndex].text = lbl;
             else
@@ -186,7 +327,7 @@
         };
 
         newElm.isDirty = function () {
-            return originalValue !== el.value;
+            return originalValue !== currentValue();
         };
 
         newElm.readOnly = function (flg = true) {
@@ -211,14 +352,19 @@
             return el.hasAttribute('readonly');
         };
 
+        // Disabling or hiding a focused control does not reliably blur it, so end any
+        // filter here rather than leave the list narrowed until the next blur.
+
         newElm.disable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            endFilter();
             el.disabled = flg;
             return this;
         };
 
         newElm.enable = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            endFilter();
             el.disabled = !flg;
             return this;
         };
@@ -229,6 +375,7 @@
 
         newElm.hide = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            endFilter();
             if (flg)
                 DOMUtils.hide(el);
             else
@@ -238,6 +385,7 @@
 
         newElm.show = function (flg = true) {
             flg = flg && (!Array.isArray(flg) || flg.length); // make zero length arrays false too
+            endFilter();
             if (flg)
                 DOMUtils.show(el);
             else
@@ -290,16 +438,18 @@
         };
 
         newElm.selectedIndex = function () {
-            return el.selectedIndex;
+            return logicalSelectedIndex();
         };
 
         newElm.selectIndex = function (idx) {
+            endFilter();
             if (idx >= 0 && idx < el.options.length)
                 el.selectedIndex = idx;
             return this;
         };
 
         newElm.removeByIndex = function (idx) {
+            endFilter();
             const val = el.value;
             if (idx < el.options.length)
                 el.remove(idx);

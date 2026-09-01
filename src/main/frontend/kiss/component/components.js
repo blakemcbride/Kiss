@@ -212,6 +212,24 @@ class components {
      *     The <em>Content</em> represents the HTML that would normally be inside an HTML <code>select</code> element.  This would only be used
      *     in cases of a static list.  List contents that depended on data would use the <code>add</code> method.
      * <br><br>
+     * <strong>Typing to filter</strong>
+     * <br><br>
+     *     While the control has focus, typing narrows the list to the options whose label contains the typed
+     *     characters.  Matching is case-insensitive, and the text may appear anywhere in the label, not only at
+     *     its start.  As the user types, the current selection is kept if it still matches; otherwise the first
+     *     matching option becomes selected (and <code>onChange</code> fires, as with the browser's own type-ahead).
+     *     <code>Backspace</code> removes the last typed character.  <code>Escape</code> erases the typed sequence,
+     *     restores the full list, and returns to the selection that was current before typing began, so the user
+     *     can start again.  Leaving the control also restores the full list, keeping whatever is then selected.
+     *     A leading space keeps its native meaning (opening the list); once a sequence has begun, a space is part of it.
+     * <br><br>
+     *     The filter changes only what the list displays and which option is selected.  <code>size()</code>,
+     *     <code>getValue(idx)</code>, <code>getLabel(idx)</code>, <code>getAllLabels()</code>,
+     *     <code>selectedIndex()</code>, and the other index-based methods always refer to the complete list, and
+     *     any method that modifies the list first restores it.  Browsers differ in whether keystrokes reach the
+     *     page while the native list is open; where they do not (Chrome, for example), type with the list closed
+     *     and then open it (<code>Alt+Down</code> or a click) to see the narrowed list.
+     * <br><br>
      * <table>
      *     <tr><th align="left" style="padding-right: 120px;">API</th><th align="left">Description</th></tr>
      *     <tr><td>    add(val, lbl, data)     </td><td>     add a new list item.  <code>val</code> is the value associated to the option, <code>lbl</code> is the text shown in the list, and <code>data</data> represents optional and arbitrary data associated to the option               </td></tr>
