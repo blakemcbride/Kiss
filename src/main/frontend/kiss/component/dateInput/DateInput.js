@@ -74,11 +74,19 @@
         let focusoutHandler = null;
         let changeHandler = null;
 
-        inputHandler = function () {
+        //  'input' fires on every user-driven value change - typing, Backspace/Delete,
+        //  paste (keyboard or context menu), cut, drag-and-drop, and browser
+        //  autofill/autocomplete - whereas 'keyup' only sees keystrokes.  The value is
+        //  filtered first so anything reading the control afterwards (including the
+        //  user's onCChange function) sees the cleaned value.
+        function defaultInputHandler() {
             let val = el.value.trim();
             val = val.replace(/[^0-9./-]/g, '');  // remove characters
             el.value = val;
-        };
+            Utils.someControlValueChanged();
+        }
+
+        inputHandler = defaultInputHandler;
         DOMUtils.on(el, 'input', inputHandler);
 
         function baseKeyUpHandler(event) {
@@ -239,15 +247,14 @@
         };
 
         newElm.onCChange = function (fun) {
-            if (keyupHandler) {
-                DOMUtils.off(el, 'keyup', keyupHandler);
-            }
-            keyupHandler = function (event) {
-                baseKeyUpHandler(event);
-                if (fun && (Utils.isChangeChar(event) || event.key === 'Enter'))
+            if (inputHandler)
+                DOMUtils.off(el, 'input', inputHandler);
+            inputHandler = function (event) {
+                defaultInputHandler(event);
+                if (fun)
                     fun(newElm.getIntValue());
             };
-            DOMUtils.on(el, 'keyup', keyupHandler);
+            DOMUtils.on(el, 'input', inputHandler);
             return this;
         };
 

@@ -106,6 +106,16 @@
 
         DOMUtils.on(el, 'keyup', keyUpHandler);
 
+        //  'input' fires on every user-driven value change - typing, Backspace/Delete,
+        //  paste (keyboard or context menu), cut, drag-and-drop, and browser
+        //  autofill/autocomplete - whereas 'keyup' only sees keystrokes.
+        function defaultInputHandler() {
+            Utils.someControlValueChanged();
+        }
+
+        let inputHandler = defaultInputHandler;
+        DOMUtils.on(el, 'input', inputHandler);
+
         el.addEventListener('focusout', () => {
             let sval = Utils.htmlToText(el.value).replace(/^\s+/, '');
             sval = sval ? sval.replace(/ +/g, ' ') : '';
@@ -241,18 +251,15 @@
             return this;
         };
 
-        let keyupHandler = null;
-
         newElm.onCChange = function (fun) {
-            if (keyupHandler) {
-                DOMUtils.off(el, 'keyup', keyupHandler);
-            }
-            keyupHandler = function (event) {
-                keyUpHandler(event);
-                if (fun && (Utils.isChangeChar(event) || event.key === 'Enter'))
+            if (inputHandler)
+                DOMUtils.off(el, 'input', inputHandler);
+            inputHandler = function (event) {
+                defaultInputHandler(event);
+                if (fun)
                     fun(newElm.getValue());
             };
-            DOMUtils.on(el, 'keyup', keyupHandler);
+            DOMUtils.on(el, 'input', inputHandler);
             return this;
         };
 

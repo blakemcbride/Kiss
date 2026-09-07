@@ -147,20 +147,18 @@
         };
 
         newElm.onCChange = function (fun) {
-            // Remove old keyup handler
-            if (keyupHandler)
-                DOMUtils.off(el, 'keyup', keyupHandler);
+            // Remove old input handler
+            if (inputHandler)
+                DOMUtils.off(el, 'input', inputHandler);
 
             // Create new handler
-            keyupHandler = function (event) {
-                if (!/^[0-9.-]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
-                    return;
-                defaultKeyUpHandler(event);
-                if (fun && Utils.isChangeChar(event))
+            inputHandler = function (event) {
+                defaultInputHandler(event);
+                if (fun)
                     fun(newElm.getValue());
             };
 
-            DOMUtils.on(el, 'keyup', keyupHandler);
+            DOMUtils.on(el, 'input', inputHandler);
             return this;
         };
 
@@ -296,7 +294,12 @@
             return false;
         };
 
-        inputHandler = function () {
+        //  'input' fires on every user-driven value change - typing, Backspace/Delete,
+        //  paste (keyboard or context menu), cut, drag-and-drop, and browser
+        //  autofill/autocomplete - whereas 'keyup' only sees keystrokes.  The value is
+        //  filtered/normalized first so anything reading the control afterwards
+        //  (including the user's onCChange function) sees the cleaned value.
+        function defaultInputHandler() {
             let val = el.value.trim();
             if (dollar)
                 if (typeof min === 'number'  &&  min >= 0)
@@ -331,7 +334,10 @@
                     ret += c;
             }
             el.value = ret;
-        };
+            Utils.someControlValueChanged();
+        }
+
+        inputHandler = defaultInputHandler;
         DOMUtils.on(el, 'input', inputHandler);
 
         focusoutHandler = function () {

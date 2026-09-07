@@ -65,6 +65,7 @@
         // Event handler tracking for proper removal
         let keyupHandler = null;
         let changeHandler = null;
+        let inputHandler = null;
         let blurHandler = null;
         let keydownHandler = null;
 
@@ -84,6 +85,17 @@
             Utils.someControlValueChanged();
         };
         el.addEventListener('change', changeHandler);
+
+        //  'input' fires on every user-driven value change - typing, the native date
+        //  picker, paste (keyboard or context menu), cut, drag-and-drop, and browser
+        //  autofill/autocomplete - whereas 'keyup' only sees keystrokes.  It is tracked
+        //  separately from the 'change' handler so onCChange and onChange are independent.
+        function defaultInputHandler() {
+            Utils.someControlValueChanged();
+        }
+
+        inputHandler = defaultInputHandler;
+        DOMUtils.on(el, 'input', inputHandler);
 
         //--
 
@@ -207,17 +219,17 @@
         };
 
         newElm.onCChange = function (fun) {
-            // Remove old change handler
-            if (changeHandler)
-                el.removeEventListener('change', changeHandler);
+            // Remove old input handler
+            if (inputHandler)
+                DOMUtils.off(el, 'input', inputHandler);
 
-            changeHandler = null;
-            if (fun) {
-                changeHandler = () => {
+            inputHandler = function (event) {
+                defaultInputHandler(event);
+                if (fun)
                     fun(newElm.getIntValue());
-                };
-                el.addEventListener('change', changeHandler);
-            }
+            };
+
+            DOMUtils.on(el, 'input', inputHandler);
             return this;
         };
 

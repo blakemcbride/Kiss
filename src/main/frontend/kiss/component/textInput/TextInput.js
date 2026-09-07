@@ -92,6 +92,27 @@
         keyupHandler = defaultKeyUpHandler;
         DOMUtils.on(el, 'keyup', keyupHandler);
 
+        //  The normalization this control applies to whatever the user put in the field.
+        function normalizeValue() {
+            let val = el.value.replace(/^\s+/, "");
+            if (Utils.forceASCII)
+                val = Utils.toASCII(val);
+            el.value = upcase ? val.toUpperCase() : val;
+        }
+
+        //  'input' fires on every user-driven value change - typing, Backspace/Delete,
+        //  paste (keyboard or context menu), cut, drag-and-drop, and browser
+        //  autofill/autocomplete - whereas 'keyup' only sees keystrokes.  The value is
+        //  normalized first so anything reading the control afterwards (including the
+        //  user's onCChange function) sees the cleaned value.
+        function defaultInputHandler() {
+            normalizeValue();
+            Utils.someControlValueChanged();
+        }
+
+        inputHandler = defaultInputHandler;
+        DOMUtils.on(el, 'input', inputHandler);
+
         newElm.setPassword = function (val) {
             let prev = password;
             password = val;
@@ -203,18 +224,18 @@
         //--
 
         newElm.onCChange = function (fun) {
-            // Remove old keyup handler
-            if (keyupHandler)
-                DOMUtils.off(el, 'keyup', keyupHandler);
+            // Remove old input handler
+            if (inputHandler)
+                DOMUtils.off(el, 'input', inputHandler);
 
             // Create new handler
-            keyupHandler = function (event) {
-                defaultKeyUpHandler(event);
-                if (fun && Utils.isChangeChar(event))
+            inputHandler = function (event) {
+                defaultInputHandler(event);
+                if (fun)
                     fun(newElm.getValue());
             };
 
-            DOMUtils.on(el, 'keyup', keyupHandler);
+            DOMUtils.on(el, 'input', inputHandler);
             return this;
         };
 
@@ -261,14 +282,6 @@
             }
             return false;
         };
-
-        inputHandler = function () {
-            let val = el.value.replace(/^\s+/, "");
-            if (Utils.forceASCII)
-                val = Utils.toASCII(val);
-            el.value = upcase ? val.toUpperCase() : val;
-        };
-        DOMUtils.on(el, 'input', inputHandler);
     };
 
     const componentInfo = {

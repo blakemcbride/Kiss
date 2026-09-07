@@ -1363,6 +1363,7 @@ The `src/main/precompiled/` directory is for shared Java utility classes that ne
   - `.isError()` - Validate and show error if invalid
   - `.focus()` - Set focus to component
   - `.onChange()` - Set change event handler (capital C, not onchange)
+  - `.onCChange()` - Set immediate (per-change) change event handler
   - `.add(value, label)` - Add items to list-box or drop-down components
   - `.onclick()` - Set click event handler for buttons
 
@@ -1378,6 +1379,61 @@ The `src/main/precompiled/` directory is for shared Java utility classes that ne
         // handle selection
     });
     ```
+
+### Input Control Change Events: `onCChange` vs `onChange`
+
+Every text-style input control (`text-input`, `textbox-input`, `numeric-input`,
+`date-input`, `native-date-input`, `time-input`, `duration-input`, `combo-box`)
+offers two change callbacks, and they answer two different questions:
+
+| Method | Underlying DOM event | Fires |
+|---|---|---|
+| `onCChange(fun)` | `input` | on **every** user-driven value change, as it happens |
+| `onChange(fun)` | `change` | once the value is committed, i.e. on blur for a text field |
+
+`onCChange` is built on the native `input` event, which the browser fires for
+*every* way a user can change a field's value: typing, Backspace/Delete, paste
+(keyboard shortcut **or** context menu), cut, drag-and-drop, browser
+autofill/autocomplete, and — for `native-date-input` — the date picker. It is
+therefore the correct hook for anything that must track the field live, such as
+enabling a Save button as soon as the form becomes complete. A handler wired to
+keystrokes alone would miss autofill, which typically fills several fields at
+once with no keystroke at all, leaving a screen showing filled-in fields and a
+still-disabled button.
+
+Rules the controls guarantee:
+
+- `fun` is called exactly **once** per change and is passed the control's value
+  (`getValue()`, or `getIntValue()` for the date controls) — never twice for one
+  keystroke.
+- Keys that do not change the value (arrows, Tab, Shift, **Enter**) do not call
+  it; the `input` event does not fire for them, so `Enter` reaches `onEnter` and
+  not `onCChange`. The exception is `textbox-input`, where `Enter` inserts a
+  newline: that is a real value change, so `input` fires and `onCChange` is
+  called once, exactly as for any other edit.
+- The control's own normalization runs **first**, so `fun` always sees the
+  cleaned value — `text-input`'s `upcase`/`forceASCII`/leading-whitespace strip,
+  `numeric-input`'s and `date-input`'s character filtering, `time-input`'s and
+  `duration-input`'s format filtering.
+- `onCChange(null)` removes the callback, and calling `onCChange` again replaces
+  the previous callback rather than adding a second one.
+- A user-driven change also sets the unsaved-changes flag
+  (`Utils.someControlValueChanged()`), autofill and paste included.
+  Programmatic `setValue()` does not fire `input`, so it neither calls `fun` nor
+  sets the flag — which is what makes the flag mean "the *user* changed
+  something".
+
+**A screen that re-hooks `'input'` on one of these controls takes over that
+event.** `DOMUtils.on(el, event, handler)` keeps at most one handler per
+element/event pair and silently replaces any previous one, and these controls
+own their element's `input` event. Screen code doing
+`DOMUtils.on(id, 'input', ...)` — e.g. to reject characters the control has no
+attribute for — therefore detaches the control's normalization and its
+`onCChange` callback, and must take over whatever of those it still needs. The
+unsaved-changes flag is only partly lost: the control's `keyup` handler is
+untouched and still sets it for keystrokes (typed characters, Backspace/Delete,
+and a Ctrl+V paste), but a change arriving with no keystroke at all — autofill,
+a context-menu paste or cut, a drag-and-drop — no longer sets it.
 
 ### Dropdown Default Values
 - When populating dropdowns that require a selection, use "(select)" as the default text instead of blank

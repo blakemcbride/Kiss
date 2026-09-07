@@ -186,7 +186,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is hidden (not visible)      &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is read-only     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is visible (not hidden)      &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, Backspace/Delete, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code> whenever the user commits a change (selection or leaving the field after editing). &lt;code>fun&lt;/code> is called as &lt;code>fun(value, text, data)&lt;/code>              &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute &lt;code>fun&lt;/code> when the enter key is hit   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td>    make control read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)      &lt;/td>&lt;/tr>
@@ -232,7 +232,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>   &lt;code>true&lt;/code> if the control is hidden (not visible)    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>   &lt;code>true&lt;/code> if the control is read-only    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>   &lt;code>true&lt;/code> if the control is visible (not hidden)    &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, Backspace/Delete, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user exits the control if the value changed, &lt;code>fun&lt;/code> is passed the control value               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute fun when enter key hit   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td>    set control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)  &lt;/td>&lt;/tr>
@@ -338,7 +338,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is hidden (not visible)     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is read-only     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is visible (not hidden)    &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, Backspace/Delete, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code> whenever the user exits the control if the value changed, &lt;code>fun&lt;/code> is passed the control value               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute fun when enter key hit   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td>   sets control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)   &lt;/td>&lt;/tr>
@@ -484,7 +484,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>   &lt;code>true&lt;/code> if the control is hidden (not visible)    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>   &lt;code>true&lt;/code> if the control is read-only    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>   &lt;code>true&lt;/code> if the control is visible (not hidden)    &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, the date picker, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user exits the control if the value changed, &lt;code>fun&lt;/code> is passed the control value               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute fun when enter key hit   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td>    set control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)  &lt;/td>&lt;/tr>
@@ -533,7 +533,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>     is control hidden?   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>     is control read-only?    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>     is control visible?   &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, Backspace/Delete, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user exits the control if the value changed, &lt;code>fun&lt;/code> is passed the control value               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute fun when enter key hit   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td> set control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)    &lt;/td>&lt;/tr>
@@ -900,7 +900,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>    &lt;code>true&lt;/code> if user control is hidden (not visible)             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>    &lt;code>true&lt;/code> if control is read-only             &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>    &lt;code>true&lt;/code> if control is visible (not hidden)          &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, Backspace/Delete, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user exits the control if the value changed, &lt;code>fun&lt;/code> is passed the control value               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td>     sets control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)       &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readWrite([flg])     &lt;/td>&lt;td>     sets control to read-write (or the reverse if the optional argument is &lt;code>false&lt;/code>)     &lt;/td>&lt;/tr>
@@ -943,7 +943,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td> is the control hidden? &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td> is the control read-only?    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td> is the control visible?   &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, Backspace/Delete, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user exits the control if the value changed, &lt;code>fun&lt;/code> is passed the control value               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute fun when enter key hit   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td> set control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)    &lt;/td>&lt;/tr>
@@ -1013,7 +1013,7 @@ class components {
      *     &lt;tr>&lt;td>    isHidden()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is hidden (not visible)     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isReadOnly()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is read-only     &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    isVisible()     &lt;/td>&lt;td>     &lt;code>true&lt;/code> if control is visible (not hidden)    &lt;/td>&lt;/tr>
-     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> immediately when the value is changed by the user, &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
+     *     &lt;tr>&lt;td>    onCChange(fun)     &lt;/td>&lt;td> execute &lt;code>fun&lt;/code> whenever the user changes the value (typing, Backspace/Delete, paste, cut, drag-and-drop, or browser autofill), &lt;code>fun&lt;/code> is passed the control value    &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onChange(fun)     &lt;/td>&lt;td>     execute &lt;code>fun&lt;/code>whenever the user exits the control if the value changed, &lt;code>fun&lt;/code> is passed the control value               &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    onEnter(fun)      &lt;/td>&lt;td>  execute fun when enter key hit   &lt;/td>&lt;/tr>
      *     &lt;tr>&lt;td>    readOnly([flg])     &lt;/td>&lt;td>   sets control to read-only (or the reverse if the optional argument is &lt;code>false&lt;/code>)   &lt;/td>&lt;/tr>

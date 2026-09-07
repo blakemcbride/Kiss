@@ -85,6 +85,18 @@
 
         DOMUtils.on(el, 'keyup', keyUpHandler);
 
+        //  'input' fires on every user-driven value change - typing, Backspace/Delete,
+        //  paste (keyboard or context menu), cut, drag-and-drop, and browser
+        //  autofill/autocomplete - whereas 'keyup' only sees keystrokes.  The control's
+        //  own oninput normalization is attached to the element when it is created, so it
+        //  runs before this handler and the user's onCChange function sees the cleaned value.
+        function defaultInputHandler() {
+            Utils.someControlValueChanged();
+        }
+
+        let inputHandler = defaultInputHandler;
+        DOMUtils.on(el, 'input', inputHandler);
+
         //--
 
         newElm.getValue = function () {
@@ -234,22 +246,17 @@
             return this;
         }
 
-        let changeKeyUpHandler = null;
-
         newElm.onCChange = function (fun) {
-            if (changeKeyUpHandler) {
-                DOMUtils.off(el, 'keyup', changeKeyUpHandler);
-                changeKeyUpHandler = null;
+            if (inputHandler) {
+                DOMUtils.off(el, 'input', inputHandler);
+                inputHandler = null;
             }
-            changeKeyUpHandler = function (event) {
-                if (!/^[0-9:aApPmM]/.test(event.key) && event.key !== 'Backspace' && event.key !== 'Delete')
-                    return;
-                keyUpHandler(event);
-                if (fun && Utils.isChangeChar(event))
+            inputHandler = function (event) {
+                defaultInputHandler(event);
+                if (fun)
                     fun(newElm.getValue());
             };
-            DOMUtils.off(el, 'keyup', keyUpHandler);
-            DOMUtils.on(el, 'keyup', changeKeyUpHandler);
+            DOMUtils.on(el, 'input', inputHandler);
             return this;
         };
 
