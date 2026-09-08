@@ -93,12 +93,6 @@
         let dataStore = {};
         let changeHandler;
 
-        changeHandler = function () {
-            if (triggerGlobalChange)
-                Utils.someControlValueChanged();
-        };
-        DOMUtils.on(el, 'change', changeHandler);
-
         //--  Type-to-filter
         //
         //  While the control has focus, typed characters accumulate in filterText and the list
@@ -231,8 +225,29 @@
                 DOMUtils.trigger(el, 'change');
         };
 
+        // Called on every change event (the control's own and the browser's) so the filter
+        // state follows the selection however it was moved, e.g. by the arrow keys.
+        const syncSelection = function () {
+            if (allOptions && !multiple && el.selectedOptions[0])
+                lastSelected = el.selectedOptions[0];
+        };
+
+        const isReadOnly = function () {
+            return el.hasAttribute('readonly');
+        };
+
+        // Keys that move or change the selection; a read-only list ignores them.
+        const VALUE_KEYS = ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'PageUp', 'PageDown', 'Backspace'];
+
         DOMUtils.on(el, 'keydown', function (e) {
-            if (e.ctrlKey || e.altKey || e.metaKey || e.isComposing)
+            if (e.isComposing)
+                return;
+            if (isReadOnly()) {
+                if (e.key.length === 1 || VALUE_KEYS.indexOf(e.key) !== -1)
+                    e.preventDefault();   // a read-only list shows its selection; nothing changes it
+                return;
+            }
+            if (e.ctrlKey || e.altKey || e.metaKey)
                 return;
             if (e.key === 'Escape') {
                 if (filterText) {
@@ -261,9 +276,30 @@
             applyFilter();
         });
 
+        // A read-only list ignores a press on its rows (which would move the selection) but
+        // not one on its scrollbar, so it can still be scrolled through.
+        DOMUtils.on(el, 'mousedown', function (e) {
+            if (!isReadOnly())
+                return;
+            const r = DOMUtils.getRect(el);
+            const onScrollbar = e.clientX >= r.left + el.clientLeft + el.clientWidth ||
+                                e.clientY >= r.top + el.clientTop + el.clientHeight;
+            if (onScrollbar)
+                return;
+            e.preventDefault();
+            el.focus({preventScroll: true});
+        });
+
         DOMUtils.on(el, 'blur', function () {
             endFilter();
         });
+
+        changeHandler = function () {
+            syncSelection();
+            if (triggerGlobalChange)
+                Utils.someControlValueChanged();
+        };
+        DOMUtils.on(el, 'change', changeHandler);
 
         //--
 
@@ -434,7 +470,7 @@
         };
 
         newElm.isReadOnly = function () {
-            return el.hasAttribute('readonly');
+            return isReadOnly();
         };
 
         //--
@@ -513,6 +549,7 @@
         newElm.onChange = function (func) {
             DOMUtils.off(el, 'change', changeHandler);
             changeHandler = function () {
+                syncSelection();
                 if (triggerGlobalChange)
                     Utils.someControlValueChanged();
                 // func gets passed the selected value, label

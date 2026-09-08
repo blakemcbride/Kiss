@@ -1153,7 +1153,7 @@ The framework provides custom HTML components that should be used:
 - `<numeric-input>` - Number input
 - `<check-box>` - Checkbox control
 - `<radio-button>` - Radio button
-- `<list-box>` - List selection; same type-to-filter behavior as `<drop-down>` (a `multiple` list only narrows what is shown and leaves all selections alone)
+- `<list-box>` - List selection; same type-to-filter behavior as `<drop-down>` (a `multiple` list only narrows what is shown and leaves all selections alone); `readOnly()` is enforced: neither the keyboard nor a row click changes the selection, scrolling still works
 - `<file-upload>` - File upload control
 - `<search-input>` - Search field with a built-in clear button and optional result list
 - `<smart-chooser>` - Select that auto-switches to a chooser-button + async selection function when its item count is too large for a usable drop-down (also handles zero/one-item cases); low-level and high-level (`setup`/`run`) APIs; the chooser button's appearance (`.btn-smart-chooser`) is not styled by the framework and must be supplied by the application
