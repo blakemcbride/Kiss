@@ -671,6 +671,81 @@
     background: var(--kiss-ui-ring);
 }
 
+/* drop-down: the open list the control draws in place of the browser's pop-up (DropDown.js).
+   One shared element, appended to the body and positioned by the control. */
+.kiss-dropdown-list {
+    position: fixed;
+    z-index: 17000;
+    box-sizing: border-box;
+    max-width: min(480px, calc(100vw - 16px));
+    margin: 0;
+    padding: 4px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    color: var(--kiss-ui-ink, #232832);
+    background: var(--kiss-ui-bg, #fff);
+    border-radius: 8px;
+    box-shadow:
+        0 0 0 1px var(--kiss-ui-ring),
+        0 8px 16px -14px rgba(0, 0, 0, 0.34),
+        0 18px 48px -28px rgba(0, 0, 0, 0.48);
+    outline: none;
+}
+
+.kiss-dropdown-list[hidden] {
+    display: none;
+}
+
+.kiss-dropdown-filter {
+    margin-bottom: 3px;
+    padding: 3px 8px 5px;
+    color: var(--kiss-ui-muted);
+    border-bottom: 1px solid var(--kiss-ui-ring);
+    font-size: 0.9em;
+    white-space: pre;
+}
+
+.kiss-dropdown-group {
+    padding: 5px 8px 2px;
+    color: var(--kiss-ui-muted);
+    font-size: 0.85em;
+    font-weight: 700;
+}
+
+.kiss-dropdown-item {
+    padding: 4px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kiss-dropdown-item:hover {
+    background: var(--kiss-ui-soft-bg);
+}
+
+.kiss-dropdown-item.is-selected {
+    color: var(--kiss-ui-ink, #232832);
+    background: var(--kiss-ui-accent-soft, #e9f0ff);
+    box-shadow: inset 3px 0 0 var(--kiss-ui-accent);
+}
+
+.kiss-dropdown-item.is-disabled {
+    cursor: default;
+    opacity: 0.52;
+}
+
+.kiss-dropdown-item.is-disabled:hover {
+    background: transparent;
+}
+
+.kiss-dropdown-empty {
+    padding: 4px 8px;
+    color: var(--kiss-ui-muted);
+    font-style: italic;
+}
+
 .kiss-segmented-control {
     display: inline-flex;
     align-items: center;
