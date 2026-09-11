@@ -3,6 +3,8 @@ package org.kissweb;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -43,6 +45,8 @@ import java.util.concurrent.TimeUnit;
  * Date: 2/23/19</p>
  */
 public class Image {
+
+    private static final Logger logger = LogManager.getLogger(Image.class);
 
     /** Utility class — not intended for instantiation. */
     private Image() {}
@@ -189,11 +193,14 @@ public class Image {
      * The aspect ratio is retained.
      * <p>
      * If the type is not handled, the image passed is simply returned.
+     * <p>
+     * Bytes that ImageIO cannot decode (for example a CMYK or progressive JPEG it does not support,
+     * a file saved under the wrong extension, or a truncated/corrupt file) are also returned unchanged.
      *
      * @param in   the raw image bytes to resize
      * @param type file type; JPG, JPEG, BMP, PNG, or GIF (case doesn't matter)
      * @param size the target size in pixels for the longer axis (height or width)
-     * @return the resized image bytes, or the original bytes if no resize was needed or the type is unsupported
+     * @return the resized image bytes, or the original bytes if no resize was needed, the type is unsupported, or the bytes could not be decoded
      */
     public static byte[] resizeImage(byte[] in, String type, int size) {
         if (type == null)
@@ -203,6 +210,10 @@ public class Image {
             return in;
         try {
             BufferedImage bi = toBufferedImage(in);
+            if (bi == null) {
+                logger.warn("resizeImage: ImageIO could not decode the supplied {} bytes; storing unresized", type);
+                return in;
+            }
             int h = bi.getHeight();
             int w = bi.getWidth();
             int h2, w2;
