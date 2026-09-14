@@ -16,9 +16,10 @@
     let openDropDown = null;        // closes the drop-down whose list is showing, if any
 
     const sharedList = function () {
-        if (!listEl) {
+        if (!listEl || !DOMUtils.contains(document.body, listEl)) {
             listEl = DOMUtils.create('div', {id: 'kiss-dropdown-list', class: 'kiss-dropdown-list', role: 'listbox', tabindex: '-1', hidden: ''});
             DOMUtils.appendChild(document.body, listEl);
+            openDropDown = null;   // whatever control thought it owned the old (now-gone) list no longer does
         }
         return listEl;
     };

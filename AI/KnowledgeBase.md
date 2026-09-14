@@ -1289,6 +1289,62 @@ site. Free-standing helpers that re-query the DOM by id/name on every call inste
 closure reference (e.g. `DOMUtils.RadioButtons.*`, `Utils.showMessage`/`Utils.yesNo`'s modal button
 handlers) are not exposed through `$$(id)` and are not subject to this gotcha.
 
+### Shared Singleton DOM Nodes Must Verify Liveness, Not Just "Was It Ever Created"
+
+A component that lazily creates one DOM node shared by every instance (e.g. a single floating
+overlay, popover, or list appended directly to `document.body` and reused by whichever instance
+opens it next) must check that the cached node is **still attached to the live document** before
+reusing it — not merely that a reference to it was ever assigned. The common bug shape is a
+module-scope variable (`let sharedEl = null;`) with a creation guard that only tests truthiness:
+
+```javascript
+// WRONG — only checks "have we ever made one", not "is it still live"
+const sharedNode = function () {
+    if (!el) {
+        el = DOMUtils.create(...);
+        DOMUtils.appendChild(document.body, el);
+    }
+    return el;
+};
+
+// CORRECT — also verify the cached node is still in the live document
+const sharedNode = function () {
+    if (!el || !DOMUtils.contains(document.body, el)) {
+        el = DOMUtils.create(...);
+        DOMUtils.appendChild(document.body, el);
+    }
+    return el;
+};
+```
+
+A host application can detach a node like this without the component ever being told: any
+full-container or `document.body.innerHTML` replacement (a common pattern for whole-page
+navigation models) silently orphans it. Once that happens, every later call into the component
+keeps reusing the same disconnected node forever — internal state updates "succeed" (attributes
+get set, items get rendered into it, flags flip) but nothing is visible, because the node is no
+longer part of the document. There is no exception and no console error; the only symptom is that
+the control quietly stops doing anything, for the rest of the page session, with no way to
+recover short of a full page reload. This is easy to miss in testing because it only reproduces
+after the shared node's owning component has been used at least once *and* the host has performed
+whatever navigation detaches it — the first use in a session, or a host with no such navigation
+model, both look completely fine.
+
+The fix is a liveness check at the point of reuse, using `DOMUtils.contains(container, node)`
+(already the idiomatic way to ask "is this node currently inside that container" elsewhere in the
+framework) rather than only a not-null/not-undefined test. When the check fails, drop the stale
+reference and rebuild exactly as on first use — this is a strict generalization of "create on
+first use," not a behavior change, so it costs nothing when the node was never detached. If any
+other module-level state tracks "which instance currently owns the shared node" (e.g. which
+open popover should close on an outside click), reset that ownership state in the same branch,
+since it refers to the node that no longer exists.
+
+This class of bug is specific to a node cached in a **module-level** variable and reused across
+every instance of a component — not to a per-instance element a component creates and keeps for
+its own lifetime (that element usually gets torn down along with the instance itself, or falls
+under the clone-and-replace pattern above). When auditing for it, look for a `let`/`const` holding
+an `Element` at the outer scope of a component's IIFE (shared by all instances), guarded only by a
+truthiness check before being reused or appended.
+
 ### File Restrictions
 - **DO NOT MODIFY** files under:
   - `src/main/frontend/kiss/` - Framework components
@@ -1873,4 +1929,4 @@ ServicePassword = ""    # correct
 
 ---
 
-*Last Updated: 2026-09-07*
+*Last Updated: 2026-09-14*
