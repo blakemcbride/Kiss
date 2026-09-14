@@ -1265,6 +1265,30 @@ This layered architecture ensures:
 - Easier maintenance and bug fixes (changes to DOM handling only need to be made in one place)
 - Proper abstraction between application code and low-level DOM operations
 
+### Component Element Replacement Pattern (clone-and-replace to shed listeners)
+
+Several components reset an element's event listeners by cloning it (`el.cloneNode(true)`, or the
+equivalent `DOMUtils.removeAllListeners(el)` helper) and swapping the clone into the DOM in place
+of the original (`el.parentNode.replaceChild(newEl, el)`). `cloneNode` copies DOM attributes and
+children but **not** JS properties/expandos attached directly to the node object — so the clone
+does not carry the `.kiss` expando that `Utils.replaceHTML` attaches to the original element and
+that `$$(id)` reads (`kiss/Utils.js`, `$$()` returns `element.kiss`). Any component that performs
+this clone-and-replace must, immediately after the swap:
+1. Re-attach the wrapper: `newEl.kiss = <the component's kiss wrapper object>;` so `$$(id)` keeps
+   resolving to a live component after the swap.
+2. Repoint every closure variable the component's other methods read/write (e.g. a `let el = ...`
+   captured once at setup) at the replacement element — not just a `.element` property nobody else
+   reads — so calls made after the swap operate on the element actually attached to the DOM rather
+   than a stale, detached one.
+Both steps matter independently: skipping #1 makes `$$(id)` return `undefined` (a hard crash for
+any caller); skipping #2 leaves the component silently reading/writing an orphaned node forever
+after the first reset (e.g. `.files` on a stale `<input type="file">` always empty). `SmartChooser`
+(`kiss/component/smartChooser/SmartChooser.js`) is the reference implementation — it reassigns its
+mutable element variable and does `elmObj.kiss = newElm` at every clone/replace/outerHTML-swap
+site. Free-standing helpers that re-query the DOM by id/name on every call instead of caching a
+closure reference (e.g. `DOMUtils.RadioButtons.*`, `Utils.showMessage`/`Utils.yesNo`'s modal button
+handlers) are not exposed through `$$(id)` and are not subject to this gotcha.
+
 ### File Restrictions
 - **DO NOT MODIFY** files under:
   - `src/main/frontend/kiss/` - Framework components

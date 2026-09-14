@@ -66,7 +66,11 @@
 
         if (!newElm)
             return;
-        const el = newElm.element;
+        // `el` always refers to the input element currently attached to the DOM.
+        // click()/onChange() below replace that element (to shed old listeners) and
+        // must repoint `el` at the replacement so every other method here keeps
+        // reading/writing the live element instead of a stale, detached one.
+        let el = newElm.element;
 
         if (custom) {
             const btnEl = document.getElementById(id + '-btn');
@@ -105,10 +109,11 @@
 
         newElm.click = function () {
             // Remove any existing click handlers by cloning the element
-            const newEl = el.cloneNode(true);
-            el.parentNode.replaceChild(newEl, el);
-            // Update the reference
-            newElm.element = newEl;
+            const newEl = DOMUtils.removeAllListeners(el);
+            // Update the reference and re-attach the Kiss wiring so $$(id) and
+            // every other method here keep working against the live element
+            el = newElm.element = newEl;
+            newEl.kiss = newElm;
             newEl.click();
         };
 
@@ -167,9 +172,11 @@
 
         newElm.onChange = function (fun) {
             // Remove existing change event listeners by cloning
-            const newEl = el.cloneNode(true);
-            el.parentNode.replaceChild(newEl, el);
-            newElm.element = newEl;
+            const newEl = DOMUtils.removeAllListeners(el);
+            // Update the reference and re-attach the Kiss wiring so $$(id) and
+            // every other method here keep working against the live element
+            el = newElm.element = newEl;
+            newEl.kiss = newElm;
             // Add new listener
             newEl.addEventListener('change', fun);
             return this;
