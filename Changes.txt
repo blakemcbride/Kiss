@@ -12,3 +12,20 @@ Kiss change log
     - Make Java 17 the minimum Java version
     - Move to Jakarta 6.1 (EE 11)
 
+9/18/2026
+
+- Fixed Connection.getPrimaryColumnName()/getPrimaryColumns(): both called
+  DatabaseMetaData.getPrimaryKeys(null, null, table) with no catalog/schema, so on a
+  database where the same table name exists in several schemas or catalogs (e.g. one
+  schema per tenant plus a shared schema), the driver returned the primary key column
+  once per schema. getPrimaryColumns() returned that many duplicate copies of a
+  single-column key (harmless in the generated SQL, which just repeated the same
+  column in the WHERE clause, but wrong data), and getPrimaryColumnName() threw
+  "Primary column is composit" for a genuinely single-column key. Both methods now
+  narrow the JDBC call to the connection's current schema/catalog where the driver
+  reports one (falling back to the prior unnarrowed call otherwise), and always
+  de-duplicate by schema as a second guard, preferring the connection's current
+  schema. A genuinely composite key (several different columns in one schema) is
+  unaffected. See org.kissweb.database.Connection.resolvePrimaryKeyColumns and the
+  Database Features section of AI/KnowledgeBase.md for the full explanation.
+

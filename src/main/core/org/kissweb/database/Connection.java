@@ -73,9 +73,11 @@ public class Connection implements AutoCloseable {
         SQLite
     }
 
-    /** Cache of table names to auto-increment primary key column names */
+    /** Cache of table names to auto-increment primary key column names.  Keyed by table name
+     *  only, not by schema -- see the "Caching assumption" note on {@link #getPrimaryColumns(String)}. */
     private final ConcurrentHashMap<String, String> primaryColName = new ConcurrentHashMap<>();
-    /** Cache of table names to primary key column names */
+    /** Cache of table names to primary key column names.  Keyed by table name only, not by
+     *  schema -- see the "Caching assumption" note on {@link #getPrimaryColumns(String)}. */
     private final ConcurrentHashMap<String, List<String>> primaryColumns = new ConcurrentHashMap<>();
     /** Cache of table existence status */
     private final HashMap<String, Boolean> TableExistenceCache = new HashMap<>();
@@ -777,8 +779,166 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * A single row of primary-key metadata as returned by
+     * {@code DatabaseMetaData.getPrimaryKeys(catalog, schema, table)}: the owning schema
+     * (may be null, depending on the database), the primary-key column name, and its
+     * 1-based position within a composite key (KEY_SEQ).
+     */
+    static final class PrimaryKeyRow {
+        final String schema;
+        final String column;
+        final int keySeq;
+
+        PrimaryKeyRow(String schema, String column, int keySeq) {
+            this.schema = schema;
+            this.column = column;
+            this.keySeq = keySeq;
+        }
+    }
+
+    /**
+     * Collapse primary-key metadata rows that describe more than one schema down to the
+     * rows of a single schema, ordered by KEY_SEQ.
+     * <br><br>
+     * {@code DatabaseMetaData.getPrimaryKeys} called with no catalog/schema restriction
+     * returns one row per schema in which a table of that name exists.  On a database
+     * where the same table name is deployed in several schemas -- for example, one
+     * schema per tenant plus a shared "master" schema, as PostgreSQL allows -- a simple
+     * single-column primary key therefore comes back once per schema instead of once,
+     * which is indistinguishable from a genuine composite key unless something accounts
+     * for it.  This method is that accounting, and it is applied unconditionally as a
+     * second guard regardless of whether the caller already tried to narrow the JDBC
+     * call to the connection's current schema/catalog -- so it also protects the case
+     * where that narrowing wasn't possible or didn't take effect for a given driver.
+     * <br><br>
+     * A genuinely composite key -- several different columns in one schema -- is
+     * unaffected: those rows all share one schema, so none of them are filtered out, and
+     * they are returned in KEY_SEQ order.
+     *
+     * @param rows the raw primary-key rows, in the order returned by the driver
+     * @param currentSchema the connection's current schema/catalog if known, else null
+     * @return the column names of the selected schema's primary key, in KEY_SEQ order
+     */
+    static List<String> resolvePrimaryKeyColumns(List<PrimaryKeyRow> rows, String currentSchema) {
+        List<String> colnames = new ArrayList<>();
+        if (rows.isEmpty())
+            return colnames;
+        LinkedHashSet<String> schemas = new LinkedHashSet<>();
+        for (PrimaryKeyRow row : rows)
+            schemas.add(row.schema);
+        String chosenSchema;
+        if (schemas.size() <= 1) {
+            // Only one schema present (including the common case of a single, possibly
+            // null, TABLE_SCHEM) -- nothing to filter.
+            chosenSchema = schemas.iterator().next();
+        } else {
+            String match = null;
+            if (currentSchema != null)
+                for (String schema : schemas)
+                    if (currentSchema.equalsIgnoreCase(schema)) {
+                        match = schema;
+                        break;
+                    }
+            // No match against the connection's current schema: fall back to whichever
+            // schema's rows appeared first, so the result is deterministic rather than
+            // dependent on driver-internal row ordering.
+            chosenSchema = match != null ? match : rows.get(0).schema;
+        }
+        List<PrimaryKeyRow> filtered = new ArrayList<>();
+        for (PrimaryKeyRow row : rows)
+            if (Objects.equals(chosenSchema, row.schema))
+                filtered.add(row);
+        filtered.sort(Comparator.comparingInt(r -> r.keySeq));
+        for (PrimaryKeyRow row : filtered)
+            colnames.add(row.column);
+        return colnames;
+    }
+
+    /**
+     * Best-effort lookup of this connection's current schema, used to resolve which
+     * schema's primary-key metadata to prefer when a table exists in several (see
+     * {@link #resolvePrimaryKeyColumns}).  Returns null if the driver doesn't report one
+     * -- {@code java.sql.Connection.getSchema()} is JDBC 4.1+, and some drivers (older
+     * ones, and SQLite, which has no schema concept) throw
+     * {@code SQLFeatureNotSupportedException} rather than return null.
+     */
+    private String currentSchema() {
+        try {
+            String schema = conn.getSchema();
+            return (schema == null || schema.isEmpty()) ? null : schema;
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Best-effort lookup of this connection's current catalog (the JDBC equivalent of
+     * "current database" -- MySQL in particular has no separate schema concept and
+     * reports the active database as the catalog).  Returns null if unavailable.
+     */
+    private String currentCatalog() {
+        try {
+            String catalog = conn.getCatalog();
+            return (catalog == null || catalog.isEmpty()) ? null : catalog;
+        } catch (SQLException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Query {@code DatabaseMetaData.getPrimaryKeys} for a table, narrowed to this
+     * connection's current schema/catalog when the driver supports it, so that a table
+     * deployed under the same name in several schemas (e.g. one schema per tenant) does
+     * not return one copy of its primary key per schema.  PostgreSQL is narrowed by
+     * schema (its {@code getSchema()} reports the first entry of {@code search_path});
+     * MySQL, which has no independent schema concept, is narrowed by catalog; other
+     * database types try both.  If the narrowed call comes back empty -- which can
+     * happen if a particular driver's catalog/schema semantics don't line up the way
+     * assumed here -- this falls back to the original unnarrowed (null, null) call so
+     * existing behavior for that database type is preserved.  Rows from more than one
+     * schema can therefore still come back; {@link #resolvePrimaryKeyColumns} is the
+     * second, always-applied guard against that.
+     */
+    private List<PrimaryKeyRow> queryPrimaryKeyRows(String table) throws SQLException {
+        String catalog = null;
+        String schema = null;
+        switch (ctype) {
+            case PostgreSQL:
+                schema = currentSchema();
+                break;
+            case MySQL:
+                catalog = currentCatalog();
+                break;
+            default:
+                // MicrosoftServer, Oracle, SQLite, or unrecognized: try both -- an
+                // unsupported one simply comes back null and is a no-op below.
+                schema = currentSchema();
+                catalog = currentCatalog();
+                break;
+        }
+        List<PrimaryKeyRow> rows = readPrimaryKeyRows(catalog, schema, table);
+        if (rows.isEmpty() && (catalog != null || schema != null))
+            rows = readPrimaryKeyRows(null, null, table);
+        return rows;
+    }
+
+    private List<PrimaryKeyRow> readPrimaryKeyRows(String catalog, String schema, String table) throws SQLException {
+        List<PrimaryKeyRow> rows = new ArrayList<>();
+        try (ResultSet r = dmd.getPrimaryKeys(catalog, schema, table)) {
+            while (r.next())
+                rows.add(new PrimaryKeyRow(r.getString("TABLE_SCHEM"), r.getString("COLUMN_NAME"), r.getInt("KEY_SEQ")));
+        }
+        return rows;
+    }
+
+    /**
      * Return the name of the column that is the table's primary key.  Throws an exception of
      * the table has a composite primary key.
+     * <br><br>
+     * Resolving the underlying metadata is shared with {@link #getPrimaryColumns(String)} --
+     * see that method for how a table deployed under the same name in several schemas (as
+     * happens on a multi-tenant database with one schema per tenant) is resolved down to a
+     * single schema's primary key before this method decides composite-or-not.
      *
      * @param table the table name
      * @return the primary key column name
@@ -789,13 +949,10 @@ public class Connection implements AutoCloseable {
     public String getPrimaryColumnName(String table) throws SQLException {
         String colname = primaryColName.get(table);
         if (colname == null) {
-            try (ResultSet r = dmd.getPrimaryKeys(null, null, table)) {
-                if (!r.next())
-                    throw new SQLException("No primary column");
-                colname = r.getString(4);
-                if (r.next())
-                    throw new SQLException("Primary column is composit");
-            }
+            List<String> colnames = getPrimaryColumns(table);
+            if (colnames.size() > 1)
+                throw new SQLException("Primary column is composit");
+            colname = colnames.get(0);
             primaryColName.put(table, colname);
         }
         return colname;
@@ -803,6 +960,25 @@ public class Connection implements AutoCloseable {
 
     /**
      * Returns a list of column names that make up the primary key.
+     * <br><br>
+     * {@code DatabaseMetaData.getPrimaryKeys} returns one row per schema in which a table of
+     * that name exists.  Called with no catalog/schema restriction, that means a table
+     * deployed under the same name in several schemas -- as happens on a multi-tenant
+     * database with one schema per tenant -- returns its primary key column once per schema,
+     * which looks indistinguishable from a genuine composite key unless something accounts
+     * for it.  This method narrows the lookup to this connection's current schema/catalog
+     * where the driver supports it, and always applies {@link #resolvePrimaryKeyColumns} as a
+     * second guard, so a single-column key comes back as exactly one column regardless of how
+     * many schemas the table exists in, while a genuinely composite key (several different
+     * columns in one schema) is still returned in full.
+     * <br><br>
+     * <b>Caching assumption:</b> the result is cached by table name alone, not by schema.
+     * This is safe because a Kiss {@code Connection} is expected to be bound to one
+     * schema/catalog for its entire life (e.g. a fixed connection string, or a per-request
+     * PostgreSQL {@code search_path} set once before any service code runs) and not changed
+     * mid-life by application code after primary-key metadata may already have been cached.
+     * An application that does change a connection's current schema after use would need its
+     * own cache invalidation; Kiss does not attempt to detect that case.
      *
      * @param table the table name
      * @return a list of primary key column names
@@ -813,14 +989,10 @@ public class Connection implements AutoCloseable {
     public List<String> getPrimaryColumns(String table) throws SQLException {
         List<String> colnames = primaryColumns.get(table);
         if (colnames == null) {
-            try (ResultSet r = dmd.getPrimaryKeys(null, null, table)) {
-                if (!r.next())
-                    throw new SQLException("No primary column");
-                colnames = new ArrayList<String>();
-                colnames.add(r.getString(4));
-                while (r.next())
-                    colnames.add(r.getString(4));
-            }
+            List<PrimaryKeyRow> rows = queryPrimaryKeyRows(table);
+            if (rows.isEmpty())
+                throw new SQLException("No primary column");
+            colnames = resolvePrimaryKeyColumns(rows, currentSchema());
             primaryColumns.put(table, colnames);
         }
         return colnames;

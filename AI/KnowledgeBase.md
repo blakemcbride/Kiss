@@ -862,6 +862,39 @@ String reply = client.callToolText("echo", new JSONObject().put("message", "hi")
 - **Transaction Support**: Built-in transaction management
 - **Schema Support**: Can specify schema in table names (e.g., "admin.users")
 
+### Primary Key Discovery Across Schemas/Catalogs
+
+`Connection.getPrimaryColumns(table)` and `Connection.getPrimaryColumnName(table)` (used
+internally by `Record.update()`/`Record.delete()` to build the WHERE clause, and by
+`Record.delete()` to decide whether to fire the delete callback) resolve a table's primary key
+via JDBC's `DatabaseMetaData.getPrimaryKeys(catalog, schema, table)`. When the same table name
+exists in more than one schema or catalog on the connected database (for example, an
+application that gives every tenant its own schema, or one that also has a shared/admin
+schema), that JDBC call, if not narrowed, returns one row per schema/catalog the table exists
+in -- so a single-column key comes back duplicated once per schema, which is indistinguishable
+from a genuine multi-column composite key unless something accounts for it.
+
+Both methods narrow the lookup to the connection's own current schema/catalog when the driver
+reports one (PostgreSQL via `getSchema()`, which reflects the first entry of `search_path`;
+MySQL, which has no independent schema concept, via `getCatalog()`; other database types try
+both), falling back to the original unnarrowed call when the driver returns null or throws
+(`getSchema()` is JDBC 4.1+ and some drivers don't implement it), or when the narrowed call
+comes back empty. As a second, always-applied guard -- independent of whether the narrowing
+above worked -- the raw metadata rows are de-duplicated by schema: rows matching the
+connection's current schema are kept; if none match, the rows of whichever schema appeared
+first are kept. A genuinely composite key (several *different* columns within one schema) is
+unaffected by either guard: those rows share a single schema, so all of them survive, in
+`KEY_SEQ` order.
+
+**Caching assumption.** Both methods cache their result per table name only, not per
+schema/catalog. This is safe under the assumption that one `Connection` instance is bound to a
+single schema/catalog for its entire life (e.g. a fixed JDBC connection string, or a
+multi-tenant application that sets the current schema once per request before any application
+code runs) and is never repointed at a different schema mid-life after primary-key metadata for
+some table may already have been cached. An application that does change a connection's current
+schema after use is responsible for its own cache invalidation (or for using a fresh
+`Connection` per schema) -- Kiss does not detect that case.
+
 ## Database Record Insertion Pattern
 
 Rather than using SQL INSERT commands to insert records, always use the Kiss pattern:
@@ -1929,4 +1962,4 @@ ServicePassword = ""    # correct
 
 ---
 
-*Last Updated: 2026-09-14*
+*Last Updated: 2026-09-18*
