@@ -38,7 +38,6 @@ import org.kissweb.json.JSONObject;
 import java.io.IOException;
 import java.sql.Array;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +61,6 @@ public class Command implements AutoCloseable {
     PreparedStatement pstat;
     boolean isSelect;
     private String lastSQL;
-    private List<String> pcols;
 
     Command(Connection c) throws SQLException {
         conn = c;
@@ -98,8 +96,6 @@ public class Command implements AutoCloseable {
                 pstat.close();
             pstat = conn.conn.prepareStatement(sql);
             lastSQL = null;
-            if (pcols != null)
-                pcols.clear();
         } else
             pstat.clearParameters();
         if (args != null)
@@ -251,8 +247,6 @@ public class Command implements AutoCloseable {
                 pstat.close();
             pstat = conn.conn.prepareStatement(sql);
             lastSQL = null;
-            if (pcols != null)
-                pcols.clear();
         } else
             pstat.clearParameters();
         if (args != null)
@@ -522,18 +516,28 @@ public class Command implements AutoCloseable {
         return new QueryBuilder(this);
     }
 
+    /**
+     * Returns the primary key column(s) of the table a Cursor was read from.
+     * <br><br>
+     * Delegates entirely to {@link Connection#getPrimaryColumns(String)} so there is a single
+     * source of truth for primary-key resolution (including its schema/catalog scoping and
+     * de-duplication -- see that method's javadoc). This method previously made its own,
+     * separately-cached, unscoped {@code DatabaseMetaData.getPrimaryKeys(null, null, table)}
+     * call; on a table deployed under the same name in several schemas that returned one
+     * duplicate row per schema, which {@code Record.update()}/{@code Record.delete()} then used
+     * to bind more WHERE-clause parameters than the (correctly scoped) generated SQL text
+     * actually had placeholders for -- a JDBC "column index out of range" error on every
+     * update/delete of a fetched row from such a table.
+     *
+     * @param c the cursor whose table's primary key is being resolved
+     * @return the primary key column name(s), in KEY_SEQ order
+     */
     List<String> getPriColumns(Cursor c) {
-        if (pcols == null  ||  pcols.isEmpty()) {
-            if (pcols == null)
-                pcols = new ArrayList<String>();
-            try (ResultSet r = conn.dmd.getPrimaryKeys(null, null, c.getTableName())) {
-                while (r.next())
-                    pcols.add(r.getString(4));
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
+        try {
+            return conn.getPrimaryColumns(c.getTableName());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
-        return pcols;
     }
 
     /**

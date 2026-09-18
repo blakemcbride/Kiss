@@ -19,13 +19,27 @@ Kiss change log
   database where the same table name exists in several schemas or catalogs (e.g. one
   schema per tenant plus a shared schema), the driver returned the primary key column
   once per schema. getPrimaryColumns() returned that many duplicate copies of a
-  single-column key (harmless in the generated SQL, which just repeated the same
-  column in the WHERE clause, but wrong data), and getPrimaryColumnName() threw
-  "Primary column is composit" for a genuinely single-column key. Both methods now
-  narrow the JDBC call to the connection's current schema/catalog where the driver
-  reports one (falling back to the prior unnarrowed call otherwise), and always
-  de-duplicate by schema as a second guard, preferring the connection's current
-  schema. A genuinely composite key (several different columns in one schema) is
-  unaffected. See org.kissweb.database.Connection.resolvePrimaryKeyColumns and the
-  Database Features section of AI/KnowledgeBase.md for the full explanation.
+  single-column key, and getPrimaryColumnName() threw "Primary column is composit"
+  for a genuinely single-column key. Both methods now narrow the JDBC call to the
+  connection's current schema/catalog where the driver reports one (falling back to
+  the prior unnarrowed call otherwise), and always de-duplicate by schema as a second
+  guard, preferring the connection's current schema. A genuinely composite key
+  (several different columns in one schema) is unaffected. See
+  org.kissweb.database.Connection.resolvePrimaryKeyColumns and the Database Features
+  section of AI/KnowledgeBase.md for the full explanation.
+
+- Follow-up same day: the fix above was incomplete and caused a regression.
+  Record.update()/delete(), for a record read in via a SELECT cursor, build the
+  WHERE-clause SQL text from Connection.getPrimaryColumns(table) (now correctly
+  scoped to one column) but bound the WHERE parameter VALUES from a separate method,
+  Command.getPriColumns(Cursor), which still called
+  DatabaseMetaData.getPrimaryKeys(null, null, table) unscoped and cached the result
+  independently -- so for a multi-schema table it kept returning N duplicate columns.
+  Binding N values into SQL text with 1 placeholder threw "The column index is out
+  of range" on every update()/delete() of a fetched row from such a table -- this was
+  NOT harmless, contrary to what the entry above said before this correction.
+  Command.getPriColumns(Cursor) now simply delegates to
+  Connection.getPrimaryColumns(table) and no longer keeps its own cache/logic, so
+  there is exactly one source of truth for a table's primary-key columns and the two
+  call sites can never disagree again.
 

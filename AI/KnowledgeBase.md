@@ -864,15 +864,13 @@ String reply = client.callToolText("echo", new JSONObject().put("message", "hi")
 
 ### Primary Key Discovery Across Schemas/Catalogs
 
-`Connection.getPrimaryColumns(table)` and `Connection.getPrimaryColumnName(table)` (used
-internally by `Record.update()`/`Record.delete()` to build the WHERE clause, and by
-`Record.delete()` to decide whether to fire the delete callback) resolve a table's primary key
-via JDBC's `DatabaseMetaData.getPrimaryKeys(catalog, schema, table)`. When the same table name
-exists in more than one schema or catalog on the connected database (for example, an
-application that gives every tenant its own schema, or one that also has a shared/admin
-schema), that JDBC call, if not narrowed, returns one row per schema/catalog the table exists
-in -- so a single-column key comes back duplicated once per schema, which is indistinguishable
-from a genuine multi-column composite key unless something accounts for it.
+`Connection.getPrimaryColumns(table)` and `Connection.getPrimaryColumnName(table)` resolve a
+table's primary key via JDBC's `DatabaseMetaData.getPrimaryKeys(catalog, schema, table)`. When
+the same table name exists in more than one schema or catalog on the connected database (for
+example, an application that gives every tenant its own schema, or one that also has a
+shared/admin schema), that JDBC call, if not narrowed, returns one row per schema/catalog the
+table exists in -- so a single-column key comes back duplicated once per schema, which is
+indistinguishable from a genuine multi-column composite key unless something accounts for it.
 
 Both methods narrow the lookup to the connection's own current schema/catalog when the driver
 reports one (PostgreSQL via `getSchema()`, which reflects the first entry of `search_path`;
@@ -885,6 +883,21 @@ connection's current schema are kept; if none match, the rows of whichever schem
 first are kept. A genuinely composite key (several *different* columns within one schema) is
 unaffected by either guard: those rows share a single schema, so all of them survive, in
 `KEY_SEQ` order.
+
+**Single source of truth -- `Command.getPriColumns(Cursor)` delegates to
+`Connection.getPrimaryColumns(table)`.** `Record.update()`/`Record.delete()` need a table's
+primary-key columns twice for the same operation: once to build the WHERE-clause SQL *text*
+(always via `Connection.getPrimaryColumns(table)`), and, when the `Record` was read in via a
+SELECT cursor rather than freshly constructed, again to supply the WHERE-clause parameter
+*values* to bind, via `Command.getPriColumns(Cursor)`. These two calls **must always agree** on
+how many columns make up the key -- otherwise the number of `?` placeholders in the generated
+SQL and the number of values bound to it diverge, and the JDBC driver throws a
+"column index out of range" error on every `update()`/`delete()` of a fetched row. For that
+reason `Command.getPriColumns(Cursor)` contains no primary-key resolution logic of its own; it
+purely delegates to `Connection.getPrimaryColumns(c.getTableName())`, so there is exactly one
+place in the framework that decides a table's primary-key columns. Do not reintroduce a
+separate `DatabaseMetaData.getPrimaryKeys(...)` call or cache inside `Command` -- that
+duplication is precisely what caused the divergence described above the first time.
 
 **Caching assumption.** Both methods cache their result per table name only, not per
 schema/catalog. This is safe under the assumption that one `Connection` instance is bound to a
