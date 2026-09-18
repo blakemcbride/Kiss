@@ -7,3 +7,4 @@ Follow the instructions in `AI/KnowledgeBase.md`.
 You may update `AI/KnowledgeBase.md` when useful.
 
 Never modify `CLAUDE.md` or `AGENTS.md`.
+

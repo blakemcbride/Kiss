@@ -1,7 +1,7 @@
 
 @AI/KnowledgeBase.md
 
-Claude should never change this file.
+Never change this file.
 
 ## HUMAN NOTES (To be ignored by Claude)
 
