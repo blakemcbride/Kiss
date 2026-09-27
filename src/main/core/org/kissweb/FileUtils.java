@@ -11,6 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Utilities to deal with files on the back-end.  These are usually PDF or CSV files that
@@ -30,6 +32,8 @@ public class FileUtils {
 
     private final static String TempDir = "temporary";
     private final static int DaysOld = 1;
+    private final static long DeleteOldFilesIntervalMillis = 15L * 60L * 1000L;
+    private final static AtomicLong lastDeleteOldFilesRun = new AtomicLong(0L);
 
     /**
      * Create a new file in a server accessible temp directory.  The file returned is guaranteed
@@ -65,7 +69,60 @@ public class FileUtils {
         return f;
     }
 
+    /**
+     * Create a new file with a randomized name derived from the caller-supplied {@code fname},
+     * in the same server accessible temp directory used by {@link #createReportFile(String, String)}.
+     * The returned file's name is never exactly {@code fname}: a random integer is inserted
+     * immediately before the file name's extension (or appended to the end, if {@code fname} has
+     * no extension), and if a file with the resulting name already exists, a fresh random name is
+     * tried instead (recursively) until an unused one is found. Concurrent callers therefore never
+     * collide on the same path, even when they pass the same {@code fname}. This file is also
+     * subject to the same "deleted when more than a day old" cleanup as
+     * {@link #createReportFile(String, String)}.
+     *
+     * @param fname the base file name to use within the temp directory (any "/" characters are
+     *              replaced with "-", since this is a file name, not a path); a random integer is
+     *              inserted before its extension, or appended if it has none, to make the
+     *              returned name unique
+     * @return the file reference (not pre-populated with any data), guaranteed not to already exist
+     */
+    public static File createReportFile(final String fname)
+    {
+        File dir;
+
+        try {
+            // Needed when Kiss is not used as a server
+            Class.forName("jakarta.servlet.http.HttpServlet");
+            dir = new File(MainServlet.getRootPath(), TempDir);
+            dir.mkdir();
+            deleteOldFiles(dir);
+        } catch (ClassNotFoundException e) {
+            dir = new File(System.getProperty("java.io.tmpdir"));
+        }
+        final String cleanName = fname.replace("/", "-");
+        final String ext = getExtension(cleanName);
+        final String randomName = ext.isEmpty()
+                ? cleanName + ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE)
+                : cleanName.substring(0, cleanName.length() - ext.length() - 1) + ThreadLocalRandom.current().nextInt(1, Integer.MAX_VALUE) + "." + ext;
+        final File f = dir == null ? new File(randomName) : new File(dir, randomName);
+        if (f.exists())
+            return createReportFile(fname);
+        f.deleteOnExit();
+        return f;
+    }
+
     private static void deleteOldFiles(File dir) {
+        // Do the actual scan/delete at most once per DeleteOldFilesIntervalMillis; callers arriving
+        // sooner (this can be hit from many concurrent request threads via createReportFile) return
+        // immediately. The CAS ensures that when several threads race through the check at once,
+        // only one of them actually runs the scan below. lastDeleteOldFilesRun starts at 0, so the
+        // first call after JVM start is always far enough past it to run.
+        final long now = System.currentTimeMillis();
+        final long last = lastDeleteOldFilesRun.get();
+        if (now - last < DeleteOldFilesIntervalMillis)
+            return;
+        if (!lastDeleteOldFilesRun.compareAndSet(last, now))
+            return;
         try {
             long nDaysAgo = new java.util.Date().getTime();
 
