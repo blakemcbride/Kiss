@@ -1952,6 +1952,120 @@ Do not use `width: 100%` on input controls (textbox-input, text-input, etc.). Th
 <textbox-input style="width: 300px;"></textbox-input>
 ```
 
+## External File Storage (org.kissweb.database.ExternalFile)
+
+`org.kissweb.database.ExternalFile` lets any row of any SQL table have one or more files
+associated with it that live on the filesystem instead of in a database column. The file's
+location is always recomputed from the table name, the row's primary key, and (when a row has
+more than one associated file) a fictitious field name — nothing about location is ever stored in
+the database, so relocating the file store works without touching any row.
+
+**Zero built-in assumptions about configuration or primary-key shape.** Two lambdas must be
+registered once at application startup, before any other method on this class is used:
+
+```java
+ExternalFile.setRootSupplier(() -> myApp.currentExternalFileRoot());
+ExternalFile.setDirectoryMapper((tableName, primaryKey) -> myApp.shardPath(tableName, primaryKey));
+```
+
+- `setRootSupplier(Supplier<String>)` — returns the current root directory. Called fresh on every
+  path computation (never cached), so a root that legitimately varies at runtime (e.g. per tenant)
+  is honored with no extra plumbing.
+- `setDirectoryMapper(BiFunction<String,String,String>)` — given a table name and primary key,
+  returns the directory (relative to the root) where that row's file(s) live. This is the seam
+  that keeps the class free of any primary-key-format assumption; an application with a composite
+  or non-numeric key, or that wants a different sharding depth, supplies its own mapping.
+- Calling any other method before both are configured throws `IllegalStateException` naming which
+  one is missing.
+
+**Everything else is generic and needs no further configuration**: a `String name` → `(tableName,
+fieldName)` registry (`addField`/`get`) for referring to a file type by one logical name;
+save/read/delete/exists by string name or by a directly-constructed `ExternalField`; multiple
+files per row via the fictitious field name; `saveInputStream` with automatic EXIF-orientation
+normalization for uploaded images (delegates to `org.kissweb.Image.getExifOrientation` /
+`applyExifOrientation`, so no extra dependency is needed — `metadata-extractor` is already a Kiss
+lib); and `getURL`/`getURL2` for producing an HTTP-servable temporary copy (via
+`FileUtils.createReportFile`/`getHTTPPath`), `getURL2` using a deterministic destination name with
+copy-to-temp-then-atomic-move so concurrent callers can't race.
+
+**Cascade-delete participation** — `ExternalFile.deleteCallback(String, Object)` matches
+`Connection.setDeleteCallback`'s `BiConsumer<String,Object>` shape exactly, so an application
+wires it in once per connection (`conn.setDeleteCallback(ExternalFile::deleteCallback)`) and then
+opts individual tables in, one at a time, via `ExternalFile.cascadeDeleteFor(tableName)`. A table
+not opted in is a no-op on delete (logged at DEBUG) — deliberately, so wiring up the callback can
+never silently change behavior for a table whose rows have always been deleted without their files
+being removed; opting in is a reviewed, per-table decision, not a side effect of the callback
+existing. See `Connection.setDeleteCallback`/`Record.delete()` for the mechanics of when the
+callback fires (only when the table has a single-column primary key).
+
+**Does not participate in SQL transactions.** A file write/delete happens immediately and
+independently of the surrounding database transaction; a rollback does not undo it. An application
+needing correctness under rollback must handle that itself (defer the write until after commit, or
+tolerate an orphaned file).
+
+File: `src/main/core/org/kissweb/database/ExternalFile.java`. It is a generalization of an
+application's own external-file utility (the pattern above — root lambda + directory-mapper lambda
++ per-table cascade opt-in — is the one to follow when adapting such a class to use this one).
+
+### Hybrid Inline/External Column Storage (ExternalFile.saveHybridColumn / getHybridColumn)
+
+Everything above is the "virtual column" pattern: no SQL column is involved at all, only a
+computed path. `ExternalFile.saveHybridColumn(Connection db, String tableName, String columnName,
+String primaryKey, String data)` and `ExternalFile.getHybridColumn(Connection db, String tableName,
+String columnName, String primaryKey)` instead back a real, existing `varchar` column: data that
+fits in the column is stored in it directly; data too large for the column overflows to an external
+file (reusing the same root-supplier/directory-mapper configuration as the virtual-column methods,
+with the column name standing in for the fictitious field name), with a sentinel value left in the
+column so a single `getHybridColumn` call transparently returns the real value regardless of where
+it lives. Use this instead of the virtual-column pattern when a real column already exists (or is
+one the schema is willing to add) whose content is normally small but occasionally large; use the
+virtual-column pattern when there is no real column at all.
+
+**Threshold: read from metadata, never hard-coded.** The column's declared size is read from JDBC
+column metadata via `Connection.getColumnInfo(table)` / `ColumnInfo.getColumnSize()` (both
+package-private, reused directly since `ExternalFile` lives in the same `org.kissweb.database`
+package rather than duplicating metadata-reading code) — the unit is characters, which is already
+correct for a database like PostgreSQL where `varchar(n)` is measured in characters, not bytes. The
+result is cached in a static `Map<String,Integer>` keyed by `table.column` for the life of the JVM.
+Like `Connection.getPrimaryColumns`'s own cache, this is keyed by table+column name alone, not by
+schema, which is safe under the same assumption already documented there (a multi-tenant deployment
+applies identical DDL to every tenant's copy of a table, so a given table+column name has one size
+everywhere it exists).
+
+**Sentinel and escaping.** A short sentinel (`"\u0001KFX\u0001"`) stored verbatim in the column
+means "the data is external." Because real inline data could coincidentally begin with that exact
+sequence — or with the escape prefix itself (`"\u0001KFI\u0001"`) — any data starting with either
+one is stored with the escape prefix prepended, so it is never misread as the external marker on a
+later read; data that doesn't collide with either sentinel is stored completely unescaped, with no
+overhead. This makes the round trip exact for every possible input, including a value that merely
+looks like the sentinel.
+
+**Transitions and cascade delete.** A later save can flip storage direction either way: going from
+external to inline (or saving null/empty) deletes the now-stale external file (harmless no-op if
+none exists); going from external to external simply overwrites the same deterministic path. Since
+the external file's path is computed the same way as for virtual columns (table name + primary key
++ column name), a table already opted into `cascadeDeleteFor` needs no separate wiring for hybrid
+columns — cascade delete removes both kinds of files together.
+
+**Primary key binding.** Both methods require a single-column primary key (`Connection.getPrimaryColumnName`)
+and convert the caller's `String primaryKey` to the Java type the key column's JDBC type expects
+(`Integer`/`Long`/`BigDecimal` for integer/numeric keys; unchanged `String` otherwise, which is
+already correct for character/UUID keys) before binding it — necessary because some databases
+(e.g. PostgreSQL) reject a text-typed bind parameter compared against a numeric column.
+
+**Not transactional**, same caveat as the rest of the class — but the file operation (if any) is
+deliberately performed *before* the column update, so a failure on the database side leaves at
+worst an orphaned/stale external file, never a column pointing at a file that was never written.
+
+**No binary/byte[] variant.** varchar backing implies text, so only a `String` API is provided; a
+binary variant was not added because it does not fall out of this design trivially (binary data
+would need an encoding decision, e.g. Base64, that the character-counting threshold and sentinel
+scheme above are not built around). A caller with binary data should Base64-encode it before calling
+`saveHybridColumn`, or use the existing pure-external `saveData`/`getBinary` methods instead.
+
+Documented in the Kiss book, Chapter 23 ("File Handling"), Section 23.7 ("External File Storage") —
+covers both the virtual-column pattern and this hybrid-column pattern in one place.
+
 ## Known Issues & Solutions
 
 ### Empty `application.ini` values must be quoted (`Key = ""`, not `Key =`)
