@@ -8,7 +8,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -27,6 +29,7 @@ import java.nio.file.Paths;
  *   <li>Text and multimodal (text + image) chat completions</li>
  *   <li>Streaming and non-streaming response modes</li>
  *   <li>Configurable generation parameters (temperature, top-p sampling, max tokens)</li>
+ *   <li>Model listing ({@link #getAvailableModels()})</li>
  *   <li>Built-in retry logic and timeout handling</li>
  * </ul>
  *
@@ -71,6 +74,7 @@ public class Anthropic {
 
     private static String ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
     private static String ANTHROPIC_VERSION = "2023-06-01";
+    private static String ANTHROPIC_MODELS_URL = "https://api.anthropic.com/v1/models?limit=1000";
 
     private final String apiKey; // Your Anthropic API key
     private final String model;  // e.g. "claude-sonnet-4-20250514"
@@ -119,6 +123,22 @@ public class Anthropic {
      */
     public static void setVersion(String version) {
         ANTHROPIC_VERSION = version;
+    }
+
+    /**
+     * Overrides the Anthropic Models endpoint URL used by {@link #getAvailableModels()}.
+     *
+     * <p>This is a global setting: changing the URL affects all current and future
+     * {@link Anthropic} instances created in this JVM.</p>
+     *
+     * <p>This is primarily intended for testing, proxies, gateways, or Anthropic-compatible
+     * endpoints.</p>
+     *
+     * @param url the full URL to use for model-listing requests (for example,
+     *            {@code https://api.anthropic.com/v1/models?limit=1000})
+     */
+    public static void setModelsUrl(String url) {
+        ANTHROPIC_MODELS_URL = url;
     }
 
     /**
@@ -377,6 +397,48 @@ public class Anthropic {
                        Consumer<String> onToken,
                        Runnable onDone) throws Exception {
         stream(query, null, onToken, onDone);
+    }
+
+    /* ----------------------------------------------------------------------
+     * Model listing
+     * ---------------------------------------------------------------------- */
+
+    /**
+     * Returns a list of models currently available from the Anthropic API.
+     *
+     * <p>Calls the Models API ({@code GET /v1/models}) and returns every model id
+     * exactly as reported, in the order the provider lists them (no filtering or
+     * sorting is applied). Requests up to 1000 models in one page, which covers the
+     * current catalog; no further pagination is attempted.</p>
+     *
+     * <p>This call does not depend on the model configured in the constructor, so it
+     * works even when this instance was constructed with a {@code null} or placeholder
+     * model name.</p>
+     *
+     * @return the list of model ids reported by Anthropic
+     * @throws Exception if the API request fails or the response cannot be parsed
+     */
+    public List<String> getAvailableModels() throws Exception {
+        lastHttpStatus = 0;
+        lastErrorBody = null;
+
+        JSONObject headers = new JSONObject()
+                .put("x-api-key", apiKey)
+                .put("anthropic-version", ANTHROPIC_VERSION);
+
+        JSONObject json = restClient.jsonCall("GET", ANTHROPIC_MODELS_URL, (String) null, headers);
+        lastHttpStatus = restClient.getResponseCode();
+        if (lastHttpStatus / 100 != 2) {
+            lastErrorBody = restClient.getResponseString();
+            throw new Exception("Anthropic request failed with HTTP " + lastHttpStatus + ": " + lastErrorBody);
+        }
+        lastResponse = json;
+
+        List<String> models = new ArrayList<>();
+        JSONArray data = json.getJSONArray("data");
+        for (int i = 0; i < data.length(); i++)
+            models.add(data.getJSONObject(i).getString("id"));
+        return models;
     }
 
     /* ----------------------------------------------------------------------

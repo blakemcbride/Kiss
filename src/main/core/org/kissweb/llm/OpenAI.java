@@ -8,7 +8,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -30,6 +32,7 @@ import java.nio.file.Paths;
  *   <li>Streaming and non-streaming response modes</li>
  *   <li>Support for reasoning models (o1, o3, etc.) with reasoning effort control</li>
  *   <li>Text embeddings generation</li>
+ *   <li>Model listing ({@link #getAvailableModels()})</li>
  *   <li>Configurable generation parameters (temperature, top-p sampling)</li>
  *   <li>Built-in retry logic and timeout handling</li>
  * </ul>
@@ -86,6 +89,7 @@ public class OpenAI {
 
     private static String OPENAI_URL = "https://api.openai.com/v1/chat/completions";
     private static String OPENAI_RESPONSES_URL = "https://api.openai.com/v1/responses";
+    private static String OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
 
     /**
      * Which of the provider's two APIs a request is sent to.
@@ -151,6 +155,22 @@ public class OpenAI {
      */
     public static void setResponsesUrl(String url) {
         OPENAI_RESPONSES_URL = url;
+    }
+
+    /**
+     * Overrides the OpenAI Models endpoint URL used by {@link #getAvailableModels()}.
+     *
+     * <p>This is a global setting: changing the URL affects all current and future
+     * {@link OpenAI} instances created in this JVM.</p>
+     *
+     * <p>This is primarily intended for testing, proxies, gateways, or OpenAI-compatible
+     * endpoints.</p>
+     *
+     * @param url the full URL to use for model-listing requests (for example,
+     *            {@code https://api.openai.com/v1/models})
+     */
+    public static void setModelsUrl(String url) {
+        OPENAI_MODELS_URL = url;
     }
 
     /**
@@ -623,6 +643,46 @@ public class OpenAI {
         double[] result = new double[arr.length()];
         for (int i = 0; i < arr.length(); i++) result[i] = arr.getDouble(i);
         return result;
+    }
+
+    /* ----------------------------------------------------------------------
+     * Model listing
+     * ---------------------------------------------------------------------- */
+
+    /**
+     * Returns a list of models currently available from the OpenAI API.
+     *
+     * <p>Calls the Models API ({@code GET /v1/models}) and returns every model id
+     * exactly as reported, in the order the provider lists them (no filtering or
+     * sorting is applied).</p>
+     *
+     * <p>This call does not depend on the model configured in the constructor, so it
+     * works even when this instance was constructed with a {@code null} or placeholder
+     * model name.</p>
+     *
+     * @return the list of model ids reported by OpenAI
+     * @throws Exception if the API request fails or the response cannot be parsed
+     */
+    public List<String> getAvailableModels() throws Exception {
+        lastHttpStatus = 0;
+        lastErrorBody = null;
+
+        JSONObject headers = new JSONObject()
+                .put("Authorization", "Bearer " + apiKey);
+
+        JSONObject json = restClient.jsonCall("GET", OPENAI_MODELS_URL, (String) null, headers);
+        lastHttpStatus = restClient.getResponseCode();
+        if (lastHttpStatus / 100 != 2) {
+            lastErrorBody = restClient.getResponseString();
+            throw new Exception("OpenAI request failed with HTTP " + lastHttpStatus + ": " + lastErrorBody);
+        }
+        lastResponse = json;
+
+        List<String> models = new ArrayList<>();
+        JSONArray data = json.getJSONArray("data");
+        for (int i = 0; i < data.length(); i++)
+            models.add(data.getJSONObject(i).getString("id"));
+        return models;
     }
 
     /* ----------------------------------------------------------------------

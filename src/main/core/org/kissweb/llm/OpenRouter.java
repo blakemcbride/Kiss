@@ -8,7 +8,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -36,6 +38,7 @@ import java.nio.file.Paths;
  *   <li>Streaming and non-streaming response modes</li>
  *   <li>Model fallback routing (alternate models tried automatically if the primary fails)</li>
  *   <li>Unified reasoning-effort control across providers that support reasoning</li>
+ *   <li>Model listing ({@link #getAvailableModels()})</li>
  *   <li>Configurable generation parameters (temperature, top-p sampling)</li>
  *   <li>Built-in retry logic and timeout handling</li>
  * </ul>
@@ -76,6 +79,7 @@ import java.nio.file.Paths;
 public class OpenRouter {
 
     private static String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+    private static String OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 
     private final String apiKey; // Your OpenRouter API key
     private final String model;  // e.g. "openai/gpt-4o"
@@ -106,6 +110,21 @@ public class OpenRouter {
      */
     public static void setUrl(String url) {
         OPENROUTER_URL = url;
+    }
+
+    /**
+     * Overrides the OpenRouter Models endpoint URL used by {@link #getAvailableModels()}.
+     *
+     * <p>This is a global setting: changing the URL affects all current and future
+     * {@link OpenRouter} instances created in this JVM.</p>
+     *
+     * <p>This is primarily intended for testing, proxies, or gateways.</p>
+     *
+     * @param url the full URL to use for model-listing requests (for example,
+     *            {@code https://openrouter.ai/api/v1/models})
+     */
+    public static void setModelsUrl(String url) {
+        OPENROUTER_MODELS_URL = url;
     }
 
     /**
@@ -420,6 +439,49 @@ public class OpenRouter {
                        Consumer<String> onToken,
                        Runnable onDone) throws Exception {
         stream(query, null, onToken, onDone);
+    }
+
+    /* ----------------------------------------------------------------------
+     * Model listing
+     * ---------------------------------------------------------------------- */
+
+    /**
+     * Returns a list of models currently available through OpenRouter.
+     *
+     * <p>Calls the Models API ({@code GET /v1/models}) and returns every model id
+     * exactly as reported (in {@code provider/model} form), in the order the provider
+     * lists them (no filtering or sorting is applied). This endpoint works even without
+     * an API key; when this instance has one, it is sent so the response can reflect any
+     * account-specific availability.</p>
+     *
+     * <p>This call does not depend on the model configured in the constructor, so it
+     * works even when this instance was constructed with a {@code null} or placeholder
+     * model name.</p>
+     *
+     * @return the list of model ids reported by OpenRouter
+     * @throws Exception if the API request fails or the response cannot be parsed
+     */
+    public List<String> getAvailableModels() throws Exception {
+        lastHttpStatus = 0;
+        lastErrorBody = null;
+
+        JSONObject headers = new JSONObject();
+        if (apiKey != null && !apiKey.isEmpty())
+            headers.put("Authorization", "Bearer " + apiKey);
+
+        JSONObject json = restClient.jsonCall("GET", OPENROUTER_MODELS_URL, (String) null, headers);
+        lastHttpStatus = restClient.getResponseCode();
+        if (lastHttpStatus / 100 != 2) {
+            lastErrorBody = restClient.getResponseString();
+            throw new Exception("OpenRouter request failed with HTTP " + lastHttpStatus + ": " + lastErrorBody);
+        }
+        lastResponse = json;
+
+        List<String> models = new ArrayList<>();
+        JSONArray data = json.getJSONArray("data");
+        for (int i = 0; i < data.length(); i++)
+            models.add(data.getJSONObject(i).getString("id"));
+        return models;
     }
 
     /* ----------------------------------------------------------------------
