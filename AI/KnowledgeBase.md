@@ -2026,11 +2026,16 @@ column metadata via `Connection.getColumnInfo(table)` / `ColumnInfo.getColumnSiz
 package-private, reused directly since `ExternalFile` lives in the same `org.kissweb.database`
 package rather than duplicating metadata-reading code) — the unit is characters, which is already
 correct for a database like PostgreSQL where `varchar(n)` is measured in characters, not bytes. The
-result is cached in a static `Map<String,Integer>` keyed by `table.column` for the life of the JVM.
-Like `Connection.getPrimaryColumns`'s own cache, this is keyed by table+column name alone, not by
-schema, which is safe under the same assumption already documented there (a multi-tenant deployment
-applies identical DDL to every tenant's copy of a table, so a given table+column name has one size
-everywhere it exists).
+result is cached in a static `Map<String,Integer>` keyed by `schema|table.column` for the life of
+the JVM.
+
+**Metadata reads are schema-scoped.** Any `DatabaseMetaData` call that takes a table name
+(`getColumns`, `getPrimaryKeys`) must be narrowed to the connection's current schema (PostgreSQL) or
+catalog (MySQL) via `Connection.metadataScope()`; passing null/null returns the table from every
+schema, and in a schema-per-tenant database whichever schema sorts last silently wins. If the
+scoped read is empty it falls back to the unscoped call. Any cache of such metadata must include
+the scope (`Connection.metadataScopeKey()`), since one `Connection` can switch schemas via
+`setSchema` and the JVM-wide caches span tenants. `SchemaGraph` already passes an explicit schema.
 
 **Sentinel and escaping.** A short sentinel (`"\u0001KFX\u0001"`) stored verbatim in the column
 means "the data is external." Because real inline data could coincidentally begin with that exact
@@ -2056,6 +2061,16 @@ already correct for character/UUID keys) before binding it — necessary because
 **Not transactional**, same caveat as the rest of the class — but the file operation (if any) is
 deliberately performed *before* the column update, so a failure on the database side leaves at
 worst an orphaned/stale external file, never a column pointing at a file that was never written.
+
+**Resolve-from-raw, isExternal, release.** `ExternalFile.resolveHybridColumn(db, table, column, pk,
+raw)` turns an already-fetched raw column value into the real data with no SELECT (null -> null;
+no leading SOH -> as-is; `INLINE_ESCAPE` prefix -> stripped; `EXTERNAL_MARKER` -> read the file, ""
+if missing); `pk` is used only to compute the file path. `getHybridColumn` delegates to it after its
+SELECT so they cannot drift. `ExternalFile.isExternal(raw)` is true exactly for the external marker.
+`ExternalFile.releaseHybridColumn(db, table, column, pk, nullable)` deletes any external file and
+clears the column (NULL if nullable, "" if NOT NULL); `saveHybridColumn(..., null)` stores SQL NULL
+and `(..., "")` stores "" exactly as passed, so use release when nullability is what matters.
+No-DB tests: `ExternalFileHybridResolveTest`; the DB tests are gated by `-Dkiss.test.postgres=true`.
 
 **No binary/byte[] variant.** varchar backing implies text, so only a `String` API is provided; a
 binary variant was not added because it does not fall out of this design trivially (binary data

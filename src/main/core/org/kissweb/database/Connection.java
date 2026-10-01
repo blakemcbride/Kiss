@@ -900,6 +900,24 @@ public class Connection implements AutoCloseable {
      * second, always-applied guard against that.
      */
     private List<PrimaryKeyRow> queryPrimaryKeyRows(String table) throws SQLException {
+        final String[] scope = metadataScope();
+        final String catalog = scope[0];
+        final String schema = scope[1];
+        List<PrimaryKeyRow> rows = readPrimaryKeyRows(catalog, schema, table);
+        if (rows.isEmpty() && (catalog != null || schema != null))
+            rows = readPrimaryKeyRows(null, null, table);
+        return rows;
+    }
+
+    /**
+     * Determines the {catalog, schema} pair to pass to {@code DatabaseMetaData} so a read is
+     * narrowed to this connection's current schema/catalog (PostgreSQL by schema, MySQL by
+     * catalog, others both; an unsupported one comes back null and is a no-op).  Every metadata
+     * read that takes a table name must use this: passing null/null makes PostgreSQL return the
+     * table from every schema, which in a schema-per-tenant database mixes tenants' (and the
+     * master schema's) definitions.
+     */
+    private String[] metadataScope() {
         String catalog = null;
         String schema = null;
         switch (ctype) {
@@ -910,16 +928,21 @@ public class Connection implements AutoCloseable {
                 catalog = currentCatalog();
                 break;
             default:
-                // MicrosoftServer, Oracle, SQLite, or unrecognized: try both -- an
-                // unsupported one simply comes back null and is a no-op below.
                 schema = currentSchema();
                 catalog = currentCatalog();
                 break;
         }
-        List<PrimaryKeyRow> rows = readPrimaryKeyRows(catalog, schema, table);
-        if (rows.isEmpty() && (catalog != null || schema != null))
-            rows = readPrimaryKeyRows(null, null, table);
-        return rows;
+        return new String[]{catalog, schema};
+    }
+
+    /**
+     * A string identifying the current catalog/schema scope, for keying caches of metadata
+     * so a schema switch on a shared connection (or a JVM-wide cache) never serves another
+     * schema's answer.
+     */
+    String metadataScopeKey() {
+        final String[] scope = metadataScope();
+        return (scope[0] == null ? "" : scope[0]) + "/" + (scope[1] == null ? "" : scope[1]);
     }
 
     private List<PrimaryKeyRow> readPrimaryKeyRows(String catalog, String schema, String table) throws SQLException {
@@ -1060,15 +1083,19 @@ public class Connection implements AutoCloseable {
      * @throws SQLException if a database access error occurs
      */
     public int getColumnSize(String table, String cname) throws SQLException {
-        int size;
-        try (ResultSet columns = dmd.getColumns(null, null, table, cname)) {
-            if (columns.next()) {
-                String s = columns.getString("COLUMN_SIZE");
-                size = Integer.parseInt(s);
-            } else
-                size = -1;
-        }
+        final String[] scope = metadataScope();
+        int size = readColumnSize(scope[0], scope[1], table, cname);
+        if (size == -1 && (scope[0] != null || scope[1] != null))
+            size = readColumnSize(null, null, table, cname);
         return size;
+    }
+
+    private int readColumnSize(String catalog, String schema, String table, String cname) throws SQLException {
+        try (ResultSet columns = dmd.getColumns(catalog, schema, table, cname)) {
+            if (columns.next())
+                return Integer.parseInt(columns.getString("COLUMN_SIZE"));
+            return -1;
+        }
     }
 
     /**
@@ -1288,7 +1315,8 @@ public class Connection implements AutoCloseable {
     }
 
     /**
-     * Gets column information for the specified table.
+     * Gets column information for the specified table, read from the connection's current
+     * schema/catalog (see {@link #metadataScope}) and cached per scope+table.
      *
      * @param table the table name
      * @return a map of column names to ColumnInfo objects, or null if table is null or empty
@@ -1297,21 +1325,30 @@ public class Connection implements AutoCloseable {
     HashMap<String, ColumnInfo> getColumnInfo(String table) throws SQLException {
         if (table == null || table.isEmpty())
             return null;
-        HashMap<String, ColumnInfo> colInfo = columnInfo.get(table);
+        final String[] scope = metadataScope();
+        final String key = metadataScopeKey() + "|" + table;
+        HashMap<String, ColumnInfo> colInfo = columnInfo.get(key);
         if (colInfo != null)
             return colInfo;
+        colInfo = readColumnInfo(scope[0], scope[1], table);
+        if (colInfo.isEmpty() && (scope[0] != null || scope[1] != null))
+            colInfo = readColumnInfo(null, null, table);
+        columnInfo.put(key, colInfo);
+        return colInfo;
+    }
+
+    private HashMap<String, ColumnInfo> readColumnInfo(String catalog, String schema, String table) throws SQLException {
+        final HashMap<String, ColumnInfo> colInfo = new HashMap<>();
         DatabaseMetaData meta = conn.getMetaData();
-        ResultSet res = meta.getColumns(null, null, table, null);
-        colInfo = new HashMap<>();
-        while (res.next()) {
-            String colName = res.getString("COLUMN_NAME");
-            colInfo.put(colName, new ColumnInfo(colName,
-                    res.getInt("DATA_TYPE"),
-                    res.getInt("COLUMN_SIZE"),
-                    res.getInt("NULLABLE")));
+        try (ResultSet res = meta.getColumns(catalog, schema, table, null)) {
+            while (res.next()) {
+                String colName = res.getString("COLUMN_NAME");
+                colInfo.put(colName, new ColumnInfo(colName,
+                        res.getInt("DATA_TYPE"),
+                        res.getInt("COLUMN_SIZE"),
+                        res.getInt("NULLABLE")));
+            }
         }
-        res.close();
-        columnInfo.put(table, colInfo);
         return colInfo;
     }
 

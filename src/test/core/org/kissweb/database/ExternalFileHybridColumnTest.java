@@ -93,6 +93,21 @@ class ExternalFileHybridColumnTest {
     }
 
     @Test
+    void testReleaseHybridColumn() throws Exception {
+        insertRow(9);
+        String big = "x".repeat(100);
+        ExternalFile.saveHybridColumn(db, TABLE, COLUMN, "9", big);
+        assertTrue(expectedExternalFile(9).exists());
+        ExternalFile.releaseHybridColumn(db, TABLE, COLUMN, "9", true);
+        assertFalse(expectedExternalFile(9).exists());
+        assertNull(rawColumnValue(9));
+        ExternalFile.saveHybridColumn(db, TABLE, COLUMN, "9", big);
+        ExternalFile.releaseHybridColumn(db, TABLE, COLUMN, "9", false);
+        assertFalse(expectedExternalFile(9).exists());
+        assertEquals("", rawColumnValue(9));
+    }
+
+    @Test
     void testSmallValueStoredInline() throws Exception {
         insertRow(1);
         ExternalFile.saveHybridColumn(db, TABLE, COLUMN, "1", "hello");

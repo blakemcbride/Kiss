@@ -641,17 +641,11 @@ public class ExternalFile {
     private static final String HYBRID_EXTENSION = ".col";
 
     /**
-     * Per (table, column) cache of a varchar column's declared size (in characters), populated by
-     * {@link #getColumnSize}.  A table's schema does not change while the application is running,
-     * so this is never invalidated.
-     * <br><br>
-     * <b>Caching assumption:</b> like {@link Connection#getPrimaryColumns}'s own cache, this is
-     * keyed by table+column name alone, not by schema. This is safe under the same assumption
-     * already documented there: a multi-tenant deployment with one schema per tenant applies
-     * identical DDL to every tenant's copy of a table, so a given table+column name has one size
-     * everywhere it exists. An application that gives the same table+column name genuinely
-     * different sizes in different schemas would need its own cache invalidation; Kiss does not
-     * attempt to detect that case.
+     * Per (schema, table, column) cache of a varchar column's declared size (in characters),
+     * populated by {@link #getColumnSize}.  Keyed by the connection's current schema/catalog
+     * (see {@link Connection#metadataScopeKey}) because the same table name can have different
+     * column sizes in different schemas.  A table's definition does not change while the
+     * application is running, so entries are never invalidated.
      */
     private static final Map<String, Integer> hybridColumnSizeCache = new ConcurrentHashMap<>();
 
@@ -660,11 +654,11 @@ public class ExternalFile {
      * column metadata already reports character types in, e.g. PostgreSQL {@code varchar(n)} is
      * measured in characters, not bytes) via {@link Connection#getColumnInfo}, the same metadata
      * facility {@link Connection#getPrimaryColumns} and friends are built on. The result is cached
-     * per table+column for the life of the JVM (see {@link #hybridColumnSizeCache}), so repeated
+     * per schema+table+column for the life of the JVM (see {@link #hybridColumnSizeCache}), so repeated
      * saves/gets against the same column cost one metadata lookup, not one per call.
      */
     private static int getColumnSize(Connection db, String tableName, String columnName) throws SQLException {
-        final String key = tableName.toLowerCase() + "." + columnName.toLowerCase();
+        final String key = db.metadataScopeKey() + "|" + tableName.toLowerCase() + "." + columnName.toLowerCase();
         final Integer cached = hybridColumnSizeCache.get(key);
         if (cached != null)
             return cached;
@@ -781,7 +775,10 @@ public class ExternalFile {
      * @param columnName the {@code varchar} column name backing this data
      * @param primaryKey the primary key value for the row, as a string
      * @param data       the data to save, or null/empty to clear the column and remove any external
-     *                   file for this row/column
+     *                   file for this row/column. The value written to the column in that case is
+     *                   exactly {@code data} as passed: null stores SQL NULL (which fails on a NOT NULL
+     *                   column) and {@code ""} stores an empty string. To clear a column without having
+     *                   to know which is appropriate, use {@link #releaseHybridColumn}.
      * @throws SQLException if a database access error occurs, the table's primary key is
      *                       composite, or the column does not exist
      * @throws IOException  if there is an error writing or deleting the external file
@@ -851,18 +848,83 @@ public class ExternalFile {
         if (rec == null)
             return null;
 
-        final String stored = rec.getString(columnName);
-        if (stored == null)
+        return resolveHybridColumn(db, tableName, columnName, primaryKey, rec.getString(columnName));
+    }
+
+    /**
+     * Tells whether a raw column value, exactly as fetched from the database, is the marker meaning
+     * "the real data lives in an external file" rather than being the data itself.
+     * <br><br>
+     * Only the exact marker qualifies; a value carrying the inline escape prefix is real (inline)
+     * data and returns false. No database or file access is performed.
+     *
+     * @param raw the raw value of a hybrid column as stored (may be null)
+     * @return true exactly when {@code raw} is the external-storage marker
+     * @see #resolveHybridColumn(Connection, String, String, String, String)
+     */
+    public static boolean isExternal(String raw) {
+        return EXTERNAL_MARKER.equals(raw);
+    }
+
+    /**
+     * Resolves an already-fetched raw hybrid column value to the real data, without issuing any
+     * SELECT. This is what {@link #getHybridColumn} does after reading the column, and
+     * {@link #getHybridColumn} delegates to it so the two can never drift.
+     * <br><br>
+     * Use it when the raw value arrives as part of a larger query (a list, a join) and a per-row
+     * {@code getHybridColumn} round trip would be wasteful. Behavior: null returns null; a value
+     * that does not begin with the internal sentinel character is returned as-is; a value with the
+     * {@link #INLINE_ESCAPE} prefix has that one prefix stripped (no file is read); the exact
+     * {@link #EXTERNAL_MARKER} causes the external file to be read and returned ({@code ""} if the
+     * file is unexpectedly missing, matching {@link #getHybridColumn}).
+     * <br><br>
+     * {@code db} is not used to query anything; {@code primaryKey} (together with {@code tableName}
+     * and {@code columnName}) is needed only to compute the external file's path, and is ignored
+     * unless {@code raw} is the external marker.
+     *
+     * @param db         the database connection (not queried; retained for signature symmetry)
+     * @param tableName  the SQL table name
+     * @param columnName the {@code varchar} column name backing this data
+     * @param primaryKey the primary key value for the row, as a string (used only for the file path)
+     * @param raw        the raw column value as fetched, possibly null
+     * @return the real data, or null if {@code raw} is null
+     * @throws IOException if there is an error reading the external file
+     * @see #isExternal(String)
+     */
+    public static String resolveHybridColumn(Connection db, String tableName, String columnName, String primaryKey, String raw) throws IOException {
+        if (raw == null)
             return null;
-        if (stored.equals(EXTERNAL_MARKER)) {
+        if (raw.isEmpty() || raw.charAt(0) != '\u0001')
+            return raw;
+        if (raw.equals(EXTERNAL_MARKER)) {
             final String path = hybridExternalPath(tableName, primaryKey, columnName, false);
             if (!new File(path).exists())
                 return "";
             return FileUtils.readFile(path);
         }
-        if (stored.startsWith(INLINE_ESCAPE))
-            return stored.substring(INLINE_ESCAPE.length());
-        return stored;
+        if (raw.startsWith(INLINE_ESCAPE))
+            return raw.substring(INLINE_ESCAPE.length());
+        return raw;
+    }
+
+    /**
+     * Releases a hybrid column's data: removes any external file for this row/column and clears the
+     * column &mdash; to SQL NULL when {@code nullable} is true, to an empty string when false (for a
+     * NOT NULL column). This replaces guessing between {@code saveHybridColumn(..., null)} and
+     * {@code saveHybridColumn(..., "")}. Safe to call when no external file exists.
+     *
+     * @param db         the database connection
+     * @param tableName  the SQL table name
+     * @param columnName the {@code varchar} column name backing this data
+     * @param primaryKey the primary key value for the row, as a string
+     * @param nullable   true if the column permits NULL (clear to NULL), false if NOT NULL (clear to "")
+     * @throws SQLException if a database access error occurs, the table's primary key is composite,
+     *                       or the column does not exist
+     * @throws IOException  if there is an error deleting the external file
+     * @see #saveHybridColumn(Connection, String, String, String, String)
+     */
+    public static void releaseHybridColumn(Connection db, String tableName, String columnName, String primaryKey, boolean nullable) throws SQLException, IOException {
+        saveHybridColumn(db, tableName, columnName, primaryKey, nullable ? null : "");
     }
 
     // ------------------------------------------------------------------------------------------
