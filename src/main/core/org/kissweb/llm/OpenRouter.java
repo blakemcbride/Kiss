@@ -91,6 +91,7 @@ public class OpenRouter {
     private String siteUrl;           // Optional HTTP-Referer attribution header
     private String siteName;          // Optional X-Title attribution header
     private String[] fallbackModels;  // Optional alternate models tried in order
+    private boolean webSearch = false; // When true, the "web" plugin is requested
 
     private JSONObject lastResponse;  // Full JSON of last non-stream call
     private int lastHttpStatus;       // HTTP status of the last call
@@ -263,6 +264,22 @@ public class OpenRouter {
      */
     public void setSiteName(String name) {
         this.siteName = name;
+    }
+
+    /**
+     * Enables or disables the provider's web search plugin (off by default).
+     *
+     * <p>When enabled, the request carries {@code "plugins": [{"id": "web"}]} (the model id is
+     * left untouched, unlike the {@code :online} suffix). OpenRouter uses the underlying
+     * provider's native search where available and otherwise its own search engine, and grounds
+     * the answer in the results. When disabled the request is unchanged. If the account or model
+     * cannot use it the provider's HTTP error is thrown as usual; there is no retry without the
+     * plugin. Search is billed by the provider in addition to tokens.</p>
+     *
+     * @param webSearch {@code true} to allow web search
+     */
+    public void setWebSearch(boolean webSearch) {
+        this.webSearch = webSearch;
     }
 
     /* ----------------------------------------------------------------------
@@ -571,6 +588,9 @@ public class OpenRouter {
                 models.put(m);
             body.put("models", models);
         }
+
+        if (webSearch)
+            body.put("plugins", new JSONArray().put(new JSONObject().put("id", "web")));
 
 // Assemble user message content
         JSONArray contentArray = new JSONArray()

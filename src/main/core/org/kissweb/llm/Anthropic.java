@@ -88,6 +88,7 @@ public class Anthropic {
     private float topP = 0.7f;           // Nucleus sampling, used only if topPSet
     private boolean topPSet = false;
     private int maxTokens = 4096;     // Required by Anthropic API
+    private boolean webSearch = false;   // When true, the server-side web search tool is offered
 
     private JSONObject lastResponse;  // Full JSON of last non-stream call
     private int lastHttpStatus;       // HTTP status of the last call
@@ -228,6 +229,23 @@ public class Anthropic {
      */
     public void setMaxTokens(int maxTokens) {
         this.maxTokens = maxTokens;
+    }
+
+    /**
+     * Enables or disables the provider's server-side web search tool (off by default).
+     *
+     * <p>When enabled, the request carries
+     * {@code "tools": [{"type": "web_search_20250305", "name": "web_search"}]} and the model may
+     * consult the public web while generating. The provider runs the searches itself; the
+     * returned text is the concatenation of all of the model's text, across the blocks that
+     * surround the search calls. When disabled the request is unchanged. If the account or model
+     * does not support web search the provider's HTTP error is thrown as usual (there is no
+     * retry without the tool). Searches are billed by the provider in addition to tokens.</p>
+     *
+     * @param webSearch {@code true} to allow web search
+     */
+    public void setWebSearch(boolean webSearch) {
+        this.webSearch = webSearch;
     }
 
     /* ----------------------------------------------------------------------
@@ -568,6 +586,12 @@ public class Anthropic {
                         .put("content", contentArray));
 
         body.put("messages", messages);
+
+        if (webSearch)
+            body.put("tools", new JSONArray()
+                    .put(new JSONObject()
+                            .put("type", "web_search_20250305")
+                            .put("name", "web_search")));
         return body;
     }
 

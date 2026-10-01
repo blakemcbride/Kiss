@@ -117,6 +117,7 @@ public class OpenAI {
     private String reasoningEffort = "medium"; // Extra signal for reasoning models
     private String imageDetail = "auto"; // "low", "high", "auto"
     private Api api = Api.AUTO; // Which endpoint to use
+    private boolean webSearch = false; // When true, the web_search tool is offered (responses endpoint)
 
     private JSONObject lastResponse; // Full JSON of last non-stream call
     private int lastHttpStatus;      // HTTP status of the last streaming call
@@ -287,6 +288,22 @@ public class OpenAI {
         this.api = api == null ? Api.AUTO : api;
     }
 
+    /**
+     * Enables or disables the provider's built-in web search tool (off by default).
+     *
+     * <p>Web search is a feature of the responses endpoint, so when enabled the request is
+     * always sent there, regardless of the model and of {@link #setApi(Api)}, with
+     * {@code "tools": [{"type": "web_search"}]}. When disabled, routing and request bodies are
+     * unchanged. If the account or model does not support web search (for example a reasoning
+     * model run at minimal effort) the provider's HTTP error is thrown as usual; there is no
+     * retry without the tool. Searches are billed by the provider in addition to tokens.</p>
+     *
+     * @param webSearch {@code true} to allow web search
+     */
+    public void setWebSearch(boolean webSearch) {
+        this.webSearch = webSearch;
+    }
+
     /* ----------------------------------------------------------------------
      * Public helpers – ONE send, ONE stream
      * ---------------------------------------------------------------------- */
@@ -375,8 +392,10 @@ public class OpenAI {
                        Runnable onDone) throws Exception {
 
         Api use = api;
-        if (use == Api.AUTO)
-            use = RESPONSES_ONLY_MODELS.contains(model) ? Api.RESPONSES : Api.CHAT_COMPLETIONS;
+        if (webSearch)
+            use = Api.RESPONSES; // web_search is a responses-endpoint tool
+        else if (use == Api.AUTO)
+            use = isResponsesOnlyModel(model) ? Api.RESPONSES : Api.CHAT_COMPLETIONS;
 
         if (use == Api.RESPONSES) {
             streamResponses(query, imagePath, onToken, onDone);
@@ -386,22 +405,72 @@ public class OpenAI {
         try {
             streamChatCompletions(query, imagePath, onToken, onDone);
         } catch (Exception e) {
-            if (api != Api.AUTO  ||  !modelRequiresResponsesApi())
+            if (api != Api.AUTO  ||  !isResponsesRequiredError(lastHttpStatus, lastErrorBody))
                 throw e;
-            // The model exists but is served only by the responses endpoint.  Nothing has
+            // The provider says the model is not served by chat completions.  Nothing has
             // been delivered to the caller yet (the failure is the HTTP status of the
             // request itself), so the call can simply be re-sent to the other endpoint.
-            RESPONSES_ONLY_MODELS.add(model);
+            // This happens at most once per call: a failure of the responses request
+            // propagates as is (for example, when the model simply does not exist).
             streamResponses(query, imagePath, onToken, onDone);
+            // Remember only after the responses endpoint has actually served the model, so
+            // an unknown model is never misclassified and later calls skip the extra trip.
+            if (model != null)
+                RESPONSES_ONLY_MODELS.add(model);
         }
     }
 
     /**
-     * Whether the last failed request failed because the model is served only by the
-     * responses endpoint (the provider reports this as a 404 naming that endpoint).
+     * Whether a model is known up front to be served only by the responses endpoint:
+     * either the provider already told us so during this JVM's life, or its id ends in
+     * {@code -pro} (the provider's convention for its extended-reasoning models, such as
+     * {@code o1-pro} and {@code gpt-5-pro}, none of which are served by chat completions).
+     *
+     * @param model the model id, may be {@code null}
+     * @return {@code true} if requests should go straight to the responses endpoint
      */
-    private boolean modelRequiresResponsesApi() {
-        return lastHttpStatus == 404  &&  lastErrorBody != null  &&  lastErrorBody.contains("/responses");
+    static boolean isResponsesOnlyModel(String model) {
+        if (model == null)
+            return false;
+        return RESPONSES_ONLY_MODELS.contains(model)  ||  isProModel(model);
+    }
+
+    /** Whether the model id ends in {@code -pro}, the provider's extended-reasoning family. */
+    static boolean isProModel(String model) {
+        return model != null  &&  model.toLowerCase().endsWith("-pro");
+    }
+
+    /**
+     * Whether a failed chat completions request failed because the model is served only by
+     * the responses endpoint.  The provider reports this as an HTTP 404 and has worded the
+     * body differently over time, so any of these qualifies: the body names the
+     * {@code /responses} endpoint; its message says the model "is not a chat model"; or its
+     * error {@code param} is {@code "model"} (other than the plain unknown-model case,
+     * code {@code model_not_found}, which a different endpoint cannot cure).
+     *
+     * <p>Any other status, or a 404 that names none of these, is not eligible.</p>
+     *
+     * @param status the HTTP status of the failed request
+     * @param body   the raw error body, may be {@code null}
+     * @return {@code true} if the request should be re-sent to the responses endpoint
+     */
+    static boolean isResponsesRequiredError(int status, String body) {
+        if (status != 404  ||  body == null)
+            return false;
+        if (body.contains("/responses"))
+            return true;
+        try {
+            JSONObject json = new JSONObject(body);
+            JSONObject err = json.has("error") && !json.isNull("error") ? json.getJSONObject("error") : json;
+            String message = err.has("message") && !err.isNull("message") ? err.getString("message") : "";
+            if (message.toLowerCase().contains("not a chat model"))
+                return true;
+            String code = err.has("code") && !err.isNull("code") ? err.getString("code") : "";
+            String param = err.has("param") && !err.isNull("param") ? err.getString("param") : "";
+            return "model".equals(param)  &&  !"model_not_found".equals(code);
+        } catch (Exception e) {
+            return body.toLowerCase().contains("not a chat model"); // not JSON
+        }
     }
 
     /**
@@ -832,7 +901,9 @@ public class OpenAI {
 
         if (reasoningModel) {
             body.put("reasoning", new JSONObject().put("effort", reasoningEffort));
-        } else {
+        } else if (!isProModel(model)) {
+            // "-pro" models always reason and reject sampling parameters, so nothing is sent
+            // for them unless the caller flagged the model as a reasoning model (above).
             body.put("temperature", temperature)
                     .put("top_p", topP);
         }
@@ -857,6 +928,10 @@ public class OpenAI {
                 .put(new JSONObject()
                         .put("role", "user")
                         .put("content", contentArray)));
+
+        if (webSearch)
+            body.put("tools", new JSONArray()
+                    .put(new JSONObject().put("type", "web_search")));
         return body;
     }
 
