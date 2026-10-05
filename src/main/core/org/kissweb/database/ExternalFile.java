@@ -1200,6 +1200,8 @@ public class ExternalFile {
         }
 
         /**
+         * Returns the SQL table name this file type belongs to.
+         *
          * @return the SQL table name this file type belongs to
          */
         public String getTableName() {
@@ -1207,6 +1209,8 @@ public class ExternalFile {
         }
 
         /**
+         * Returns the fictitious field name of this file type.
+         *
          * @return the fictitious field name distinguishing this file type from any other file(s)
          *         associated with the same table, or null
          */
