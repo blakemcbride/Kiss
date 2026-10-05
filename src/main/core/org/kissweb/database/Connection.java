@@ -43,6 +43,8 @@ import java.util.*;
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *  This class represents a connection to an SQL database.
@@ -58,6 +60,14 @@ import java.util.function.BiConsumer;
  *
  */
 public class Connection implements AutoCloseable {
+
+    private static final Logger logger = LogManager.getLogger(Connection.class);
+
+    /**
+     * The schema most recently set through {@link #setSchema(String)}, or null if none was set.
+     * Used to re-assert the schema after a rollback (see {@link #reassertSchema()}).
+     */
+    private String desiredSchema;
 
     /** Enumeration of supported database types */
     public enum ConnectionType {
@@ -336,6 +346,33 @@ public class Connection implements AutoCloseable {
      */
     public void rollback() throws SQLException {
         conn.rollback();
+        reassertSchema();
+    }
+
+    /**
+     * Re-apply the schema last set with {@link #setSchema(String)} to the underlying JDBC connection.
+     * <br><br>
+     * In PostgreSQL, {@code SET search_path} (what JDBC {@code setSchema} executes) is transactional:
+     * if it was issued inside a transaction that is later rolled back, the search path silently reverts.
+     * The next transaction would then run against the wrong schema.  {@link #rollback()} calls this
+     * method automatically.  Code that rolls back the same physical JDBC connection by other means
+     * (for example an ORM sharing the connection) should call this method right after its rollback.
+     * <br><br>
+     * This does nothing if no schema was set through this object or if the database is not PostgreSQL
+     * (other databases do not treat the schema/catalog switch as transactional).  Failure to re-apply is logged
+     * as an error and rethrown, since continuing would run in the wrong schema.
+     *
+     * @throws SQLException if the schema cannot be re-applied
+     */
+    public void reassertSchema() throws SQLException {
+        if (desiredSchema == null || ctype != ConnectionType.PostgreSQL || conn == null)
+            return;
+        try {
+            conn.setSchema(desiredSchema);
+        } catch (SQLException | RuntimeException e) {
+            logger.error("Failed to re-assert schema '" + desiredSchema + "' after rollback", e);
+            throw e;
+        }
     }
 
     /**
@@ -1228,6 +1265,9 @@ public class Connection implements AutoCloseable {
      * Set the default schema for the connection.  This is the schema that
      * will be used if no schema is specified in a query.
      *
+     * The schema is remembered and automatically re-applied after {@link #rollback()}, because in
+     * PostgreSQL the search path is transactional and a rollback would otherwise revert it.
+     *
      * @param  schema  the schema to set
      * @return         the previous schema
      * @throws SQLException if an error occurs setting the schema
@@ -1235,6 +1275,7 @@ public class Connection implements AutoCloseable {
     public String setSchema(String schema) throws SQLException {
         String oldSchema = conn.getSchema();
         conn.setSchema(schema);
+        desiredSchema = schema;
         schemaGraph = SchemaGraph.fromDatabase(this, schema);
         return oldSchema;
     }

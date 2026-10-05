@@ -864,6 +864,18 @@ String reply = client.callToolText("echo", new JSONObject().put("message", "hi")
 - **Transaction Support**: Built-in transaction management
 - **Schema Support**: Can specify schema in table names (e.g., "admin.users")
 
+### Schema Survives Rollback (PostgreSQL search_path is transactional)
+
+In PostgreSQL, `SET search_path` (what JDBC `setSchema` executes) issued inside a transaction is
+undone if that transaction rolls back, so the next transaction would silently run in the wrong
+schema (typically `public`) and fail with "relation ... does not exist". `Connection.setSchema()`
+therefore remembers the schema, and `Connection.rollback()` re-asserts it on the JDBC connection
+right after the rollback. Re-assertion is PostgreSQL-only (other databases' schema/catalog switch is
+not transactional); failures are logged at error level and rethrown. `Connection.reassertSchema()` is
+public: any code that rolls back the same physical JDBC connection by other means (e.g. an ORM sharing
+the connection) must call it on the Kiss `Connection` that set the schema, immediately after its rollback.
+The remembered schema is per Kiss `Connection` object, so it must be the same object that called `setSchema`.
+
 ### Primary Key Discovery Across Schemas/Catalogs
 
 `Connection.getPrimaryColumns(table)` and `Connection.getPrimaryColumnName(table)` resolve a
