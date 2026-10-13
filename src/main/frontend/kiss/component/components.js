@@ -91,9 +91,13 @@ class components {
 
     /**
      * This HTML tag, "combo-box", is the equivalent of the Microsoft Windows combobox control.  It is a drop-down list
-     * that <em>also</em> allows the user to type in a value that is not in the list (free entry).  Like a Windows combobox,
-     * the drop-down arrow always reopens the complete list regardless of what has been typed (unlike the native HTML
-     * <code>datalist</code>, which filters itself away once the typed text matches no option).
+     * that <em>also</em> allows the user to type in a value that is not in the list (free entry).  As the user types, the list
+     * opens (if closed) and narrows to the items whose label contains the typed text anywhere (case-insensitive); an empty
+     * field shows every item, and the list closes when nothing matches.  Like a Windows combobox, the drop-down arrow
+     * button (and clicking into the field) always shows the complete list regardless of what has been typed.  The Up/Down
+     * arrow keys (list open or closed) show and move through only the items matching the current text and never widen to
+     * the full list; Enter and Escape also operate on the items shown.  Setting the value programmatically never opens or
+     * filters the list.
      * <br><br>
      * Each list item has a <em>label</em> (the text shown, typed, and selected by the user) and an optional underlying
      * <em>value</em> and arbitrary associated <em>data</em>.  When the user types text that is not in the list,

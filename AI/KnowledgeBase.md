@@ -1202,7 +1202,7 @@ The file `Kiss/src/main/frontend/kiss/component/components.js` serves as the JSD
 The framework provides custom HTML components that should be used:
 - `<text-input>` - Text input field
 - `<drop-down>` - Dropdown select; type-to-filter: while focused, open or closed, typing narrows the list to labels containing the typed text (matched anywhere, case-insensitive), Backspace edits the sequence, Escape erases it and restores the full list and prior selection; the index-based API always sees the complete list. Mouse/keyboard opens (click, Space, Alt+Down, F4) show a Kiss-drawn list (`.kiss-dropdown-list`, one shared element on the body) instead of the browser's pop-up, because the browser delivers no keystrokes to the page while its own pop-up is open; touch input keeps the native picker
-- `<combo-box>` - Editable dropdown (Windows-style combobox; pick from the list or type free text)
+- `<combo-box>` - Editable dropdown (Windows-style combobox; pick from the list or type free text). Typing opens the list and narrows it to labels containing the typed text anywhere (case-insensitive); empty text shows all, no match closes the list. The arrow button and clicking into the field show the FULL list (exact-match highlighted); ArrowDown/ArrowUp (open or closed) show and navigate only the items matching the current text and never widen to the full list (empty text = all, no match = stays closed); Enter/Escape act on the shown items only. Programmatic `setValue`/`setText`/`clear` never open or filter the list. Custom Kiss-drawn `<ul>` list, not a native datalist
 - `<push-button>` - Button element
 - `<popup>` - Modal dialog
 - `<popup-title>` - Popup header

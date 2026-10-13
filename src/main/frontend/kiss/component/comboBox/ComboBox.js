@@ -5,11 +5,16 @@
  * control.  It is a drop-down list that ALSO allows the user to type in a value
  * that is not in the list (free entry).
  *
- * It is a custom drop-down (not the native HTML <datalist>): the native datalist
- * behaves as a type-ahead filter, so once the user types text that matches no
- * option it shows nothing and the full list can no longer be reopened.  A real
- * Windows combobox always reopens the complete list from the drop-down arrow
- * regardless of what was typed, which is what this control does.
+ * It is a custom drop-down (not the native HTML <datalist>).  As the user types,
+ * the list opens (if closed) and narrows to the items whose label contains the
+ * typed text anywhere (case-insensitive substring match); an empty field shows
+ * every item, and when nothing matches the list closes.  The drop-down arrow
+ * button (and clicking into the field) always shows the complete list regardless
+ * of what was typed, so every choice can still be browsed.  The Up/Down arrow
+ * keys, on an open or closed list, show and move through only the items matching
+ * the current text (never widening to the full list); Enter and Escape also
+ * operate on the items shown.  Text that is not in the list is accepted as free entry, and
+ * setting the value programmatically never opens or filters the list.
  */
 
 /* global Utils, DOMUtils */
@@ -92,7 +97,9 @@
 
         let items = [];          // { value, label, data }
         let isOpen = false;
-        let highlightIndex = -1;
+        let highlightIndex = -1;       // index into items of the highlighted item, or -1
+        let visible = [];              // indexes into items of the items currently shown
+        let currentFilter = '';        // the (lower-case) filter text applied to the list
 
         function currentText() {
             const v = el.value;
@@ -133,24 +140,60 @@
                 closeList();
         }
 
-        function openList() {
+        //  Shows only the items whose label contains txt (case-insensitive); an
+        //  empty txt shows all items.  Returns the number of items shown.
+        function applyFilter(txt) {
+            currentFilter = txt ? txt.toLowerCase() : '';
+            visible = [];
+            const lis = list.children;
+            for (let i = 0; i < items.length; i++) {
+                const show = currentFilter === '' || String(items[i].label).toLowerCase().indexOf(currentFilter) !== -1;
+                lis[i].style.display = show ? '' : 'none';
+                if (show)
+                    visible.push(i);
+            }
+            return visible.length;
+        }
+
+        //  Opens the list showing the items matching filterTxt (all items when
+        //  omitted/empty) and highlights the item whose label equals the current text.
+        function openList(filterTxt) {
             if (!isInteractive() || !items.length)
                 return;
-            //  highlight the item matching the current text (if any)
+            if (!applyFilter(filterTxt)) {
+                closeList();
+                return;
+            }
             const txt = currentText();
             let idx = -1;
-            for (let i = 0; i < items.length; i++)
-                if (items[i].label === txt) {
-                    idx = i;
+            for (let k = 0; k < visible.length; k++)
+                if (items[visible[k]].label === txt) {
+                    idx = visible[k];
                     break;
                 }
             list.style.display = 'block';
-            isOpen = true;
+            list.scrollTop = 0;
             setHighlight(idx);
             scrollHighlightIntoView();
-            //  raw listener (per instance) so multiple combo-boxes do not clobber
-            //  each other the way DOMUtils' single-handler-per-event tracking would
-            document.addEventListener('mousedown', outsideHandler, true);
+            if (!isOpen) {
+                isOpen = true;
+                //  raw listener (per instance) so multiple combo-boxes do not clobber
+                //  each other the way DOMUtils' single-handler-per-event tracking would
+                document.addEventListener('mousedown', outsideHandler, true);
+            }
+        }
+
+        //  Moves the highlight by delta positions among the items currently shown.
+        function moveHighlight(delta) {
+            if (!visible.length)
+                return;
+            const pos = visible.indexOf(highlightIndex);
+            let np;
+            if (pos < 0)
+                np = delta > 0 ? 0 : visible.length - 1;
+            else
+                np = Math.max(0, Math.min(pos + delta, visible.length - 1));
+            setHighlight(visible[np]);
         }
 
         function closeList() {
@@ -158,6 +201,7 @@
                 return;
             list.style.display = 'none';
             isOpen = false;
+            highlightIndex = -1;
             document.removeEventListener('mousedown', outsideHandler, true);
         }
 
@@ -189,7 +233,12 @@
             if (!isInteractive())
                 return;
             el.focus();
-            toggleList();
+            //  the arrow always shows the full list: if the list is open but narrowed
+            //  by typing, widen it instead of closing it
+            if (isOpen && currentFilter !== '')
+                openList();
+            else
+                toggleList();
         });
 
         //  Clicking into the edit field also drops the list down (so "going into it"
@@ -200,7 +249,11 @@
                 openList();
         });
 
+        //  Fires only for user edits (never for programmatic value changes): narrow
+        //  the list to the items containing the typed text, opening it if closed.
         DOMUtils.on(el, 'input', function () {
+            if (isInteractive())
+                openList(currentText());
             if (triggerGlobalChange)
                 Utils.someControlValueChanged();
             if (onCChangeFn)
@@ -219,17 +272,17 @@
                 case 'ArrowDown':
                     e.preventDefault();
                     if (!isOpen)
-                        openList();
+                        openList(currentText());
                     else
-                        setHighlight(Math.min(highlightIndex + 1, items.length - 1));
+                        moveHighlight(1);
                     scrollHighlightIntoView();
                     break;
                 case 'ArrowUp':
                     e.preventDefault();
                     if (!isOpen)
-                        openList();
+                        openList(currentText());
                     else
-                        setHighlight(Math.max(highlightIndex - 1, 0));
+                        moveHighlight(-1);
                     scrollHighlightIntoView();
                     break;
                 case 'Enter':
@@ -264,6 +317,7 @@
 
         newElm.clearList = function () {
             items = [];
+            visible = [];
             list.innerHTML = '';
             highlightIndex = -1;
             return this;
@@ -290,6 +344,8 @@
                 setHighlight(idx);
             });
             list.appendChild(li);
+            if (isOpen)
+                applyFilter(currentFilter);     // keep the shown subset consistent
             return this;
         };
 
