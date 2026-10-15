@@ -451,7 +451,7 @@ class components {
      *     <tr><td>    readWrite([flg])     </td><td>     sets control to read-write (or the reverse if the optional argument is <code>false</code>)    </td></tr>
      *     <tr><td>    removeByIndex(idx)     </td><td>     remove the row indicated by <code>idx</code>             </td></tr>
      *     <tr><td>    setLabel(lbl, idx)     </td><td>     sets a row label to <code>lbl</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.             </td></tr>
-     *     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  </td></tr>
+     *     <tr><td>    setValue(val, idx)     </td><td>     sets a row value to <code>val</code>.  If <code>idx</code> is undefined, the selected row is affected otherwise the row indexed by <code>idx</code> is updated.  In a <code>multiple</code> list, when <code>idx</code> is undefined, <code>val</code> may be an array of values (or a single value; <code>null</code>, <code>undefined</code>, or <code>''</code> clears all): every option whose value (compared as a string) is in the set is selected and all others are deselected.  </td></tr>
      *     <tr><td>    selectedIndex()     </td><td>     returns the index of the selected item  (-1 if none)             </td></tr>
      *     <tr><td>    selectIndex(row)     </td><td>     selects the indicated row index            </td></tr>
      *     <tr><td>    show([flg])     </td><td>     the control is made visible (or the reverse if the optional argument is <code>false</code>)               </td></tr>

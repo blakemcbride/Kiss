@@ -394,8 +394,19 @@
         newElm.setValue = function (val, row) {
             endFilter();
             if (row !== 0 && !row) {
-                el.value = val;
-                originalValue = el.value;
+                if (multiple) {
+                    // Accepts an array of values, a single scalar, or null/undefined/'' (clear all).
+                    const vals = val === null || val === undefined || val === '' ? [] : Array.isArray(val) ? val : [val];
+                    const sel = new Set(vals.map(v => String(v)));
+                    const o = opts();
+                    for (let i = 0; i < o.length; i++)
+                        o[i].selected = sel.has(String(o[i].value));
+                    const first = firstSelected();
+                    originalValue = first ? first.value : '';
+                } else {
+                    el.value = val;
+                    originalValue = el.value;
+                }
             } else {
                 const origVal = newElm.getValue(row);
                 el.options[row].value = val;
