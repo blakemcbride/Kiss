@@ -291,6 +291,9 @@ public class Tasks {
         unJar(workDir, BUILDDIR + "/Kiss.jar");
         unJar(workDir, "libs/" + postgresqlJar);
 
+        // SQLite driver, so tests that need a throwaway database (the OAuth store, column metadata) can run.
+        unJar(workDir, "libs/sqlite-jdbc-3.53.1.0.jar");
+
         // Kiss core (src/main/core) has depended on Log4j 2.x for logging (Cron, PDF, MCPServerBase,
         // RestServerBase, Crypto, ...) since well before unit tests existed for any of those classes.
         // Bundle it here so a test that touches any such class can actually initialize it - without

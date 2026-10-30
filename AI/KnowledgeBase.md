@@ -225,7 +225,7 @@ class ServiceName {
   from the exploded tree.
 - `./bld war` - Create WAR file for deployment
 - `./bld -v unit-tests` - Build `work/KissUnitTest.jar`, a self-contained JUnit 5 console-launcher jar
-  (Kiss core + precompiled + test classes + JUnit + Log4j + jakarta.servlet-api, all unpacked and
+  (Kiss core + precompiled + test classes + JUnit + Log4j + jakarta.servlet-api + the PostgreSQL and SQLite JDBC drivers, all unpacked and
   re-jarred together with a `Main-Class: org.junit.platform.console.ConsoleLauncher` manifest). There is
   no separate `test` task - `unit-tests` only builds the jar; run the tests with:
   ```
@@ -711,16 +711,119 @@ Typical use: set normalization and aliases, `readHeader()`, `requireHeaders(...)
 Persistence-agnostic base class for importing a CSV file; built on `DelimitedFileReader` (normalized headers + aliases).
 It never touches a database, logger, or web path - the subclass and hooks do.
 
-- Subclass implements `initColumns()` (calls `addColumn(name, required, aliases...)`), `checkRow(rowNum)`, `parseRow(rowNum)`.
+- Subclass implements `initColumns()` (calls `addColumn(name, required, aliases...)` or the fluent `addColumn(name)`; both return the
+  column's `Column` declaration, which callers may ignore), `checkRow(rowNum)`, `parseRow(rowNum)`.
   Helpers: `getString(name)`, `columnHasData(name)`, `colExists(name)`, `getFileColumns()`, `fixNum(s)`; reader is `df`.
 - `run()` (never throws) validates the header (missing required, duplicate, nothing recognized), runs the check pass
   over all rows, and only if there are zero errors runs the parse pass; in `FULL_MODE` it then calls `deactivateMissing()`.
   Errors are prefixed with the 1-based data row number. `addWarning` does not stop the import.
+- **Check without importing: `List<String> check()`.** Header validation + every line readable + `checkRow(n)` for every
+  data row; writes nothing (no `parseRow`/`commitBatch`/`deactivateMissing`/`onFinish`). For accepting or refusing a file
+  before any import starts (e.g. an upload handler). Returns ALL problems, no cap; empty = importable. Row problems are
+  `"Row n: ..."` (n counts data rows, blank lines skipped, title line excluded). The header rules are the single
+  `readHeader()` implementation `run()` also uses; the subclass's existing `checkRow(int)` is the per-row hook (no second rule
+  set). File-level wording (user-facing): `The file is missing its first line of column titles.`, `The file is missing the
+  required column "X".` (one per column), `The file has no recognizable columns.`, `Duplicate column titles (A, B); each
+  column may appear only once, even under a different accepted name.`, `Row n could not be read: msg` (continues),
+  `The file could not be read after row n: msg` (I/O; stops). No title line / missing required column / no recognizable
+  column is reported ALONE (`checkHeader`/`checkRow` not called); a duplicate title is reported and rows are STILL checked.
+  An exception from `initColumns`/`checkHeader`/`checkRow` propagates out of `check()` (file closed), it is not a "problem".
+- `runChecked()` (never throws) = `check()`'s check phase (same problems, same wording) then, only if clean, the parse pass
+  exactly as in `run()`. `run()` keeps its original technical wording (`import file is missing required column X`...) and
+  still stops at the first header problem; do not "unify" the two wordings (existing callers/tests depend on `run()`'s).
+- `checkHeader()` hook (no-op default): called once by `run()`, `runChecked()` and `check()` after the title line is accepted
+  and before the first row is checked; the reader is still on the title line (`df.getString(i)` = title i). Use it to prepare
+  per-file state `checkRow` needs and to report title problems with `addError` (no row prefix).
+- **The file's own titles** (all `protected`, available from the moment the title line is read: in `checkHeader()`, `checkRow`
+  and `parseRow` under `run()`, `runChecked()` and `check()` alike; empty before then and for a file with no title line, and
+  filled even when the header is rejected; unmodifiable; unchanged by the parse pass's re-read of the title line):
+  - `List<String> getFileColumnTitles()` - EVERY column of the title line, by file column index (element i = `df.getString(i)`
+    on a data row): trimmed by the reader and otherwise exactly as in the file (case, inner spaces, hyphens, a BOM are kept);
+    an empty title is `""`, so indexes stay aligned. (`getFileColumns()` is only the declared columns that are present.)
+  - `String getFileColumnTitle(String name)` - the file's own title for a declared column (found by name or alias, so it may be
+    the alias); `""` if the file lacks it or the name is not declared.
+  - `List<String> getUnknownColumns()` / `List<Integer> getUnknownColumnIndexes()` - the columns no declared column reads: titles
+    (original text, file order, a sub-list of `getFileColumnTitles()`) and the parallel zero-based file column indexes. "Reads" =
+    the index the reader resolves a declared name to (`df.getColumnIndex`), i.e. the one resolution the header validation and
+    `getString(name)` use, so case/white space/hyphens/underscores/non-printables are ignored and aliases count; no second
+    matching implementation exists. Empty titles are omitted. With two columns for one declared column (a duplicate-title
+    problem) only the column a by-name lookup reads is recognized; the other is listed as unknown too. The value of an
+    unknown column in the current row is `df.getString(index)` (trimmed, `""` past the end of a short row); `getUnknownString(index)` is the same with the rules of
+    `unknownColumnRules()` applied (below). Compare titles
+    with `colExists`/`df.getColumnIndex`, not by comparing `getFileColumnTitles()` text.
+- An instance is single-use: `check()` consumes it (file closed). Import after a clean check on a NEW instance, or use
+  `runChecked()`. A second `check()` throws `IllegalStateException`; a second `run()`/`runChecked()` returns an error `Result`.
 - Modes: `APPEND_MODE`, `UPDATE_MODE`, `FULL_MODE` (field `mode`). Counters `recordsAdded/Updated/Deactivated` are
   incremented by the subclass; `rowsRead` by the base.
 - No-op hooks: `commitBatch()` (every `setBatchSize(n)` rows, default 20, and at the end of the parse pass),
   `onFinish(Result)`, `onFailure(Throwable)`, `log(level, msg)`. `setLogPath(path)` makes Kiss write
   `Result.getSummary()` to that file with plain java.io; the caller computes any URL.
+- **Declarative column rules** (`DelimitedFileImport.Column`, chained onto `addColumn(...)` in `initColumns()`). No database needed;
+  every rule runs automatically once per data row in `check()`, the check phase of `runChecked()` and the check pass of `run()`,
+  BEFORE `checkRow(n)` (which is still called for a row that broke a rule). Every broken rule is a row error `"Row n: ..."`, in file
+  (left-to-right) order, nothing capped. Messages name the column by the FILE's own title (`getFileColumnTitle`, so an alias if the
+  file used it) in double quotes. A rule applies only to a column the file has. A blank cell is valid unless `notBlank()`, and a blank
+  skips the length/number/date checks (a blank in a `notBlank()` typed column is the one error `"X" must have a value.`).
+  - `required()`/`required(boolean)`/`aliases(...)` = the fluent form of `addColumn`'s `required`/`aliases` (header rule only).
+    `notBlank()` = row rule, independent of `required`; a column that is both gets both.
+  - Text: `maxLength(int)` / `maxLength(IntSupplier)` (code points, like a DB column; `Integer.MAX_VALUE` = no limit; a negative
+    supplier result is `IllegalStateException`). Default on overflow = row error `"Job Title" is 45 characters long; at most 30 are
+    allowed.` With `truncate()` the value is cut instead. The supplier is called ONCE per run, after the title line is accepted and
+    before `checkHeader()`, only if the file has the column, never per row or per pass. DelimitedFileImport stays DB-free: a DB width
+    is passed as a lambda (e.g. wrapping `Connection.getColumnWidth`, which throws `SQLException`).
+  - Truncation happens in ONE place (`prepareRow`, before `checkRow`/`parseRow`): `getString(name)` returns the shortened text in
+    check and parse alike (`df.getString` stays the file's text; `columnHasData` goes through `getString`). The cut is by code points
+    (never splits a surrogate pair) and keeps trailing blanks it leaves. Each cut is a WARNING recorded once, in the check pass only
+    (the parse pass recomputes silently): `Row 4: "Job Title" was 45 characters long and was shortened to 30 characters.` Warnings are in
+    `Result.getWarnings()` / the summary after `run()`/`runChecked()` and in the new `public List<String> getWarnings()` on the instance
+    (the only way to read them after `check()`, which returns just problems). A warning never makes a file unacceptable.
+  - Numbers: `integer()` (fits int), `longInteger()`, `decimal()`; bounds (inclusive, declare the type first) `min/max/range` with
+    `long`, `double` or `BigDecimal` (null = open). Parsing is lenient like a spreadsheet: `$`, commas, any white space ignored, optional
+    leading sign, decimal point; no exponent/percent/text. Integer kinds ROUND a decimal half away from zero (`1500.5` -> 1501) before the
+    range check; `decimal()` keeps the exact value (scale as written). Message: `"# Employees" must be a whole number from 0 to 1,000,000
+    (found "50-100").` (also `of at least 0`, `of at most 9`; the type's own limit is named only when a value breaks it).
+  - Dates: `date()` (= forms `DateUtils.parse` reads: `M/d/yyyy`, `M/d/yy`, `M.d.yyyy`, `M.d.yy`, `yyyy-M-d`), `date(fmt, more...)`,
+    `dateTime(fmt, more...)`; bounds `min/max/range` with `LocalDate` (date) or `LocalDateTime` (date-time), inclusive. Formats are
+    `DateTimeFormatter` patterns with fixed differences: `yyyy` = exactly 4 digits (this is how "03-15-24" is refused), `yy` = two-digit year
+    with `DateUtils`' window (no more than 10 years ahead is 20yy else 19yy), `MM`/`dd` need 2 digits (`M`/`d` take 1 or 2), case-insensitive,
+    STRICT resolution (Feb 30 and trailing text are errors, unlike `DateUtils.parse`), English month names/AM-PM. A format is checked at
+    declaration (sample date formatted and re-parsed): a bad or unreadable pattern, or a date-time without a time, is
+    `IllegalArgumentException`. Message: `"Start Date" must be a date such as 03/25/2024 (found "13/45/2024").` (the example is the
+    format applied to 2024-03-25 14:30; several formats are joined with " or "); range: `must be a date from A to B` / `on or after A` /
+    `on or before B` (`at or ...` for date-times).
+  - Typed getters (protected; valid in `checkRow`/`parseRow`): `getInt` (integer), `getLong` (integer/longInteger), `getBigDecimal`,
+    `getDouble` (any number), `getLocalDate`, `getIntDate` (YYYYMMDD) for date or date-time, `getLocalDateTime`, `getIntTime` (HHMM) for date-time.
+    Blank / rule-broken / absent column give `0` (primitives) or `null` (BigDecimal, dates), so `checkRow` may call them freely; use
+    `columnHasData` to tell blank from zero. An undeclared name is `IllegalArgumentException`; a type the column was not declared with is
+    `IllegalStateException` (loud on purpose). The name is found like `getString` finds it (declared name any case/spacing, or the file's title).
+  - Declaration mistakes (range before its type, range on text, a second type, `truncate()` with a type, backwards range, `NaN` bound, bad
+    date format) throw from `initColumns()`: `check()` propagates, `run()`/`runChecked()` report "Unexpected error" in the result.
+  - `addColumn(...)` used to return `void`; it now returns `Column`. Source compatible (every existing call ignores the value) but NOT
+    binary compatible: callers must be recompiled against the new Kiss.
+- **Rules for the unrecognized columns: `protected Column unknownColumnRules()`.** One `Column` declaration for EVERY unknown column
+  (those `getUnknownColumnIndexes()` lists), chained in `initColumns()` like any other: `unknownColumnRules().maxLength(() -> w).truncate()`.
+  Internally the declaration is a template: after the title line is accepted each unknown column gets its own copy (own file title, own
+  per-row value), so the rules run exactly as a declared column's: once per row in `check()`/`runChecked()`/the check pass of `run()`,
+  before `checkRow`, errors in file order together with the declared columns', truncation as the same-worded warning recorded once (check
+  pass only), the column named by the file's own title (shortened to 60 chars + "..." if longer). The run-time `maxLength(IntSupplier)` is read
+  ONCE per run (not per column), only if the file has an unknown column. `required()`/`aliases()` on it throw `IllegalStateException`
+  (they match a title to a declared name). A number/date type declared on it is enforced but there is no typed getter (read as text). The set
+  of unknown columns is fixed when the title line is read: declare in `initColumns()`, a later declaration does not affect the run. Default
+  (never called, or called with no rule): nothing changes. A subclass that keeps only some unknown columns applies its own selection; the
+  rules cover all of them (a duplicate-title second column is unknown too and gets them).
+  - `String getUnknownString(int fileColumnIndex)` / `getUnknownString(String title)`: the trimmed value with those rules applied (a truncated
+    value is the shortened text, in `checkRow` and `parseRow` alike; `df.getString` stays the file's text). By index: any index not in
+    `getUnknownColumnIndexes()` (declared column, empty title, out of range) is `IllegalArgumentException` (program error); by title: exact
+    match on the file's text, first of equal titles wins, `""` if none.
+- **Shortening a derived value: `protected String truncate(String label, String value, int max)`.** For a value the column rules cannot reach
+  (e.g. a street cut out of a declared full-address cell). Cuts to `max` code points (never splits a surrogate pair, keeps trailing blanks the
+  cut leaves, same as `Column.truncate()`), null -> null, `Integer.MAX_VALUE` = no limit, negative -> `IllegalArgumentException`. When it cuts it
+  records `addWarning("\"label\" was X characters long and was shortened to N characters.")` (Kiss adds the quotes and the `Row n: ` prefix).
+  De-duplication: the warning is recorded only while NOT in the parse pass (the `parsing` flag set by `readRows(true)`), so the same call made
+  in `checkRow` and `parseRow` (or in one method both use) lists a cut once under `run()`, `runChecked()` and `check()`; within one row an
+  identical warning (same label, value, limit) is also recorded once (`shortenedInRow`, cleared per row). Consequences: a value shortened ONLY in
+  `parseRow` is never reported (shorten it in the check pass too); called from `checkHeader()` (or `deactivateMissing()`) it records a warning
+  with no row prefix. The declared-column cut and this helper share `cutTo`/`shortenedMessage`, so the wording cannot drift.
 - `Result`: `getErrors()`, `getWarnings()`, `isSuccess()`, counts, `getSummary()`.
 - Transactions: the subclass owns them (commit in `commitBatch()`/`onFinish`, roll back in `onFailure`).
 
@@ -884,6 +987,13 @@ String reply = client.callToolText("echo", new JSONObject().put("message", "hi")
   - `exists(String sql, Object... args)` - Check if records exist. Implemented as `fetchOne(sql, args) != null` so it routes through the framework's per-vendor `limit()` and works uniformly across all five supported databases. Pass a plain WHERE-clause query (do not pre-wrap with `SELECT EXISTS(...)` or pre-add `LIMIT`)
   - `fetchCount(String sql, Object... args)` - Count rows that would be returned by the given select. Wraps the query as `SELECT COUNT(*) AS n FROM (...) tmp123`; the explicit `AS n` alias and bare table alias are portable across PostgreSQL, MySQL, SQLite, SQL Server, and Oracle
   - `fetchAllJSON(String sql, Object... args)` - Fetch results directly as JSON array
+  - `getColumnWidth(String table, String column)` - the declared width in characters of a column of the current schema,
+    for checking a value before writing it. Cached JVM-wide per `metadataScopeKey()` + table + column (thread-safe,
+    case-insensitive names, exact match: `_` is a character, not the `DatabaseMetaData` pattern wildcard). A text/unbounded
+    column, a column reporting no positive size, and a MISSING column/table all answer `Connection.UNLIMITED_COLUMN_WIDTH`
+    (`Integer.MAX_VALUE`) and never throw for that reason; a missing column is not cached (a patch may add it later). An
+    `SQLException` from the metadata read propagates (an outage must not silently switch a check off). `getColumnSize` is the
+    older uncached, pattern-matching call that answers -1 for a missing column.
 - **Field Access Methods**:
   - `getString()` - Get string value
   - `getInt()` - Get integer value
@@ -2070,12 +2180,16 @@ one the schema is willing to add) whose content is normally small but occasional
 virtual-column pattern when there is no real column at all.
 
 **Threshold: read from metadata, never hard-coded.** The column's declared size is read from JDBC
-column metadata via `Connection.getColumnInfo(table)` / `ColumnInfo.getColumnSize()` (both
-package-private, reused directly since `ExternalFile` lives in the same `org.kissweb.database`
-package rather than duplicating metadata-reading code) — the unit is characters, which is already
-correct for a database like PostgreSQL where `varchar(n)` is measured in characters, not bytes. The
-result is cached in a static `Map<String,Integer>` keyed by `schema|table.column` for the life of
-the JVM.
+column metadata through the package-private `Connection.declaredColumnSize(table, column)` (the raw
+size, or `NO_SUCH_COLUMN`), the lookup behind the public cached `Connection.getColumnWidth` — the unit
+is characters, which is already correct for a database like PostgreSQL where `varchar(n)` is measured
+in characters, not bytes. The result is cached in one static map in `Connection` keyed by
+`metadataScopeKey|table.column` for the life of the JVM; `ExternalFile` has no cache of its own. A
+missing column is an error at the `ExternalFile` level (`SQLException`), which is why it uses the raw
+lookup rather than `getColumnWidth` (that one answers "unlimited" for a missing column).
+`Connection.getColumnInfo` keeps only the rows whose `TABLE_NAME` equals the requested table: the table
+name handed to `DatabaseMetaData.getColumns` is a pattern in which `_` matches any character, so on
+PostgreSQL `pw_t` also returned the columns of `pwXt` and the last one silently won.
 
 **Metadata reads are schema-scoped.** Any `DatabaseMetaData` call that takes a table name
 (`getColumns`, `getPrimaryKeys`) must be narrowed to the connection's current schema (PostgreSQL) or
@@ -2118,7 +2232,7 @@ SELECT so they cannot drift. `ExternalFile.isExternal(raw)` is true exactly for 
 `ExternalFile.releaseHybridColumn(db, table, column, pk, nullable)` deletes any external file and
 clears the column (NULL if nullable, "" if NOT NULL); `saveHybridColumn(..., null)` stores SQL NULL
 and `(..., "")` stores "" exactly as passed, so use release when nullability is what matters.
-No-DB tests: `ExternalFileHybridResolveTest`; the DB tests are gated by `-Dkiss.test.postgres=true`.
+No-DB tests: `ExternalFileHybridResolveTest`; the PostgreSQL tests (`ExternalFileHybridColumnTest`, `ConnectionColumnWidthPostgresTest`, which proves the exact-table-name fix) are gated by `-Dkiss.test.postgres=true`; `ConnectionColumnWidthTest` (SQLite, throwaway temp file) always runs.
 
 **No binary/byte[] variant.** varchar backing implies text, so only a `String` API is provided; a
 binary variant was not added because it does not fall out of this design trivially (binary data

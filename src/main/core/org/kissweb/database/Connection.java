@@ -1112,7 +1112,93 @@ public class Connection implements AutoCloseable {
     }
 
     /**
+     * The width reported by {@link #getColumnWidth(String, String)} for a column that has no length limit
+     * (text, or a character type declared without a length) or whose width could not be determined.  It is
+     * {@link Integer#MAX_VALUE}, which is also what PostgreSQL and SQL Server report for such columns, so
+     * {@code value.length() > connection.getColumnWidth(table, column)} is never true for them.
+     */
+    public static final int UNLIMITED_COLUMN_WIDTH = Integer.MAX_VALUE;
+
+    /** The size reported by {@link #declaredColumnSize} when the table has no such column. */
+    static final int NO_SUCH_COLUMN = -1;
+
+    /**
+     * (metadata scope | table.column), lower case, to the declared size of the column, for every column found.
+     * JVM-wide and shared by all connections, because the same table has the same definition for every connection
+     * to the same schema; the scope is part of the key because it can differ per schema (see
+     * {@link #metadataScopeKey()}).  A table's definition does not change while an application runs, so entries are
+     * never invalidated.  A column that was not found is not cached: it may be added later (a schema patch).
+     */
+    private static final Map<String, Integer> columnSizeCache = new ConcurrentHashMap<>();
+
+    /**
+     * Returns the declared width, in characters, of a column of the connection's current schema, read from the
+     * database metadata at run time instead of being repeated as a constant in Java.  It is meant for checking a
+     * value against the column before writing it, so the check always agrees with the schema.
+     * <br><br>
+     * <b>Caching.</b>  Each answer is read once and then remembered for the life of the JVM, per current
+     * schema/catalog (the scope, so a connection that is switched to another schema, or a different tenant's
+     * connection, never gets another schema's answer), table and column.  The cache is thread-safe and shared by all
+     * connections.  Names are case-insensitive for the cache and for matching the column (the table name is passed to
+     * the driver as given).  The match is exact: a {@code _} in a table or column name is a character, not the
+     * single-character wildcard that {@link #getColumnSize} hands to {@code DatabaseMetaData.getColumns}.
+     * <br><br>
+     * <b>Result.</b>  The width in characters (the unit JDBC reports character columns in) for a bounded character
+     * column.  {@link #UNLIMITED_COLUMN_WIDTH} for a text column or one declared without a length, for a column the
+     * driver reports no positive size for, and for a column that does not exist; this never throws because a column
+     * is missing.  (A caller that must tell a missing column from an unlimited one cannot use this method.  Note
+     * that a missing column is not remembered, so that a column added later is picked up.)
+     * <br><br>
+     * <b>Metadata failure.</b>  An {@link SQLException} raised by the database while reading the metadata is not
+     * hidden: it propagates, because treating an outage as "unlimited" would quietly switch a check off.  A caller
+     * that prefers a never-throwing lookup catches it and uses {@link #UNLIMITED_COLUMN_WIDTH}.
+     *
+     * @param table  the table name
+     * @param column the column name
+     * @return the width in characters, or {@link #UNLIMITED_COLUMN_WIDTH}
+     * @throws SQLException if the database could not provide the table's metadata
+     */
+    public int getColumnWidth(String table, String column) throws SQLException {
+        final int size = declaredColumnSize(table, column);
+        return size <= 0 ? UNLIMITED_COLUMN_WIDTH : size;
+    }
+
+    /**
+     * The declared size of a column exactly as the driver reports it (it may be 0 or huge), from the cache shared
+     * with {@link #getColumnWidth(String, String)}; {@link #NO_SUCH_COLUMN} if the column is not in the table.
+     * Used by {@link ExternalFile}, which must tell a missing column from an unlimited one.
+     */
+    int declaredColumnSize(String table, String column) throws SQLException {
+        if (table == null || column == null)
+            return NO_SUCH_COLUMN;
+        final String key = metadataScopeKey() + "|" + table.toLowerCase(Locale.ROOT) + "." + column.toLowerCase(Locale.ROOT);
+        final Integer cached = columnSizeCache.get(key);
+        if (cached != null)
+            return cached;
+        final HashMap<String, ColumnInfo> cols = getColumnInfo(table);
+        if (cols == null)
+            return NO_SUCH_COLUMN;
+        ColumnInfo ci = cols.get(column);
+        if (ci == null)
+            for (final Map.Entry<String, ColumnInfo> e : cols.entrySet())
+                if (e.getKey().equalsIgnoreCase(column)) {
+                    ci = e.getValue();
+                    break;
+                }
+        if (ci == null)
+            return NO_SUCH_COLUMN;
+        final int size = ci.getColumnSize();
+        columnSizeCache.put(key, size);
+        return size;
+    }
+
+    /**
      * Manly useful in CHAR or VARCHAR columns, this method returns the maximum size of the column.
+     * <br><br>
+     * This reads the metadata on every call, matches the column name as a {@code DatabaseMetaData} pattern (so a
+     * {@code _} or {@code %} in the name matches other characters), and answers -1 for a column it cannot find.
+     * To check a value against a column's width, use {@link #getColumnWidth(String, String)}, which is cached, exact,
+     * and answers {@link #UNLIMITED_COLUMN_WIDTH} for a column with no limit.
      *
      * @param table the table name
      * @param cname the column name
@@ -1383,6 +1469,10 @@ public class Connection implements AutoCloseable {
         DatabaseMetaData meta = conn.getMetaData();
         try (ResultSet res = meta.getColumns(catalog, schema, table, null)) {
             while (res.next()) {
+                //The table name is a pattern in which '_' matches any character; keep only the table asked for.
+                final String tableName = res.getString("TABLE_NAME");
+                if (tableName != null && !tableName.equalsIgnoreCase(table))
+                    continue;
                 String colName = res.getString("COLUMN_NAME");
                 colInfo.put(colName, new ColumnInfo(colName,
                         res.getInt("DATA_TYPE"),

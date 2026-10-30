@@ -641,39 +641,17 @@ public class ExternalFile {
     private static final String HYBRID_EXTENSION = ".col";
 
     /**
-     * Per (schema, table, column) cache of a varchar column's declared size (in characters),
-     * populated by {@link #getColumnSize}.  Keyed by the connection's current schema/catalog
-     * (see {@link Connection#metadataScopeKey}) because the same table name can have different
-     * column sizes in different schemas.  A table's definition does not change while the
-     * application is running, so entries are never invalidated.
-     */
-    private static final Map<String, Integer> hybridColumnSizeCache = new ConcurrentHashMap<>();
-
-    /**
      * Looks up {@code tableName.columnName}'s declared size (in characters &mdash; the unit JDBC
      * column metadata already reports character types in, e.g. PostgreSQL {@code varchar(n)} is
-     * measured in characters, not bytes) via {@link Connection#getColumnInfo}, the same metadata
-     * facility {@link Connection#getPrimaryColumns} and friends are built on. The result is cached
-     * per schema+table+column for the life of the JVM (see {@link #hybridColumnSizeCache}), so repeated
-     * saves/gets against the same column cost one metadata lookup, not one per call.
+     * measured in characters, not bytes) through {@link Connection#declaredColumnSize}, the lookup
+     * behind {@link Connection#getColumnWidth}.  That lookup caches the size per schema+table+column for
+     * the life of the JVM, so repeated saves/gets against the same column cost one metadata lookup, not one
+     * per call.  A column that is not in the table is an error here (the caller named a column to store data in).
      */
     private static int getColumnSize(Connection db, String tableName, String columnName) throws SQLException {
-        final String key = db.metadataScopeKey() + "|" + tableName.toLowerCase() + "." + columnName.toLowerCase();
-        final Integer cached = hybridColumnSizeCache.get(key);
-        if (cached != null)
-            return cached;
-        final HashMap<String, ColumnInfo> cols = db.getColumnInfo(tableName);
-        ColumnInfo ci = cols == null ? null : cols.get(columnName);
-        if (ci == null && cols != null)
-            for (final Map.Entry<String, ColumnInfo> e : cols.entrySet())
-                if (e.getKey().equalsIgnoreCase(columnName)) {
-                    ci = e.getValue();
-                    break;
-                }
-        if (ci == null)
+        final int size = db.declaredColumnSize(tableName, columnName);
+        if (size == Connection.NO_SUCH_COLUMN)
             throw new SQLException("Column \"" + columnName + "\" not found in table \"" + tableName + "\".");
-        final int size = ci.getColumnSize();
-        hybridColumnSizeCache.put(key, size);
         return size;
     }
 
