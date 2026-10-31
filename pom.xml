@@ -41,7 +41,7 @@
     <dependency>
       <groupId>org.apache.groovy</groupId>
       <artifactId>groovy</artifactId>
-      <version>4.0.28</version>
+      <version>4.0.33</version>
     </dependency>
     <dependency>
       <groupId>jakarta.servlet</groupId>
@@ -66,7 +66,7 @@
     <dependency>
       <groupId>com.microsoft.sqlserver</groupId>
       <artifactId>mssql-jdbc</artifactId>
-      <version>12.4.2.jre8</version>
+      <version>13.6.0.jre11</version>
     </dependency>
     <dependency>
       <groupId>com.oracle.ojdbc</groupId>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.12</version>
+      <version>42.7.14</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -195,10 +195,10 @@
     </dependency>
     <dependency>
       <groupId>mysql</groupId>
-      <artifactId>mysql-connector-java</artifactId>
-      <version>9.2.0</version>
+      <artifactId>mysql-connector-j</artifactId>
+      <version>26.10.0</version>
       <scope>system</scope>
-      <systemPath>${project.basedir}/libs/mysql-connector-java-9.2.0.jar</systemPath>
+      <systemPath>${project.basedir}/libs/mysql-connector-j-26.10.0.jar</systemPath>
     </dependency>
     <!-- END GENERATED DEPENDENCIES -->
 

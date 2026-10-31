@@ -50,9 +50,9 @@ public class Tasks {
     private static int portBase = 8000;
 
     // Things that change semi-often
-    final static String groovyVer = "4.0.28";
-    final static String postgresqlVer = "42.7.12";
-    final static String tomcatVer = "11.0.12";
+    final static String groovyVer = "4.0.33";
+    final static String postgresqlVer = "42.7.14";
+    final static String tomcatVer = "11.0.18";
 
     //  Jars shipped with this application rather than downloaded.  The versions are
     //  named here because pom.xml describes them to the IDE by path.
@@ -60,7 +60,7 @@ public class Tasks {
     final static String commonsCompressVer = "1.27.1";
     final static String commonsIoVer = "2.16.1";
     final static String commonsLang3Ver = "3.18.0";
-    final static String mysqlConnectorVer = "9.2.0";
+    final static String mysqlConnectorVer = "26.10.0";
     final static String jqueryVer = "3.6.3";
 
     //  Bounds of the machine-written region of pom.xml.  See the pom task.
@@ -222,8 +222,8 @@ public class Tasks {
                            libPath + "/commons-lang3-" + commonsLang3Ver + ".jar")
                 //  Oracle removes MySQL drivers from public downloads, so this one is not
                 //  downloaded by the build and must be supplied by hand.
-                .addSystem("mysql", "mysql-connector-java", mysqlConnectorVer,
-                           libPath + "/mysql-connector-java-" + mysqlConnectorVer + ".jar")
+                .addSystem("mysql", "mysql-connector-j", mysqlConnectorVer,
+                           libPath + "/mysql-connector-j-" + mysqlConnectorVer + ".jar")
                 .writeInto(POM_FILE, POM_BEGIN, POM_END);
     }
 
@@ -570,7 +570,7 @@ public class Tasks {
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.26.1/log4j-core-2.26.1.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.26.1/log4j-api-2.26.1.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/mchange/mchange-commons-java/0.6.1/mchange-commons-java-0.6.1.jar");
-        dep.add(LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/12.4.2.jre8/mssql-jdbc-12.4.2.jre8.jar");
+        dep.add(LIBS, "https://repo1.maven.org/maven2/com/microsoft/sqlserver/mssql-jdbc/13.6.0.jre11/mssql-jdbc-13.6.0.jre11.jar");
         // Oracle has removed these files from their public repository
         //dep.add(LIBS, "https://repo1.maven.org/maven2/mysql/mysql-connector-java/9.2.0/mysql-connector-java-9.2.0.jar");
         dep.add(LIBS, "https://repo1.maven.org/maven2/com/oracle/ojdbc/ojdbc10/19.3.0.0/ojdbc10-19.3.0.0.jar");
