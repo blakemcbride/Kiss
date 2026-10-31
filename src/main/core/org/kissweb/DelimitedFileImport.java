@@ -187,6 +187,8 @@ public abstract class DelimitedFileImport {
     private boolean checkWording;   // true during check() / runChecked(): user-facing wording for file problems
 
     /**
+     * Create an importer for a comma-delimited file with double-quoted fields.
+     *
      * @param typeOfImport a word for what is being imported (e.g. "employee"), used in messages
      * @param filename     the file to import
      * @param mode         {@link #APPEND_MODE}, {@link #UPDATE_MODE}, or {@link #FULL_MODE}
@@ -197,6 +199,8 @@ public abstract class DelimitedFileImport {
     }
 
     /**
+     * Create an importer with a caller-supplied field delimiter and quote character.
+     *
      * @param typeOfImport a word for what is being imported, used in messages
      * @param filename     the file to import
      * @param mode         {@link #APPEND_MODE}, {@link #UPDATE_MODE}, or {@link #FULL_MODE}
@@ -258,11 +262,19 @@ public abstract class DelimitedFileImport {
     protected void commitBatch() {
     }
 
-    /** Hook called at the end of every run, after the result is built.  Default does nothing. */
+    /**
+     * Hook called at the end of every run, after the result is built.  Default does nothing.
+     *
+     * @param result the result of the run
+     */
     protected void onFinish(Result result) {
     }
 
-    /** Hook called if an unexpected exception aborts the run (the exception is also added as an error). Default does nothing. */
+    /**
+     * Hook called if an unexpected exception aborts the run (the exception is also added as an error). Default does nothing.
+     *
+     * @param t the exception that aborted the run
+     */
     protected void onFailure(Throwable t) {
     }
 
@@ -314,12 +326,21 @@ public abstract class DelimitedFileImport {
         return addColumn(name, false);
     }
 
-    /** @return true if the file has the column (valid after the header has been read) */
+    /**
+     * Whether the file has the column (valid after the header has been read).
+     *
+     * @param name the column name or one of its aliases
+     * @return true if the file has the column
+     */
     protected boolean colExists(String name) {
         return df.getColumnIndex(name) > -1;
     }
 
-    /** @return the declared columns that are present, in file order */
+    /**
+     * The declared columns that are present in the file.
+     *
+     * @return the declared columns that are present, in file order
+     */
     protected List<String> getFileColumns() {
         return Collections.unmodifiableList(fileColumns);
     }
@@ -493,7 +514,12 @@ public abstract class DelimitedFileImport {
         return "";
     }
 
-    /** @return true if the column exists and the current row has non-blank data in it */
+    /**
+     * Whether the column exists and the current row has non-blank data in it.
+     *
+     * @param name the column name or one of its aliases
+     * @return true if the column exists and the current row has non-blank data in it
+     */
     protected boolean columnHasData(String name) {
         return !getString(name).isEmpty();
     }
@@ -504,6 +530,9 @@ public abstract class DelimitedFileImport {
      * value (see {@link Column#maxLength(IntSupplier)}); it is shortened in this one place only, so every caller
      * ({@link #checkRow(int)} and {@link #parseRow(int)} alike) sees the same text.  {@code df.getString(...)} is
      * always the file's own, untouched text.
+     *
+     * @param name the column name or one of its aliases
+     * @return the trimmed (and possibly shortened) value, or "" if the file does not have the column
      */
     protected String getString(String name) {
         int i = df.getColumnIndex(name);
@@ -651,19 +680,30 @@ public abstract class DelimitedFileImport {
                 + "; declare it with " + Kind.declaration(accepted) + " in initColumns().");
     }
 
-    /** Remove dollar signs and commas from a number so it can be parsed. */
+    /**
+     * Remove dollar signs and commas from a number so it can be parsed.
+     *
+     * @param num the number text
+     * @return the text without dollar signs and commas
+     */
     protected String fixNum(String num) {
         return num.replace("$", "").replace(",", "");
     }
 
     /**
      * Record an error.  During the row passes the current row number is prefixed.
+     *
+     * @param err the error message
      */
     protected void addError(String err) {
         errors.add(currentRow > 0 ? "Row " + currentRow + ": " + err : err);
     }
 
-    /** Record a warning (does not stop the import). */
+    /**
+     * Record a warning (does not stop the import).  During the row passes the current row number is prefixed.
+     *
+     * @param warn the warning message
+     */
     protected void addWarning(String warn) {
         warnings.add(currentRow > 0 ? "Row " + currentRow + ": " + warn : warn);
     }
@@ -729,7 +769,11 @@ public abstract class DelimitedFileImport {
         return quotedName + " was " + chars(length) + " long and was shortened to " + chars(max) + ".";
     }
 
-    /** @return the number of errors so far */
+    /**
+     * The number of errors recorded so far.
+     *
+     * @return the number of errors so far
+     */
     protected int errorCount() {
         return errors.size();
     }
@@ -747,12 +791,20 @@ public abstract class DelimitedFileImport {
         return Collections.unmodifiableList(new ArrayList<>(warnings));
     }
 
-    /** Set how many rows are processed between {@link #commitBatch()} calls (default 20). */
+    /**
+     * Set how many rows are processed between {@link #commitBatch()} calls (default 20).
+     *
+     * @param n rows per batch (values below 1 are treated as 1)
+     */
     public void setBatchSize(int n) {
         batchSize = Math.max(1, n);
     }
 
-    /** Ask this class to write the summary / error log to the given file with plain java.io.  Not written if never set. */
+    /**
+     * Ask this class to write the summary / error log to the given file with plain java.io.  Not written if never set.
+     *
+     * @param path the log file path
+     */
     public void setLogPath(String path) {
         logPath = path;
     }
@@ -1971,22 +2023,54 @@ public abstract class DelimitedFileImport {
             this.deactivated = deactivated;
         }
 
-        /** @return the errors (each prefixed with its row number where applicable) */
+        /**
+         * The errors recorded during the run.
+         *
+         * @return the errors (each prefixed with its row number where applicable)
+         */
         public List<String> getErrors() { return errors; }
-        /** @return the warnings */
+        /**
+         * The warnings recorded during the run.
+         *
+         * @return the warnings
+         */
         public List<String> getWarnings() { return warnings; }
-        /** @return true if there were no errors */
+        /**
+         * Whether the run completed without errors.
+         *
+         * @return true if there were no errors
+         */
         public boolean isSuccess() { return errors.isEmpty(); }
-        /** @return rows read */
+        /**
+         * The number of data rows read.
+         *
+         * @return rows read
+         */
         public int getRowsRead() { return rowsRead; }
-        /** @return records added */
+        /**
+         * The number of records added.
+         *
+         * @return records added
+         */
         public int getRecordsAdded() { return added; }
-        /** @return records updated */
+        /**
+         * The number of records updated.
+         *
+         * @return records updated
+         */
         public int getRecordsUpdated() { return updated; }
-        /** @return records deactivated */
+        /**
+         * The number of records deactivated.
+         *
+         * @return records deactivated
+         */
         public int getRecordsDeactivated() { return deactivated; }
 
-        /** @return formatted text: file, errors, warnings and counts */
+        /**
+         * A printable summary of the run.
+         *
+         * @return formatted text: file, errors, warnings and counts
+         */
         public String getSummary() {
             StringBuilder sb = new StringBuilder();
             sb.append(type).append(" import\nFile: ").append(fileName).append("\n\n");
