@@ -471,9 +471,7 @@ class Utils {
      * @returns {boolean} true if valid
      */
     static isValidDomain(d) {
-        if (!d || typeof d !== 'string' || d.length < 3)
-            return false;
-        if (d.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789.-]/gi, ''))
+        if (!d || typeof d !== 'string' || d.length < 3 || d.length > 253)
             return false;
         if (d[0] === '.' ||  d[d.length-1] === '.')
             return false;
@@ -481,7 +479,8 @@ class Utils {
             return false;
         if (d.indexOf('.') === -1)
             return false;
-        return true;
+        // each label: 1-63 letters/digits/hyphens, not starting or ending with a hyphen
+        return d.split('.').every(label => /^[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/.test(label));
     }
 
     /**
@@ -493,18 +492,19 @@ class Utils {
     static isValidEmailAddress(add) {
         if (!add || typeof add !== 'string' || add.length < 5)
             return false;
-        if (add.replaceAll(/[abcdefghijklmnopqrstuvwxyz0123456789._-]/gi, '') !== '@')
-            return false;
         const idx = add.indexOf("@");
-        const dom = add.substr(idx+1);
+        if (idx < 0  ||  idx !== add.lastIndexOf("@"))
+            return false;
+        const dom = add.substring(idx+1);
         if (!Utils.isValidDomain(dom))
             return false;
-        const user = add.substr(0, idx);
-        if (user.length < 1  ||  user[0] === '.' ||  user[user.length-1] === '.')
+        const user = add.substring(0, idx);
+        if (user.length < 1  ||  user.length > 64  ||  user[0] === '.' ||  user[user.length-1] === '.')
             return false;
         if (user.indexOf('..') !== -1)
             return false;
-        return true;
+        // letters, digits, '.' and the RFC 5322 atext specials; quoted local parts are not supported
+        return /^[A-Za-z0-9!#$%&'*+\/=?^_`{|}~.-]+$/.test(user);
     }
 
     /**
