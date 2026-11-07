@@ -68,7 +68,7 @@ class AGGrid {
             }
         }
         this.gridOptions = {
-            columnDefs: this.columns,
+            columnDefs: this.sortableColumns_(),
             rowData: this.data || [],
             rowSelection: {
                 mode: this.rowSelection,
@@ -89,6 +89,15 @@ class AGGrid {
                 resizable: true
             },
             getRowStyle: this.rowStyleFun,
+            // When server sorting is on, ag-grid may mark columns sorted (to show indicators) but must never move rows.
+            postSortRows: params => {
+                if (!self.serverSortFn || !params.nodes.length)
+                    return;
+                // restore the order in which the rows were added
+                const order = new Map();
+                params.nodes[0].parent.allLeafChildren.forEach((n, i) => order.set(n, i));
+                params.nodes.sort((a, b) => order.get(a) - order.get(b));
+            },
             onGridReady: function (params) {
                 setGridReady(params.api);
                 
@@ -152,6 +161,10 @@ class AGGrid {
             const api = agGrid.createGrid(eGridDiv, this.gridOptions);
             this.gridInstantiated = true;
             setGridReady(api);
+            if (this.serverSortFn)
+                this.installSortClick_();
+            if (this.sortIndicators)
+                this.applySortIndicators_();
         }
         if (!AGGrid.gridContext.length)
             AGGrid.newGridContext();
@@ -599,6 +612,158 @@ class AGGrid {
     multiSelect() {
         this.rowSelection = AGGrid.MULTI_SELECTION;
         return this;
+    }
+
+    /**
+     * Enable server-side column sorting.
+     * <br><br>
+     * Use this when the rows shown are only a (possibly capped) subset of the data, so sorting just the rows in the
+     * browser would be wrong.  Clicking a column header (or pressing Enter on a focused header) does <b>not</b> sort
+     * the grid.  Instead, <code>fn(colId)</code> is called, where <code>colId</code> is the column's colId (which is its
+     * <code>field</code> unless the column def specifies a <code>colId</code>).  The application is expected to
+     * re-query the server using whatever sort it chooses and then reload the grid, and to call
+     * <code>setSortIndicators()</code> to show the user what the grid is sorted by.
+     * <br><br>
+     * The grid itself never reorders rows: they always display in the order they were added
+     * (<code>setRowData</code>, <code>addRecords</code>, etc.).  The application owns the sort policy (which column
+     * becomes primary, direction toggling, etc.).
+     * <br><br>
+     * Every column becomes header-clickable except columns whose column def says <code>sortable: false</code>
+     * (and column groups).  Columns with <code>sortable: false</code> are left alone: clicking them does nothing.
+     * <br><br>
+     * May be called before or after <code>show()</code>.  Grids that never call this method are not affected in any way.
+     * Passing a falsy value turns server sorting back off and clears any indicators.
+     *
+     * @param {function(string)} fn called with the colId of the clicked column
+     * @returns {AGGrid}
+     * @see AGGrid#setSortIndicators
+     */
+    setServerSort(fn) {
+        this.serverSortFn = fn || null;
+        if (!fn)
+            this.sortIndicators = null;
+        if (this.gridInstantiated) {
+            this.setColumnDefs_(this.sortableColumns_());
+            this.installSortClick_();
+            this.applySortIndicators_();
+        }
+        return this;
+    }
+
+    /**
+     * Display sort indicators (the standard ag-grid arrows) on column headers without sorting or reordering any rows
+     * and without calling the function given to <code>setServerSort()</code>.
+     * <br><br>
+     * <code>list</code> is an array of <code>{field, asc}</code> objects in priority order (first = primary sort).
+     * <code>field</code> is a column's colId (its field unless the column def has a <code>colId</code>) and
+     * <code>asc</code> is true for ascending, false for descending.  When more than one column is listed, ag-grid also
+     * shows each column's priority number.  A field that has no column, or whose column is hidden, is silently ignored.
+     * <br><br>
+     * <code>null</code> or an empty array clears all indicators.  May be called before or after <code>show()</code>.
+     *
+     * @param {Array<{field: string, asc: boolean}>|null} list
+     * @returns {AGGrid}
+     */
+    setSortIndicators(list) {
+        this.sortIndicators = list && list.length ? list.slice() : null;
+        if (this.gridInstantiated)
+            this.applySortIndicators_();
+        return this;
+    }
+
+    /**
+     * Internal: the column defs to give ag-grid.  When server sorting is on, every column that has not said
+     * <code>sortable: false</code> is made sortable (copies; the caller's column defs are never modified).
+     *
+     * @private
+     */
+    sortableColumns_() {
+        if (!this.serverSortFn)
+            return this.columns;
+        const conv = cols => cols.map(c => {
+            if (c.children)
+                return Object.assign({}, c, { children: conv(c.children) });
+            return c.sortable === false ? c : Object.assign({}, c, { sortable: true });
+        });
+        return conv(this.columns);
+    }
+
+    /**
+     * Internal: replace the column defs on a live grid (works for ag-grid 30 and 32+).
+     *
+     * @private
+     */
+    setColumnDefs_(defs) {
+        const api = this.gridOptions.api;
+        if (api.setGridOption)
+            api.setGridOption('columnDefs', defs);
+        else
+            api.setColumnDefs(defs);
+    }
+
+    /**
+     * Internal: the object that carries the column API (ag-grid 32+: the grid api; ag-grid 30: gridOptions.columnApi).
+     *
+     * @private
+     */
+    columnApi_() {
+        const api = this.gridOptions.api;
+        return api.applyColumnState ? api : this.gridOptions.columnApi;
+    }
+
+    /**
+     * Internal: push this.sortIndicators into ag-grid's column state (works for ag-grid 30 and 32+).
+     *
+     * @private
+     */
+    applySortIndicators_() {
+        const colApi = this.columnApi_();
+        const state = [];
+        (this.sortIndicators || []).forEach(s => {
+            const col = s && s.field !== undefined ? colApi.getColumn(s.field) : null;
+            if (!col || !col.isVisible() || state.some(x => x.colId === col.getColId()))
+                return;
+            state.push({ colId: col.getColId(), sort: s.asc ? 'asc' : 'desc', sortIndex: state.length });
+        });
+        colApi.applyColumnState({ state: state, defaultState: { sort: null, sortIndex: null } });
+    }
+
+    /**
+     * Internal: intercept header clicks (capture phase) so ag-grid never sorts, and report them to the server sort function.
+     *
+     * @private
+     */
+    installSortClick_() {
+        if (this.sortClickInstalled || !this.gridElement)
+            return;
+        this.sortClickInstalled = true;
+        const self = this;
+        const handler = e => {
+            if (!self.serverSortFn || !self.gridInstantiated)
+                return;
+            if (e.type === 'keydown' && e.key !== 'Enter')
+                return;
+            const t = e.target;
+            const cell = t && t.closest ? t.closest('.ag-header-cell') : null;
+            if (!cell || !self.gridElement.contains(cell))
+                return;
+            if (t.closest('.ag-header-cell-resize, .ag-header-cell-menu-button, .ag-header-cell-filter-button, .ag-floating-filter, .ag-checkbox'))
+                return;
+            const colId = cell.getAttribute('col-id');
+            const col = colId ? self.columnApi_().getColumn(colId) : null;
+            if (!col || !col.getColDef().sortable)
+                return;
+            e.stopPropagation();
+            e.preventDefault();
+            // A press that travelled (a drag that came back to the same header) is not a click.
+            if (e.type === 'click' && down && Math.hypot(e.clientX - down.x, e.clientY - down.y) > 4)
+                return;
+            self.serverSortFn(colId);
+        };
+        let down = null;
+        this.gridElement.addEventListener('mousedown', e => { down = { x: e.clientX, y: e.clientY }; }, true);
+        this.gridElement.addEventListener('click', handler, true);
+        this.gridElement.addEventListener('keydown', handler, true);
     }
 
     /**

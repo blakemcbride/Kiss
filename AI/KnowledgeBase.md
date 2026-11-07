@@ -1203,6 +1203,13 @@ FK order_line order_id,product_id order_product order_id,product_id
 
 **Edge:** `SchemaGraph.Edge` represents a foreign key relationship (single or composite). Methods: `getFromTable()`, `getToTable()`, `getFromColumn()`, `getToColumn()`, `getFromColumns()`, `getToColumns()`, `isComposite()`, `buildOnCondition(fromAlias, toAlias)`.
 
+### SortBuilder (server-side sort key -> ORDER BY)
+`org.kissweb.database.SortBuilder` maps client-sent sort keys to fixed SQL so client text never reaches SQL. Client side: see "AGGrid Server-Side Sorting" (`setServerSort` / `setSortIndicators`).
+- Register once (static init): `new SortBuilder().key("rep", text("p.lname"), text("p.fname")).key("status", raw("st.seqno")).join(JOIN_SQL, "lastMail")`. Helpers: `text(col)` (case-insensitive, empty/whitespace = blank), `zeroBlank(col)` (0 = blank), `raw(sql)` (verbatim, must yield NULL when blank); an `Expr` lambda `t -> ...` receives the `ConnectionType` (use `textSql(t, col)` inside it).
+- Per request: `build(db.getDBType(), List<Sort.of(key, asc)>, Sort.of(defaultKey, true), tiebreakItems...)` returns `Result`: `orderBy()` ("order by ..." with no surrounding spaces, empty if nothing), `joins()` (each needed join once, trailing space) / `joinList()`, `rejectedKeys()` (unknown non-blank keys, trimmed, deduped; client text - sanitize before logging). Blank keys are silently ignored; unknown keys are never an exception. The default is used only when no key was usable; tiebreak items (verbatim, include their own direction) go last. A default that is not registered, or a join naming an unregistered key, throws IllegalArgumentException (programmer error).
+- Every expression gets the direction; blanks sort LAST in both directions. PostgreSQL/Oracle/SQLite emit `x asc nulls last`; MySQL/SQL Server emit `case when x is null then 1 else 0 end, x asc`. Text blank rule: PG `lower(nullif(btrim(x), ''))`, SQL Server `lower(nullif(ltrim(rtrim(x)), ''))`, Oracle `lower(trim(x))`, MySQL/SQLite `lower(nullif(trim(x), ''))`. Raw expressions, joins and tiebreaks are not translated.
+- Tests: `src/test/core/org/kissweb/database/SortBuilderTest.java`.
+
 ### QueryBuilder
 
 **Construction:**
@@ -1376,6 +1383,15 @@ The framework provides custom HTML components that should be used:
 ### Grid Column Configuration
 - Column widths can be specified as pixels (e.g., `width: 200`)
 - Custom cell renderers supported (e.g., for formatting Yes/No display)
+
+### AGGrid Server-Side Sorting (`setServerSort` / `setSortIndicators`)
+For grids showing a capped subset of server rows, where sorting in the browser would be wrong:
+- `grid.setServerSort(fn)` - a header click (or Enter on a focused header) calls `fn(colId)` and does **not** sort. Every column is clickable except those with `sortable: false` (and column groups). Works before or after `show()`; falsy `fn` turns it off. The grid never reorders rows: they display in the order added.
+- `grid.setSortIndicators([{field, asc}, ...])` - shows ag-grid's sort arrows in priority order (ag-grid numbers them when there is more than one); `null`/`[]` clears. Fields with no column or a hidden column are ignored. Never calls `fn`, never reorders.
+- The screen owns the policy (primary column, direction toggle) and re-queries the server, then calls `setSortIndicators`.
+- Mechanism: a capture-phase click/keydown listener on the grid div swallows header clicks; `postSortRows` restores add order (needed because applying column state to show the arrow would otherwise sort client-side); `setServerSort` swaps in copies of the column defs with `sortable: true`.
+- Works with ag-grid 30 (Stack360 Frontend, `columnApi`) and 32+ (Kiss, `api.applyColumnState`); `columnApi_()` picks the right one. Note `Column.isSortable()` is absent in 30, so read `getColDef().sortable`.
+- ag-grid 30 columns default to not sortable; grids that never call these methods are unchanged.
 
 ### Design Tokens (`--kiss-ui-*` CSS Custom Properties)
 

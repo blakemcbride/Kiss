@@ -228,6 +228,12 @@ caching.
 @item src/main/core/org/kissweb/database/QueryBuilder.java
 Fluent query builder: SELECT, WHERE, ORDER BY, GROUP BY, HAVING,
 explicit joins, aggregate helpers, build, and execute methods.
+@item src/main/core/org/kissweb/database/SortBuilder.java
+Maps client-sent sort keys to fixed SQL ORDER BY expressions (nulls last in
+both directions, per-database SQL, optional joins, rejected-key report), so
+client text never reaches SQL.  Used with the AGGrid @code{setServerSort}
+and @code{setSortIndicators} methods.  Tests are in
+@code{src/test/core/org/kissweb/database/SortBuilderTest.java}.
 @item src/test/core/org/kissweb/database/QueryBuilderTest.java
 108 unit tests covering all functionality.
 @end table
