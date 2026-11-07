@@ -1,0 +1,385 @@
+\chapter{Server Communication}
+\label{ch:server-comm}
+
+All communication between the Kiss frontend and backend uses JSON-RPC via the \texttt{Server}\index{Server.js} class.  This chapter covers making calls, handling responses, managing sessions, uploading files, and downloading reports.
+
+\section{Server.call()}
+\label{sec:sc-call}
+
+\texttt{Server.call()} is the primary communication method.  It sends a JSON-RPC request to the backend and returns a Promise with the response:
+
+\begin{lstlisting}[style=javascript]
+const res = await Server.call("services/Crud", "getRecords", {
+    departmentId: 42,
+    activeOnly: true
+});
+if (res._Success) {
+    grid.addRecords(res.rows);
+}
+\end{lstlisting}
+
+\noindent
+The three required parameters are:
+
+\begin{enumerate}
+  \item \textbf{Service path} --- the path to the backend service class (e.g., \texttt{"services/Crud"}).
+  \item \textbf{Method name} --- the method to invoke on the service class.
+  \item \textbf{Input data} --- a JavaScript object sent as the \texttt{injson} parameter to the backend method.  This parameter is optional; omit it if the method requires no input.
+\end{enumerate}
+
+\noindent
+\texttt{Server.call()} automatically:
+\begin{itemize}
+  \item Includes the session UUID in every request.
+  \item Shows a wait cursor while the request is in progress.
+  \item Handles authentication failures (error code 2) by redirecting to login.
+  \item Retries once on transient network errors.
+  \item Displays error messages for server-side exceptions.
+\end{itemize}
+
+\section{Request/Response Format}
+\label{sec:sc-format}
+
+Behind the scenes, \texttt{Server.call()} sends an HTTP POST to the \texttt{/rest} endpoint with a JSON body:
+
+\begin{lstlisting}[style=javascript]
+// Outgoing request
+{
+    "_class": "services/Crud",
+    "_method": "getRecords",
+    "_uuid": "a1b2c3d4-e5f6-...",
+    "departmentId": 42,
+    "activeOnly": true
+}
+
+// Successful response
+{
+    "_Success": true,
+    "_ErrorCode": 0,
+    "rows": [ ... ]
+}
+
+// Error response
+{
+    "_Success": false,
+    "_ErrorCode": -1,
+    "_ErrorMessage": "Department not found"
+}
+\end{lstlisting}
+
+\noindent
+The \texttt{\_Success} field is always present.  On error, \texttt{\_ErrorMessage} contains the error text and \texttt{\_ErrorCode} indicates the type:
+
+\begin{longtable}{cl}
+\toprule
+\textbf{Code} & \textbf{Meaning} \\
+\midrule
+\endhead
+0 & Success \\
+2 & Authentication failure (session expired or invalid) \\
+$-1$ & Server error (exception in service method) \\
+\bottomrule
+\end{longtable}
+
+\section{Error Handling}
+\label{sec:sc-errors}
+
+When the backend throws an exception, \texttt{Server.call()} displays the error message to the user automatically.  The callback still executes, but \texttt{res.\_Success} is \texttt{false}:
+
+\begin{lstlisting}[style=javascript]
+const res = await Server.call(WS, 'save', data);
+if (res._Success) {
+    // handle success
+    Utils.showMessage('Info', 'Saved successfully');
+} else {
+    // The error message has already been shown to the user.
+    // This branch is optional --- use it only if you need
+    // custom error recovery.
+}
+\end{lstlisting}
+
+\noindent
+Different backend exception types produce different behaviors:
+
+\begin{description}[style=nextline]
+  \item[\texttt{UserException}] The message is displayed to the user.  No stack trace is logged on the server.
+  \item[\texttt{ServerException}] A generic error message is shown.  The full stack trace is logged on the server.
+  \item[\texttt{LogException}] The message is displayed to the user \emph{and} the full stack trace is logged on the server.
+\end{description}
+
+\section{Quiet Calls}
+\label{sec:sc-quiet}
+
+\texttt{Server.callQuiet()} is a variant of \texttt{Server.call()} for lightweight background requests --- type-ahead searches, autocomplete lookups, polling, and similar work where the screen should not appear blocked and where a transport failure should be handled silently rather than interrupting the user.  It takes the same arguments as \texttt{Server.call()} and returns the same Promise-wrapped response:
+
+\begin{lstlisting}[style=javascript]
+const res = await Server.callQuiet("services/Customers",
+                                   "search", {q: text});
+if (res._Success)
+    showResults(res.customers);
+\end{lstlisting}
+
+\noindent
+It differs from \texttt{Server.call()} in two ways:
+
+\begin{itemize}
+  \item It does \emph{not} change the global wait cursor or busy count, so a rapid sequence of keystroke-driven calls does not make the whole application flicker as busy.  The screen owns whatever loading indication it wants to show.
+  \item A transport or JSON-parse failure does \emph{not} raise the framework error popup.  Instead the caller receives a \texttt{\{\_Success: false\}} result to handle quietly.
+\end{itemize}
+
+\noindent
+In every other respect it behaves like \texttt{Server.call()}: the session UUID is attached automatically, and an authentication failure (error code 2) still shows the standard message and routes to the login screen.
+
+\begin{tipbox}
+Use \texttt{callQuiet()} for background work whose result the user did not explicitly request, and \texttt{call()} for actions the user is waiting on (saving a form, running a report).  The \texttt{<search-input>} component (Chapter~\ref{ch:components}) is designed to pair with \texttt{callQuiet()}.
+\end{tipbox}
+
+\section{Parallel Calls}
+\label{sec:sc-parallel}
+
+When a screen needs data from multiple independent services, use \texttt{Server.callAll()} to execute them in parallel:
+
+\begin{lstlisting}[style=javascript]
+const error = await Server.callAll(
+    [
+        Server.call(WS, 'getDepartments'),
+        Server.call(WS, 'getStatuses')
+    ],
+    function (deptRes) {
+        // process department data
+        for (let dept of deptRes.departments)
+            $$('department').add(dept.id, dept.name);
+    },
+    function (statusRes) {
+        // process status data
+        for (let s of statusRes.statuses)
+            $$('status').add(s.id, s.name);
+    }
+);
+if (!error) {
+    // all calls succeeded
+}
+\end{lstlisting}
+
+\noindent
+\texttt{callAll()} waits for all promises to complete before calling any handlers.  It returns \texttt{true} if any call failed, \texttt{false} if all succeeded.
+
+\section{Session Management}
+\label{sec:sc-sessions}
+
+After login, the backend assigns a session token (a UUID).  \texttt{Server.js} stores this token and includes it automatically in every subsequent request as the \texttt{\_uuid} field.
+
+The session expires after a configurable period of inactivity (set by \texttt{UserInactiveSeconds} in \texttt{application.ini}).  When a request arrives with an expired UUID, the backend returns error code 2 and \texttt{Server.call()} redirects to the login screen.
+
+\subsection{Inactivity Timeout (Frontend)}
+
+The frontend can also enforce an inactivity timeout independently:
+
+\begin{lstlisting}[style=javascript]
+Server.setMaxInactivitySeconds(900);   // 15 minutes
+Server.setMaxInactivityMinutes(15);    // equivalent
+Server.setMaxInactivityHours(1);       // 1 hour
+\end{lstlisting}
+
+\noindent
+The frontend timeout runs a \texttt{checkTime()} method that compares the elapsed time since the last user interaction.  If the timeout is exceeded, the user is logged out.
+
+\section{Logging Out}
+\label{sec:sc-logout}
+
+\begin{lstlisting}[style=javascript]
+Server.logout();
+\end{lstlisting}
+
+\noindent
+\texttt{Server.logout()} performs a complete cleanup:
+
+\begin{enumerate}
+  \item Calls the backend \texttt{Logout} service to invalidate the session.
+  \item Clears the stored UUID (and all other persisted client state).
+  \item Disables back-button protection.
+  \item Calls \texttt{Utils.cleanup()} to release frontend resources.
+  \item Performs a full page reload of a fresh \texttt{index.html}, landing on the login route (\texttt{Router.loginHash()}).
+\end{enumerate}
+
+\noindent
+The reload in the final step re-boots the tab on the latest cache-busted code, so a tab that stayed open across a redeploy picks up the new release the next time its session ends (Chapter~\ref{ch:caching-security}).
+
+\section{File Uploads}
+\label{sec:sc-uploads}
+
+File uploads use \texttt{Server.fileUploadSend()}, which sends files as multipart/form-data:
+
+\begin{lstlisting}[style=javascript]
+$$('upload-btn').onclick(async () => {
+    const count = $$('file-ctl').numberOfUploadFiles();
+    if (count === 0) {
+        Utils.showMessage('Error', 'Please select a file');
+        return;
+    }
+    const fd = $$('file-ctl').getFormData();
+    const res = await Server.fileUploadSend(
+        WS, 'upload', fd, {},
+        'Uploading...', 'Upload complete');
+});
+\end{lstlisting}
+
+\noindent
+The parameters are:
+
+\begin{enumerate}
+  \item \textbf{Service path} and \textbf{method name} --- same as \texttt{Server.call()}.
+  \item \textbf{FormData} --- from the \texttt{<file-upload>} component's \texttt{getFormData()}.
+  \item \textbf{Additional data} --- a JavaScript object with extra fields to send alongside the files.
+  \item \textbf{Wait message} --- shown during upload.
+  \item \textbf{Success message} --- shown after successful upload.
+\end{enumerate}
+
+\noindent
+On the backend, the service method accesses uploaded files through the \texttt{servlet} parameter:
+
+\begin{lstlisting}[style=groovy]
+int count = servlet.getUploadFileCount()
+String name = servlet.getUploadFileName(0)
+BufferedInputStream is =
+    servlet.getUploadBufferedInputStream(0)
+\end{lstlisting}
+
+\section{File Downloads}
+\label{sec:sc-downloads}
+
+For reports and exports, the backend generates a temporary file and returns its URL.  The frontend opens the URL to trigger the browser's download or display behavior:
+
+\begin{lstlisting}[style=javascript]
+// Backend generates a PDF report and returns the URL
+const res = await Server.call(WS, 'runReport');
+if (res._Success)
+    Utils.showReport(res.reportUrl);
+\end{lstlisting}
+
+\begin{lstlisting}[style=groovy]
+// Backend service method
+Groff rpt = new Groff("Report-", "My Report", false)
+// ... build report ...
+outjson.put("reportUrl", rpt.process())
+\end{lstlisting}
+
+\noindent
+Temporary report files are automatically cleaned up by the framework after approximately one day.
+
+\section{Binary Data}
+\label{sec:sc-binary}
+
+For retrieving binary data (e.g., images), use \texttt{Server.binaryCall()}:
+
+\begin{lstlisting}[style=javascript]
+const res = await Server.binaryCall(WS, 'getImage',
+    { id: imageId });
+if (res._Success) {
+    // res._data contains the binary content as an ArrayBuffer
+    const blob = new Blob([res._data]);
+    const url = URL.createObjectURL(blob);
+    // use the URL in an img tag or picture component
+}
+\end{lstlisting}
+
+\noindent
+\texttt{binaryCall()} returns the response as an ArrayBuffer.  JSON metadata and binary content are separated by a delimiter character, and the parsing is handled automatically.
+
+\section{A Complete Screen Example}
+\label{sec:sc-complete-example}
+
+The following example ties together everything in this chapter: loading data, populating controls, saving with validation, and refreshing:
+
+\begin{lstlisting}[style=javascript]
+'use strict';
+
+(async function () {
+    const WS = 'services/Crud';
+
+    // --- Grid setup ---
+    const columnDefs = [
+        {headerName: 'Last Name', field: 'lastName',
+            width: 33},
+        {headerName: 'First Name', field: 'firstName',
+            width: 33},
+        {headerName: 'Phone', field: 'phoneNumber', width: 33}
+    ];
+    const grid = new AGGrid('grid', columnDefs, 'id');
+    grid.show();
+
+    // --- Load data ---
+    async function updateGrid() {
+        grid.clear();
+        $$('edit').disable();
+        $$('delete').disable();
+        const res = await Server.call(WS, 'getRecords');
+        if (res._Success)
+            grid.addRecords(res.rows);
+    }
+    updateGrid();
+
+    // --- Grid selection ---
+    grid.setOnSelectionChanged((rows) => {
+        $$('edit').enable(rows);
+        $$('delete').enable(rows);
+    });
+
+    // --- Add new record ---
+    $$('new').onclick(() => {
+        $$('erp-first-name').clear();
+        $$('erp-last-name').clear();
+        $$('erp-phone-number').clear();
+        Utils.popup_open('edit-record-popup',
+            'erp-first-name');
+
+        $$('erp-ok').onclick(async () => {
+            if ($$('erp-first-name').isError('First Name'))
+                return;
+            if ($$('erp-last-name').isError('Last Name'))
+                return;
+            const data = {
+                firstName: $$('erp-first-name').getValue(),
+                lastName: $$('erp-last-name').getValue(),
+                phoneNumber: $$('erp-phone-number').getValue()
+            };
+            const res = await Server.call(WS, 'addRecord',
+                data);
+            if (res._Success) {
+                Utils.popup_close();
+                updateGrid();
+            }
+        });
+
+        $$('erp-cancel').onclick(() => Utils.popup_close());
+    });
+
+    // --- Delete with confirmation ---
+    $$('delete').onclick(() => {
+        Utils.yesNo('Confirm',
+            'Delete the selected record?', async () => {
+            const row = grid.getSelectedRow();
+            const res = await Server.call(WS, 'deleteRecord',
+                { id: row.id });
+            if (res._Success) updateGrid();
+        });
+    });
+
+    // --- PDF report ---
+    $$('report').onclick(async () => {
+        const res = await Server.call(WS, 'runReport');
+        if (res._Success)
+            Utils.showReport(res.reportUrl);
+    });
+
+    // --- CSV export ---
+    $$('export').onclick(async () => {
+        const res = await Server.call(WS, 'runExport');
+        if (res._Success)
+            Utils.showReport(res.exportUrl);
+    });
+})();
+\end{lstlisting}
+
+\noindent
+This is adapted from the actual CRUD example that ships with Kiss.  It demonstrates the standard patterns: load data into a grid, enable/disable buttons based on selection, open popups for editing, validate before saving, and confirm before deleting.

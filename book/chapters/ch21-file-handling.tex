@@ -1,0 +1,953 @@
+\chapter{File Handling}
+\label{ch:files}
+
+Kiss provides comprehensive file handling: browser uploads, CSV parsing and generation, FTP transfers, pixel-precise PDF creation, and temporary file management for browser delivery.
+
+\section{File Uploads}
+\label{sec:file-upload}
+
+\subsection{Frontend: The file-upload Component}
+
+The \texttt{<file-upload>}\index{file-upload component} component renders a file-selection button:
+
+\begin{lstlisting}[style=html]
+<file-upload id="myFile">Upload File</file-upload>
+\end{lstlisting}
+
+\noindent
+Access it through the standard component API:
+
+\begin{lstlisting}[style=javascript]
+const ctl = $$('myFile');
+ctl.clear();               // reset selection
+ctl.disable();             // disable the button
+ctl.enable();              // enable the button
+\end{lstlisting}
+
+\noindent
+To send the selected file to the backend, use \texttt{Server.fileUploadSend()} instead of the regular \texttt{Server.call()}:
+
+\begin{lstlisting}[style=javascript]
+const res = await Server.fileUploadSend(
+    'services.FileUpload', 'upload',
+    { description: 'Q1 Data' }  // additional JSON fields
+);
+if (res._Success)
+    Utils.showMessage('Info', 'File uploaded successfully.');
+\end{lstlisting}
+
+\noindent
+The third parameter is a JSON object of extra fields sent alongside the file.  Any \texttt{<file-upload>} components on the current screen are automatically included in the multipart request.
+
+\subsection{Backend: Receiving Uploads}
+
+On the backend, the \texttt{servlet} parameter provides access to uploaded files:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.restServer.ProcessServlet
+
+void upload(JSONObject injson, JSONObject outjson,
+            Connection db, ProcessServlet servlet) {
+    String description = injson.getString("description")
+
+    // Uploaded files are addressed by index, starting at 0
+    if (servlet.getUploadFileCount() == 0) {
+        outjson.put("error", "No file received")
+        return
+    }
+
+    // Original filename from the browser
+    String originalName = servlet.getUploadFileName(0)
+
+    // Save the upload to a temp file, then process it
+    String localPath = servlet.saveUploadFile(0)
+    File f = new File(localPath)
+    // ... read and process f ...
+
+    db.commit()
+}
+\end{lstlisting}
+
+\noindent
+Key servlet methods for file uploads (all file arguments are zero-based indexes):
+
+\begin{longtable}{P{6.0cm}P{4.5cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getUploadFileCount()} & Number of uploaded files. \\
+\texttt{getUploadFileName(i)} & Original filename of upload \texttt{i} (from the browser). \\
+\texttt{getUploadFileType(i)} & File extension of upload \texttt{i}. \\
+\texttt{saveUploadFile(i)} & Save upload \texttt{i} to a temp file; returns its path. \\
+\texttt{getUploadBytes(i)} & Upload \texttt{i} as a \texttt{byte[]}. \\
+\texttt{getUploadBufferedInputStream(\allowbreak i)} & Input stream for upload \texttt{i}. \\
+\bottomrule
+\end{longtable}
+
+\begin{tipbox}
+The uploaded file is stored in a temporary location.  Copy or process it immediately --- it may be cleaned up after the request completes.
+\end{tipbox}
+
+\subsection{Complete Upload Example}
+
+This example imports a CSV file of employee records:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.database.Connection
+import org.kissweb.DelimitedFileReader
+
+void importEmployees(JSONObject injson, JSONObject outjson,
+                     Connection db, ProcessServlet servlet) {
+    if (servlet.getUploadFileCount() == 0)
+        throw new Exception("No file uploaded")
+    String path = servlet.saveUploadFile(0)
+
+    DelimitedFileReader reader =
+        new DelimitedFileReader(path)
+    int count = 0
+
+    while (reader.nextLine()) {
+        Record rec = db.newRecord("employees")
+        rec.set("first_name", reader.getString(0))
+        rec.set("last_name", reader.getString(1))
+        rec.set("email", reader.getString(2))
+        rec.addRecord()
+        count++
+    }
+    reader.close()
+
+    db.commit()
+    outjson.put("imported", count)
+}
+\end{lstlisting}
+
+\section{Parsing CSV Files}
+\label{sec:file-csv-read}
+
+The \texttt{DelimitedFileReader}\index{DelimitedFileReader} class parses CSV and other delimited files with proper handling of quoted fields, embedded delimiters, and newlines within fields.
+
+\subsection{Basic Usage}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.DelimitedFileReader
+
+DelimitedFileReader reader =
+    new DelimitedFileReader("/path/to/data.csv")
+
+while (reader.nextLine()) {
+    String name = reader.getString(0)   // by column index
+    String email = reader.getString(1)
+    double salary = reader.getDouble(2)
+    int age = reader.getInt(3)
+    // process row
+}
+reader.close()
+\end{lstlisting}
+
+\subsection{Custom Delimiters}
+
+By default, \texttt{DelimitedFileReader} uses comma as the delimiter and double-quote as the quote character.  You can specify alternatives:
+
+\begin{lstlisting}[style=groovy]
+// Tab-delimited file (delimiter and quote char
+// specified together)
+DelimitedFileReader reader =
+    new DelimitedFileReader(path, '\t' as char, '"' as char)
+
+// Pipe-delimited with single-quote quoting
+DelimitedFileReader reader =
+    new DelimitedFileReader(path, '|' as char,
+                            '\'' as char)
+\end{lstlisting}
+
+\subsection{Header-Based Access}
+
+If the first row contains column headers, call \texttt{readHeader()} to enable access by column name:
+
+\begin{lstlisting}[style=groovy]
+DelimitedFileReader reader =
+    new DelimitedFileReader(path)
+reader.readHeader()
+
+while (reader.nextLine()) {
+    String name = reader.getString("Name")
+    String email = reader.getString("Email")
+    double salary = reader.getDouble("Salary")
+}
+reader.close()
+\end{lstlisting}
+
+\subsection{Field Access Methods}
+
+\begin{longtable}{P{4.5cm}P{6cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{nextLine()} & Advance to the next record.  Returns \texttt{false} at end of file. \\
+\texttt{readHeader()} & Read the first line as column headers for name-based access. \\
+\texttt{getString(int)} & Get field by column index (0-based). \\
+\texttt{getString(String)} & Get field by column name (requires \texttt{readHeader()}). \\
+\texttt{getInt(int)} & Get field as integer by index. \\
+\texttt{getInt(String)} & Get field as integer by name. \\
+\texttt{getDouble(int)} & Get field as double by index. \\
+\texttt{getDouble(String)} & Get field as double by name. \\
+\texttt{size()} & Number of fields in the current record. \\
+\texttt{close()} & Close the file. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Tolerant Header Matching}
+\label{sec:file-csv-headers}
+
+Files from different sources rarely agree on column titles.  Several opt-in methods make name-based access tolerant.  Nothing changes unless you call them; by default titles are matched case-insensitively only.
+
+\begin{lstlisting}[style=groovy]
+DelimitedFileReader reader =
+    new DelimitedFileReader(path)
+reader.setNormalizeHeaders(true)
+reader.addAlias("Company Name", "Company", "Account")
+reader.readHeader()
+
+// Throws IllegalArgumentException naming EVERY
+// missing column, not just the first
+reader.requireHeaders("Company Name", "Phone")
+
+while (reader.nextLine()) {
+    String company = reader.getString("Company Name")
+    int    count   = reader.getInt("Count")
+    int    start   = reader.getDate("Start Date") // YYYYMMDD
+}
+reader.close()
+\end{lstlisting}
+
+\begin{longtable}{P{5.0cm}P{5.5cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{setNormalizeHeaders(}\allowbreak\texttt{boolean)} & When on, titles match ignoring case, white space, hyphens, underscores, and a leading byte-order mark, so \texttt{"Company Name"}, \texttt{"company\_name"} and \texttt{"COMPANY-NAME"} are the same column.  May be called before or after \texttt{readHeader()}. \\
+\texttt{addAlias(logical,}\allowbreak\ \texttt{alternates...)} & Register other titles a file may use for a logical column.  Lookups by the logical name find the column under any of them. \\
+\texttt{getColumnIndex(name)} & Zero-origin index of a column (aliases and normalization apply), or \texttt{-1} if absent.  Requires \texttt{readHeader()}. \\
+\texttt{missingHeaders(}\allowbreak\texttt{names...)} & The names, in the order given, that have no matching column.  Empty if none. \\
+\texttt{requireHeaders(}\allowbreak\texttt{names...)} & Throws \texttt{IllegalArgumentException} listing all missing columns. \\
+\texttt{getDuplicateHeaders()} & One entry per collision of file columns that resolve to the same logical column.  Empty if none. \\
+\texttt{getString/}\allowbreak\texttt{getInt/}\allowbreak\texttt{getDouble/}\allowbreak\texttt{getDate(name)} & Typed getters by name; all honor aliases and normalization.  \texttt{getDate} returns an \texttt{int} in YYYYMMDD form. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Structured Imports with DelimitedFileImport}
+\label{sec:file-csv-import}
+
+\texttt{org.kissweb.DelimitedFileImport}\index{DelimitedFileImport} is an abstract base class for the common ``validate the whole file, then load it'' import.  It has \textbf{no database or ORM dependency}.  It reads the file and drives the process; your subclass does all persistence (JDBC, Kiss \texttt{Connection}, or anything else) in the abstract methods and hooks.
+
+A run proceeds in order:
+\begin{enumerate}
+\item \textbf{Header validation.}  Missing required columns, duplicate columns, and a file with no recognized column are reported as errors.  If the header is acceptable, the optional \texttt{checkHeader} hook is called once.
+\item \textbf{Check pass.}  Every row is passed to \texttt{checkRow}, which reports problems with \texttt{addError}.  Nothing should be written.
+\item \textbf{Parse pass.}  Only if there are zero errors, the file is read again and every row is passed to \texttt{parseRow}, which does the work.  \texttt{commitBatch} is called every batch (default 20 rows) and at the end.
+\item In \texttt{FULL\_MODE}, if still error-free, \texttt{deactivateMissing} is called.
+\item \texttt{onFinish(Result)} is called (or \texttt{onFailure} after an unexpected exception) and the \texttt{Result} is returned.
+\end{enumerate}
+
+Because no row is written unless every row passes the check, a bad file never leaves a partial load.
+
+\begin{lstlisting}[style=java]
+import org.kissweb.DelimitedFileImport;
+import java.io.FileNotFoundException;
+
+class ContactImport extends DelimitedFileImport {
+
+    ContactImport(String file, int mode)
+            throws FileNotFoundException {
+        super("contact", file, mode);
+    }
+
+    @Override
+    protected void initColumns() {
+        // name, required?, aliases...
+        addColumn("Last Name", true, "LNAME", "Surname");
+        addColumn("Phone", false);
+    }
+
+    @Override
+    protected void checkRow(int rowNum) {
+        if (getString("Last Name").isEmpty())
+            addError("Last Name is missing");  // "Row n: ..."
+        if (columnHasData("Phone")
+                && getString("Phone").length() < 7)
+            addWarning("Phone looks short");
+    }
+
+    @Override
+    protected void parseRow(int rowNum) {
+        // Write getString("Last Name") using YOUR
+        // persistence layer; then count it.
+        recordsAdded++;
+    }
+
+    @Override
+    protected void commitBatch() {
+        // e.g. connection.commit();
+    }
+}
+
+ContactImport imp = new ContactImport(path,
+    DelimitedFileImport.UPDATE_MODE);
+imp.setBatchSize(100);
+imp.setLogPath("/tmp/contact-import.log");
+DelimitedFileImport.Result r = imp.run();   // never throws
+if (!r.isSuccess())
+    System.out.println(r.getErrors());
+\end{lstlisting}
+
+\subsubsection*{Members}
+
+\begin{longtable}{P{5.0cm}P{5.5cm}}
+\toprule
+\textbf{Member} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{addColumn(name,}\allowbreak\ \texttt{required, aliases...)}, \texttt{addColumn(name)} & Declare a column by logical name (call from \texttt{initColumns}).  Matching is normalized (see above).  Returns the column's \texttt{Column} declaration, to which rules are chained (see ``Declarative Column Rules'' below); ignoring the return value is fine. \\
+\texttt{initColumns()} & \emph{Abstract.}  Declare the columns. \\
+\texttt{checkRow(rowNum)} & \emph{Abstract.}  Validate the current row; report with \texttt{addError}/\texttt{addWarning}.  \texttt{rowNum} is 1-based and excludes the header. \\
+\texttt{parseRow(rowNum)} & \emph{Abstract.}  Process the current row; increment the counters. \\
+\texttt{checkHeader()} & Optional hook, called once after the title line is accepted and before the first row is checked (by \texttt{run}, \texttt{runChecked} and \texttt{check}).  The reader is still on the title line, so \texttt{df.getString(i)} is the title of column \texttt{i}.  Report problems with \texttt{addError} (no row number). \\
+\texttt{getFileColumnTitles()} & The title of every column of the file, in file order, as the file has it (see below). \\
+\texttt{getFileColumnTitle(}\allowbreak\texttt{name)} & The file's own title for a declared column; \texttt{""} if the file lacks it. \\
+\texttt{getUnknownColumns()}, \texttt{get\-Unknown\-Column\-Indexes()} & The columns that match no declared column or alias: their titles, and their (parallel) column indexes (see below). \\
+\texttt{deactivateMissing()} & Hook, \texttt{FULL\_MODE} only: deactivate records not in the file. \\
+\texttt{commitBatch()} & Hook: flush or commit your persistence layer. \\
+\texttt{onFinish(Result)} & Hook: called at the end of every run. \\
+\texttt{onFailure(Throwable)} & Hook: called when an unexpected exception aborts the run. \\
+\texttt{log(level, msg)} & Hook: level is \texttt{LOG\_INFO}, \texttt{LOG\_WARNING} or \texttt{LOG\_ERROR}. \\
+\texttt{setBatchSize(n)} & Rows between \texttt{commitBatch} calls (default 20). \\
+\texttt{setLogPath(path)} & Write the summary to this file using plain \texttt{java.io}. \\
+\texttt{run()} & Run the import; never throws.  Returns a \texttt{Result}. \\
+\texttt{check()} & Check the whole file without importing anything; returns every problem as a \texttt{List<String>} (empty if the file is acceptable).  See below. \\
+\texttt{runChecked()} & All-or-nothing import that applies the same check phase as \texttt{check()}; never throws.  Returns a \texttt{Result}. \\
+\texttt{getString(name)}, \texttt{columnHasData(}\allowbreak\texttt{name)}, \texttt{colExists(name)}, \texttt{fixNum(s)} & Helpers: trimmed value (\texttt{""} if absent; already shortened if the column is declared with \texttt{truncate()}), non-blank test, column-present test, and removal of \texttt{\$} and commas from a number. \\
+\texttt{getInt}, \texttt{getLong}, \texttt{getBigDecimal}, \texttt{getDouble}, \texttt{getLocalDate}, \texttt{getLocalDateTime}, \texttt{getIntDate}, \texttt{getIntTime} \texttt{(name)} & Typed getters for columns declared with a type (see below). \\
+\texttt{getWarnings()} & The warnings recorded so far (a value shortened by \texttt{truncate()}, or added with \texttt{addWarning}); the way to read them after \texttt{check()}, which returns only problems. \\
+\bottomrule
+\end{longtable}
+
+\textbf{Modes.}  \texttt{APPEND\_MODE} adds new records and ignores existing ones; \texttt{UPDATE\_MODE} adds and updates; \texttt{FULL\_MODE} adds, updates, and deactivates records absent from the file.  The class only passes the mode through (\texttt{mode} field); your \texttt{parseRow} and \texttt{deactivateMissing} implement the behavior.
+
+\textbf{Counters.}  Subclasses increment the protected fields \texttt{recordsAdded}, \texttt{recordsUpdated} and \texttt{recordsDeactivated}; \texttt{rowsRead} is maintained by the class.
+
+\textbf{Result.}  \texttt{getErrors()}, \texttt{getWarnings()}, \texttt{isSuccess()}, \texttt{getRowsRead()}, \texttt{getRecordsAdded()}, \texttt{getRecordsUpdated()}, \texttt{get\-Records\-Deactivated()}, and \texttt{getSummary()} (formatted text, also what \texttt{setLogPath} writes).  Errors and warnings are prefixed with their row number.
+
+\subsubsection*{The File's Own Titles and Extra Columns}
+\label{sec:file-csv-titles}
+
+A subclass declares the columns it understands, but a file often carries more.  Four protected accessors show what the file actually has; they are filled as soon as the title line has been read, so they can be used in \texttt{checkHeader}, \texttt{checkRow} and \texttt{parseRow}, under \texttt{run}, \texttt{runChecked} and \texttt{check} alike.
+
+\begin{itemize}
+\item \texttt{List<String> getFileColumnTitles()}\index{DelimitedFileImport!getFileColumnTitles} --- \emph{every} column of the title line, by file column index, so element \texttt{i} is the title of the column whose value in a data row is \texttt{df.getString(i)}.  The titles are the file's own text: the reader trims surrounding white space and nothing else is changed (letter case, inner spaces, hyphens and a byte-order mark are kept).  An empty title is \texttt{""}, which keeps the indexes aligned.  (\texttt{getFileColumns()}, by contrast, lists only the \emph{declared} columns that are present.)
+\item \texttt{String getFileColumnTitle(String name)} --- the title the file uses for a declared column.  The column is found exactly as \texttt{getString(name)} finds it, by its logical name or any alias, so the result may be the alias (\texttt{"Surname"} for \texttt{"Last Name"}); it is \texttt{""} if the file does not have the column.
+\item \texttt{List<String> getUnknownColumns()} and \texttt{List<Integer> getUnknownColumnIndexes()}\index{DelimitedFileImport!getUnknownColumns} --- the columns that no declared column reads: the titles (original text, file order) and, in a parallel list, their zero-based column indexes.
+\item \texttt{String getUnknownString(int index)} and \texttt{String getUnknownString(String title)}\index{DelimitedFileImport!getUnknownString} --- the value of an unknown column in the current row: trimmed, \texttt{""} for a short row, and with the rules of Section~\ref{sec:file-csv-unknown-rules} applied (a truncated value is already shortened).  By index it takes an index from \texttt{getUnknownColumnIndexes()} and throws \texttt{IllegalArgumentException} for any other column, since that is a mistake in the program; by title it matches the file's own text exactly and answers \texttt{""} if no unknown column has that title.
+\end{itemize}
+
+\begin{lstlisting}[style=java]
+@Override
+protected void checkHeader() {
+    // keep every extra column as a free-form attribute
+    for (int k = 0; k < getUnknownColumns().size(); k++) {
+        String title = getUnknownColumns().get(k);
+        int col = getUnknownColumnIndexes().get(k);
+        if (title.length() > 50)
+            addError("The column title '" + title
+                + "' is too long to keep");
+        extras.put(col, title);
+    }
+}
+
+@Override
+protected void parseRow(int rowNum) {
+    for (Map.Entry<Integer, String> e : extras.entrySet())
+        save(e.getValue(), df.getString(e.getKey()));
+}
+\end{lstlisting}
+
+A column is \emph{unknown} when its title matches neither a declared column's logical name nor any of its aliases.  There is no separate matching code for this: the same reader lookup that \texttt{getString(name)}, \texttt{colExists(name)} and the header validation use decides, so case, white space, hyphens, underscores and non-printable characters are ignored and aliases count (a title of \texttt{"SUR-name"} is the alias \texttt{Surname}, not an extra column).  A column with an empty title is not listed, since it has no name to report.  If the file has two columns for one declared column, which the header validation reports as a duplicate title, only the column a lookup by name reads is recognized and the other is listed as unknown as well.  To compare a title with a declared name, use \texttt{colExists(name)} (or \texttt{df.getColumnIndex(name)}) rather than comparing the text of \texttt{getFileColumnTitles()}.  The value of a column in the current row is \texttt{df.getString(index)}: trimmed, and \texttt{""} for a short row.  All three lists are unmodifiable.
+
+\subsubsection*{Checking a File Without Importing It}
+\label{sec:file-csv-check}
+
+Sometimes a file must be accepted or refused \emph{before} any import starts --- for example, an upload handler that reports a bad file straight back to the user instead of failing later in a background job.  \texttt{check()}\index{DelimitedFileImport!check} performs exactly the check phase of a run and nothing more.  It reads the title line, applies the header validation that \texttt{run()} itself uses (there is only one implementation of those rules), verifies that every line can be read, and calls your \texttt{checkRow} for every data row.  It writes nothing and calls none of \texttt{parseRow}, \texttt{commitBatch}, \texttt{deactivateMissing} or \texttt{onFinish}.  It returns \emph{every} problem (there is no limit), so the user can fix the whole file at once; the list is empty if, and only if, the file may be imported.
+
+\begin{lstlisting}[style=java]
+ContactImport chk = new ContactImport(path,
+    DelimitedFileImport.UPDATE_MODE);
+List<String> problems = chk.check();
+if (!problems.isEmpty())
+    reject(problems);     // nothing was imported
+else    // a check consumes its instance: use a new one
+    new ContactImport(path,
+        DelimitedFileImport.UPDATE_MODE).run();
+\end{lstlisting}
+
+A problem in a data row is reported as ``Row \emph{n}: \emph{problem}'', where \emph{n} counts the data rows only (blank lines are skipped and the title line is not counted, so the first data row is Row~1).  The \texttt{checkRow} you already wrote for \texttt{run()} supplies those problems, using the same \texttt{getString} helpers; there is no second set of row rules.  The file-level problems are:
+
+\begin{longtable}{P{4.2cm}P{6.3cm}}
+\toprule
+\textbf{Situation} & \textbf{Message} \\
+\midrule
+\endhead
+No title line & The file is missing its first line of column titles. \\
+A required column is absent & The file is missing the required column ``Name''.  (One message per missing column.) \\
+No declared column is present & The file has no recognizable columns. \\
+The same column twice, even under different accepted names & Duplicate column titles (A, B); each column may appear only once, even under a different accepted name. \\
+A line cannot be parsed & Row \emph{n} could not be read: \emph{reason}.  Checking continues. \\
+An I/O failure & The file could not be read after row \emph{n}: \emph{reason}.  Checking stops. \\
+\bottomrule
+\end{longtable}
+
+A header problem that makes the rows meaningless (no title line, a missing required column, no recognizable column) is reported \emph{alone}: \texttt{checkHeader} and \texttt{checkRow} are not called.  A repeated title is reported \emph{and} the rows are still checked, so one pass shows the user everything; as in the import, the last of the repeated columns is the one a lookup by name reads.
+
+\texttt{run()} keeps its original, more technical wording for the same header problems and stops at the first header problem; \texttt{check()} and \texttt{runChecked()} use the user-facing wording above.  An exception thrown by \texttt{initColumns}, \texttt{checkHeader} or \texttt{checkRow} is not turned into a problem; it propagates out of \texttt{check()} (after the file is closed), because it is a failure of the program, not a defect of the file.  Like \texttt{run()}, a check consumes the instance --- the file is closed when it returns --- and a second use of the same instance throws \texttt{IllegalStateException}.
+
+\texttt{runChecked()} is the all-or-nothing import built on the same check phase: it checks everything (header and rows together, the identical problems \texttt{check()} would report) and imports only if there is nothing to report, then proceeds exactly as \texttt{run()} does.  Use it when one call should both check and import; use \texttt{check()} followed by a new instance's \texttt{run()} when the refusal must happen earlier than the import (the background import then re-checks the file, which is correct if the data the rules read may have changed in between).
+
+\subsubsection*{Declarative Column Rules}
+\label{sec:file-csv-rules}
+
+Most row checks ask the same few questions: is a value there, does it fit the database column, is it a number in range, is it a date in range.  \texttt{addColumn} therefore returns the column's \texttt{Column}\index{DelimitedFileImport!Column} declaration, and rules are chained onto it in \texttt{initColumns}.  The rules need no database; a limit that is known only at run time, such as the width of a database column, is passed as a callback.
+
+\begin{lstlisting}[style=java]
+@Override
+protected void initColumns() {
+    addColumn("Last Name", true, "LNAME", "Surname")
+        .notBlank().maxLength(30);
+    addColumn("Job Title")
+        .maxLength(() -> widthOf("person", "job_title"))
+        .truncate();
+    addColumn("# Employees").integer().range(0, 1_000_000);
+    addColumn("Revenue").decimal().min(0);
+    addColumn("Hire Date").date("MM/dd/yyyy")
+        .range(LocalDate.of(1990, 1, 1), LocalDate.now());
+    addColumn("Activity Time").dateTime("MM-dd-yyyy hh:mm a");
+}
+
+@Override
+protected void parseRow(int rowNum) {
+    int size = getInt("# Employees");            // parsed
+    String title = getString("Job Title");       // shortened
+    LocalDate hired = getLocalDate("Hire Date"); // or null
+}
+\end{lstlisting}
+
+\begin{longtable}{P{4.6cm}P{6.0cm}}
+\toprule
+\textbf{Rule} & \textbf{Meaning} \\
+\midrule
+\endhead
+\texttt{required()}, \texttt{aliases(...)} & The fluent form of the \texttt{required} and \texttt{aliases} arguments of the long \texttt{addColumn}.  \texttt{required} is a rule about the title line only. \\
+\texttt{notBlank()}\index{DelimitedFileImport!notBlank} & When the file has the column, every data row must have a value in it.  Independent of \texttt{required()}; a column that is both is checked for both. \\
+\texttt{maxLength(n)}, \texttt{maxLength(IntSupplier)}\index{DelimitedFileImport!maxLength} & A text value may have at most \texttt{n} characters (Unicode code points, as a database column counts them).  A longer value is a row error, unless \texttt{truncate()} is also given.  The supplier is called once per run, after the title line is accepted, and only if the file has the column.  A result of \texttt{Integer.MAX\_VALUE} means no limit. \\
+\texttt{truncate()}\index{DelimitedFileImport!truncate} & Shorten a value that is too long instead of rejecting it, and record a warning.  Text columns only. \\
+\texttt{integer()}, \texttt{longInteger()}, \texttt{decimal()} & The value must be a whole number that fits an \texttt{int}, a whole number that fits a \texttt{long}, or a number. \\
+\texttt{min(x)}, \texttt{max(x)}, \texttt{range(lo, hi)} & Inclusive bounds, given after the type: \texttt{long}, \texttt{double} or \texttt{BigDecimal} for a number; \texttt{LocalDate} for a \texttt{date}; \texttt{LocalDateTime} for a \texttt{dateTime}.  A \texttt{null} bound is open. \\
+\texttt{date()}, \texttt{date(fmt, more...)}, \texttt{dateTime(fmt, more...)} & The value must be a date (or date and time) in one of the formats; the first that reads the whole cell is used.  \texttt{date()} with no format accepts what \texttt{DateUtils.parse} accepts. \\
+\bottomrule
+\end{longtable}
+
+\textbf{When the rules run.}  The rules of every declared column run automatically, once per data row, in \texttt{check()}, in the check phase of \texttt{runChecked()} and in the check pass of \texttt{run()}, \emph{before} \texttt{checkRow} is called for the row.  A rule that is not met is a row error, every one is recorded (nothing is capped), and \texttt{checkRow} is still called, so its own problems follow in the same list.  Within a row the messages are in file order.  The rules apply only to a column the file has.  A blank cell is valid unless the column is \texttt{notBlank()}, and a blank cell skips the length, number and date checks, so an empty optional number is not an error and a missing required one is reported once.
+
+\textbf{Messages.}  They are plain English and name the column by the title the file uses (an alias if that is what the file has), so the user sees their own header:
+
+\begin{longtable}{P{4.4cm}P{6.2cm}}
+\toprule
+\textbf{Rule broken} & \textbf{Message} \\
+\midrule
+\endhead
+\texttt{notBlank()} & Row 2: ``Last Name'' must have a value. \\
+\texttt{maxLength(30)} & Row 3: ``Job Title'' is 45 characters long; at most 30 are allowed. \\
+\texttt{integer().range(0, 1\_000\_000)} & Row 5: ``\# Employees'' must be a whole number from 0 to 1,000,000 (found ``50-100''). \\
+\texttt{integer().min(0)} & Row 5: ``\# Employees'' must be a whole number of at least 0 (found ``-1''). \\
+\texttt{decimal().max(100)} & Row 6: ``Rate'' must be a number of at most 100 (found ``100.5''). \\
+\texttt{date("MM/dd/yyyy")} & Row 7: ``Hire Date'' must be a date such as 03/25/2024 (found ``13/45/2024''). \\
+\texttt{date(...).range(lo, hi)} & Row 8: ``Hire Date'' must be a date from 01/01/1990 to 12/31/2030 (found ``01/01/1980''). \\
+\bottomrule
+\end{longtable}
+
+\textbf{Numbers} are read as a person writes them in a spreadsheet: dollar signs, commas and white space are ignored (``\$1,500,000'', ``1 500''), a leading sign is allowed, and a decimal point may be used.  An \texttt{integer()} or \texttt{longInteger()} rounds a value with a decimal point to the nearest whole number, halves away from zero (``1500.5'' is 1501), and then checks the range; \texttt{decimal()} keeps the exact value (``\$1,234.50'' is 1234.50).  Text, exponents, percent signs and a second decimal point are errors.
+
+\textbf{Dates.}  A format is a \texttt{java.time.format.DateTimeFormatter} pattern with these differences, all meant to catch bad data: \texttt{yyyy} accepts exactly a four-digit year, so ``03-15-24'' is refused; \texttt{yy} reads a two-digit year with the window \texttt{DateUtils} uses; \texttt{MM} and \texttt{dd} need two digits where \texttt{M} and \texttt{d} accept one or two; letter case is ignored; the text is read strictly, so February 30 and trailing text are errors; and month names and AM/PM are English.  The example in the message is the first format applied to a sample date.  A format that is not a valid pattern, or cannot read the date it writes (a date-time format without a time, a 12-hour \texttt{h} without \texttt{a}), throws \texttt{IllegalArgumentException} from \texttt{initColumns}, so the mistake appears the first time the import runs.
+
+\textbf{Typed getters.}  \texttt{getInt} (for \texttt{integer()}), \texttt{getLong} (\texttt{integer()} or \texttt{longInteger()}), \texttt{getBigDecimal} and \texttt{getDouble} (any number), \texttt{getLocalDate} and \texttt{getIntDate} (a date or date-time; \texttt{getIntDate} is Kiss's YYYYMMDD \texttt{int}), \texttt{getLocalDateTime} and \texttt{getIntTime} (a date-time; \texttt{getIntTime} is HHMM) return the value the rules accepted.  They are valid in \texttt{checkRow} and \texttt{parseRow}.  A blank cell, a cell that broke its rule (already reported), and a column the file lacks give \texttt{0} for the primitive getters and \texttt{null} for the object getters, so a \texttt{checkRow} may call them without guarding; use \texttt{columnHasData} to tell a blank from a zero.  Asking for a type the column was not declared with, or for a column that was never declared, throws at once.
+
+\textbf{Shortening and warnings.}  A column declared with \texttt{maxLength} and \texttt{truncate()} is cut to the limit in one place, before the row is checked or parsed, so \texttt{getString} returns the same shortened text in \texttt{checkRow} and \texttt{parseRow} (the reader's \texttt{df.getString} remains the file's own text).  The cut never splits a character that takes two UTF-16 units.  A shortened value is not an error, but it is not silent: each one is recorded, once, in the check pass, as a warning such as \texttt{Row 4: "Job Title" was 45 characters long and was shortened to 30 characters.}  Warnings never make a file unacceptable.  They are in \texttt{Result.getWarnings()} (and in the summary) after \texttt{run()} or \texttt{runChecked()}, and in \texttt{getWarnings()} on the import object after \texttt{check()}, whose return value is only problems.
+
+\textbf{A limit from the database.}  Pass the width as a callback so that Kiss itself needs no database; the callback runs once per run, on the importing thread, after the title line is accepted:
+
+\begin{lstlisting}[style=java]
+addColumn("City").maxLength(() -> {
+    try {
+        return db.getColumnWidth("address", "city");
+    } catch (SQLException e) {
+        throw new IllegalStateException(e);
+    }
+});
+\end{lstlisting}
+
+\textbf{Mistakes in the declaration} (a range before its type, a range on a text column, two types, \texttt{truncate()} on a number, a backwards range, a bad date format) throw \texttt{IllegalStateException} or \texttt{IllegalArgumentException} from \texttt{initColumns}; like any exception from \texttt{initColumns}, \texttt{check()} lets it propagate and \texttt{run()} reports it in the result.
+
+\subsubsection*{Rules for the Extra Columns and for Derived Values}
+\label{sec:file-csv-unknown-rules}
+
+Two situations fall outside the rules of a declared column: the values of the columns the subclass did not declare (extra columns it keeps anyway, say as free-form attributes with a database width of their own), and a \emph{part} of a declared value (a street cut out of a full-address cell, which must fit the street column).  Both want the same behavior as a declared column, with the same messages and warnings.
+
+\textbf{Rules for every unknown column.}  \texttt{unknownColumnRules()}\index{DelimitedFileImport!unknownColumnRules} returns the \texttt{Column} declaration for \emph{all} the unknown columns at once, so the rules above are chained onto it in \texttt{initColumns} in the same way:
+
+\begin{lstlisting}[style=java]
+@Override
+protected void initColumns() {
+    addColumn("Company", true).notBlank();
+    unknownColumnRules()
+        .maxLength(() -> answerWidth()).truncate();
+}
+
+@Override
+protected void parseRow(int rowNum) {
+    List<String> titles = getFileColumnTitles();
+    for (int i : getUnknownColumnIndexes())
+        save(titles.get(i), getUnknownString(i)); // shortened
+}
+// Row 4: "Fax No" was 2300 characters long and was
+// shortened to 2000 characters.            (a warning)
+\end{lstlisting}
+
+The rules run exactly as those of a declared column do: once per data row in \texttt{check()}, in the check phase of \texttt{runChecked()} and in the check pass of \texttt{run()}, before \texttt{checkRow}; every unmet rule is a row error, in file order together with the declared columns' errors; a truncated value is a warning, recorded once, in the check pass only; and the message names the column by the title the file has (a title longer than 60 characters is shown shortened, with ``...'').  The run-time limit is read once per run, not once per column, and only if the file has an unknown column.  \texttt{getUnknownString} returns the value with the rules applied, in \texttt{checkRow} and \texttt{parseRow} alike, so the check and the import see the same text; \texttt{df.getString(index)} is still the file's own.
+
+Declare the rules in \texttt{initColumns}: the set of unknown columns is fixed when the title line has been read.  An import that keeps only some of the unknown columns, or none, simply declares no rules (or applies its own selection when it reads them); with nothing declared the unknown columns behave as before.  Every rule of a declared column is available, a number or date type included (enforced in every row, the value read as text), except \texttt{required()} and \texttt{aliases(...)}, which are about matching a title to a declared name and throw \texttt{IllegalStateException} here.
+
+\textbf{Shortening a derived value.}  \texttt{truncate(label, value, max)}\index{DelimitedFileImport!truncate(label, value, max)} cuts any value to \texttt{max} characters and records the same warning a truncated column does:
+
+\begin{lstlisting}[style=java]
+String street = truncate(
+    "Street (from Company Address)",
+    parts.street, widthOf("address", "street"));
+// Row 7: "Street (from Company Address)" was 45
+// characters long and was shortened to 30 characters.
+\end{lstlisting}
+
+It counts Unicode code points and never splits a character made of two UTF-16 units; a value that fits is returned unchanged, \texttt{null} is returned as \texttt{null}, and \texttt{Integer.MAX\_VALUE} means no limit.  The label is put between double quotes and should name the value as the user knows it.
+
+\textbf{It reports once.}  The value that is checked must be the value that is saved, so call \texttt{truncate} wherever the value is computed, in \texttt{checkRow} and \texttt{parseRow} alike (for instance from one method that both call); both passes get the same text.  The warning is recorded only while the rows are not being imported: in the check pass of \texttt{run()}, in \texttt{check()} and in the check phase of \texttt{runChecked()}.  The parse pass shortens the same value silently, which is how a cut is listed once, as it is for a declared column.  Within one row the same warning (same label, value and limit) is also recorded only once, so several helpers of \texttt{checkRow} may reach the same value.  A value that is only shortened in \texttt{parseRow} is never reported, so shorten it in the check pass too.  Called outside the rows, for instance from \texttt{checkHeader}, it records a warning without a row number.
+
+\section{Writing CSV Files}
+\label{sec:file-csv-write}
+
+The \texttt{DelimitedFileWriter}\index{DelimitedFileWriter} class writes CSV files with automatic quoting and escaping.  Its full API is covered in Chapter~\ref{ch:reports}, Section~\ref{sec:rpt-csv}.  Here is a quick reference:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.DelimitedFileWriter
+import org.kissweb.FileUtils
+
+File f = FileUtils.createReportFile("Export-", ".csv")
+DelimitedFileWriter dfw =
+    new DelimitedFileWriter(f.getAbsolutePath())
+
+// Header
+dfw.writeField("Name")
+dfw.writeField("Amount")
+dfw.endRecord()
+
+// Data
+dfw.writeField("Alice Smith")
+dfw.writeField(12345.67)
+dfw.endRecord()
+
+dfw.close()
+String url = FileUtils.getHTTPPath(f)
+\end{lstlisting}
+
+\noindent
+Like \texttt{DelimitedFileReader}, the writer supports custom delimiters and quote characters through its extended constructor.
+
+\section{FTP Transfers}
+\label{sec:file-ftp}
+
+The \texttt{FTP}\index{FTP} class provides a client for transferring files to and from remote FTP servers.
+
+\subsection{Connecting and Transferring}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.FTP
+
+FTP ftp = new FTP("ftp.example.com", "username", "password")
+
+// Upload a file
+ftp.put("local-report.csv", "remote-report.csv")
+
+// Download a file
+ftp.get("remote-data.csv", "local-data.csv")
+
+// Change remote directory
+ftp.cd("/incoming/reports")
+
+// Upload to current remote directory
+ftp.put("monthly-report.pdf", "monthly-report.pdf")
+
+ftp.close()
+\end{lstlisting}
+
+\subsection{FTP Methods}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{FTP(host, user, pw)} & Connect and authenticate. \\
+\texttt{put(local, remote)} & Upload a local file to the remote server. \\
+\texttt{get(remote, local)} & Download a remote file to a local path. \\
+\texttt{cd(path)} & Change the remote working directory. \\
+\texttt{close()} & Disconnect from the server. \\
+\bottomrule
+\end{longtable}
+
+\begin{warnbox}
+Always call \texttt{ftp.close()} when done, preferably in a \texttt{try/finally} block, to avoid leaving connections open on the remote server.
+\end{warnbox}
+
+\subsection{Example: Automated Export via FTP}
+
+This cron task generates a CSV export and uploads it to a partner's FTP server:
+
+\begin{lstlisting}[style=groovy]
+// CronTasks/NightlyExport.groovy
+import org.kissweb.database.*
+import org.kissweb.*
+
+static void start(Object obj) {
+    Connection db = (Connection) obj
+
+    // Generate CSV
+    File f = File.createTempFile("export-", ".csv")
+    DelimitedFileWriter dfw =
+        new DelimitedFileWriter(f.getAbsolutePath())
+    dfw.writeField("ID")
+    dfw.writeField("Name")
+    dfw.writeField("Amount")
+    dfw.endRecord()
+
+    List<Record> recs = db.fetchAll(
+        "select * from orders where order_date = ?",
+        DateUtils.addDays(DateUtils.today(), -1))
+    for (Record r : recs) {
+        dfw.writeField(r.getString("order_id"))
+        dfw.writeField(r.getString("customer_name"))
+        dfw.writeField(r.getDouble("amount"))
+        dfw.endRecord()
+    }
+    dfw.close()
+
+    // Upload via FTP
+    FTP ftp = null
+    try {
+        ftp = new FTP("ftp.partner.com", "user", "pass")
+        ftp.cd("/incoming")
+        ftp.put(f.getAbsolutePath(), "daily-orders.csv")
+    } finally {
+        if (ftp != null)
+            ftp.close()
+        f.delete()
+    }
+
+    db.commit()
+    println("Nightly export uploaded")
+}
+\end{lstlisting}
+
+\section{PDF Generation}
+\label{sec:file-pdf}
+
+Kiss provides two PDF generation approaches:
+
+\begin{enumerate}
+  \item \textbf{Groff} --- Table-oriented reports with automatic headers, footers, and page numbers (Chapter~\ref{ch:reports}).  Requires the \texttt{groff} typesetting system to be installed on the host running the backend; it is not bundled with Kiss.
+  \item \textbf{PDF class} --- Pixel-precise document creation via Apache PDFBox for forms, certificates, and custom layouts.
+\end{enumerate}
+
+\noindent
+The \texttt{PDF}\index{PDF} class is covered in Chapter~\ref{ch:reports}, Section~\ref{sec:rpt-pdf}.  Here is a summary of its key capabilities:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.PDF
+
+PDF pdf = new PDF("output.pdf")
+pdf.newPage()
+
+// Text output by line/column (1-indexed)
+pdf.setFont(PDType1Font.HELVETICA_BOLD, 16)
+pdf.startText()
+pdf.textOut(1, 1, "Invoice #12345")
+pdf.setFont(PDType1Font.HELVETICA, 10)
+pdf.textOut(3, 1, "Customer: Acme Corp")
+pdf.textOut(4, 1, "Date: 04/04/2026")
+pdf.endText()
+
+// Graphics
+pdf.startGraphics()
+pdf.drawHLine(5.0f * 72, 72, 7.5f * 72)
+pdf.endGraphics()
+
+// Images with scaling
+pdf.imageOut(300, 72, 0.5f, "company-logo.png")
+
+pdf.endDocument()
+\end{lstlisting}
+
+\noindent
+Key capabilities:
+
+\begin{itemize}
+  \item Text positioning by line/column or absolute pixel coordinates.
+  \item Graphics primitives: horizontal lines, rectangles.
+  \item Image placement with scaling by ratio, width, or height.
+  \item Portrait and landscape page orientation.
+  \item Load existing PDFs as templates and add content to them.
+  \item Multiple pages with independent content.
+\end{itemize}
+
+\section{Temporary File Management}
+\label{sec:file-delivery}
+
+\texttt{FileUtils}\index{FileUtils} manages temporary files for browser delivery.  This is the standard pattern for delivering generated files (reports, exports, documents) to the browser.
+
+\subsection{Creating and Delivering Files}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.FileUtils
+
+// Create a temporary file with a prefix and extension
+File f = FileUtils.createReportFile("Invoice-", ".pdf")
+
+// ... write content to f ...
+
+// Get the HTTP-accessible URL
+String url = FileUtils.getHTTPPath(f)
+outjson.put("downloadUrl", url)
+\end{lstlisting}
+
+\noindent
+On the frontend, open the URL to trigger the download:
+
+\begin{lstlisting}[style=javascript]
+const res = await Server.call(WS, 'generateInvoice');
+if (res._Success)
+    Utils.showReport(res.downloadUrl);
+\end{lstlisting}
+
+\subsection{How It Works}
+
+\begin{enumerate}
+  \item \texttt{createReportFile()} creates a uniquely named file in a managed temporary directory that is accessible via HTTP.
+  \item \texttt{getHTTPPath()} returns the URL path relative to the application root.
+  \item \texttt{Utils.showReport()} opens the URL in a new browser tab, triggering the download.
+  \item Files are automatically cleaned up after approximately one day.
+\end{enumerate}
+
+\subsection{Additional FileUtils Methods}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{createReportFile(prefix, ext)} & Create a temp file for browser delivery. \\
+\texttt{getHTTPPath(File)} & Get the HTTP URL for a temp file. \\
+\texttt{readFile(path)} & Read an entire file into a string. \\
+\texttt{write(path, content)} & Write a string to a file. \\
+\texttt{copy(src, dest)} & Copy a file. \\
+\texttt{getMimeType(filename)} & Determine MIME type from extension. \\
+\bottomrule
+\end{longtable}
+
+\begin{tipbox}
+Use \texttt{FileUtils.createReportFile()} for all generated files that need browser delivery.  It handles unique naming, proper directory placement, and automatic cleanup.
+\end{tipbox}
+
+\section{External File Storage}
+\label{sec:file-external}
+
+The \texttt{ExternalFile}\index{ExternalFile} class (\texttt{org.kissweb.database.ExternalFile}) associates one or more files on disk with a row of any SQL table --- useful when content (photos, scanned documents, PDFs, large text blobs) is more naturally kept as a file than as database bytes, while still needing to travel with a specific row's lifecycle (in particular, its deletion). A file's location is always \emph{computed} from the table name, the row's primary key, and (when a row has more than one associated file) a field name --- never stored in the database --- so relocating the file store to another path or machine requires no data migration.
+
+\texttt{ExternalFile} supports two distinct patterns, covered in turn below:
+
+\begin{itemize}
+  \item \textbf{Virtual columns} --- a file associated with a row through no SQL column at all; the association exists purely in the file's computed path.
+  \item \textbf{Hybrid columns} --- a real, existing \texttt{varchar} column that stores its value inline when it fits and transparently overflows to an external file when it does not.
+\end{itemize}
+
+\subsection{Configuration}
+\label{sec:file-external-config}
+
+Before any other method on \texttt{ExternalFile} is used, the application registers two lambdas once, typically from \texttt{KissInit.groovy}:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.database.ExternalFile
+
+// Where files are stored, evaluated fresh on every call (safe
+// to vary, e.g. per tenant)
+ExternalFile.setRootSupplier({ -> Config.externalFileRoot() })
+
+// How a (tableName, primaryKey) pair maps to a directory
+// under the root
+ExternalFile.setDirectoryMapper({ String table, String pk ->
+    "${table}/${pk}"
+})
+\end{lstlisting}
+
+\noindent
+Calling any other \texttt{ExternalFile} method before both are configured throws \texttt{IllegalStateException}. Nothing else about primary-key format, sharding, or table layout is assumed --- the directory mapper decides all of that, so an application with composite or non-numeric keys, or that wants deeper sharding as row counts grow (e.g. splitting on a key prefix), supplies its own mapping.
+
+\subsection{Virtual Columns}
+\label{sec:file-external-virtual}
+
+A virtual column has no backing SQL column; the file's association with a row is entirely computed. Register a logical name once for each file type a table has, giving it the table name and a field name (fictitious --- it need not, and normally does not, exist as a real column):
+
+\begin{lstlisting}[style=groovy]
+ExternalFile.addField("employeePhoto", "employee", "photo")
+ExternalFile.addField("employeeResume", "employee", "resume")
+\end{lstlisting}
+
+\noindent
+Save and retrieve by that logical name and the row's primary key:
+
+\begin{lstlisting}[style=groovy]
+// Save (String, byte[], and Byte[] overloads are all provided)
+ExternalFile.saveData("employeePhoto", employeeId, ".jpg",
+    imageBytes)
+
+// Read back -- "" / empty array if nothing was ever saved
+String resumeText = ExternalFile.getString("employeeResume",
+    employeeId, ".txt")
+byte[] photoBytes  = ExternalFile.getBinary("employeePhoto",
+    employeeId, ".jpg")
+
+// Remove
+ExternalFile.deleteExternalFile("employeePhoto", employeeId,
+    ".jpg")
+\end{lstlisting}
+
+\noindent
+For uploaded files specifically, prefer \texttt{saveInputStream()} over \texttt{saveData()}: it additionally normalizes EXIF orientation on supported image types (jpg, png, bmp, gif, tiff) so a photo taken on a rotated phone camera does not display sideways.
+
+\begin{lstlisting}[style=groovy]
+void upload(JSONObject injson, JSONObject outjson,
+            Connection db, ProcessServlet servlet) {
+    String ext = servlet.getUploadFileType(0)
+    ExternalFile.saveInputStream("employeePhoto",
+        injson.getString("employeeId"),
+        ext, servlet.getUploadBufferedInputStream(0))
+}
+\end{lstlisting}
+
+\noindent
+A single row may have several associated files distinguished by field name; every method above accepts an \texttt{ExternalField} constructed directly (\texttt{new ExternalField(tableName, fieldName)}) as an alternative to a registered logical name, for callers that prefer not to populate the registry.
+
+\noindent
+To deliver a stored file to the browser, generate a temporary HTTP-servable copy:
+
+\begin{lstlisting}[style=groovy]
+String url = ExternalFile.getURL("employeePhoto", employeeId,
+    "Photo-", ".jpg")
+outjson.put("photoUrl", url)
+\end{lstlisting}
+
+\noindent
+Key methods:
+
+\begin{longtable}{P{5.2cm}P{5.3cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{addField(name, table, field)} & Register a logical file type. \\
+\texttt{saveData(name, pk, ext, data)} & Save (String/byte[]/Byte[]), overwriting any existing file. \\
+\texttt{saveInputStream(name, pk, ext, is)} & Save an upload, normalizing EXIF orientation for images. \\
+\texttt{getString(name, pk, ext)} / \texttt{getBinary(...)} & Read back; \texttt{""} / empty array if none saved. \\
+\texttt{deleteExternalFile(name, pk, ext)} & Delete; a no-op if the file does not exist. \\
+\texttt{externalFileExists(name, pk)} & Does any file exist for this row (any field/extension)? \\
+\texttt{deleteAllExternalFiles(\allowbreak table, pk)} & Delete every file for this row, all fields and extensions. \\
+\texttt{getURL(name, pk, prefix, ext)} & Temporary HTTP-servable copy of the stored file. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Cascade Delete}
+\label{sec:file-external-cascade}
+
+\texttt{ExternalFile} can participate in the delete callback described in Section~\ref{sec:crud-delete}, so a row's files are removed automatically when the row is deleted:
+
+\begin{lstlisting}[style=groovy]
+// Once, e.g. from a Connection-preparation hook
+db.setDeleteCallback(ExternalFile::deleteCallback)
+
+// Once per table, after confirming this is the wanted behavior
+ExternalFile.cascadeDeleteFor("employee")
+\end{lstlisting}
+
+\noindent
+Cascade delete is opt-in per table and off by default. Wiring the callback into a \texttt{Connection} has no effect on a table until that table is separately opted in with \texttt{cascadeDeleteFor()} --- an application that has always deleted rows without removing their files does not have that behavior silently change the moment the callback exists elsewhere in the codebase. A table not opted in is simply a no-op on delete. This applies equally to hybrid columns (Section~\ref{sec:file-external-hybrid}): once a table is opted in, both its virtual-column files and its hybrid-column overflow files are removed on row delete, since both use the same table+primary-key path scheme.
+
+\subsection{Hybrid Columns: A Real Column That Overflows to a File}
+\label{sec:file-external-hybrid}
+
+A hybrid column is a real, existing \texttt{varchar} SQL column whose value is normally small but occasionally too large for the column. \texttt{saveHybridColumn()} and \texttt{getHybridColumn()} store it inline in the column when it fits, and in an external file (using the same root/directory-mapper configuration as virtual columns) when it does not --- transparently, in a single call each way:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.database.ExternalFile
+
+// Save -- decides inline vs. external internally
+ExternalFile.saveHybridColumn(db, "note", "body", noteId,
+    bodyText)
+
+// Read -- transparently returns the real value either way
+String bodyText = ExternalFile.getHybridColumn(db, "note",
+    "body", noteId)
+\end{lstlisting}
+
+\noindent
+This is the right tool when a column's content is normally short but occasionally long (a notes field, a JSON blob, a description that is usually a sentence and occasionally a whole document) and a real column for it already exists, or is one the schema is willing to add. Use the virtual-column methods in Section~\ref{sec:file-external-virtual} instead when there is no real column at all --- a photo or a resume, for example, has no reason to have a database column.
+
+\paragraph{How the size decision is made.} \texttt{saveHybridColumn()} determines the column's declared size (in characters --- the same unit a database like PostgreSQL uses for \texttt{varchar(n)}) by reading it from the database's own column metadata (the cached \texttt{Connection.getColumnWidth()} lookup of Section~\ref{sec:db-metadata}); the caller never supplies or hard-codes a threshold, and the metadata lookup is cached per schema, table and column for the life of the application. Data that fits is written directly into the column; data that does not is written to an external file, and a short sentinel value is written into the column in its place so a later \texttt{getHybridColumn()} call knows to read the file instead.
+
+\paragraph{Data that happens to look like the sentinel.} Because real data could coincidentally begin with the exact bytes used as the sentinel, \texttt{saveHybridColumn()} checks for that collision on every save: a value that would be misread is stored with a short escape prefix instead, and \texttt{getHybridColumn()} strips it back off. Ordinary data --- the overwhelming majority --- collides with neither sequence and is stored with no overhead at all. The round trip is exact for every possible input, including a value that merely looks like the sentinel.
+
+\paragraph{Transitions.} A later save can move a row's data in either direction. Going from a large value to a small one deletes the now-stale external file; going from one large value to another simply overwrites the same file. A save of \texttt{null} or an empty string clears the column and removes any external file for that row. Because the file's location is computed the same way as for virtual columns (table name, primary key, and the column name standing in for the field name), a table already opted into cascade delete (Section~\ref{sec:file-external-cascade}) needs no separate wiring for hybrid columns.
+
+\paragraph{Resolving a value you already have.} When the raw column value arrives as part of a larger query (a list or a join), calling \texttt{getHybridColumn()} per row would add a SELECT each time. \texttt{resolveHybridColumn()} takes the raw value as fetched and returns the real data without querying: \texttt{null} stays \texttt{null}, ordinary data is returned as-is, an escaped value has its prefix stripped, and the external marker causes the file to be read (an empty string if it is missing). The primary key is needed only to compute the file's path. \texttt{getHybridColumn()} itself delegates to it, so the two cannot drift. \texttt{isExternal()} tests whether a raw value is the external marker, for example to skip a large field in a list view.
+
+\begin{lstlisting}[style=groovy]
+// from a larger query
+String raw = rec.getString("body")
+if (!ExternalFile.isExternal(raw))
+    show(raw)
+String bodyText = ExternalFile.resolveHybridColumn(db, "note",
+    "body", noteId, raw)
+\end{lstlisting}
+
+\paragraph{Clearing a column.} \texttt{saveHybridColumn()} with \texttt{null} stores SQL \texttt{NULL} and with an empty string stores an empty string; on a \texttt{NOT NULL} column the former fails. \texttt{releaseHybridColumn()} removes the external file (if any) and clears the column to \texttt{NULL} or to an empty string according to its \texttt{nullable} argument, so the caller states the column's nullability rather than choosing between the two save calls.
+
+\begin{longtable}{P{5.2cm}P{5.3cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{saveHybridColumn(db, table, column, pk, data)} & Save, choosing inline vs. external automatically; \texttt{null}/empty clears the column and removes any external file. \\
+\texttt{getHybridColumn(db, table, column, pk)} & Read, transparently returning the real value regardless of where it is stored. \\
+\texttt{resolveHybridColumn(db, table, column, pk, raw)} & Resolve an already-fetched raw column value to the real data with no SELECT. \\
+\texttt{isExternal(raw)} & True exactly when a raw column value is the external-storage marker. \\
+\texttt{releaseHybridColumn(db, table, column, pk, nullable)} & Remove any external file and clear the column: to \texttt{NULL} if \texttt{nullable}, else to an empty string. \\
+\bottomrule
+\end{longtable}
+
+\begin{warnbox}
+As with the rest of \texttt{ExternalFile}, a file write or delete is not transactional with the surrounding database transaction --- it happens immediately, independent of commit/rollback. \texttt{saveHybridColumn()} performs the file operation \emph{before} updating the column, so a failure on the database side leaves at worst an orphaned external file, never a column pointing at a file that was never written. The table must also have a single-column primary key.
+\end{warnbox}

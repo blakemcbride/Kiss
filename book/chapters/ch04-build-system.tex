@@ -1,0 +1,313 @@
+\chapter{The Build System}
+\label{ch:build}
+
+Kiss uses a custom build system centered on the \texttt{bld} script.  This chapter covers the build commands, how incremental compilation works, and how to generate deployable artifacts.  No Maven, Gradle, or other external build tool is required.
+
+\section{Why \texttt{bld} Instead of Maven or Gradle?}
+\label{sec:build-why-bld}
+
+A reasonable first question is why Kiss ships its own build system at all when Maven and Gradle are widely used and well understood.
+
+The short answer: Maven and Gradle work very well for applications that conform to their standards --- a fixed source layout, a fixed lifecycle, dependency resolution from public repositories, artifacts compiled ahead of time and packaged into a JAR or WAR.  Kiss does not fit cleanly into that mould.  Its defining feature is that backend service code is compiled \emph{at runtime} when source files change, not as a separate build step, and that the running server itself participates in the development loop.  Wedging that workflow into a Maven lifecycle or a Gradle task graph requires fighting the tool at every turn.
+
+\texttt{bld} is far simpler and more flexible.  It is a small Java program wrapped by a one-page shell script.  It performs smart, timestamp-based incremental builds; it knows how to start and stop the embedded Tomcat, run tests, generate JavaDoc, and package a WAR; and because it is just Java code, customizing it is the same as editing any other class in the project --- no plugins, no DSL, no third-party lifecycle to learn.  The result is a build system that supports the dynamic nature of Kiss directly instead of working around it.
+
+The build system is organized as three Java source files, layered by how widely each is shared:
+
+\begin{description}
+  \item[\texttt{BuildUtils.java}]\index{BuildUtils} (in \texttt{src/main/core/org/kissweb/}) The fully generic build utilities: compiling Java, creating and unpacking JARs, downloading dependencies, copying file trees, and running external commands.  It contains nothing specific to Kiss or Tomcat, so it can also serve as the engine of a generic build system in projects unrelated to Kiss.
+  \item[\texttt{KissBuildUtils.java}]\index{KissBuildUtils} (in \texttt{src/main/core/org/kissweb/}) Build procedures shared by every Kiss application: the development port block and the port-override option parsing (Section~\ref{sec:build-ports}), Tomcat installation and control (\texttt{installTomcat}, \texttt{shutdownTomcat}, \texttt{rewriteServerXmlPorts}), and the version stamping applied to production WARs for cache busting.
+  \item[\texttt{Tasks.java}]\index{Tasks.java} (in \texttt{src/main/precompiled/}) The application-specific layer: this application's tasks, dependency lists, third-party versions, and its \texttt{portBase} (Section~\ref{sec:build-ports}).  This is the only build file an application normally edits.
+\end{description}
+
+\noindent
+When you add build functionality of your own, application-specific work goes in \texttt{Tasks.java}.  Something any Kiss application could use belongs in \texttt{KissBuildUtils.java}; something universally generic belongs in \texttt{BuildUtils.java}.
+
+\section{The \texttt{bld} Script}
+\label{sec:build-bld}
+
+The \texttt{bld} script (with a \texttt{bld.cmd} counterpart for Windows) is the single entry point for all build operations.  It is a thin shell wrapper that:
+
+\begin{enumerate}
+  \item Checks whether the build engine source files (\texttt{Tasks.java}, \texttt{BuildUtils.java}, and \texttt{KissBuildUtils.java}) are newer than their compiled classes.
+  \item If a rebuild is needed, compiles them with \texttt{javac}.
+  \item Invokes the compiled build system, passing along any command-line arguments.
+\end{enumerate}
+
+\noindent
+This two-stage design means the build engine itself rebuilds only when its source changes.
+
+\begin{notebox}
+On Linux, macOS, BSD, and other Unix-like systems, invoke the script as \texttt{./bld} (the leading \texttt{./} is required because the current directory is not on \texttt{PATH}).  On Windows, invoke it without the prefix as \texttt{bld} --- this runs the \texttt{bld.cmd} batch file.  Throughout this book, examples use the \texttt{./bld} form; Windows users should drop the \texttt{./} prefix.
+\end{notebox}
+
+\section{IDE Integration via Ant (\texttt{build.xml})}
+\label{sec:build-ant}
+
+Kiss includes an Ant build file, \texttt{build.xml}, in the project root.  Its sole purpose is to act as a bridge between IDEs and \texttt{bld}: most IDEs ship with first-class Ant integration, so an Ant script gives them a familiar way to invoke Kiss's native build system.
+
+The targets in \texttt{build.xml} do not reimplement the build --- each one simply shells out to \texttt{bld} (or directly invokes the compiled \texttt{Tasks} class) for the corresponding action.  IDE users get the standard Ant tool window with build, clean, test, and run targets, and those targets drive exactly the same code paths that running \texttt{bld} on the command line would.
+
+If you build only from the terminal you can ignore \texttt{build.xml} entirely; it exists for the convenience of IDE users.
+
+\section{Build Commands}
+\label{sec:build-commands}
+
+\subsection{Development}
+
+\begin{lstlisting}[style=shell]
+# Build and start frontend + backend servers
+./bld develop
+# Build and start backend only (background)
+./bld start-backend
+./bld stop-backend    # Stop background backend server
+./bld start-frontend  # Start frontend dev server only
+./bld stop-frontend   # Stop frontend dev server
+\end{lstlisting}
+
+\noindent
+\texttt{./bld develop} is the primary development command.  It compiles everything, starts Tomcat on the back-end port (8001 by default), starts the frontend server on the front-end port (8000 by default --- the URL you browse to), and watches for changes.  See Section~\ref{sec:build-ports} for how the ports are assigned.
+
+If the backend is not running when \texttt{stop-backend} is invoked (for example, Tomcat exited after a startup error), the command prints one clear line pointing at \texttt{tomcat/logs/catalina.out} rather than a stack trace.
+
+\subsection{Build and Package}
+
+\begin{lstlisting}[style=shell]
+./bld -v build        # Compile all source code (verbose)
+./bld war             # Create deployable WAR file
+# Build Kiss.jar (reusable utility library)
+./bld jar
+./bld javadoc         # Generate JavaDoc documentation
+\end{lstlisting}
+
+\subsection{Cleanup}
+
+\begin{lstlisting}[style=shell]
+# Remove compiled files (keep JARs and Tomcat)
+./bld clean
+# Remove build artifacts, JARs, and Tomcat
+./bld realclean
+./bld ideclean        # Total cleanup including IDE files
+\end{lstlisting}
+
+\subsection{Testing}
+
+\begin{lstlisting}[style=shell]
+./bld unit-tests      # Build and run unit tests
+\end{lstlisting}
+
+\section{Development Ports: the Port Block}
+\label{sec:build-ports}
+
+The embedded Tomcat and the frontend development server bind to four ports.  All four come from a \emph{single variable} at the top of \texttt{Tasks.java}:
+
+\begin{lstlisting}[style=java]
+private static int portBase = 8000;
+\end{lstlisting}
+
+\noindent
+\texttt{Tasks.main()} passes it to \texttt{KissBuildUtils.setPortBase()}, which assigns the four ports as one consecutive block:
+
+\begin{longtable}{P{3.0cm}P{2.0cm}P{5.0cm}}
+\toprule
+\textbf{Port} & \textbf{Default} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{portBase}     & 8000 & front-end dev server (the URL you browse to) \\
+\texttt{portBase + 1} & 8001 & back-end (Tomcat HTTP) \\
+\texttt{portBase + 2} & 8002 & Tomcat shutdown \\
+\texttt{portBase + 3} & 8003 & JDWP debug \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The point of the block is running \emph{several unrelated Kiss applications in development mode at the same time}: give each application its own \texttt{portBase} (say 8000, 8100, 8200, \ldots) and they never collide.  Because the base lives in \texttt{Tasks.java}, the choice is made once per application and is checked into that application's repository.
+
+The front end automatically finds the back end under this convention --- a page served by the front-end dev server calls the back end at its own port~$+$~1, and pages served by Tomcat itself use their own origin --- so changing \texttt{portBase} requires no front-end configuration.  Section~\ref{sec:fe-backend-url} describes the mechanism.
+
+\subsection{Port Overrides}
+
+Each of the four ports can additionally be overridden for a single run from the \texttt{bld} command line.  The overrides are parsed \emph{after} \texttt{setPortBase} runs, so they always win over the block.
+
+\begin{longtable}{P{1.7cm}P{4.2cm}P{1.4cm}P{2.2cm}}
+\toprule
+\textbf{Short} & \textbf{Long} & \textbf{Default} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{-dp PORT} & \texttt{-{}-debug-port=PORT}    & 8003 & JDWP debug port \\
+\texttt{-bp PORT} & \texttt{-{}-backend-port=PORT}  & 8001 & development back-end port \\
+\texttt{-sp PORT} & \texttt{-{}-shutdown-port=PORT} & 8002 & Tomcat shutdown port \\
+\texttt{-fp PORT} & \texttt{-{}-frontend-port=PORT} & 8000 & development front-end port \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Options may appear in any position on the command line and are consumed before the task name is dispatched.  Both short and long forms are accepted; the long form may use either a separate argument or an \texttt{=} suffix.  \texttt{./bld help} always shows the live defaults --- the values produced by this application's \texttt{portBase}.
+
+\begin{lstlisting}[style=shell]
+./bld -bp 8090 -fp 8010 develop
+./bld --backend-port=8090 --frontend-port=8010 develop
+\end{lstlisting}
+
+\begin{warnbox}
+An override that breaks the consecutive-block relationship (for example \texttt{-fp} alone) also breaks the front end's port~$+$~1 discovery of the back end.  For a one-off unusual topology, set \texttt{SystemInfo.backendUrl} explicitly (Section~\ref{sec:fe-backend-url}).
+\end{warnbox}
+
+\noindent
+The HTTP and shutdown ports are written into \texttt{tomcat/conf/server.xml} on every \texttt{setup-tomcat} run; the debug port is written into \texttt{tomcat/bin/debug}; the frontend port is passed on the \texttt{SimpleWebServer} command line.  All four values are re-applied on every \texttt{bld} invocation, so different runs can pick different ports with no manual cleanup.
+
+Non-numeric or out-of-range values are reported on \texttt{stderr} and the default is retained for that port.
+
+\section{Compilation Order}
+\label{sec:build-order}
+
+The build compiles in this order:
+
+\begin{enumerate}
+  \item \textbf{Core framework files} (\texttt{src/main/core/}) --- the Kiss framework itself.  You do not modify these.
+  \item \textbf{Precompiled utilities} (\texttt{src/main/precompiled/}) --- shared Java classes for your application.
+  \item \textbf{Test files} (\texttt{src/test/core/}) --- JUnit test classes.
+\end{enumerate}
+
+\noindent
+All compiled classes go to \texttt{work/exploded/WEB-INF/classes/}.
+
+\begin{notebox}
+Backend service files (\texttt{.groovy}, \texttt{.java}, \texttt{.lisp}) in \texttt{src/main/backend/services/} are \emph{not} compiled by the build system.  They are compiled on-the-fly by the framework when first accessed or when changed.
+\end{notebox}
+
+\section{Incremental Compilation}
+\label{sec:build-incremental}
+
+The build system tracks file timestamps and only recompiles files that have changed.  \texttt{BuildUtils.java}\index{BuildUtils} provides the infrastructure for this, including methods for checking file modification times and running shell commands.
+
+\section{The \texttt{precompiled} Directory}
+\label{sec:build-precompiled}
+
+Place shared Java utility classes in \texttt{src/main/precompiled/} when they need to be accessible from Groovy services at compile time.  These classes are compiled by \texttt{./bld build} and placed on the classpath.
+
+\begin{warnbox}
+Classes in the \texttt{precompiled} directory \textbf{must have a package declaration} to be importable from Groovy services.  Classes in the default package (no package declaration) cannot be accessed from packaged Groovy code --- this is a Java/Groovy language restriction, not a Kiss limitation.
+\end{warnbox}
+
+\begin{lstlisting}[style=java]
+// src/main/precompiled/com/myapp/utils/IdGenerator.java
+package com.myapp.utils;
+
+public class IdGenerator {
+    public static String generate() {
+        return java.util.UUID.randomUUID().toString();
+    }
+}
+\end{lstlisting}
+
+\noindent
+The directory structure must match the package declaration.  After adding or modifying precompiled classes, run \texttt{./bld -v build}.
+
+\section{WAR Generation}
+\label{sec:build-war}
+
+\begin{lstlisting}[style=shell]
+./bld war
+\end{lstlisting}
+
+\noindent
+This produces \texttt{work/Kiss.war}, a standard WAR file deployable to any Jakarta EE 11 (Servlet 6.1) container.
+
+The WAR build process:
+
+\begin{enumerate}
+  \item Compiles all source code.
+  \item Copies \texttt{web-secure.xml} (restrictive CORS) into \texttt{web.xml} for production packaging.
+  \item Packages everything into a standard WAR file.
+  \item Copies \texttt{web-unsafe.xml} back into \texttt{web.xml} so local development continues with permissive CORS.
+\end{enumerate}
+
+\section{JavaDoc Generation}
+\label{sec:build-javadoc}
+
+\begin{lstlisting}[style=shell]
+./bld javadoc
+\end{lstlisting}
+
+\noindent
+Generates JavaDoc for the backend API in \texttt{work/javadoc/}.  This documents the core framework classes (Connection, Record, QueryBuilder, SchemaGraph, etc.) and any precompiled application classes.
+
+\section{Helper Scripts}
+\label{sec:build-helpers}
+
+Kiss includes several convenience scripts in the project root:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Script} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{serve} & Start the frontend development server on port 8000. \\
+\texttt{is-tomcat-running} & Check if the backend server is running. \\
+\texttt{kill-tomcat} & Force-stop the Tomcat process. \\
+\texttt{view-log} & Tail the server log (\texttt{tomcat/logs/catalina.out}). \\
+\texttt{upgrade-kiss} & Update the framework from a fresh Kiss clone using \texttt{rsync}. \\
+\texttt{new-app} & Remove git history and documentation to start a new application from the Kiss template. \\
+\texttt{build-dist} & Package the application with Tomcat into a distributable zip. \\
+\texttt{shrink} & Minify JavaScript files using UglifyJS. \\
+\texttt{expand} & Restore original (unminified) JavaScript files. \\
+\bottomrule
+\end{longtable}
+
+\section{Dependency Management}
+\label{sec:build-deps}
+
+Third-party JAR files are stored in the \texttt{libs/} directory.  The \texttt{./bld libs} command downloads all required dependencies.  Key libraries include:
+
+\begin{itemize}
+  \item \textbf{Groovy} --- dynamic language support.
+  \item \textbf{C3P0} --- database connection pooling.
+  \item \textbf{Log4j} --- logging framework.
+  \item \textbf{PDFBox} --- PDF generation and manipulation.
+  \item Database drivers for PostgreSQL, MySQL, SQLite, SQL Server, and Oracle.
+  \item \textbf{JUnit 5} --- unit testing framework.
+\end{itemize}
+
+\begin{tipbox}
+To add a new dependency, place the JAR in \texttt{libs/} and it will automatically be included on the classpath during builds and at runtime.  No configuration file changes are needed.
+\end{tipbox}
+
+\subsection{Foreign Dependencies and Superseded Versions}
+\label{sec:build-deps-prune}
+
+Two kinds of JAR live in \texttt{libs/}.  \emph{Local} dependencies are simply dropped into the directory and committed with the project, as the tip above describes.  \emph{Foreign} dependencies are declared in \texttt{Tasks.java}, in \texttt{buildForeignDependencies()}, as a repository URL each; \texttt{BuildUtils.downloadAll()}\index{downloadAll} fetches them on demand and they are normally excluded from version control.  Upgrading one is a matter of editing its version in that URL.
+
+That upgrade has a subtlety worth understanding.  Downloading is keyed on the file name, and the new version has a new name, so the file holding the \emph{previous} version is not overwritten --- it simply stays where it is.  Both versions then sit in \texttt{libs/} and both land on the classpath, at which point which one the class loader actually uses is arbitrary.  The consequences are unpleasant precisely because they are so far removed from the cause: a library may load but be missing a class its companion library expects, and the resulting \texttt{ClassNotFoundException} arrives during startup, in code nowhere near the dependency you edited.
+
+\texttt{downloadAll()} therefore prunes superseded versions after it finishes downloading, reporting each file it removes.  The rule it applies is deliberately narrow.  A file is deleted only when it sits in the same target directory as a current dependency, its artifact name is \emph{exactly} that dependency's artifact name, it carries a version --- meaning the artifact name is followed by a hyphen and a digit --- it shares the same extension, and it is not itself one of the wanted files.
+
+Insisting on an exact artifact-name match is what makes this safe, because a great many real artifacts are prefixes of their siblings.  Pruning \texttt{pdfbox} must not disturb \texttt{pdfbox-io-3.0.5.jar}, and pruning \texttt{junit-jupiter} must not disturb \texttt{junit-jupiter-api-5.11.0.jar}.  In both cases the text following the prefix is another name rather than a version, so neither file is a candidate.  The same reasoning keeps \texttt{log4j-api} and \texttt{log4j-core} independent of one another.  The artifact name itself is taken to be everything ahead of the \emph{last} hyphen followed by a digit, which is what allows an artifact whose own name ends in a digit, such as \texttt{commons-lang3}, to be parsed correctly.
+
+\begin{notebox}
+Pruning only ever considers artifacts that are actually declared as foreign dependencies.  A JAR you placed in \texttt{libs/} yourself is never touched, even when it shares a prefix with a managed artifact.  Nor is the download cache pruned: reverting to an earlier version restores it from the cache rather than downloading it again.
+\end{notebox}
+
+\subsection{Where \texttt{pom.xml} Comes From}
+\label{sec:build-pom}
+
+Kiss ships a \texttt{pom.xml}, which is easy to misread as a sign that Maven builds the project.  It does not.  The file exists so that an IDE can understand the project layout, and so that repository scanners --- the automated services that watch a project's declared dependencies and report known vulnerabilities in them --- can see what the project uses.
+
+That combination is a trap.  Because no build ever reads the dependency list in \texttt{pom.xml}, nothing fails when it falls behind the list the build actually downloads.  A hand-maintained copy drifts quietly, and the drift is invisible until a scanner reports a vulnerability against a version the project abandoned long ago --- or, worse, stays silent about one it still uses.  A second copy of a list that nothing validates is a liability rather than documentation.
+
+The \texttt{pom} task removes the second copy.  Everything between the two marker comments in \texttt{pom.xml},
+
+\begin{verbatim}
+    <!-- BEGIN GENERATED DEPENDENCIES -->
+    <!-- END GENERATED DEPENDENCIES -->
+\end{verbatim}
+
+\noindent is written from the same \texttt{ForeignDependencies} the build downloads, with coordinates recovered from each dependency's repository URL.  The task runs as part of \texttt{libs}, so an ordinary build keeps the file current, and it rewrites the file only when the generated text actually differs, leaving the timestamp alone otherwise.  \textbf{Dependencies are therefore edited in \texttt{Tasks.java} and never in \texttt{pom.xml}.}
+
+Only the marked region is generated.  The \texttt{build} element --- the source roots, the enforcer configuration, and the \texttt{antrun} executions that let \texttt{mvn antrun:run@\emph{task}} invoke \texttt{bld} tasks --- is hand-maintained and left untouched, as are the project coordinates above it.
+
+The division of labor follows the usual rule.  The generic machinery lives in \texttt{BuildUtils}: \texttt{mavenCoordinatesFromUrl()} recovers a group, artifact, and version from a repository URL, and the \texttt{MavenDependencies} builder assembles the elements and splices them into the file.  \texttt{Tasks.java} contributes only what is particular to the application: which artifacts are needed solely for tests, and which JARs are supplied locally rather than downloaded and so must be emitted with system scope.
+
+\begin{notebox}
+A URL that does not follow the Maven layout of \texttt{group/artifact/version/artifact-version.ext} yields no coordinates and is passed over rather than guessed at, so a dependency fetched from a CDN or any other non-repository source simply does not appear in the generated list.
+\end{notebox}

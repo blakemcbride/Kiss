@@ -1,0 +1,431 @@
+\chapter{OAuth 2.1 Client}
+\label{ch:oauth-client}
+
+The previous two chapters covered the two server-side OAuth roles: validating tokens (Chapter~\ref{ch:oauth}) and issuing them (Chapter~\ref{ch:oauth-as}).  This chapter covers the third role, the mirror image of both: Kiss as an OAuth 2.1 \emph{client} (relying party), obtaining tokens from a \emph{remote} authorization server and presenting them on outbound calls.
+
+Where the resource server \emph{consumes} tokens that arrive and the authorization server \emph{produces} tokens for others, the client \emph{acquires} tokens for itself.  A Kiss application uses the client role when it needs to call some other organization's OAuth-protected API --- a remote MCP server, a partner's REST endpoint, any service that speaks OAuth 2.1.  The framework drives the full authorization-code + PKCE dance, discovers the remote server's endpoints, registers itself when necessary, captures the browser redirect, persists the resulting tokens, and refreshes them automatically --- so application code is reduced to ``give me a valid token for provider \texttt{X}.''
+
+The three roles are independent.  An app can use any one, any two, or all three.  A Kiss-hosted MCP server typically runs the resource and authorization servers together (Chapter~\ref{ch:oauth-as}); the client role is what an app reaches for when it is the one making the protected call rather than receiving it.  And like the other two, the client role is \emph{inert until configured}: with no \texttt{[OAuthClient *]} section in \texttt{application.ini}, the callback servlet returns 404, no database is touched, and no network request is ever made.
+
+\section{What the Client Does}
+\label{sec:oc-overview}
+
+When at least one provider is configured, the framework does four things on your behalf:
+
+\begin{enumerate}
+  \item \emph{Discovers} the remote authorization server starting from the resource URL: it reads the RFC 9728 protected-resource metadata to learn which authorization server protects the resource, then reads that server's RFC 8414 metadata (falling back to OpenID Connect discovery) to learn the authorization, token, and registration endpoints.  The result is cached.
+  \item \emph{Registers} the client: it uses a pre-configured \texttt{client\_id} when one is set, or performs RFC 7591 Dynamic Client Registration as a public (PKCE-only) client when none is.  The result is cached.
+  \item \emph{Drives the authorization-code + PKCE flow}: it builds the authorization URL, captures the redirect at a built-in callback servlet (\texttt{/oauth/client/callback}), and exchanges the returned code for tokens.
+  \item \emph{Refreshes} access tokens automatically when they expire --- single-flight per provider, honoring refresh-token rotation.
+\end{enumerate}
+
+\begin{notebox}
+The client role is generic.  It has no knowledge of \emph{what} the remote server does --- MCP, a plain REST API, anything else.  It obtains a bearer token and makes it available; sending that token on an actual request is the application's job (typically an \texttt{Authorization: Bearer} header on a \texttt{RestClient} call, Section~\ref{sec:ext-restclient}).
+\end{notebox}
+
+\section{Configuration}
+\label{sec:oc-config}
+
+Each remote server is declared in its own section named \texttt{[OAuthClient <name>]}, where \texttt{<name>} is a label you choose.  The label is used both in code (\texttt{OAuthClient.for\-Provider("<name>")}) and as the key under which that provider's discovery document, registration, and tokens are persisted.  Multiple providers are supported --- one section each.
+
+\begin{lstlisting}[style=ini]
+[OAuthClient myprovider]
+; remote resource/server URL (required)
+Url          = https://remote.example.com/mcp
+; space- or comma-separated (optional)
+Scopes       = mcp:read mcp:write
+; blank => Dynamic Client Registration (RFC 7591)
+ClientId     =
+; only if pre-registered + confidential
+ClientSecret =
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{Url}] \emph{(required)}  The remote resource or server URL.  Discovery starts from this URL's origin; audience binding (RFC 8707) uses the full value.  A provider section with no \texttt{Url} is logged and ignored.
+  \item[\texttt{Scopes}] \emph{(optional)}  Space- or comma-separated scopes to request.  Omit to request none.
+  \item[\texttt{ClientId}] \emph{(optional)}  A pre-registered client id.  Leave blank to trigger Dynamic Client Registration against the remote server.
+  \item[\texttt{ClientSecret}] \emph{(optional)}  A pre-registered client secret, only for a confidential client.  Leave blank for the usual public, PKCE-only client.
+\end{description}
+
+\begin{warnbox}
+Unlike the resource-server and authorization-server keys, which live in the \texttt{[main]} section, the \texttt{[OAuthClient *]} sections are their own named sections.  Kiss's flat environment map (\texttt{MainServlet.getEnvironment()}) only carries \texttt{[main]}, so these sections are read directly from the ini file by \texttt{OAuthClientConfig} via \texttt{IniFile.load(...)}, \texttt{getSectionNames()}, and \texttt{get(section, key)} (Chapter~\ref{ch:configuration}).
+\end{warnbox}
+
+A few optional keys, which \emph{do} live in \texttt{[main]}, tune the client globally:
+
+\begin{lstlisting}[style=ini]
+# Base URL used to build the redirect_uri
+# (<base>/oauth/client/callback).  If unset, it is
+# taken from the base URL passed to beginAuthorization(),
+# or derived from the request that starts the flow.  The
+# remote server must accept this redirect_uri (registered
+# automatically when using Dynamic Client Registration).
+# OAuthClientRedirectBaseUrl = http://localhost:8001
+
+# Treat an access token as expired this many seconds
+# before its real expiry, so a refresh happens slightly
+# early.  Default 60.
+# OAuthClientRefreshSkewSeconds = 60
+
+# The ini file the [OAuthClient *] sections are read
+# from.  Default application.ini.  Exists mainly so tests
+# can point at a fixture.
+# OAuthClientConfigFile = application.ini
+\end{lstlisting}
+
+\noindent
+There is no client state-file key: cached registrations and tokens go into the same \texttt{oauth.db} the authorization server uses (Section~\ref{sec:oc-persistence}).
+
+\section{Using the Client from App Code}
+\label{sec:oc-usage}
+
+The entire API surface an application touches is the \texttt{OAuthClient}\index{OAuthClient} facade.  Obtain one for a configured provider with \texttt{forProvider}, then either start an interactive login or ask for a token:
+
+\begin{lstlisting}[style=java,basicstyle=\ttfamily\scriptsize]
+import org.kissweb.oauth.client.OAuthClient;
+import org.kissweb.oauth.client.OAuthAuthorizationRequiredException;
+
+OAuthClient client = OAuthClient.forProvider("myprovider");
+
+// Before making outbound calls, ensure we are authorized:
+if (!client.isAuthorized()) {
+    // Send the browser to this URL to log in / consent. The
+    // base URL becomes <base>/oauth/client/callback; pass null
+    // to use OAuthClientRedirectBaseUrl from application.ini.
+    String authorizeUrl = client.beginAuthorization(
+        "http://localhost:8001");
+    // ... redirect the browser to authorizeUrl ...
+}
+
+// On every outbound call --- refreshes the access token as
+// needed (discovery and registration happened in
+// beginAuthorization):
+try {
+    String token = client.getAccessToken();
+    JSONObject headers = new JSONObject();
+    headers.put("Authorization", "Bearer " + token);
+    // ... call the remote API with RestClient ...
+} catch (OAuthAuthorizationRequiredException e) {
+    // No usable token and none obtainable without a fresh
+    // login --- kick off beginAuthorization() again.
+}
+\end{lstlisting}
+
+\noindent
+The methods:
+
+\begin{description}[style=nextline]
+  \item[\texttt{static OAuthClient forProvider(String name)}]  Returns the client bound to the named provider.  Throws \texttt{OAuthClientException} if no \texttt{[OAuthClient <name>]} section is configured.
+  \item[\texttt{boolean isAuthorized()}]  True when a usable token is held --- either an access token that is still valid, or a refresh token that can mint a new one.  A cheap, non-throwing pre-check before starting an interactive flow.
+  \item[\texttt{String beginAuthorization(String redirectBaseUrl)}]  Runs discovery and (if needed) registration, generates a PKCE verifier/challenge and a random \texttt{state}, records them in the in-memory pending registry, and returns the authorization URL the browser must visit.  Pass the externally-reachable base URL, or \texttt{null} to use \texttt{OAuthClientRedirectBaseUrl}.  Throws \texttt{OAuthClientException} if no base URL is available or discovery/registration fails.
+  \item[\texttt{String getAccessToken()}]  Returns a currently-valid access token, refreshing transparently when the cached one is expired (within the skew margin).  Throws \texttt{OAuthAuthorizationRequiredException} when no token is held and none can be obtained without an interactive login; throws \texttt{OAuthClientException} on an unexpected failure.
+  \item[\texttt{void clearTokens()}]  Discards stored tokens for the provider (logout), while keeping the cached discovery and registration so a later login skips re-discovery.
+  \item[\texttt{String getProviderName()}]  The provider label this client is bound to.
+\end{description}
+
+\begin{tipbox}
+\texttt{OAuthAuthorizationRequiredException} is a normal control-flow signal, not an error condition.  It means ``there is no token and I cannot get one silently --- send the user through \texttt{beginAuthorization()}.''  Catch it where you make outbound calls and turn it into a redirect to the login URL.  Its \texttt{getProvider()} method returns the provider name that needs authorization.
+\end{tipbox}
+
+\section{The Authorization-Code Flow Step by Step}
+\label{sec:oc-flow}
+
+The flow as it plays out across the application, the browser, and the remote authorization server:
+
+\begin{enumerate}
+  \item The app calls \texttt{client.beginAuthorization(base)}.  The framework resolves discovery (from cache, or fetched and cached on first use), ensures a client registration (the configured \texttt{ClientId}, or DCR --- again cached), generates a fresh PKCE verifier/challenge and a random \texttt{state}, stores a \texttt{PendingAuthorization} keyed by that state, and returns the authorization URL:
+
+\begin{lstlisting}[style=shell]
+GET <authorization_endpoint>
+    ?response_type=code
+    &client_id=<id>
+    &redirect_uri=<base>/oauth/client/callback
+    &scope=mcp:read mcp:write
+    &state=<random CSRF nonce>
+    &code_challenge=<S256 hash of verifier>
+    &code_challenge_method=S256
+    # RFC 8707 audience binding
+    &resource=<provider Url>
+\end{lstlisting}
+
+  \item The app redirects the browser to that URL.  The user logs in and consents \emph{at the remote authorization server} --- Kiss is not involved in that step.
+  \item The remote server 302-redirects the browser back to \texttt{<base>/oauth/client/callback?code=...\&state=...}.
+  \item \texttt{OAuthCallbackServlet} handles the redirect.  It validates the returned \texttt{state} against the pending registry --- the entry is single-use and short-lived, which is the CSRF defense --- then calls \texttt{OAuthClient.completeAuthorization}, which POSTs to the remote token endpoint:
+
+\begin{lstlisting}[style=shell]
+POST <token_endpoint>
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=authorization_code
+&code=<code>
+&redirect_uri=<must match step 1 exactly>
+&client_id=<id>
+&code_verifier=<PKCE verifier>
+&resource=<provider Url>
+\end{lstlisting}
+
+  The returned tokens are persisted, and the servlet renders a small ``Authorization complete --- you may close this window'' page.
+  \item Subsequent \texttt{client.getAccessToken()} calls return the stored access token, refreshing it when needed (Section~\ref{sec:oc-refresh}).
+\end{enumerate}
+
+\begin{notebox}
+The callback servlet is a framework OAuth endpoint, in the same family as the authorization-server servlets under \texttt{org.kissweb.oauth.as}.  It legitimately renders a small HTML completion page: the ``backend never generates HTML'' rule (Chapter~\ref{ch:architecture}) governs application business endpoints, not OAuth protocol endpoints.  When no provider is configured, the servlet returns 404 --- the same inertness convention the resource-server discovery endpoint follows.
+\end{notebox}
+
+\section{Token Refresh and Rotation}
+\label{sec:oc-refresh}
+
+When \texttt{getAccessToken()} finds the access token expired --- treating it as expired \texttt{OAuthClientRefreshSkewSeconds} (default 60) before its real expiry so the refresh happens slightly early --- it performs a \texttt{refresh\_token} grant against the remote token endpoint.
+
+The refresh is \textbf{single-flight per provider}.  Concurrent callers for the same provider serialize on a per-provider lock; a thread that wakes after another has already refreshed simply re-reads and uses the fresh token rather than refreshing again.  This prevents a burst of concurrent outbound calls from firing a storm of redundant (and potentially rotation-tripping) refresh requests.
+
+The client \textbf{honors refresh-token rotation}.  If the token response carries a new \texttt{refresh\_token}, it replaces the stored one; if it does not, the existing refresh token is kept.  This works correctly whether the remote server rotates refresh tokens (as Kiss's own authorization server does, Section~\ref{sec:as-rotation}) or not.
+
+If the remote server rejects the refresh with \texttt{invalid\_grant} --- for example, the refresh token was revoked, or its family was invalidated by the server's reuse detection --- the client deletes the stored tokens and throws \texttt{OAuthAuthorizationRequiredException}, so the next attempt cleanly starts a fresh login rather than retrying a dead token.
+
+\section{Discovery and Registration in Detail}
+\label{sec:oc-discovery}
+
+\subsection{Discovery}
+
+Discovery resolves three endpoints --- \texttt{authorization\_endpoint}, \texttt{token\_endpoint}, and (optionally) \texttt{registration\_endpoint} --- from nothing but the provider's \texttt{Url}.  It follows the same well-known ladder the resource-server side uses, but in the client direction:
+
+\begin{enumerate}
+  \item \emph{Protected-resource metadata.}  GET \texttt{<origin>/.well-known/oauth-protected-resource} (RFC 9728) and read the first entry of \texttt{authorization\_servers}.  That value is the issuer.
+  \item \emph{Authorization-server metadata.}  GET \texttt{<issuer>/.well-known/oauth-authorization-server} (RFC 8414), falling back to \texttt{<issuer>/.well-known/openid-configuration} (OpenID Connect discovery) if the first is absent.  Read the endpoint URLs from the returned document.
+\end{enumerate}
+
+If step 1 yields nothing --- the resource publishes no protected-resource metadata --- the provider URL's own origin is treated as the issuer and step 2 is attempted directly.  So a server that is simultaneously the resource server and its own authorization server still resolves with no special configuration.  If the discovered metadata lacks an \texttt{authorization\_endpoint} or \texttt{token\_endpoint}, discovery fails with \texttt{OAuthClientException}.
+
+The resolved metadata is cached in \texttt{oauth.db} keyed by provider name; subsequent flows reuse it without re-fetching.
+
+\subsection{Registration}
+
+If the provider section sets a \texttt{ClientId}, that id (with the optional \texttt{ClientSecret}) is used directly --- no registration request is made.
+
+Otherwise the framework performs RFC 7591 Dynamic Client Registration against the discovered \texttt{registration\_endpoint}, registering a \emph{public} client:
+
+\begin{lstlisting}[style=java]
+POST <registration_endpoint>
+{
+  "client_name": "Kiss OAuth Client (myprovider)",
+  "redirect_uris": ["<base>/oauth/client/callback"],
+  "grant_types": ["authorization_code", "refresh_token"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "none",
+  "scope": "mcp:read mcp:write"
+}
+\end{lstlisting}
+
+\noindent
+\texttt{token\_endpoint\_auth\_method=none} produces a public client whose security rests entirely on PKCE --- the right shape for an application that cannot keep a client secret confidential, and what MCP servers expect.  The returned \texttt{client\_id} (and any \texttt{client\_secret}, though public registrations rarely return one) is cached.  If the provider has no configured \texttt{ClientId} \emph{and} the remote server advertises no registration endpoint, registration fails with a configuration error pointing you at the \texttt{ClientId} key.
+
+\begin{notebox}
+Registration is keyed on the redirect URI as well as the provider.  If you start a flow with a different redirect base URL than the cached registration used, the framework re-registers for the new redirect URI rather than reusing a registration the remote server would reject.
+\end{notebox}
+
+\section{Persistence: The Shared oauth.db}
+\label{sec:oc-persistence}
+
+The client does \emph{not} open its own database.  It persists into the same SQLite file the authorization server uses (\texttt{oauth.db} by default; configured by \texttt{OAuthAsSqliteFile}, Section~\ref{sec:as-persistence}), reusing \texttt{OAuthSqliteStore}'s single JDBC connection and its JVM-wide monitor.  All access goes through the Kiss \texttt{org.kissweb.database} API (Chapters~\ref{ch:db-connection}--\ref{ch:db-crud}) --- never raw JDBC.
+
+Three tables, keyed by provider name, are created lazily (\texttt{CREATE TABLE IF NOT EXISTS}) on the first client read or write and sit alongside the authorization-server tables in that one file:
+
+\begin{lstlisting}[style=sql]
+CREATE TABLE oauth_client_discovery (
+    provider                TEXT PRIMARY KEY,
+    issuer                  TEXT,
+    authorization_endpoint  TEXT NOT NULL,
+    token_endpoint          TEXT NOT NULL,
+    registration_endpoint   TEXT,
+    fetched_at              INTEGER NOT NULL
+);
+
+CREATE TABLE oauth_client_registration (
+    provider       TEXT PRIMARY KEY,
+    client_id      TEXT NOT NULL,
+    -- null for a public client
+    client_secret  TEXT,
+    redirect_uri   TEXT NOT NULL,
+    created_at     INTEGER NOT NULL
+);
+
+CREATE TABLE oauth_client_tokens (
+    provider       TEXT PRIMARY KEY,
+    access_token   TEXT NOT NULL,
+    refresh_token  TEXT,
+    token_type     TEXT,
+    scope          TEXT,
+    expires_at     INTEGER NOT NULL,
+    created_at     INTEGER NOT NULL
+);
+\end{lstlisting}
+
+\noindent
+The in-flight \texttt{PendingAuthorization} (the \texttt{state} plus PKCE verifier for a single login in progress) is held in memory only --- single-use and short-lived (10-minute TTL), so losing it on a restart costs the user at most a re-click of the login button.
+
+Because the client shares the authorization server's file and lock, the concurrency, build-safety, and inspection notes from the AS persistence section (Section~\ref{sec:as-persistence}) apply equally here.  In particular:
+
+\begin{itemize}
+  \item \emph{Single-process.}  The shared connection serializes AS and client access under one monitor; two JVMs against the same file collide with SQLite's \texttt{database is locked} rather than corrupting state.
+  \item \emph{Build safety.}  \texttt{./bld build} excludes \texttt{oauth.db} (and its \texttt{-journal}/\texttt{-wal}/\texttt{-shm} sidecars) from the WAR copy; add the same names to \texttt{.gitignore}.
+  \item \emph{Client-only deployments still use \texttt{oauth.db}.}  An application that uses the client role but not the authorization server still gets an \texttt{oauth.db} file; the AS tables are created but remain empty, and the client tables hold the live state.
+\end{itemize}
+
+\section{Security Considerations}
+\label{sec:oc-security}
+
+\begin{description}[style=nextline]
+  \item[PKCE is mandatory.]  S256 only.  Dynamic Client Registration registers a public client (\texttt{token\_endpoint\_auth\_method=none}) whose security rests entirely on PKCE.
+  \item[\texttt{state} is a CSRF token.]  The callback proceeds only when the returned \texttt{state} matches a pending, unexpired, single-use entry.  A forged or replayed callback finds no matching entry and is rejected.
+  \item[Redirect capture is a fixed framework servlet] at \texttt{/oauth/client/callback}.  The remote server must accept that \texttt{redirect\_uri}; DCR registers it automatically, otherwise whitelist it when you pre-register the client.  Exact-match redirect rules at the remote server mean the base URL you use must match what was registered.
+  \item[Audience binding.]  Each authorization and token request carries \texttt{resource=<provider Url>} (RFC 8707) so the issued token's audience is bound to the intended remote server, not replayable elsewhere.
+  \item[Token storage.]  Access and refresh tokens are stored at rest in \texttt{oauth.db}, unencrypted, exactly like the authorization server's refresh tokens.  Protect the file with filesystem permissions, and in production set \texttt{OAuthAsSqliteFile} to an absolute path outside the deployed webapp tree.
+  \item[Run over HTTPS in production.]  The authorization code and the tokens are bearer credentials in transit; TLS termination is the deployer's responsibility.
+\end{description}
+
+\section{Components}
+\label{sec:oc-components}
+
+All classes live in \texttt{org.kiss\-web.oauth.client}\index{org.kissweb.oauth.client}.  Application developers touch only \texttt{OAuthClient} (plus the two exceptions); everything else is internal machinery, listed here for orientation and debugging.
+
+\begin{description}[style=nextline]
+  \item[\texttt{OAuthClient}\index{OAuthClient}]  The facade: \texttt{forProvider}, \texttt{begin\-Authorization}, \texttt{isAuthorized}, \texttt{getAccessToken}, \texttt{clearTokens}.  The only class application code normally references.
+  \item[\texttt{OAuthClientConfig}\index{OAuthClientConfig}]  Reads the \texttt{[OAuthClient *]} sections and the client \texttt{[main]} keys.  Lazy singleton.
+  \item[\texttt{OAuthClientProvider}\index{OAuthClientProvider}]  Immutable parsed provider: name, URL, scopes, optional client id/secret.
+  \item[\texttt{OAuthMetadataDiscovery}\index{OAuthMetadataDiscovery}]  RFC 9728 $\rightarrow$ RFC 8414 / OIDC endpoint discovery via \texttt{RestClient}.
+  \item[\texttt{DynamicClientRegistration}\index{DynamicClientRegistration}]  RFC 7591 registration of a public client.
+  \item[\texttt{Pkce}\index{Pkce}]  Client-side S256 verifier/challenge generator.
+  \item[\texttt{OAuthClientStore}\index{OAuthClientStore}]  Persists discovery, registration, and tokens into the shared \texttt{oauth.db}.
+  \item[\texttt{PendingAuthorization}\index{PendingAuthorization}]  In-memory, single-use \texttt{state} + PKCE verifier for an in-flight login (10-minute TTL).
+  \item[\texttt{OAuthCallbackServlet}\index{OAuthCallbackServlet}]  \texttt{/oauth/client/callback} --- validates \texttt{state}, exchanges the code for tokens, renders the completion page.
+  \item[\texttt{DiscoveryMetadata}, \texttt{ClientRegistration}, \texttt{TokenSet}]  Immutable value records for the three persisted kinds of state.
+  \item[\texttt{OAuthClientException}\index{OAuthClientException}]  Unrecoverable client error (discovery, registration, or token failure).
+  \item[\texttt{OAuthAuthorizationRequiredException}\index{OAuthAuthorizationRequiredException@OAuth\-Authorization\-Required\-Exception}]  Control-flow signal that an interactive login is required.
+\end{description}
+
+\section{A Worked Example}
+\label{sec:oc-example}
+
+Suppose a Kiss application needs to call a remote MCP server at \url{https://partner.example.com/mcp} that is OAuth-protected and supports dynamic registration.  Two changes get it connected.
+
+\subsection{Step 1: Declare the provider in application.ini}
+
+\begin{lstlisting}[style=ini]
+[OAuthClient partner]
+Url    = https://partner.example.com/mcp
+Scopes = mcp:read mcp:write
+# ClientId left blank => the framework will self-register
+# via Dynamic Client Registration.
+\end{lstlisting}
+
+\noindent
+If the app runs behind a fixed public URL, also set the redirect base in \texttt{[main]} so the redirect URI is stable across requests:
+
+\begin{lstlisting}[style=ini]
+OAuthClientRedirectBaseUrl = https://myapp.example.com
+\end{lstlisting}
+
+\subsection{Step 2: Drive the flow from a service}
+
+A pair of JSON-RPC service methods (Chapter~\ref{ch:services}) --- one to start the login, one to make the authorized call:
+
+\begin{lstlisting}[style=groovy,basicstyle=\ttfamily\scriptsize]
+import org.kissweb.oauth.client.OAuthClient
+import org.kissweb.oauth.client.OAuthAuthorizationRequiredException
+import org.kissweb.RestClient
+import org.kissweb.json.JSONObject
+
+class PartnerService {
+
+    // Returns a URL the front end should open in a browser tab
+    // so the user can log in at the partner. Empty when
+    // already authorized.
+    void getLoginUrl(JSONObject injson, JSONObject outjson,
+                     Connection db, ProcessServlet servlet) {
+        OAuthClient client = OAuthClient.forProvider("partner")
+        if (client.isAuthorized()) {
+            outjson.put("loginUrl", "")
+            return
+        }
+        // null => OAuthClientRedirectBaseUrl
+        outjson.put("loginUrl", client.beginAuthorization(
+            null))
+    }
+
+    // Makes an authorized outbound call to the partner
+    // MCP server.
+    void listRemoteTools(JSONObject injson, JSONObject outjson,
+                         Connection db, ProcessServlet servlet) {
+        OAuthClient client = OAuthClient.forProvider("partner")
+        try {
+            // refreshes as needed
+            String token = client.getAccessToken()
+            JSONObject headers = new JSONObject()
+            headers.put("Authorization", "Bearer " + token)
+            headers.put("Content-Type", "application/json")
+            RestClient rc = new RestClient()
+            JSONObject body = new JSONObject()
+            body.put("method", "tools/list")
+            JSONObject resp = rc.jsonCall("POST",
+                "https://partner.example.com/mcp",
+                body.toString(), headers)
+            outjson.put("tools", resp.getJSONArray("tools"))
+        } catch (OAuthAuthorizationRequiredException ignore) {
+            // front end then calls getLoginUrl
+            outjson.put("needsLogin", true)
+        }
+    }
+}
+\end{lstlisting}
+
+\subsection{What Happens at Runtime}
+
+The first time \texttt{getLoginUrl} runs, \texttt{isAuthorized()} is false, so \texttt{beginAuthorization()} discovers the partner's endpoints, dynamically registers this app as a public client, and returns an authorization URL.  The user opens it, logs in and consents at the partner, and the browser lands on \texttt{/oauth/client/callback}, which exchanges the code and stores the tokens.  From then on, \texttt{listRemoteTools} calls \texttt{getAccessToken()} and gets a valid token straight from \texttt{oauth.db}, with the framework silently refreshing it whenever it ages out.  No further interactive step until the refresh token itself is revoked or expires.
+
+\section{Troubleshooting}
+\label{sec:oc-troubleshooting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{/oauth/client/callback} returns 404.]  No client provider is configured.  Add an \texttt{[OAuthClient <name>]} section with a \texttt{Url} and restart (configuration is read once at startup).
+  \item[\texttt{forProvider("x")} throws ``No OAuth client provider named 'x'\,''.]  The section header must be exactly \texttt{[OAuthClient x]} (note the single space and exact label), and it must contain a non-empty \texttt{Url}; a section with no \texttt{Url} is logged and skipped.
+  \item[\texttt{beginAuthorization} throws ``No redirect base URL available''.]  Pass a base URL to \texttt{beginAuthorization()} or set \texttt{OAuthClientRedirectBaseUrl} in \texttt{[main]}.
+  \item[Discovery fails with ``Could not fetch authorization-server metadata''.]  The provider's origin publishes neither \texttt{/.well-known/oauth-authorization-server} nor \texttt{/.well-known/openid-configuration}, or they are unreachable.  Confirm the \texttt{Url} is correct and the remote server is up; check \texttt{tomcat/logs/catalina.out} for the per-URL discovery debug lines.
+  \item[Registration fails with ``no pre-registered ClientId and \dots\ does not support Dynamic Client Registration''.]  The remote server advertises no \texttt{registration\_endpoint}.  Pre-register out of band and set \texttt{ClientId} (and \texttt{ClientSecret} if confidential) in the provider section.
+  \item[Callback shows ``Invalid or expired authorization state''.]  The \texttt{state} did not match a pending entry --- the login took longer than the 10-minute TTL, the server was restarted mid-flow (pending entries are in-memory), or the callback was reached without a matching \texttt{beginAuthorization()}.  Start the login again.
+  \item[\texttt{getAccessToken()} keeps throwing \texttt{OAuthAuthorizationRequiredException}.]  Either no tokens are stored yet (run the interactive flow), or the stored refresh token was rejected with \texttt{invalid\_grant} and discarded.  The remote server may have revoked the refresh-token family (Section~\ref{sec:as-rotation}); the user must log in again.
+  \item[Tokens vanish after redeploy.]  \texttt{oauth.db} was inside the webapp tree and got rewritten by the WAR deploy.  Set \texttt{OAuthAsSqliteFile} to an absolute path outside the deployed directory.
+\end{description}
+
+\section{What's Not Implemented}
+\label{sec:oc-omissions}
+
+Consistent with the rest of the Kiss OAuth support, the client role is deliberately scoped.  Out of scope for v1:
+
+\begin{itemize}
+  \item \emph{Loopback redirect capture (RFC 8252).}  Redirect capture is via the \texttt{/oauth/client/callback} servlet only.  The loopback-listener pattern that CLI and desktop tools with no web server use is not implemented; it can be added later behind the same \texttt{OAuthClient} API.
+  \item \emph{Path-based protected-resource discovery.}  Protected-resource metadata is fetched from the origin-root well-known path (\texttt{<origin>/.well-known/oauth-protected-resource}); the RFC 9728 path-insertion variant is not implemented.  When no protected-resource document is published, the provider URL's origin is treated as the issuer and RFC 8414 / OIDC discovery is attempted directly.
+  \item \emph{Discovery TTL.}  Discovery is cached indefinitely and re-fetched only when absent --- there is no time-based refresh of endpoint metadata.  Clear the \texttt{oauth\_client\_discovery} row to force re-discovery.
+  \item \emph{Shared or clustered storage.}  Single-process, sharing the authorization server's \texttt{oauth.db} concurrency model (Section~\ref{sec:as-persistence}).
+  \item \emph{RSA-only / bearer tokens.}  No DPoP (RFC 9449) or mTLS (RFC 8705) binding, consistent with the resource-server and authorization-server roles.
+\end{itemize}
+
+\section{Further Reading}
+\label{sec:oc-references}
+
+The standalone OAuth reference at the repository root, \texttt{OAuth.md}, covers all three roles --- resource server, authorization server, and client --- in one place.
+
+Relevant RFCs:
+
+\begin{itemize}
+  \item \emph{RFC 6749} --- The OAuth 2.0 Authorization Framework
+  \item \emph{RFC 7591} --- OAuth 2.0 Dynamic Client Registration Protocol
+  \item \emph{RFC 7636} --- Proof Key for Code Exchange by OAuth Public Clients (PKCE)
+  \item \emph{RFC 8414} --- OAuth 2.0 Authorization Server Metadata
+  \item \emph{RFC 8707} --- Resource Indicators for OAuth 2.0
+  \item \emph{RFC 9728} --- OAuth 2.0 Protected Resource Metadata
+  \item \emph{draft-ietf-oauth-v2-1} (OAuth 2.1) --- the consolidation that mandates PKCE and refresh-token rotation
+\end{itemize}
+
+\noindent
+The Model Context Protocol authorization specification (\url{https://modelcontextprotocol.io}) describes the client side of obtaining and presenting tokens, and is the relevant reference when the remote server is itself an MCP server.

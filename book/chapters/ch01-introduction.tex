@@ -1,0 +1,91 @@
+\chapter{Introduction}
+\label{ch:introduction}
+
+The \emph{Kiss Framework}\index{Kiss Framework} is an application development framework for building web-based business applications, portable desktop applications, and command-line utilities.  Kiss focuses on simplicity and development speed, abstracting away infrastructure so that developer effort is maximally applied to the business problem.
+
+\begin{notebox}
+The Kiss framework has undergone a security audit\index{security audit} spanning authentication and session management, the OAuth authorization server, database access, request and file handling, the cryptographic utilities, and the frontend.  Issues identified during the audit have been resolved.
+\end{notebox}
+
+\section{Design Philosophy}
+\label{sec:intro-philosophy}
+
+Kiss is built on several core principles:
+
+\begin{description}[style=nextline]
+  \item[Simplicity] Minimal configuration, no annotations, no XML wiring.  A service is a class with methods; nothing more is required.  There are no dependency injection containers, no aspect-oriented programming, and no code generators.
+
+  \item[Hot Reload] Backend and frontend code can be changed while the system is running.  There is no manual build step, no restart, and no redeploy during development.  Save a file, reload the browser, and the new code runs immediately.  Despite being compiled on the fly, every backend service --- whether written in Groovy, Java, or Common Lisp --- always executes at full compiled bytecode speed.  The hot-reload mechanism never falls back to interpretation; you pay no runtime performance penalty for the development convenience.
+
+  \item[Clean Separation] The backend never generates HTML or JavaScript.  Communication between frontend and backend is strictly JSON-RPC.  This means the backend and frontend can be developed, tested, and deployed independently.
+
+  \item[Multi-Language Services] Backend services can be written in Java, Groovy, or Common Lisp (via ABCL).  Groovy is the most common choice because its concise syntax reduces boilerplate and its on-the-fly compile phase is faster than Java's, but Java is equally supported for teams that prefer static typing.
+
+  \item[Completeness] Kiss ships with everything needed for a business application: database access, authentication, session management, PDF reports, CSV export, file uploads, scheduled tasks, and LLM integration.  There is no need to assemble dozens of third-party libraries.
+\end{description}
+
+\section{What Kiss Provides}
+\label{sec:intro-provides}
+
+A Kiss application comes with the following out of the box:
+
+\begin{itemize}
+  \item A backend server (Tomcat 11) with JSON-RPC services that auto-compile on change.
+  \item A frontend component library with custom HTML tags for forms, grids, popups, and file uploads.
+  \item A database abstraction layer supporting PostgreSQL, MySQL, SQLite, SQL Server, and Oracle.
+  \item An automatic join-resolution query builder based on foreign key graph analysis.
+  \item Built-in authentication and session management with configurable inactivity timeouts.
+  \item PDF report generation via Groff (which must be installed on the host system; see Chapter~\ref{ch:reports}), CSV export, and temporary file management.
+  \item A build system that requires no Maven, Gradle, or other external build tools.
+  \item Electron compatibility for packaging as a desktop application.
+\end{itemize}
+
+\section{What Kiss Is Not}
+\label{sec:intro-isnot}
+
+Kiss is not a microservices framework, a REST API toolkit, or a single-page application library.  It is an integrated full-stack platform where the frontend and backend are designed to work together out of the box.
+
+Kiss does not use REST conventions (resources, HTTP verbs, status codes).  Despite the \texttt{/rest} endpoint name, all communication uses JSON-RPC: every request is a POST with a service name, method name, and a JSON payload.
+
+Kiss does not generate HTML on the server.  There are no template engines, no server-side rendering, and no view models.  The backend returns data; the frontend decides how to display it.
+
+\section{Who This Book Is For}
+\label{sec:intro-audience}
+
+This book is for developers with working knowledge of Java, SQL, HTML, CSS, and JavaScript who want to build business applications efficiently.  No prior experience with Groovy, Lisp, or Kiss is assumed.
+
+If you are an experienced Java developer, you will find that Kiss lets you build a working application in a fraction of the code and time that a Spring Boot or Jakarta EE project would require.  If you are a full-stack developer accustomed to Node.js or Python, you will appreciate the zero-configuration service model and the hot-reload development cycle.
+
+\section{How to Read This Book}
+\label{sec:intro-reading}
+
+The chapters are ordered as a tutorial: each builds on the ones before it.  However, each chapter is also designed to stand alone as a reference.  If you already know the basics, skip to the chapter you need and follow the cross-references backward as necessary.
+
+\begin{description}[style=nextline]
+  \item[Tutorial track] Read Parts~I through~IV in order.  By Chapter~17, you will have built screens that talk to backend services, query a database, and display results in a grid.
+  \item[Reference track] Jump to the chapter you need.  Appendix~\ref{ch:api-reference} provides quick-lookup tables for every major API.
+  \item[Capstone] Chapter~\ref{ch:complete-app} walks through a complete application from schema design to deployment.
+\end{description}
+
+\section{Conventions Used}
+\label{sec:intro-conventions}
+
+\begin{itemize}
+  \item \texttt{Monospace text} denotes class names, method names, file paths, and configuration keys.
+  \item Code examples are shown in shaded listings with syntax highlighting.
+\end{itemize}
+
+\noindent
+Three types of callout box appear throughout the book:
+
+\begin{tipbox}
+A shortcut, best practice, or productivity hint.
+\end{tipbox}
+
+\begin{warnbox}
+A common mistake, pitfall, or behavior that surprises newcomers.
+\end{warnbox}
+
+\begin{notebox}
+Supplementary information that provides context or background.
+\end{notebox}

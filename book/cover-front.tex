@@ -1,0 +1,65 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage[paperwidth=6.69in, paperheight=9.61in,
+            margin=0in]{geometry}
+
+% Colors from the Kiss logo
+\definecolor{kissteal}{HTML}{2EBC9B}
+\definecolor{kissdarkteal}{HTML}{239B80}
+\definecolor{kissgold}{HTML}{D4C47A}
+\definecolor{kisscream}{HTML}{F5F0DC}
+
+\pagestyle{empty}
+
+\begin{document}%
+\noindent%
+\begin{tikzpicture}[x=1in, y=1in]
+
+  % Background
+  \fill[kissteal] (0,0) rectangle (6.69, 9.61);
+
+  % Decorative circle behind logo
+  \fill[kissgold, opacity=0.25]
+    (3.345, 6.5) circle (2.3);
+
+  % Kiss logo — clipped to circle
+  \node at (3.345, 6.5) {%
+    \begin{tikzpicture}
+      \clip (0,0) circle (2.3);
+      \node {\includegraphics[width=4.6in]{figures/Kiss-logo.jpg}};
+    \end{tikzpicture}%
+  };
+
+  % Title
+  \node[black, font=\bfseries\fontsize{48}{52}\selectfont]
+    at (3.345, 3.7) {Kiss};
+
+  % Subtitle
+  \node[black, font=\fontsize{14}{18}\selectfont,
+        text width=4.5in, align=center]
+    at (3.345, 2.8)
+    {A Complete Guide to the\\Web Application Framework};
+
+  % Divider line
+  \fill[kissgold]
+    (1.845, 2.2) rectangle ++(3.0, 0.02);
+
+  % Author
+  \node[black, font=\fontsize{16}{20}\selectfont]
+    at (3.345, 1.7) {Blake McBride};
+
+  % Bottom accent line
+  \fill[kissgold, opacity=0.5]
+    (0, 0.7) rectangle (6.69, 0.71);
+
+  % Tagline
+  \node[black, font=\itshape\fontsize{10}{12}\selectfont]
+    at (3.345, 1.1) {From Setup to Production};
+
+\end{tikzpicture}%
+\end{document}

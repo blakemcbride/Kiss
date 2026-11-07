@@ -1,0 +1,180 @@
+\chapter{Scheduled Tasks}
+\label{ch:cron}
+
+Kiss includes a built-in task scheduler that runs Groovy scripts on a cron-like schedule.  This chapter covers the cron system, crontab configuration, and writing task scripts.
+
+\section{The Cron System}
+\label{sec:cron-system}
+
+The \texttt{Cron}\index{Cron} class reads a schedule file and executes Groovy scripts at specified intervals.  It:
+
+\begin{itemize}
+  \item Checks for scheduled tasks every 60 seconds.
+  \item Runs each task in a separate thread.
+  \item Dynamically reloads the crontab file when it is modified --- no restart required.
+  \item Provides a database connection to each task.
+\end{itemize}
+
+\noindent
+The cron system starts automatically when the Kiss server starts, reading from \texttt{src/main/backend/CronTasks/crontab}.
+
+\section{The Crontab File}
+\label{sec:cron-crontab}
+
+The crontab file at \texttt{src/main/backend/CronTasks/crontab} defines the schedule.  The format follows standard Unix cron conventions:
+
+\begin{lstlisting}[style=ini]
+# minute  hour  day  month  dayOfWeek  scriptName
+# Run every minute
+*  *  *  *  *  EveryMinute
+
+# Run at 2 AM every day
+0  2  *  *  *  NightlyCleanup
+
+# Run at 9 AM on weekdays (Mon-Fri)
+0  9  *  *  1-5  WeekdayReport
+
+# Run at noon on the 1st and 15th
+0  12  1,15  *  *  BiMonthlyExport
+\end{lstlisting}
+
+\noindent
+The five time fields are:
+
+\begin{longtable}{clP{6.5cm}}
+\toprule
+\textbf{Field} & \textbf{Range} & \textbf{Description} \\
+\midrule
+\endhead
+Minute & 0--59 & Minute of the hour \\
+Hour & 0--23 & Hour of the day (24-hour) \\
+Day & 1--31 & Day of the month \\
+Month & 1--12 & Month of the year \\
+Day of week & 0--7 & 0 or 7 = Sunday, 6 = Saturday \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Each field supports:
+\begin{itemize}
+  \item \texttt{*} --- matches all values.
+  \item A single number --- matches that value exactly.
+  \item A range --- e.g., \texttt{8-17} for 8 AM through 5 PM.
+  \item A list --- e.g., \texttt{1,15} for the 1st and 15th.
+\end{itemize}
+
+\noindent
+Lines starting with \texttt{\#} are comments.  The script name is the Groovy file name without the \texttt{.groovy} extension.
+
+\section{Writing a Cron Task}
+\label{sec:cron-writing}
+
+A cron task is a Groovy file in \texttt{src/main/backend/CronTasks/}.  Every task must have a static \texttt{start(Object obj)} method:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.database.Connection
+import org.kissweb.DateTime
+
+static void start(Object obj) {
+    Connection db = (Connection) obj
+    println("Task running at " +
+        DateTime.currentDateTimeFormatted())
+
+    // Perform scheduled work
+    db.execute("DELETE FROM temp_data WHERE created < ?",
+        DateUtils.addDays(DateUtils.today(), -30))
+    db.commit()
+}
+\end{lstlisting}
+
+\noindent
+The \texttt{obj} parameter is a database \texttt{Connection} provided by the framework.  Key points:
+
+\begin{itemize}
+  \item The method receives its own database connection, separate from any service request.
+  \item You must call \texttt{db.commit()} to persist changes.
+  \item Each invocation runs in its own thread, so long-running tasks do not block other tasks or service requests.
+  \item If the task throws an exception, it is caught and logged --- other tasks continue running.
+\end{itemize}
+
+\begin{warnbox}
+Always call \texttt{db.commit()} in cron tasks.  Unlike service methods, the framework does \emph{not} auto-commit for cron tasks.
+\end{warnbox}
+
+\section{Example: Nightly Data Cleanup}
+\label{sec:cron-cleanup}
+
+\begin{lstlisting}[style=groovy]
+// CronTasks/NightlyCleanup.groovy
+import org.kissweb.database.Connection
+import org.kissweb.DateUtils
+
+static void start(Object obj) {
+    Connection db = (Connection) obj
+
+    // Delete old audit records
+    int cutoff = DateUtils.addDays(DateUtils.today(), -90)
+    db.execute("DELETE FROM audit_log WHERE created_date < ?",
+        cutoff)
+
+    // Deactivate expired accounts
+    db.execute("""
+        UPDATE users SET user_active = 'N'
+        WHERE expiration_date < ? AND user_active = 'Y'
+    """, DateUtils.today())
+
+    db.commit()
+    println("Nightly cleanup completed")
+}
+\end{lstlisting}
+
+\noindent
+Crontab entry:
+
+\begin{lstlisting}[style=ini]
+0  2  *  *  *  NightlyCleanup
+\end{lstlisting}
+
+\section{Example: Periodic Report Generation}
+\label{sec:cron-report}
+
+\begin{lstlisting}[style=groovy]
+// CronTasks/WeeklyReport.groovy
+import org.kissweb.database.*
+import org.kissweb.*
+
+static void start(Object obj) {
+    Connection db = (Connection) obj
+
+    Groff rpt = new Groff("WeeklyStatus-",
+        "Weekly Status Report", false)
+    rpt.startTable("Lw(2i) Nw(1i) Lw(1i)")
+    rpt.column("Project")
+    rpt.column("Hours")
+    rpt.column("Status")
+    rpt.endTitle()
+
+    List<Record> projects = db.fetchAll(
+        "select name, total_hours, status from project " +
+        "where active = 'Y' order by name")
+    for (Record r : projects) {
+        rpt.column(r.getString("name"))
+        rpt.column(r.getDouble("total_hours"), "C", 1)
+        rpt.column(r.getString("status"))
+    }
+
+    rpt.process()
+    // Report saved to temp directory
+    println("Weekly report generated: " +
+        rpt.getRealFileName())
+}
+\end{lstlisting}
+
+\section{Dynamic Crontab Reloading}
+\label{sec:cron-reload}
+
+The cron system monitors the crontab file for changes.  If you edit the file while the server is running, the new schedule takes effect automatically on the next 60-second check cycle.  No restart is needed.
+
+\begin{tipbox}
+During development, use a short interval like \texttt{* * * * *} (every minute) to test your cron task, then change to the real schedule when it works correctly.
+\end{tipbox}

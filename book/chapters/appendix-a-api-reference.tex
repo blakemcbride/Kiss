@@ -1,0 +1,293 @@
+\chapter{API Quick Reference}
+\label{ch:api-reference}
+
+This appendix provides lookup tables for the most commonly used Kiss APIs.  For full documentation, see the JavaDoc (backend) and JSDoc (frontend).
+
+\section{Connection}
+\label{sec:api-connection}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{execute(sql, args...)} & Execute INSERT, UPDATE, DELETE. \\
+\texttt{fetchOne(sql, args...)} & Fetch single Record (or null). \\
+\texttt{fetchAll(sql, args...)} & Fetch all Records as List. \\
+\texttt{fetchAllJSON(sql, args...)} & Fetch as JSONArray. \\
+\texttt{query(sql, args...)} & Return Cursor for iteration. \\
+\texttt{exists(sql, args...)} & True if any records match. \\
+\texttt{newRecord(table)} & Create Record for insertion. \\
+\texttt{newCommand()} & Create Command for fine control. \\
+\texttt{newQueryBuilder()} & Create QueryBuilder with auto-joins. \\
+\texttt{commit()} & Commit current transaction. \\
+\texttt{rollback()} & Rollback current transaction. \\
+\texttt{getSchemaGraph()} & Get or build the SchemaGraph. \\
+\texttt{getDBType()} & Get the database type. \\
+\bottomrule
+\end{longtable}
+
+\section{Record}
+\label{sec:api-record}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{set(column, value)} & Set a column value. \\
+\texttt{addRecord()} & INSERT the record. \\
+\texttt{update()} & UPDATE changed columns only. \\
+\texttt{delete()} & DELETE the record. \\
+\texttt{getString(column)} & Get String value. \\
+\texttt{getChar(column)} & Get char value. \\
+\texttt{getInt(column)} & Get int value. \\
+\texttt{getShort(column)} & Get short value. \\
+\texttt{getLong(column)} & Get long value. \\
+\texttt{getFloat(column)} & Get float value. \\
+\texttt{getDouble(column)} & Get double value. \\
+\texttt{getBigDecimal(column)} & Get BigDecimal value (for NUMERIC / DECIMAL). \\
+\texttt{getDateAsInt(column)} & Get date as YYYYMMDD int. \\
+\texttt{getDateTime(column)} & Get as java.util.Date. \\
+\texttt{toJSON()} & Convert to JSONObject. \\
+\texttt{copy(src)} & Copy column values from another Record into this one. \\
+\texttt{getTableName()} & Get the source table name. \\
+\bottomrule
+\end{longtable}
+
+\section{Command}
+\label{sec:api-command}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{execute(sql, args...)} & Execute a statement. \\
+\texttt{fetchOne(sql, args...)} & Fetch one Record. \\
+\texttt{fetchAll(sql, args...)} & Fetch all Records. \\
+\texttt{query(sql, args...)} & Return Cursor. \\
+\texttt{fetchAllJSON(sql, args...)} & Fetch all Records as JSONArray. \\
+\texttt{newQueryBuilder()} & Create a QueryBuilder bound to this Command. \\
+\texttt{close()} & Release JDBC resources. \\
+\bottomrule
+\end{longtable}
+
+\section{Cursor}
+\label{sec:api-cursor}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{isNext()} & Advance; true if row available. \\
+\texttt{getRecord()} & Get current Record. \\
+\texttt{close()} & Close the cursor. \\
+\bottomrule
+\end{longtable}
+
+\section{QueryBuilder}
+\label{sec:api-querybuilder}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{select(columns...)} & Add SELECT columns. \\
+\texttt{distinct()} & Enable SELECT DISTINCT. \\
+\texttt{where(cond, params...)} & Add WHERE condition (AND). \\
+\texttt{startOr()} / \texttt{endOr()} & Begin/end OR group. \\
+\texttt{startAnd()} / \texttt{endAnd()} & Begin/end AND group. \\
+\texttt{orderBy(col)} & ORDER BY ascending. \\
+\texttt{orderByDesc(col)} & ORDER BY descending. \\
+\texttt{groupBy(col)} & GROUP BY. \\
+\texttt{having(cond, params...)} & HAVING condition. \\
+\texttt{limit(max)} & Limit result rows. \\
+\texttt{join(fromTbl, fromCol, toTbl, toCol [, alias])} & INNER JOIN. \\
+\texttt{leftJoin(fromTbl, fromCol, toTbl, toCol [, alias])} & LEFT JOIN. \\
+\texttt{rightJoin(fromTbl, fromCol, toTbl, toCol [, alias])} & RIGHT JOIN. \\
+\texttt{whereIn(col, subquery)} & WHERE col IN (subquery). \\
+\texttt{whereNotIn(col, subquery)} & WHERE col NOT IN. \\
+\texttt{whereExists(subquery)} & WHERE EXISTS. \\
+\texttt{whereNotExists(\allowbreak subquery)} & WHERE NOT EXISTS. \\
+\texttt{with(name, sql)} & Common Table Expression. \\
+\texttt{union(qb)} & UNION. \\
+\texttt{unionAll(qb)} & UNION ALL. \\
+\texttt{fetchAll()} & Execute, return List<Record>. \\
+\texttt{fetchOne()} & Execute, return Record or null. \\
+\texttt{fetchAllJSON()} & Execute, return JSONArray. \\
+\texttt{query()} & Execute, return Cursor. \\
+\texttt{build()} & Generate SQL string. \\
+\texttt{getParameters()} & Get parameter values. \\
+\bottomrule
+\end{longtable}
+
+\section{SortBuilder}
+\label{sec:api-sortbuilder}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{key(key, exprs...)} & Register a sort key with one or more expressions; returns this. \\
+\texttt{join(joinSql, keys...)} & Join emitted once when any listed key is used; returns this. \\
+\texttt{text(col)} & Static. Case-insensitive text; empty/whitespace is blank. \\
+\texttt{zeroBlank(col)} & Static. Number or int date; 0 is blank. \\
+\texttt{raw(sql)} & Static. Verbatim SQL; must yield NULL when blank. \\
+\texttt{textSql(type, col)} & Static. The \texttt{text()} SQL for a \texttt{ConnectionType}. \\
+\texttt{build(type, sorts, default, tiebreak...)} & Return a \texttt{Result}. Blanks last; unknown keys rejected. \\
+\texttt{Sort.of(key, asc)} & A requested sort. \\
+\texttt{Result.orderBy()} & \texttt{order by ...} clause, or empty. \\
+\texttt{Result.joins()} & Needed joins, each once, trailing space. \\
+\texttt{Result.joinList()} & Needed joins as a list. \\
+\texttt{Result.rejectedKeys()} & Unknown non-blank keys (client text). \\
+\bottomrule
+\end{longtable}
+
+\section{SchemaGraph}
+\label{sec:api-schemagraph}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{fromDatabase(conn)} & Build from DB metadata. \\
+\texttt{addForeignKey(fromTbl, fromCol, toTbl, toCol)} & Add a relationship (also a composite \texttt{String[]} overload). \\
+\texttt{findJoinPath(tables, rootTable)} & BFS shortest join path (returns \texttt{List<Edge>}). \\
+\texttt{getEdges(table)} & Get all edges for a table. \\
+\texttt{saveToFile(path)} & Serialize to file. \\
+\texttt{loadFromFile(path)} & Deserialize from file. \\
+\bottomrule
+\end{longtable}
+
+\section{Frontend: Server.js}
+\label{sec:api-serverjs}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{Server.call(svc, meth, data)} & Call backend service (async). \\
+\texttt{Server.\allowbreak callAll(\allowbreak promises...)} & Parallel service calls. \\
+\texttt{Server.\allowbreak fileUploadSend(\allowbreak cls, meth, fd, injson)} & Upload file(s); \texttt{fd} is a \texttt{FormData}. \\
+\texttt{Server.logout()} & End session; full page reload onto the login route. \\
+\texttt{Server.setURL(url)} & Set backend base URL. \\
+\texttt{Server.\allowbreak setMaxInactivity\allowbreak Seconds(\allowbreak n)} & Frontend timeout. \\
+\texttt{Server.\allowbreak setMaxInactivity\allowbreak Minutes(\allowbreak n)} & Frontend timeout (minutes). \\
+\bottomrule
+\end{longtable}
+
+\section{Frontend: Component Methods}
+\label{sec:api-components}
+
+Common methods available on all components via \texttt{\$\$('id')}:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getValue()} & Get current value. \\
+\texttt{setValue(val)} & Set value. \\
+\texttt{clear()} & Clear/reset. \\
+\texttt{enable()} / \texttt{disable()} & Enable or disable. \\
+\texttt{show()} / \texttt{hide()} & Show or hide. \\
+\texttt{isError(msg)} & Validate; show error if invalid. \\
+\texttt{focus()} & Set keyboard focus. \\
+\texttt{onChange(fn)} & Set change handler. \\
+\texttt{onclick(fn)} & Set click handler (buttons). \\
+\texttt{add(value, label)} & Add option (drop-down, list-box). \\
+\texttt{readOnly()} / \texttt{readWrite()} & Toggle editability. \\
+\bottomrule
+\end{longtable}
+
+\section{Frontend: Utils.js}
+\label{sec:api-utilsjs}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{Utils.loadPage(path, target)} & Load screen into element. \\
+\texttt{Utils.popup\_open(id)} & Open a popup. \\
+\texttt{Utils.popup\_close(id)} & Close a popup. \\
+\texttt{Utils.showMessage(title, msg)} & Message dialog. \\
+\texttt{Utils.yesNo(title, msg, yesFn, noFn)} & Confirmation dialog. \\
+\texttt{Utils.waitMessage(msg)} & Show progress indicator. \\
+\texttt{Utils.waitMessageEnd()} & Hide progress indicator. \\
+\texttt{Utils.showReport(url)} & Open URL in new tab. \\
+\texttt{Utils.cleanup()} & Clean up current screen. \\
+\texttt{Utils.rescan()} & Activate injected components. \\
+\texttt{Utils.\allowbreak useComponent(\allowbreak name)} & Register a component. \\
+\texttt{Utils.getAppUrl()} & Get application base URL. \\
+\texttt{Utils.saveData(key, val)} & Save cross-screen data by key (persisted via AppState). \\
+\texttt{Utils.getData(key)} & Retrieve cross-screen data by key. \\
+\texttt{Utils.\allowbreak getAndEraseData(\allowbreak key)} & Retrieve cross-screen data by key and remove it. \\
+\bottomrule
+\end{longtable}
+
+\section{Frontend: DateUtils.js}
+\label{sec:api-dateutils-fe}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{DateUtils.today()} & Today as YYYYMMDD int. \\
+\texttt{DateUtils.intToStr4(dt)} & Format as MM/DD/YYYY. \\
+\texttt{DateUtils.intToStr2(dt)} & Format as MM/DD/YY. \\
+\texttt{DateUtils.strToInt(str)} & Parse date string to int. \\
+\texttt{DateUtils.intAddDays(dt, n)} & Add days. \\
+\texttt{DateUtils.\allowbreak daysDifference(\allowbreak d1, d2)} & Days between dates. \\
+\texttt{DateUtils.year(dt)} & Extract year. \\
+\texttt{DateUtils.month(dt)} & Extract month. \\
+\texttt{DateUtils.day(dt)} & Extract day. \\
+\texttt{DateUtils.isValid(dt)} & Validate date int. \\
+\bottomrule
+\end{longtable}
+
+\section{Frontend: AGGrid}
+\label{sec:api-aggrid}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{new AGGrid(id, cols, tag)} & Create grid. \\
+\texttt{show()} & Render the grid. \\
+\texttt{addRecords(data)} & Load/replace data. \\
+\texttt{getSelectedRow()} & Get selected row data. \\
+\texttt{getSelectedRows()} & Get all selected (multi). \\
+\texttt{getAllRows()} & Get all row data. \\
+\texttt{setOnSelectionChanged(\allowbreak fn)} & Selection handler. \\
+\texttt{setOnRowDoubleClicked(\allowbreak fn)} & Double-click handler. \\
+\texttt{getNumberOfRows()} & Row count. \\
+\texttt{clear()} & Remove all rows. \\
+\texttt{destroy()} & Clean up grid. \\
+\texttt{setServerSort(fn)} & Header clicks call \texttt{fn(colId)} instead of sorting; rows never move. Falsy turns it off. \\
+\texttt{setSortIndicators(\allowbreak list)} & Show sort arrows from \texttt{[\{field, asc\}]} in priority order (numbered if more than one); \texttt{null} clears. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Built-in column formatters:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Formatter} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{AGGrid.date} & YYYYMMDD to MM/DD/YYYY. \\
+\texttt{AGGrid.time} & HHMM to H:MM AM/PM. \\
+\texttt{AGGrid.dateTime} & Date/time epoch to MM/DD/YYYY H:MM AM/PM. \\
+\texttt{AGGrid.numericFormat} & Number with commas. \\
+\bottomrule
+\end{longtable}

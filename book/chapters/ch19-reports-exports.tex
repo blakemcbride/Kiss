@@ -1,0 +1,259 @@
+\chapter{Reports and Exports}
+\label{ch:reports}
+
+Kiss supports PDF report generation via Groff, CSV export, and general file delivery to the browser.  This chapter covers the report generation pipeline, number formatting for aligned columns, and the temporary file management system.
+
+\section{PDF Reports with Groff}
+\label{sec:rpt-groff}
+
+The \texttt{Groff}\index{Groff} class provides an interface to the groff typesetting system for generating PDF reports with headers, footers, page numbers, and formatted tables.
+
+\begin{warnbox}
+The \texttt{Groff} class is a thin wrapper around the underlying \texttt{groff} typesetting system --- the framework does not bundle it.  \texttt{groff} (and its \texttt{tbl} preprocessor) must be installed on whatever machine runs the Kiss backend, in development and in production alike.  It is available by default on Linux and macOS.  Windows requires a separate installation; see the \emph{Kiss Getting Started Guide} for the procedure.  Without \texttt{groff} on the host system, every call to \texttt{Groff.process()} will fail at runtime.
+\end{warnbox}
+
+\begin{lstlisting}[style=groovy]
+Groff rpt = new Groff("PhoneList-", "Phone List", false)
+
+// Define table columns (tbl format specification)
+rpt.startTable("Lw(1i) Lw(1i) Lw(1i)")
+rpt.column("Last Name")
+rpt.column("First Name")
+rpt.column("Phone Number")
+rpt.endTitle()
+
+// Write data rows
+List<Record> recs = db.fetchAll(
+    "select * from phone order by last_name")
+for (Record rec : recs) {
+    rpt.column(rec.getString("last_name"))
+    rpt.column(rec.getString("first_name"))
+    rpt.column(rec.getString("phone_number"))
+}
+
+// Generate PDF and return URL for browser
+outjson.put("reportUrl", rpt.process())
+\end{lstlisting}
+
+\noindent
+The constructor parameters are:
+
+\begin{enumerate}
+  \item \textbf{Filename prefix} --- used to generate a unique temporary file.
+  \item \textbf{Report title} --- appears at the top of each page.
+  \item \textbf{Landscape} --- \texttt{true} for landscape, \texttt{false} for portrait.
+\end{enumerate}
+
+\subsection{Table Column Formatting}
+
+The \texttt{startTable()} format string uses \texttt{tbl} syntax.  Common specifications:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Format} & \textbf{Meaning} \\
+\midrule
+\endhead
+\texttt{Lw(1.5i)} & Left-aligned, 1.5 inches wide \\
+\texttt{Rw(1i)} & Right-aligned, 1 inch wide \\
+\texttt{Cw(2i)} & Centered, 2 inches wide \\
+\texttt{Nw(1i)} & Numeric (decimal-aligned), 1 inch \\
+\bottomrule
+\end{longtable}
+
+\subsection{Numeric Columns}
+
+For formatted numeric output in tables:
+
+\begin{lstlisting}[style=groovy]
+// Dollar amount with commas, 2 decimals
+rpt.column(rec.getDouble("salary"), "CD", 2)
+
+// Integer with commas
+rpt.column(rec.getInt("quantity"), "C")
+\end{lstlisting}
+
+\noindent
+The format mask codes match \texttt{NumberFormat} (Section~\ref{sec:rpt-numberformat}).
+
+\subsection{Date Columns}
+
+\begin{lstlisting}[style=groovy]
+rpt.dateColumn(rec.getDateAsInt("hire_date"))   // MM/DD/YYYY
+rpt.dateColumn2(rec.getDateAsInt("hire_date"))  // MM/DD/YY
+\end{lstlisting}
+
+\subsection{Report Configuration}
+
+\begin{lstlisting}[style=groovy]
+rpt.setFooter("Confidential", "Page \\n[%]")
+rpt.addPageTitleLine("Department: Engineering")
+rpt.noAutoPageHeader()  // disable automatic title
+rpt.needLines(5)        // page break if < 5 lines remain
+\end{lstlisting}
+
+\subsection{Generating the PDF}
+
+\begin{lstlisting}[style=groovy]
+String url = rpt.process()          // standard margins
+String url = rpt.process(0.5f)      // custom side margin
+String path = rpt.getRealFileName() // absolute file path
+\end{lstlisting}
+
+\noindent
+\texttt{process()} invokes the groff pipeline, generates a PDF, and returns the HTTP-accessible URL.  The file is automatically cleaned up after approximately one day.
+
+\section{CSV Export}
+\label{sec:rpt-csv}
+
+The \texttt{DelimitedFileWriter}\index{DelimitedFileWriter} class writes CSV files with proper quoting and escaping:
+
+\begin{lstlisting}[style=groovy]
+File f = FileUtils.createReportFile("Export-", ".csv")
+DelimitedFileWriter dfw =
+    new DelimitedFileWriter(f.getAbsolutePath())
+
+// Header row
+dfw.writeField("Last Name")
+dfw.writeField("First Name")
+dfw.writeField("Salary")
+dfw.endRecord()
+
+// Data rows
+for (Record rec : records) {
+    dfw.writeField(rec.getString("last_name"))
+    dfw.writeField(rec.getString("first_name"))
+    dfw.writeField(rec.getDouble("salary"))
+    dfw.endRecord()
+}
+dfw.close()
+
+outjson.put("exportUrl", FileUtils.getHTTPPath(f))
+\end{lstlisting}
+
+\noindent
+\texttt{DelimitedFileWriter} automatically handles quoting when field values contain commas, quotes, or newlines.  It supports custom delimiters and quote characters via the extended constructor.
+
+\subsection{Field Writing Methods}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{writeField(String)} & Write string field with auto-quoting. \\
+\texttt{writeField(int)} & Write integer. \\
+\texttt{writeField(double)} & Write double (2 decimal places). \\
+\texttt{writeField(char)} & Write single character. \\
+\texttt{writeDate(int)} & Write YYYYMMDD as formatted date. \\
+\texttt{writeDate(Date)} & Write Date object as formatted date. \\
+\texttt{writeNoZero(int)} & Write integer; empty string if zero. \\
+\texttt{writeFieldUpperCase(\allowbreak String)} & Write uppercase string. \\
+\texttt{endRecord()} & Finalize row with CRLF. \\
+\bottomrule
+\end{longtable}
+
+\section{NumberFormat for Reports}
+\label{sec:rpt-numberformat}
+
+The \texttt{NumberFormat}\index{NumberFormat} class formats numbers with commas, dollar signs, parentheses for negatives, and fixed-width fields.  It is essential for aligned columnar reports.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.NumberFormat
+
+// Currency: ($12,345.35)
+NumberFormat.Format(-12345.348, "CDP", 12, 2)
+
+// Dollar with commas: $12,345.15
+NumberFormat.Format(12345.146, "CD", 10, 2)
+
+// Left-justified: $125.15
+NumberFormat.Format(125.146, "CDL", 10, 2)
+
+// Zero-filled with parentheses: (00005.15)
+NumberFormat.Format(-5.146, "ZCP", 10, 2)
+\end{lstlisting}
+
+\noindent
+Format mask codes:
+
+\begin{longtable}{cl}
+\toprule
+\textbf{Code} & \textbf{Meaning} \\
+\midrule
+\endhead
+\texttt{B} & Blank if zero \\
+\texttt{C} & Add commas \\
+\texttt{D} & Floating dollar sign \\
+\texttt{L} & Left justify \\
+\texttt{P} & Parentheses for negatives \\
+\texttt{Z} & Zero fill \\
+\texttt{U} & Uppercase (for hex) \\
+\texttt{R} & Append percent sign \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Parameters: \texttt{Format(number, mask, width, decimalPlaces)}.  Width of 0 means auto-size.  Decimal places of $-1$ means auto-detect.  If the number cannot fit in the specified width, asterisks (\texttt{***}) are returned.
+
+\section{Temporary File Management}
+\label{sec:rpt-tempfiles}
+
+\texttt{FileUtils}\index{FileUtils} manages temporary files for browser delivery:
+
+\begin{lstlisting}[style=groovy]
+// Create a temporary report file
+File f = FileUtils.createReportFile("MyExport-", ".xlsx")
+// ... write to f ...
+
+// Get the URL for browser download
+String url = FileUtils.getHTTPPath(f)
+outjson.put("downloadUrl", url)
+\end{lstlisting}
+
+\noindent
+Files created with \texttt{createReportFile()} are placed in a managed temporary directory and automatically deleted after approximately one day.
+
+On the frontend, open the URL to trigger the download:
+
+\begin{lstlisting}[style=javascript]
+const res = await Server.call(WS, 'runExport');
+if (res._Success)
+    Utils.showReport(res.downloadUrl);
+\end{lstlisting}
+
+\section{The PDF Class}
+\label{sec:rpt-pdf}
+
+For pixel-precise PDF generation beyond what Groff provides, the \texttt{PDF}\index{PDF} class wraps Apache PDFBox:
+
+\begin{lstlisting}[style=groovy]
+PDF pdf = new PDF("output.pdf")
+pdf.newPage()
+pdf.setFont(PDType1Font.HELVETICA_BOLD, 16)
+pdf.startText()
+pdf.textOut(1, 1, "Employee Report")
+pdf.setFont(PDType1Font.HELVETICA, 10)
+pdf.textOut(3, 1, "Name: Alice Smith")
+pdf.textOut(4, 1, "Department: Engineering")
+pdf.endText()
+
+// Draw a horizontal line
+pdf.startGraphics()
+pdf.drawHLine(5.0f * 72, 72, 7.5f * 72)
+pdf.endGraphics()
+
+// Add an image
+pdf.imageOut(300, 72, 0.5f, "logo.png")
+
+pdf.endDocument()
+\end{lstlisting}
+
+\noindent
+Key features:
+\begin{itemize}
+  \item Text positioning by line/column (1-indexed) or pixel coordinates.
+  \item Graphics primitives: lines, rectangles.
+  \item Image placement with scaling by ratio, width, or height.
+  \item Portrait and landscape orientation.
+  \item Load and modify existing PDFs as templates.
+\end{itemize}

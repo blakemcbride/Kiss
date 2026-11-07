@@ -22,7 +22,6 @@ libs/apiguardian*.jar
 libs/jakarta.*.jar
 libs/metadata-extractor-*.jar
 libs/xmpcore-*.jar
-book
 target
 # OAuth authorization-server persistent state (signing keys, registered
 # clients, refresh tokens).  Created at runtime in the deployed copy;

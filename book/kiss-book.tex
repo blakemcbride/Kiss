@@ -1,0 +1,222 @@
+\documentclass[11pt,twoside,openright]{book}
+
+% ---- Encoding and fonts ----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+
+% ---- Page layout ----
+\usepackage[paperwidth=6.69in,paperheight=9.61in,margin=1in,inner=1.25in,outer=1in]{geometry}
+\emergencystretch=3em  % Allow looser line-breaking to prevent margin overflow
+\sloppy                % Prevent text from extending past margins
+
+% ---- Graphics ----
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+
+% ---- Code listings ----
+\usepackage{listings}
+\usepackage{upquote}
+\usepackage{xcolor}
+
+\definecolor{codebg}{HTML}{F5F5F5}
+\definecolor{codeframe}{HTML}{CCCCCC}
+\definecolor{keyword}{HTML}{0000CC}
+\definecolor{string}{HTML}{008800}
+\definecolor{comment}{HTML}{888888}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{codeframe},
+  keywordstyle=\color{keyword}\bfseries,
+  stringstyle=\color{string},
+  commentstyle=\color{comment}\itshape,
+  showstringspaces=false,
+  breaklines=true,
+  breakatwhitespace=false,
+  breakindent=0pt,
+  columns=flexible,
+  tabsize=4,
+  numberstyle=\tiny\color{comment},
+  xleftmargin=2em,
+  framexleftmargin=1.5em,
+  aboveskip=1em,
+  belowskip=1em,
+}
+
+\lstdefinestyle{java}{language=Java,morekeywords={var,record,sealed,permits}}
+\lstdefinestyle{groovy}{language=Java,morekeywords={def,as,in,trait}}
+\lstdefinestyle{javascript}{language=Java,morekeywords={let,const,async,await,function,undefined}}
+\lstdefinestyle{sql}{language=SQL}
+\lstdefinestyle{html}{language=HTML,alsoletter={-},sensitive=false}
+\lstdefinestyle{ini}{language={},comment=[l]{\#},morecomment=[l]{;}}
+\lstdefinestyle{shell}{language=bash}
+
+% ---- Tables ----
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\setlength{\tabcolsep}{5pt}  % column widths sum to 10.5cm; 6pt padding overflowed the 4.44in text block by 1.87pt
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}  % ragged-right paragraph column: avoids wide word gaps in narrow cells
+
+% ---- Hyperlinks ----
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue!60!black,
+  urlcolor=blue!60!black,
+  citecolor=blue!60!black,
+  bookmarksdepth=3,
+}
+
+% ---- Index ----
+\usepackage{makeidx}
+\makeindex
+
+% ---- Headers and footers ----
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ---- Chapter and section styling ----
+\usepackage{titlesec}
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries}
+  {\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+% ---- List customization ----
+\usepackage{enumitem}
+
+% ---- Diagrams ----
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+% ---- Tip and warning boxes ----
+\usepackage[most]{tcolorbox}
+
+\newtcolorbox{tipbox}[1][Tip]{
+  colback=blue!5,colframe=blue!50!black,
+  fonttitle=\bfseries,title=#1
+}
+
+\newtcolorbox{warnbox}[1][Warning]{
+  colback=red!5,colframe=red!50!black,
+  fonttitle=\bfseries,title=#1
+}
+
+\newtcolorbox{notebox}[1][Note]{
+  colback=yellow!5,colframe=yellow!50!black,
+  fonttitle=\bfseries,title=#1
+}
+
+% ---- Title ----
+\title{
+  \vspace{2cm}
+  {\Huge\bfseries Kiss}\\[0.5cm]
+  {\LARGE A Complete Guide to the\\Web Application Framework}\\[2cm]
+  \vfill
+}
+\author{\Large Blake McBride}
+\date{\today}
+
+% ============================================================================
+\begin{document}
+
+\frontmatter
+\maketitle
+
+% ---- Copyright page ----
+\thispagestyle{empty}
+\vspace*{\fill}
+\begin{center}
+Copyright \copyright{} 2026 Blake McBride\\
+All rights reserved.\\[6pt]
+ISBN 979-8-9902780-7-3\\[6pt]
+\today
+\end{center}
+\vspace*{\fill}
+\clearpage
+
+% ---- Acknowledgments ----
+\thispagestyle{empty}
+\vspace*{2in}
+\begin{center}
+{\Large\bfseries Acknowledgments}
+
+\bigskip
+Thanks to Melaine Sarbey for the creation of the Kiss logo.
+\end{center}
+\clearpage
+
+\tableofcontents
+
+% ============================================================================
+\mainmatter
+
+% ---- Part I: Getting Started ----
+\part{Getting Started}
+\include{chapters/ch01-introduction}
+\include{chapters/ch02-setup}
+\include{chapters/ch03-architecture}
+\include{chapters/ch04-build-system}
+\include{chapters/ch05-configuration}
+
+% ---- Part II: Backend Development ----
+\part{Backend Development}
+\include{chapters/ch06-backend-services}
+\include{chapters/ch07-groovy}
+\include{chapters/ch08-database-connection}
+\include{chapters/ch09-database-crud}
+\include{chapters/ch10-query-builder}
+\include{chapters/ch11-schema-graph}
+
+% ---- Part III: Frontend Development ----
+\part{Frontend Development}
+\include{chapters/ch12-frontend-overview}
+\include{chapters/ch12a-routing-and-state}
+\include{chapters/ch12b-caching-and-security}
+\include{chapters/ch13-components}
+\include{chapters/ch14-grids}
+\include{chapters/ch15-popups-dialogs}
+\include{chapters/ch16-frontend-utilities}
+\include{chapters/ch17-server-communication}
+
+% ---- Part IV: Application Features ----
+\part{Application Features}
+\include{chapters/ch18-authentication}
+\include{chapters/ch19-reports-exports}
+\include{chapters/ch20-cron}
+\include{chapters/ch21-file-handling}
+\include{chapters/ch22-llm-integration}
+\include{chapters/ch28-external-systems}
+\include{chapters/ch29-oauth}
+\include{chapters/ch30-oauth-as}
+\include{chapters/ch31-oauth-client}
+
+% ---- Part V: Utilities and Advanced Topics ----
+\part{Utilities and Advanced Topics}
+\include{chapters/ch23-utilities}
+\include{chapters/ch24-desktop}
+\include{chapters/ch25-testing}
+\include{chapters/ch26-deployment}
+\include{chapters/ch27-complete-application}
+
+% ---- Appendices ----
+\appendix
+\part{Appendices}
+\include{chapters/appendix-a-api-reference}
+\include{chapters/appendix-b-groovy-primer}
+\include{chapters/appendix-c-ide-setup}
+
+% ---- Back matter ----
+\backmatter
+\printindex
+
+\end{document}

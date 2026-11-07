@@ -1,0 +1,236 @@
+\chapter{Popups and Dialogs}
+\label{ch:popups}
+
+Kiss provides a popup system for modal dialogs and several built-in dialog types for messages and confirmations.  Popups are the primary mechanism for editing records selected from a grid.
+
+\section{The Popup Component}
+\label{sec:popup-component}
+
+A popup is defined in the screen's HTML using the \texttt{<popup>}\index{popup} tag.  It requires exactly two direct children: \texttt{<popup-title>} and \texttt{<popup-body>}.
+
+\begin{lstlisting}[style=html]
+<popup id="edit-popup" height="200px" width="450px">
+    <popup-title>Edit Employee</popup-title>
+    <popup-body>
+        <div style="display: grid;
+                    grid-template-columns: auto 1fr;
+                    gap: 8px; padding: 10px;">
+            <span>First Name:</span>
+            <text-input id="ep-first" required
+                        style="width: 250px;"></text-input>
+            <span>Last Name:</span>
+            <text-input id="ep-last" required
+                        style="width: 250px;"></text-input>
+        </div>
+        <div style="text-align: right; margin-top: 10px;">
+            <push-button id="ep-ok">OK</push-button>
+            <push-button id="ep-cancel">Cancel</push-button>
+        </div>
+    </popup-body>
+</popup>
+\end{lstlisting}
+
+\begin{warnbox}
+The popup \emph{must} have exactly two direct children: \texttt{<popup-title>} and \texttt{<popup-body>}.  Using a single wrapper \texttt{<div>} instead causes a ``Cannot set properties of undefined'' error at runtime.
+
+\begin{lstlisting}[style=html]
+<!-- WRONG: causes error -->
+<popup id="bad-popup">
+    <div class="content">...</div>
+</popup>
+
+<!-- CORRECT -->
+<popup id="good-popup">
+    <popup-title>Title</popup-title>
+    <popup-body>Content</popup-body>
+</popup>
+\end{lstlisting}
+\end{warnbox}
+
+\section{Opening and Closing Popups}
+\label{sec:popup-openclose}
+
+\begin{lstlisting}[style=javascript]
+// Open popup, set focus to a control
+Utils.popup_open('edit-popup', 'ep-first');
+
+// Close popup
+Utils.popup_close();
+\end{lstlisting}
+
+\noindent
+\texttt{Utils.popup\_open()}\index{Utils.popup\_open} accepts two parameters:
+
+\begin{enumerate}
+  \item \textbf{Popup ID} --- the \texttt{id} of the \texttt{<popup>} element.
+  \item \textbf{Focus control} (optional) --- the \texttt{id} of a component that should receive focus when the popup opens.
+\end{enumerate}
+
+\noindent
+\texttt{Utils.popup\_close()}\index{Utils.popup\_close} closes the most recently opened popup.  You can optionally pass the popup ID for verification.
+
+\subsection{Popup Stacking}
+
+Multiple popups can be open simultaneously.  The framework manages a stack of open popups and increments the z-index for each new popup.  Closing a popup pops the stack and restores the previous popup's state.
+
+\subsection{DOM Preservation After Close}
+
+When a popup is closed, its DOM elements are \emph{hidden}, not destroyed.  This means:
+
+\begin{itemize}
+  \item All controls within the popup remain accessible.
+  \item Values can be read from popup controls after closing.
+  \item Control references (\texttt{\$\$('popup-control-id')}) continue to work.
+  \item The popup can be reopened without re-initializing its controls.
+\end{itemize}
+
+\begin{lstlisting}[style=javascript]
+Utils.popup_open('edit-popup');
+// ... user interacts with popup ...
+Utils.popup_close();
+
+// Controls are still accessible after close
+let name = $$('ep-first').getValue();  // works!
+\end{lstlisting}
+
+\section{Popup Sizing}
+\label{sec:popup-sizing}
+
+Specify both \texttt{height} and \texttt{width} attributes on the \texttt{<popup>} tag:
+
+\begin{lstlisting}[style=html]
+<popup id="my-popup" height="300px" width="500px">
+\end{lstlisting}
+
+\noindent
+Size the popup appropriately for its content.  Avoid excess whitespace, and test on different screen sizes.
+
+Dynamic sizing is also available:
+
+\begin{lstlisting}[style=javascript]
+Utils.popup_set_width('my-popup', '600px');
+Utils.popup_set_height('my-popup', '400px');
+\end{lstlisting}
+
+\section{The Standard Edit Pattern}
+\label{sec:popup-edit-pattern}
+
+The most common popup use case is editing a record selected from a grid.  The pattern uses one popup for both adding and editing:
+
+\begin{lstlisting}[style=javascript]
+// New record
+$$('new-btn').onclick(() => {
+    $$('ep-title').setValue('Add Employee');
+    $$('ep-first').clear();
+    $$('ep-last').clear();
+    Utils.popup_open('edit-popup', 'ep-first');
+
+    $$('ep-ok').onclick(async () => {
+        if ($$('ep-first').isError('First Name')) return;
+        if ($$('ep-last').isError('Last Name')) return;
+        const res = await Server.call(WS, 'create', {
+            firstName: $$('ep-first').getValue(),
+            lastName: $$('ep-last').getValue()
+        });
+        if (res._Success) {
+            Utils.popup_close();
+            loadGrid();
+        }
+    });
+
+    $$('ep-cancel').onclick(() => Utils.popup_close());
+});
+
+// Edit selected record
+$$('edit-btn').onclick(() => {
+    const row = grid.getSelectedRow();
+    $$('ep-title').setValue('Edit Employee');
+    $$('ep-first').setValue(row.firstName);
+    $$('ep-last').setValue(row.lastName);
+    Utils.popup_open('edit-popup', 'ep-first');
+
+    $$('ep-ok').onclick(async () => {
+        if ($$('ep-first').isError('First Name')) return;
+        if ($$('ep-last').isError('Last Name')) return;
+        const res = await Server.call(WS, 'save', {
+            id: row.id,
+            firstName: $$('ep-first').getValue(),
+            lastName: $$('ep-last').getValue()
+        });
+        if (res._Success) {
+            Utils.popup_close();
+            loadGrid();
+        }
+    });
+
+    $$('ep-cancel').onclick(() => Utils.popup_close());
+});
+\end{lstlisting}
+
+\begin{tipbox}
+Use a \texttt{<text-label>} for the popup title so it can be changed programmatically between ``Add'' and ``Edit'' modes.
+\end{tipbox}
+
+\section{Message Dialogs}
+\label{sec:popup-message}
+
+\texttt{Utils.showMessage()}\index{Utils.showMessage} displays an informational dialog with an OK button:
+
+\begin{lstlisting}[style=javascript]
+Utils.showMessage('Info', 'Record saved successfully.');
+Utils.showMessage('Error', 'Failed to connect to server.');
+\end{lstlisting}
+
+\noindent
+The dialog is modal and draggable.  The title bar is colored based on the title text: red for ``Error'', blue otherwise.  The method returns a Promise that resolves when the user clicks OK.
+
+\begin{lstlisting}[style=javascript]
+await Utils.showMessage('Info', 'Please review the changes.');
+// execution continues after user clicks OK
+\end{lstlisting}
+
+\section{Confirmation Dialogs}
+\label{sec:popup-yesno}
+
+\texttt{Utils.yesNo()}\index{Utils.yesNo} displays a Yes/No confirmation dialog:
+
+\begin{lstlisting}[style=javascript]
+// Callback style
+Utils.yesNo('Confirm', 'Delete this record?',
+    function () {
+        // user clicked Yes
+        deleteRecord();
+    },
+    function () {
+        // user clicked No (optional)
+    }
+);
+
+// Promise style
+const answer = await Utils.yesNo('Confirm', 'Delete?');
+if (answer) {
+    deleteRecord();
+}
+\end{lstlisting}
+
+\noindent
+The dialog is modal, draggable, and mobile-responsive (adjusts width for small screens).
+
+\section{Wait Messages}
+\label{sec:popup-wait}
+
+For long-running operations, display a non-modal wait message:
+
+\begin{lstlisting}[style=javascript]
+Utils.waitMessage('Processing...');
+// ... long operation ...
+Utils.waitMessageEnd();
+\end{lstlisting}
+
+\noindent
+Wait messages stack: calling \texttt{waitMessage()} while one is already shown replaces the message text; calling \texttt{waitMessageEnd()} restores the previous message.
+
+\begin{notebox}
+\texttt{Server.call()} automatically shows a wait cursor during requests, so you only need \texttt{waitMessage()} for custom long operations or when you want a specific message.
+\end{notebox}
+

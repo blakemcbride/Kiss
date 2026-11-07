@@ -1,0 +1,472 @@
+\chapter{Writing Backend Services}
+\label{ch:services}
+
+Services are the heart of a Kiss backend.  A service is simply a class with methods --- no configuration files, no annotations, no registration.  This chapter covers how to write, organize, and debug services.
+
+\section{The Service Pattern}
+\label{sec:svc-pattern}
+
+Every service method has the same four-parameter signature:
+
+\begin{lstlisting}[style=groovy]
+class MyService {
+    void myMethod(JSONObject injson, JSONObject outjson,
+                  Connection db, ProcessServlet servlet) {
+        // Read input from injson
+        // Do work (database queries, business logic)
+        // Write output to outjson
+    }
+}
+\end{lstlisting}
+
+\noindent
+The four parameters are:
+
+\begin{description}[style=nextline]
+  \item[\texttt{injson}] A \texttt{JSONObject} containing the data sent from the frontend.
+  \item[\texttt{outjson}] A \texttt{JSONObject} that the method populates with the response.
+  \item[\texttt{db}] A database \texttt{Connection} with auto-commit disabled.  The framework commits on success and rolls back on exception.
+  \item[\texttt{servlet}] The \texttt{ProcessServlet} instance, used for file uploads and advanced features.
+\end{description}
+
+\noindent
+The framework handles everything else: authentication, JSON parsing, database connection management, transaction control, and error responses.
+
+\begin{tipbox}
+A service method's only job is business logic.  It reads from \texttt{injson}, does work, and writes to \texttt{outjson}.
+\end{tipbox}
+
+\begin{notebox}
+Although services are compiled on the fly when their source changes, they always run at full compiled bytecode speed --- never interpreted.  This applies equally to Groovy, Java, and Common Lisp services.  The compile step happens once per change; every subsequent request executes the cached bytecode at full JVM performance.  Hot reload is a development-time convenience with no runtime cost.
+\end{notebox}
+
+\section{Service Discovery}
+\label{sec:svc-discovery}
+
+Service files live in \texttt{src/main/backend/services/}.  The framework finds them by class name: a call to \texttt{Server.call("services/MyService",} \texttt{"myMethod", ...)} maps to \texttt{services/MyService.groovy} (or \texttt{.java} or \texttt{.lisp}).
+
+The resolution order is:
+\begin{enumerate}
+  \item Groovy (\texttt{.groovy})
+  \item Java (\texttt{.java})
+  \item Common Lisp (\texttt{.lisp})
+\end{enumerate}
+
+\noindent
+Subdirectories are supported.  A call to
+\texttt{Server.call("services/\allowbreak{}admin/\allowbreak{}UserService", ...)} maps to
+\texttt{services/admin/\allowbreak{}UserService.groovy}.
+
+\section{Groovy Services}
+\label{sec:svc-groovy}
+
+Groovy is the most common language for Kiss services.  Files are automatically compiled on change --- no build step required.  The on-the-fly compile phase for Groovy is also faster than for Java, so the edit-save-reload cycle is noticeably quicker during development.
+
+\begin{lstlisting}[style=groovy]
+class Crud {
+    void getRecords(JSONObject injson, JSONObject outjson,
+                    Connection db, ProcessServlet servlet) {
+        List<Record> recs = db.fetchAll(
+            "select * from phone order by last_name, first_name")
+        JSONArray rows = new JSONArray()
+        for (Record rec : recs) {
+            JSONObject row = new JSONObject()
+            row.put("id", rec.getInt("rec_id"))
+            row.put("firstName", rec.getString("first_name"))
+            row.put("lastName", rec.getString("last_name"))
+            row.put("phoneNumber", rec.getString(
+                "phone_number"))
+            rows.put(row)
+        }
+        outjson.put("rows", rows)
+    }
+}
+\end{lstlisting}
+
+\noindent
+This service fetches all phone records, builds a JSON array, and returns it.  The frontend receives the \texttt{rows} array in the callback.
+
+\begin{notebox}
+Groovy's concise syntax means that semicolons are optional, \texttt{return} is optional for the last expression, and type declarations can use \texttt{def} instead of explicit types.  See Chapter~\ref{ch:groovy} for a full primer.
+\end{notebox}
+
+\section{Java Services}
+\label{sec:svc-java}
+
+Java services work identically but use \texttt{.java} files.  They are also auto-compiled on change during development.
+
+\begin{lstlisting}[style=java]
+import org.kissweb.json.JSONObject;
+import org.kissweb.database.Connection;
+import org.kissweb.restServer.ProcessServlet;
+
+public class MyJavaService {
+    public void addNumbers(JSONObject injson,
+        JSONObject outjson,
+        Connection db, ProcessServlet servlet) {
+        Integer num1 = injson.getInt("num1");
+        Integer num2 = injson.getInt("num2");
+        if (num1 == null || num2 == null)
+            outjson.put("num3", 0);
+        else
+            outjson.put("num3", num1 + num2);
+    }
+}
+\end{lstlisting}
+
+\section{Lisp Services}
+\label{sec:svc-lisp}
+
+Services can be written in Common Lisp using ABCL (Armed Bear Common Lisp).  This option is available for teams that prefer Lisp but is less commonly used.
+
+\section{Reading Input and Writing Output}
+\label{sec:svc-io}
+
+Input arrives in the \texttt{injson} parameter.  Output is written to \texttt{outjson}.
+
+\begin{lstlisting}[style=groovy]
+// Reading input
+String name = injson.getString("name")
+int id = injson.getInt("id")
+double amount = injson.getDouble("amount")
+boolean active = injson.getBoolean("active")
+
+// Writing output
+outjson.put("status", "success")
+outjson.put("count", 42)
+outjson.put("total", 1234.56)
+\end{lstlisting}
+
+\noindent
+Input values come directly from the JavaScript object passed to \texttt{Server.call()}.  Output values become properties of the response object in the JavaScript callback.
+
+\subsection{Returning Record Lists}
+
+The most common pattern is to return a list of database records as a JSON array:
+
+\begin{lstlisting}[style=groovy]
+// Option 1: Build JSON manually (full control over
+// field names)
+List<Record> recs = db.fetchAll("select * from employee")
+JSONArray rows = new JSONArray()
+for (Record rec : recs) {
+    JSONObject row = new JSONObject()
+    row.put("id", rec.getInt("employee_id"))
+    row.put("name", rec.getString("last_name"))
+    rows.put(row)
+}
+outjson.put("rows", rows)
+
+// Option 2: Use fetchAllJSON (column names become JSON keys)
+outjson.put("rows", db.fetchAllJSON(
+    "select employee_id, last_name, first_name from employee"))
+\end{lstlisting}
+
+\begin{tipbox}
+Use \texttt{fetchAllJSON()} when the database column names match what the frontend expects.  Use manual JSON building when you need to rename columns or compute derived values.
+\end{tipbox}
+
+\subsection{Returning a Single Record}
+
+\begin{lstlisting}[style=groovy]
+Record rec = db.fetchOne(
+    "select * from employee where employee_id = ?", id)
+if (rec == null)
+    throw new UserException("Employee not found")
+outjson.put("firstName", rec.getString("first_name"))
+outjson.put("lastName", rec.getString("last_name"))
+outjson.put("salary", rec.getDouble("salary"))
+\end{lstlisting}
+
+\section{Error Handling}
+\label{sec:svc-errors}
+
+Kiss provides three exception types for different error scenarios:
+
+\begin{description}[style=nextline]
+  \item[\texttt{UserException}]\index{UserException} Sends a message to the frontend for the user to see.  Does \emph{not} log a backend stack trace.  Use this for validation errors and expected conditions.
+
+\begin{lstlisting}[style=groovy]
+if (name == null || name.isEmpty())
+    throw new UserException("Name is required")
+\end{lstlisting}
+
+  \item[\texttt{ServerException}]\index{ServerException} Logs the full stack trace in the backend log and sends a generic error code to the frontend.  Use this for unexpected errors where the user should not see implementation details.
+
+  \item[\texttt{LogException}]\index{LogException} Logs the full stack trace \emph{and} sends the error message to the frontend.  Use this when both debugging information and a user-visible message are needed.
+\end{description}
+
+\noindent
+If a service method throws any other exception, the framework catches it, logs the stack trace, rolls back the transaction, and sends a generic error response.
+
+\section{A Complete CRUD Service}
+\label{sec:svc-crud-example}
+
+The following service demonstrates all four CRUD operations, a PDF report, and a CSV export:
+
+\begin{lstlisting}[style=groovy]
+package services
+
+import org.kissweb.json.*
+import org.kissweb.database.*
+import org.kissweb.*
+import org.kissweb.restServer.ProcessServlet
+
+class Crud {
+
+    void getRecords(JSONObject injson, JSONObject outjson,
+                    Connection db, ProcessServlet servlet) {
+        List<Record> recs = db.fetchAll(
+            "select * from phone order by last_name, first_name")
+        JSONArray rows = new JSONArray()
+        for (Record rec : recs) {
+            JSONObject row = new JSONObject()
+            row.put("id", rec.getInt("rec_id"))
+            row.put("firstName", rec.getString("first_name"))
+            row.put("lastName", rec.getString("last_name"))
+            row.put("phoneNumber", rec.getString(
+                "phone_number"))
+            rows.put(row)
+        }
+        outjson.put("rows", rows)
+    }
+
+    void addRecord(JSONObject injson, JSONObject outjson,
+                   Connection db, ProcessServlet servlet) {
+        Record rec = db.newRecord("phone")
+        rec.set("first_name", injson.getString("firstName"))
+        rec.set("last_name", injson.getString("lastName"))
+        rec.set("phone_number", injson.getString(
+            "phoneNumber"))
+        rec.addRecord()
+    }
+
+    void updateRecord(JSONObject injson, JSONObject outjson,
+                      Connection db, ProcessServlet servlet) {
+        Record rec = db.fetchOne(
+            "select * from phone where rec_id=?",
+            injson.getInt("id"))
+        rec.set("first_name", injson.getString("firstName"))
+        rec.set("last_name", injson.getString("lastName"))
+        rec.set("phone_number", injson.getString(
+            "phoneNumber"))
+        rec.update()
+    }
+
+    void deleteRecord(JSONObject injson, JSONObject outjson,
+                      Connection db, ProcessServlet servlet) {
+        db.execute("delete from phone where rec_id=?",
+                   injson.getInt("id"))
+    }
+
+    void runReport(JSONObject injson, JSONObject outjson,
+                   Connection db, ProcessServlet servlet) {
+        Groff rpt = new Groff("PhoneList-", "Phone List",
+            false)
+        rpt.startTable("Lw(1i) Lw(1i) Lw(1i)")
+        rpt.column("Last Name")
+        rpt.column("First Name")
+        rpt.column("Phone Number")
+        rpt.endTitle()
+
+        List<Record> recs = db.fetchAll(
+            "select * from phone order by last_name, first_name")
+        for (Record rec : recs) {
+            rpt.column(rec.getString("last_name"))
+            rpt.column(rec.getString("first_name"))
+            rpt.column(rec.getString("phone_number"))
+        }
+        outjson.put("reportUrl", rpt.process())
+    }
+
+    void runExport(JSONObject injson, JSONObject outjson,
+                   Connection db, ProcessServlet servlet) {
+        File f = FileUtils.createReportFile("PhoneList-",
+            ".csv")
+        DelimitedFileWriter dfw =
+            new DelimitedFileWriter(f.getAbsolutePath())
+
+        dfw.writeField("Last Name")
+        dfw.writeField("First Name")
+        dfw.writeField("Phone Number")
+        dfw.endRecord()
+
+        List<Record> recs = db.fetchAll(
+            "select * from phone order by last_name, first_name")
+        for (Record rec : recs) {
+            dfw.writeField(rec.getString("last_name"))
+            dfw.writeField(rec.getString("first_name"))
+            dfw.writeField(rec.getString("phone_number"))
+            dfw.endRecord()
+        }
+        dfw.close()
+        outjson.put("exportUrl", FileUtils.getHTTPPath(f))
+    }
+}
+\end{lstlisting}
+
+\begin{notebox}
+This is the actual \texttt{Crud.groovy} from the Kiss example application.  Notice:
+\begin{itemize}
+  \item No configuration files or annotations.
+  \item No explicit transaction management (the framework handles it).
+  \item No authentication code (the framework checks the session automatically).
+  \item Six methods, each a complete JSON-RPC endpoint.
+\end{itemize}
+\end{notebox}
+
+\section{File Upload Handling}
+\label{sec:svc-upload}
+
+File uploads use the \texttt{servlet} parameter to access uploaded files:
+
+\begin{lstlisting}[style=groovy]
+void upload(JSONObject injson, JSONObject outjson,
+            Connection db, ProcessServlet servlet) {
+    int numberOfFiles = servlet.getUploadFileCount()
+    String fileName = servlet.getUploadFileName(0)
+    BufferedInputStream is
+        = servlet.getUploadBufferedInputStream(0)
+    // Process the input stream (save to disk, parse, etc.)
+    is.close()
+}
+\end{lstlisting}
+
+\noindent
+See Chapter~\ref{ch:files} for complete file upload examples.
+
+\section{Interfacing with External Systems}
+\label{sec:svc-external-pointer}
+
+Services frequently need to call out to third-party APIs or accept inbound calls from external systems that don't speak Kiss's JSON-RPC.  Both directions, plus exposing the application as an MCP server to AI assistants, are covered in Chapter~\ref{ch:external}.
+
+\section{Calling Other Dynamically Compiled Services}
+\label{sec:svc-cross-call}
+
+Dynamically compiled services (Groovy, Java, or Common Lisp) can freely call any precompiled code in the system --- framework classes such as \texttt{Connection}, \texttt{Record}, \texttt{RestClient}, the Kiss utility classes, and anything you place in \texttt{src/main/precompiled/} --- using ordinary imports and method calls.  Within a single source file, methods, inner classes, and helpers can also call one another directly with no special handling.
+
+What you \emph{cannot} do is have one dynamically compiled service hold a direct, compile-time reference to a class defined in a \emph{different} dynamically compiled source file.  Each on-the-fly compile produces a fresh class identity, so any direct reference would become stale the moment the target file is edited and recompiled --- defeating hot reload.  The framework therefore requires cross-file calls to go through an indirection that always resolves to the most recently compiled version of the target.
+
+For Groovy services, that indirection is \texttt{GroovyService.run} (with \texttt{GroovyService.getMethod} as a companion for repeated calls):
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.restServer.GroovyService
+
+// Single call: latest version is loaded, compiled if needed,
+// and the method is invoked.
+Object result = GroovyService.run(
+    "services",        // path relative to src/main/backend/
+    "OtherService",    // class/file name (no .groovy)
+    "doWork",          // method name
+    null,              // instance, or null for static
+    arg1, arg2)        // boxed or unboxed arguments
+\end{lstlisting}
+
+\noindent
+When the same method will be called repeatedly, fetch the \texttt{Method} handle once and reuse it:
+
+\begin{lstlisting}[style=groovy]
+import java.lang.reflect.Method
+import org.kissweb.restServer.GroovyService
+
+Method m = GroovyService.getMethod(
+    "services", "OtherService", "doWork",
+    String.class, Integer.class)
+
+Object r1 = GroovyService.run(m, null, "alpha", 1)
+Object r2 = GroovyService.run(m, null, "beta",  2)
+\end{lstlisting}
+
+\begin{notebox}
+\texttt{GroovyService.run} verifies that the target source file is loaded and up-to-date before dispatching the call, so hot reload continues to work seamlessly across service boundaries.  Direct references would not.
+\end{notebox}
+
+\begin{tipbox}
+This restriction is \emph{only} for crossing source-file boundaries between dynamically compiled units.  Methods within the same source file call each other normally, and any dynamically compiled service can call precompiled (framework or \texttt{precompiled/}) code directly.
+\end{tipbox}
+
+\section{Reusable Scripts}
+\label{sec:svc-scripts}
+
+The same cross-file mechanism is the standard way to share logic between services via reusable scripts.  Groovy scripts in \texttt{src/main/backend/scripts/} can be called from any service:
+
+\begin{lstlisting}[style=groovy]
+// In scripts/MyScript.groovy
+public static Object myMethod(Integer a, Integer b) {
+    return a + b + 100
+}
+\end{lstlisting}
+
+\begin{lstlisting}[style=groovy]
+// In a service method
+import org.kissweb.restServer.GroovyService
+
+Object result = GroovyService.run(false, "~/scripts",
+    "MyScript", "myMethod", null, num1, num2)
+\end{lstlisting}
+
+\section{Services Without a Database}
+\label{sec:svc-nodb}
+
+If the application has no database configured, the \texttt{db} parameter will be \texttt{null}.  Services should check for this:
+
+\begin{lstlisting}[style=groovy]
+void myMethod(JSONObject injson, JSONObject outjson,
+              Connection db, ProcessServlet servlet) {
+    if (db == null) {
+        outjson.put("nodb", true)
+        return
+    }
+    // ... normal database operations ...
+}
+\end{lstlisting}
+
+\section{Long-Running Requests}
+\label{sec:long-running-requests}
+
+Most service methods return quickly.  A few --- a slow LLM generation, a large
+report, a bulk export --- can run for many seconds or minutes.  Kiss processes
+every request asynchronously, and the servlet container imposes a default
+timeout (roughly thirty seconds with the bundled Tomcat) on each asynchronous
+request.  When a method exceeds it, the container aborts the request in flight:
+the front-end's call fails, and the user sees ``Error communicating with the
+server.''
+
+A method that may legitimately run long should lift that limit by calling
+\texttt{setTimeout} on its \texttt{ProcessServlet} argument before the slow work
+begins:
+
+\begin{lstlisting}[style=groovy]
+void bigReport(JSONObject injson, JSONObject outjson,
+               Connection db, ProcessServlet servlet) {
+    // no async timeout for this request
+    servlet.setTimeout(0)
+    // ... work that may take minutes ...
+}
+\end{lstlisting}
+
+\noindent
+A value of zero (or any value $\le 0$) means no timeout at all; a positive value
+sets the timeout, in milliseconds, for this request only.  Other requests are
+unaffected and keep the default as a safety net, so one stuck handler cannot
+quietly tie up a worker forever.
+
+\begin{notebox}
+Lifting the servlet timeout governs only how long Kiss itself will wait for the
+method to finish.  Work that calls out to something else --- a long database
+query, an external HTTP request, an LLM server --- has its \emph{own} timeout
+that must also be generous enough.  For the Ollama client specifically, see
+``Timeouts and Long Generations'' in the LLM Integration chapter.
+\end{notebox}
+
+\section{Service Best Practices}
+\label{sec:svc-bestpractices}
+
+\begin{itemize}
+  \item Keep services focused.  One service class per entity or functional area.
+  \item Use \texttt{UserException} for validation errors the user should see.
+  \item Use parameterized queries (\texttt{?} placeholders) for all SQL to prevent injection.
+  \item Let the framework handle transactions.  Only call \texttt{db.commit()} explicitly for long-running batch operations.
+  \item Do not set database columns that have defaults (e.g., \texttt{CURRENT\_TIMESTAMP}).
+  \item Use Kiss utility classes (\texttt{DateTime}, \texttt{NumberUtils}, \texttt{FileUtils}) instead of standard Java/Groovy alternatives for consistent behavior.
+\end{itemize}

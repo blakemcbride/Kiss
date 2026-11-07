@@ -1,0 +1,441 @@
+\chapter{Database Connections and Transactions}
+\label{ch:db-connection}
+
+Kiss provides a database abstraction layer that supports five database engines through a unified API.  This chapter covers the \texttt{Connection}\index{Connection}, \texttt{Command}\index{Command}, and \texttt{Cursor}\index{Cursor} classes that form the foundation of all database access.
+
+\section{The Connection Class}
+\label{sec:db-connection}
+
+\texttt{Connection} wraps a JDBC connection with convenience methods for queries, transactions, and metadata access.  In a service method, the framework provides a \texttt{Connection} as the \texttt{db} parameter --- you rarely need to create one yourself.
+
+\begin{lstlisting}[style=groovy]
+void myMethod(JSONObject injson, JSONObject outjson,
+              Connection db, ProcessServlet servlet) {
+    // db is ready to use --- connection pooling, auto-commit
+    // off, and transaction management are all handled by
+    // the framework
+    Record emp = db.fetchOne(
+        "select * from employee where employee_id = ?", empId)
+}
+\end{lstlisting}
+
+\subsection{Creating Standalone Connections}
+
+For batch jobs, utilities, or code outside the service framework, you can create a connection directly:
+
+\begin{lstlisting}[style=java]
+try (Connection db = new Connection(
+        ConnectionType.PostgreSQL,
+        "localhost", null, "mydb", "user", "password")) {
+    // use db ...
+    db.commit();
+}  // connection auto-closes via try-with-resources
+\end{lstlisting}
+
+\noindent
+Available \texttt{ConnectionType}\index{ConnectionType} values: \texttt{PostgreSQL}, \texttt{MySQL}, \texttt{SQLite}, \texttt{MicrosoftServer}, \texttt{Oracle}.
+
+\section{Supported Databases}
+\label{sec:db-databases}
+
+Kiss supports five database engines.  The database type is specified in \texttt{application.ini} and affects SQL generation for features like \texttt{LIMIT} and pagination:
+
+\begin{longtable}{lll}
+\toprule
+\textbf{Database} & \textbf{ConnectionType} & \textbf{LIMIT Syntax} \\
+\midrule
+\endhead
+PostgreSQL & \texttt{PostgreSQL} & \texttt{LIMIT n} \\
+MySQL & \texttt{MySQL} & \texttt{LIMIT n} \\
+SQLite & \texttt{SQLite} & \texttt{LIMIT n} \\
+SQL Server & \texttt{MicrosoftServer} & \texttt{TOP n} \\
+Oracle & \texttt{Oracle} & \texttt{OFFSET ... FETCH} \\
+\bottomrule
+\end{longtable}
+
+\section{Executing SQL}
+\label{sec:db-execute}
+
+The \texttt{execute()} method runs INSERT, UPDATE, and DELETE statements:
+
+\begin{lstlisting}[style=groovy]
+// Update
+db.execute(
+    "UPDATE employee SET active = ? WHERE employee_id = ?",
+    "N", empId)
+
+// Insert
+db.execute("INSERT INTO log (message, created) VALUES (?, ?)",
+           msg, new Date())
+
+// Delete
+db.execute("DELETE FROM temp_data WHERE created < ?",
+    cutoffDate)
+\end{lstlisting}
+
+\begin{warnbox}
+Always use \texttt{?} parameter placeholders instead of string concatenation.  This prevents SQL injection and handles type conversion automatically.
+\end{warnbox}
+
+\subsection{Existence Checks}
+
+\begin{lstlisting}[style=groovy]
+if (db.exists("SELECT * FROM employee WHERE email = ?", email))
+    throw new UserException("Email already in use")
+\end{lstlisting}
+
+\subsection{Row Counting}
+
+\begin{lstlisting}[style=groovy]
+long total = db.fetchCount(
+    "SELECT * FROM employee WHERE active = 'Y'")
+\end{lstlisting}
+
+\noindent
+\texttt{fetchCount()} wraps the query in \texttt{SELECT COUNT(*) FROM (...)} --- use it primarily for pagination display, as it executes the full query internally.
+
+\section{Fetching Data}
+\label{sec:db-fetch}
+
+Kiss provides several methods for retrieving data, each suited to a different use case.
+
+\subsection{Single Record}
+
+\begin{lstlisting}[style=groovy]
+Record emp = db.fetchOne(
+    "SELECT * FROM employee WHERE employee_id = ?", id)
+if (emp == null)
+    throw new UserException("Employee not found")
+String name = emp.getString("first_name")
+\end{lstlisting}
+
+\noindent
+\texttt{fetchOne()} returns the first record or \texttt{null} if no rows match.  The returned \texttt{Record} can be updated or deleted (see Chapter~\ref{ch:db-crud}).
+
+\subsection{All Records}
+
+\begin{lstlisting}[style=groovy]
+List<Record> emps = db.fetchAll(
+    "SELECT * FROM employee WHERE active = 'Y'")
+for (Record emp : emps) {
+    String name = emp.getString("last_name")
+    // process each record
+}
+\end{lstlisting}
+
+\noindent
+Returns an empty list (not \texttt{null}) if no rows match.
+
+\subsection{Limited Records}
+
+\begin{lstlisting}[style=groovy]
+// Fetch at most 100 records
+List<Record> page = db.fetchAll(100,
+    "SELECT * FROM employee ORDER BY last_name")
+\end{lstlisting}
+
+\subsection{Paginated Records}
+
+\begin{lstlisting}[style=groovy]
+// Fetch page 2 (zero-based), 25 records per page
+List<Record> page = db.fetchAll(2, 25,
+    "SELECT * FROM employee ORDER BY last_name")
+\end{lstlisting}
+
+\subsection{Fetching as JSON}
+
+For the common case of returning query results directly to the frontend:
+
+\begin{lstlisting}[style=groovy]
+// All records as JSON array
+outjson.put("employees", db.fetchAllJSON(
+    "SELECT employee_id, first_name, last_name FROM employee"))
+
+// Single record as JSON object
+outjson.put("employee", db.fetchOneJSON(
+    "SELECT * FROM employee WHERE employee_id = ?", id))
+\end{lstlisting}
+
+\noindent
+\texttt{fetchAllJSON()} also supports \texttt{max} and \texttt{page/max} variants.
+
+\begin{tipbox}
+Use \texttt{fetchAllJSON()} and \texttt{fetchOneJSON()} when the database column names match what the frontend expects.  This eliminates the need to manually build JSON objects from Records.
+\end{tipbox}
+
+\section{Cursors for Large Result Sets}
+\label{sec:db-cursor}
+
+When a result set is too large to hold in memory, use a \texttt{Cursor} to iterate row by row:
+
+\begin{lstlisting}[style=groovy]
+try (Cursor cursor = db.query(
+        "SELECT * FROM large_table ORDER BY id")) {
+    while (cursor.isNext()) {
+        Record r = cursor.getRecord()
+        String name = r.getString("name")
+        // process one row at a time
+    }
+}
+\end{lstlisting}
+
+\noindent
+Despite the name, Kiss cursors are \emph{not} database cursors.  The framework downloads the entire result set into a local cache (in memory for small sets, on disk for large ones) and then closes the database cursor.  This means:
+
+\begin{itemize}
+  \item Multiple cursors can be open simultaneously without database performance issues.
+  \item Nested cursor operations work correctly.
+  \item Memory usage is controlled by the caching strategy, not the result set size.
+\end{itemize}
+
+\noindent
+The \texttt{query()} method also supports \texttt{max} and \texttt{page/max} parameters:
+
+\begin{lstlisting}[style=groovy]
+// At most 1000 rows
+Cursor cursor = db.query(1000, "SELECT * FROM audit_log")
+
+// Page 3, 50 rows per page
+Cursor cursor = db.query(3, 50, "SELECT * FROM audit_log")
+\end{lstlisting}
+
+\section{The Command Class}
+\label{sec:db-command}
+
+\texttt{Command} provides fine-grained control over prepared statements.  Use it when you need to execute the same SQL repeatedly or need a separate statement context:
+
+\begin{lstlisting}[style=groovy]
+try (Command cmd = db.newCommand()) {
+    cmd.execute("INSERT INTO log (message) VALUES (?)", msg)
+}
+\end{lstlisting}
+
+\noindent
+\texttt{Command} supports all the same methods as \texttt{Connection} --- \texttt{execute()}, \texttt{fetchOne()}, \texttt{fetchAll()}, \texttt{fetchAllJSON()}, \texttt{query()}, \texttt{exists()} --- but against its own prepared statement.  This is useful when you need multiple active statements simultaneously.
+
+\begin{lstlisting}[style=groovy]
+try (Command selectCmd = db.newCommand()
+     Command updateCmd = db.newCommand()) {
+    Cursor cursor = selectCmd.query(
+        "SELECT * FROM employee WHERE needs_update = 'Y'")
+    while (cursor.isNext()) {
+        Record r = cursor.getRecord()
+        updateCmd.execute(
+            "UPDATE employee SET processed = 'Y' " +
+            "WHERE employee_id = ?",
+            r.getInt("employee_id"))
+    }
+    db.commit()
+}
+\end{lstlisting}
+
+\noindent
+\texttt{Command} also provides \texttt{newQueryBuilder()} for using the \texttt{QueryBuilder} (Chapter~\ref{ch:query-builder}) with a specific command instance.  This is essential when iterating over one query's results while executing another query on the same connection:
+
+\begin{lstlisting}[style=groovy]
+try (Command cmd1 = db.newCommand()
+     Command cmd2 = db.newCommand()) {
+    Cursor cursor = cmd1.newQueryBuilder()
+        .select("employee.first_name", "employee.last_name")
+        .where("employee.active = ?", "Y")
+        .query()
+    while (cursor.isNext()) {
+        Record emp = cursor.getRecord()
+        List<Record> tasks = cmd2.newQueryBuilder()
+            .select("task.description", "task.due_date")
+            .where("task.employee_id = ?",
+                   emp.getString("employee_id"))
+            .fetchAll()
+        // process tasks...
+    }
+}
+\end{lstlisting}
+
+\section{Transactions}
+\label{sec:db-transactions}
+
+Kiss connections always have auto-commit disabled.  This means:
+
+\begin{itemize}
+  \item Changes are not visible to other connections until \texttt{commit()} is called.
+  \item The framework calls \texttt{commit()} automatically when a service method returns successfully.
+  \item The framework calls \texttt{rollback()} automatically when a service method throws an exception.
+  \item After each \texttt{commit()} or \texttt{rollback()}, a new transaction begins automatically.
+\end{itemize}
+
+\begin{lstlisting}[style=groovy]
+// Usually you don't need to call commit() explicitly. The
+// framework does it for you at the end of each service call.
+
+// Exception: long-running batch operations
+int count = 0
+for (Record rec : records) {
+    db.execute("UPDATE ...", rec.getInt("id"))
+    if (++count % 100 == 0)
+        db.commit()  // commit every 100 rows
+}
+db.commit()  // commit remaining rows
+\end{lstlisting}
+
+\begin{warnbox}
+If you call \texttt{db.commit()} partway through a service method and then throw an exception, the committed changes cannot be rolled back.  Use mid-method commits only for batch operations where partial progress is acceptable.
+\end{warnbox}
+
+\section{Parameterized Queries}
+\label{sec:db-params}
+
+All query and execute methods accept \texttt{?} parameter placeholders:
+
+\begin{lstlisting}[style=groovy]
+db.fetchAll(
+    "SELECT * FROM employee WHERE dept = ? AND active = ?",
+    deptId, "Y")
+\end{lstlisting}
+
+\noindent
+Parameters are bound using JDBC prepared statements.  This:
+
+\begin{itemize}
+  \item Prevents SQL injection attacks.
+  \item Handles type conversion automatically (strings, numbers, dates).
+  \item Allows the database to cache query plans.
+\end{itemize}
+
+\noindent
+Date parameters are handled automatically.  You can pass \texttt{java.util.Date}, \texttt{java.util.Calendar}, \texttt{ZonedDateTime}, \texttt{LocalDateTime}, \texttt{LocalDate}, or \texttt{LocalTime} objects, and Kiss will convert them to the appropriate JDBC type.
+
+\section{Database-Specific SQL}
+\label{sec:db-specific}
+
+When you need database-portable row limiting, pass a maximum row count to the fetch methods instead of writing \texttt{LIMIT} or \texttt{TOP} directly.  The \texttt{max}-argument overloads (and \texttt{QueryBuilder.limit(int)}) generate the correct syntax for the connected database:
+
+\begin{lstlisting}[style=groovy]
+// Limit to max rows (database-portable)
+List<Record> recs = db.fetchAll(100,
+    "SELECT * FROM employee ORDER BY last_name")
+\end{lstlisting}
+
+\noindent
+Internally Kiss produces the correct syntax for the connected database:
+\begin{itemize}
+  \item PostgreSQL/MySQL/SQLite: appends \texttt{LIMIT 100}
+  \item SQL Server: inserts \texttt{TOP 100} after \texttt{SELECT}
+  \item Oracle: appends \texttt{OFFSET 0 ROWS FETCH NEXT 100 ROWS ONLY}
+\end{itemize}
+
+\section{Connection Metadata}
+\label{sec:db-metadata}
+
+\texttt{Connection} provides several metadata methods:
+
+\begin{lstlisting}[style=groovy]
+// Check if a table exists
+if (db.tableExists("employee")) { ... }
+
+// Get the width of a VARCHAR column (cached, exact)
+int maxLen = db.getColumnWidth("employee", "last_name")
+
+// Get primary key column names
+List<String> pkCols = db.getPrimaryColumns("employee")
+
+// Get single primary key column name
+String pkCol = db.getPrimaryColumnName("employee")
+
+// Get the database type
+ConnectionType type = db.getDBType()
+\end{lstlisting}
+
+\paragraph{Column widths.} \texttt{getColumnWidth(table, column)}\index{Connection!getColumnWidth} returns the declared width of a column in characters, read from the database metadata, so a value can be checked against the schema instead of against a constant repeated in Java: \texttt{value.length() > db.getColumnWidth("person", "fname")}.  Each answer is read once and then remembered for the life of the JVM, per schema (or catalog), table and column; the cache is thread-safe and shared by all connections.  Names are case-insensitive, and the match is exact --- a \texttt{\_} in a table or column name is an ordinary character, not the single-character wildcard that \texttt{DatabaseMetaData} patterns use.  A column with no limit (text, or a character type declared without a length) and a column that does not exist both answer \texttt{Connection.UNLIMITED\_COLUMN\_WIDTH} (\texttt{Integer.MAX\_VALUE}), so the comparison above never rejects anything for them; a missing column never throws and is not remembered, so a column added later is picked up.  An \texttt{SQLException} raised by the database while reading the metadata is not hidden: it propagates, because treating an outage as ``unlimited'' would silently switch the check off.  \texttt{getColumnSize()} is the older, uncached call: it treats the names as patterns and answers $-1$ for a missing column.
+
+\paragraph{Metadata is scoped to the current schema.} Every metadata read --- column definitions, column sizes, and primary keys --- is scoped to the connection's current schema (the current catalog on MySQL). In a multi-schema database, such as a schema-per-tenant layout, a table of the same name in another schema never influences the result. Anything derived from metadata follows the same rule; for example, the inline threshold of a hybrid column (Section~\ref{sec:file-external-hybrid}) always reflects the current schema's column definition.
+
+\section{Connection Pooling}
+\label{sec:db-pooling}
+
+Kiss uses C3P0\index{C3P0} for connection pooling.  Pool parameters are configured automatically based on CPU core count:
+
+\begin{itemize}
+  \item \textbf{Minimum pool size}: max(2, number of cores)
+  \item \textbf{Initial pool size}: max(minimum, cores $\times$ 2)
+  \item \textbf{Maximum pool size}: cores $\times$ 4, minimum 20
+  \item \textbf{Idle timeout}: 30 minutes
+  \item \textbf{Test period}: Every 5 minutes on idle connections
+  \item \textbf{Checkout timeout}: 10 seconds
+\end{itemize}
+
+\noindent
+These defaults work well for most applications.  For high-load production deployments, see Chapter~\ref{ch:deployment} for tuning guidance.
+
+\section{Per-Request Connection Preparation}
+\label{sec:db-request-preparer}
+
+Every REST request that carries a database connection gets that connection handed to the service method fully ready to use.  Sometimes ``ready to use'' involves per-request state --- the canonical example is a \textbf{multi-tenant} application that stores each tenant in its own database schema and must point every request's connection at the right one (for example, the PostgreSQL \texttt{search\_path}) before any service code runs.
+
+\texttt{RequestConnectionPreparer}\index{RequestConnectionPreparer} is the framework hook for exactly this.  An application registers one implementation, typically from \texttt{KissInit.groovy}:
+
+\begin{lstlisting}[style=groovy]
+MainServlet.setRequestConnectionPreparer(
+    new MyConnectionPreparer())
+\end{lstlisting}
+
+\noindent
+The interface has two methods:
+
+\begin{lstlisting}[style=java]
+public interface RequestConnectionPreparer {
+    /** Called after authentication, before the web service
+     *  method runs. */
+    void prepare(Connection db,
+        UserData userData) throws Exception;
+
+    /** Called when a request connection is closed, before the
+     *  underlying connection returns to the pool.  Default:
+     *  no action. */
+    default void release(Connection db) {
+    }
+}
+\end{lstlisting}
+
+The contract:
+
+\begin{itemize}
+  \item \texttt{prepare} runs for every REST request that carries a database connection, \emph{after} authentication has completed and \emph{before} the service method executes.  \texttt{userData} is the authenticated user --- or \texttt{null} when the method is allowed without authentication (Chapter~\ref{ch:authentication}) and no valid session accompanies the request.
+  \item \textbf{Fail-closed:} if \texttt{prepare} throws, the request is aborted with an error response and the service method never runs.  An authenticated session that cannot be mapped to a valid tenant therefore reaches no business data.
+  \item \texttt{release} runs when the request's connection is closed, before the underlying pooled connection is returned --- use it to clear whatever \texttt{prepare} set (reset the search path, clear thread-local state), so pooled connections never leak state from one consumer to the next.
+  \item Connections obtained \emph{outside} the request path --- cron tasks, \texttt{MainServlet.openNewConnection()} --- are \textbf{not} passed to \texttt{prepare}; such consumers must establish any needed connection state themselves.
+\end{itemize}
+
+A multi-tenant implementation, condensed:
+
+\begin{lstlisting}[style=java]
+public class MyConnectionPreparer
+        implements RequestConnectionPreparer {
+    @Override
+    public void prepare(Connection db,
+        UserData userData) throws Exception {
+        if (userData == null) {
+            //  Allowed-without-authentication: public
+            //  schema only.
+            setSearchPath(db, "public");
+            return;
+        }
+        // set at login
+        String tenantId = (String) userData.getUserData(
+            "tenantId");
+        if (tenantId == null)
+            throw new Exception(
+                "No tenant is associated with this session");
+        // every service is now tenant-neutral
+        setSearchPath(db, tenantId);
+    }
+
+    @Override
+    public void release(Connection db) {
+        // never return a tenant-pointed
+        setSearchPath(db, "public");
+    }
+}
+\end{lstlisting}
+
+\noindent
+The payoff of this design is that \emph{no web service ever mentions a tenant}: services read and write tables normally, and the schema selection happens once, in one place, for every request.  When no preparer is registered the hook costs nothing.

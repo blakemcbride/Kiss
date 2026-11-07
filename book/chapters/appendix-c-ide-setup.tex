@@ -1,0 +1,144 @@
+\chapter{IDE Setup}
+\label{ch:ide-setup}
+
+Kiss can be developed in any text editor, but an IDE provides code completion, debugging, and navigation.  This appendix covers setup for the most common IDEs.
+
+\section{General Approach}
+\label{sec:ide-general}
+
+Kiss does not use Maven or Gradle, so IDE setup is manual but straightforward.  The key steps for any IDE are:
+
+\begin{enumerate}
+  \item Open the Kiss root directory as a project.
+  \item Configure source directories.
+  \item Add library JARs to the project classpath.
+  \item Set the Java SDK to version 17 or later.
+  \item Exclude build output and dependency directories.
+\end{enumerate}
+
+\noindent
+The source directories to configure are:
+
+\begin{longtable}{P{4.4cm}P{2.2cm}P{3.4cm}}
+\toprule
+\textbf{Directory} & \textbf{Type} & \textbf{Contains} \\
+\midrule
+\endhead
+\texttt{src/main/core} & Source root & Framework Java code \\
+\texttt{src/main/precompiled} & Source root & Shared utilities \\
+\texttt{src/main/backend} & Source root & Groovy/Java services \\
+\texttt{src/test/core} & Test root & JUnit test classes \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Library JARs are in the \texttt{libs/} directory.  Add all \texttt{*.jar} files to the project classpath.
+
+\begin{warnbox}
+Do not modify files under \texttt{src/main/core/} or \texttt{src/main/frontend/kiss/}.  These are framework files.  Application code goes in \texttt{src/main/backend/} (services) and \texttt{src/main/frontend/} (screens).
+\end{warnbox}
+
+\section{IntelliJ IDEA}
+\label{sec:ide-intellij}
+
+\subsection{Community Edition}
+
+\begin{enumerate}
+  \item \textbf{Open project}: File $\rightarrow$ Open $\rightarrow$ select the Kiss root directory.
+  \item \textbf{Set SDK}: File $\rightarrow$ Project Structure $\rightarrow$ Project $\rightarrow$ SDK $\rightarrow$ Java 17+.
+  \item \textbf{Mark source roots}: In Project Structure $\rightarrow$ Modules:
+  \begin{itemize}
+    \item Mark \texttt{src/main/core} as Sources.
+    \item Mark \texttt{src/main/precompiled} as Sources.
+    \item Mark \texttt{src/test/core} as Tests.
+  \end{itemize}
+  \item \textbf{Add libraries}: Project Structure $\rightarrow$ Libraries $\rightarrow$ Add $\rightarrow$ Java $\rightarrow$ select the \texttt{libs/} directory.
+  \item \textbf{Exclude directories}: Mark \texttt{work/}, \texttt{node\_modules/}, \texttt{target/}, and \texttt{tomcat/} as Excluded.
+\end{enumerate}
+
+\subsection{Ultimate Edition}
+
+In addition to the Community Edition steps, Ultimate Edition provides:
+
+\begin{itemize}
+  \item \textbf{Groovy support} --- code completion, refactoring, and error highlighting in \texttt{.groovy} service files.
+  \item \textbf{JavaScript debugging} --- set breakpoints in frontend code and debug with Chrome.
+  \item \textbf{Database tool} --- connect to your database and run queries from within the IDE.
+  \item \textbf{HTTP client} --- test backend service endpoints directly.
+\end{itemize}
+
+\begin{tipbox}
+IntelliJ IDEA is the recommended IDE for Kiss development due to its excellent Groovy and Java support.  The Community Edition is free and sufficient for most development tasks.
+\end{tipbox}
+
+\begin{notebox}
+IntelliJ IDEA is the only IDE known to support interactive debugging of Kiss's dynamically loaded backend services.  Because Kiss compiles Groovy and Java service files at runtime rather than at build time, breakpoints set in service source files are only honored by IntelliJ's debugger.  Other IDEs (Eclipse, NetBeans, VS Code) can edit and navigate these files but cannot reliably step through them while the server is running.  If interactive debugging of services matters to your workflow, use IntelliJ.
+\end{notebox}
+
+\section{Eclipse}
+\label{sec:ide-eclipse}
+
+\begin{enumerate}
+  \item \textbf{Import project}: File $\rightarrow$ Import $\rightarrow$ General $\rightarrow$ Existing Projects into Workspace $\rightarrow$ select the Kiss root directory.
+  \item \textbf{Configure build path}: Right-click project $\rightarrow$ Properties $\rightarrow$ Java Build Path:
+  \begin{itemize}
+    \item Source tab: Add \texttt{src/main/core}, \texttt{src/main/precompiled}.
+    \item Libraries tab: Add External JARs $\rightarrow$ select all JARs in \texttt{libs/}.
+  \end{itemize}
+  \item \textbf{Install Groovy plugin} (optional): Help $\rightarrow$ Eclipse Marketplace $\rightarrow$ search for ``Groovy Development Tools'' $\rightarrow$ Install.
+  \item \textbf{Set JRE}: Properties $\rightarrow$ Java Build Path $\rightarrow$ Libraries $\rightarrow$ set JRE System Library to Java 17+.
+\end{enumerate}
+
+\section{NetBeans}
+\label{sec:ide-netbeans}
+
+\begin{enumerate}
+  \item \textbf{Open project}: File $\rightarrow$ Open Project $\rightarrow$ select the Kiss root directory (or create a new Java project with existing sources).
+  \item \textbf{Add source folders}: Project Properties $\rightarrow$ Sources $\rightarrow$ Add Folder for \texttt{src/main/core} and \texttt{src/main/precompiled}.
+  \item \textbf{Add libraries}: Project Properties $\rightarrow$ Libraries $\rightarrow$ Add JAR/Folder $\rightarrow$ select all JARs in \texttt{libs/}.
+  \item \textbf{Set platform}: Project Properties $\rightarrow$ Libraries $\rightarrow$ Java Platform $\rightarrow$ Java 17+.
+\end{enumerate}
+
+\section{VS Code}
+\label{sec:ide-vscode}
+
+\begin{enumerate}
+  \item \textbf{Open workspace}: File $\rightarrow$ Open Folder $\rightarrow$ select the Kiss root directory.
+  \item \textbf{Install extensions}:
+  \begin{itemize}
+    \item \textbf{Extension Pack for Java} (Microsoft) --- Java language support, debugging, project management.
+    \item \textbf{Groovy} (optional) --- syntax highlighting for \texttt{.groovy} files.
+  \end{itemize}
+  \item \textbf{Configure classpath}: Create a \texttt{.vscode/settings.json} with:
+  \begin{lstlisting}[style=ini]
+{
+    "java.project.sourcePaths": [
+        "src/main/core",
+        "src/main/precompiled"
+    ],
+    "java.project.referencedLibraries": [
+        "libs/**/*.jar"
+    ]
+}
+  \end{lstlisting}
+  \item Frontend HTML/CSS/JavaScript support is built in --- no additional extensions needed.
+\end{enumerate}
+
+\section{General Tips}
+\label{sec:ide-tips}
+
+\begin{itemize}
+  \item \textbf{Use the terminal for building and running.}  Run \texttt{./bld develop} in a terminal alongside the IDE.  The IDE is for editing and navigation; the \texttt{bld} script handles compilation, server startup, and hot reload.
+
+  \item \textbf{Do not create IDE-specific build configurations} for Kiss.  The \texttt{bld} script is the authoritative build system.  IDE build features may conflict with the framework's compilation order.
+
+  \item \textbf{Exclude large directories} (\texttt{work/}, \texttt{node\_modules/}, \texttt{target/}, \texttt{tomcat/}) from indexing to keep the IDE responsive.
+
+  \item \textbf{Frontend editing} does not require special IDE support.  Kiss frontend code is plain HTML, CSS, and JavaScript with no build step.  Any editor with basic web support works well.
+
+  \item \textbf{Groovy editing} benefits from IDE support (code completion, import management, error checking), but is not strictly required.  Groovy syntax is close enough to Java that a Java-configured editor provides a good experience.
+\end{itemize}
+
+\begin{notebox}
+Remember that Kiss compiles and loads service files automatically when they change.  You do not need to trigger a build from the IDE --- just save the file and the framework handles the rest.
+\end{notebox}

@@ -1,0 +1,439 @@
+\chapter{Cache Busting and Browser Security}
+\label{ch:caching-security}
+
+This chapter covers two cross-cutting front-end concerns that the Kiss framework solves with zero servlet-container configuration: forcing every browser to download the new code on each release (\emph{cache busting}), and hardening the application against cross-site scripting, clickjacking, and related browser-level attacks (the \emph{Content-Security-Policy} and the accompanying security headers).
+
+Both mechanisms are deliberately deployment-agnostic.  They behave identically on the development static server, on a \texttt{file://} (Electron) origin, and on a deployed WAR served by Tomcat, and neither requires you to touch a web server, a CDN, or a servlet container's configuration files.
+
+\section{Cache Busting}
+\label{sec:cache-busting}
+
+\subsection{The Problem}
+\label{sec:cache-the-problem}
+
+When you ship a new release, every client that has the old front-end cached must re-download the changed files --- HTML, CSS, JavaScript, third-party libraries, and images.  The conventional technique is to append a version query parameter (\texttt{?ver=...}) to each URL so that a version bump produces new, uncached URLs.
+
+This works for every file \emph{except one}: the file that carries the version number itself.  That file cannot also be version-stamped, because the browser would have to already know the new version in order to request the fresh copy --- a chicken-and-egg problem.  If the version-carrying file is ever served stale, the whole scheme pins itself to an old version and never updates.
+
+\begin{notebox}
+The entire cache-busting design hinges on one invariant: \textbf{the file that carries the version number must never be served stale.}  Everything else follows from keeping that one file perpetually fresh.
+\end{notebox}
+
+Kiss solves this by putting the version in the only file it can keep perpetually fresh with no server cooperation: \texttt{index.html}\index{index.html}.
+
+\subsection{The Version and the Application Mode}
+\label{sec:cache-version-meta}
+
+Two \texttt{<meta>} tags in \texttt{index.html} are the \emph{only} per-deployment cache values in the entire system:
+
+\begin{lstlisting}[style=html]
+<meta name="app-version" content="EDIT-1">
+<meta name="app-mode" content="development">
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{app-version}]\index{app-version} The version of the \emph{application} built on Kiss (not of the Kiss framework itself).  In production it is the bust token appended as \texttt{?ver=<version>} to every other downloaded file: bumping it invalidates every cached file at once.
+  \item[\texttt{app-mode}]\index{app-mode} Either \texttt{development} or \texttt{production} (any other value behaves as \texttt{development}).  The mode selects the bust token.  In \texttt{production} the token is the stable \texttt{app-version}, so the browser caches everything until the version changes.  In \texttt{development} the token is a fresh per-page-load timestamp, so nothing is ever served from cache and a plain reload always fetches fresh files.
+\end{description}
+
+\noindent
+The source ships with \texttt{EDIT-1} and \texttt{development}.  Production values are stamped automatically by \texttt{./bld war} (Section~\ref{sec:cache-war-stamp}); you do not bump the version or switch the mode by hand.
+
+\subsection{The Byte-Stable Inline Kernel}
+\label{sec:cache-kernel}
+
+\texttt{index.html} contains one small inline \texttt{<script>}, the \emph{bootstrap kernel}\index{bootstrap kernel}.  It is intentionally tiny and byte-stable --- it carries no per-deployment values (those live in the \texttt{<meta>} tags) so its bytes never change from one deployment to the next.  Its job is fourfold: keep \texttt{index.html} itself uncached, read the version from the meta, expose a global \texttt{window.cacheBust()} helper, and load \texttt{kiss/bootstrap.js} version-busted.
+
+\begin{lstlisting}[style=html]
+<script>
+    (function () {
+        function meta(n) {
+            var m = document.querySelector(
+                'meta[name="' + n + '"]');
+            return m ? m.getAttribute('content') : '';
+        }
+        var ver = meta('app-version');
+        var cacheOn = meta('app-mode') === 'production';
+        window.KissVersion = ver;
+        window.KissCacheOn = cacheOn;
+        //  Bust token: the release version in production
+        //  (stable across a release), or a fresh
+        //  per-page-load timestamp in development so
+        //  nothing is ever served from cache.
+        var token = cacheOn ? ver : String(Date.now());
+        window.KissBustToken = token;
+        window.cacheBust = function (url) {
+            return url + (url.indexOf('?') >= 0 ? '&' : '?')
+                + 'ver=' + token;
+        };
+        //  Keep index.html itself uncached via a ?now
+        //  redirect (both modes) so the version/meta and
+        //  this kernel are always fresh on reload.
+        var now = null, s = window.location.search;
+        if (s) {
+            var parts = s.substring(1).split('&');
+            for (var i = 0; i < parts.length; i++) {
+                var kv = parts[i].split('=');
+                if (kv[0] === 'now')
+                    now = kv[1];
+            }
+        }
+        if (!(now &&
+              Math.abs((Date.now() - Number(now)) / 1000)
+                  <= 30)) {
+            window.onbeforeunload = null;
+            var args = s ?
+                s.substring(1).replace(/now=[^&]*&*/g, '') : '';
+            window.location.href = 'index.html?now=' +
+                Date.now() +
+                (args ? '&' + args : '') +
+                window.location.hash;
+            return;
+        }
+        var b = document.createElement('script');
+        b.src = window.cacheBust('kiss/bootstrap.js');
+        document.head.appendChild(b);
+    })();
+</script>
+\end{lstlisting}
+
+\subsubsection*{The \texttt{?now} redirect}
+
+The key trick is the \texttt{?now} redirect.  On every page load --- in both modes --- the kernel looks for a \texttt{now=} query parameter carrying a timestamp.  If that timestamp is missing or older than 30 seconds, the kernel redirects the browser to \texttt{index.html?now=<current-timestamp>} and stops.  Because the timestamp is freshly generated by \texttt{Date.now()}, the redirect target is a URL the browser has \emph{never} seen, so it cannot be served from cache --- it forces a fresh fetch from the server.  On that second load the \texttt{now} value is fresh (within 30 seconds), so the kernel skips the redirect and proceeds to load \texttt{kiss/bootstrap.js}.
+
+The consequence is that \textbf{\texttt{index.html} loads twice} on a cold navigation (once to bounce through the \texttt{?now} redirect, once to actually run).  The 30-second tolerance is the redirect's loop terminator --- the freshly redirected load must recognize itself as fresh and stop --- and it also skips the extra hop on rapid successive reloads.  The extra round trip is the price of guaranteeing freshness with no server configuration.
+
+\begin{notebox}
+This is the deployment-agnostic way to keep a file fresh on \emph{any} host.  It needs no \texttt{Cache-Control} header, no CDN purge, no \texttt{.htaccess} rule, and no servlet-container tuning --- it works on the dev static server, on \texttt{file://}, on Tomcat, and on Electron, because the freshness is enforced entirely by the unique \texttt{?now} query string the browser cannot have cached.
+\end{notebox}
+
+\noindent
+The redirect preserves the URL's hash fragment (so a deep-linked screen survives the bounce) and any other query parameters (stripping only the previous \texttt{now=}).  It also clears \texttt{window.onbeforeunload} first, so an unsaved-changes guard cannot block the redirect.
+
+\subsubsection*{\texttt{window.cacheBust()}}
+
+The kernel exposes \texttt{window.cacheBust(url)}\index{cacheBust}, which appends \texttt{?ver=<token>} (or \texttt{\&ver=<token>} when the URL already has a query string), where the token is the application version in production and the per-page-load timestamp in development.  It loads \texttt{kiss/bootstrap.js} through this helper, so even the bootstrap loader is busted.
+
+\subsection{Busting Everything Else: \texttt{bootstrap.js}}
+\label{sec:cache-bootstrap}
+
+\texttt{kiss/bootstrap.js}\index{bootstrap.js} takes over from the kernel and loads \emph{every} remaining downloaded resource through the buster.  Its \texttt{getScript()} / \texttt{getScripts()} loaders and its \texttt{addStylesheet()} helper all route their URLs through \texttt{window.cacheBust()}:
+
+\begin{lstlisting}[style=javascript]
+function cacheBustUrl(url) {
+    return (typeof window.cacheBust === 'function')
+        ? window.cacheBust(url) : url;
+}
+
+function getScript(url) {
+    return new Promise(function (resolve, reject) {
+        const script = document.createElement("script");
+        script.src = cacheBustUrl(url);   // version-busted
+        // ...
+    });
+}
+\end{lstlisting}
+
+\noindent
+Through these helpers, \texttt{bootstrap.js} busts:
+
+\begin{itemize}
+  \item the stylesheets (\texttt{normalize.css}, \texttt{kiss/starter-theme.css}, \texttt{kiss/Utils.css}, the AG-Grid theme, \dots);
+  \item the third-party libraries (the data grid and the rich-text editor);
+  \item \texttt{SystemInfo.js} (the per-deployment configuration);
+  \item all framework JavaScript (\texttt{DOMUtils.js}, \texttt{AppState.js}, \texttt{Utils.js}, \texttt{Server.js}, \texttt{Router.js}, \dots) and the application's \texttt{routes.js} and \texttt{index.js}.
+\end{itemize}
+
+\noindent
+Screen HTML loaded later through \texttt{Utils.getHTML()} is busted too.  After fetching a screen's HTML, \texttt{Utils.cacheBustHtmlResources()}\index{cacheBustHtmlResources} rewrites relative \texttt{<img src>} URLs in the HTML \emph{text}, before it is inserted into the DOM, so the browser never even issues a request for the un-busted image URL.  Absolute, protocol-relative, \texttt{data:}, and already-busted URLs are left alone.
+
+\texttt{DOMUtils.fetchHTML()}\index{fetchHTML} --- the generic \texttt{\$.get}-style HTML fetch available to application code --- participates as well.  A relative URL is fetched with the standard bust token, conservatively: pre-existing query arguments are preserved (the token is appended), a \texttt{\#fragment} stays in place, and URLs that are absolute (\texttt{http:}, \texttt{https:}, \texttt{//}), \texttt{data:}, \texttt{blob:}, or that already carry a \texttt{ver=} argument are left untouched.
+
+After loading \texttt{SystemInfo.js}, \texttt{bootstrap.js} also mirrors the meta values onto \texttt{SystemInfo}, so application code may read them from either place:
+
+\begin{lstlisting}[style=javascript]
+await getScript("SystemInfo.js");
+// from <meta name="app-version">
+SystemInfo.softwareVersion = window.KissVersion;
+// true in production mode
+SystemInfo.controlCache    = window.KissCacheOn;
+\end{lstlisting}
+
+\subsection{What Is \emph{Not} Busted}
+\label{sec:cache-not-covered}
+
+One category falls outside the busting path:
+
+\begin{description}[style=nextline]
+  \item[\texttt{background-image:url()} inside CSS] The browser resolves these static URLs itself; they are not rewritten.  They refresh only when their containing stylesheet is re-fetched (and the stylesheet \emph{is} busted, so a version bump still pulls a fresh stylesheet, which then re-resolves its background images).  When an image referenced from CSS is changed in place, rename the asset.
+\end{description}
+
+\begin{tipbox}
+Version busting is global: because a single version token drives every URL, each release re-downloads \emph{everything}, including unchanged third-party libraries.  This is a deliberate trade --- absolute correctness (no client ever runs a stale mix of files) in exchange for re-downloading some bytes that did not change.
+\end{tipbox}
+
+\subsection{Why It Is Rock-Solid}
+\label{sec:cache-robust}
+
+The design is self-healing.  The version lives in always-fresh \texttt{index.html}, and the kernel is byte-stable.  Suppose a browser \emph{does} serve a stale, cached copy of \texttt{index.html}: that stale copy still contains the identical byte-stable kernel, which immediately redirects to \texttt{index.html?now=<fresh>} --- a never-before-seen URL that forces a fresh fetch from the server.  The fresh copy then carries the current version, and busting proceeds correctly.  No cacheable file anywhere in the chain can pin the application to a stale version, because the one file that determines the version refuses to be served stale.
+
+\subsection{Development Mode: Nothing Is Ever Cached}
+\label{sec:cache-dev-mode}
+
+In development mode the bust token is a fresh timestamp generated on every page load, so no two loads ever request the same URLs.  The practical effect is that \textbf{a plain browser reload always fetches every file fresh} --- edited framework files, application screens, stylesheets, and loaded HTML alike.  There is never a need for a hard reload or for clearing the browser cache during development.
+
+The one thing cache busting cannot do --- in either mode --- is update a page that is already \emph{running}: an open tab keeps executing the code it booted with until a page load happens.  In development that page load is your reload after an edit.  In production it happens automatically, as the next section explains.
+
+\subsection{How an Open Tab Picks Up a New Release}
+\label{sec:cache-release-pickup}
+
+Cache busting guarantees that every \emph{page load} gets the current release.  But a browser tab that stays open across a redeploy performs no page load --- it keeps running the JavaScript it booted with, against a back end that has since changed.
+
+Kiss closes this gap through the logout path.  \texttt{Server.logout()} (Chapter~\ref{ch:server-comm}) performs a \textbf{full page reload} of a fresh \texttt{index.html} (using the same always-fresh \texttt{?now} URL form the kernel uses), landing on the login route.  A redeploy restarts the back end, which invalidates every session; the next service call from an open tab therefore receives the standard session-expired response, which funnels through \texttt{Server.logout()} --- and the reload re-boots the tab on the new release's cache-busted files.
+
+Reloading on every logout costs nothing when there is no new release: the bust token is the unchanged version, so the re-booted page loads from the browser cache.  When the version \emph{did} change, the reload is exactly what re-downloads the new code.  Any session-expiry resume target is carried into the reloaded login route, so the user still lands back where they were after re-authenticating (Chapter~\ref{ch:routing-state}).
+
+\subsection{Production Stamping by \texttt{./bld war}}
+\label{sec:cache-war-stamp}
+
+You never edit the version by hand for a release.  \texttt{./bld war} stamps production cache-busting values automatically, via \texttt{KissBuildUtils.stampVersion(explodedDir)}\index{stampVersion}:
+
+\begin{lstlisting}[style=shell]
+./bld war
+\end{lstlisting}
+
+\noindent
+\texttt{stampVersion()} edits \emph{only the meta values} in the staged \texttt{work/exploded} copies of the front-end files:
+
+\begin{itemize}
+  \item \texttt{app-version} is set to a fresh random UUID (so every WAR forces every client to re-download);
+  \item \texttt{app-mode} is set to \texttt{production};
+  \item \texttt{SystemInfo.releaseDate} (in \texttt{SystemInfo.js}) is set to the build date;
+  \item \texttt{SystemInfo.sameOriginBackend} is set to \texttt{true}, because a WAR is always served by the back end itself (Section~\ref{sec:fe-backend-url}).
+\end{itemize}
+
+\begin{lstlisting}[style=java]
+public static void stampVersion(String explodedDir) {
+    final String uuid = java.util.UUID.randomUUID().toString();
+    final String date = java.time.LocalDate.now().toString();
+    final java.nio.file.Path idx = java.nio.file.Paths.get(
+        explodedDir, "index.html");
+    String html = java.nio.file.Files.readString(idx);
+    html = html.replaceAll(
+        "(name=\"app-version\"\\s+content=\")[^\"]*(\")",
+        "$1" + java.util.regex.Matcher.quoteReplacement(uuid)
+            + "$2");
+    html = html.replaceAll(
+        "(name=\"app-mode\"\\s+content=\")[^\"]*(\")",
+        "$1production$2");
+    java.nio.file.Files.writeString(idx, html);
+    // ... SystemInfo.releaseDate replaced with the build
+    // date ...
+    // ... then stampSameOriginBackend(explodedDir) ...
+}
+\end{lstlisting}
+
+\noindent
+Because it touches only the staged copies, the \emph{source} files keep their \texttt{EDIT-1} / \texttt{false} placeholders.  And because it rewrites only the meta values --- never the bootstrap kernel --- the kernel's bytes are unchanged, so the CSP hash that pins the kernel (Section~\ref{sec:security-csp}) is unaffected by stamping.
+
+\subsection{Restoring the Staged Files After the WAR Is Built}
+\label{sec:cache-war-restore}
+
+There is a subtle build-ordering hazard.  \texttt{stampVersion()} rewrites the staged \texttt{index.html} and \texttt{SystemInfo.js} \emph{in place}, giving them production busting and a newer modification time.  Once the WAR is jarred, those stamped files have already been captured inside the archive --- but they are still sitting in \texttt{work/exploded} with production values and fresh mtimes.
+
+The problem is that the routine which stages the front-end (\texttt{copyTree}) is \emph{mtime-incremental}: it copies a source file over the staged copy only when the source is newer.  After stamping, the staged copies are newer than the source, so a later \texttt{develop} build would \emph{not} overwrite them --- and the developer would silently end up running with production busting (stale \texttt{?ver}, the double \texttt{index.html} load) on their dev machine.
+
+To prevent this ``poisoning,'' \texttt{war()} explicitly restores the two staged files from source, using \texttt{copyForce} (which overwrites regardless of mtime), immediately after the WAR is jarred:
+
+\begin{lstlisting}[style=java]
+public static void war() {
+    buildSystem();
+    stampVersion(explodedDir);
+    copyForce("src/main/core/WEB-INF/web-secure.xml",
+        explodedDir + "/WEB-INF/web.xml");
+    createJar(explodedDir, BUILDDIR + "/Kiss.war");
+    copyForce("src/main/core/WEB-INF/web-unsafe.xml",
+        explodedDir + "/WEB-INF/web.xml");
+    // Un-stamp the staged frontend files so a later 'develop'
+    // isn't poisoned with production busting. copyTree is
+    // mtime-incremental and would NOT overwrite the newer
+    // stamped files; copyForce overwrites regardless.
+    copyForce("src/main/frontend/index.html",
+        explodedDir + "/index.html");
+    copyForce("src/main/frontend/SystemInfo.js",
+        explodedDir + "/SystemInfo.js");
+}
+\end{lstlisting}
+
+\noindent
+This mirrors the build's existing \texttt{web.xml} dance, where \texttt{web-secure.xml} is swapped in for the jar step and \texttt{web-unsafe.xml} is restored afterward (see Chapter~\ref{ch:deployment}).  In both cases the WAR captures the secure/production form, and the staged tree is restored to its safe development form so the next local build behaves correctly.
+
+\begin{warnbox}
+The restore after jarring is not optional.  Without it, the mtime-incremental \texttt{copyTree} leaves the production-stamped \texttt{index.html} and \texttt{SystemInfo.js} in \texttt{work/exploded}, and a subsequent \texttt{./bld develop} runs with production cache busting --- meaning your local edits may be served stale behind a frozen \texttt{?ver}.
+\end{warnbox}
+
+\section{Browser Security}
+\label{sec:security}
+
+Kiss ships a single servlet filter, \texttt{SecurityHeadersFilter}\index{SecurityHeadersFilter} (in \texttt{src/main/core/org/kissweb/restServer/}), that adds a baseline set of browser-security response headers --- most importantly the Content-Security-Policy --- to every response.
+
+\subsection{A Self-Registering Filter, No Configuration Needed}
+\label{sec:security-filter}
+
+The entire CSP is delivered as an \textbf{HTTP response header}, not as an \texttt{<meta>} tag.  There are two reasons.  First, the Report-Only form of the policy (used during rollout) is \emph{invalid} in a meta tag --- browsers ignore it --- so a meta tag could never support the report-only-then-enforce workflow.  Second, a response header is the single source of truth for every deployment (production and Electron are all served by the same Tomcat), whereas a meta tag would have to be duplicated and kept in sync.
+
+The filter self-registers through annotation scanning with \texttt{@WebFilter("/*")}, so it needs no \texttt{web.xml} entry and ships entirely inside the application WAR.  Like the framework's \texttt{@WebServlet}-annotated endpoints, it requires no servlet-container or Tomcat configuration --- dropping the WAR in is enough.
+
+\begin{lstlisting}[style=java]
+@WebFilter(filterName = "SecurityHeadersFilter",
+           urlPatterns = "/*", asyncSupported = true)
+public class SecurityHeadersFilter implements Filter {
+    // ...
+}
+\end{lstlisting}
+
+\subsection{The Content-Security-Policy}
+\label{sec:security-csp}
+
+The XSS-relevant policy is the constant \texttt{CONTENT\_SECURITY\_POLICY}:
+
+\begin{lstlisting}[style=java]
+public static final String CONTENT_SECURITY_POLICY =
+        "default-src 'self'; " +
+        //  The one allowed inline script is the byte-stable
+        //  bootstrap kernel in index.html. If that kernel is
+        //  ever edited, recompute this hash.
+        "script-src 'self' " +
+        "'sha256-JaGBSNrOPztIc2kS" +
+        "DoiyDCHVqjcvVQSMYv5X2fO3RCE='; " +
+        "style-src 'self' 'unsafe-inline'; " +
+        "img-src 'self' data: blob:; " +
+        "font-src 'self' data:; " +
+        "connect-src 'self'; " +
+        "object-src 'none'; " +
+        "base-uri 'self'; " +
+        "form-action 'self'";
+\end{lstlisting}
+
+\noindent
+Directive by directive:
+
+\begin{description}[style=nextline]
+  \item[\texttt{default-src 'self'}] The fallback for any fetch directive not otherwise listed: only same-origin resources are allowed.
+  \item[\texttt{script-src 'self' 'sha256-\dots'}]\index{Content-Security-Policy!script-src} Scripts must come from the same origin --- with exactly one exception: the inline bootstrap kernel in \texttt{index.html}, allowed by its SHA-256 hash.  Every other script in the application is external and served under \texttt{'self'}.  No \texttt{'unsafe-inline'} and no \texttt{'unsafe-eval'} are permitted for scripts.
+  \item[\texttt{style-src 'self' 'unsafe-inline'}] Inline styles are allowed because the bundled rich-text editor and data grid (CKEditor / AG-Grid) inject inline \texttt{<style>}/\texttt{style=""} at runtime.
+  \item[\texttt{img-src 'self' data: blob:}] Same-origin images, plus \texttt{data:} and \texttt{blob:} URLs, which are required by the binary-image fetch path (\texttt{Server.binaryCall}).
+  \item[\texttt{font-src 'self' data:}] Same-origin fonts plus inline \texttt{data:} fonts.
+  \item[\texttt{connect-src 'self'}]\index{Content-Security-Policy!connect-src} Restricts the origins \texttt{fetch}/XHR/WebSocket may reach.  Same-origin suffices because every page this filter covers is served by the back end itself (the front-end dev server cannot set headers, so its pages never carry a CSP at all).  \textbf{A separated production back-end must be added here} (see below).
+  \item[\texttt{object-src 'none'}] Forbids \texttt{<object>}, \texttt{<embed>}, and \texttt{<applet>} plugins entirely.
+  \item[\texttt{base-uri 'self'}] Prevents an injected \texttt{<base>} tag from rewriting relative URLs to an attacker's origin.
+  \item[\texttt{form-action 'self'}] Forms may only submit to the same origin.
+\end{description}
+
+\begin{warnbox}
+\texttt{script-src} pins the inline kernel by its SHA-256 hash.  If the bootstrap kernel in \texttt{index.html} is ever edited --- even by a single byte --- its hash changes and the browser will refuse to run it, breaking the entire application.  After any kernel edit you must recompute the hash and update \texttt{SecurityHeadersFilter.CONTENT\_SECURITY\_POLICY}.  This is precisely why the kernel is kept byte-stable and carries no per-deployment values (those live in the \texttt{<meta>} tags, which are \emph{not} part of the hashed script).
+\end{warnbox}
+
+\begin{notebox}
+In a split deployment where the back-end lives on a different origin from the front-end, add that back-end's origin to \texttt{connect-src}.  Otherwise the browser will block the application's \texttt{Server.call()} requests as CSP violations.
+\end{notebox}
+
+\subsection{Report-Only Versus Enforcing}
+\label{sec:security-rollout}
+
+A Content-Security-Policy can be delivered in two forms.  The \texttt{Content-Security-Policy} header \emph{enforces} the policy: violations are blocked.  The \texttt{Content-Security-Policy-Report-Only} header only \emph{reports} violations (to the browser console / a report endpoint) without blocking anything.  The report-only form lets you validate a policy against the real application --- exercising every screen --- and confirm there are no violations before you turn on enforcement, so you never break the app for users.
+
+The filter chooses between the two with a single flag:
+
+\begin{lstlisting}[style=java]
+/** true => send as Content-Security-Policy-Report-Only
+ *  (log, don't block); false => enforce. */
+private static final boolean CSP_REPORT_ONLY = false;
+\end{lstlisting}
+
+\noindent
+The framework ships with \texttt{CSP\_REPORT\_ONLY = false}, so the XSS policy is \textbf{enforced}.  To re-validate after changing the policy, exercise every screen (the rich-text editor, the data grid, file upload, binary images, login/logout) with the browser console open, confirm the console is free of CSP violations, then re-enable enforcement.
+
+A validation pass does not require touching the compiled flag: both switches can be overridden per deployment from \texttt{application.ini} (the \texttt{[main]} section), with the secure defaults applying when the keys are absent:
+
+\begin{lstlisting}[style=ini]
+; report violations instead of blocking them
+; (rollout / re-validation)
+CspReportOnly = true
+
+; emit no security headers at all -- see below before using this
+SecurityHeaders = false
+\end{lstlisting}
+
+\noindent
+\texttt{SecurityHeaders = false} exists chiefly for applications whose front end predates the byte-stable bootstrap kernel (Section~\ref{sec:cache-robust}): the CSP permits exactly one inline script, pinned by the kernel's hash, so a pre-kernel \texttt{index.html} with its own inline startup script would be blocked outright.  Such an application disables the filter in its own configuration --- keeping the framework source identical across applications --- and re-enables it after its front end adopts the kernel design.
+
+\begin{lstlisting}[style=java]
+response.addHeader(CSP_REPORT_ONLY
+    ? "Content-Security-Policy-Report-Only"
+    : "Content-Security-Policy",
+    CONTENT_SECURITY_POLICY);
+\end{lstlisting}
+
+\begin{warnbox}
+The CSP must be validated by browsing the application through the \textbf{Tomcat origin} --- the application's back-end port, \texttt{http://localhost:8001} with the default port block.  The development static server is a prebuilt static file server and \emph{cannot} set response headers, and a \texttt{file://} origin has no server at all --- in both of those contexts the browser receives no CSP, so you would be testing nothing.  Only the Tomcat-served origin exercises the filter.
+\end{warnbox}
+
+\subsection{Always-On Header Protections}
+\label{sec:security-headers}
+
+Regardless of the report-only flag, and as long as the filter is enabled (the compiled master switch, which \texttt{SecurityHeaders = false} in \texttt{application.ini} can override per deployment), every response also carries a set of header-only protections:
+
+\begin{lstlisting}[style=java]
+public void doFilter(ServletRequest req, ServletResponse res,
+    FilterChain chain) {
+    if (ENABLED && res instanceof HttpServletResponse) {
+        final HttpServletResponse response =
+            (HttpServletResponse) res;
+
+        response.setHeader("X-Content-Type-Options",
+            "nosniff");
+        response.setHeader("Referrer-Policy", "no-referrer");
+
+        //  Clickjacking protection is always enforced.
+        response.addHeader("Content-Security-Policy",
+            "frame-ancestors 'none'");
+        response.setHeader("X-Frame-Options", "DENY");
+
+        //  The XSS policy: report-only during rollout,
+        //  enforcing afterward.
+        response.addHeader(CSP_REPORT_ONLY
+            ? "Content-Security-Policy-Report-Only"
+            : "Content-Security-Policy",
+            CONTENT_SECURITY_POLICY);
+
+        //  HSTS only over HTTPS; never on plain-http dev.
+        if (req instanceof HttpServletRequest
+            && ((HttpServletRequest) req).isSecure())
+            response.setHeader("Strict-Transport-Security",
+                "max-age=31536000; includeSubDomains");
+    }
+    chain.doFilter(req, res);
+}
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[Clickjacking protection]\index{clickjacking} \texttt{Content-Security-Policy: frame-ancestors 'none'} plus the legacy \texttt{X-Frame-Options: DENY}.  These are sent \emph{always}, independent of the report-only rollout --- the application may never be embedded in a frame on any origin.  (\texttt{frame-ancestors} must be a header; it has no meta-tag form, which is another reason CSP is delivered as a header.)
+  \item[\texttt{X-Content-Type-Options: nosniff}] Stops the browser from MIME-sniffing a response into a different content type than declared.
+  \item[\texttt{Referrer-Policy: no-referrer}] Prevents leaking URLs (which may carry application state) to other origins via the \texttt{Referer} header.
+  \item[\texttt{Strict-Transport-Security}]\index{HSTS} Sent \emph{only} when the request is secure (\texttt{request.isSecure()}), so it is never emitted on plain-HTTP development such as \texttt{http://localhost}.  Over HTTPS it instructs the browser to use HTTPS for a year, including subdomains.
+\end{description}
+
+\subsection{The Master Switch}
+\label{sec:security-enabled}
+
+The filter has its own master switch, separate from the CSP rollout flag:
+
+\begin{lstlisting}[style=java]
+/** Set to false to emit no security headers at all
+ *  (pass-through). */
+private static final boolean ENABLED = true;
+\end{lstlisting}
+
+\noindent
+Setting \texttt{ENABLED = false} turns the filter into a pass-through that emits no security headers whatsoever.  This is useful only as a diagnostic --- to A/B isolate whether these headers are responsible for some observed behavior.  In normal operation it stays \texttt{true}.

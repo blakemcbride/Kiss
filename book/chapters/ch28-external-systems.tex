@@ -1,0 +1,532 @@
+\chapter{Interfacing with External Systems}
+\label{ch:external}
+
+A typical Kiss application is more than a self-contained box: it calls third-party APIs, accepts inbound webhooks, and increasingly both exposes tools to AI assistants and consumes tools from them.  This chapter covers the seven classes the framework provides for that work:
+
+\begin{itemize}
+  \item \texttt{RestClient}\index{RestClient} --- make HTTP calls \emph{out} to external services.
+  \item \texttt{RestServerBase}\index{RestServerBase} --- accept HTTP calls \emph{in} from external services that don't speak Kiss's JSON-RPC.
+  \item \texttt{RestServerExample}\index{RestServerExample} --- a working template that extends \texttt{RestServerBase}.
+  \item \texttt{MCPServerBase}\index{MCPServerBase} --- expose the application as a Model Context Protocol (MCP) server, the standard way for AI assistants to discover and invoke tools.
+  \item \texttt{MCPServerExample}\index{MCPServerExample} --- a working template that extends \texttt{MCPServerBase}.
+  \item \texttt{MCPClientBase}\index{MCPClientBase} --- consume tools from a \emph{remote} MCP server, the mirror image of \texttt{MCPServerBase}.
+  \item \texttt{MCPClientExample}\index{MCPClientExample} --- a working template that extends \texttt{MCPClientBase}.
+\end{itemize}
+
+\noindent
+The three \texttt{*Base}/\texttt{*Example} pairs are intentionally parallel: \texttt{*Base} carries the protocol boilerplate and lives in \texttt{src/main/core/}; \texttt{*Example} is a copyable template under \texttt{src/main/precompiled/} that you adapt for each endpoint or remote server you work with.
+
+\noindent
+The \texttt{RestClient} side is symmetric --- it is the same set of operations any HTTP client offers, just bound to Kiss's JSON utilities.  The server side has more nuance, because there is already a built-in JSON-RPC entry point (\texttt{/rest}) used by the Kiss frontend; the classes here are for the cases where that is not the protocol the caller is using.
+
+\begin{notebox}
+Use a normal Kiss JSON-RPC service (Chapter~\ref{ch:services}) for everything called from the Kiss frontend.  Reach for the classes in this chapter only when an \emph{external}, non-Kiss client is the caller --- typically because that client demands a specific URL, HTTP method, header set, authentication scheme, or response format that does not fit Kiss's JSON-RPC convention.
+\end{notebox}
+
+\section{RestClient --- Calling External APIs}
+\label{sec:ext-restclient}
+
+\texttt{RestClient} is an HTTP client for making REST calls to external APIs.  It supports JSON, string, XML, and streaming response types.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.RestClient
+
+// JSON GET request
+JSONObject result = RestClient.jsonCall(
+    "GET", "https://api.example.com/users/123")
+
+// JSON POST with body
+JSONObject body = new JSONObject()
+body.put("name", "Alice")
+body.put("email", "alice@example.com")
+JSONObject result = RestClient.jsonCall(
+    "POST", "https://api.example.com/users", body)
+
+// String response
+String html = RestClient.strCall(
+    "GET", "https://example.com/page")
+
+// XML response
+Document xml = RestClient.xmlCall(
+    "GET", "https://api.example.com/data.xml")
+
+// Streaming response
+InputStream stream = RestClient.streamCall(
+    "GET", "https://example.com/large-file.zip")
+\end{lstlisting}
+
+\noindent
+Inside a Kiss service the same pattern applies.  The HTTP call is just a piece of the service's normal logic:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.RestClient
+
+void fetchWeather(JSONObject injson, JSONObject outjson,
+                  Connection db, ProcessServlet servlet) {
+    String city = injson.getString("city")
+    RestClient rc = new RestClient()
+    JSONObject result = rc.jsonGet(
+        "https://api.example.com/weather?city=" + city)
+    outjson.put("temperature", result.getDouble("temp"))
+}
+\end{lstlisting}
+
+\subsection{Advanced Configuration}
+
+\begin{lstlisting}[style=groovy]
+RestClient client = new RestClient()
+
+// Proxy support
+client.setProxy("proxy.corp.com", 8080)
+
+// TLS client certificate
+client.setTLSKey("keystore.p12", "password")
+
+// Retry policy for transient failures
+client.setRetryPolicy(3, 1000)  // 3 retries, 1s delay
+\end{lstlisting}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{jsonCall(method, url)} & HTTP call, parse JSON response. \\
+\texttt{jsonCall(method, url, body)} & HTTP call with JSON body. \\
+\texttt{strCall(method, url)} & HTTP call, return string. \\
+\texttt{xmlCall(method, url)} & HTTP call, parse XML response. \\
+\texttt{streamCall(method, url)} & HTTP call, return InputStream. \\
+\texttt{setProxy(host, port)} & Configure HTTP proxy. \\
+\texttt{setTLSKey(path, pw)} & Set client certificate. \\
+\texttt{setRetryPolicy(n, delay)} & Set retry count and delay. \\
+\bottomrule
+\end{longtable}
+
+\section{RestServerBase --- Receiving External REST Calls}
+\label{sec:ext-restserverbase}
+
+When an \emph{external} system needs to call into your application (a webhook from a payment processor, an inbound notification from a third-party API, a status callback from a remote job, etc.), that system will not speak Kiss's JSON-RPC protocol.  For these cases the framework provides a thin base class, \texttt{org.kissweb.RestServerBase}, that lets you expose a conventional servlet-style REST endpoint.
+
+\subsection{What \texttt{RestServerBase} Provides}
+
+\texttt{RestServerBase} extends \texttt{HttpServlet} and adds a small set of static helpers so the endpoint code stays focused on application logic:
+
+\begin{itemize}
+  \item \texttt{basicAuthenticate(request, response, realm, user, password)} --- validates an HTTP Basic \texttt{Authorization} header against an expected username and password, and sets a 401 response on failure.
+  \item \texttt{getBodyString(request)} --- read the full request body as a \texttt{String}.
+  \item \texttt{getBodyJson(request)} --- read the body as a \texttt{JSONObject} (returns \texttt{null} if the content type is not \texttt{application/json}).
+  \item \texttt{getBodyBinary(request)} --- read the body as a \texttt{byte[]}.
+  \item \texttt{setResponse(response, jsonObject)} --- write a JSON response with the correct content type and UTF-8 encoding.
+  \item \texttt{setResponse(response, contentType, string)} and \texttt{setResponse(response, contentType, byte[])} --- write text or binary responses.
+  \item \texttt{isTextContentType(contentType)} / \texttt{isBinaryContentType(contentType)} --- best-guess classification of an HTTP content type.
+\end{itemize}
+
+Override any of \texttt{doGet}, \texttt{doPost}, \texttt{doPut}, or \texttt{doDelete} to handle the corresponding HTTP method; everything else follows standard Jakarta Servlet conventions.
+
+\subsection{Configuration --- No \texttt{web.xml} Required}
+
+The \texttt{@WebServlet} annotation is the \emph{only} configuration required to register the endpoint.  The URL the annotation declares (e.g.\ \texttt{/myservice}) is appended to the application's context path; no \texttt{<servlet>} or \texttt{<servlet-mapping>} entry in \texttt{web.xml} is needed.  Servlet 6.x annotation scanning discovers the class at startup automatically.
+
+\begin{notebox}
+The framework's \texttt{src/main/core/WEB-INF/web.xml} only declares the framework's startup listener and a global CORS filter mapped to \texttt{/*}.  Your endpoint inherits CORS handling for free; you do not add anything to \texttt{web.xml} when adding new external endpoints.
+\end{notebox}
+
+\subsection{Why It Must Live Under \texttt{precompiled/}}
+
+Servlet annotation scanning happens once, when the servlet container starts.  Classes that the container needs to discover at startup must therefore be compiled into the WAR ahead of time --- they cannot be supplied by Kiss's runtime compiler, which only loads files under \texttt{src/main/backend/} on demand.  For this reason, every class extending \texttt{RestServerBase} must be placed under \texttt{src/main/precom\-piled/}, where \texttt{./bld -v build} compiles it into \texttt{work/exploded/WEB-INF/classes/} before Tomcat starts.
+
+The practical consequence: after adding or modifying a \texttt{RestServerBase} subclass, run \texttt{./bld -v build} and restart the server.  The hot-reload behavior that applies to backend services does \emph{not} apply here.
+
+\begin{tipbox}
+\texttt{@MultipartConfig} is only needed when the endpoint accepts \texttt{multi\-part/form-data} uploads.  Omit it for plain JSON or text endpoints.
+\end{tipbox}
+
+\section{RestServerExample --- The Template}
+\label{sec:ext-restserverexample}
+
+A working template lives at \texttt{src/main/precom\-piled/com/mycompany/Rest\-Server\-Example.java}.  Copy it, rename it, and edit it for each external endpoint you need to expose.
+
+\begin{lstlisting}[style=java]
+package com.mycompany;
+
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.kissweb.RestServerBase;
+import org.kissweb.json.JSONObject;
+import java.io.IOException;
+
+@WebServlet(urlPatterns="/myservice")
+@MultipartConfig
+public class RestServerExample extends RestServerBase {
+
+    @Override
+    protected void doPost(HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        if (!basicAuthenticate(request, response, null,
+                               "username", "password"))
+            return;
+
+        JSONObject in = getBodyJson(request);
+        // ... process the request ...
+        JSONObject out = new JSONObject();
+        out.put("ok", true);
+        setResponse(response, out);
+    }
+}
+\end{lstlisting}
+
+\noindent
+The shipped example also stubs out \texttt{doGet}, \texttt{doPut}, and \texttt{doDelete} as override points; delete the methods you don't need.
+
+\section{MCPServerBase --- Exposing Tools to AI Assistants}
+\label{sec:ext-mcpserverbase}
+
+The Model Context Protocol (MCP) is the open protocol AI assistants such as Claude Desktop and Claude Code use to talk to external tools and data.  An MCP server advertises a list of tools (each with a JSON-Schema for its arguments); the assistant chooses when to call them and feeds the results back into the model's reasoning.
+
+\texttt{MCPServerBase} is the framework's MCP server base class.  It extends \texttt{RestServer\-Base}, so it inherits the same body-reading and response-writing helpers, the same \texttt{@WebServlet}-based registration model, and the same precompiled-directory requirement.  On top of that it implements all of the wire-protocol boilerplate --- the JSON-RPC 2.0 envelope, the \texttt{initialize} handshake, \texttt{ping}, notifications, and error replies --- so a subclass only has to declare its tools and run them.
+
+\subsection{The Wire Protocol}
+
+Every MCP exchange is a JSON-RPC 2.0 message:
+
+\begin{lstlisting}[style=java]
+// request
+{ "jsonrpc": "2.0", "id": 1, "method": "tools/list",
+    "params": {} }
+
+// response
+{ "jsonrpc": "2.0", "id": 1, "result": { "tools": [ ... ] } }
+
+// notification (no id, no response expected)
+{ "jsonrpc": "2.0", "method": "notifications/initialized" }
+\end{lstlisting}
+
+\noindent
+\texttt{MCPServerBase.doPost} parses the envelope, dispatches on the \texttt{method} field, and either returns a JSON response (for requests) or a 202 Accepted with no body (for notifications).  It is declared \texttt{final} --- subclasses extend behavior through hooks rather than by overriding the dispatcher.
+
+\subsection{The Three Methods That Matter}
+
+A minimum-viable MCP server implements three methods, all of which \texttt{MCPServerBase} dispatches automatically:
+
+\begin{itemize}
+  \item \texttt{initialize} --- handshake.  Client sends its protocol version and info; server responds with its protocol version, server info, and \emph{capabilities} (which feature areas it supports).
+  \item \texttt{tools/list} --- catalog.  Server returns an array of tools, each with \texttt{name}, \texttt{description}, and an \texttt{inputSchema} (a JSON Schema describing the expected arguments).  The model uses these to decide when and how to call each tool.
+  \item \texttt{tools/call} --- invocation.  Server runs the named tool with the supplied arguments and returns a list of \emph{content blocks} (most commonly a single \texttt{type:"text"} block).
+\end{itemize}
+
+\noindent
+\texttt{MCPServerBase} also handles \texttt{ping} (the MCP keep-alive) and the standard \texttt{notifications/*} client-to-server notifications without any subclass involvement.
+
+\subsection{Subclass Hooks}
+
+A subclass implements four required hooks and may override three optional ones:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Purpose} \\
+\midrule
+\endhead
+\multicolumn{2}{l}{\emph{Required}} \\
+\texttt{getServerName()} & Server name reported during \texttt{initialize}. \\
+\texttt{getServerVersion()} & Server version reported during \texttt{initialize}. \\
+\texttt{listTools()} & Return the tool catalog as a \texttt{JSONArray}. \\
+\texttt{callTool(name, args)} & Execute a tool, return its result object. \\
+\midrule
+\multicolumn{2}{l}{\emph{Optional}} \\
+\texttt{authenticate(req, resp)} & Gate every request.  Default: allow all. \\
+\texttt{getCapabilities()} & Capabilities advertised at \texttt{initialize}.  Default: tools only. \\
+\texttt{dispatchExtension(\allowbreak method, params)} & Handle methods beyond the built-in set (\texttt{resources/list}, \texttt{prompts/get}, etc.). Default: return null, which produces a method-not-found error. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Helpers}
+
+\texttt{MCPServerBase} exposes static helpers for the common shapes of MCP data:
+
+\begin{itemize}
+  \item \texttt{textBlock(text)} --- builds a \texttt{\{"type":"text","text":...\}} content block.
+  \item \texttt{toolResult(text)} --- builds a complete \texttt{tools/call} result containing one text block.
+  \item \texttt{toolError(message)} --- builds a \texttt{tools/call} result with \texttt{isError: true}.  Use this for tool-specific failures the model should see and react to (see below).
+  \item \texttt{buildSchema(title, required, names, types, descriptions)} --- builds a JSON-Schema object for a tool's \texttt{inputSchema} from parallel arrays.
+\end{itemize}
+
+\noindent
+The class also exposes JSON-RPC error code constants (\texttt{ERR\_PARSE}, \texttt{ERR\_INVALID\_REQUEST}, \texttt{ERR\_METHOD\_NOT\_FOUND}, \texttt{ERR\_INVALID\_PARAMS}, \texttt{ERR\_INTERNAL}) and a protected \texttt{sendError} method for extension handlers that need to fail fast.
+
+\subsection{Tool Errors vs.\ Protocol Errors}
+
+There are two distinct error channels and they mean different things:
+
+\begin{itemize}
+  \item \emph{Protocol errors} --- malformed JSON, unknown method, missing parameters --- are returned as JSON-RPC errors (\texttt{-32700} parse, \texttt{-32600} invalid request, \texttt{-32601} method not found, \texttt{-32603} internal).  The client treats these as transport failures.
+  \item \emph{Tool errors} --- ``the database lookup failed,'' ``the file you asked about doesn't exist'' --- are returned as a normal \texttt{tools/call} \emph{result} with \texttt{isError: true}.  The model \emph{sees} the failure and can react to it; it does not see protocol errors.
+\end{itemize}
+
+\noindent
+Use \texttt{toolError} (the latter channel) for anything you want the AI to be able to recover from, retry, or report back to the user.  Anything thrown out of \texttt{callTool} becomes a JSON-RPC \texttt{ERR\_INTERNAL} response, which the model does not see.
+
+\subsection{What MCPServerBase Does Not Implement}
+
+To stay focused, the base class omits several MCP features.  All of them layer on top of the same JSON-RPC envelope and can be added by overriding \texttt{dispatchExtension} and \texttt{getCapabilities}:
+
+\begin{itemize}
+  \item \emph{Resources} --- read-only data the model can request (files, database rows, etc.).  Implement \texttt{resources/list} and \texttt{resources/read}; advertise the \texttt{resources} capability.
+  \item \emph{Prompts} --- reusable prompt templates the host UI can offer to the user.  Implement \texttt{prompts/list} and \texttt{prompts/get}; advertise the \texttt{prompts} capability.
+  \item \emph{Sampling} --- server-initiated requests asking the client's model to generate something on the server's behalf.
+  \item \emph{SSE streaming} --- responses streamed back as Server-Sent Events instead of a single JSON body.  Useful for long-running tools that produce incremental output.
+  \item \emph{Sessions} --- the \texttt{Mcp-Session-Id} header lets a server keep per-client state across requests.
+\end{itemize}
+
+\section{MCPServerExample --- The Template}
+\label{sec:ext-mcpserverexample}
+
+A working template lives at \texttt{src/main/precom\-piled/com/mycompany/MCPServer\-Example.java}.  It extends \texttt{MCPServerBase}, exposes an endpoint at \texttt{/mcp}, and ships with two example tools (\texttt{echo} and \texttt{add}).  Because all of the protocol work is in the base class, the entire example is just the four hooks:
+
+\begin{lstlisting}[style=java]
+@WebServlet(urlPatterns="/mcp")
+public class MCPServerExample extends MCPServerBase {
+
+    @Override protected String getServerName() {
+        return "kiss-mcp-example";
+    }
+    @Override protected String getServerVersion() {
+        return "1.0.0";
+    }
+
+    @Override
+    protected JSONArray listTools() {
+        JSONArray tools = new JSONArray();
+
+        JSONObject add = new JSONObject();
+        add.put("name", "add");
+        add.put("description",
+            "Add two numbers and return the sum.");
+        add.put("inputSchema", buildSchema(
+                "Add input",
+                // required
+                new String[]{"a", "b"},
+                new String[]{"a", "b"},
+                new String[]{"number", "number"},
+                new String[]{"First addend",
+                    "Second addend"}));
+        tools.put(add);
+        // ... echo tool elided ...
+        return tools;
+    }
+
+    @Override
+    protected JSONObject callTool(String name,
+        JSONObject args) {
+        switch (name) {
+            case "add": {
+                double a = args.getDouble("a", 0.0);
+                double b = args.getDouble("b", 0.0);
+                return toolResult(String.valueOf(a + b));
+            }
+            // ... echo case elided ...
+            default:
+                return toolError("Unknown tool: " + name);
+        }
+    }
+}
+\end{lstlisting}
+
+\noindent
+The two methods stay in sync by convention: every entry in \texttt{listTools} needs a matching \texttt{case} in \texttt{callTool}, and vice versa.
+
+\subsection{Build and Authentication}
+
+Like \texttt{RestServerExample}, \texttt{MCPServerExample} relies on annotation scanning, lives under \texttt{src/main/pre\-compiled/}, and requires a build + restart to pick up changes:
+
+\begin{lstlisting}[style=shell]
+./bld -v build
+\end{lstlisting}
+
+\noindent
+The shipped example does not authenticate.  Most MCP clients support adding an \texttt{Authorization} header to outgoing requests, so basic auth drops in by overriding \texttt{authenticate}:
+
+\begin{lstlisting}[style=java]
+@Override
+protected boolean authenticate(HttpServletRequest req,
+                               HttpServletResponse resp) {
+    return basicAuthenticate(req, resp, null, "user",
+        "secret");
+}
+\end{lstlisting}
+
+\noindent
+For OAuth 2.1 bearer-token authentication --- which the MCP specification mandates --- no override is needed.  Set \texttt{OAuthAuthorizationServer} in \texttt{application.ini} and every \texttt{MCPServerBase} subclass automatically validates incoming tokens against the configured authorization server.  Chapter~\ref{ch:oauth} covers this in detail.
+
+\section{MCPClientBase --- Consuming a Remote MCP Server}
+\label{sec:ext-mcpclientbase}
+
+Where \texttt{MCPServerBase} \emph{exposes} tools to an AI assistant, \texttt{MCPClientBase} sits on the other end of the same wire: it \emph{consumes} the tools a remote MCP server offers.  It is the mirror image of the server base class --- the two speak the identical JSON-RPC 2.0 protocol (protocol version \texttt{2025-06-18}) and interoperate directly, so one Kiss app can call another Kiss app's \texttt{MCPServerBase} endpoint with nothing between them but HTTP.
+
+Two differences from the server side are worth noting up front:
+
+\begin{itemize}
+  \item It is \emph{not} a servlet.  There is no \texttt{@WebServlet} annotation and no inbound URL; you \emph{instantiate or subclass} it from a backend service and call its methods.  Because it does not depend on annotation scanning, \texttt{MCPClientBase} itself lives in \texttt{src/main/core/} as ordinary framework code rather than under \texttt{precompiled/}.  (The shipped \emph{template} still lives under \texttt{precompiled/} so it sits beside the other examples.)
+  \item HTTP is done through \texttt{RestClient} (Section~\ref{sec:ext-restclient}), so timeouts, proxying, and TLS behave as they do for any other outbound call.
+\end{itemize}
+
+\subsection{The Lazy Handshake}
+
+MCP requires a client to perform an \texttt{initialize} handshake --- and send a \texttt{notifications/initialized} follow-up --- before any other request.  \texttt{MCPClientBase} runs this automatically the first time you call any operation, so the common case needs no ceremony:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.MCPClientBase
+import org.kissweb.restServer.MainServlet
+
+class MyMcpClient extends MCPClientBase {
+    protected String getServerUrl() {
+        return (String) MainServlet.getEnvironment(
+            "RemoteMcpUrl")
+    }
+}
+
+MyMcpClient client = new MyMcpClient()
+// runs initialize on first use
+JSONArray tools = client.listTools()
+String reply = client.callToolText("echo",
+        new JSONObject().put("message", "hi"))
+\end{lstlisting}
+
+\noindent
+Call \texttt{initialize()} explicitly only when you want the server's advertised capabilities --- \texttt{getServerInfo()}, \texttt{getServerCapabilities()}, \texttt{getNegotiatedProtocolVersion()} --- before making any tool calls.
+
+\begin{tipbox}
+\texttt{MainServlet.getEnvironment()} returns \texttt{Object}, not \texttt{String}.  Groovy assigns it to a \texttt{String} variable without complaint, but a \texttt{Java} subclass of \texttt{MCPClientBase} must cast it: \texttt{return (String) MainServlet.getEnvironment("RemoteMcpUrl");}
+\end{tipbox}
+
+\subsection{Subclass Hooks}
+
+A subclass implements one required hook and may override four optional ones:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Purpose} \\
+\midrule
+\endhead
+\multicolumn{2}{l}{\emph{Required}} \\
+\texttt{getServerUrl()} & Full URL of the remote MCP endpoint.  Per Kiss convention, read from \texttt{application.ini}. \\
+\midrule
+\multicolumn{2}{l}{\emph{Optional}} \\
+\texttt{getClientName()} & Client name reported during \texttt{initialize}.  Default provided. \\
+\texttt{getClientVersion()} & Client version reported during \texttt{initialize}.  Default provided. \\
+\texttt{getOAuthProviderName()} & Name of an \texttt{[OAuthClient \emph{name}]} provider to obtain bearer tokens from.  Default: none. \\
+\texttt{applyAuthentication(\allowbreak headers)} & Attach authentication headers to each request.  Default: an OAuth bearer token when a provider name is set, otherwise nothing. \\
+\texttt{getClientCapabilities()} & Client capabilities sent at \texttt{initialize}.  Default: none. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Operations}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{initialize()} & Run the handshake (once); return the server's \texttt{initialize} result. \\
+\texttt{listTools()} & Fetch the tool catalog as a \texttt{JSONArray}; \texttt{nextCursor} pagination is followed automatically. \\
+\texttt{callTool(name, args)} & Call a tool; return the raw result object. \\
+\texttt{callToolText(name, args)} & Call a tool and return its text content; throws on a tool error. \\
+\texttt{ping()} & MCP keep-alive. \\
+\texttt{call(method, params)} & Arbitrary JSON-RPC request, for methods without a wrapper. \\
+\texttt{notify(method, params)} & Arbitrary JSON-RPC notification. \\
+\texttt{setTimeouts(connect, request)} & Connect and request timeouts (defaults 30\,s / 60\,s). \\
+\bottomrule
+\end{longtable}
+
+\subsection{Reading Tool Results}
+
+A \texttt{tools/call} result is a list of content blocks plus an optional \texttt{isError} flag.  Two static helpers cover the common cases:
+
+\begin{itemize}
+  \item \texttt{isError(result)} --- \texttt{true} if the tool reported \texttt{isError: true}.
+  \item \texttt{textOf(result)} --- the \texttt{text} of every \texttt{type:"text"} block, joined with newlines (non-text blocks are skipped).
+\end{itemize}
+
+\noindent
+\texttt{callToolText} combines them: it returns \texttt{textOf(result)} but throws \texttt{MCPClientException} when \texttt{isError} is set --- the convenient ``give me the text, fail on error'' path.  Use \texttt{callTool} plus the helpers when you need the raw blocks or want to handle a tool error without an exception.
+
+\subsection{Tool Errors vs.\ Protocol Errors}
+
+This is the client-side mirror of the two error channels described for the server (Section~\ref{sec:ext-mcpserverbase}).  A \emph{protocol} failure --- a JSON-RPC error from the server, a non-2xx HTTP status, an unparseable body, or a transport failure --- is raised as \texttt{MCPClientBase.MCPClientException} (a \texttt{Runtime\-Exception}); when the failure carries a JSON-RPC error code it is available via \texttt{getCode()} (otherwise \texttt{0}).  A \emph{tool} error the model is meant to see arrives instead as a normal result with \texttt{isError: true}, which \texttt{callTool} returns without throwing.
+
+\subsection{Authentication}
+
+Authentication is the symmetric counterpart of the server's.  The server \emph{validates} incoming bearer tokens (the OAuth 2.1 resource-server role); the client \emph{obtains} them (the relying-party role, Chapter~\ref{ch:oauth-client}).  Point the client at a configured \texttt{[OAuthClient \emph{name}]} provider by overriding \texttt{getOAuthProviderName()}, and every request carries a transparently-refreshed \texttt{Authorization: Bearer} header --- discovery, dynamic registration, and token refresh are all handled by the OAuth client.
+
+When no usable token is held and an interactive login is required, \texttt{OAuthAuthorizationRequiredException} propagates out of the call.  That is a normal control-flow signal, not a failure: catch it where you make the call and start the browser redirect flow.
+
+\begin{lstlisting}[style=groovy,basicstyle=\ttfamily\scriptsize]
+import org.kissweb.oauth.client.OAuthAuthorizationRequiredException
+import org.kissweb.oauth.client.OAuthClient
+
+try {
+    reply = client.callToolText("echo", args)
+} catch (OAuthAuthorizationRequiredException e) {
+    String url = OAuthClient.forProvider("myprovider")
+            .beginAuthorization("http://localhost:8001")
+    // redirect the browser to 'url'; retry after the
+    // callback completes.
+}
+\end{lstlisting}
+
+\noindent
+For any other scheme --- HTTP basic auth, a static API token, a custom header --- override \texttt{applyAuthentication(headers)} directly instead:
+
+\begin{lstlisting}[style=java]
+@Override
+protected void applyAuthentication(JSONObject headers) {
+    headers.put("Authorization", "Bearer "
+            + (String) MainServlet.getEnvironment(
+                "RemoteMcpToken"));
+}
+\end{lstlisting}
+
+\subsection{What MCPClientBase Does Not Implement}
+
+Mirroring the server base class, the client omits the same set of features, each of which can be added incrementally on top of the same JSON-RPC envelope: resources, prompts, sampling, server-initiated requests, SSE (\texttt{text/event-stream}) streaming responses, and \texttt{Mcp-Session-Id} session management.  (Because \texttt{RestClient} surfaces only the response body, not its headers, session management in particular would require reading response headers.)
+
+\section{MCPClientExample --- The Template}
+\label{sec:ext-mcpclientexample}
+
+A working template lives at \texttt{src/main/precom\-piled/com/mycompany/MCPClient\-Example.java}.  It extends \texttt{MCPClientBase}, reads the remote URL from \texttt{application.ini}, and provides a static \texttt{demo()} helper that lists the remote server's tools and calls its \texttt{echo} tool --- the natural counterpart to the \texttt{echo} tool in \texttt{MCPServerExample}:
+
+\begin{lstlisting}[style=java]
+package com.mycompany;
+
+import org.kissweb.MCPClientBase;
+import org.kissweb.json.JSONArray;
+import org.kissweb.json.JSONObject;
+import org.kissweb.restServer.MainServlet;
+
+public class MCPClientExample extends MCPClientBase {
+
+    @Override
+    protected String getServerUrl() {
+        return (String) MainServlet.getEnvironment(
+            "RemoteMcpUrl");
+    }
+
+    public static String demo() {
+        MCPClientExample client = new MCPClientExample();
+
+        // runs initialize
+        JSONArray tools = client.listTools();
+        JSONObject args = new JSONObject();
+        args.put("message", "Hello from the Kiss MCP client");
+        return client.callToolText("echo", args);
+    }
+}
+\end{lstlisting}
+
+\noindent
+The template lives under \texttt{precompiled/} so it ships beside \texttt{MCP\-Server\-Example}; like any class there it is compiled by \texttt{./bld -v build} and requires a restart to pick up changes.  The file also carries commented-out blocks showing how to wire OAuth authentication (via \texttt{getOAuthProviderName()}) or a custom header (via \texttt{applyAuthentication()}), as described above.  Call \texttt{demo()} from any backend service:
+
+\begin{lstlisting}[style=groovy]
+String reply = com.mycompany.MCPClientExample.demo()
+\end{lstlisting}

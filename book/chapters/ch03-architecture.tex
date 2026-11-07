@@ -1,0 +1,201 @@
+\chapter{Architecture Overview}
+\label{ch:architecture}
+
+This chapter describes how the major pieces of Kiss fit together: the frontend, the backend, the database layer, and the communication protocol that connects them.  Understanding this architecture will make every subsequent chapter easier to follow.
+
+\section{High-Level View}
+\label{sec:arch-highlevel}
+
+A Kiss application has three tiers:
+
+\begin{enumerate}
+  \item \textbf{Browser} --- HTML, CSS, and JavaScript served as static files.  All UI rendering happens here.  The browser never receives generated HTML from the server.
+  \item \textbf{Backend server} --- A Java servlet running inside an embedded Tomcat instance.  It receives JSON-RPC requests, executes service methods, and returns JSON responses.
+  \item \textbf{Database} --- Any of the five supported engines: PostgreSQL, MySQL, SQLite, SQL Server, or Oracle.
+\end{enumerate}
+
+\begin{notebox}
+In development, the frontend runs on a separate lightweight server and the backend runs on Tomcat --- by default ports 8000 and 8001, both derived from the application's \texttt{portBase} (Section~\ref{sec:build-ports}).  In production, both are served from the same Tomcat instance as a single WAR file.
+\end{notebox}
+
+\section{Request Lifecycle}
+\label{sec:arch-request}
+
+Every user action that involves the server follows the same path:
+
+\begin{enumerate}
+  \item The browser calls \texttt{Server.call("ServiceName", "methodName", data)}.
+  \item \texttt{Server.js} sends a JSON-RPC POST request to the \texttt{/rest} endpoint with the service name, method name, input data, and the session UUID.
+  \item \texttt{MainServlet}\index{MainServlet} receives the HTTP request and starts an async context so the Tomcat connector thread is not blocked.
+  \item The request is submitted to the \texttt{QueueManager}\index{QueueManager}, which manages a fixed-size thread pool.
+  \item A worker thread picks up the request.  \texttt{ProcessServlet}\index{ProcessServlet} obtains a database connection from the C3P0 connection pool, validates the session UUID, and locates the service class.
+  \item The service method executes.  It receives four parameters: the input JSON, an output JSON object, a database \texttt{Connection}, and the \texttt{ProcessServlet} instance.
+  \item On success, the framework commits the transaction and sends the output JSON back to the browser with \texttt{\_Success: true}.
+  \item On failure, the framework rolls back the transaction and sends an error response with \texttt{\_Success: false}.
+\end{enumerate}
+
+\begin{tipbox}
+Because the framework handles connection management, transaction commit/rollback, authentication, and JSON serialization, a typical service method contains only business logic --- no boilerplate.
+\end{tipbox}
+
+\section{Service Discovery and Language Support}
+\label{sec:arch-languages}
+
+When a request arrives, \texttt{ProcessServlet} searches for the service class in the following order:
+
+\begin{enumerate}
+  \item \textbf{Groovy} (\texttt{.groovy}) --- looks in \texttt{src/main/backend/services/} for a matching file.
+  \item \textbf{Java} (\texttt{.java}) --- same directory, Java source file.
+  \item \textbf{Common Lisp} (\texttt{.lisp}) --- same directory, ABCL Lisp source.
+\end{enumerate}
+
+\noindent
+The first match wins.  All three languages are auto-compiled when the source file changes.  No build step is required during development.
+
+\begin{notebox}
+Groovy is the most common choice for application services.  It offers concise syntax, optional typing, closures, and seamless Java interoperability, and the on-the-fly compile phase for Groovy services is faster than for Java services --- which makes the edit-save-reload cycle noticeably snappier in development.  Chapter~\ref{ch:groovy} covers Groovy in detail.
+\end{notebox}
+
+\section{Hot Reload}
+\label{sec:arch-hotreload}
+
+Kiss detects file changes and recompiles automatically\index{hot reload}:
+
+\begin{description}[style=nextline]
+  \item[Backend services] When you save a Groovy or Java file in \texttt{services/}, Kiss detects the change on the next request, recompiles the file, and loads the new class.  There is no restart and no delay beyond the compilation itself.
+  \item[Frontend files] HTML, CSS, and JavaScript are served directly.  Save the file, reload the browser, and the new code runs.
+  \item[Precompiled classes] Files in \texttt{src/main/precompiled/} are compiled by \texttt{./bld build}, not on-the-fly.  After changing a precompiled class, run \texttt{./bld -v build} to recompile.
+\end{description}
+
+\begin{notebox}
+On-the-fly compilation does \emph{not} mean interpreted execution.  Every Kiss web service --- Groovy, Java, or Common Lisp --- is compiled to JVM bytecode and runs at full compiled speed.  The framework recompiles only when source changes; subsequent requests reuse the cached bytecode.  There is no runtime performance penalty for the hot-reload convenience.
+\end{notebox}
+
+\section{Thread Model}
+\label{sec:arch-threads}
+
+The \texttt{QueueManager} maintains a fixed-size pool of worker threads.  The pool size is set by \texttt{MaxWorkerThreads} in \texttt{application.ini} (see Chapter~\ref{ch:configuration}).  If the setting is absent, the framework uses a default based on the number of CPU cores.
+
+Each request runs on its own thread with its own database \texttt{Connection}.  This model:
+
+\begin{itemize}
+  \item Is simple --- no shared mutable state between requests.
+  \item Scales naturally --- the thread pool limits concurrency to a safe level.
+  \item Avoids deadlocks --- each thread owns exactly one database connection.
+\end{itemize}
+
+\section{The JSON-RPC Protocol}
+\label{sec:arch-jsonrpc}
+
+Despite the \texttt{/rest} endpoint name, Kiss uses JSON-RPC\index{JSON-RPC}, not REST.  Every request is an HTTP POST containing a JSON object with at least three fields:
+
+\begin{lstlisting}[style=javascript]
+{
+    "_class": "ServiceName",
+    "_method": "methodName",
+    "_uuid": "session-token",
+    // ... application data ...
+}
+\end{lstlisting}
+
+\noindent
+Every response is a JSON object containing:
+
+\begin{lstlisting}[style=javascript]
+{
+    "_Success": true,       // or false
+    "_ErrorCode": 0,        // 0 = success, 2 = auth failure
+    "_ErrorMessage": "",    // present on error
+    // ... application data ...
+}
+\end{lstlisting}
+
+\noindent
+This uniform protocol means there is no need to design URL schemes, choose HTTP verbs, or interpret status codes.  Every call is the same shape.
+
+\subsection{REST vs.\ JSON-RPC}
+\label{sec:arch-rest-vs-rpc}
+
+The two styles solve the same problem --- letting a client invoke server-side behavior over HTTP --- but they take very different shapes.
+
+\textbf{REST} models the server as a collection of \emph{resources}.  Each resource has a URL (e.g., \texttt{/employees/42}), and the operation is encoded in the HTTP verb (\texttt{GET} to read, \texttt{POST} to create, \texttt{PUT}/\texttt{PATCH} to update, \texttt{DELETE} to remove).  Outcomes are signaled through HTTP status codes (\texttt{200}, \texttt{201}, \texttt{404}, \texttt{409}, \ldots).  REST works well when the API really is resource-oriented and when third-party clients benefit from a uniform, cacheable, hyperlinked interface.
+
+\textbf{JSON-RPC} models the server as a collection of \emph{procedures}.  Every call is a POST of a JSON object that names a class and a method and carries the arguments; every response is a JSON object that carries the return value (or an error).  There is one URL, one verb, and one response shape.
+
+For the kind of business applications Kiss is designed to build, JSON-RPC is the better fit:
+
+\begin{itemize}
+  \item \textbf{Operations rarely map cleanly to CRUD on a resource.}  ``Approve this invoice and notify the requester,'' ``run the month-end close,'' or ``transfer funds between accounts'' are procedures, not nouns.  Forcing them into REST verbs and URLs adds modeling work that produces no real benefit.
+
+  \item \textbf{Uniform shape, uniform tooling.}  Because every call has the same shape, the framework can handle authentication, transaction management, JSON parsing, error reporting, and logging in one place.  A service method receives \texttt{injson}, \texttt{outjson}, \texttt{db}, and \texttt{servlet} --- nothing more --- and the rest is automatic.  REST's verb/URL/status-code matrix would have to be re-implemented per endpoint.
+
+  \item \textbf{Easier evolution.}  Adding a parameter, returning an extra field, or deprecating a method is just a code change.  There are no URL schemes to redesign and no HTTP semantics to renegotiate.
+
+  \item \textbf{Errors are first-class data.}  Application-level failures (validation errors, business-rule violations) come back as fields in the response body, not as overloaded HTTP status codes that must be reverse-engineered by the client.
+
+  \item \textbf{Simpler client code.}  The frontend uses a single \texttt{Server.call(class, method, data)} function for every backend interaction.  There is no client-side router, no per-endpoint wrapper, and no debate about whether something should be a \texttt{PUT} or a \texttt{POST}.
+\end{itemize}
+
+\noindent
+REST remains the right choice when you are publishing a public, resource-oriented API for arbitrary third-party consumers.  Kiss assumes a different scenario: an application's own frontend talking to its own backend, where shared, uniform plumbing pays for itself many times over.  The \texttt{/rest} endpoint name is preserved purely for historical reasons; the protocol on the wire is JSON-RPC.
+
+\section{Authentication Flow}
+\label{sec:arch-auth}
+
+Authentication is built into the request lifecycle:
+
+\begin{enumerate}
+  \item The login screen sends the username and password to the \texttt{Login} service.
+  \item \texttt{Login} validates the credentials and creates a \texttt{UserData}\index{UserData} object in the \texttt{UserCache}\index{UserCache}.  A UUID is generated and returned to the browser.
+  \item \texttt{Server.js} stores the UUID and includes it in every subsequent request.
+  \item On each request, \texttt{ProcessServlet} looks up the UUID in the \texttt{UserCache}.  If the UUID is missing or the session has expired, the request is rejected with error code 2.
+  \item The browser detects error code 2 and redirects to the login screen.
+\end{enumerate}
+
+\noindent
+Services can be exempted from authentication by calling
+\texttt{MainServlet.allow\-Without\-Authentication()} in \texttt{KissInit.groovy} (see Chapter~\ref{ch:authentication}).
+
+\section{Database Connection Lifecycle}
+\label{sec:arch-dbconn}
+
+Each request receives a database \texttt{Connection} from a C3P0 connection pool\index{C3P0}.  The connection's auto-commit is disabled.  The lifecycle is:
+
+\begin{enumerate}
+  \item \texttt{ProcessServlet} obtains a connection from the pool before invoking the service method.
+  \item The service method uses the connection for queries, inserts, updates, and deletes.
+  \item If the service method returns normally, the framework calls \texttt{commit()}.
+  \item If the service method throws an exception, the framework calls \texttt{rollback()}.
+  \item The connection is returned to the pool.
+\end{enumerate}
+
+\begin{warnbox}
+Because auto-commit is off, changes are not visible to other connections until the service completes successfully.  If you need to commit partway through a long operation, call \texttt{db.commit()} explicitly.
+\end{warnbox}
+
+\section{Frontend Architecture}
+\label{sec:arch-frontend}
+
+The Kiss frontend is a single-page application built with plain HTML, CSS, and JavaScript.  There is no build step, no transpiler, and no framework beyond Kiss's own component library.  All DOM manipulation is performed through \texttt{DOMUtils.js}\index{DOMUtils}, a thin wrapper over the native browser DOM API; jQuery is not used.
+
+Screens are loaded dynamically by \texttt{Utils.loadPage()}, which injects HTML into the page and executes the associated JavaScript file.  Each screen is a pair of files: \texttt{ScreenName.html} and \texttt{ScreenName.js}.
+
+Custom HTML tags (\texttt{<text-input>}, \texttt{<drop-down>}, \texttt{<push-button>}, etc.) are registered by the Kiss component system and provide a uniform API for getting/setting values, validation, and event handling.  Chapter~\ref{ch:components} covers every component in detail.
+
+\section{Putting It All Together}
+\label{sec:arch-summary}
+
+A typical user interaction:
+
+\begin{enumerate}
+  \item The user clicks a ``Save'' button on a screen.
+  \item The button's \texttt{onclick} handler calls \texttt{Server.call("EmployeeService", "save", data)}.
+  \item The request travels through MainServlet $\to$ QueueManager $\to$ ProcessServlet.
+  \item \texttt{ProcessServlet} verifies the session, obtains a database connection, and invokes \texttt{EmployeeService.save()}.
+  \item The service method reads input from \texttt{injson}, updates the database, and writes a response to \texttt{outjson}.
+  \item The framework commits the transaction and sends the JSON response.
+  \item The browser callback receives the response and updates the screen.
+\end{enumerate}
+
+\noindent
+Every interaction follows this pattern.  Once you understand it, you understand Kiss.

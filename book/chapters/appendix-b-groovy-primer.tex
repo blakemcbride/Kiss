@@ -1,0 +1,296 @@
+\chapter{Groovy Primer}
+\label{ch:groovy-primer}
+
+This appendix is a crash course in Groovy for Java developers.  It covers the language features most relevant to writing Kiss backend services.  For a more detailed treatment, see Chapter~\ref{ch:groovy}.  An additional standalone overview --- ``Groovy Overview,'' covering what Groovy is, why it was chosen for Kiss, its strengths and weaknesses, and how it is invoked from the framework --- ships with the project as \texttt{manual/\allowbreak{}GroovyOverview.html}.
+
+\section{Why Groovy?}
+\label{sec:gp-why}
+
+Groovy is a JVM language that is nearly a superset of Java.  Valid Java is (mostly) valid Groovy.  The key advantages for Kiss development:
+
+\begin{itemize}
+  \item \textbf{No compilation step} --- Groovy files are compiled automatically by the framework when they change.
+  \item \textbf{Less boilerplate} --- optional semicolons, optional types, streamlined syntax.
+  \item \textbf{Full Java interop} --- call any Java class, use any Java library, no bridges or wrappers.
+  \item \textbf{String interpolation} --- embed expressions directly in strings.
+\end{itemize}
+
+\section{Basic Syntax}
+\label{sec:gp-syntax}
+
+\begin{lstlisting}[style=groovy]
+// Semicolons are optional
+def name = "Alice"
+int count = 42
+
+// Type inference with def
+def list = [1, 2, 3]            // ArrayList
+def map = [name: "Alice", age: 30]  // LinkedHashMap
+
+// String interpolation (GStrings)
+println "Hello, ${name}! Count is ${count}."
+
+// Multi-line strings
+def sql = """
+    SELECT *
+    FROM employee
+    WHERE active = 'Y'
+"""
+\end{lstlisting}
+
+\section{Differences from Java}
+\label{sec:gp-diffs}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Java} & \textbf{Groovy Equivalent} \\
+\midrule
+\endhead
+\texttt{String[] a = new String[]\{"a"\};} & \texttt{def a = ["a"]} \\
+\texttt{map.get("key")} & \texttt{map.key} or \texttt{map["key"]} \\
+\texttt{for (String s : list)} & \texttt{for (s in list)} or \texttt{list.each \{ \}} \\
+\texttt{obj != null ? obj.m() : null} & \texttt{obj?.m()} (safe navigation) \\
+\texttt{val != null ? val : def} & \texttt{val ?: def} (Elvis operator) \\
+\texttt{import needed} & Many common imports automatic \\
+\texttt{checked exceptions} & All exceptions unchecked \\
+\texttt{private fields} & Properties with auto getters/setters \\
+\bottomrule
+\end{longtable}
+
+\section{Variables and Types}
+\label{sec:gp-types}
+
+Groovy supports both static and dynamic typing:
+
+\begin{lstlisting}[style=groovy]
+// Dynamic typing (any type)
+def x = "hello"
+x = 42           // valid: x is now an Integer
+
+// Static typing (type-checked)
+String name = "Alice"
+int count = 42
+double rate = 3.14
+
+// Type casting
+String s = (String) someObject
+int n = someString as int    // Groovy-style cast
+\end{lstlisting}
+
+\section{Closures}
+\label{sec:gp-closures}
+
+Closures are anonymous functions --- Groovy's most powerful feature:
+
+\begin{lstlisting}[style=groovy]
+// Single parameter (implicit 'it')
+[1, 2, 3].each { println it }
+
+// Named parameters
+[1, 2, 3].collect { n -> n * 2 }  // [2, 4, 6]
+
+// Multi-parameter
+files.sort { File a, File b ->
+    Long.compare(b.lastModified(), a.lastModified())
+}
+
+// As a variable
+def greet = { name -> "Hello, ${name}!" }
+println greet("Alice")  // "Hello, Alice!"
+\end{lstlisting}
+
+\begin{warnbox}
+When using closures with Kiss framework methods that expect Java functional interfaces (e.g., \texttt{Consumer<UserData>}), you must add an explicit cast: \texttt{\{ ud -> ... \} as Consumer<UserData>}.
+\end{warnbox}
+
+\section{String Features}
+\label{sec:gp-strings}
+
+\begin{lstlisting}[style=groovy]
+// GStrings (double quotes) support interpolation
+def name = "World"
+println "Hello, ${name}"       // Hello, World
+println "2 + 2 = ${2 + 2}"    // 2 + 2 = 4
+
+// Regular strings (single quotes) --- no interpolation
+println 'Hello, ${name}'       // Hello, ${name}
+
+// Triple-quoted (multi-line, preserves whitespace)
+def msg = """
+    Dear ${name},
+    Welcome aboard.
+"""
+
+// Useful string methods
+"Hello".contains("ell")        // true
+"Hello World".split(" ")       // ["Hello", "World"]
+"hello".capitalize()           // "Hello"
+"  hello  ".trim()             // "hello"
+
+// SHA-256 hashing (Kiss extension)
+"password".sha256()            // 64-char hex string
+\end{lstlisting}
+
+\section{Collections}
+\label{sec:gp-collections}
+
+\begin{lstlisting}[style=groovy]
+// Lists
+def nums = [1, 2, 3, 4, 5]
+nums << 6                      // append
+nums += [7, 8]                 // concatenate
+nums[0]                        // 1 (first)
+nums[-1]                       // 8 (last)
+nums[1..3]                     // [2, 3, 4] (range)
+
+// Maps
+def config = [host: "localhost", port: 5432]
+config.host                    // "localhost"
+config["port"]                 // 5432
+config.each { k, v -> println "${k}=${v}" }
+
+// Filtering and transforming
+nums.findAll { it > 3 }        // [4, 5, 6, 7, 8]
+nums.collect { it * 2 }        // [2, 4, 6, ...]
+nums.sum()                     // 36
+nums.max()                     // 8
+\end{lstlisting}
+
+\section{Control Structures}
+\label{sec:gp-control}
+
+\begin{lstlisting}[style=groovy]
+// Standard if/else
+if (count > 10) {
+    println "Many"
+} else {
+    println "Few"
+}
+
+// Switch (supports ranges, types, closures)
+switch (x) {
+    case 1..5:    println "small"; break
+    case 6..10:   println "medium"; break
+    case String:  println "text"; break
+    default:      println "other"
+}
+
+// For loops
+for (item in list) { ... }
+for (int i = 0; i < 10; i++) { ... }  // Java-style
+
+// While
+while (condition) { ... }
+\end{lstlisting}
+
+\section{Null Safety}
+\label{sec:gp-null}
+
+\begin{lstlisting}[style=groovy]
+// Safe navigation operator (?.)
+String city = employee?.address?.city
+// Returns null if employee or address is null
+// (no NullPointerException)
+
+// Elvis operator (?:)
+String name = inputName ?: "Unknown"
+// Uses "Unknown" if inputName is null or empty
+
+// Combining both
+String dept = emp?.department?.name ?: "Unassigned"
+\end{lstlisting}
+
+\section{Common Patterns in Kiss Services}
+\label{sec:gp-kiss-patterns}
+
+\begin{lstlisting}[style=groovy]
+// Service method signature
+void methodName(JSONObject injson, JSONObject outjson,
+                Connection db, ProcessServlet servlet) {
+    // Read input
+    String id = injson.getString("id")
+
+    // Database operations
+    Record rec = db.fetchOne(
+        "select * from table where id = ?", id)
+
+    // Null check with safe navigation
+    String name = rec?.getString("name") ?: ""
+
+    // Return data
+    outjson.put("name", name)
+    outjson.put("records", db.fetchAllJSON(
+        "select * from table order by name"))
+
+    // Commit if modified
+    db.commit()
+}
+\end{lstlisting}
+
+\section{Working with Java}
+\label{sec:gp-java-interop}
+
+Groovy code can call any Java class directly:
+
+\begin{lstlisting}[style=groovy]
+// Java classes work seamlessly
+import java.time.LocalDate
+import java.util.UUID
+
+def today = LocalDate.now()
+def id = UUID.randomUUID().toString()
+
+// Kiss Java classes
+import org.kissweb.database.Connection
+import org.kissweb.DateUtils
+
+int date = DateUtils.today()
+\end{lstlisting}
+
+\noindent
+Java code can also call Groovy classes, though in Kiss the typical pattern is Groovy services calling Java framework classes, not the reverse.
+
+\section{Common Pitfalls}
+\label{sec:gp-pitfalls}
+
+\begin{description}[style=nextline]
+  \item[Default package] Classes without a \texttt{package} declaration cannot be imported from packaged Groovy files.  Always use a package for shared utility classes.
+
+  \item[Closure type inference] Groovy's type inference can cause \texttt{ClassCastException} in closure-based operations.  Use explicit \texttt{for} loops when this occurs:
+  \begin{lstlisting}[style=groovy]
+// May fail with type issues
+def files = dir.listFiles().findAll {
+    it.name.endsWith(".sql") }
+
+// Safer alternative
+File[] all = dir.listFiles()
+List<File> sqlFiles = []
+for (File f : all) {
+    if (f.name.endsWith(".sql"))
+        sqlFiles.add(f)
+}
+  \end{lstlisting}
+
+  \item[Optional syntax can hurt readability] Optional semicolons and optional parentheses on method calls are convenient but can reduce readability, especially in chained or nested expressions.  Prefer parentheses on method calls when the intent would otherwise be unclear.
+
+  \item[Parentheses ambiguity] While parentheses are optional in some cases, omitting them can cause Groovy to interpret a method call as property access:
+  \begin{lstlisting}[style=groovy]
+// Ambiguous: method call or property?
+println list.size    // works (Groovy magic)
+println list.size()  // clearer, always works
+  \end{lstlisting}
+
+  \item[No \texttt{char} type] Groovy has no distinct character literal --- \texttt{'x'} is a \texttt{String}, not a \texttt{char}.  When a character is needed (for example, calling a Java API that takes a \texttt{char}), use an explicit cast:
+  \begin{lstlisting}[style=groovy]
+char c1 = (char) 'x'
+char c2 = 'x' as char
+  \end{lstlisting}
+
+  \item[Floating-point literals are \texttt{BigDecimal}] A literal like \texttt{3.14} is a \texttt{BigDecimal}, not a \texttt{double}.  This has caused many subtle bugs --- for example, when passing a literal to an overloaded method, the \texttt{BigDecimal} overload is selected instead of the \texttt{double} overload, or arithmetic produces unexpected scale or rounding behavior.  When a \texttt{double} is required, use the \texttt{d} suffix:
+  \begin{lstlisting}[style=groovy]
+def a = 3.14      // BigDecimal
+double b = 3.14d  // double
+  \end{lstlisting}
+
+  \item[\texttt{==} vs \texttt{.equals()}] In Groovy, \texttt{==} calls \texttt{.equals()}, not reference equality.  Use \texttt{.is()} for reference comparison.
+\end{description}

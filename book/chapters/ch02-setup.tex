@@ -1,0 +1,163 @@
+\chapter{Setup and Installation}
+\label{ch:setup}
+
+This chapter walks through downloading, installing, and running Kiss for the first time.  By the end you will have a working development environment with both the frontend and backend servers running.
+
+\section{Prerequisites}
+\label{sec:setup-prerequisites}
+
+Kiss requires:
+
+\begin{itemize}
+  \item \textbf{Java 17 or later} (JDK, not just JRE).  Kiss compiles and runs Java and Groovy code at runtime, so a full JDK is required.  Verify with \texttt{java -version} and \texttt{javac -version}.
+  \item \textbf{A modern web browser} --- Chrome, Firefox, Edge, or Safari.
+  \item \textbf{Optionally, an IDE} for code editing.  See Appendix~\ref{ch:ide-setup} for setup instructions.  Any text editor works; Kiss does not depend on IDE tooling.
+\end{itemize}
+
+\begin{notebox}
+Kiss includes its own build system, an embedded Tomcat server, and all required JAR dependencies.  No Maven, Gradle, or Node.js installation is necessary.
+\end{notebox}
+
+\begin{warnbox}
+Windows requires several additional system-level dependencies (such as a package manager and supporting tools) that Linux and macOS typically provide out of the box.  These are not duplicated here --- consult the \emph{Kiss Getting Started Guide} for the complete Windows setup procedure before proceeding.
+\end{warnbox}
+
+\section{Downloading Kiss}
+\label{sec:setup-download}
+
+Kiss is distributed as a self-contained directory.  Clone the repository or download and extract the archive:
+
+\begin{lstlisting}[style=shell]
+git clone https://github.com/blakemcbride/Kiss.git
+cd Kiss
+\end{lstlisting}
+
+\noindent
+Alternatively, download a release archive from the project's GitHub page, extract it, and \texttt{cd} into the resulting directory.
+
+\section{Directory Structure}
+\label{sec:setup-directory}
+
+The top-level directory contains everything needed to build and run the application:
+
+\begin{lstlisting}
+Kiss/
+  src/
+    main/
+      core/          # Core framework (do not modify)
+      backend/       # Your application services
+      frontend/      # Your application screens
+        kiss/        # Framework components (do not modify)
+      precompiled/   # Shared Java utilities
+    test/            # Unit tests
+  libs/              # Third-party JAR dependencies
+  manual/            # Documentation source
+  tomcat/            # Embedded Tomcat server
+    logs/            # Server log files
+  work/              # Build output
+\end{lstlisting}
+
+\begin{warnbox}
+Two directories must not be modified:
+\begin{itemize}
+  \item \texttt{src/main/core/} --- the Kiss framework's Java classes.
+  \item \texttt{src/main/frontend/kiss/} --- the Kiss frontend component library.
+\end{itemize}
+Your application code goes in \texttt{src/main/backend/} (services) and \texttt{src/main/frontend/} (screens, excluding the \texttt{kiss/} subdirectory).
+\end{warnbox}
+
+\section{First Run}
+\label{sec:setup-first-run}
+
+Start both the frontend and backend development servers with a single command:
+
+\begin{lstlisting}[style=shell]
+./bld -v develop              [Linux, macOS, BSD, etc.]
+      -or-
+bld -v develop                [Windows]
+\end{lstlisting}
+
+\begin{warnbox}
+On Linux, macOS, BSD, and other Unix-like systems, run the script as \texttt{./bld} (the leading \texttt{./} is required).  On Windows, run it as \texttt{bld} (without the \texttt{./} prefix), which invokes the \texttt{bld.cmd} batch file.  All examples in this book use the \texttt{./bld} form; Windows users should drop the \texttt{./} prefix in every command.
+\end{warnbox}
+
+\noindent
+This command:
+\begin{enumerate}
+  \item Compiles the core framework and any precompiled utilities.
+  \item Starts the backend server on port 8001.
+  \item Starts a frontend development server on port 8000.
+  \item Watches for file changes and recompiles automatically.
+\end{enumerate}
+
+\noindent
+Open \texttt{http://localhost:8000} in a browser.  The login page should appear.
+
+\begin{tipbox}
+Keep the terminal running.  You can edit backend and frontend files while the system is running, and changes will take effect without a restart.
+\end{tipbox}
+
+\section{Verifying the Installation}
+\label{sec:setup-verify}
+
+Log in with the default credentials: username \texttt{kiss}, password \texttt{password}.  These credentials are valid when using the bundled SQLite demo database.
+
+After logging in, the example application's navigation menu appears.  Click through the screens to confirm that the database, frontend, and backend are communicating correctly:
+
+\begin{description}[style=nextline]
+  \item[Controls] A showcase of every Kiss UI component: text inputs, dropdowns, date pickers, checkboxes, radio buttons, and more.
+  \item[CRUD] A phone book application demonstrating create, read, update, and delete operations with a data grid, popup editor, PDF report, and CSV export.
+  \item[REST Services] Examples of calling backend service methods and displaying results.
+  \item[Users] User management for the built-in authentication system.
+  \item[File Upload] Demonstrates file upload handling.
+\end{description}
+
+\section{The Example Application}
+\label{sec:setup-example-app}
+
+Kiss ships with a working example application that serves two purposes: it verifies that everything is installed correctly, and it provides a template for your own code.  The example includes:
+
+\begin{itemize}
+  \item A login page with session management.
+  \item A navigation framework that loads screens dynamically.
+  \item A CRUD screen (phone book) with a grid, popup editor, PDF report, and CSV export.
+  \item A controls showcase demonstrating every UI component.
+  \item A file upload screen.
+  \item An AI/LLM integration screen (requires Ollama).
+\end{itemize}
+
+\noindent
+All example services are in \texttt{src/main/backend/services/} and all example screens are in \texttt{src/main/frontend/screens/}.  Study these files as you read through the book --- they are the simplest working examples of each feature.
+
+\section{Development URLs}
+\label{sec:setup-urls}
+
+During development, two servers run simultaneously:
+
+\begin{longtable}{ll}
+\toprule
+\textbf{URL} & \textbf{Purpose} \\
+\midrule
+\texttt{http://localhost:8000} & Frontend (HTML/CSS/JS) \\
+\texttt{http://localhost:8001} & Backend (JSON-RPC services) \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Both ports come from a single \texttt{portBase} variable in \texttt{Tasks.java} (front end = \texttt{portBase}, back end = \texttt{portBase}~+~1; default 8000), so several Kiss applications can run in development at once by giving each a different base --- see Section~\ref{sec:build-ports}.  Pages served by the frontend dev server call the backend at their own port~+~1 automatically.  In production, both are served from the same Tomcat instance (see Chapter~\ref{ch:deployment}).
+
+\section{Server Logs}
+\label{sec:setup-logs}
+
+Backend log output is written to \texttt{tomcat/logs/catalina.out}.  This file contains startup messages, service compilation events, request logs, and any errors thrown by backend code.
+
+On Linux, macOS, BSD, and other Unix-like systems, use the bundled \texttt{view-log} script to tail the log:
+
+\begin{lstlisting}[style=shell]
+./view-log
+\end{lstlisting}
+
+\noindent
+On Windows, the log window opens automatically when the backend starts --- no separate command is needed.
+
+This is the first place to look when something goes wrong.

@@ -1,0 +1,151 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{fontspec}
+% KDP paperback cover geometry (trim 6.69in x 9.61in, WHITE paper):
+%   spine  = pages * 0.002252in
+%   width  = 2*6.69 + 2*0.125 + spine
+%   height = 9.61 + 2*0.125
+% ONLY \PageCount below needs to change when the interior grows or shrinks;
+% every dimension on this cover is derived from it.  \PageCount must equal
+% the page count of kiss-book.pdf exactly, or KDP rejects the upload with
+% "expected cover size is WxH but the submitted file size is ...".
+\newcommand{\PageCount}{510}
+
+% These use \fpeval (LaTeX kernel), NOT \pgfmathsetmacro: pgfmath's
+% fixed-point arithmetic computes the spine as 1.0456in instead of
+% 1.042676in, which is enough to fail KDP's cover-size check.
+\newcommand{\TrimW}{6.69}
+\newcommand{\TrimH}{9.61}
+\newcommand{\Bleed}{0.125}
+\edef\SpineW{\fpeval{\PageCount*0.002252}}
+\edef\CoverW{\fpeval{2*\TrimW + 2*\Bleed + \SpineW}}
+\edef\CoverH{\fpeval{\TrimH + 2*\Bleed}}
+\edef\SpineL{\fpeval{\TrimW + \Bleed}}
+\edef\SpineR{\fpeval{\SpineL + \SpineW}}
+\edef\SpineC{\fpeval{\SpineL + \SpineW/2}}
+\edef\FrontC{\fpeval{(\SpineR + \CoverW)/2}}
+\edef\FrontRuleL{\fpeval{\FrontC - 1.5}}
+
+\usepackage{geometry}
+\geometry{paperwidth=\CoverW in, paperheight=\CoverH in, margin=0in}
+
+% Colors from the Kiss logo
+\definecolor{kissteal}{HTML}{2EBC9B}
+\definecolor{kissdarkteal}{HTML}{239B80}
+\definecolor{kissgold}{HTML}{D4C47A}
+\definecolor{kisscream}{HTML}{F5F0DC}
+
+\pagestyle{empty}
+
+\begin{document}%
+\noindent%
+\begin{tikzpicture}[x=1in, y=1in]
+
+  % ============================================================
+  % BACKGROUND — full page fill
+  % ============================================================
+  \fill[kissteal] (0,0) rectangle (\CoverW, \CoverH);
+
+  % ============================================================
+  % SPINE  (x = \SpineL to \SpineR)
+  % ============================================================
+  \fill[kissdarkteal] (\SpineL, 0) rectangle (\SpineR, \CoverH);
+
+  % Small logo on spine
+  \node at (\SpineC, 8.6) {%
+    \begin{tikzpicture}
+      \clip (0,0) circle (0.28);
+      \node {\includegraphics[width=0.56in]{figures/Kiss-logo.jpg}};
+    \end{tikzpicture}%
+  };
+
+  \node[rotate=-90, black, font=\bfseries\fontsize{24}{26}\selectfont]
+    at (\SpineC, 6.2) {Kiss};
+  \node[rotate=-90, black, font=\fontsize{12}{14}\selectfont]
+    at (\SpineC, 3.6) {A Complete Guide};
+  \node[rotate=-90, black, font=\fontsize{12}{14}\selectfont]
+    at (\SpineC, 1.4) {Blake McBride};
+
+  % ============================================================
+  % FRONT COVER  (right half, x = \SpineR to \CoverW)
+  % ============================================================
+
+  % Decorative circle behind logo
+  \fill[kissgold, opacity=0.25]
+    (\FrontC, 6.8) circle (2.3);
+
+  % Kiss logo — clipped to circle so the JPG background blends with the cover
+  \node at (\FrontC, 6.8) {%
+    \begin{tikzpicture}
+      \clip (0,0) circle (2.3);
+      \node {\includegraphics[width=4.6in]{figures/Kiss-logo.jpg}};
+    \end{tikzpicture}%
+  };
+
+  % Title
+  \node[black, font=\bfseries\fontsize{48}{52}\selectfont]
+    at (\FrontC, 4.0) {Kiss};
+
+  % Subtitle
+  \node[black, font=\fontsize{14}{18}\selectfont,
+        text width=4.5in, align=center]
+    at (\FrontC, 3.1)
+    {A Complete Guide to the\\Web Application Framework};
+
+  % Divider line
+  \fill[kissgold]
+    (\FrontRuleL, 2.5) rectangle ++(3.0, 0.02);
+
+  % Author
+  \node[black, font=\fontsize{16}{20}\selectfont]
+    at (\FrontC, 2.0) {Blake McBride};
+
+  % Bottom accent line
+  \fill[kissgold, opacity=0.5]
+    (\SpineR, 1.0) rectangle (\CoverW, 1.01);
+
+  % Tagline
+  \node[black, font=\itshape\fontsize{10}{12}\selectfont]
+    at (\FrontC, 1.4) {From Setup to Production};
+
+  % ============================================================
+  % BACK COVER  (left half, x = 0 to \SpineL)
+  % ============================================================
+
+  \node[black, font=\fontsize{11}{15}\selectfont,
+        text width=4.8in, align=left, anchor=north]
+    at (3.47, 8.8)
+    {\textbf{\fontsize{18}{22}\selectfont About This Book}\\[12pt]
+     The Kiss framework lets you build complete web applications with
+     minimal configuration and maximum productivity. This book is your
+     comprehensive guide --- from first installation to production
+     deployment.\\[10pt]
+     \textbf{What you'll learn:}\\[4pt]
+     \begin{minipage}{4.6in}
+     \begin{itemize}\setlength{\itemsep}{2pt}
+       \item Backend services in Groovy, Java, or Lisp with hot reload
+       \item Database abstraction: Connection, Record, QueryBuilder
+       \item Custom HTML components and single-page architecture
+       \item AG-Grid, popups, reports, and CSV export
+       \item Authentication, session management, and scheduling
+       \item LLM integration with OpenAI, Anthropic, OpenRouter, and Ollama
+       \item Desktop packaging with Electron
+       \item Testing, deployment, and performance tuning
+     \end{itemize}
+     \end{minipage}\\[10pt]
+     Includes a complete project-tracking application built
+     step by step, plus an API quick-reference appendix.};
+
+  % Bottom lines on back cover
+  \fill[kissgold, opacity=0.5]
+    (0, 0) rectangle (\SpineL, 0.01);
+  \fill[kissgold, opacity=0.5]
+    (0, 1.0) rectangle (\SpineL, 1.01);
+
+
+\end{tikzpicture}%
+\end{document}

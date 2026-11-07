@@ -1,0 +1,485 @@
+\chapter{Client-Side Routing and State}
+\label{ch:routing-state}
+
+Two tightly-coupled front-end modules give a Kiss application durable client-side state and real, deep-linkable URLs:
+
+\begin{description}[style=nextline]
+  \item[\texttt{AppState}\index{AppState}] The single client-side state store.  It holds arbitrary front-end state that must survive screen navigation and page reloads --- including the session token.
+  \item[\texttt{Router}\index{Router}] A hash-based client-side router.  It gives each screen its own URL, makes the browser Back and Forward buttons navigate within the application, and resumes the user's location across a reload.
+\end{description}
+
+They are coupled because the router's authentication gate and session-resume behavior are both expressed in terms of a single value held by \texttt{AppState}: the persisted session token \texttt{\_uuid}.  This chapter documents \texttt{AppState} first, then \texttt{Router}, and finally how they cooperate to resume a session from a deep link.
+
+Both modules live under \texttt{src/main/frontend/kiss/} (framework code).  The one application-owned piece is the route table, \texttt{routes.js}, described in Section~\ref{sec:rs-routes-file}.
+
+\section{AppState: The Client-Side State Store}
+\label{sec:rs-appstate}
+
+\texttt{AppState}\index{AppState} (\texttt{src/main/frontend/kiss/AppState.js}) is the framework's single place to keep front-end state that needs to outlive a screen transition or a page reload.  Everything the application wants to remember between navigations goes through it.
+
+A central design decision is that the session token is \emph{not} special.  It is simply the reserved entry \texttt{\_uuid}\index{\_uuid} stored alongside any other application state.  Because everything lives in one store, logout is a single \texttt{AppState.clear()} call --- there is no separate ``session'' concept to tear down.
+
+\subsection{The Storage Layering Rule}
+\label{sec:rs-appstate-layering}
+
+\texttt{AppState} is the \emph{only} module permitted to touch \texttt{window.localStorage} or \texttt{window.sessionStorage} directly.  This mirrors the rule that \texttt{DOMUtils} is the only module permitted to touch the DOM directly (Chapter~\ref{ch:frontend}).  All other code --- framework or application --- reaches Web Storage through the \texttt{AppState} API, never through the browser objects.
+
+\begin{notebox}
+The layering rule is what makes the per-tab/per-origin storage choice (below) a one-line configuration change rather than a code change scattered across the application.  Because all persistence flows through one module, the backing store is selected in exactly one place.
+\end{notebox}
+
+\subsection{Backing Stores}
+\label{sec:rs-appstate-backends}
+
+The backing store is chosen \emph{once} at startup from \texttt{SystemInfo.stateStore}\index{SystemInfo.stateStore} (in \texttt{src/main/frontend/SystemInfo.js}).  Three values are recognized:
+
+\begin{longtable}{P{0.17\textwidth}P{0.27\textwidth}P{0.44\textwidth}}
+\toprule
+\textbf{Value} & \textbf{Backing store} & \textbf{Behavior} \\
+\midrule
+\endhead
+\texttt{'session'} & \texttt{sessionStorage} & Survives reload; \textbf{per-tab} (each tab is its own isolated session, so two tabs never clobber each other's state); cleared when the tab closes.  \emph{This is the default.} \\
+\texttt{'local'} & \texttt{localStorage} & Survives reload, new tabs, and Electron restarts; \textbf{shared} across all tabs of the same origin. \\
+\texttt{'memory'} & in-memory only & Lost on reload --- the framework's classic single-page behavior. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+If \texttt{SystemInfo.stateStore} is unset or holds an unrecognized value, \texttt{AppState} defaults to \texttt{'session'}.
+
+\subsection{The Per-Tab Default and Its Consequences}
+\label{sec:rs-appstate-pertab}
+
+The default, \texttt{'session'}, makes state \emph{per-tab}.  Each browser tab gets an isolated \texttt{sessionStorage}, so two tabs of the same application never overwrite each other's state, and closing a tab discards that tab's state.
+
+This has one important consequence to understand:
+
+\begin{itemize}
+  \item \textbf{A new tab starts with no token, so it requires its own login.}  Opening the application in a second tab does \emph{not} carry the first tab's session across --- the new tab has an empty \texttt{sessionStorage} and therefore no \texttt{\_uuid}.
+  \item \textbf{A reload within a tab resumes.}  Because \texttt{sessionStorage} survives a reload, refreshing the page (or following a deep link in the same tab) keeps the \texttt{\_uuid} and resumes the session.
+\end{itemize}
+
+\begin{tipbox}
+If your deployment wants one login shared across every tab of the origin (for example, a kiosk or an Electron desktop application that should stay logged in across windows), set \texttt{SystemInfo.stateStore = 'local'}.  The token then lives in \texttt{localStorage}, which is shared across tabs and survives an Electron restart.  There is no cross-tab logout coordination, but under the per-tab default that coordination is unnecessary.
+\end{tipbox}
+
+\subsection{Namespacing and Isolation}
+\label{sec:rs-appstate-namespace}
+
+Every stored key is namespaced with a \texttt{kiss.}\ prefix before it reaches the backing store.  Two things follow from this:
+
+\begin{itemize}
+  \item Kiss state never collides with anything else stored on the same origin (other libraries, other applications served from the same host).
+  \item \texttt{AppState.clear()} removes \emph{only} the \texttt{kiss.}-prefixed keys.  Unrelated keys on the same origin are left untouched, so logging out of the Kiss application does not wipe out a co-resident application's storage.
+\end{itemize}
+
+The namespace is applied and stripped internally; callers always use the bare key (\texttt{'\_uuid'}, not \texttt{'kiss.\_uuid'}).
+
+\subsection{Serialization Caveats}
+\label{sec:rs-appstate-serialize}
+
+Values are stored by JSON serialization (\texttt{JSON.stringify} on write, \texttt{JSON.parse} on read).  Only JSON-serializable data survives a round trip.  In particular:
+
+\begin{warnbox}
+A \texttt{Date}, a \texttt{Map}, a \texttt{Set}, or a function does \emph{not} survive being stored in \texttt{AppState}.  A \texttt{Date} comes back as a string; a \texttt{Map}/\texttt{Set} comes back as an empty object; a function is dropped entirely.  Store primitives, plain objects, and arrays.  If you need a date, store it as a YYYYMMDD integer (Chapter~\ref{ch:fe-utilities}) or an ISO string and reconstruct it on read.
+\end{warnbox}
+
+\noindent
+Two robustness details are worth knowing:
+
+\begin{itemize}
+  \item A corrupt stored entry (one that fails \texttt{JSON.parse}) is discarded rather than thrown --- \texttt{get()} returns \texttt{undefined} and removes the bad entry.
+  \item If a single write fails (for example, a quota error on one large value), \texttt{AppState} holds that one key in memory for the rest of the session and keeps the application running, rather than failing the write.
+\end{itemize}
+
+\subsection{Graceful Fallback}
+\label{sec:rs-appstate-fallback}
+
+When Web Storage is unavailable --- private-browsing mode in some browsers, storage disabled by policy, or an exhausted quota --- \texttt{AppState.init()} probes the requested store at startup and silently falls back to the in-memory backend.  The application still runs; it simply behaves as if \texttt{stateStore} were \texttt{'memory'} (state is lost on reload).  Call \texttt{AppState.backend()} to learn which backend is actually in use.
+
+\subsection{The API}
+\label{sec:rs-appstate-api}
+
+All methods are static.
+
+\begin{longtable}{P{0.30\textwidth}P{0.62\textwidth}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{init()} & Select the backing store from \texttt{SystemInfo.stateStore} and probe it.  Called once by the bootstrap before any other \texttt{AppState} use. \\
+\texttt{set(key, value)} & Store a JSON-serializable value.  Passing \texttt{undefined} removes the key. \\
+\texttt{get(key)} & Retrieve a value, or \texttt{undefined} if absent. \\
+\texttt{has(key)} & \texttt{true} if the key is present. \\
+\texttt{remove(key)} & Remove a single key. \\
+\texttt{keys()} & All application keys currently held (namespace stripped), as a \texttt{string[]}. \\
+\texttt{clear()} & Remove all Kiss state (used by logout).  Only \texttt{kiss.}-namespaced keys are removed. \\
+\texttt{backend()} & The resolved backend in use: \texttt{'memory'}, \texttt{'session'}, or \texttt{'local'}. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Typical usage from application code:
+
+\begin{lstlisting}[style=javascript]
+// Remember the user's grid filter so it survives a reload.
+AppState.set('orderGridFilter', { status: 'open',
+    region: 'NE' });
+
+// ... after a reload, on the next visit to the screen:
+// {status:'open', region:'NE'}
+const filter = AppState.get('orderGridFilter');
+if (filter)
+    grid.applyFilter(filter);
+
+// Remove it when no longer wanted.
+// same as AppState.remove('orderGridFilter')
+AppState.set('orderGridFilter', undefined);
+\end{lstlisting}
+
+\subsection{The Session Token Is Just \texttt{\_uuid}}
+\label{sec:rs-appstate-uuid}
+
+\texttt{Server.js}\index{Server.js} (Chapter~\ref{ch:server-comm}) consumes \texttt{AppState} for its session token.  There is no separate session variable:
+
+\begin{lstlisting}[style=javascript]
+// Server.js (excerpt)
+static setUUID(uuid) {
+    // login stores the token here
+    AppState.set('_uuid', uuid);
+}
+
+static get uuid() {
+    // every Server.call() reads it here
+    return AppState.get('_uuid') || '';
+}
+
+static async logout(captureReturn = false) {
+    // ... call the backend Logout service ...
+    // logout is a single clear()
+    AppState.clear();
+    // ... then reload a fresh index.html onto /login
+    // (see below) ...
+}
+\end{lstlisting}
+
+\noindent
+Because the token persists through the configured backing store, a reload within a tab keeps the user logged in, and the router can resume the user's location (Section~\ref{sec:rs-resume}).  The boot id used for server-restart detection (\texttt{\_bootId}) is stored the same way.
+
+\subsection{Cross-Screen Data Helpers}
+\label{sec:rs-appstate-data}
+
+The ``pass data between screens'' helpers on \texttt{Utils} are backed by \texttt{AppState}:
+
+\begin{longtable}{P{0.34\textwidth}P{0.58\textwidth}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{Utils.saveData(key, val)} & Store a value for another screen to read. \\
+\texttt{Utils.getData(key)} & Read a previously stored value (leaves it in place). \\
+\texttt{Utils.\allowbreak getAndEraseData(\allowbreak key)} & Read a value and remove it in one step (the common ``hand off once'' pattern). \\
+\bottomrule
+\end{longtable}
+
+\noindent
+These are stored under a \texttt{data.}\ sub-namespace inside \texttt{AppState}, so application data passed between screens can never collide with framework entries such as \texttt{\_uuid} or \texttt{\_bootId}:
+
+\begin{lstlisting}[style=javascript]
+// Screen A: stash the selected customer id, then navigate.
+Utils.saveData('selectedCustomerId', 12345);
+Router.go('/customer-detail');
+
+// Screen B: pick it up once.
+// 12345, then erased
+const id = Utils.getAndEraseData('selectedCustomerId');
+\end{lstlisting}
+
+\begin{notebox}
+Because these helpers ride on \texttt{AppState}, data passed between screens survives a reload and is per-tab (under the default backend).  An in-memory variable could not provide this --- a router-driven reload would wipe it --- which is why the helpers use persistent, namespaced storage.
+\end{notebox}
+
+\section{Router: Hash-Based Client-Side Routing}
+\label{sec:rs-router}
+
+\texttt{Router}\index{Router} (\texttt{src/main/frontend/kiss/Router.js}) gives each screen its own URL.  Instead of a single opaque page that loads screens invisibly, the application now has addressable locations such as \texttt{\#/controls} or \texttt{\#/customer/123}.
+
+\subsection{Why Hash Routing}
+\label{sec:rs-router-why}
+
+The router encodes the current screen in the URL \emph{hash} (the part after \texttt{\#}).  Hash routing needs no server-side URL rewriting, because the server never sees the hash --- it is processed entirely in the browser.  As a result the router works identically across every Kiss deployment target:
+
+\begin{itemize}
+  \item the development static server,
+  \item \texttt{file://} (opening the files directly),
+  \item Electron desktop, and
+  \item a deployed WAR served by Tomcat.
+\end{itemize}
+
+\noindent
+The benefits the router brings:
+
+\begin{itemize}
+  \item \textbf{Deep links and bookmarks} --- the hash changes per screen, so any screen can be linked to or bookmarked directly.
+  \item \textbf{Back/Forward become in-app navigation} --- pressing the browser Back button moves between the screens the user visited, rather than leaving the application.
+  \item \textbf{Session resume} --- a reload (or a followed deep link) lands on the same screen, validated lazily by the first backend call (Section~\ref{sec:rs-resume}).
+\end{itemize}
+
+\subsection{Two Navigation Levels}
+\label{sec:rs-router-levels}
+
+The router maps the hash onto Kiss's two existing navigation levels:
+
+\begin{description}[style=nextline]
+  \item[Full-body screens] A ``shell'' or the login page.  These are loaded by replacing \texttt{document.body}.  A route with no \texttt{tag} is a full-body screen.
+  \item[Sub-screens] Screens loaded into a region \emph{within} a shell --- for example the home shell's content area, \texttt{app-screen-area}.  A route with a \texttt{tag} is a sub-screen; the router first ensures the sub-screen's shell occupies the body, then loads the sub-screen into the named region.
+\end{description}
+
+\subsection{Route Definitions}
+\label{sec:rs-router-defs}
+
+A route is a path plus a definition object.  The definition fields are:
+
+\begin{longtable}{P{0.13\textwidth}P{0.79\textwidth}}
+\toprule
+\textbf{Field} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{page} & The \texttt{loadPage} path (without extension), \emph{or} a function returning one.  A function lets a route choose its page at navigation time --- for example, a device-aware mobile/desktop selection. \\
+\texttt{tag} & The id of the container element the screen loads into.  Omit it for a full-body screen (shell or login). \\
+\texttt{shell} & For a sub-screen (a route with a \texttt{tag}), the route whose page hosts it and must occupy the body first.  \textbf{Defaults to the default route} (the application's main shell), so it is usually omitted. \\
+\texttt{focus} & The id of the control to focus after the screen loads. \\
+\texttt{auth} & Defaults to \texttt{true} (the route requires a session).  Set it to \texttt{false} for public routes such as login. \\
+\bottomrule
+\end{longtable}
+
+\subsection{The Route Table (\texttt{routes.js})}
+\label{sec:rs-routes-file}
+
+Routes are registered in the application-owned file \texttt{src/main/frontend/routes.js}\index{routes.js} using \texttt{Router.add(path, def)}.  This is the one piece of the routing system that belongs to the application rather than the framework; add a route here for each addressable screen.  \texttt{index.js} calls \texttt{Router.start()} once the components are loaded.
+
+\begin{lstlisting}[style=javascript]
+// routes.js -- the application's route table
+(function () {
+
+    // A route's page may be a function for
+    // device-aware selection.
+    function loginPage() {
+        return (screen.height * screen.width < 600000)
+            ? 'mobile/login' : 'login';
+    }
+    function homePage() {
+        return (screen.height * screen.width < 600000)
+             ? 'mobile/page1' : 'screens/Framework/Framework';
+    }
+
+    // Full-body screens (no tag). /login is public; / is the
+    // default shell.
+    Router.add('/login', { page: loginPage, auth: false });
+    Router.add('/',      { page: homePage });
+
+    // Sub-screens loaded into the home shell's content region.
+    // shell defaults to '/', so it is omitted.
+    Router.add('/controls', {
+        page: 'screens/Controls/Controls',
+        tag: 'app-screen-area', focus: 'ctl-text' });
+    Router.add('/crud', {
+        page: 'screens/CRUD/CRUD',
+        tag: 'app-screen-area' });
+    Router.add('/users', {
+        page: 'screens/Users/Users',
+        tag: 'app-screen-area' });
+    Router.add('/customer/:id', {
+        page: 'screens/Customer/Customer',
+        tag: 'app-screen-area' });
+
+    // File-based fallback (see below): any unmatched URL is
+    // loaded as a screen under 'screens', into the home
+    // shell's content region.
+    Router.setScreenRoot('screens', { shell: '/',
+        tag: 'app-screen-area' });
+
+})();
+\end{lstlisting}
+
+\noindent
+\texttt{Router.setDefault(path)} changes the route used when the hash is empty or unmatched; it defaults to \texttt{'/'}.
+
+\subsection{Path Parameters}
+\label{sec:rs-router-params}
+
+A path segment of the form \texttt{:name} is a path parameter.  When the router matches such a route, it:
+
+\begin{enumerate}
+  \item parses the parameter values out of the URL,
+  \item passes them to the screen through the existing \texttt{loadPage} \texttt{argv} mechanism, and
+  \item makes them readable from anywhere via \texttt{Router.params()}.
+\end{enumerate}
+
+\noindent
+So a deep-linked screen can rebuild its state purely from the URL:
+
+\begin{lstlisting}[style=javascript]
+// Route:  Router.add('/customer/:id', {
+//             page: 'screens/Customer/Customer',
+//             tag: 'app-screen-area' });
+// URL:    #/customer/123
+
+// Inside screens/Customer/Customer.js:
+const id = Router.params().id;          // '123'
+const res = await Server.call(WS, 'getCustomer', { id });
+\end{lstlisting}
+
+\subsection{File-Based Fallback Routing}
+\label{sec:rs-router-fallback}
+
+Registering a route for every screen is unnecessary.  \texttt{Router.setScreenRoot(root, \{shell, tag\})} enables \emph{file-based fallback}: a URL that matches no registered route is treated as a screen path under \texttt{root}.
+
+With root \texttt{'screens'}, the URL \texttt{\#/Reports/Daily} loads \texttt{screens/Reports/Daily} into the configured shell and region --- no \texttt{Router.add()} required.  Register a route explicitly only for screens that need a clean or stable URL, path parameters, or special metadata (such as \texttt{auth:\ false}); every other screen resolves by convention.
+
+The options control where fallback screens render: \texttt{shell} defaults to the default route, and without a \texttt{tag} they load full-body.  Three rules keep fallback routing safe:
+
+\begin{itemize}
+  \item \textbf{Fallback screens always require authentication.}  There is no way to expose a public screen by convention --- a public screen must be registered explicitly with \texttt{auth:\ false}.
+  \item \textbf{No path traversal.}  Empty segments and \texttt{.}\ / \texttt{..}\ segments are rejected, so a URL cannot escape the screen root.
+  \item \textbf{Every screen file under the root becomes URL-addressable.}  This is the point of the feature, but it is also a security consideration: with fallback enabled, the route table is no longer an allowlist.  Anything reachable as a file under \texttt{root} can be navigated to (subject to the auth gate).
+\end{itemize}
+
+\begin{warnbox}
+Enabling \texttt{setScreenRoot} makes the route table no longer an allowlist of reachable screens.  If a screen must never be directly addressable, either keep it outside the screen root or do not enable fallback routing.  All fallback screens still pass through the authentication gate, so an unauthenticated user cannot reach them.
+\end{warnbox}
+
+\subsection{The \texttt{?tag} Override}
+\label{sec:rs-router-tagoverride}
+
+A \texttt{?tag=} query parameter on the URL --- or the second argument to \texttt{Router.go(path, tag)} --- overrides a screen's region at navigation time.  This lets the same screen be directed into a different container without a separate route.  For example, \texttt{Router.go('/controls', 'side-panel')} loads the Controls screen into \texttt{side-panel} instead of its route's default \texttt{app-screen-area}.
+
+\subsection{The API}
+\label{sec:rs-router-api}
+
+All methods are static.
+
+\begin{longtable}{P{0.26\textwidth}P{0.66\textwidth}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{add(path, def)} & Register a route; \texttt{path} may contain \texttt{:name} parameters. \\
+\texttt{setDefault(\allowbreak path)} & Set the route used when the hash is empty or unmatched (default \texttt{'/'}). \\
+\texttt{setScreenRoot(\allowbreak root, opts)} & Enable file-based fallback routing under \texttt{root}; \texttt{opts} is \texttt{\{shell, tag\}}. \\
+\texttt{start()} & Begin routing: listen for hash changes and dispatch the current hash.  Call once at startup. \\
+\texttt{isStarted()} & \texttt{true} once \texttt{start()} has been called. \\
+\texttt{go(path, tag?)} & Navigate to a path, pushing a Back-button history entry.  The optional \texttt{tag} overrides the route's region. \\
+\texttt{replace(path)} & Navigate to a path, replacing the current history entry (no new Back step). \\
+\texttt{params()} & The current route's path parameters, e.g.\ \texttt{\{id:\ '123'\}}. \\
+\texttt{query()} & The current hash query string parsed to an object, e.g.\ \texttt{\{return:\ '\#/controls'\}}. \\
+\texttt{returnTarget()} & The post-login destination: the \texttt{return} query parameter when present, otherwise \texttt{'/'}. \\
+\texttt{current()} & The currently matched route path. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Navigation: \texttt{go} vs.\ \texttt{replace}}
+\label{sec:rs-router-go}
+
+The two navigation methods differ only in their effect on browser history:
+
+\begin{description}[style=nextline]
+  \item[\texttt{Router.go(path, tag?)}] Pushes a new history entry, so the previous screen becomes the Back-button target.  Use this for ordinary navigation.
+  \item[\texttt{Router.replace(path)}] Replaces the current history entry, leaving no Back step.  Use this when going Back to the current location would be wrong --- most notably after login, so that pressing Back does not return to the login screen.
+\end{description}
+
+\section{The Dispatch Algorithm}
+\label{sec:rs-dispatch}
+
+The same algorithm runs when \texttt{Router.start()} is called and on every \texttt{hashchange} (which fires whenever the hash changes, including Back/Forward).  Conceptually:
+
+\begin{enumerate}
+  \item \textbf{Match.}  Parse the hash into a path plus a query object.  Find the registered route whose pattern matches.  If none matches and file-based fallback is enabled, build a fallback route under the screen root.  If there is still no match, fall back to the default route.
+  \item \textbf{Auth gate.}  If the route requires authentication (\texttt{auth !== false}) and \texttt{AppState.get('\_uuid')} is absent, \texttt{replace('/login?return=<hash>')} --- redirecting to login while remembering where the user was headed.
+  \item \textbf{Ensure the shell.}  For a sub-screen (a route with a \texttt{tag}), make sure the sub-screen's shell page occupies the body first; for a full-body screen, load it directly into the body.
+  \item \textbf{Load.}  \texttt{loadPage} the screen --- into the named region for a sub-screen, or into the body for a full-body screen --- passing the path parameters and the focus id.
+\end{enumerate}
+
+\noindent
+The shell is reloaded only when the body is not already showing it, so navigating between sub-screens of the same shell does not rebuild the shell each time.
+
+\section{Session Resume and the Auth Gate}
+\label{sec:rs-resume}
+
+The auth gate (step 2 above) plus persistent \texttt{AppState} produce \emph{session resume} for free.  Consider a user who has logged in and is sitting on \texttt{\#/customer/123} when the tab is reloaded:
+
+\begin{enumerate}
+  \item On reload, the bootstrap re-initializes \texttt{AppState}.  Because the backend is \texttt{sessionStorage} (the default), the persisted \texttt{\_uuid} is still present.
+  \item \texttt{Router.start()} dispatches the current hash, \texttt{\#/customer/123}.  The route requires auth; \texttt{AppState.get('\_uuid')} is present, so the gate passes and the screen loads straight through.
+  \item The session is validated \emph{lazily} by the first \texttt{/rest} call the screen makes.  If the session is still valid, nothing more happens --- the user simply resumes.
+  \item If the session has expired, that first call returns \texttt{\_ErrorCode 2}, which triggers \texttt{Server.logout(true)} --- clearing \texttt{AppState} and reloading a fresh \texttt{index.html} onto \texttt{/login} \emph{carrying the current location as the \texttt{return}}.  After re-authenticating, the user lands back on \texttt{\#/customer/123}.
+\end{enumerate}
+
+\noindent
+The deep-link case is identical: opening \texttt{\#/customer/123} in a tab that already has a persisted \texttt{\_uuid} loads straight through and is validated lazily by the first backend call.
+
+\subsection{Login and Logout Integration}
+\label{sec:rs-resume-loginout}
+
+The login and logout paths close the loop:
+
+\begin{description}[style=nextline]
+  \item[Login] On a successful login, \texttt{login.js} calls \texttt{Router.replace(Router.query().return || '/')} --- equivalently \texttt{Router.replace(Router.returnTarget())}.  It uses \texttt{replace} (not \texttt{go}) so that pressing Back does not return to the login screen, and it honors the \texttt{return} the auth gate stashed, so the user lands back where they were headed.
+  \item[Logout] \texttt{Server.logout()} clears \texttt{AppState} and performs a \emph{full page reload} of a fresh \texttt{index.html}, landing on the login route.  The login route's URL form (\texttt{\#/login}, \texttt{\#/login?return=...}) is defined in exactly one place --- \texttt{Router.loginHash(captureReturn)}\index{loginHash}, also used by \texttt{Router.gotoLogin()} --- so an intentional logout (\texttt{Server.logout()}) lands on \texttt{/login} with no \texttt{return}, while a session-expiry logout (\texttt{Server.logout(true)}) captures the current location as the \texttt{return} for resume.  The reload re-boots the tab on the latest cache-busted code --- which is how an open tab picks up a new release after a redeploy (Chapter~\ref{ch:caching-security}).
+\end{description}
+
+\begin{lstlisting}[style=javascript]
+// login.js (on success)
+const res = await Server.call('', 'Login', data);
+if (res._Success) {
+    // persisted through AppState
+    Server.setUUID(res.uuid);
+    // back to where the user was headed, or '/'
+    Router.replace(Router.returnTarget());
+}
+\end{lstlisting}
+
+\subsection{Browser Back/Forward Is Now In-App}
+\label{sec:rs-resume-back}
+
+Because each screen has its own hash, the browser Back and Forward buttons move \emph{between screens} rather than leaving the application.  This is the intended behavior.  The per-screen unsaved-changes guard (\texttt{DOMUtils.preventNavigation}, Chapter~\ref{ch:authentication}) is available as an opt-in for screens that must warn before navigating away.
+
+\begin{notebox}
+\textbf{Session expiry vs.\ server restart are detected separately.}  The resume path above handles an expired \emph{session} --- the back end is still the same process, but the session timed out.  A back-end \emph{restart} (the process itself was bounced, invalidating every in-memory session) is detected by a distinct boot-id mechanism that runs once at startup, before routing begins.  See the ``Server-Restart Detection'' material in Chapter~\ref{ch:authentication}.
+\end{notebox}
+
+\section{Putting It Together}
+\label{sec:rs-together}
+
+A minimal but complete setup looks like this:
+
+\begin{lstlisting}[style=javascript]
+// routes.js -- application-owned
+(function () {
+    Router.add('/login', { page: 'login', auth: false });
+    Router.add('/',
+        { page: 'screens/Framework/Framework' });
+    Router.add('/customer/:id', {
+        page: 'screens/Customer/Customer',
+        tag: 'app-screen-area'
+    });
+    Router.setScreenRoot('screens', { shell: '/',
+        tag: 'app-screen-area' });
+})();
+
+// index.js -- start routing once components are ready
+Utils.afterComponentsLoaded(function () {
+    Router.start();
+});
+
+// Any screen -- navigate by URL, pass data, read params
+// survives reload, per-tab
+Utils.saveData('lastViewed', Date.now());
+// pushes history; #/customer/123
+Router.go('/customer/123');
+// ... inside Customer.js:
+const id = Router.params().id;              // '123'
+\end{lstlisting}
+
+\noindent
+With this in place: every screen is addressable and bookmarkable, the Back button navigates within the application, a reload resumes the user's location, a brand-new tab requires its own login (under the per-tab default), and arbitrary application state survives navigation through \texttt{AppState} and the \texttt{Utils.saveData}/\texttt{getData}/\texttt{getAndEraseData} helpers.

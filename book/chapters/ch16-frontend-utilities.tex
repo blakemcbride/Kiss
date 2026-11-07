@@ -1,0 +1,312 @@
+\chapter{Frontend Utility Classes}
+\label{ch:fe-utilities}
+
+Kiss provides a suite of JavaScript utility classes for date/time handling, number formatting, DOM manipulation, and general-purpose operations.  This chapter covers each class with examples.
+
+\section{DateUtils}
+\label{sec:feu-dateutils}
+
+\texttt{DateUtils}\index{DateUtils.js} handles dates as YYYYMMDD integers --- the same format used by the Kiss backend.  This avoids timezone ambiguity and makes date arithmetic simple.
+
+\begin{lstlisting}[style=javascript]
+let today = DateUtils.today();              // e.g., 20260404
+let formatted = DateUtils.intToStr4(today); // "04/04/2026"
+let short = DateUtils.intToStr2(today);     // "04/04/26"
+let sql = DateUtils.intToSQL(today);        // "2026-04-04"
+// "Sat April 4, 2026"
+let long = DateUtils.longFormat(today);
+\end{lstlisting}
+
+\subsection{Conversion}
+
+\begin{lstlisting}[style=javascript]
+// String to integer
+let dt = DateUtils.strToInt("04/04/2026");  // 20260404
+let dt2 = DateUtils.SQLtoInt("2026-04-04"); // 20260404
+
+// Universal converter (accepts Date, string, or number)
+// today as YYYYMMDD
+let dt3 = DateUtils.toInt(new Date());
+
+// Integer to JavaScript Date
+let jsDate = DateUtils.intToDate(20260404);
+\end{lstlisting}
+
+\subsection{Date Arithmetic}
+
+\begin{lstlisting}[style=javascript]
+let next = DateUtils.intAddDays(20260404, 7);    // 20260411
+let prev = DateUtils.intAddDays(20260404, -30);  // 20260305
+let diff = DateUtils.daysDifference(20260404, 20260101); // 93
+// 12
+let months = DateUtils.monthsDifference(20260404, 20250404);
+\end{lstlisting}
+
+\subsection{Date Components}
+
+\begin{lstlisting}[style=javascript]
+let y = DateUtils.year(20260404);       // 2026
+let m = DateUtils.month(20260404);      // 4
+let d = DateUtils.day(20260404);        // 4
+let dow = DateUtils.dayOfWeek(20260404);     // 6 (Saturday)
+let name = DateUtils.dayOfWeekName(20260404); // "Saturday"
+let mon = DateUtils.monthName(20260404);      // "April"
+\end{lstlisting}
+
+\subsection{Validation}
+
+\begin{lstlisting}[style=javascript]
+DateUtils.isValid(20260404);       // true
+DateUtils.isValid(20261332);       // false (invalid month/day)
+DateUtils.isSQLDate("2026-04-04"); // true
+\end{lstlisting}
+
+\begin{notebox}
+\texttt{DateUtils} is locale-aware.  \texttt{strToInt()} and \texttt{intToStr4()} automatically detect whether the locale uses MM/DD/YYYY or DD/MM/YYYY format.
+\end{notebox}
+
+\section{TimeUtils}
+\label{sec:feu-timeutils}
+
+\texttt{TimeUtils}\index{TimeUtils.js} handles times as HHMM integers (e.g., 1430 for 2:30 PM).
+
+\begin{lstlisting}[style=javascript]
+let now = TimeUtils.current();              // e.g., 1430
+let ampm = TimeUtils.format(1430);          // "2:30 PM"
+// "02:30 PM" (zero-filled hour)
+let zf   = TimeUtils.format(1430, true);
+\end{lstlisting}
+
+\subsection{Conversion and Parsing}
+
+\begin{lstlisting}[style=javascript]
+// Parse various formats
+TimeUtils.strToInt("2:30 PM");   // 1430
+TimeUtils.strToInt("14:30");     // 1430
+TimeUtils.strToInt("1430");      // 1430
+
+// Universal converter
+TimeUtils.toInt(new Date());     // current time as HHMM
+\end{lstlisting}
+
+\subsection{Time Arithmetic}
+
+\begin{lstlisting}[style=javascript]
+TimeUtils.addHours(1430, 2);      // 1630
+TimeUtils.addMinutes(1430, 45);   // 1515
+TimeUtils.diff(1630, 1430);       // 120 (minutes)
+TimeUtils.totalMinutes(1430);     // 870
+TimeUtils.minutesToTime(870);     // 1430
+\end{lstlisting}
+
+\subsection{Time Components}
+
+\begin{lstlisting}[style=javascript]
+TimeUtils.hours(1430);    // 14
+TimeUtils.minutes(1430);  // 30
+\end{lstlisting}
+
+\section{DateTimeUtils}
+\label{sec:feu-datetimeutils}
+
+\texttt{DateTimeUtils}\index{DateTimeUtils.js} handles combined date/time values as YYYYMMDDHHMM integers and provides extensive timezone support.
+
+\begin{lstlisting}[style=javascript]
+// Current date/time
+let now = DateTimeUtils.now();  // e.g., 202604041430
+
+// Create from date + time
+let dt = DateTimeUtils.create(20260404, 1430); // 202604041430
+
+// Format for display (locale-aware)
+DateTimeUtils.formatDate(202604041430);
+    // "04/04/2026 2:30 PM"
+\end{lstlisting}
+
+\subsection{Epoch Millisecond Handling}
+
+Backend datetime values often arrive as epoch milliseconds.  \texttt{DateTimeUtils} handles this automatically:
+
+\begin{lstlisting}[style=javascript]
+// Backend returns epoch millis (e.g., 1737292576000)
+let formatted = DateTimeUtils.formatDate(res.createdAt);
+    // "01/19/2025 11:36 AM"
+\end{lstlisting}
+
+\begin{warnbox}
+Always use \texttt{DateTimeUtils.formatDate()} to format backend datetime values.  Never manually parse epoch milliseconds with substring operations --- that produces garbage like ``49/12/1768''.
+\end{warnbox}
+
+\subsection{Component Extraction}
+
+\begin{lstlisting}[style=javascript]
+let dt = 202604041430;
+DateTimeUtils.getDate(dt);  // 20260404 (YYYYMMDD)
+DateTimeUtils.getTime(dt);  // 1430 (HHMM)
+\end{lstlisting}
+
+\subsection{DateTime Arithmetic (DST-Aware)}
+
+\begin{lstlisting}[style=javascript]
+let dt = 202604041430;
+DateTimeUtils.addDays(dt, 7);      // 202604111430
+DateTimeUtils.addHours(dt, 3);     // 202604041730
+DateTimeUtils.addMinutes(dt, 90);  // 202604041600
+DateTimeUtils.addMonths(dt, 1);    // 202605041430
+DateTimeUtils.addYears(dt, 1);     // 202704041430
+\end{lstlisting}
+
+\noindent
+All arithmetic methods accept an optional timezone parameter and handle DST transitions correctly.
+
+\subsection{Timezone Support}
+
+\begin{lstlisting}[style=javascript]
+// Get local timezone
+DateTimeUtils.localZone();           // "America/New_York"
+DateTimeUtils.getLocalTimezoneShortText(); // "EDT"
+
+// Convert between timezones
+DateTimeUtils.epochToDisplayEpoch(
+    epochMs, 'America/New_York', 'America/Chicago');
+\end{lstlisting}
+
+\section{NumberUtils}
+\label{sec:feu-numberutils}
+
+\texttt{NumberUtils}\index{NumberUtils.js} provides number comparison and rounding:
+
+\begin{lstlisting}[style=javascript]
+// Approximate equality (useful for floating-point)
+NumberUtils.floatEqual(0.1 + 0.2, 0.3, 0.0001); // true
+
+// Rounding
+NumberUtils.round(3.14159, 2);     // 3.14
+NumberUtils.roundUp(3.141, 2);     // 3.15
+NumberUtils.roundDown(3.149, 2);   // 3.14
+\end{lstlisting}
+
+\section{DOMUtils}
+\label{sec:feu-domutils}
+
+\texttt{DOMUtils}\index{DOMUtils.js} is the DOM abstraction layer.  It provides methods for element access, manipulation, visibility, attributes, events, and dimensions.
+
+\begin{warnbox}
+\textbf{Only code under the \texttt{kiss/} directory should use DOMUtils directly.}  Application code should use the Kiss component APIs (\texttt{\$\$()}, \texttt{getValue()}, etc.) instead.  This layered architecture ensures consistent DOM manipulation and easier maintenance.
+\end{warnbox}
+
+\noindent
+Key DOMUtils categories:
+
+\begin{description}[style=nextline]
+  \item[Element access] \texttt{getElement(id)}, \texttt{query(selector)}, \texttt{queryAll(selector)}
+  \item[Creation] \texttt{create(tag, attrs)}, \texttt{append(parent, html)}
+  \item[Visibility] \texttt{show(el)}, \texttt{hide(el)}, \texttt{isVisible(el)}
+  \item[Classes] \texttt{addClass(el, cls)}, \texttt{removeClass(el, cls)}, \texttt{toggleClass(el, cls)}
+  \item[Attributes] \texttt{attr(el, name, val)}, \texttt{prop(el, name, val)}, \texttt{css(el, prop, val)}
+  \item[Content] \texttt{text(el, text)}, \texttt{html(el, html)}, \texttt{val(el, value)}
+  \item[Events] \texttt{on(el, event, handler)}, \texttt{off(el, event, handler)}
+  \item[Navigation] \texttt{children(el)}, \texttt{parent(el)}, \texttt{closest(el, selector)}
+  \item[Dimensions] \texttt{width(el)}, \texttt{height(el)}, \texttt{offset(el)}
+  \item[Navigation protection] \texttt{preventNavigation(isActive, onBack)}
+\end{description}
+
+\subsection{Browser Back Button Prevention}
+
+\texttt{DOMUtils.preventNavigation()}\index{DOMUtils.preventNavigation} prevents accidental back-button and page-reload navigation:
+
+\begin{lstlisting}[style=javascript]
+DOMUtils.preventNavigation(
+    function () { return true; },  // active when returns true
+    function () {                  // called on back button
+        Utils.yesNo('Confirm',
+            'Are you sure you want to logout?',
+            function () { Server.logout(); });
+    }
+);
+\end{lstlisting}
+
+\begin{notebox}
+Chrome blocks navigation prevention until the page has received a user gesture (click, keypress, or touch).  Before any interaction, the back button cannot be prevented.  After the first click or keypress, full protection activates.
+\end{notebox}
+
+\section{Utils}
+\label{sec:feu-utils}
+
+\texttt{Utils}\index{Utils.js} is the general-purpose utility class.  Its most important functions are covered in other chapters:
+
+\begin{itemize}
+  \item \texttt{Utils.loadPage()} --- Chapter~\ref{ch:frontend}
+  \item \texttt{Utils.popup\_open()} / \texttt{popup\_close()} --- Chapter~\ref{ch:popups}
+  \item \texttt{Utils.showMessage()} / \texttt{Utils.yesNo()} --- Chapter~\ref{ch:popups}
+  \item \texttt{\$\$()} --- Chapter~\ref{ch:frontend}
+\end{itemize}
+
+\noindent
+Additional utility methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{Utils.cleanup()} & Remove event handlers and state from the current screen before loading a new one. \\
+\texttt{Utils.showReport(url)} & Open a report URL in a new browser tab. \\
+\texttt{Utils.waitMessage(msg)} & Show a non-modal progress message. \\
+\texttt{Utils.waitMessageEnd()} & Dismiss the progress message. \\
+\texttt{Utils.rescan()} & Activate custom components in newly injected HTML. \\
+\texttt{Utils.\allowbreak afterComponentsLoaded(\allowbreak fn)} & Execute a function after all components are loaded. \\
+\texttt{Utils.\allowbreak useComponent(\allowbreak name)} & Register a UI component for use. \\
+\texttt{Utils.getAppUrl()} & Get the application's base URL. \\
+\texttt{Utils.saveData(key, val)} & Save a cross-screen data item by key.  Backed by \texttt{AppState}\index{AppState}, so per the configured store (Chapter~\ref{ch:routing-state}) it survives page navigation and reload; the value must be JSON-serializable. \\
+\texttt{Utils.getData(key)} & Retrieve a cross-screen data item by key. \\
+\texttt{Utils.\allowbreak getAndEraseData(\allowbreak key)} & Retrieve a cross-screen data item by key and remove it, returning its prior value. \\
+\bottomrule
+\end{longtable}
+
+\section{MutableString}
+\label{sec:feu-mutablestring}
+
+\texttt{MutableString}\index{MutableString.js} provides efficient character-level string modifications:
+
+\begin{lstlisting}[style=javascript]
+let ms = new MutableString("Hello World");
+ms.setCharAt(5, '-');          // "Hello-World"
+ms.insert(5, " Beautiful");    // "Hello Beautiful-World"
+ms.delete(5);                  // "Hell Beautiful-World"
+ms.append("!");                // "Hell Beautiful-World!"
+ms.replace("World", "Day");   // "Hell Beautiful-Day!"
+let ch = ms.charAt(0);        // "H"
+let len = ms.length();        // 20
+let str = ms.toString();      // "Hell Beautiful-Day!"
+ms.clear();                   // ""
+\end{lstlisting}
+
+\section{Editor}
+\label{sec:feu-editor}
+
+\texttt{Editor}\index{Editor.js} wraps CKEditor 5 for rich text editing:
+
+\begin{lstlisting}[style=javascript]
+// Create editor in a container div
+const editor = await Editor.create('editor-container');
+
+// Get/set content
+let html = editor.getHtml();
+let text = editor.getText();
+editor.setHtml('<p>Hello <b>World</b></p>');
+editor.clear();
+
+// Read-only mode
+editor.readOnly();
+editor.readWrite();
+
+// Print editor contents
+editor.printEditorContent();
+
+// Cleanup (usually handled by framework)
+editor.dispose();
+\end{lstlisting}
+
+\noindent
+Editors are automatically cleaned up when screens unload via the editor context management system, similar to grids.

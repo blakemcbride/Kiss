@@ -1,0 +1,233 @@
+\chapter{The Schema Graph}
+\label{ch:schema-graph}
+
+The \texttt{SchemaGraph}\index{SchemaGraph} models a database schema as a graph where tables are nodes and foreign key relationships are edges.  It powers the \texttt{QueryBuilder}'s automatic join resolution (Chapter~\ref{ch:query-builder}).  Most applications use it indirectly through \texttt{db.newQueryBuilder()}, but understanding it helps when debugging join paths or working with schemas that lack declared foreign keys.
+
+\section{Graph Model}
+\label{sec:sg-model}
+
+A \texttt{SchemaGraph} is an undirected graph:
+
+\begin{itemize}
+  \item \textbf{Nodes} are database table names.
+  \item \textbf{Edges} are foreign key relationships, each connecting two tables via their key columns.
+  \item Edges are traversable in both directions: knowing that \texttt{employee.department\_id} references \texttt{department.department\_id} lets the builder join from either table to the other.
+  \item Both single-column and composite (multi-column) foreign keys are supported.
+\end{itemize}
+
+\section{Building a Schema Graph}
+\label{sec:sg-building}
+
+\subsection{From Database Metadata}
+
+The simplest approach reads the schema directly from the live database connection using JDBC \texttt{DatabaseMetaData}:
+
+\begin{lstlisting}[style=java]
+SchemaGraph graph = SchemaGraph.fromDatabase(conn);
+\end{lstlisting}
+
+\noindent
+This discovers all tables and their foreign key relationships.  It works well for databases with properly declared foreign keys.
+
+\subsection{Cached per Schema (Thread-Safe)}
+
+For applications with multiple schemas or concurrent requests, use the cached variant:
+
+\begin{lstlisting}[style=java]
+SchemaGraph graph = SchemaGraph.fromDatabase(conn, "mySchema");
+\end{lstlisting}
+
+\noindent
+This uses a thread-safe cache (double-checked locking with \texttt{ConcurrentHashMap}) so the schema graph is built only once per schema name, regardless of how many threads request it simultaneously.
+
+\subsection{Programmatic Declaration}
+
+For databases without declared foreign keys (common in legacy systems), build the graph manually:
+
+\begin{lstlisting}[style=java]
+SchemaGraph graph = new SchemaGraph();
+graph.addForeignKey("employee", "department_id",
+                    "department", "department_id");
+graph.addForeignKey("assignment", "employee_id",
+                    "employee", "employee_id");
+graph.addForeignKey("assignment", "project_id",
+                    "project", "project_id");
+\end{lstlisting}
+
+\subsection{Composite Foreign Keys}
+
+\begin{lstlisting}[style=java]
+graph.addForeignKey("order_line",
+    new String[]{"order_id", "product_id"},
+    "order_product",
+    new String[]{"order_id", "product_id"});
+\end{lstlisting}
+
+\subsection{Hybrid Approach}
+
+Start from database metadata and add undeclared relationships:
+
+\begin{lstlisting}[style=java]
+SchemaGraph graph = SchemaGraph.fromDatabase(conn);
+// Add a relationship for a legacy table without declared FKs
+graph.addForeignKey("audit_log", "user_id",
+                    "employee", "employee_id");
+\end{lstlisting}
+
+\begin{tipbox}
+The hybrid approach is the best option for databases that have some declared foreign keys but also contain legacy tables without formal constraints.
+\end{tipbox}
+
+\section{File Caching}
+\label{sec:sg-caching}
+
+Building a schema graph from database metadata takes a few hundred milliseconds for large schemas.  For faster startup, save the graph to a file and load it later:
+
+\begin{lstlisting}[style=java]
+// Save (once, during setup or schema migration)
+graph.saveToFile("schema-cache.txt");
+
+// Load (sub-millisecond)
+SchemaGraph graph = SchemaGraph.loadFromFile(
+    "schema-cache.txt");
+\end{lstlisting}
+
+\noindent
+The file format is a simple text format with \texttt{TABLE} and \texttt{FK} lines:
+
+\begin{lstlisting}
+TABLE employee
+TABLE department
+FK employee department_id department department_id
+FK assignment employee_id employee employee_id
+\end{lstlisting}
+
+\section{In-Memory Cache Management}
+\label{sec:sg-cache-mgmt}
+
+The per-schema cache can be cleared when the database schema changes:
+
+\begin{lstlisting}[style=java]
+// Clear all cached schema graphs
+SchemaGraph.clearSchemaCache();
+
+// Clear a specific schema
+SchemaGraph.clearSchemaCache("mySchema");
+\end{lstlisting}
+
+\section{Querying the Graph}
+\label{sec:sg-querying}
+
+\begin{lstlisting}[style=java]
+// Check if a table exists in the graph
+boolean exists = graph.hasTable("employee");
+
+// Get all table names
+Set<String> tables = graph.getTables();
+
+// Get all edges (FK relationships) for a table
+List<SchemaGraph.Edge> edges = graph.getEdges("employee");
+for (SchemaGraph.Edge e : edges) {
+    System.out.println(e.getFromTable() + "." +
+        e.getFromColumn() + " -> " +
+        e.getToTable() + "." + e.getToColumn());
+}
+\end{lstlisting}
+
+\section{Finding Join Paths}
+\label{sec:sg-paths}
+
+The core algorithm finds the shortest join path connecting a set of tables:
+
+\begin{lstlisting}[style=java]
+Set<String> tables = Set.of("employee", "department",
+    "building");
+List<SchemaGraph.Edge> path =
+    graph.findJoinPath(tables, "employee");
+\end{lstlisting}
+
+\noindent
+The second parameter is the root table (the FROM table in the generated SQL).  The method returns an ordered list of edges representing the required JOINs.
+
+The algorithm uses BFS (breadth-first search), which:
+\begin{itemize}
+  \item Always finds the shortest path (fewest joins).
+  \item Runs in sub-millisecond time even for schemas with 300+ tables.
+  \item Uses a greedy Steiner tree approximation for connecting multiple tables.
+  \item Throws \texttt{SQLException} if no path exists between some tables.
+\end{itemize}
+
+\section{The Edge Inner Class}
+\label{sec:sg-edge}
+
+\texttt{SchemaGraph.Edge}\index{SchemaGraph.Edge} represents a foreign key relationship.  Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getFromTable()} & Child table containing the FK column(s). \\
+\texttt{getToTable()} & Parent/referenced table. \\
+\texttt{getFromColumn()} & FK column name (first column if composite). \\
+\texttt{getToColumn()} & Referenced column name (first if composite). \\
+\texttt{getFromColumns()} & All FK column names (unmodifiable list). \\
+\texttt{getToColumns()} & All referenced column names (unmodifiable list). \\
+\texttt{isComposite()} & \texttt{true} if multi-column foreign key. \\
+\texttt{buildOnCondition(from, to)} & Builds the ON clause string for a JOIN. \\
+\bottomrule
+\end{longtable}
+
+\section{Integration with Connection}
+\label{sec:sg-connection}
+
+A \texttt{Connection} lazily builds and caches its schema graph:
+
+\begin{lstlisting}[style=java]
+// Get or build the schema graph for this connection
+SchemaGraph graph = db.getSchemaGraph();
+
+// Set the default schema
+db.setSchema("myschema");
+\end{lstlisting}
+
+\noindent
+When you call \texttt{db.newQueryBuilder()}, the builder automatically uses the connection's schema graph.  Most applications never interact with \texttt{SchemaGraph} directly.
+
+\section{Integration with Command}
+\label{sec:sg-command}
+
+The \texttt{Command} class also provides \texttt{newQueryBuilder()}, which creates a \texttt{QueryBuilder} bound to that specific command.  The schema graph is obtained from the command's parent connection.
+
+This is essential when multiple queries must be active simultaneously on the same connection.  Each \texttt{Command} wraps its own \texttt{PreparedStatement}, avoiding interference between concurrent result sets.  See Section~\ref{sec:qb-command} for usage examples.
+
+\section{Example: Inspecting a Schema}
+\label{sec:sg-example}
+
+\begin{lstlisting}[style=groovy]
+void inspectSchema(JSONObject injson, JSONObject outjson,
+                   Connection db, ProcessServlet servlet) {
+    SchemaGraph graph = db.getSchemaGraph()
+
+    // List all tables
+    Set<String> tables = graph.getTables()
+    outjson.put("tableCount", tables.size())
+
+    // For each table, list its relationships
+    JSONArray tableInfo = new JSONArray()
+    for (String table : tables) {
+        JSONObject info = new JSONObject()
+        info.put("name", table)
+        List<SchemaGraph.Edge> edges = graph.getEdges(table)
+        JSONArray rels = new JSONArray()
+        for (SchemaGraph.Edge e : edges) {
+            rels.put(e.getFromTable() + "." +
+                e.getFromColumn() + " -> " +
+                e.getToTable() + "." + e.getToColumn())
+        }
+        info.put("relationships", rels)
+        tableInfo.put(info)
+    }
+    outjson.put("tables", tableInfo)
+}
+\end{lstlisting}

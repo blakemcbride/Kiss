@@ -1,0 +1,244 @@
+\chapter{Groovy for Kiss Developers}
+\label{ch:groovy}
+
+Groovy is the primary language for Kiss backend services.  This chapter covers the Groovy features most relevant to Kiss development.  For a more complete Groovy primer, see Appendix~\ref{ch:groovy-primer}.  A standalone overview of the language --- what it is, why it was chosen, and how it is used in Kiss --- is also distributed with the project as \texttt{manual/\allowbreak{}GroovyOverview.html}; readers new to Groovy may find it useful to skim before continuing.
+
+\section{Why Groovy}
+\label{sec:groovy-why}
+
+Groovy compiles to JVM bytecode and interoperates seamlessly with Java.  Every Java library works unchanged.  Groovy adds:
+
+\begin{itemize}
+  \item Dynamic and optional typing --- less boilerplate.
+  \item Closures --- anonymous functions for concise iteration and callbacks.
+  \item String interpolation --- embed expressions directly in strings.
+  \item Safe navigation --- avoid null pointer exceptions with \texttt{?.}.
+  \item Simplified syntax --- optional semicolons, optional parentheses, optional \texttt{return}.
+\end{itemize}
+
+\noindent
+Kiss services run at compiled speed, not interpreted speed.  Groovy source files are compiled to bytecode on first access and recompiled automatically when the file changes.
+
+\section{Key Differences from Java}
+\label{sec:groovy-diffs}
+
+\begin{longtable}{P{4.2cm}P{6.3cm}}
+\toprule
+\textbf{Java} & \textbf{Groovy} \\
+\midrule
+\endhead
+\texttt{String[] arr = new String[]\{"a"\};} & \texttt{def arr = ["a"]} \\
+\texttt{map.get("key")} & \texttt{map.key} or \texttt{map["key"]} \\
+\texttt{for (String s : list)} & \texttt{for (s in list)} or \texttt{list.each \{ \}} \\
+\texttt{obj != null ? obj.method() : null} & \texttt{obj?.method()} \\
+\texttt{value != null ? value : def} & \texttt{value ?: defaultValue} \\
+\texttt{String.format("\%s is \%d", n, a)} & \texttt{"\$\{n\} is \$\{a\}"} \\
+Semicolons required & Semicolons optional \\
+\texttt{return} required & Last expression is implicit return \\
+Types required & \texttt{def} for dynamic typing \\
+\bottomrule
+\end{longtable}
+
+\section{Variables and Types}
+\label{sec:groovy-types}
+
+Groovy supports both explicit types and dynamic typing with \texttt{def}:
+
+\begin{lstlisting}[style=groovy]
+// Explicit types (same as Java)
+String name = "Alice"
+int count = 42
+double salary = 75000.50
+
+// Dynamic typing with def
+def name = "Alice"     // inferred as String
+def count = 42         // inferred as Integer
+def list = [1, 2, 3]  // inferred as ArrayList
+// inferred as LinkedHashMap
+def map = [name: "Alice", age: 30]
+\end{lstlisting}
+
+\begin{tipbox}
+In Kiss services, use explicit types for method parameters and return values (clarity for other developers), and \texttt{def} for local variables where the type is obvious from context.
+\end{tipbox}
+
+\section{String Interpolation}
+\label{sec:groovy-strings}
+
+Groovy distinguishes between single-quoted strings (plain) and double-quoted strings (interpolated):
+
+\begin{lstlisting}[style=groovy]
+String name = "Alice"
+int age = 30
+
+// GStrings (interpolated) - double quotes
+println "Hello, ${name}! Age: ${age}"
+println "Next year: ${age + 1}"
+
+// Plain strings - single quotes
+println 'No interpolation: ${name}'  // prints literally
+
+// Multi-line strings - triple quotes
+def sql = """
+    SELECT *
+    FROM employee
+    WHERE active = 'Y'
+"""
+\end{lstlisting}
+
+\section{Safe Navigation and Elvis Operator}
+\label{sec:groovy-safe}
+
+These two operators eliminate most null-checking boilerplate:
+
+\begin{lstlisting}[style=groovy]
+// Safe navigation: returns null if employee is null
+String dept = employee?.department?.name
+
+// Elvis operator: returns right side if left is null
+String dept = employee?.department?.name ?: "Unknown"
+
+// Combined pattern in Kiss services
+String email = injson.getString("email")?.toLowerCase() ?: ""
+\end{lstlisting}
+
+\section{Closures}
+\label{sec:groovy-closures}
+
+Closures are anonymous functions enclosed in \texttt{\{ \}}.  They are used heavily in Groovy for iteration, filtering, and callbacks:
+
+\begin{lstlisting}[style=groovy]
+// Implicit 'it' parameter (single parameter closures)
+[1, 2, 3].each { println it }
+
+// Named parameters
+[1, 2, 3].collect { n -> n * 2 }  // [2, 4, 6]
+
+// Multi-line with typed parameters
+files.sort { File a, File b ->
+    Long.compare(b.lastModified(), a.lastModified())
+}
+
+// Common collection operations
+def active = employees.findAll { it.active == "Y" }
+def names = employees.collect { it.lastName }
+def senior = employees.find { it.yearsOfService > 10 }
+def totalSalary = employees.sum { it.salary }
+\end{lstlisting}
+
+\section{Groovy Idioms in Kiss Services}
+\label{sec:groovy-idioms}
+
+\subsection{Concise Service Methods}
+
+Groovy's concise syntax makes service methods shorter than equivalent Java:
+
+\begin{lstlisting}[style=groovy]
+class EmployeeService {
+    void list(JSONObject injson, JSONObject outjson,
+              Connection db, ProcessServlet servlet) {
+        outjson.put("employees", db.fetchAllJSON(
+            "select employee_id, first_name, last_name " +
+            "from employee order by last_name"))
+    }
+
+    void save(JSONObject injson, JSONObject outjson,
+              Connection db, ProcessServlet servlet) {
+        Record rec = db.fetchOne(
+            "select * from employee where employee_id = ?",
+            injson.getInt("id"))
+        rec.set("first_name", injson.getString("firstName"))
+        rec.set("last_name", injson.getString("lastName"))
+        rec.update()
+    }
+}
+\end{lstlisting}
+
+\subsection{Null-Safe Input Handling}
+
+\begin{lstlisting}[style=groovy]
+// Safe extraction with defaults
+String name = injson.getString("name") ?: ""
+int page = injson.getInt("page") ?: 0
+\end{lstlisting}
+
+\subsection{File Operations}
+
+\begin{lstlisting}[style=groovy]
+// Reading a file
+String content = new File("data.txt").text
+
+// Listing and filtering files
+File dir = new File("/path/to/files")
+File[] allFiles = dir.listFiles()
+List<File> sqlFiles = []
+for (File file : allFiles) {
+    if (file.isFile() && file.getName().endsWith(".sql"))
+        sqlFiles.add(file)
+}
+
+// Sorting files by modification time (newest first)
+sqlFiles.sort { File a, File b ->
+    Long.compare(b.lastModified(), a.lastModified())
+}
+\end{lstlisting}
+
+\begin{warnbox}
+Use simple \texttt{for} loops instead of closure-based filters (\texttt{.findAll\{\}}) when filtering files.  Groovy's type inference can cause \texttt{ClassCastException} in closure-based file operations.
+\end{warnbox}
+
+\section{Java Interoperability}
+\label{sec:groovy-java}
+
+Groovy can call any Java class directly and vice versa.  All Java libraries in \texttt{libs/} are available without configuration.  This is why Kiss services can seamlessly use the Java-based \texttt{Connection}, \texttt{Record}, and \texttt{QueryBuilder} classes.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.DateUtils
+import org.kissweb.NumberFormat
+import java.util.UUID
+
+// Kiss utility classes
+String formatted = NumberFormat.Format(12345.67, "CD", 12, 2)
+int today = DateUtils.today()        // YYYYMMDD
+
+// Standard Java
+String uuid = UUID.randomUUID().toString()
+\end{lstlisting}
+
+\section{When to Use Groovy vs.\ Java}
+\label{sec:groovy-vs-java}
+
+\begin{description}[style=nextline]
+  \item[Use Groovy for] Application services, business logic, scripts, cron tasks --- anything where conciseness and rapid development matter.
+  \item[Use Java for] Performance-critical code, shared library classes in \texttt{precompiled/}, and when your team prefers static typing and IDE support.
+\end{description}
+
+\noindent
+Both languages produce the same bytecode and run at the same speed.  The choice is primarily about developer preference and tooling.
+
+\section{Common Pitfalls}
+\label{sec:groovy-pitfalls}
+
+\begin{description}[style=nextline]
+  \item[Default package] Classes without a package declaration cannot be imported from packaged Groovy services.  Always use a package declaration in \texttt{precompiled/} classes.
+
+  \item[Closure types] Use explicit \texttt{for} loops when Groovy's type inference causes \texttt{ClassCastException} in closure-based operations, especially with file filtering.
+
+  \item[Optional syntax can hurt readability] Optional semicolons and optional parentheses on method calls are convenient but can reduce readability, especially in chained or nested expressions.  Prefer parentheses on method calls when the intent would otherwise be unclear.
+
+  \item[Parentheses ambiguity] While parentheses are optional in many cases, omitting them can cause ambiguity with property access.  When in doubt, include them.
+
+  \item[No \texttt{char} type] Groovy has no distinct character literal --- \texttt{'x'} is a \texttt{String}, not a \texttt{char}.  When a character is needed (for example, calling a Java API that takes a \texttt{char}), use an explicit cast:
+  \begin{lstlisting}[style=groovy]
+char c1 = (char) 'x'
+char c2 = 'x' as char
+  \end{lstlisting}
+
+  \item[Floating-point literals are \texttt{BigDecimal}] A literal like \texttt{3.14} is a \texttt{BigDecimal}, not a \texttt{double}.  This has caused many subtle bugs --- for example, when passing a literal to an overloaded method, the \texttt{BigDecimal} overload is selected instead of the \texttt{double} overload, or arithmetic produces unexpected scale or rounding behavior.  When a \texttt{double} is required, use the \texttt{d} suffix:
+  \begin{lstlisting}[style=groovy]
+def a = 3.14      // BigDecimal
+double b = 3.14d  // double
+  \end{lstlisting}
+
+  \item[Framework utilities] Always use Kiss framework utilities (\texttt{DateTime}, \texttt{NumberUtils}, \texttt{FileUtils}) instead of standard Java alternatives (\texttt{SimpleDateFormat}, \texttt{DecimalFormat}).  The Kiss utilities are designed to work consistently with the framework.
+\end{description}

@@ -1,0 +1,275 @@
+\chapter{Configuration}
+\label{ch:configuration}
+
+Kiss is configured through a small number of files.  This chapter covers each one and explains every setting.
+
+\section{\texttt{application.ini}}
+\label{sec:config-appini}
+
+The primary configuration file, located at \texttt{src/main/backend/application.ini}\index{application.ini}.  It uses a simple \texttt{key = value} format with \texttt{\#} for comments.  Settings are organized under an \texttt{[main]} section header.
+
+\subsection{Database Settings}
+
+\begin{lstlisting}[style=ini]
+[main]
+DatabaseType = PostgreSQL
+DatabaseHost = localhost
+# DatabasePort = 5432
+DatabaseName = myapp
+# DatabaseSchema = public
+DatabaseUser = appuser
+DatabasePassword = secret
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{DatabaseType}] One of: \texttt{PostgreSQL}, \texttt{MySQL}, \texttt{SQLite}, \texttt{MicrosoftServer}, \texttt{Oracle}.
+  \item[\texttt{DatabaseHost}] Hostname or IP address (default: \texttt{localhost}).
+  \item[\texttt{DatabasePort}] Port number.  Uses the database's default port if omitted.
+  \item[\texttt{DatabaseName}] Database name or file path (for SQLite, e.g., \texttt{DB.sqlite}).
+  \item[\texttt{DatabaseSchema}] Default schema (e.g., \texttt{public} for PostgreSQL).
+  \item[\texttt{DatabaseUser}] Database username.
+  \item[\texttt{DatabasePassword}] Database password.
+  \item[\texttt{DatabaseConnectionParameters}] Additional JDBC connection string parameters.
+\end{description}
+
+\begin{notebox}
+The default \texttt{application.ini} ships configured for SQLite with no authentication, which is convenient for initial development and testing.
+\end{notebox}
+
+\subsection{When the Configured Database Cannot Be Reached}
+\label{sec:config-db-unreachable}
+
+If a database \emph{is} configured but cannot be reached at startup --- the database server is down, the database was dropped or never created, or the credentials are wrong --- Kiss logs an unmistakable multi-line \texttt{FATAL} banner to \texttt{tomcat/logs/catalina.out} naming the database and the underlying error, and then fails the web application's deployment.  Nothing in the application can work without its configured database, so the application is disabled rather than left half-alive.
+
+The servlet container (Tomcat) itself is deliberately left running: a bad database must never take down the container or any other applications it hosts on a production system.
+
+Be aware of what the disabled state looks like from the outside.  With the application context down, every request receives a bare 404/503 carrying none of the application's response headers --- and browsers frequently misreport that as something else entirely, most commonly a CORS policy failure on the front end.  If you see unexplained CORS errors or bare 404s immediately after a restart, check \texttt{catalina.out} for the banner before chasing anything else:
+
+\begin{lstlisting}[style=shell]
+***************************************************************
+*  FATAL: cannot connect to the configured database.
+*
+*      <the underlying error>
+*
+*      Database: localhost:myapp
+*
+*  The application cannot run without its configured database.
+*  Verify that the database server is running, that the database
+*  exists, and that the Database* settings in
+*  application.ini are correct; then restart.
+*
+*  THIS APPLICATION HAS BEEN DISABLED.  The servlet container
+*  itself has been left running.
+***************************************************************
+\end{lstlisting}
+
+\noindent
+Running with \emph{no} database configured is a supported mode and is unaffected by any of this.
+
+\subsection{Server Settings}
+
+\begin{lstlisting}[style=ini]
+MaxWorkerThreads = 30
+UserInactiveSeconds = 900
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{MaxWorkerThreads}] Size of the request-handling thread pool.  Each concurrent request uses one thread.  Default: 30.
+  \item[\texttt{UserInactiveSeconds}] Seconds of user inactivity before a session expires and the user is logged out.  Default: 900 (15 minutes).  Set to 0 for the framework default of 3600 seconds (1 hour).
+  \item[\texttt{RequireAuthentication}] Set to \texttt{true} to require authentication even when no SQL database is configured (useful when using an alternative data store).
+  \item[\texttt{SecurityHeaders}] Set to \texttt{false} to disable the browser security-header filter (CSP and friends) for this deployment --- chiefly for an application whose front end predates the bootstrap kernel whose hash the CSP pins.  Default: enabled.  See Chapter~\ref{ch:caching-security}.
+  \item[\texttt{CspReportOnly}] Set to \texttt{true} to deliver the Content-Security-Policy in report-only form (violations logged, nothing blocked) for a validation pass.  Default: enforcing.  See Chapter~\ref{ch:caching-security}.
+\end{description}
+
+\subsection{Connection Pool Settings}
+
+Kiss uses C3P0 for connection pooling.  The framework provides sensible defaults based on CPU core count, but all settings can be overridden:
+
+\begin{lstlisting}[style=ini]
+# DatabaseMinPoolSize = 10
+# DatabaseInitialPoolSize = 10
+# DatabaseMaxPoolSize = 100
+# DatabaseAcquireIncrement = 5
+# DatabaseCheckoutTimeout = 10000
+# DatabaseMaxStatements = 500
+# DatabaseMaxStatementsPerConnection = 25
+# DatabaseIdleTestPeriod = 300
+# DatabaseMaxIdleTime = 1800
+# DatabaseTestOnCheckout = false
+# DatabaseTestOnCheckin = true
+# DatabaseHelperThreads = 10
+# DatabaseUnreturnedTimeout = 60
+# DatabaseDebugStackTraces = false
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{DatabaseMinPoolSize}] Minimum connections to maintain in pool.
+  \item[\texttt{DatabaseMaxPoolSize}] Maximum connections allowed.  For high-load production, set to at least CPU cores $\times$ 4.
+  \item[\texttt{DatabaseCheckoutTimeout}] Milliseconds to wait for a connection before throwing an error.
+  \item[\texttt{DatabaseMaxStatements}] Total prepared statements to cache across all connections.
+  \item[\texttt{DatabaseIdleTestPeriod}] Seconds between testing idle connections.
+  \item[\texttt{DatabaseMaxIdleTime}] Seconds before removing idle connections.
+  \item[\texttt{DatabaseDebugStackTraces}] Enable stack traces for debugging unreturned connections.  Disable in production.
+\end{description}
+
+\begin{tipbox}
+For most applications, the framework defaults work well.  Only tune connection pool settings when you observe connection-related bottlenecks in production.
+\end{tipbox}
+
+\subsection{Accessing Configuration from Code}
+
+Configuration values can be read programmatically:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.restServer.MainServlet
+
+String dbHost = MainServlet.getEnvironment(
+    "DatabaseHost") ?: "localhost"
+String dbName = MainServlet.getEnvironment("DatabaseName")
+String custom = MainServlet.getEnvironment("MyCustomSetting")
+\end{lstlisting}
+
+\noindent
+You can add your own application-specific settings to \texttt{application.ini} and read them the same way.  Note that \texttt{getEnvironment} is declared to return \texttt{Object} (the stored values are strings); Groovy assigns the result to a \texttt{String} directly, but a Java caller must cast --- \texttt{(String) MainServlet.getEnvironment("DatabaseHost")}.
+
+\subsection{Secrets and External Configuration}
+\label{sec:config-secrets}
+
+\begin{warnbox}
+All URLs, passwords, security keys, API keys, tokens, and user names must be kept in \texttt{src/main/backend/application.ini}.  Nothing of this kind should be hard-coded in source files (Java, Groovy, Lisp, JavaScript, HTML, or other configuration files).  Whenever such a value is found outside \texttt{application.ini}, it must be moved into \texttt{application.ini} and accessed via \texttt{MainServlet.getEnvironment()}.
+\end{warnbox}
+
+\noindent
+The retrieval API is the same \texttt{getEnvironment} method shown above, defined in \texttt{src/main/core/\allowbreak{}org/kissweb/restServer/MainServlet.java}:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.restServer.MainServlet
+
+String apiUrl   = MainServlet.getEnvironment("ExternalApiUrl")
+String apiKey   = MainServlet.getEnvironment("ExternalApiKey")
+String smtpUser = MainServlet.getEnvironment("SmtpUser")
+String smtpPass = MainServlet.getEnvironment("SmtpPassword")
+\end{lstlisting}
+
+\noindent
+Centralizing these values in \texttt{application.ini} provides several benefits:
+
+\begin{itemize}
+  \item Secrets can be rotated without code changes.
+  \item Credentials are kept out of version control when \texttt{application.ini} is excluded from the repository.
+  \item Values are not duplicated across multiple files.
+  \item Per-environment configuration (development, staging, production) is straightforward --- only \texttt{application.ini} differs between environments.
+\end{itemize}
+
+\noindent
+Categories of values that must live in \texttt{application.ini}:
+
+\begin{description}[style=nextline]
+  \item[URLs of external services] REST endpoints, SMTP servers, LDAP servers, third-party APIs, webhooks.
+  \item[Passwords] Database, SMTP, service accounts, third-party APIs.
+  \item[Security keys] API keys, tokens, client secrets, encryption keys, signing keys.
+  \item[User names] Account identifiers used by the application to authenticate to external systems.
+\end{description}
+
+\section{\texttt{web.xml}}
+\label{sec:config-webxml}
+
+The servlet configuration lives in \texttt{src/main/core/WEB-INF/}.  Kiss ships two source variants of this file:
+
+\begin{description}[style=nextline]
+  \item[\texttt{web-unsafe.xml}] Development configuration.  CORS filter allows any origin (\texttt{*}), enabling rapid frontend development from any port or device.
+  \item[\texttt{web-secure.xml}] Production configuration.  CORS restricted to specific hosts only (e.g., \texttt{localhost:8000}).
+\end{description}
+
+\noindent
+Both register the \texttt{StartupListener} for REST server initialization and configure the CORS filter with allowed methods: GET, POST, HEAD, OPTIONS, PUT.
+
+The deployed \texttt{web.xml} is not edited by hand --- the \texttt{bld} script copies the appropriate variant into place: \texttt{web-unsafe.xml} for development builds and \texttt{web-secure.xml} when packaging a WAR for production.  Any \texttt{web.xml} present in the source tree is simply a working copy left over from the most recent build and will be overwritten on the next \texttt{bld} run.
+
+\begin{warnbox}
+Never deploy with the permissive CORS configuration (\texttt{web-unsafe.xml}) in production.  The WAR build automatically substitutes \texttt{web-secure.xml}, but verify this if you have a custom deployment process.
+\end{warnbox}
+
+\section{\texttt{log4j2.xml}}
+\label{sec:config-logging}
+
+Kiss uses Log4j for logging.  The configuration file \texttt{src/main/core/\allowbreak{}log4j2.xml} defines the logging behavior:
+
+\begin{lstlisting}[style=html]
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern=
+    "%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-25c{2}] - %m%n" />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="error">
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+</Configuration>
+\end{lstlisting}
+
+\noindent
+The default configuration logs only errors to the console (which is captured in \texttt{tomcat/logs/catalina.out}).
+
+\subsection{Changing Log Levels}
+
+To see more detail during development, change the root level:
+
+\begin{lstlisting}[style=html]
+<Root level="info">     <!-- or "debug" for maximum detail -->
+\end{lstlisting}
+
+\subsection{Using Logging in Services}
+
+\begin{lstlisting}[style=java]
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+private static final Logger logger =
+    LogManager.getLogger(MyService.class);
+
+logger.info("Processing employee " + empId);
+logger.error("Failed to save record", exception);
+\end{lstlisting}
+
+\noindent
+For production logging best practices, see Chapter~\ref{ch:deployment}.
+
+\section{\texttt{context.xml}}
+\label{sec:config-context}
+
+The Tomcat context configuration at \texttt{src/main/core/META-INF/context.xml}:
+
+\begin{lstlisting}[style=html]
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/Kiss"/>
+\end{lstlisting}
+
+\noindent
+This sets the application context path.  Typically requires no modification.
+
+\section{Development vs.\ Production Mode}
+\label{sec:config-devprod}
+
+Kiss automatically adapts its behavior based on the deployment context:
+
+\begin{longtable}{P{2.7cm}P{3.9cm}P{3.3cm}}
+\toprule
+\textbf{Feature} & \textbf{Development} & \textbf{Production} \\
+\midrule
+\endhead
+Service compilation & Auto-compile on change & Auto-compile on change \\
+Frontend serving & Separate server (port 8000) & Same Tomcat instance \\
+CORS & Permissive (any origin) & Restricted \\
+Logging & Configurable & Typically ERROR/WARN \\
+\texttt{web.xml} & \texttt{web-unsafe.xml} & \texttt{web-secure.xml} \\
+\bottomrule
+\end{longtable}
+
+\begin{tipbox}
+Service auto-compilation works in both modes.  This means you can fix a production bug by editing a service file directly on the server --- the change takes effect on the next request without a restart.
+\end{tipbox}

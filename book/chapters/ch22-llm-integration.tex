@@ -1,0 +1,876 @@
+\chapter{LLM Integration}
+\label{ch:llm}
+
+Kiss includes built-in support for large language models (LLMs) through five classes in the \texttt{org.kissweb.llm} package.  This chapter covers configuration and usage of each provider, streaming responses, embeddings, and vector search for Retrieval Augmented Generation (RAG).
+
+\section{Overview}
+\label{sec:llm-overview}
+
+The LLM integration provides:
+
+\begin{itemize}
+  \item \textbf{OpenAI} --- Chat completions, streaming, and embeddings via the OpenAI API, over either of that provider's two endpoints (Section~\ref{sec:llm-openai-api}).
+  \item \textbf{Anthropic} --- Chat completions and streaming via the Claude API.
+  \item \textbf{OpenRouter} --- Chat completions and streaming for models from many providers (OpenAI, Anthropic, Google, Meta, Mistral, and others) through one OpenAI-compatible gateway API and one API key.
+  \item \textbf{Ollama} --- Local model inference for privacy-sensitive or offline deployments.
+  \item \textbf{QdrantClient} --- Vector database client for RAG workflows.
+\end{itemize}
+
+\noindent
+All the provider classes share a similar pattern: construct with credentials, send a prompt, receive a response.  Streaming variants deliver tokens incrementally via callbacks.
+
+\subsection{Error Handling}
+\label{sec:llm-errors}
+
+The three cloud classes (\texttt{OpenAI}, \texttt{Anthropic}, and \texttt{OpenRouter}) share one error contract.  A failed call --- a non-2xx HTTP response, or an error event the provider reports mid-stream --- throws an exception whose message carries the HTTP status and the provider's raw error body, for example:
+
+\begin{lstlisting}[language={}]
+OpenRouter request failed with HTTP 401:
+{"error":{"message":"User not found.","code":401}}
+\end{lstlisting}
+
+\noindent
+The same information remains available afterward from the instance: \texttt{getResponseCode()} returns the HTTP status of the last call, and \texttt{getResponseString()} returns the raw error body of the last failed call.  Because \texttt{send()} is built on \texttt{stream()}, the contract is identical for both.  Wrap calls in \texttt{try/catch} and log the exception message --- it contains everything the provider said about the failure.
+
+\subsection{Web Search}
+\label{sec:llm-websearch}\index{web search!LLM}
+
+\texttt{OpenAI}, \texttt{Anthropic}, and \texttt{OpenRouter} can let the model consult the public web while it generates --- for example, to read a prospect's company website.  The feature is opt-in: call \texttt{setWebSearch(true)} on the instance.  By default it is off, and requests are exactly what they would be without the method.
+
+\begin{lstlisting}[style=groovy]
+Anthropic ai = new Anthropic(key, "claude-sonnet-4-20250514")
+ai.setWebSearch(true)
+String answer = ai.send("What does acme.example sell?")
+\end{lstlisting}
+
+\noindent
+The provider performs the searches itself; the caller still receives one stream of text, so \texttt{send()} and \texttt{stream()} are used as usual.  What changes on the wire differs by provider:
+
+\begin{longtable}{P{2.4cm}P{8.1cm}}
+\toprule
+\textbf{Class} & \textbf{Request when enabled} \\
+\midrule
+\endhead
+\texttt{Anthropic} & The Messages API request carries \texttt{"tools": [\{"type": "web\_search\_20250305", "name": "web\_search"\}]}.  All text the model produces, including the text on either side of its searches, is returned concatenated. \\
+\texttt{OpenAI} & Web search is a feature of the responses endpoint, so the request is always sent there --- whatever the model, and even if \texttt{setApi(Api.CHAT\_COMPLETIONS)} was called --- with \texttt{"tools": [\{"type": "web\_search"\}]}.  The search progress events in the stream are ignored and only the answer text is delivered. \\
+\texttt{OpenRouter} & The chat request carries \texttt{"plugins": [\{"id": "web"\}]}; the model id is left unchanged. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Web search is billed by the provider in addition to tokens.  If the account or model does not support it (for example, an administrator has disabled it, or an OpenAI reasoning model is run at minimal effort), the provider's HTTP error is thrown as described in Section~\ref{sec:llm-errors}; the request is not silently retried without search.  \texttt{Ollama} runs models locally and has no web search option.
+
+\section{OpenAI}
+\label{sec:llm-openai}
+
+The \texttt{OpenAI}\index{OpenAI} class connects to the OpenAI API for chat completions and embeddings.
+
+\subsection{Construction}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.llm.OpenAI
+
+// API key, model, and whether the model is a
+// reasoning model (o1, o3, etc.)
+OpenAI ai = new OpenAI(apiKey, "gpt-4o", false)
+
+// A reasoning model, with effort control
+OpenAI r = new OpenAI(apiKey, "o1", true)
+r.setReasoningEffort("high")   // "low", "medium", "high"
+\end{lstlisting}
+
+\noindent
+The third constructor parameter declares whether the model is a reasoning model.  For a reasoning model the request carries the \texttt{reasoning\_effort} parameter (set with \texttt{setReasoningEffort()}); for a standard model it carries \texttt{temperature} and \texttt{top\_p} instead.
+
+\subsection{Chat Completions}
+
+\begin{lstlisting}[style=groovy]
+// Simple request
+String response = ai.send("Explain SQL joins.")
+
+// With an image (JPEG, PNG, GIF, or WebP)
+String answer = ai.send("What's in this image?",
+    "/path/to/image.jpg")
+\end{lstlisting}
+
+\subsection{Streaming Responses}
+
+For real-time token delivery (e.g., a chat interface), use the streaming variant.  \texttt{stream()} takes the prompt, a \texttt{Consumer<String>} called for each token as it arrives, and a \texttt{Runnable} called once the response is complete:
+
+\begin{lstlisting}[style=groovy]
+ai.stream("Write a haiku about databases.",
+    // onToken: Consumer<String>
+    { token -> print(token) },
+    { println("\n---\nDone.") })         // onDone:  Runnable
+\end{lstlisting}
+
+\noindent
+A four-argument overload adds an image path after the prompt.  Errors are thrown as exceptions rather than delivered through a callback --- see Section~\ref{sec:llm-errors} for the shared error contract.
+
+\subsection{The Two Endpoints: Chat Completions and Responses}
+\label{sec:llm-openai-api}
+
+OpenAI serves its models through two different HTTP endpoints.  The long-standing one is \emph{chat completions} (\texttt{/v1/chat/completions}), the endpoint every OpenAI-compatible gateway implements and the one this class has always used.  The newer one is \emph{responses} (\texttt{/v1/responses}), which OpenAI now positions as its primary API.  The distinction would be an implementation detail except for one fact: some models are served \emph{only} by the responses endpoint.  Send such a model to chat completions and the request fails with an HTTP 404 whose body says, in effect, ``this model is not supported in \texttt{v1/chat/completions}; use \texttt{v1/responses} instead.''  Which models fall on which side changes as OpenAI releases new ones, so Kiss does not rely on a list of names; it combines one naming rule with detection of the failure itself.
+
+Kiss handles this for you.  The \texttt{Api}\index{OpenAI!Api enum} enum selects the behavior, and the default --- \texttt{Api.AUTO} --- needs no configuration at all:
+
+\begin{itemize}
+  \item \texttt{Api.AUTO} (default) --- route automatically: a model whose id ends in \texttt{-pro} (for example \texttt{o1-pro}, \texttt{gpt-5-pro}) is responses-only and goes straight to the responses endpoint; any other model is sent to chat completions, and if the provider reports that it requires the responses endpoint, the identical request is transparently re-sent there.
+  \item \texttt{Api.CHAT\_COMPLETIONS} --- always use chat completions; never fall back.
+  \item \texttt{Api.RESPONSES} --- always use responses.
+\end{itemize}
+
+\noindent
+The provider has worded that 404 differently over time (naming \texttt{/responses}, or saying the model ``is not a chat model'' with the error parameter set to \texttt{model}), so Kiss accepts any of these forms as the signal.  A 404 that merely reports an unknown model (error code \texttt{model\_not\_found}) is not such a signal and is surfaced as an ordinary error.  The retry happens at most once per call: if the responses endpoint also fails, that failure is thrown and nothing is remembered.  For \texttt{-pro} models the responses request omits \texttt{temperature} and \texttt{top\_p}, which those models reject.
+
+The fallback is safe precisely because of \emph{when} the failure occurs.  The 404 is the HTTP status of the request itself, so it is known before a single token has been streamed --- no partial output has reached the caller's \texttt{onToken} callback, and there is nothing to undo.  The class therefore simply issues the second request and the caller sees one clean stream, never learning that two HTTP calls took place.  Had the error arrived mid-stream, after tokens were already delivered, no such retry would be possible; that case still surfaces as an exception (Section~\ref{sec:llm-errors}).
+
+The result is also cached.  When the responses endpoint has successfully served a model after such a fallback, its name is recorded in a static, thread-safe set shared by every \texttt{OpenAI} instance in the JVM, so only the \emph{first} request for that model pays the cost of the failed attempt.  Every later request --- from any instance --- goes straight to the responses endpoint.  The set is per-process and is not persisted; a server restart re-learns it on the first call, which costs one extra round trip.
+
+Because \texttt{send()} is implemented on top of \texttt{stream()} (it streams into a \texttt{StringBuilder}), the blocking and streaming calls both get this behavior; there is no separate code path to configure.
+
+Pin the endpoint explicitly only when you have a reason to:
+
+\begin{lstlisting}[style=groovy]
+// Default: no configuration needed
+OpenAI ai = new OpenAI(apiKey, "gpt-5", false)
+String answer = ai.send("Explain SQL joins.")
+
+// Pointing at a gateway that implements only
+// chat completions -- suppress the fallback
+ai.setApi(OpenAI.Api.CHAT_COMPLETIONS)
+
+// A model you know is responses-only -- skip the
+// probe request entirely
+ai.setApi(OpenAI.Api.RESPONSES)
+\end{lstlisting}
+
+\noindent
+Passing \texttt{null} to \texttt{setApi()} restores \texttt{Api.AUTO}.
+
+\subsubsection*{What Differs Between the Two}
+
+The two endpoints carry the same information in different shapes, and the class translates between them so that neither your code nor your callbacks change:
+
+\begin{longtable}{P{2.6cm}P{3.7cm}P{3.7cm}}
+\toprule
+\textbf{Concept} & \textbf{Chat completions} & \textbf{Responses} \\
+\midrule
+System prompt   & a \texttt{system} message   & top-level \texttt{instructions} \\
+Prompt          & \texttt{messages} array     & \texttt{input} array \\
+Text content    & \texttt{type: "text"}       & \texttt{type: "input\_text"} \\
+Image content   & \texttt{type: "image\_url"} & \texttt{type: "input\_image"} \\
+Reasoning       & \texttt{reasoning\_effort}  & \texttt{reasoning: \{effort\}} \\
+Stream shape    & message deltas              & typed events \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The streaming difference is the one worth understanding.  Chat completions emits a series of chunks, each carrying a \texttt{delta} of message content, terminated by a \texttt{[DONE]} sentinel.  The responses endpoint instead emits a sequence of \emph{typed events} describing the whole lifecycle of the response --- creation, output-item boundaries, content-part boundaries, text deltas, and completion.  Kiss listens for exactly the events that matter and discards the rest:
+
+\begin{itemize}
+  \item \texttt{response.output\_text.delta} --- the generated text; its \texttt{delta} field is passed to \texttt{onToken}.
+  \item \texttt{response.completed} --- the response finished normally; \texttt{onDone} fires.
+  \item \texttt{response.incomplete} --- the response was cut short (a token limit, for example).  Whatever was produced has already been delivered, so \texttt{onDone} fires here too rather than leaving the caller waiting.
+  \item \texttt{response.failed} and \texttt{error} --- a failure reported mid-stream; the raw event is retained in \texttt{getResponseString()} and an exception is thrown.
+  \item Everything else --- progress events carrying nothing the caller needs; ignored.
+\end{itemize}
+
+\noindent
+\texttt{onDone} is guarded so it fires exactly once, whichever event ends the stream, and is called unconditionally at the end if no completion event ever arrived.  From the caller's side the two endpoints are indistinguishable: the same \texttt{Consumer<String>} receives the same token stream, and the same \texttt{Runnable} runs once at the end.
+
+\subsection{Configuration}
+
+\begin{lstlisting}[style=groovy]
+ai.setTemperature(0.7f)       // creativity (0.0 - 2.0)
+ai.setSampling(0.7f)          // top-p nucleus sampling
+ai.setReasoningEffort("high") // reasoning models only
+ai.setImageDetail("auto")     // "low", "high", "auto"
+ai.setApi(OpenAI.Api.AUTO)    // endpoint selection (default)
+
+// Override the default OpenAI endpoint URLs
+// (useful for proxies, gateways, or compatible endpoints)
+OpenAI.setUrl(
+    "https://my-proxy.example.com/v1/chat/completions")
+OpenAI.setResponsesUrl(
+    "https://my-proxy.example.com/v1/responses")
+OpenAI.setModelsUrl(
+    "https://my-proxy.example.com/v1/models")
+\end{lstlisting}
+
+\noindent
+The static \texttt{setUrl()} and \texttt{setResponsesUrl()} methods override the chat completions and responses endpoint URLs respectively.  Both are global, affecting all current and future \texttt{OpenAI} instances, and are primarily intended for proxies, gateways, or OpenAI-compatible endpoints.  If your gateway implements only one of the two, pair the override with \texttt{setApi()} so no request is ever sent to the other (Section~\ref{sec:llm-openai-api}).  \texttt{setModelsUrl()} likewise overrides the endpoint \texttt{getAvailableModels()} calls (Section~\ref{sec:llm-openai-models}), independently of which chat endpoint is selected.
+
+\subsection{Embeddings}
+
+OpenAI can generate vector embeddings for text, which are used for semantic search and RAG.  Construct the instance with an embeddings model:
+
+\begin{lstlisting}[style=groovy]
+OpenAI embedder = new OpenAI(apiKey,
+    "text-embedding-3-small", false)
+double[] embedding = embedder.getEmbeddings(
+    "The quarterly report shows revenue growth.")
+// embedding is a double array (e.g., 1536 dimensions)
+\end{lstlisting}
+
+\subsection{Model Listing}
+\label{sec:llm-openai-models}
+
+\texttt{getAvailableModels()} calls the Models API and returns every model id OpenAI reports, unfiltered and in the order given:
+
+\begin{lstlisting}[style=groovy]
+List<String> models = ai.getAvailableModels()
+\end{lstlisting}
+
+\noindent
+This does not depend on the model configured in the constructor, so it also works on an instance built with a placeholder model name.  Override the endpoint with the static, global \texttt{OpenAI.setModelsUrl(url)} for testing, proxies, or gateways.
+
+\section{Anthropic (Claude)}
+\label{sec:llm-anthropic}
+
+The \texttt{Anthropic}\index{Anthropic} class connects to the Claude API.
+
+\subsection{Construction and Usage}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.llm.Anthropic
+
+Anthropic ai = new Anthropic(apiKey, "claude-sonnet-4-6")
+ai.setMaxTokens(2000)
+
+String response = ai.send("Summarize this quarter's results.")
+
+// With an image (JPEG, PNG, GIF, or WebP)
+String answer = ai.send("What's in this image?",
+    "/path/to/image.jpg")
+\end{lstlisting}
+
+\subsection{Streaming}
+
+\begin{lstlisting}[style=groovy]
+ai.stream("List the top 5 programming languages.",
+    // onToken: Consumer<String>
+    { token -> print(token) },
+    { println("\n--- done ---") })       // onDone:  Runnable
+\end{lstlisting}
+
+\noindent
+As with \texttt{OpenAI}, errors surface as thrown exceptions rather than through a callback (Section~\ref{sec:llm-errors}).
+
+\subsection{Endpoint and Version Configuration}
+
+The \texttt{Anthropic} class provides static methods for overriding global defaults:
+
+\begin{lstlisting}[style=groovy]
+// Override the default Anthropic endpoint URL
+// (useful for proxies, gateways, or compatible endpoints)
+Anthropic.setUrl(
+    "https://my-proxy.example.com/v1/messages")
+
+// Override the anthropic-version header value
+Anthropic.setVersion("2023-06-01")
+
+// Override the model-listing endpoint used by
+// getAvailableModels()
+Anthropic.setModelsUrl(
+    "https://my-proxy.example.com/v1/models?limit=1000")
+\end{lstlisting}
+
+\noindent
+All three are static methods that affect all current and future \texttt{Anthropic} instances globally.
+
+\subsection{Anthropic Methods}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{Anthropic(key, model)} & Constructor with API key and model name. \\
+\texttt{send(prompt [, imagePath])} & Send a prompt (optionally with an image), return the complete response. \\
+\texttt{stream(prompt [, imagePath], onToken, onDone)} & Stream tokens to a \texttt{Consumer<String>}; run a \texttt{Runnable} on completion. \\
+\texttt{setMaxTokens(n)} & Set maximum response tokens. \\
+\texttt{setTemperature(t)} & Set generation randomness (0.0 -- 1.0). \\
+\texttt{setSampling(p)} & Set top-p nucleus sampling. \\
+\texttt{setWebSearch(b)} & Allow the model to search the web (default off; Section~\ref{sec:llm-websearch}). \\
+\texttt{getAvailableModels()} & List available model ids, unfiltered and in the order Anthropic reports them. \\
+\texttt{setUrl(url)} & Override the API endpoint URL (static, global). \\
+\texttt{setVersion(version)} & Override the \texttt{anthropic-version} header (static, global). \\
+\texttt{setModelsUrl(url)} & Override the model-listing endpoint URL (static, global). \\
+\texttt{getResponseCode()} & HTTP status of the last call. \\
+\texttt{getResponseString()} & Raw error body of the last failed call. \\
+\bottomrule
+\end{longtable}
+
+\section{OpenRouter (Multi-Provider Gateway)}
+\label{sec:llm-openrouter}
+
+The \texttt{OpenRouter}\index{OpenRouter} class connects to OpenRouter (\texttt{openrouter.ai}), a cloud gateway that provides access to models from many providers --- OpenAI, Anthropic, Google, Meta, Mistral, and others --- through a single, OpenAI-compatible API and a single API key.  This makes it easy to switch models (or mix providers) without holding an account with each one.  Models are identified with a \texttt{provider/model} string, such as \texttt{"openai/gpt-4o"}, \texttt{"anthropic/claude-sonnet-4"}, or \texttt{"meta-llama/llama-3.1-70b-instruct"}.
+
+\subsection{Construction and Usage}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.llm.OpenRouter
+
+OpenRouter ai = new OpenRouter(apiKey, "openai/gpt-4o")
+
+String response = ai.send("Explain SQL joins.")
+
+// With an image (JPEG, PNG, GIF, or WebP)
+String answer = ai.send("What's in this image?",
+    "/path/to/image.jpg")
+\end{lstlisting}
+
+\subsection{Streaming}
+
+\begin{lstlisting}[style=groovy]
+ai.stream("Write a haiku about databases.",
+    // onToken: Consumer<String>
+    { token -> print(token) },
+    { println("\n---\nDone.") })         // onDone:  Runnable
+\end{lstlisting}
+
+\noindent
+A four-argument overload adds an image path after the prompt.  Errors surface as thrown exceptions carrying the HTTP status and OpenRouter's error body (Section~\ref{sec:llm-errors}).
+
+\subsection{Model Fallback Routing}
+
+OpenRouter can automatically retry a request with alternate models when the primary model is unavailable or its provider fails:
+
+\begin{lstlisting}[style=groovy]
+OpenRouter ai = new OpenRouter(apiKey,
+    "anthropic/claude-sonnet-4")
+ai.setFallbackModels("openai/gpt-4o",
+    "meta-llama/llama-3.1-70b-instruct")
+\end{lstlisting}
+
+\noindent
+The alternates are tried in order.  Note that OpenRouter validates every model ID up front --- an invalid ID anywhere in the request is rejected immediately with HTTP 400; fallback engages only between \emph{valid} models when a provider fails at request time.
+
+\subsection{Reasoning Effort}
+
+OpenRouter normalizes reasoning control across providers.  When an effort level is set, it is translated to each model's native reasoning mechanism; models without reasoning support ignore it gracefully:
+
+\begin{lstlisting}[style=groovy]
+ai.setReasoningEffort("high")   // "low", "medium", "high"
+\end{lstlisting}
+
+\subsection{Attribution Headers}
+
+OpenRouter can attribute requests to your application in its usage statistics and rankings.  Both settings are optional and have no effect on request processing:
+
+\begin{lstlisting}[style=groovy]
+ai.setSiteUrl("https://example.com")   // HTTP-Referer header
+ai.setSiteName("My Application")       // X-Title header
+\end{lstlisting}
+
+\subsection{OpenRouter Methods}
+
+\begin{longtable}{P{5.4cm}P{5.1cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{OpenRouter(key, model)} & Constructor with API key and \texttt{provider/model} identifier. \\
+\texttt{send(prompt [, imagePath])} & Send a prompt (optionally with an image), return the complete response. \\
+\texttt{stream(prompt [, imagePath], onToken, onDone)} & Stream tokens to a \texttt{Consumer<String>}; run a \texttt{Runnable} on completion. \\
+\texttt{setTemperature(t)} & Set generation randomness (0.0 -- 2.0). \\
+\texttt{setSampling(p)} & Set top-p nucleus sampling. \\
+\texttt{setReasoningEffort(e)} & Request reasoning at \texttt{"low"}, \texttt{"medium"}, or \texttt{"high"} effort. \\
+\texttt{setImageDetail(d)} & Image analysis detail: \texttt{"low"}, \texttt{"high"}, \texttt{"auto"}. \\
+\texttt{setFallbackModels(m...)} & Alternate models tried in order on provider failure. \\
+\texttt{setSiteUrl(url)} & Optional \texttt{HTTP-Referer} attribution header. \\
+\texttt{setSiteName(name)} & Optional \texttt{X-Title} attribution header. \\
+\texttt{setWebSearch(b)} & Enable the web search plugin (default off; Section~\ref{sec:llm-websearch}). \\
+\texttt{getAvailableModels()} & List available model ids, unfiltered and in the order OpenRouter reports them; works without an API key. \\
+\texttt{setUrl(url)} & Override the API endpoint URL (static, global). \\
+\texttt{setModelsUrl(url)} & Override the model-listing endpoint URL (static, global). \\
+\texttt{getResponseCode()} & HTTP status of the last call. \\
+\texttt{getResponseString()} & Raw error body of the last failed call. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+There is no embeddings method --- OpenRouter does not offer an embeddings endpoint; use \texttt{OpenAI} or \texttt{Ollama} for embeddings.
+
+\section{Ollama (Local Models)}
+\label{sec:llm-ollama}
+
+The \texttt{Ollama}\index{Ollama} class connects to a local Ollama instance for on-premise inference without sending data to external APIs.
+
+\subsection{Construction}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.llm.Ollama
+
+// Connect to local Ollama with a specific model
+Ollama ai = new Ollama("http://localhost:11434", "llama3")
+
+// Using default localhost URL
+Ollama ai = new Ollama("llama3")
+\end{lstlisting}
+
+\subsection{Sending a Prompt}
+
+The \texttt{send()} method posts a single prompt to Ollama's \texttt{/api/generate} endpoint and returns the complete response as a string:
+
+\begin{lstlisting}[style=groovy]
+String response = ai.send("What is the capital of France?")
+\end{lstlisting}
+
+\noindent
+For multi-turn, role-structured conversations --- and for function calling --- use \texttt{chat()} instead, described next.
+
+\subsection{Multi-Turn Conversations}
+
+\texttt{send()} posts a single prompt to Ollama's \texttt{/api/generate} endpoint with a hand-built prompt string.  The \texttt{chat()} method instead posts a structured \texttt{messages} array to \texttt{/api/chat}, and is the better choice for any conversational or instruction-following use:
+
+\begin{itemize}
+  \item \textbf{Correct chat templating.} Each instruct model ships its own chat template with special tokens --- Llama~3's \texttt{<|start\_header\_id|>}, Mistral's \texttt{[INST]...[/INST]}, and so on.  \texttt{/api/chat} applies the model's registered template automatically.  Inlining ``User: \dots{} Assistant: \dots'' into \texttt{/api/generate} emits a format the model was not trained on, degrading role separation and instruction-following --- subtly on large models, badly on small ones.  This is the single biggest quality lever available here.
+  \item \textbf{Clean role separation.} System, user, and assistant turns become explicit fields rather than text the model must parse out of one blob.  This improves grounding and reduces prompt-injection ambiguity; query-dependent context (recalled facts, retrieved RAG chunks) goes into the system message and can be refreshed each turn.
+  \item \textbf{Tool-calling foundation.} \texttt{/api/chat} is also where Ollama exposes the \texttt{tools} parameter for function calling --- the basis for an agentic loop in which the model itself decides when to invoke a tool.  Adopting \texttt{/api/chat} now is both a quality win and the foundation that form of integration is built on.
+\end{itemize}
+
+\noindent
+Each message is a \texttt{Map<String,String>} carrying at least a \texttt{role} (\texttt{"system"}, \texttt{"user"}, or \texttt{"assistant"}) and \texttt{content}; any other keys are passed through to Ollama unchanged:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.llm.Ollama
+
+Ollama ai = new Ollama("http://localhost:11434", "llama3")
+
+List<Map<String,String>> messages = [
+    [role: "system",
+     content: "You are a concise database expert."],
+    [role: "user",
+     content: "What is a covering index?"]
+]
+String answer = ai.chat(messages)
+\end{lstlisting}
+
+\noindent
+The request is sent with \texttt{stream:\ false}, so \texttt{chat()} returns the assistant message's \texttt{content} as a single string.
+
+A second overload accepts a \texttt{JSONArray} of tool descriptors, included as the \texttt{tools} parameter of the request when non-empty:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.json.JSONArray
+
+JSONArray tools = new JSONArray()
+// ... populate with function/tool descriptors ...
+String answer = ai.chat(messages, tools)
+\end{lstlisting}
+
+\noindent
+When the model elects to call a tool, the assistant message's \texttt{content} is typically empty and the tool calls appear under the response's \texttt{tool\_calls} field; call \texttt{getResponseString()} to inspect the full raw response in that case.
+
+\subsection{Streaming Responses}
+\label{sec:llm-ollama-streaming}
+\index{Ollama!streaming}\index{streaming!Ollama}
+
+The two methods seen so far --- \texttt{send(prompt)} and \texttt{chat(}\allowbreak\texttt{messages)} --- are \emph{blocking}.  Each posts its request with \texttt{stream:}\hspace{0.3em}\texttt{false}, so Ollama answers with a single, complete JSON object; the method blocks until the entire reply has been generated, parses that one object, and returns the assistant's text as a \texttt{String}.  This is the simplest mode and the right choice whenever the caller only needs the finished answer.
+
+\begin{notebox}
+The blocking methods deliberately set \texttt{stream:\ false}.  Ollama's default \emph{streaming} reply to \texttt{/api/generate} is newline-delimited JSON --- a sequence of objects (\texttt{\{\dots\}\textbackslash n\{\dots\}\textbackslash n\dots}) rather than one document --- which cannot be parsed as a single JSON object.  Requesting \texttt{stream:\ false} makes Ollama return exactly one object.
+\end{notebox}
+
+\noindent
+For a live, token-by-token experience --- a chat window that fills in as the model ``types'' --- \texttt{Ollama} provides a \emph{streaming} overload of each method.  Each adds a single \texttt{Consumer<String>} parameter, conventionally named \texttt{onToken}:
+
+\begin{lstlisting}[style=java]
+// /api/generate, streamed
+String send(String prompt,
+    Consumer<String> onToken) throws Exception
+
+// /api/chat, streamed
+String chat(List<Map<String,String>> messages,
+            Consumer<String> onToken) throws Exception
+\end{lstlisting}
+
+\noindent
+These overloads post the request with \texttt{stream:\ true}.  Ollama then replies with its newline-delimited JSON stream --- one JSON object per line, emitted as each fragment of the answer is produced.  Internally both methods share one engine (the private \texttt{streamRequest()} helper) that reads the response a line at a time via the framework's \texttt{RestClient.streamCall()}, and for every line:
+
+\begin{itemize}
+  \item parses the line as a JSON object; a non-JSON \emph{keep-alive} line is silently skipped;
+  \item if the object carries an \texttt{"error"} field, throws an \texttt{IOException} reporting it;
+  \item extracts the incremental text chunk and, when it is non-empty, appends it to the running result \emph{and} passes it to \texttt{onToken};
+  \item stops once the object's \texttt{"done"} marker is seen.
+\end{itemize}
+
+\noindent
+The two endpoints carry their incremental text in different places, and each overload knows the right one: the \texttt{/api/generate} stream (from \texttt{send()}) puts each chunk in the top-level \texttt{response} field, while the \texttt{/api/chat} stream (from \texttt{chat()}) puts it in \texttt{message.content}.  The caller never has to know the difference --- the chunk delivered to \texttt{onToken} is the plain text in both cases.
+
+\noindent
+Crucially, each streaming call serves \emph{both} purposes at once: it pushes every chunk to \texttt{onToken} as it arrives \emph{and} returns the complete, assembled reply once the stream is done.  A caller that wants the live stream and the final string needs only this one call --- there is no separate ``collect'' step.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.llm.Ollama
+
+Ollama ai = new Ollama("http://localhost:11434", "llama3")
+
+// Each token is printed the instant it is produced,
+// so the user sees the answer build up in real time.
+String full = ai.send("Write a haiku about databases.",
+    { chunk -> print(chunk) })   // onToken: Consumer<String>
+
+println()
+// `full` also holds the entire haiku.
+\end{lstlisting}
+
+\noindent
+The same shape applies to \texttt{chat()}, which is the preferred path for any conversational use (Section~\ref{sec:llm-ollama}).  Here each chunk is appended to a UI element as it lands:
+
+\begin{lstlisting}[style=groovy]
+List<Map<String,String>> messages = [
+    [role: "system",
+     content: "You are a concise database expert."],
+    [role: "user",
+     content: "Explain a covering index in two sentences."]
+]
+
+StringBuilder ui = new StringBuilder()
+String reply = ai.chat(messages,
+    { chunk -> ui.append(chunk) })  // live append
+
+// `reply` is the complete assistant message;
+// `ui` has been growing chunk-by-chunk all along.
+\end{lstlisting}
+
+\noindent
+Because the method assembles the same chunks it streams, the returned string is exactly the concatenation of everything handed to \texttt{onToken}:
+
+\begin{lstlisting}[style=groovy]
+StringBuilder collected = new StringBuilder()
+String full = ai.send("Name three SQL databases.",
+    { chunk -> collected.append(chunk) })
+
+assert full == collected.toString()   // always true
+\end{lstlisting}
+
+\begin{tipbox}
+Passing \texttt{null} for \texttt{onToken} is allowed: the method still consumes the stream and returns the fully assembled text, just without invoking any per-chunk callback.  This is handy when streaming is convenient on the wire but the caller only wants the final result.
+\end{tipbox}
+
+\noindent
+These streaming overloads are the foundation for live, token-by-token chat interfaces: a backend service can forward each chunk to the browser as it arrives (for example over Server-Sent Events or a websocket) so the user watches the reply appear word by word, exactly as with hosted providers.
+
+\subsection{Timeouts and Long Generations}
+
+A large model, or a long prompt, can take far longer to respond than an ordinary
+REST call, and two separate timeouts govern how long Kiss will wait.  A long
+generation can trip either one.
+
+The first is on the call from Kiss to the Ollama server.  By default
+\texttt{Ollama} allows up to five minutes for a generation to complete --- far
+more than \texttt{RestClient}'s ordinary request timeout, precisely because LLM
+responses are slow.  Raise (or lower) it with \texttt{setTimeoutSeconds}:
+
+\begin{lstlisting}[style=groovy]
+Ollama ai = new Ollama("qwen3.5:27b")
+ai.setTimeoutSeconds(900)   // allow up to 15 minutes
+String reply = ai.send("Write a detailed 2000-word report ...")
+\end{lstlisting}
+
+\noindent
+This request-timeout bound applies to the blocking calls (\texttt{send} and
+\texttt{chat}); values of zero or less are ignored, so the five-minute default
+stays in force unless you explicitly raise it.  The streaming overloads instead
+keep reading for as long as the server keeps sending, so they are governed by the
+liveness of the stream rather than by a single overall deadline.
+
+The second timeout is on the servlet side.  A web service that blocks on a slow
+generation is, by default, aborted by the servlet container after roughly thirty
+seconds --- after which the browser shows ``Error communicating with the
+server.''  A service that may run long must lift that limit itself, as described
+in Section~\ref{sec:long-running-requests}.  The bundled Ollama demo does exactly
+this, and also lets the timeout be tuned from \texttt{application.ini}:
+
+\begin{lstlisting}[style=groovy]
+void ask(JSONObject injson, JSONObject outjson,
+         Connection db, ProcessServlet servlet) {
+    // no servlet-side async timeout
+    servlet.setTimeout(0)
+    Ollama ai = new Ollama()
+    String secs = MainServlet.getEnvironment(
+        "OllamaTimeoutSeconds")
+    if (secs != null && secs.trim().isInteger())
+        // optional, per-deployment
+        ai.setTimeoutSeconds(secs.trim().toInteger())
+    ai.selectModel(injson.getString("model"))
+    outjson.put("textResponse", ai.send(injson.getString(
+        "prompt")))
+}
+\end{lstlisting}
+
+\begin{warnbox}
+Both timeouts matter.  Lifting only the servlet timeout still leaves the
+five-minute Ollama bound; lifting only the Ollama timeout still leaves the
+roughly thirty-second servlet abort.  For a service that can run several minutes,
+raise both.
+\end{warnbox}
+
+\noindent
+The \texttt{OllamaTimeoutSeconds} key read above lives in \texttt{application.ini}
+and is consulted by the demo service, not by the framework, so a deployment can
+tune it without recompiling.  Streaming, described earlier in this chapter,
+sidesteps the problem from the other direction: because data flows continuously
+the connection never sits idle, so a very long reply both stays alive and shows
+its progress as it arrives.
+
+\subsection{Embeddings}
+
+Ollama can also generate embeddings using compatible models:
+
+\begin{lstlisting}[style=groovy]
+double[] embedding = ai.getEmbeddings(
+    "Customer satisfaction improved this quarter.")
+\end{lstlisting}
+
+\subsection{Model Management}
+
+\begin{lstlisting}[style=groovy]
+// List available models
+List<String> models = ai.getAvailableModels()
+
+// Check if the configured Ollama server is running
+boolean running = ai.isOllamaUp()
+\end{lstlisting}
+
+\subsection{HTML Conversion}
+
+Ollama provides a convenience method to convert Markdown responses to HTML:
+
+\begin{lstlisting}[style=groovy]
+String markdown = ai.send("Explain REST APIs.")
+String html = Ollama.toHtml(markdown)
+\end{lstlisting}
+
+\section{QdrantClient (Vector Database)}
+\label{sec:llm-qdrant}
+
+The \texttt{QdrantClient}\index{QdrantClient} class interfaces with a Qdrant vector database for storing and querying embeddings.  This is the foundation for Retrieval Augmented Generation (RAG), where relevant documents are retrieved by semantic similarity and injected into LLM prompts.
+
+\subsection{Collections}
+
+A Qdrant collection is a named set of vectors with a fixed dimensionality and a similarity metric (Kiss creates collections using cosine distance).  Collections are managed through \emph{static} methods; the server URL defaults to \texttt{http://localhost:6333} and can be changed globally with \texttt{setUrl()}.  A \texttt{QdrantClient} \emph{instance}, by contrast, is bound to one collection and is used for the per-point operations that follow.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.llm.QdrantClient
+
+// Optional: point at a non-default server (static, global)
+QdrantClient.setUrl("http://localhost:6333")
+
+// Create a collection for OpenAI embeddings (1536 dims)
+QdrantClient.createCollection("documents", 1536)
+
+// Bind a client instance to that collection
+QdrantClient qc = new QdrantClient("documents")
+\end{lstlisting}
+
+\noindent
+The other collection-level operations are \texttt{QdrantClient.listCollections()} and \texttt{QdrantClient.deleteCollection(name)}, both static.
+
+\subsection{Inserting Vectors}
+
+\texttt{insertOrUpdate()} stores one embedding together with its source text and metadata.  Pass \texttt{null} as the chunk ID to have a UUID generated; the method returns the ID actually used.  The vector's length must match the collection's dimensionality.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.json.JSONObject
+
+// Generate embedding with OpenAI
+OpenAI embedder = new OpenAI(apiKey,
+    "text-embedding-3-small", false)
+double[] embedding = embedder.getEmbeddings(
+    "Revenue increased 15% in Q1.")
+
+// Optional extra metadata, merged into the point's payload
+JSONObject meta = new JSONObject()
+meta.put("source", "quarterly-report.pdf")
+meta.put("page", 3)
+
+// chunkId (null => auto UUID), documentId, sequenceNumber,
+// vector, text, otherInfo
+String chunkId = qc.insertOrUpdate(
+    null, "doc-001", 0, embedding,
+    "Revenue increased 15% in Q1.", meta)
+\end{lstlisting}
+
+\noindent
+The supplied \texttt{text} is stored in the payload under \texttt{text}, alongside \texttt{document\_id} and \texttt{sequence\_number}; any keys in \texttt{otherInfo} are merged into that same payload.
+
+\subsection{Searching}
+
+\texttt{search()} queries the client's own collection and returns a \texttt{JSONArray} of the nearest points --- each a \texttt{JSONObject} with \texttt{id}, \texttt{score}, and \texttt{payload}:
+
+\begin{lstlisting}[style=groovy]
+// Find the 5 most similar points
+double[] queryVec = ai.getEmbeddings(
+    "How did revenue perform?")
+JSONArray results = qc.search(queryVec, 5)
+
+for (int i = 0; i < results.length(); i++) {
+    JSONObject hit = results.getJSONObject(i)
+    println("Score: " + hit.getDouble("score"))
+    println("Text:  " +
+        hit.getJSONObject("payload").getString("text"))
+}
+\end{lstlisting}
+
+\noindent
+A three-argument overload, \texttt{search(vector, limit, filter)}, accepts a Qdrant filter as a \texttt{JSONObject} to restrict results by payload fields.
+
+\subsection{Record Management}
+
+\begin{lstlisting}[style=groovy]
+// Retrieve a specific record by its point ID
+JSONObject record = qc.getRecord(chunkId)
+
+// Delete a record
+qc.deleteRecord(chunkId)
+\end{lstlisting}
+
+\noindent
+Payload fields can be made filterable by indexing them with \texttt{createFieldIndex(fieldName)} (or the two-argument form that takes an explicit field schema).
+
+\subsection{QdrantClient Methods}
+
+\begin{longtable}{P{6.6cm}P{3.9cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{QdrantClient(collection)} & Bind a client to one collection. \\
+\texttt{setUrl(url)} & Set the server URL (static, global). \\
+\texttt{createCollection(name, dim)} & Create a collection (static, cosine distance). \\
+\texttt{listCollections()} & List collection names (static). \\
+\texttt{deleteCollection(name)} & Delete a collection (static). \\
+\texttt{insertOrUpdate(chunkId, docId, seq, vec, text, otherInfo)} & Upsert a point; returns its ID. \\
+\texttt{search(vec, limit)} & Nearest-neighbor search; returns a \texttt{JSONArray}. \\
+\texttt{search(vec, limit, filter)} & Filtered nearest-neighbor search. \\
+\texttt{getRecord(id)} & Retrieve a point as a \texttt{JSONObject}. \\
+\texttt{deleteRecord(id)} & Delete a point. \\
+\texttt{createFieldIndex(field [, schema])} & Index a payload field for filtering. \\
+\bottomrule
+\end{longtable}
+
+\section{RAG Pattern}
+\label{sec:llm-rag}
+
+Retrieval Augmented Generation combines vector search with LLM prompts.  The pattern is:
+
+\begin{enumerate}
+  \item \textbf{Index} --- Split documents into chunks, generate embeddings, store in Qdrant.
+  \item \textbf{Query} --- Generate an embedding for the user's question, search Qdrant for relevant chunks.
+  \item \textbf{Augment} --- Include the retrieved chunks as context in the LLM prompt.
+  \item \textbf{Generate} --- Send the augmented prompt to the LLM for a grounded response.
+\end{enumerate}
+
+\begin{lstlisting}[style=groovy]
+// 1. User asks a question
+String question = "What was Q1 revenue?"
+
+// 2. Search for relevant context
+OpenAI embedder = new OpenAI(apiKey,
+    "text-embedding-3-small", false)
+double[] queryVec = embedder.getEmbeddings(question)
+QdrantClient qc = new QdrantClient("documents")
+JSONArray results = qc.search(queryVec, 3)
+
+// 3. Build augmented prompt
+StringBuilder context = new StringBuilder()
+for (int i = 0; i < results.length(); i++) {
+    JSONObject hit = results.getJSONObject(i)
+    context.append(hit.getJSONObject("payload").getString(
+        "text"))
+    context.append("\n")
+}
+
+// 4. Generate grounded response
+OpenAI ai = new OpenAI(apiKey, "gpt-4o", false)
+String answer = ai.send(
+    "Answer based on this context:\n" + context +
+    "\nQuestion: " + question)
+\end{lstlisting}
+
+\section{Example: A Chatbot Service}
+\label{sec:llm-example}
+
+This example implements a complete chatbot with a Groovy backend service and a JavaScript frontend.
+
+\subsection{Backend Service}
+
+\begin{lstlisting}[style=groovy]
+// services/ChatService.groovy
+import org.kissweb.llm.OpenAI
+import org.kissweb.restServer.MainServlet
+
+class ChatService {
+
+    void sendMessage(JSONObject injson, JSONObject outjson,
+                     Connection db, ProcessServlet servlet) {
+        String message = injson.getString("message")
+        String apiKey = MainServlet.getEnvironment(
+            "OpenAIKey")
+
+        OpenAI ai = new OpenAI(apiKey, "gpt-4o", false)
+        ai.setTemperature(0.7f)
+
+        String response = ai.send(message)
+        outjson.put("response", response)
+    }
+}
+\end{lstlisting}
+
+\subsection{Frontend Screen}
+
+\begin{lstlisting}[style=html]
+<!-- screens/ChatScreen.html -->
+<div>
+    <h2>AI Assistant</h2>
+    <div id="chatHistory"
+         style="height:400px; overflow-y:auto;
+                border:1px solid #ccc; padding:10px;">
+    </div>
+    <br>
+    <text-input id="userMessage"
+                style="width:500px;"></text-input>
+    <push-button id="sendBtn">Send</push-button>
+</div>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+// screens/ChatScreen.js
+const WS = 'services.ChatService';
+
+$$('sendBtn').onclick(async () => {
+    const message = $$('userMessage').getValue();
+    if (!message) return;
+
+    appendMessage('You', message);
+    $$('userMessage').clear();
+
+    Utils.waitMessage('Thinking...');
+    const res = await Server.call(WS, 'sendMessage',
+        { message: message });
+    Utils.waitMessageEnd();
+
+    if (res._Success)
+        appendMessage('Assistant', res.response);
+});
+
+function appendMessage(sender, text) {
+    const history = document.getElementById('chatHistory');
+    const div = document.createElement('div');
+    div.innerHTML = '<b>' + sender + ':</b> ' + text;
+    history.appendChild(div);
+    history.scrollTop = history.scrollHeight;
+}
+\end{lstlisting}
+
+\begin{tipbox}
+Store API keys in \texttt{application.ini} and access them via \texttt{MainServlet.getEnvironment()}.  Never hard-code API keys in service files.
+\end{tipbox}
+
+\begin{notebox}
+The LLM classes are provider-neutral wrappers.  Switching among OpenAI, Anthropic, OpenRouter, and Ollama requires changing only the constructor --- the \texttt{send()} and \texttt{stream()} methods have the same signature across all providers.  OpenRouter is a convenient way to trial many models from different vendors before committing to one, since only the model string changes.
+\end{notebox}

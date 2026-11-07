@@ -1,0 +1,378 @@
+\chapter{Frontend Overview}
+\label{ch:frontend}
+
+The Kiss frontend is a single-page application built with plain HTML, CSS, and JavaScript --- no build step, no transpiler, and no framework dependencies beyond Kiss's own component library.  This chapter covers the architecture, loading mechanism, and conventions that every Kiss frontend screen follows.
+
+\section{Architecture}
+\label{sec:fe-arch}
+
+The frontend is served as static files.  There is no server-side rendering, no template engine, and no build pipeline.  You write HTML, CSS, and JavaScript directly, and the browser executes them as-is.
+
+Navigation is handled by dynamically loading screen HTML and JavaScript into the page via \texttt{Utils.loadPage()}\index{Utils.loadPage}.  There is no client-side routing library; the framework manages screen transitions directly.
+
+The frontend depends on:
+\begin{itemize}
+  \item \textbf{DOMUtils}\index{DOMUtils} --- Kiss's native DOM API wrapper, used for any direct DOM manipulation that falls outside the component layer.  jQuery is \emph{not} used.
+  \item \textbf{AG-Grid Community} --- for data grids (Chapter~\ref{ch:grids}).
+  \item \textbf{CKEditor} --- for rich text editing.
+  \item \textbf{Kiss component library} --- custom HTML tags for forms and dialogs.
+\end{itemize}
+
+\section{Script Loading Order}
+\label{sec:fe-loading}
+
+The \texttt{index.html}\index{index.html} file is the entry point, but it does very little itself: it contains a small inline bootstrap kernel whose only job is to keep \texttt{index.html} fresh and then hand off to \texttt{kiss/bootstrap.js}\index{bootstrap.js}, which performs the actual ordered loading.  \texttt{bootstrap.js} defines the loader functions used throughout the framework:
+
+\begin{description}[style=nextline]
+  \item[\texttt{getScript(url)}] Loads a single script file.  Returns a Promise.
+  \item[\texttt{getScripts(urls)}] Loads multiple scripts in parallel using \texttt{Promise.all()}.
+  \item[\texttt{addStylesheet(url)}] Appends a stylesheet \texttt{<link>} to the page head.
+\end{description}
+
+\noindent
+Every one of these helpers routes its URL through \texttt{window.cacheBust()} before fetching it, so every downloaded resource --- scripts and stylesheets alike --- is version-busted.  The mechanics of that busting (and of the kernel that precedes \texttt{bootstrap.js}) are covered in Chapter~\ref{ch:caching-security}; this section is concerned only with \emph{what loads, in what order, and why}.
+
+\noindent
+\texttt{bootstrap.js}'s \texttt{loadUtils()} function runs the following sequence:
+
+\begin{enumerate}
+  \item \textbf{Stylesheets} are added first and do not block anything that follows: \texttt{normalize.css}, \texttt{normalize2.css}, \texttt{kiss/starter-theme.css}, \texttt{kiss/Utils.css}, and the AG-Grid theme (\texttt{kiss/ag-grid-custom.css}).
+  \item \textbf{Third-party libraries} load next, in parallel, and \emph{are} awaited: the AG-Grid data-grid engine and CKEditor.  They must finish before the Kiss wrapper scripts that reference their globals (\texttt{AGGrid.js}, \texttt{Editor.js}) load later in the sequence.
+  \item \textbf{\texttt{SystemInfo.js}}\index{SystemInfo.js} loads next, by itself.  It carries the per-deployment configuration --- including \texttt{SystemInfo.stateStore}, needed by \texttt{AppState.init()} in the next step.  Once it has loaded, \texttt{bootstrap.js} mirrors the cache-control values from the \texttt{index.html} \texttt{<meta>} tags onto \texttt{SystemInfo.softwareVersion} / \texttt{SystemInfo.controlCache}, so existing references to those properties keep working.
+  \item \textbf{\texttt{DOMUtils.js}}\index{DOMUtils.js} loads next, by itself.  Every other Kiss script that touches the DOM depends on it, and \texttt{Utils.js} in particular checks for the \texttt{DOMUtils} object at load time.
+  \item \textbf{\texttt{AppState.js}}\index{AppState} loads next, by itself, and \texttt{AppState.init()} runs immediately afterward --- before \texttt{Server.js} loads, since \texttt{Server}'s \texttt{uuid} accessor reads through \texttt{AppState}.  Chapter~\ref{ch:routing-state} covers what \texttt{AppState} does.
+  \item \textbf{The remaining framework scripts} load in parallel: \texttt{Utils.js}, \texttt{DateUtils.js}, \texttt{DateTimeUtils.js}, \texttt{TimeUtils.js}, \texttt{NumberUtils.js}, \texttt{Server.js}, \texttt{Router.js}, \texttt{AGGrid.js}, \texttt{Editor.js}, \texttt{MutableString.js}.
+  \item \textbf{\texttt{routes.js}}\index{routes.js}, the application-owned route table, loads next, by itself --- it must be in place before \texttt{index.js} calls \texttt{Router.start()}.  See Section~\ref{sec:rs-routes-file}.
+  \item \textbf{\texttt{index.js}} loads last, and is \emph{not} awaited --- nothing later in \texttt{loadUtils()} depends on it finishing.
+\end{enumerate}
+
+\begin{lstlisting}[style=javascript]
+async function loadUtils() {
+    // Stylesheets
+    addStylesheet("normalize.css");
+    addStylesheet("normalize2.css");
+    addStylesheet("kiss/starter-theme.css");
+    addStylesheet("kiss/Utils.css");
+    addStylesheet("kiss/ag-grid-custom.css");
+
+    // Third-party libraries -- must load before the kiss
+    // AGGrid/Editor wrappers that use them
+    await getScripts([
+        "lib/ag-grid-community.min.noStyle.js",
+        "lib/ckeditor.js"
+    ]);
+
+    // Per-deployment configuration (needed by AppState.init)
+    await getScript("SystemInfo.js");
+    SystemInfo.softwareVersion = window.KissVersion;
+    SystemInfo.controlCache = window.KissCacheOn;
+
+    // DOMUtils first (must complete before Utils.js); AppState
+    // before Server.js uses it
+    await getScript("kiss/DOMUtils.js");
+    await getScript("kiss/AppState.js");
+    AppState.init();
+
+    await getScripts([
+        "kiss/Utils.js",
+        "kiss/DateUtils.js",
+        "kiss/DateTimeUtils.js",
+        "kiss/TimeUtils.js",
+        "kiss/NumberUtils.js",
+        "kiss/Server.js",
+        "kiss/Router.js",
+        "kiss/AGGrid.js",
+        "kiss/Editor.js",
+        "kiss/MutableString.js"
+    ]);
+
+    // routes.js (application-owned) registers routes and must
+    // load before index.js calls Router.start()
+    await getScript("routes.js");
+    getScript("index.js");
+}
+\end{lstlisting}
+
+\begin{warnbox}
+If \texttt{DOMUtils.js} has not finished loading before \texttt{Utils.js} runs, you will see: ``DOMUtils object not found --- DOMUtils.js should be loaded before Utils.js.''  This is a race condition caused by loading them in parallel.  The sequence above avoids this, and the other ordering dependencies (third-party libraries before \texttt{AGGrid.js}/\texttt{Editor.js}, \texttt{SystemInfo.js} before \texttt{AppState.init()}, \texttt{AppState.js} before \texttt{Server.js}, \texttt{routes.js} before \texttt{index.js}), by \texttt{await}-ing each dependency before the scripts that need it are loaded.
+\end{warnbox}
+
+\section{Component Registration}
+\label{sec:fe-components}
+
+Before the login page can load, all UI components must be registered.  This happens in \texttt{index.js}:
+
+\begin{lstlisting}[style=javascript]
+(function () {
+    Utils.useComponent('Popup');
+    Utils.useComponent('CheckBox');
+    Utils.useComponent('DateInput');
+    Utils.useComponent('DropDown');
+    Utils.useComponent('ListBox');
+    Utils.useComponent('NumericInput');
+    Utils.useComponent('PushButton');
+    Utils.useComponent('RadioButton');
+    Utils.useComponent('TextboxInput');
+    Utils.useComponent('TextInput');
+    Utils.useComponent('TextLabel');
+    Utils.useComponent('TimeInput');
+    Utils.useComponent('FileUpload');
+    Utils.useComponent('NativeDateInput');
+    Utils.useComponent('Picture');
+})();
+\end{lstlisting}
+
+\noindent
+Each \texttt{Utils.useComponent()} call loads a component's JavaScript from \texttt{kiss/component/<name>/}.  After registration, the corresponding custom HTML tags (e.g., \texttt{<text-input>}, \texttt{<push-button>}) become functional.
+
+\section{The \texttt{\$\$()} Function}
+\label{sec:fe-dollardollar}
+
+The \texttt{\$\$()}\index{\$\$()} function is the primary way to access Kiss components.  Pass it the HTML \texttt{id} of a component and it returns the component's Kiss object with methods like \texttt{getValue()}, \texttt{setValue()}, \texttt{clear()}, \texttt{enable()}, \texttt{disable()}, and event handlers:
+
+\begin{lstlisting}[style=javascript]
+// Set a value
+$$('employee-name').setValue("Alice");
+
+// Get a value
+let name = $$('employee-name').getValue();
+
+// Clear a component
+$$('employee-name').clear();
+
+// Enable/disable
+$$('save-btn').enable();
+$$('save-btn').disable();
+
+// Validate (shows error message if invalid, returns true
+// on error)
+if ($$('employee-name').isError('Employee Name'))
+    return;
+
+// Set focus
+$$('employee-name').focus();
+
+// Event handling
+$$('save-btn').onclick(() => saveRecord());
+$$('department').onChange(() => filterByDept());
+\end{lstlisting}
+
+\begin{warnbox}
+Always use \texttt{\$\$()} and Kiss component methods for events --- not native DOM methods like \texttt{addEventListener()}.  The Kiss methods handle event wiring consistently across all components.
+\end{warnbox}
+
+\section{Screen Loading}
+\label{sec:fe-screens}
+
+Screens are pairs of \texttt{.html} and \texttt{.js} files in the \texttt{screens/} directory.  Each screen lives in its own subdirectory:
+
+\begin{lstlisting}
+src/main/frontend/screens/
+  CRUD/
+    CRUD.html
+    CRUD.js
+  Users/
+    Users.html
+    Users.js
+  Framework/
+    Framework.html
+    Framework.js
+\end{lstlisting}
+
+\noindent
+Load a screen with \texttt{Utils.loadPage()}:
+
+\begin{lstlisting}[style=javascript]
+Utils.loadPage("screens/CRUD/CRUD", "app-screen-area",
+    "first-name");
+\end{lstlisting}
+
+\noindent
+The three parameters are:
+\begin{enumerate}
+  \item \textbf{Path} --- the path to the screen files (without extension).  Kiss appends \texttt{.html} and \texttt{.js} automatically.
+  \item \textbf{Target} --- the ID of the HTML element where the screen's HTML will be injected.  If omitted, the body is used.
+  \item \textbf{Focus} --- the ID of a component that should receive focus after loading.
+\end{enumerate}
+
+\noindent
+When a screen loads:
+\begin{enumerate}
+  \item The HTML file is fetched and injected into the target element.
+  \item \texttt{Utils.rescan()} processes the injected HTML to activate any custom components.
+  \item The JavaScript file is loaded and executed.
+  \item Focus is set to the specified component.
+\end{enumerate}
+
+\section{Screen JavaScript Pattern}
+\label{sec:fe-screen-js}
+
+Every screen JavaScript file follows the same pattern --- an immediately-invoked async function expression (IIFE) that provides variable scope isolation:
+
+\begin{lstlisting}[style=javascript]
+'use strict';
+
+(async function () {
+    const WS = 'services/MyService';  // backend service path
+
+    // Initialize grids, load data, set up event handlers
+    const grid = new AGGrid('my-grid', columnDefs, 'id');
+    grid.show();
+
+    // Load initial data
+    const res = await Server.call(WS, 'list');
+    if (res._Success)
+        grid.addRecords(res.records);
+
+    // Button handlers
+    $$('save-btn').onclick(async () => {
+        // validate, call backend, refresh
+    });
+})();
+\end{lstlisting}
+
+\begin{tipbox}
+The IIFE pattern ensures that each screen's variables are scoped to that screen.  When a new screen loads, the previous screen's variables are garbage-collected.
+\end{tipbox}
+
+\section{The Login Flow}
+\label{sec:fe-login}
+
+The application starts at \texttt{login.html}, which presents a login form:
+
+\begin{lstlisting}[style=html]
+<form onsubmit="return false;" autocomplete="on">
+    <text-input id="username" required
+                autocomplete="username"></text-input>
+    <text-input id="password" required password
+                autocomplete="current-password"></text-input>
+    <push-button id="login">Login</push-button>
+</form>
+\end{lstlisting}
+
+\noindent
+The \texttt{<form>} tag with \texttt{onsubmit="return false;"} prevents actual form submission while enabling browser password managers via \texttt{autocomplete} attributes.
+
+The \texttt{login.js} file:
+\begin{enumerate}
+  \item Validates the username and password fields.
+  \item Calls \texttt{Server.call('', 'Login', data)} to authenticate.
+  \item On success, stores the session UUID with \texttt{Server.setUUID(res.uuid)}.
+  \item Enables back-button protection with \texttt{DOMUtils.preventNavigation()}.
+  \item Loads the main application shell via \texttt{Utils.loadPage()}.
+\end{enumerate}
+
+\begin{lstlisting}[style=javascript]
+const data = {
+    username: $$('username').getValue().toLowerCase(),
+    password: $$('password').getValue()
+};
+const res = await Server.call('', 'Login', data);
+if (res._Success) {
+    Server.setUUID(res.uuid);
+    DOMUtils.preventNavigation(
+        function () { return true; },
+        function () {
+            Utils.yesNo('Confirm',
+                'Are you sure you want to logout?',
+                function () { Server.logout(); });
+        }
+    );
+    Utils.loadPage('screens/Framework/Framework');
+}
+\end{lstlisting}
+
+\section{The Framework Screen}
+\label{sec:fe-framework}
+
+After login, the \texttt{Framework} screen provides the application shell: a navigation menu and a content area where individual screens are loaded.
+
+\begin{lstlisting}[style=javascript]
+// Framework.js - navigation button handlers
+$$('crud-btn').onclick(function () {
+    Utils.cleanup();
+    Utils.loadPage('screens/CRUD/CRUD', 'app-screen-area');
+});
+
+$$('users-btn').onclick(function () {
+    Utils.cleanup();
+    Utils.loadPage('screens/Users/Users', 'app-screen-area');
+});
+
+$$('logout').onclick(function () {
+    Server.logout();
+});
+\end{lstlisting}
+
+\noindent
+\texttt{Utils.cleanup()} removes event handlers and state from the current screen before loading a new one, preventing memory leaks.
+
+\section{Backend URL Configuration}
+\label{sec:fe-backend-url}
+
+The \texttt{index.js} initialization code auto-detects the backend URL based on the deployment mode:
+
+\begin{lstlisting}[style=javascript]
+Utils.afterComponentsLoaded(function () {
+    if (SystemInfo.backendUrl) {
+        // explicit config
+        Server.setURL(SystemInfo.backendUrl);
+    } else if (SystemInfo.sameOriginBackend) {
+        // served by the backend
+        Server.setURL(Utils.getAppUrl());
+    } else if (window.location.protocol === "file:") {
+        // Electron desktop
+        Server.setURL('http://localhost:8001');
+    } else if (window.location.port >= 8000) {
+        // development: backend is one port above
+        Server.setURL('http://' +
+            window.location.hostname + ':' +
+            (Number(window.location.port) + 1));
+    } else {
+        // production
+        Server.setURL(Utils.getAppUrl());
+    }
+});
+\end{lstlisting}
+
+The resolution order is:
+
+\begin{enumerate}
+  \item \textbf{Explicit configuration.}  \texttt{SystemInfo.backendUrl}, when set, always wins.  Use it for split deployments, or whenever the conventions below do not apply.
+  \item \textbf{Served by the backend itself.}  \texttt{SystemInfo.sameOriginBackend}\index{sameOriginBackend} is \texttt{false} in the source tree, but the build system stamps it \texttt{true} into every copy of the front end that Tomcat serves --- the production WAR (during \texttt{./bld war}) and the development \texttt{tomcat/webapps/ROOT} (during \texttt{develop}/\texttt{start-backend}).  A stamped page calls the backend at its own origin, which makes browsing the Tomcat origin directly, and any production port, work with no configuration.  Never set this by hand.
+  \item \textbf{Electron.}  Pages loaded from \texttt{file://} default to \texttt{http://localhost:8001}, the backend of the default port block; an application with a different \texttt{portBase} sets \texttt{SystemInfo.backendUrl} instead.
+  \item \textbf{Development.}  An unstamped page on a local dev port came from the front-end static server, and under the Kiss port-block convention (Section~\ref{sec:build-ports}) the backend runs one port above it.  This derivation works for any \texttt{portBase} with no front-end changes.
+  \item \textbf{Production fallback.}  Same origin as the page.
+\end{enumerate}
+
+\section{Mobile Support}
+\label{sec:fe-mobile}
+
+Kiss includes a separate \texttt{mobile/} directory with mobile-optimized login and screen templates.  The \texttt{index.js} initialization detects screen size and loads the appropriate login page:
+
+\begin{lstlisting}[style=javascript]
+const screenPixels = screen.height * screen.width;
+if (screenPixels < 600000)
+    Utils.loadPage("mobile/login");
+else
+    Utils.loadPage('login');
+\end{lstlisting}
+
+\noindent
+Mobile screens use the same component library and \texttt{Server.call()} communication pattern as desktop screens, but with layouts optimized for smaller displays.
+
+\section{Cache Control}
+\label{sec:fe-cache}
+
+In development, you may want to disable browser caching to ensure that file changes are picked up immediately.  The \texttt{index.html} file supports cache busting through the \texttt{SystemInfo.controlCache} flag:
+
+\begin{lstlisting}[style=javascript]
+const SystemInfo = {
+    version: "2026.01.01.1",
+    // append ?ver=VERSION to script URLs
+    controlCache: true
+};
+\end{lstlisting}
+
+\noindent
+When \texttt{controlCache} is \texttt{true}, the \texttt{getScript()} function appends a version query parameter to each script URL, forcing the browser to re-fetch after version changes.

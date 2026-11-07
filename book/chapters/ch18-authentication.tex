@@ -1,0 +1,424 @@
+\chapter{Authentication and Sessions}
+\label{ch:authentication}
+
+Kiss includes a built-in authentication system with session management, configurable inactivity timeout, and browser navigation protection.  This chapter covers the login flow, session lifecycle, and customization points.
+
+\section{The Login Flow}
+\label{sec:auth-login}
+
+Authentication follows a fixed sequence:
+
+\begin{enumerate}
+  \item The browser submits a username and password to the \texttt{Login} service.
+  \item \texttt{Login.groovy} validates the credentials against the \texttt{users} table.
+  \item On success, \texttt{UserCache.newUser()} creates a \texttt{UserData} object containing a randomly generated UUID session token.
+  \item The UUID is returned to the browser.  \texttt{Server.js} stores it and includes it in every subsequent request as the \texttt{\_uuid} field.
+  \item On every request, \texttt{ProcessServlet} looks up the UUID in the \texttt{UserCache}.  If the UUID is missing or the session has expired, the request is rejected with error code 2 and the browser redirects to the login screen.
+\end{enumerate}
+
+\section{The Login Service}
+\label{sec:auth-login-service}
+
+The \texttt{Login.groovy} file in \texttt{src/main/backend/} implements two required methods:
+
+\begin{lstlisting}[style=groovy]
+class Login {
+    static UserData login(Connection db, String user,
+                          String password, JSONObject outjson,
+                          ProcessServlet servlet) {
+        Record rec = db.fetchOne(
+            "select user_id, user_password from users " +
+            "where user_name = ? and user_active = 'Y'", user)
+        if (rec == null)
+            return null  // invalid user
+
+        String pw = rec.getString("user_password")
+        if (pw == null || !PasswordHash.verify(password, pw))
+            return null
+
+        return UserCache.newUser(user, password,
+            (Integer) rec.getInt("user_id"))
+    }
+
+    static Boolean checkLogin(Connection db, UserData ud,
+                               ProcessServlet servlet) {
+        Record rec = db.fetchOne(
+            "select user_password from users " +
+            "where user_name = ? and user_active = 'Y'",
+            ud.getUsername())
+        if (rec == null)
+            return false
+
+        String pw = rec.getString("user_password")
+        return pw != null && PasswordHash.verify(
+            ud.getPassword(), pw)
+    }
+}
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{login()}] Called when the user submits credentials.  Returns a \texttt{UserData} object on success, \texttt{null} on failure.  You can add data to \texttt{outjson} to pass additional information (e.g., user roles) to the frontend.
+  \item[\texttt{checkLogin()}] Called periodically (approximately every 2 minutes) to re-validate the user's session.  This catches cases where a user is deactivated or their password changes while they are logged in.
+\end{description}
+
+\begin{notebox}
+Passwords are stored as one-way salted PBKDF2 hashes using \texttt{PasswordHash} (\S\ref{sec:util-passwordhash}); \texttt{login()} verifies a submitted password against the stored hash with \texttt{PasswordHash.verify()}.  Because the encoded hash is approximately 80 characters long, the \texttt{user\_password} column must be at least \texttt{varchar(255)}.
+\end{notebox}
+
+\noindent
+Because the stored hash embeds its own iteration count (\S\ref{sec:util-passwordhash}), \texttt{login()} is also the natural place to opportunistically upgrade older hashes to the framework's current work factor.  \texttt{PasswordHash.needsRehash(stored)} returns \texttt{true} when a stored hash was produced with a lower iteration count than the current default; the standard pattern is to check it immediately after a successful \texttt{verify()} and re-hash the just-verified password when it does:
+
+\begin{lstlisting}[style=groovy]
+String pw = rec.getString("user_password")
+if (pw == null || !PasswordHash.verify(password, pw))
+    return null
+
+if (PasswordHash.needsRehash(pw)) {
+    rec.set("user_password", PasswordHash.hash(password))
+    rec.update()   // upgrade the work factor in place
+}
+
+return UserCache.newUser(user, password,
+    (Integer) rec.getInt("user_id"))
+\end{lstlisting}
+
+\noindent
+This lets every stored password gradually migrate to the current work factor as users log in successfully, with no bulk migration required.
+
+\section{KissInit.groovy}
+\label{sec:auth-init}
+
+The \texttt{KissInit.groovy}\index{KissInit.groovy} file in \texttt{src/main/backend/} runs at system startup.  It has two initialization phases:
+
+\begin{lstlisting}[style=groovy]
+class KissInit {
+    static void init() {
+        // Phase 1: runs before database is open
+        MainServlet.readIniFile "application.ini", "main"
+
+        // Whitelist methods that don't require authentication
+        // MainServlet.allowWithoutAuthentication(
+        //     "services.PublicService", "getData")
+
+        // Global logout handler
+        // UserCache.setLogoutHandler({ UserData ud ->
+        //     // Custom cleanup: close resources,
+        //     // update timestamps
+        // } as Consumer<UserData>)
+    }
+
+    static void init2(Connection db) {
+        // Phase 2: runs after database is open
+        // Initialize application-specific state
+        // If you use db, make sure you commit
+    }
+}
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{init()}] Runs before the database connection pool is created.  Use it to load configuration and set up authentication rules.
+  \item[\texttt{init2(Connection db)}] Runs after the database is available.  Use it for one-time data initialization.  If you modify the database, call \texttt{db.commit()}.
+\end{description}
+
+\section{Allowing Unauthenticated Access}
+\label{sec:auth-whitelist}
+
+By default, every service method requires authentication.  To exempt specific methods (e.g., a public API endpoint), call \texttt{allowWithoutAuthentication()} in \texttt{KissInit.init()}:
+
+\begin{lstlisting}[style=groovy]
+MainServlet.allowWithoutAuthentication(
+    "services.PublicService", "getStatus")
+MainServlet.allowWithoutAuthentication(
+    "services.PublicService", "getVersion")
+\end{lstlisting}
+
+\noindent
+Whitelisted methods still receive a \texttt{Connection} and can access \texttt{UserData} if the caller happens to be logged in, but they do not require it.
+
+\section{Session Management}
+\label{sec:auth-sessions}
+\index{session management}
+
+\subsection{UserData}
+
+\texttt{UserData}\index{UserData} holds per-user session information:
+
+\begin{lstlisting}[style=groovy]
+// In a service method
+UserData ud = servlet.getUserData()
+String username = ud.getUsername()
+Object userId = ud.getUserId()
+String uuid = ud.getUuid()
+
+// Store custom data in the session
+ud.putUserData("role", "admin")
+String role = (String) ud.getUserData("role")
+\end{lstlisting}
+
+\noindent
+\texttt{UserData} provides:
+\begin{itemize}
+  \item Immutable credentials: \texttt{getUsername()}, \texttt{getPassword()}, \texttt{getUserId()}.
+  \item A unique session identifier: \texttt{getUuid()}.
+  \item A thread-safe data map for application-specific session data: \texttt{putUserData()}, \texttt{getUserData()}.
+  \item Last-access tracking for inactivity timeout: \texttt{getLastAccessDate()}.
+\end{itemize}
+
+\subsection{UserCache}
+
+\texttt{UserCache}\index{UserCache} manages all active sessions:
+
+\begin{itemize}
+  \item \texttt{UserCache.newUser(user, password, userId)} --- creates a session and returns \texttt{UserData}.
+  \item \texttt{UserCache.findUser(uuid)} --- looks up a session by UUID.
+  \item \texttt{UserCache.removeUser(uuid)} --- invalidates a session (triggers the logout handler).
+\end{itemize}
+
+\subsection{Session Expiration}
+
+Sessions expire after a configurable period of inactivity.  The timeout is set in \texttt{application.ini}:
+
+\begin{lstlisting}[style=ini]
+UserInactiveSeconds = 900    # 15 minutes
+\end{lstlisting}
+
+\noindent
+The \texttt{UserCache} periodically purges expired sessions (approximately once per minute).  When a session is purged, the global logout handler is called if one was registered in \texttt{KissInit}.
+
+\subsection{Logout Handler}
+
+Register a global logout handler in \texttt{KissInit.init()} to perform cleanup when any user logs out or their session expires:
+
+\begin{lstlisting}[style=groovy]
+UserCache.setLogoutHandler({ UserData ud ->
+    println "User ${ud.getUsername()} logged out"
+    // Close user-specific resources
+    // Update database logout timestamp
+    // Clean up temporary files
+} as Consumer<UserData>)
+\end{lstlisting}
+
+\section{Automatic Authentication in Services}
+\label{sec:auth-automatic}
+
+The framework checks authentication before every service method call.  Service methods never need to check authentication themselves --- by the time your code runs, the session has already been validated.
+
+If a request arrives with an expired or invalid UUID:
+\begin{enumerate}
+  \item The framework returns error code 2.
+  \item \texttt{Server.js} on the frontend detects error code 2.
+  \item The browser is redirected to the login screen.
+\end{enumerate}
+
+Immediately after authentication --- and before the service method runs --- an application-registered \texttt{RequestConnectionPreparer} (if any) prepares the request's database connection from the authenticated user, e.g.\ selecting a per-tenant schema; see Section~\ref{sec:db-request-preparer}.
+
+\section{Service-Decides Authentication}
+\label{sec:auth-service-decides}
+\index{authentication!service-decides}
+\index{service-decides authentication}
+
+The default model described above is \emph{authenticate before dispatch}: the framework validates the session \emph{before} a service method is invoked, so an invalid or expired session returns \texttt{\_ErrorCode = 2} and the service never runs.  This is the right behavior for the vast majority of methods, but some endpoints need to run \emph{before} the user is known --- a public landing page, a status probe, a service that returns one thing to anonymous callers and another to authenticated ones, or a method that does some unauthenticated work and only then decides it needs a logged-in user.
+
+For these cases Kiss offers the inverse: \emph{call the service first, then let it decide}.  A method registered with \texttt{allowWithoutAuthentication()} (\S\ref{sec:auth-whitelist}) runs \emph{whether or not} the caller is logged in:
+
+\begin{lstlisting}[style=groovy]
+// In KissInit.init()
+MainServlet.allowWithoutAuthentication(
+    "services.PublicService", "landingData")
+\end{lstlisting}
+
+\noindent
+The class name uses the package path with either dots or slashes (it is normalized internally), and the method name matches the service method exactly.
+
+\subsection{Deciding Inside the Service}
+
+A service that runs without enforced authentication receives the usual signature \texttt{(JSONObject in, JSONObject out, Connection db, ProcessServlet servlet)}.  The \texttt{servlet} parameter exposes four helpers for inspecting and enforcing the session at runtime:
+
+\begin{description}[style=nextline]
+  \item[\texttt{servlet.isLoggedIn()}] Returns \texttt{true} when a valid session is attached to this request.  Branch on it to return one result to authenticated callers and another to anonymous ones.
+  \item[\texttt{servlet.getUserData()}] Returns the \texttt{UserData} for the session, or \texttt{null} when the caller is not logged in.
+  \item[\texttt{servlet.getUserData(key)}] Returns a per-session value, or \texttt{null} when the key is absent \emph{or} the caller is not logged in.  This overload is null-safe --- it never throws when there is no session.
+  \item[\texttt{servlet.requireLogin()}] Aborts the call with the standard \texttt{\_ErrorCode = 2} response when no user is logged in; a no-op when the caller is authenticated.  Use it once the service has determined it cannot proceed anonymously.
+\end{description}
+
+\begin{lstlisting}[style=groovy]
+class PublicService {
+
+    // Registered with allowWithoutAuthentication(), so it runs
+    // whether or not the caller is logged in.
+    void landingData(JSONObject injson, JSONObject outjson,
+                     Connection db, ProcessServlet servlet) {
+
+        // Public content everyone may see
+        outjson.put("announcement", getPublicAnnouncement(db))
+
+        if (servlet.isLoggedIn()) {
+            // Personalize for the authenticated user
+            UserData ud = servlet.getUserData()
+            outjson.put("greeting",
+                "Welcome back, " + ud.getUsername())
+        } else {
+            outjson.put("greeting", "Welcome, guest")
+        }
+    }
+
+    // A method that does some unauthenticated work, then
+    // insists on a logged-in user before doing the
+    // sensitive part.
+    void submitOrder(JSONObject injson, JSONObject outjson,
+                     Connection db, ProcessServlet servlet) {
+        validateCart(injson)        // fine to do anonymously
+
+        // from here on a session is required; if absent, the
+        // call aborts with _ErrorCode = 2 and nothing
+        // below runs
+        servlet.requireLogin()
+
+        Object userId = servlet.getUserData().getUserId()
+        placeOrder(db, userId, injson)
+    }
+}
+\end{lstlisting}
+
+\subsection{How \texttt{requireLogin()} Works Across Runners}
+
+\texttt{requireLogin()} throws \texttt{org.\allowbreak{}kissweb.\allowbreak{}restServer.\allowbreak{}LoginRequiredException}, a \texttt{RuntimeException}.  The framework detects it in \texttt{errorReturn} by \emph{walking the cause chain} (not just checking the top-level exception type) and converts it to exactly the same \texttt{\_ErrorCode = 2} response that a normally-protected method produces.
+
+\begin{notebox}
+Walking the cause chain is what makes this uniform.  Each service runner --- Groovy, plain Java, compiled Java, and Lisp --- wraps a thrown exception differently (for example, reflection wraps it in an \texttt{InvocationTargetException}).  Because the framework searches the whole chain for a \texttt{LoginRequiredException}, \texttt{requireLogin()} behaves identically regardless of the language a service is written in --- there is no per-runner special-casing.
+\end{notebox}
+
+\subsection{Closing the Loop on the Front End}
+
+The browser side completes the pattern.  Any response carrying \texttt{\_ErrorCode = 2} --- whether from a normally-protected method, an expired session, or a \texttt{requireLogin()} call --- triggers \texttt{Server.logout(true)}.  That clears \texttt{AppState} (the persisted client state, including the session token) and routes to \texttt{/login} \emph{carrying the current location as the \texttt{return} parameter}.  After re-authenticating, the user lands back on the page they were on rather than at a generic home screen.
+
+\begin{tipbox}
+Pass \texttt{true} to \texttt{Server.logout(true)} (as the framework does on \texttt{\_ErrorCode = 2}) to capture the return location for a post-login resume.  An intentional, user-initiated logout calls \texttt{Server.logout()} with no argument, so the user is simply returned to login with no resume target.
+\end{tipbox}
+
+\section{Server-Restart Detection (Boot ID)}
+\label{sec:auth-boot-id}
+\index{boot id}
+\index{server restart detection}
+
+Sessions live in the in-memory \texttt{UserCache}, so a back-end restart invalidates every session at once.  The \emph{client's} token, however, persists in \texttt{AppState} across reloads and (depending on the configured state store) across tabs and restarts.  Without help, a browser holding a token from before the restart would resume straight onto a session that no longer exists on the server.
+
+Kiss closes this gap with a \emph{boot id}: a UUID generated exactly once per server start.
+
+\begin{lstlisting}[style=java]
+// In MainServlet
+private static final String bootId =
+        // unique per server start
+        java.util.UUID.randomUUID().toString();
+
+public static String getBootId() {
+    return bootId;
+}
+\end{lstlisting}
+
+\noindent
+The boot id is attached to \emph{every} response as the \texttt{\_BootId} field --- both successful responses and the \texttt{\_ErrorCode = 2} login-failure response include it.  Because the value is fixed for the lifetime of a server process and changes only when the process restarts, the front end can compare it to detect a restart.
+
+\subsection{The Front-End Check}
+
+The browser records the boot id at login (\texttt{Server.setBootId}, taken from the \texttt{Login} response) and stores it in \texttt{AppState} alongside the session token.  At startup, \emph{before routing begins}, \texttt{Server.verifyServerInstance()} makes a single unauthenticated \texttt{LoginRequired} call and compares the boot id it receives against the stored one:
+
+\begin{lstlisting}[style=javascript]
+static async verifyServerInstance() {
+    if (!Server.uuid)
+        return;   // no persisted session to protect
+    const stored = Server.getBootId();
+    let res;
+    try {
+        // returns _BootId
+        res = await Server.call('', 'LoginRequired', {});
+    } catch (err) {
+        // transient error -- let the normal flow handle it
+        return;
+    }
+    const current = res ? res._BootId : null;
+    if (!current)
+        return;
+    if (stored && stored !== current) {
+        // stale session from a previous server instance
+        AppState.clear();
+        await Utils.showMessage('Notice',
+            'The server was restarted.  Please log in again.');
+    } else if (!stored) {
+        Server.setBootId(current);
+    }
+}
+\end{lstlisting}
+
+\noindent
+If the boot id changed, the back end was restarted: the persisted session is cleared and the user is forced into a \emph{clean} re-login --- no resume --- with a ``server was restarted'' notice.  If there is no persisted session, there is nothing to protect and the check returns immediately.
+
+\subsection{Restart Versus Session Expiry}
+
+A restart that happens while the application is already open is still caught: the next service call returns \texttt{\_ErrorCode = 2} and the normal logout-and-redirect path takes over.  The startup check only adds protection for the case where the browser \emph{begins} a session against an already-restarted server.
+
+It is worth contrasting the two recovery paths, because they intentionally differ:
+
+\begin{description}[style=nextline]
+  \item[Session expiry] The server is the same instance; only this user's session timed out.  The front end resumes with a \texttt{return} URL (\S\ref{sec:auth-service-decides}), so after re-authenticating the user lands back where they were.
+  \item[Server restart] The server is a \emph{new} instance (a changed boot id); all sessions are gone and any in-flight client state may be inconsistent.  The front end forces a clean login with no resume target and tells the user the server was restarted.
+\end{description}
+
+\begin{notebox}
+The boot id is not a security token --- it is a coarse ``is this the same server process?'' marker.  It is fine that it is returned on unauthenticated calls; its only job is to let the client notice that the in-memory \texttt{UserCache} it was relying on has been wiped by a restart.
+\end{notebox}
+
+\section{Login Form Best Practices}
+\label{sec:auth-form}
+
+Wrap login fields in a \texttt{<form>} tag with \texttt{autocomplete} attributes to enable browser password managers:
+
+\begin{lstlisting}[style=html]
+<form onsubmit="return false;" autocomplete="on">
+    <text-input id="username" required
+                autocomplete="username"></text-input>
+    <text-input id="password" required password
+                autocomplete="current-password"></text-input>
+    <push-button id="login">Login</push-button>
+</form>
+\end{lstlisting}
+
+\noindent
+The \texttt{onsubmit="return false;"} prevents actual form submission since login is handled by JavaScript.  The \texttt{autocomplete} attributes help password managers identify the username and password fields.
+
+\section{Browser Back Button Prevention}
+\label{sec:auth-backbutton}
+
+After login, enable back-button protection to prevent accidental navigation away from the application:
+
+\begin{lstlisting}[style=javascript]
+DOMUtils.preventNavigation(
+    function () { return true; },
+    function () {
+        Utils.yesNo('Confirm',
+            'Are you sure you want to logout?',
+            function () { Server.logout(); });
+    }
+);
+\end{lstlisting}
+
+\noindent
+The first parameter is a function that returns \texttt{true} when protection should be active.  The second parameter is called when the user presses the back button.
+
+\begin{notebox}
+Chrome blocks navigation prevention until the page has received a user gesture (click, keypress, or touch).  On a freshly loaded page before any interaction, the back button cannot be prevented.  After the user's first interaction, full protection activates.
+\end{notebox}
+
+\section{Frontend Inactivity Timeout}
+\label{sec:auth-frontend-timeout}
+
+In addition to the backend session timeout, the frontend can enforce its own inactivity limit:
+
+\begin{lstlisting}[style=javascript]
+Server.setMaxInactivitySeconds(900);   // 15 minutes
+Server.setMaxInactivityMinutes(15);    // equivalent
+Server.setMaxInactivityHours(1);       // 1 hour
+\end{lstlisting}
+
+\noindent
+If the frontend timeout is exceeded, the user is automatically logged out without waiting for the next server request to trigger the backend timeout.

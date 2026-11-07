@@ -1,0 +1,756 @@
+\chapter{The Query Builder}
+\label{ch:query-builder}
+
+In systems with many interrelated tables, writing queries with correct joins is complex and error-prone.  The \texttt{QueryBuilder}\index{QueryBuilder} solves this by automatically determining the join path from the database schema.  You specify what to select, filter, and order --- the builder figures out the joins.
+
+\section{Creating a QueryBuilder}
+\label{sec:qb-create}
+
+The recommended approach uses the \texttt{Connection} factory method:
+
+\begin{lstlisting}[style=groovy]
+List<Record> records = db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .select("department.name AS dept_name")
+    .where("employee.active = ?", "Y")
+    .orderBy("employee.last_name")
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+The builder automatically joins \texttt{employee} to \texttt{department} using the foreign key relationship discovered from the database schema.
+
+Four construction options are available:
+
+\begin{description}[style=nextline]
+  \item[\texttt{db.newQueryBuilder()}] Creates a builder with the connection's schema graph and stores the connection for no-argument execution methods.  This is the preferred approach.
+  \item[\texttt{new QueryBuilder(conn)}] Equivalent to the above.
+  \item[\texttt{cmd.newQueryBuilder()}] Creates a builder bound to a specific \texttt{Command} instance.  Use this when multiple queries must be active simultaneously on the same connection (see Section~\ref{sec:qb-command}).
+  \item[\texttt{new QueryBuilder(cmd)}] Equivalent to the above.
+  \item[\texttt{new QueryBuilder(schemaGraph)}] Uses a provided \texttt{SchemaGraph}.  Execution methods require an explicit \texttt{Connection} or \texttt{Command} parameter.
+\end{description}
+
+\section{Table Aliases}
+\label{sec:qb-alias}
+
+Table names in complex schemas can be verbose.  The \texttt{alias()} method lets you define short names for tables that can be used throughout the query:
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .alias("employee", "e")
+    .alias("department", "d")
+    .select("e.first_name", "e.last_name", "d.name")
+    .where("e.active = ?", "Y")
+    .orderBy("e.last_name")
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+The builder resolves aliases to real table names internally for join path resolution, and emits \texttt{employee e} and \texttt{department d} in the \texttt{FROM} and \texttt{JOIN} clauses so the database recognizes the short names.  Aliases can be used everywhere: \texttt{select()}, \texttt{where()}, \texttt{orderBy()}, \texttt{groupBy()}, \texttt{having()}, and even in single-argument \texttt{leftJoin()}/\texttt{rightJoin()} calls.
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .alias("employee", "e")
+    .alias("department", "d")
+    .select("e.first_name", "d.name")
+    .leftJoin("d")
+    .fetchAll()
+\end{lstlisting}
+
+\section{SELECT}
+\label{sec:qb-select}
+
+Columns are specified as \texttt{table.column}, with optional aliases:
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .select("department.name AS dept")
+    .fetchAll()
+\end{lstlisting}
+
+\subsection{DISTINCT}
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("department.name")
+    .distinct()
+    .fetchAll()
+\end{lstlisting}
+
+\subsection{Aggregate Functions}
+
+Helper methods are provided for common aggregates:
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("department.name")
+    .selectCount("employee.employee_id", "emp_count")
+    .selectSum("employee.salary", "total_salary")
+    .selectAvg("employee.salary", "avg_salary")
+    .selectMin("employee.salary", "min_salary")
+    .selectMax("employee.salary", "max_salary")
+    .groupBy("department.name")
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+Each aggregate method accepts a \texttt{table.column} and an optional alias.  Without the alias parameter, the raw aggregate expression is used.
+
+\section{WHERE Conditions}
+\label{sec:qb-where}
+
+Conditions use parameterized \texttt{?} placeholders.  Multiple \texttt{where()} calls at the same level are combined with AND:
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .where("employee.active = ?", "Y")
+    .where("employee.salary > ?", 50000)
+    .where("employee.hire_date >= ?", 20200101)
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+Conditions without parameters are also supported:
+
+\begin{lstlisting}[style=groovy]
+.where("employee.active = 'Y'")
+\end{lstlisting}
+
+\begin{tipbox}
+Always use \texttt{?} placeholders for user-supplied values.  This prevents SQL injection and handles type conversion automatically.
+\end{tipbox}
+
+\subsection{Dynamic WHERE Clauses}
+
+Because \texttt{where()} calls are additive, you can build queries dynamically:
+
+\begin{lstlisting}[style=groovy]
+def qb = db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+
+String name = injson.getString("name")
+if (name != null && !name.isEmpty())
+    qb.where("employee.last_name LIKE ?", name + "%")
+
+String dept = injson.getString("department")
+if (dept != null && !dept.isEmpty())
+    qb.where("department.name = ?", dept)
+
+qb.orderBy("employee.last_name")
+outjson.put("results", qb.fetchAllJSON())
+\end{lstlisting}
+
+\section{OR / AND Grouping}
+\label{sec:qb-or}
+
+Use \texttt{startOr()} and \texttt{endOr()} to group conditions with OR:
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name")
+    .startOr()
+        .where("employee.department_id = ?", 10)
+        .where("employee.department_id = ?", 20)
+    .endOr()
+    .where("employee.active = 'Y'")
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+This generates: \texttt{WHERE (dept\_id = 10 OR dept\_id = 20) AND active = 'Y'}.
+
+Groups can be nested:
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name")
+    .startOr()
+        .startAnd()
+            .where("employee.department_id = ?", 10)
+            .where("employee.salary > ?", 50000)
+        .endAnd()
+        .startAnd()
+            .where("employee.department_id = ?", 20)
+            .where("employee.salary > ?", 40000)
+        .endAnd()
+    .endOr()
+    .fetchAll()
+\end{lstlisting}
+
+\section{ORDER BY}
+\label{sec:qb-orderby}
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .orderBy("employee.last_name")
+    .orderByDesc("employee.hire_date")
+    .fetchAll()
+\end{lstlisting}
+
+\section{GROUP BY and HAVING}
+\label{sec:qb-groupby}
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("department.name")
+    .selectCount("employee.employee_id", "emp_count")
+    .selectAvg("employee.salary", "avg_salary")
+    .groupBy("department.name")
+    .having("COUNT(employee.employee_id) > ?", 5)
+    .orderByDesc("avg_salary")
+    .fetchAll()
+\end{lstlisting}
+
+\section{LIMIT}
+\label{sec:qb-limit}
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .orderBy("employee.hire_date")
+    .limit(10)
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+The builder generates database-appropriate syntax (\texttt{LIMIT}, \texttt{TOP}, or \texttt{FETCH}).
+
+\section{Automatic Join Resolution}
+\label{sec:qb-auto-join}
+
+The key feature of \texttt{QueryBuilder} is automatic join resolution.  When you reference columns from multiple tables, the builder:
+
+\begin{enumerate}
+  \item Collects all referenced table names from SELECT, WHERE, ORDER BY, GROUP BY, and HAVING clauses.
+  \item Selects a root table (preferring the first table mentioned in WHERE, then SELECT).
+  \item Calls \texttt{SchemaGraph.findJoinPath()} to find the shortest path connecting all tables via foreign key relationships.
+  \item Generates INNER JOIN clauses in the correct order.
+\end{enumerate}
+
+\noindent
+This means you never need to write JOIN clauses manually for tables connected by foreign keys.
+
+\begin{notebox}
+Auto-join resolution uses a BFS (breadth-first search) algorithm, which always finds the shortest path.  It runs in sub-millisecond time even for schemas with hundreds of tables.
+\end{notebox}
+
+\subsection{Foreign Keys vs.\ Join Types}
+
+It is important to understand that foreign keys and join types are orthogonal concepts:
+
+\begin{itemize}
+  \item \textbf{Foreign keys} define the \emph{path} between tables --- which columns to use in the \texttt{ON} clause.  For example, the foreign key \texttt{employee.department\_id $\rightarrow$ department.department\_id} tells the builder \emph{how} to connect the two tables.
+  \item \textbf{Join types} (INNER, LEFT, RIGHT) define the \emph{behavior} --- what happens when a row in one table has no matching row in the other.
+\end{itemize}
+
+\noindent
+The same foreign key relationship can be traversed with any join type.  Using \texttt{employee.department\_id $\rightarrow$ department.department\_id} as the example:
+
+\begin{description}[style=nextline]
+  \item[INNER JOIN] Returns only employees that have a matching department.
+  \item[LEFT JOIN] Returns all employees, with \texttt{NULL} department columns when no match exists.
+  \item[RIGHT JOIN] Returns all departments, with \texttt{NULL} employee columns when no match exists.
+\end{description}
+
+\noindent
+The automatic join resolution always uses INNER JOIN because it is the safe default --- it assumes every foreign key relationship has a matching row on both sides.  When you need outer join behavior, use the \texttt{leftJoin()} or \texttt{rightJoin()} methods described in the next section.  The \texttt{ON} condition comes from the same foreign key columns either way.
+
+\section{Explicit Joins}
+\label{sec:qb-explicit}
+
+For self-joins, ambiguous paths, or outer joins, specify the join explicitly.  When you specify an explicit join to a table, it fully replaces any automatic join that would otherwise be generated for that table --- there is no duplication or conflict.
+
+\subsection{Overriding Auto-Join Types}
+
+The simplest way to change an auto-discovered join from INNER to LEFT or RIGHT is with the single-argument form of \texttt{leftJoin()} or \texttt{rightJoin()}.  You name only the table --- the foreign key path is still resolved automatically from the schema graph:
+
+\begin{lstlisting}[style=groovy]
+// Include all employees, even those without a department
+db.newQueryBuilder()
+    .select("employee.first_name", "department.name")
+    .leftJoin("department")
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+This produces the same \texttt{ON} condition that the auto-join would generate, but uses \texttt{LEFT JOIN} instead of \texttt{INNER JOIN}.  Multiple overrides can be combined:
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name", "department.name",
+            "building.address")
+    .leftJoin("department")
+    .leftJoin("building")
+    .fetchAll()
+\end{lstlisting}
+
+\begin{notebox}
+Naming just the table is always unambiguous because the auto-join resolution brings each table into the query exactly once.  Even if a table has foreign keys to several other tables, only one join clause targets it.  When the same table must appear multiple times in a query (e.g., joining \texttt{t2} twice with different aliases), auto-join cannot express that --- use the multi-argument explicit join form described below.
+\end{notebox}
+
+\subsection{Fully Explicit Joins}
+
+When you need full control over the join columns --- for example, self-joins, composite foreign keys, or choosing a specific path when multiple foreign keys exist between two tables --- use the multi-argument forms.  These specify the exact columns and completely replace any auto-join for the target table.
+
+\begin{lstlisting}[style=groovy]
+// Explicit LEFT JOIN specifying columns
+db.newQueryBuilder()
+    .select("employee.first_name", "department.name")
+    .leftJoin("employee", "department_id",
+              "department", "department_id")
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+\texttt{leftJoin()} and \texttt{rightJoin()} multi-argument forms have the same signatures as \texttt{join()}.
+
+\subsection{Self-Joins}
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("employee.first_name")
+    .select("mgr.first_name AS manager_name")
+    .join("employee", "manager_id",
+          "employee", "employee_id", "mgr")
+    .fetchAll()
+\end{lstlisting}
+
+\noindent
+The fifth parameter is an alias for the joined table, required for self-joins.
+
+\subsection{Composite Foreign Keys}
+
+\begin{lstlisting}[style=groovy]
+db.newQueryBuilder()
+    .select("order_line.quantity")
+    .join("order_line",
+          new String[]{"order_id", "product_id"},
+          "order_product",
+          new String[]{"order_id", "product_id"},
+          null)
+    .fetchAll()
+\end{lstlisting}
+
+\section{Subqueries}
+\label{sec:qb-subqueries}
+
+\subsection{WHERE IN / NOT IN}
+
+\begin{lstlisting}[style=groovy]
+// Using a QueryBuilder subquery
+def sub = db.newQueryBuilder()
+    .select("assignment.employee_id")
+    .where("assignment.project_id = ?", projId)
+
+db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .whereIn("employee.employee_id", sub)
+    .fetchAll()
+\end{lstlisting}
+
+\begin{lstlisting}[style=groovy]
+// Using raw SQL
+db.newQueryBuilder()
+    .select("employee.first_name")
+    .whereNotIn("employee.department_id",
+        "SELECT department_id FROM closed_departments")
+    .fetchAll()
+\end{lstlisting}
+
+\subsection{WHERE EXISTS / NOT EXISTS}
+
+\begin{lstlisting}[style=groovy]
+def sub = db.newQueryBuilder()
+    .select("assignment.assignment_id")
+    .where("assignment.employee_id = employee.employee_id")
+    .where("assignment.project_id = ?", projId)
+
+db.newQueryBuilder()
+    .select("employee.first_name")
+    .whereExists(sub)
+    .fetchAll()
+\end{lstlisting}
+
+\section{Common Table Expressions (CTEs)}
+\label{sec:qb-cte}
+
+CTEs are defined with \texttt{with()} and can use raw SQL or another \texttt{QueryBuilder}:
+
+\begin{lstlisting}[style=groovy]
+// CTE with raw SQL
+db.newQueryBuilder()
+    .with("active_emps",
+        "SELECT * FROM employee WHERE active = 'Y'")
+    .select("active_emps.first_name")
+    .select("department.name")
+    .fetchAll()
+
+// CTE with QueryBuilder
+def cte = db.newQueryBuilder()
+    .select("employee.employee_id", "employee.first_name")
+    .where("employee.active = ?", "Y")
+
+db.newQueryBuilder()
+    .with("active_emps", cte)
+    .select("active_emps.first_name")
+    .fetchAll()
+\end{lstlisting}
+
+\section{UNION and UNION ALL}
+\label{sec:qb-union}
+
+\begin{lstlisting}[style=groovy]
+def current = db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .where("employee.active = 'Y'")
+
+def former = db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .where("employee.active = 'N'")
+
+current.unionAll(former)
+    .orderBy("employee.last_name")
+    .fetchAll()
+\end{lstlisting}
+
+\section{Execution Methods}
+\label{sec:qb-execution}
+
+All execution methods come in three forms:
+
+\begin{itemize}
+  \item \textbf{No argument} --- uses the stored connection or command from the constructor.
+  \item \textbf{With a \texttt{Connection}} --- uses an explicit connection (creates a temporary command internally).
+  \item \textbf{With a \texttt{Command}} --- uses an explicit command, for concurrent query scenarios.
+\end{itemize}
+
+\noindent
+When a \texttt{QueryBuilder} is created from a \texttt{Command}, the no-argument methods execute through that command.  When created from a \texttt{Connection}, they execute through the connection.
+
+\begin{longtable}{P{4.5cm}P{6cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{fetchAll()} & Execute and return \texttt{List<Record>}. \\
+\texttt{fetchAll(conn)} & Execute via explicit connection. \\
+\texttt{fetchAll(cmd)} & Execute via explicit command. \\
+\texttt{fetchOne()} & Execute and return a single \texttt{Record} or \texttt{null}. \\
+\texttt{fetchOne(conn)} & Execute via explicit connection. \\
+\texttt{fetchOne(cmd)} & Execute via explicit command. \\
+\texttt{fetchAllJSON()} & Execute and return a \texttt{JSONArray}. \\
+\texttt{fetchAllJSON(conn)} & Execute via explicit connection. \\
+\texttt{fetchAllJSON(cmd)} & Execute via explicit command. \\
+\texttt{query()} & Execute and return a \texttt{Cursor} for row-by-row iteration. \\
+\texttt{query(conn)} & Execute via explicit connection. \\
+\texttt{query(cmd)} & Execute via explicit command. \\
+\texttt{build()} & Generate the SQL string without executing.  Useful for debugging or logging. \\
+\texttt{getParameters()} & Return the list of parameter values (call after \texttt{build()}). \\
+\texttt{toString()} & Return a formatted, human-readable SQL string with newlines between clauses and parameter values appended.  Calls \texttt{build()} automatically if needed. \\
+\bottomrule
+\end{longtable}
+
+\begin{lstlisting}[style=groovy]
+// Inspect generated SQL
+def qb = db.newQueryBuilder()
+    .select("employee.first_name", "department.name")
+    .where("employee.active = ?", "Y")
+String sql = qb.build()
+println sql
+println qb.getParameters()
+\end{lstlisting}
+
+\subsection{Formatted Debug Output}
+
+The \texttt{toString()} method returns a formatted version of the built SQL that is easier to read during debugging.  Major clauses (\texttt{SELECT}, \texttt{FROM}, \texttt{WHERE}, \texttt{ORDER BY}, etc.) appear on separate lines, joins are indented, and parameter values are appended as a comment at the end.
+
+\begin{lstlisting}[style=groovy]
+def qb = db.newQueryBuilder()
+    .select("employee.first_name", "employee.last_name")
+    .select("department.name AS dept_name")
+    .select("building.address")
+    .where("project.project_id = ?", projId)
+    .where("employee.active = 'Y'")
+    .orderBy("employee.last_name")
+println qb.toString()
+\end{lstlisting}
+
+\noindent
+This produces output like:
+
+\begin{lstlisting}[style=sql]
+SELECT employee.first_name, employee.last_name,
+       department.name AS dept_name, building.address
+FROM project
+    JOIN project_assignment ON project_assignment.project_id
+         = project.project_id
+    JOIN employee ON project_assignment.employee_id
+         = employee.employee_id
+    JOIN department ON employee.department_id
+         = department.department_id
+    JOIN building ON department.building_id
+         = building.building_id
+WHERE project.project_id = ?
+  AND employee.active = 'Y'
+ORDER BY employee.last_name
+-- Parameters: [42]
+\end{lstlisting}
+
+\noindent
+Because \texttt{toString()} calls \texttt{build()} automatically if it has not already been called, it can be used directly in log statements or print calls without any prior setup.
+
+\section{Using QueryBuilder with Commands}
+\label{sec:qb-command}
+
+The \texttt{Connection} convenience methods (\texttt{db.fetchAll()}, \texttt{db.fetchOne()}, etc.) each create a temporary \texttt{Command} internally and close it immediately.  This works well for isolated queries, but when you need multiple queries active simultaneously --- for example, iterating over one result set while running another query for each row --- you must use separate \texttt{Command} instances to avoid interference.
+
+\texttt{Command.newQueryBuilder()} creates a \texttt{QueryBuilder} bound to that specific command, giving you the full fluent API without query interference:
+
+\begin{lstlisting}[style=groovy]
+try (Command cmd1 = db.newCommand()
+     Command cmd2 = db.newCommand()) {
+    Cursor cursor = cmd1.newQueryBuilder()
+        .select("employee.first_name", "employee.last_name")
+        .select("department.name AS dept")
+        .where("employee.active = ?", "Y")
+        .query()
+    while (cursor.isNext()) {
+        Record emp = cursor.getRecord()
+        List<Record> tasks = cmd2.newQueryBuilder()
+            .select("task.description", "task.due_date")
+            .where("task.employee_id = ?",
+                   emp.getString("employee_id"))
+            .fetchAll()
+        // process tasks for this employee
+    }
+}
+\end{lstlisting}
+
+\noindent
+Without this integration, the developer would be forced to write raw SQL in the very scenarios where queries are most complex (multiple related tables queried simultaneously).
+
+\begin{tipbox}
+Use \texttt{db.newQueryBuilder()} for the common case of isolated, one-shot queries.  Use \texttt{cmd.newQueryBuilder()} only when you need multiple simultaneously active queries on the same connection.
+\end{tipbox}
+
+\section{Complete Example: Flexible Employee Search}
+\label{sec:qb-example}
+
+\begin{lstlisting}[style=groovy]
+void search(JSONObject injson, JSONObject outjson,
+            Connection db, ProcessServlet servlet) {
+    def qb = db.newQueryBuilder()
+        .select("employee.employee_id")
+        .select("employee.first_name", "employee.last_name")
+        .select("department.name AS department")
+
+    // Dynamic filters
+    String name = injson.getString("lastName")
+    if (name)
+        qb.where("employee.last_name LIKE ?", name + "%")
+
+    String dept = injson.getString("department")
+    if (dept)
+        qb.where("department.name = ?", dept)
+
+    Double minSalary = injson.getDouble("minSalary")
+    if (minSalary)
+        qb.where("employee.salary >= ?", minSalary)
+
+    String active = injson.getString("activeOnly")
+    if (active == "Y")
+        qb.where("employee.active = 'Y'")
+
+    qb.orderBy("employee.last_name")
+       .orderBy("employee.first_name")
+       .limit(100)
+
+    outjson.put("results", qb.fetchAllJSON())
+}
+\end{lstlisting}
+
+\noindent
+This single method handles any combination of search filters.  The QueryBuilder automatically joins \texttt{employee} to \texttt{department} only when the department filter or column is used.
+
+\section{Client-Driven Sorting with SortBuilder}
+\label{sec:qb-sortbuilder}
+
+A screen that lets the user click grid headers to sort needs an \texttt{ORDER BY} that depends on client input.  The sort must happen in SQL: when a result is capped or paged, sorting in the browser reorders only the rows on screen (see Section~\ref{sec:grid-serversort}).  But a column name sent by the client must never be pasted into SQL.
+
+\texttt{org.kissweb.database.SortBuilder}\index{SortBuilder} solves this.  The application registers, once, every sort key it accepts together with the fixed SQL that produces the value.  For each request the client sends only keys; \texttt{SortBuilder} looks them up and emits the registered SQL.  Unknown keys are ignored, never executed.
+
+\begin{warnbox}[Security]
+Client text never reaches the SQL.  A key is used only as a lookup into the registered table; the \texttt{ORDER BY} text comes entirely from your program constants.  An unknown key is dropped and reported through \texttt{rejectedKeys()}.  Expressions passed to \texttt{raw()}, join clauses and tiebreak items are emitted verbatim, so they must be fixed program constants, never client text.
+\end{warnbox}
+
+\subsection{Registering Keys}
+
+Build the \texttt{SortBuilder} once, typically in a \texttt{static} initializer, then only read it.  \texttt{build()} is thread-safe once configuration is complete.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.database.SortBuilder
+import static org.kissweb.database.SortBuilder.*
+
+static final String LAST_PAY_JOIN =
+    "left join lateral (select max(paid_on) " +
+    "as paid_on from payment pay " +
+    "where pay.order_id = o.order_id) lp on true"
+
+static final SortBuilder SORT = new SortBuilder()
+    .key("customer", text("c.name"))
+    .key("contact",  text("c.last_name"),
+                     text("c.first_name"))
+    .key("placed",   zeroBlank("o.placed_date"))
+    .key("status",   raw("st.seqno"))
+    .key("paid",     raw("lp.paid_on"))
+    .join(LAST_PAY_JOIN, "paid")
+\end{lstlisting}
+
+Each \texttt{key()} call names a key and gives one or more expressions.  A multi-part key such as \texttt{contact} sorts by last name, then first name; every expression receives the requested direction.  The three expression helpers are:
+
+\begin{longtable}{P{3.4cm}P{7.1cm}}
+\toprule
+\textbf{Helper} & \textbf{Meaning} \\
+\midrule
+\endhead
+\texttt{text(col)} & Text, compared case-insensitively.  Empty and whitespace-only values count as blank. \\
+\texttt{zeroBlank(col)} & Number or integer date where 0 means blank (rendered as \texttt{nullif(col, 0)}). \\
+\texttt{raw(sql)} & The expression verbatim.  It must yield \texttt{NULL} when the value is blank. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+For a raw expression that must differ by database, pass a lambda instead.  An \texttt{Expr} receives the \texttt{ConnectionType}, and \texttt{SortBuilder.textSql(type, col)} gives the dialect's text rule for use inside it:
+
+\begin{lstlisting}[style=groovy]
+.key("fullName", { type ->
+    "coalesce(" + SortBuilder.textSql(type, "c.name")
+        + ", '')" } as SortBuilder.Expr)
+\end{lstlisting}
+
+\subsection{Joins}
+
+Some keys sort on a value that needs an extra join (above, the latest payment date).  \texttt{join(joinSql, keys...)} declares a join clause and the keys that need it.  The clause is emitted, once, only when at least one of those keys is actually used, so unsorted requests do not pay for the join.  The keys must already be registered.
+
+\subsection{Building the ORDER BY}
+
+\begin{lstlisting}[style=groovy]
+SortBuilder.Result r = SORT.build(
+    db.getDBType(),
+    [SortBuilder.Sort.of(sort1, asc1),
+     SortBuilder.Sort.of(sort2, asc2)],
+    SortBuilder.Sort.of("customer", true),
+    "o.order_id asc")
+\end{lstlisting}
+
+\noindent
+The arguments are:
+
+\begin{itemize}
+  \item the database type (so the SQL is rendered for the right dialect);
+  \item the requested sorts in priority order (may be \texttt{null});
+  \item the \emph{default} sort, used only when no usable key was sent (may be \texttt{null}; must be a registered key);
+  \item zero or more \emph{tiebreak} items: complete \texttt{ORDER BY} items, including their own direction, appended last so the order is deterministic.
+\end{itemize}
+
+The \texttt{Result} provides:
+
+\begin{longtable}{P{3.4cm}P{7.1cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{orderBy()} & The complete clause, such as \texttt{order by a asc nulls last, b asc}.  No leading or trailing space.  Empty if there is nothing to sort on. \\
+\texttt{joins()} & The needed join clauses, each once, in first-use order, with a trailing space.  Empty string if none. \\
+\texttt{joinList()} & The same joins as a \texttt{List<String>}. \\
+\texttt{rejectedKeys()} & Non-blank keys that were not registered: trimmed, each once, in request order. \\
+\bottomrule
+\end{longtable}
+
+Behavior to rely on:
+
+\begin{itemize}
+  \item \textbf{Blank keys} (null, empty, whitespace) are silently ignored.
+  \item \textbf{Unknown keys} are never an exception.  They are ignored and listed in \texttt{rejectedKeys()}.  Because that is client text, strip line breaks before logging it.
+  \item \textbf{The default} applies only when no requested key was usable.
+  \item \textbf{Programmer errors} throw \texttt{IllegalArgumentException}: a default that is not registered, a \texttt{join()} naming an unregistered key, or a \texttt{key()} with a blank name or no expressions.
+  \item \textbf{Re-registering} a key replaces it.
+\end{itemize}
+
+\subsection{Blanks Last and Database Dialects}
+\label{sec:qb-sortbuilder-dialects}
+
+Every expression gets the requested direction, and blank values (\texttt{NULL}) sort \emph{last in both directions}.  Databases differ in how they express this, so the SQL is rendered for the connection type at \texttt{build()} time:
+
+The \texttt{text()} blank rule, with \texttt{x} the column:
+
+\begin{longtable}{P{2.3cm}P{8.2cm}}
+\toprule
+\textbf{Database} & \textbf{\texttt{text()} SQL} \\
+\midrule
+\endhead
+PostgreSQL & \texttt{lower(nullif(btrim(x), \textquotesingle\textquotesingle{}))} \\
+SQLite & \texttt{lower(nullif(trim(x), \textquotesingle\textquotesingle{}))} \\
+Oracle & \texttt{lower(trim(x))} \\
+MySQL & \texttt{lower(nullif(trim(x), \textquotesingle\textquotesingle{}))} \\
+SQL Server & \texttt{lower(nullif(ltrim(rtrim(x)), \textquotesingle\textquotesingle{}))} \\
+\bottomrule
+\end{longtable}
+
+\noindent
+How each database orders blanks last, for an ascending key:
+
+\begin{longtable}{P{3.6cm}P{6.9cm}}
+\toprule
+\textbf{Databases} & \textbf{Emitted ORDER BY} \\
+\midrule
+\endhead
+PostgreSQL, Oracle, SQLite & \texttt{x asc nulls last} \\
+MySQL, SQL Server & \texttt{case when x is null then 1 else 0 end, x asc} \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Oracle already treats an empty string as \texttt{NULL}, so it needs no \texttt{nullif}.  Raw expressions, joins and tiebreak items are not translated; they are emitted as written.
+
+\subsection{The Service Method}
+\label{sec:qb-sortbuilder-example}
+
+This is the back end of the grid example in Section~\ref{sec:grid-serversort}.  The client sends up to two keys and directions; the method builds the query around the \texttt{SortBuilder} result:
+
+\begin{lstlisting}[style=groovy]
+void search(JSONObject injson, JSONObject outjson,
+            Connection db, ProcessServlet servlet) {
+    def r = SORT.build(db.getDBType(),
+        [SortBuilder.Sort.of(
+             injson.getString("sort1"),
+             injson.getBoolean("asc1", true)),
+         SortBuilder.Sort.of(
+             injson.getString("sort2"),
+             injson.getBoolean("asc2", true))],
+        SortBuilder.Sort.of("customer", true),
+        "o.order_id asc")
+
+    for (String bad : r.rejectedKeys())
+        logger.warn("Rejected sort key: " +
+            bad.replaceAll("[\\r\\n]", " "))
+
+    String sql = "select o.order_id, c.name as customer, " +
+        "o.placed_date as placed, st.name as status " +
+        "from orders o " +
+        "join customer c on c.customer_id = o.customer_id " +
+        "join status st on st.status_id = o.status_id " +
+        r.joins() + r.orderBy()
+    outjson.put("orders", db.fetchAllJSON(200, sql))
+}
+\end{lstlisting}
+
+\noindent
+Because the \texttt{ORDER BY} is part of the SQL, the 200-row cap applies to the correctly sorted result.  Clicking \emph{Placed} then \emph{Status} on the grid sends \texttt{sort1=status}, \texttt{sort2=placed}, and the query orders by status first, then date, then \texttt{order\_id}.
+
+\begin{tipbox}
+Keep the client's grid column \texttt{field} names identical to the \texttt{SortBuilder} keys.  The key the grid reports is then the key you register, with no translation table to maintain.
+\end{tipbox}

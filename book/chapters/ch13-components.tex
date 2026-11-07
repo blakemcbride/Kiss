@@ -1,0 +1,1093 @@
+\chapter{UI Components}
+\label{ch:components}
+
+Kiss provides a library of custom HTML components for building forms and screens.  This chapter covers every component, its attributes, and its API.  The complete component API is documented in \texttt{components.js}\index{components.js} in the framework source.
+
+\section{The Component System}
+\label{sec:comp-system}
+
+Components are custom HTML tags that Kiss registers at startup.  Each component encapsulates rendering, validation, and event handling.  When \texttt{Utils.loadPage()} injects screen HTML into the page, \texttt{Utils.rescan()} processes the HTML and activates any custom tags.
+
+Every component instance is accessed through the \texttt{\$\$()} function:
+
+\begin{lstlisting}[style=javascript]
+$$('my-component-id').getValue();
+$$('my-component-id').setValue("hello");
+\end{lstlisting}
+
+\section{Common API}
+\label{sec:comp-common}
+
+Most components share these methods (push-buttons, text-labels, and pictures support only a relevant subset --- typically \texttt{onclick} rather than \texttt{onChange}):
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getValue()} & Get the component's current value. \\
+\texttt{setValue(val)} & Set the component's value. \\
+\texttt{clear()} & Clear the component to its default/empty state. \\
+\texttt{enable()} / \texttt{disable()} & Enable or disable the component. Can pass a boolean: \texttt{enable(false)} disables. \\
+\texttt{show()} / \texttt{hide()} & Show or hide the component. Can pass a boolean. \\
+\texttt{isVisible()} / \texttt{isHidden()} & Check visibility state. \\
+\texttt{isDisabled()} / \texttt{isReadOnly()} & Check enabled/readonly state. \\
+\texttt{readOnly()} / \texttt{readWrite()} & Set read-only mode. Can pass a boolean. \\
+\texttt{isDirty()} & Returns \texttt{true} if the user has changed the value. \\
+\texttt{isError(desc)} & Validate; show error message if invalid; return \texttt{true} on error. The \texttt{desc} parameter is the field label shown in the error message. \\
+\texttt{focus()} & Set keyboard focus to the component. \\
+\texttt{onChange(fn)} & Set a change event handler (fires when user changes value and leaves the field). \\
+\texttt{onCChange(fn)} & Immediate change handler on the text/numeric/date/time input components (fires as the value changes). \\
+\bottomrule
+\end{longtable}
+
+\begin{warnbox}
+Always use Kiss component methods for events (\texttt{.onChange()}, \texttt{.onclick()}), not native DOM methods like \texttt{addEventListener()}.  The Kiss methods handle event wiring consistently across all components.
+\end{warnbox}
+
+\section{Text Input}
+\label{sec:comp-text}
+
+\texttt{<text-input>}\index{text-input} is the most commonly used component.  It renders a single-line text field.
+
+\begin{lstlisting}[style=html]
+<text-input id="first-name" required
+            maxlength="50"></text-input>
+<text-input id="password" password></text-input>
+<text-input id="search" placeholder="Search..."></text-input>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{required} & Field must not be empty.  \texttt{isError()} checks this. \\
+\texttt{password} & Masks input characters. \\
+\texttt{maxlength} & Maximum number of characters. \\
+\texttt{minlength} & Minimum number of characters (validated by \texttt{isError()}). \\
+\texttt{placeholder} & Placeholder text shown when empty. \\
+\texttt{upcase} & Converts input to uppercase. \\
+\texttt{fixcap} & Auto-capitalizes the first letter of each word. \\
+\texttt{autocomplete} & Passed through to the underlying \texttt{<input>} element for browser autofill. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Additional methods:
+
+\begin{lstlisting}[style=javascript]
+$$('search').onEnter(() => performSearch());  // fires on Enter key
+\end{lstlisting}
+
+\section{Numeric Input}
+\label{sec:comp-numeric}
+
+\texttt{<numeric-input>}\index{numeric-input} accepts only numeric values with optional formatting.
+
+\begin{lstlisting}[style=html]
+<numeric-input id="salary" min="0" max="999999"
+               decimal-places="2"></numeric-input>
+<numeric-input id="quantity" min="1"></numeric-input>
+<numeric-input id="price" money></numeric-input>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{min} & Minimum allowed value. \\
+\texttt{max} & Maximum allowed value. \\
+\texttt{decimal-places} & Number of decimal places (default 0). \\
+\texttt{money} & Shorthand for 2 decimal places with dollar sign formatting. \\
+\texttt{dollar-sign} & Display a dollar sign prefix. \\
+\texttt{required} & Field must have a value. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+\texttt{getValue()} returns a \emph{number}, not a string.  This eliminates the need for parsing on the frontend.
+
+\section{Date Input}
+\label{sec:comp-date}
+
+\texttt{<date-input>}\index{date-input} provides a date picker that works with Kiss's YYYYMMDD integer date format.
+
+\begin{lstlisting}[style=html]
+<date-input id="hire-date"></date-input>
+\end{lstlisting}
+
+\noindent
+Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getDateValue()} & Returns a JavaScript Date object. \\
+\texttt{getIntValue()} & Returns date as YYYYMMDD integer. \\
+\texttt{getSQLValue()} & Returns date in SQL format. \\
+\texttt{setValue(val)} & Accepts Date object or YYYYMMDD integer. \\
+\texttt{setMinValue(val)} & Set minimum allowed date. \\
+\texttt{setMaxValue(val)} & Set maximum allowed date. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Kiss also provides \texttt{<native-date-input>}\index{native-date-input}, which uses the browser's built-in date picker instead of Kiss's custom picker.
+
+\section{Time Input}
+\label{sec:comp-time}
+
+\texttt{<time-input>}\index{time-input} accepts times in HHMM integer format.
+
+\begin{lstlisting}[style=html]
+<time-input id="start-time"></time-input>
+\end{lstlisting}
+
+\section{Duration Input}
+\label{sec:comp-duration}
+
+\texttt{<duration-input>}\index{duration-input} accepts a duration (not a time of day) entered as two integers separated by a colon --- hours and minutes.  The minutes portion must be in the range 0--59.  If the user omits the colon, the value is treated as hours only with an implied \texttt{:00} (so \texttt{3} means three hours, zero minutes).  Input is restricted to digits and at most one colon.
+
+\begin{lstlisting}[style=html]
+<duration-input id="elapsed"></duration-input>
+<duration-input id="shift" min="0:30" max="12:00"
+                required></duration-input>
+\end{lstlisting}
+
+The control's value is the total number of minutes.  \texttt{getValue()} returns the total minutes as an integer and \texttt{getHours()} returns the duration as a floating-point number of hours.  Both return \texttt{0} when the control is blank or invalid.
+
+\begin{lstlisting}[style=javascript]
+$$('elapsed').setValue(135);          // displays as "2:15"
+const minutes = $$('elapsed').getValue();  // 135
+const hours   = $$('elapsed').getHours();  // 2.25
+$$('elapsed').setHours(1.5);          // displays as "1:30"
+\end{lstlisting}
+
+On blur, the entered value is normalized to \texttt{H:MM} (for example, \texttt{5} becomes \texttt{5:00} and \texttt{5:7} becomes \texttt{5:07}).  \texttt{min} and \texttt{max} attributes accept either an \texttt{"h:mm"} string or an integer number of total minutes.
+
+If the \texttt{decimal-hours}\index{decimal-hours} attribute is set, the user enters and the control displays a decimal number of hours instead of \texttt{H:MM} (for example, the user types \texttt{1.25} for one hour and fifteen minutes).  Only digits and at most one decimal point are accepted.  The JavaScript API is unchanged: \texttt{getValue()} still returns total minutes (so \texttt{1.25} entered returns \texttt{75}) and \texttt{setValue(75)} displays \texttt{1.25}.
+
+\begin{lstlisting}[style=html]
+<duration-input id="elapsed-decimal"
+                decimal-hours></duration-input>
+\end{lstlisting}
+
+\section{Drop-Down}
+\label{sec:comp-dropdown}
+
+\texttt{<drop-down>}\index{drop-down} renders a select list.  Items are added programmatically:
+
+\begin{lstlisting}[style=javascript]
+$$('department').clear();
+$$('department').add('', '(select)');   // default prompt
+for (let dept of departments)
+    $$('department').add(dept.id, dept.name);
+\end{lstlisting}
+
+\noindent
+Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{add(value, label)} & Add an option with the given value and display label. \\
+\texttt{addItems(items, valField, lblField)} & Add multiple items from an array of objects. \\
+\texttt{fill(selectedItem, items, valField, labelField)} & Clear and fill the drop-down from an array of objects, selecting the given item. \\
+\texttt{getValue()} & Returns the value of the selected option. \\
+\texttt{setValue(val)} & Select the option with the given value. \\
+\texttt{clear()} & Remove all options. \\
+\texttt{onChange(fn)} & Handler called when selection changes. \\
+\bottomrule
+\end{longtable}
+
+\begin{tipbox}
+When a drop-down requires a selection, use \texttt{add('', '(select)')} as the first item.  This clearly indicates that a selection is needed, instead of defaulting to the first real option.
+\end{tipbox}
+
+Opening a drop-down with the mouse or the keyboard (a click, \texttt{Space}, \texttt{Alt+Down}, or \texttt{F4}) shows a list drawn by Kiss itself, under the control or above it when there is more room there, rather than the browser's own pop-up.  The reason is the filtering described next: while the browser's pop-up is open the browser delivers every keystroke to it and none to the page, so nothing on the page could filter the list.  The Kiss list behaves as the native one does.  The current value is highlighted; \texttt{Up} and \texttt{Down} move it, firing \texttt{onChange} just as they do in a closed control; a click or \texttt{Enter} closes the list keeping the value; \texttt{Escape} closes it and returns to the value it opened with; and clicking elsewhere, leaving the control, or scrolling the page closes it.  Touch input is left to the browser's native picker, which is the better control on a device with no keyboard to filter with.  A read-only drop-down neither opens nor changes its value from the keyboard.
+
+While a drop-down has focus, whether or not its list is open, typing narrows the list to the options whose label contains the typed characters.  Matching is case-insensitive and the text may appear anywhere in the label, not only at its start, so typing \texttt{miss} in a list of states leaves only \emph{Mississippi} and \emph{Missouri}.  With the list open, the typed text is shown at the top of the list and the rows narrow with each keystroke.  As the user types, the current selection is kept when it still matches; otherwise the first matching option becomes selected and \texttt{onChange} fires, exactly as with the browser's own first-letter type-ahead.  \texttt{Backspace} removes the last typed character.  \texttt{Escape} erases the whole sequence, restores the full list, and returns to the selection that was current before typing began, so the user can start again; an open list stays open, and a second \texttt{Escape} closes it.  Leaving the control also restores the full list, keeping whatever is then selected.  A lone space opens and closes the list, as it does natively, but once a sequence has begun a space is part of it.
+
+The filter changes only what the list displays and which option is selected.  \texttt{size()}, \texttt{getValue(idx)}, \texttt{getLabel(idx)}, \texttt{getAllLabels()}, \texttt{selectedIndex()}, and the other index-based methods always refer to the complete list, and any method that modifies the list first restores it and closes the list.
+
+\section{Combo Box}
+\label{sec:comp-combobox}
+
+\texttt{<combo-box>}\index{combo-box} is an editable drop-down --- the equivalent of the Microsoft Windows combobox control.  It behaves like a \texttt{<drop-down>} but also lets the user type a value that is not in the list (a \emph{free entry}).  As the user types, the list opens (if closed) and narrows to the items whose label contains the typed text anywhere, ignoring case; an empty field shows every item, and the list closes when nothing matches.  Clicking the drop-down arrow, or clicking into the field, always reveals the complete list, and any text the user has typed is preserved.  The \texttt{Up} and \texttt{Down} arrow keys, whether the list is open or closed, show and move through only the items that match the current text and never widen it to the full list; \texttt{Enter} and \texttt{Escape} also act on the items shown.  Setting the value programmatically never opens or filters the list.
+
+A static list may be supplied as \texttt{<option>} content, exactly as with \texttt{<drop-down>}:
+
+\begin{lstlisting}[style=html]
+<combo-box id="color" placeholder="pick or type">
+    <option value="Red">
+    <option value="Green">
+    <option value="Blue">
+</combo-box>
+\end{lstlisting}
+
+\noindent
+Items may also be added programmatically.  Each item carries a \emph{value}, a \emph{label} (the text shown and typed), and optional associated \emph{data}:
+
+\begin{lstlisting}[style=javascript]
+$$('color').clearList();   // empty the suggestion list
+$$('color').add('CA', 'California', {capital: 'Sacramento'});
+$$('color').add('NY', 'New York');
+// one argument: value and label are the same
+$$('color').add('TX');
+
+$$('color').onChange((value, text, data) => {
+    // value is 'CA' when California is chosen, or the typed
+    // text itself for a free entry that is not in the list
+});
+\end{lstlisting}
+
+\begin{notebox}
+\texttt{<combo-box>} is a custom drop-down --- an input, an arrow, and a list --- \emph{not} the native HTML \texttt{<datalist>}.  A \texttt{<datalist>} filters itself away once the typed text matches no option and will not reopen the full set.  A Windows combobox, and therefore \texttt{<combo-box>}, also filters as the user types but always reopens the complete list from the arrow no matter what has been typed.
+\end{notebox}
+
+\noindent
+Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{add(value [, label, data])} & Add an item; \texttt{label} defaults to \texttt{value}, and \texttt{data} is arbitrary associated data. \\
+\texttt{addItems(items, valField, lblField [, dataField])} & Add multiple items from an array of objects. \\
+\texttt{fill(selected, items, valField, lblField [, dataField])} & Clear the list, fill it, and select the item whose value is \texttt{selected}. \\
+\texttt{getValue()} & The underlying value of the chosen item, or the typed text for a free entry not in the list. \\
+\texttt{getText()} & The text currently shown (the label), list item or free entry alike. \\
+\texttt{setValue(val)} & Show the item whose value is \texttt{val}; if none matches, show \texttt{val} as free text. \\
+\texttt{getData()} & Data associated with the shown item (\texttt{undefined} for a free entry). \\
+\texttt{clear()} & Clear the entered text; the suggestion list is left intact. \\
+\texttt{clearList()} & Remove all items from the suggestion list. \\
+\texttt{onChange(fn)} & Commit handler; receives \texttt{(value, text, data)}. \\
+\texttt{onCChange(fn)} & Per-keystroke handler; receives the current value. \\
+\bottomrule
+\end{longtable}
+
+\begin{tipbox}
+Unlike \texttt{<drop-down>}, \texttt{clear()} here empties only the typed text and leaves the suggestion list intact; use \texttt{clearList()} to empty the list.  Use \texttt{getValue()} when a coded value (such as \texttt{'CA'}) sits behind a friendly label (\texttt{'California'}): it returns the code for a chosen item, but the raw text for anything the user types that is not in the list.  Add the \texttt{required} attribute to force a non-empty entry, then call \texttt{isError(desc)} during validation, exactly as for the other input controls.
+\end{tipbox}
+
+\section{Smart Chooser}
+\label{sec:comp-smart-chooser}
+
+\texttt{<smart-chooser>}\index{smart-chooser} is a \texttt{select}-like control that automatically avoids unusably long drop-down lists.  Depending on how many items it is given, compared against a caller-supplied threshold, it renders as one of four presentations: a normal drop-down (few enough items); a disabled text field paired with a small chooser button that invokes an application-supplied \texttt{async} selection function --- typically a search popup --- when there are too many items for a drop-down; a disabled text field showing the single available choice (exactly one item and selection is not forced); or a disabled text field reading ``(nothing to select)'' (zero items and selection is not forced).
+
+\begin{lstlisting}[style=html]
+<smart-chooser id="employee" required></smart-chooser>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{required} & A selection is required. \\
+\texttt{disabled} & Disables the control. \\
+\texttt{default-}\allowbreak\texttt{option="label"} & Text shown before a selection is made (drop-down presentation only). \\
+\texttt{inside-width="n"} / \texttt{outside-width="n"} & Sets the control's inner width, or outer width including padding, in pixels. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The control can be driven at either of two levels.  The \emph{low-level} API builds the list or the chooser wiring by hand, much like \texttt{<drop-down>}:
+
+\begin{lstlisting}[style=javascript]
+$$('employee').useDropdown();               // force the drop-down presentation
+$$('employee').add('', '(choose)');
+$$('employee').addItems(employees, 'id', 'name');
+\end{lstlisting}
+
+\noindent
+Key low-level methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{add(val, label, data)} / \texttt{addItems(items, valField, labelField, dataField)} & Populate the drop-down list; \texttt{labelField} can be a field name or a function that formats the label from the item. \\
+\texttt{useDropdown([items, valField, labelField, dataField])} & Force the drop-down presentation, optionally filling it. \\
+\texttt{forceSelect([title])} & Force the chooser-button presentation, showing \texttt{title} (default ``(choose)'') until a value is set. \\
+\texttt{nothingToSelect()} / \texttt{singleValue(val, label, data)} & Force the ``(nothing to select)'' or single-value disabled presentations. \\
+\texttt{setSelectFunction(fun)} & The \texttt{async} function run when the chooser button is clicked; its resolved item is handled by the caller (see the high-level API below for the common wiring). \\
+\texttt{setForceSelection([flg])} / \texttt{setForceDropDown([flg])} & Override the automatic presentation choice in either direction. \\
+\texttt{getValue()} / \texttt{setValue(val, label, data)} & Read or set the current selection. \\
+\texttt{getLabel()} / \texttt{getData()} & Read the label text, or the associated data, of the current selection. \\
+\texttt{clear()} / \texttt{reset()} & Empty the control, or restore it to its original underlying element (undoes a prior \texttt{forceSelect()}). \\
+\texttt{disable([flg])} / \texttt{enable([flg])} & Enable or disable the control and its chooser button together. \\
+\texttt{onChange(fn)} & Handler called with \texttt{(value, label, data)} when the drop-down selection changes. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The \emph{high-level} API is the more common way to drive the control: supply the item source once, and \texttt{run()} picks the presentation automatically from the item count.
+
+\begin{lstlisting}[style=javascript]
+$$('employee').setup(15, true)                    // threshold; add a "(choose)" option
+    .setupItems(employees, 'id', 'name')
+    .setupSelectFunction(searchEmployees, 'id', 'name')
+    .run();
+\end{lstlisting}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{setup(}\allowbreak\texttt{maxNumberInDropDown,} \texttt{addChooseOption)} & First call; \texttt{maxNumberInDropDown} is the item-count threshold deciding drop-down vs. chooser button. \\
+\texttt{setupItems(items, valField, labelField, dataField)} & The candidate item array and its field names. \\
+\texttt{setupSelectFunction(}\allowbreak\texttt{selectFunction,} \texttt{valField,} \texttt{labelField,} \texttt{dataField)} & The \texttt{async} function used for the chooser-button presentation, plus the field names to read from its resolved item. \\
+\texttt{setupDefault(}\allowbreak\texttt{defaultValue,} \texttt{defaultLabel,} \texttt{defaultData)} & The initially-selected value. \\
+\texttt{run()} & Builds the control, automatically choosing the drop-down, chooser-button, single-value, or nothing-to-select presentation from the item count. \\
+\bottomrule
+\end{longtable}
+
+\begin{warnbox}
+Kiss ships no CSS for the chooser button.  The control emits it with class \texttt{btn-smart-chooser} (plus a \texttt{:disabled} state), but its appearance --- including any icon --- is entirely the hosting application's responsibility to style.  A page that uses \texttt{<smart-chooser>} without ever styling \texttt{.btn-smart-chooser} shows a plain, unstyled button.
+\end{warnbox}
+
+\section{List Box}
+\label{sec:comp-listbox}
+
+\texttt{<list-box>}\index{list-box} is a multi-line selectable list.  It supports single and multiple selection.
+
+\begin{lstlisting}[style=html]
+<list-box id="employee-list" style="height: 200px;"></list-box>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+$$('employee-list').clear();
+for (let emp of employees)
+    $$('employee-list').add(emp.id, emp.name);
+
+$$('employee-list').onChange(() => {
+    const selected = $$('employee-list').getValue();
+    loadEmployeeDetails(selected);
+});
+\end{lstlisting}
+
+\noindent
+\texttt{getValue()} returns a single value for single-select lists, or an array for multi-select.  \texttt{onDblClick(fn)} fires when a row is double-clicked.
+
+\noindent
+In a multi-select list, \texttt{setValue()} accepts an array of values and selects exactly the rows whose values (compared as strings) are in the array, deselecting all others.  A single scalar selects just that row, and \texttt{null}, \texttt{undefined}, or \texttt{''} clears the selection.
+
+\begin{lstlisting}[style=javascript]
+$$('employee-list').setValue([3, 7, 12]);   // multiple list
+$$('employee-list').setValue(null);         // clear all
+\end{lstlisting}
+
+A list box filters as the user types, exactly as a drop-down does (see Section~\ref{sec:comp-dropdown}), and because the list is always open the rows visibly disappear with each keystroke.  Matching is case-insensitive and anywhere in the label.  In a single-select list the current selection is kept when it still matches and otherwise moves to the first match, firing \texttt{onChange}; a \texttt{multiple} list only narrows what is shown and leaves every selection alone, including selections on rows the filter has hidden.  \texttt{Backspace} edits the sequence, \texttt{Escape} erases it and returns to the selection that was current before typing began, and leaving the control restores the full list keeping whatever is then selected.  As with the drop-down, \texttt{getValue()}, \texttt{size()}, and the index-based methods always report the complete list.  A read-only list (\texttt{readOnly()}) shows its selection but neither the keyboard nor a click on a row can change it; it can still be scrolled.
+
+\section{Checkbox}
+\label{sec:comp-checkbox}
+
+\texttt{<check-box>}\index{check-box} renders a labeled checkbox.
+
+\begin{lstlisting}[style=html]
+<check-box id="active" label="Active"></check-box>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+let isActive = $$('active').getValue();  // true or false
+$$('active').setValue(true);
+\end{lstlisting}
+
+\section{Radio Button}
+\label{sec:comp-radio}
+
+\texttt{<radio-button>}\index{radio-button} groups are managed by a shared \texttt{name} attribute.  Access the group through the group name with \texttt{\$\$()}:
+
+\begin{lstlisting}[style=html]
+<radio-button name="emp-type" value="full">
+    Full-time</radio-button>
+<radio-button name="emp-type" value="part">
+    Part-time</radio-button>
+<radio-button name="emp-type" value="contract">
+    Contract</radio-button>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+// Access the group
+let type = $$('emp-type').getValue();    // "full", "part", or "contract"
+$$('emp-type').setValue("part");
+$$('emp-type').onChange(() => handleTypeChange());
+$$('emp-type').getIntValue();            // numeric value if applicable
+\end{lstlisting}
+
+\section{Push Button}
+\label{sec:comp-button}
+
+\texttt{<push-button>}\index{push-button} renders a clickable button.
+
+\begin{lstlisting}[style=html]
+<push-button id="save">Save</push-button>
+<push-button id="cancel">Cancel</push-button>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+$$('save').onclick(async () => {
+    if ($$('name').isError('Name'))
+        return;
+    const res = await Server.call(WS, 'save', data);
+    if (res._Success)
+        Utils.showMessage('Info', 'Saved successfully');
+});
+\end{lstlisting}
+
+\noindent
+Buttons can be enabled and disabled:
+
+\begin{lstlisting}[style=javascript]
+$$('edit').disable();                    // disable
+$$('edit').enable();                     // enable
+// enable only if row selected
+$$('edit').enable(grid.getSelectedRow());
+\end{lstlisting}
+
+\section{Text Label}
+\label{sec:comp-label}
+
+\texttt{<text-label>}\index{text-label} displays static text that can be updated programmatically.
+
+\begin{lstlisting}[style=html]
+<text-label id="status"></text-label>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+$$('status').setValue("Ready");
+$$('status').setHTMLValue("<b>Processing...</b>");
+$$('status').setColor("red");
+$$('status').onclick(() => showDetails());
+\end{lstlisting}
+
+\section{Textbox Input}
+\label{sec:comp-textbox}
+
+\texttt{<textbox-input>}\index{textbox-input} provides a multi-line text area.
+
+\begin{lstlisting}[style=html]
+<textbox-input id="notes" style="width: 400px; height: 150px;">
+</textbox-input>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+$$('notes').getValue();                   // plain text
+$$('notes').setHtmlValue("<p>Hello</p>"); // set HTML content
+\end{lstlisting}
+
+\section{File Upload}
+\label{sec:comp-file}
+
+\texttt{<file-upload>}\index{file-upload} provides a file picker with upload capability.
+
+\begin{lstlisting}[style=html]
+<file-upload id="attachment"></file-upload>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+// Check if files were selected
+let count = $$('attachment').numberOfUploadFiles();
+
+// Get FormData for upload
+let fd = $$('attachment').getFormData();
+
+// Get filename
+let name = $$('attachment').uploadFilename(0);
+
+// Upload to backend
+Server.fileUploadSend(WS, 'upload', fd);
+\end{lstlisting}
+
+\noindent
+See Chapter~\ref{ch:files} for complete file upload examples.
+
+\section{Picture}
+\label{sec:comp-picture}
+
+\texttt{<picture>}\index{picture} displays an image that can be loaded from the backend.
+
+\begin{lstlisting}[style=html]
+<picture id="photo"
+         style="width: 200px; height: 200px;"></picture>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+$$('photo').setValue(filename, imageData);
+$$('photo').onclick(() => enlargePhoto());
+\end{lstlisting}
+
+\section{Additional UI Components}
+\label{sec:comp-additional}
+
+The components in this section build page structure, present status, drive navigation, and give the user feedback.  Unlike the form controls above, they do not participate in \texttt{isError()} validation, but they are declared as custom tags and accessed through \texttt{\$\$()} in exactly the same way as the rest of the library.  The full API for each is also documented in \texttt{components.js}.
+
+\subsection{Search Input}
+\label{sec:comp-search-input}
+
+\texttt{<search-input>}\index{search-input} is a single-line search field with a built-in search icon, a clear (\texttt{x}) button that appears once text is entered, and an optional drop-down result list for type-ahead / autocomplete behavior.
+
+\begin{lstlisting}[style=html]
+<search-input id="customer-search"
+              placeholder="Search customers..."></search-input>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{placeholder} & Placeholder text shown when empty. \\
+\texttt{value} & Initial value. \\
+\texttt{maxlength} & Maximum number of characters. \\
+\texttt{disabled} & Disables the field. \\
+\texttt{required} & Marks the underlying input as required. \\
+\texttt{clear-label} & Accessible label and tooltip for the clear button (default \texttt{Clear search}). \\
+\texttt{autocomplete} & Passed through to the input (default \texttt{off}). \\
+\texttt{spellcheck} & Passed through to the input (default \texttt{false}). \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getValue()} / \texttt{setValue(val)} & Read or set the search text. \\
+\texttt{clear()} & Empty the field and hide the result list. \\
+\texttt{focus()} & Focus the search field. \\
+\texttt{oninput(fn)} & Called on every keystroke with the current text (\texttt{onChange} is an alias). \\
+\texttt{onsearch(fn)} & Called with the text when the user presses Enter. \\
+\texttt{onclear(fn)} & Called when the clear button is pressed. \\
+\texttt{setResults(items [, opts])} & Populate and show the result list. \\
+\texttt{onselect(fn)} & Called with \texttt{(value, label, item, element)} when a result is chosen. \\
+\texttt{showResults()} / \texttt{hideResults()} & Show or hide the result list. \\
+\texttt{enable([flg])} / \texttt{disable([flg])} & Enable or disable the field. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+\texttt{setResults()} accepts an array of strings or of objects.  For objects, the field names default to \texttt{value}, \texttt{label}, \texttt{description}, and \texttt{meta}, and can be overridden through the options object (\texttt{valueField}, \texttt{labelField}, \texttt{descriptionField}, \texttt{metaField}).  An item with \texttt{disabled: true} is shown but not selectable.
+
+\begin{lstlisting}[style=javascript]
+$$('customer-search').oninput(async (text) => {
+    if (text.length < 2) {
+        $$('customer-search').hideResults();
+        return;
+    }
+    const res = await Server.callQuiet(WS, 'searchCustomers',
+                                       {q: text});
+    if (res._Success)
+        $$('customer-search').setResults(res.customers, {
+            valueField: 'id',
+            labelField: 'name',
+            descriptionField: 'city'
+        });
+});
+
+$$('customer-search').onselect((value, label) => {
+    loadCustomer(value);
+});
+\end{lstlisting}
+
+\noindent
+The list is keyboard-navigable: the down arrow moves from the field into the list, the up and down arrows move between results, Enter selects, and Escape (or a click outside the control) closes it.
+
+\begin{tipbox}
+Pair \texttt{<search-input>} with \texttt{Server.callQuiet()} (Chapter~\ref{ch:server-comm}) for type-ahead lookups.  Because \texttt{callQuiet()} does not raise the global wait cursor, rapid keystroke-driven searches do not make the whole screen flicker as busy.
+\end{tipbox}
+
+\subsection{Segmented Control}
+\label{sec:comp-segmented}
+
+\texttt{<segmented-control>}\index{segmented-control} is a horizontal group of mutually exclusive buttons --- the equivalent of a compact tab bar, or of a radio group styled as a toolbar.  Each choice is declared with a child \texttt{<segment>} tag.
+
+\begin{lstlisting}[style=html]
+<segmented-control id="view-mode" value="list" equal>
+    <segment value="list">List</segment>
+    <segment value="grid">Grid</segment>
+    <segment value="map">Map</segment>
+</segmented-control>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{value} & Value of the initially selected segment. \\
+\texttt{equal} & All segments share equal width. \\
+\texttt{disabled} & Disables the whole control. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Each child \texttt{<segment>} supports a \texttt{value}, a \texttt{selected} (or \texttt{active}) flag, and \texttt{disabled}.  Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getValue()} & Value of the selected segment. \\
+\texttt{setValue(val [, silent])} & Select a segment. \\
+\texttt{onchange(fn)} & Called with \texttt{(value, label, element)} when the selection changes. \\
+\texttt{fill(items, sel [, valField, labelField])} & Rebuild the segments from an array of strings or objects, selecting \texttt{sel}. \\
+\texttt{enable([flg])} / \texttt{disable([flg])} & Enable or disable all segments. \\
+\bottomrule
+\end{longtable}
+
+\begin{notebox}
+\texttt{setValue()} is \emph{silent} by default --- it changes the selection without firing the \texttt{onchange} handler.  Pass \texttt{false} as the second argument (\texttt{setValue(val, false)}) when you want programmatic selection to fire \texttt{onchange}, as it does for user clicks.  The arrow keys, Home, and End move and select from the keyboard.
+\end{notebox}
+
+\subsection{Menu Button}
+\label{sec:comp-menu-button}
+
+\texttt{<menu-button>}\index{menu-button} is a button that opens a small drop-down menu of actions.  Menu contents are declared with child \texttt{<menu-item>} and \texttt{<menu-separator>} tags; an optional \texttt{<menu-trigger>} supplies custom trigger content in place of a plain text label.
+
+\begin{lstlisting}[style=html]
+<menu-button id="row-actions" label="Actions">
+    <menu-item value="edit">Edit</menu-item>
+    <menu-item value="dup">Duplicate</menu-item>
+    <menu-separator></menu-separator>
+    <menu-item value="del" danger>Delete</menu-item>
+</menu-button>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{label} & Trigger text when no \texttt{<menu-trigger>} is supplied (\texttt{text} is an alias). \\
+\texttt{align} & Menu alignment: \texttt{start} or \texttt{end}. \\
+\texttt{placement} & Menu placement: \texttt{bottom} or \texttt{top}. \\
+\texttt{disabled} & Disables the trigger. \\
+\texttt{close-on-select} & Default \texttt{true}; set \texttt{false} to leave the menu open after a choice. \\
+\texttt{open} & Start with the menu open. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Each \texttt{<menu-item>} supports a \texttt{value} (or \texttt{id}), \texttt{disabled}, \texttt{danger} (destructive styling), and \texttt{href} / \texttt{target} (navigates when selected).  Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{open()} / \texttt{close()} / \texttt{toggle()} & Control menu visibility. \\
+\texttt{isOpen()} & Whether the menu is open. \\
+\texttt{onselect(fn)} & Called with \texttt{(value, label, itemElement)} when an item is chosen. \\
+\texttt{getValue()} / \texttt{setValue(val)} & Read or store the last selected value. \\
+\texttt{enable([flg])} / \texttt{disable([flg])} & Enable or disable the trigger. \\
+\texttt{focus()} & Focus the trigger. \\
+\bottomrule
+\end{longtable}
+
+\begin{lstlisting}[style=javascript]
+$$('row-actions').onselect((value) => {
+    switch (value) {
+        case 'edit': editRow();      break;
+        case 'dup':  duplicateRow(); break;
+        case 'del':  deleteRow();    break;
+    }
+});
+\end{lstlisting}
+
+\noindent
+The menu is fully keyboard-operable: the trigger opens on Enter, Space, or the down arrow (focusing the first item); the up and down arrows, Home, and End move between items; and Escape closes the menu and returns focus to the trigger.  Clicking outside the menu closes it.
+
+\subsection{Accordion}
+\label{sec:comp-accordion}
+
+\texttt{<accordion>}\index{accordion} is a group of collapsible disclosure sections.  Each section is declared with a child \texttt{<accordion-item>} tag whose \texttt{title} attribute is the clickable header and whose content is the collapsible body.
+
+\begin{lstlisting}[style=html]
+<accordion id="settings" single>
+    <accordion-item title="General" value="general" open>
+        <!-- section content -->
+    </accordion-item>
+    <accordion-item title="Notifications" value="notify">
+        <!-- section content -->
+    </accordion-item>
+</accordion>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{single} & Only one section may be open at a time (the default allows several). \\
+\texttt{persist-key} & Remembers which sections are open in \texttt{localStorage} under this key, restoring them on the next load. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Each \texttt{<accordion-item>} supports \texttt{title}, \texttt{value} (or \texttt{id}), \texttt{note} (secondary header text), \texttt{open} (start expanded), and \texttt{disabled}.  The header may alternatively be supplied as an \texttt{<accordion-title>} child element.  Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{open(value)} / \texttt{close(value)} / \texttt{toggle(value)} & Control an individual section. \\
+\texttt{getOpenValues()} & Array of the values of all open sections. \\
+\texttt{setOpen(values [, silent])} & Open exactly the given sections (silent by default). \\
+\texttt{onchange(fn)} & Called with \texttt{(value, open, openValues)} when a section is toggled. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Panel Card}
+\label{sec:comp-panel-card}
+
+\texttt{<panel-card>}\index{panel-card} is a generic card / panel surface --- a bordered, padded container with a subtle background, used to group related content.
+
+\begin{lstlisting}[style=html]
+<panel-card id="summary" hover>
+    <h3>Account summary</h3>
+    <p>...</p>
+</panel-card>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{as} & The element actually rendered: \texttt{div}, \texttt{section}, \texttt{article}, \texttt{aside}, \texttt{main}, \texttt{header}, or \texttt{footer} (default \texttt{section}). \\
+\texttt{no-pad} & Remove the default interior padding. \\
+\texttt{hover} & Raise the card with a shadow on hover. \\
+\texttt{interactive} & Make the whole card behave like a button (adds keyboard focus and a button role). \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Key methods:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{onclick(fn)} & Register a click handler (used with \texttt{interactive}). \\
+\texttt{show([flg])} / \texttt{hide([flg])} & Show or hide the card. \\
+\texttt{isVisible()} / \texttt{isHidden()} & Check visibility. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Section Title}
+\label{sec:comp-section-title}
+
+\texttt{<section-title>}\index{section-title} renders a consistent heading row for a region of a screen: an optional small ``eyebrow'' label, a heading, optional supporting subtitle text, and an action area on the right for buttons.
+
+\begin{lstlisting}[style=html]
+<section-title title="Team members"
+               subtitle="People with access to this project"
+               eyebrow="Settings">
+    <push-button id="invite">Invite</push-button>
+</section-title>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{title} & Heading text. \\
+\texttt{subtitle} & Secondary text under the heading (\texttt{note} is an alias). \\
+\texttt{eyebrow} & Small label above the heading. \\
+\texttt{level} & Heading level 1--6 (default 2), controlling the underlying \texttt{<h1>}--\texttt{<h6>}. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Any child content is placed in the action area on the right when title attributes are supplied.  If none of \texttt{title}, \texttt{subtitle}, or \texttt{eyebrow} are given, the tag's own text content becomes the title.  The methods \texttt{setTitle(text)} and \texttt{setSubtitle(text)} update the heading and subtitle at runtime.
+
+\subsection{Badge and Chip}
+\label{sec:comp-badge}
+
+\texttt{<badge-chip>}\index{badge-chip} is a small colored label for statuses, counts, categories, and tags.
+
+\begin{lstlisting}[style=html]
+<badge-chip tone="success">Active</badge-chip>
+<badge-chip tone="warning" dot>Pending</badge-chip>
+<badge-chip tone="info" icon="i">Note</badge-chip>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{tone} & Color: \texttt{neutral}, \texttt{accent}, \texttt{info}, \texttt{success}, \texttt{warning}, \texttt{error}, or \texttt{danger} (default \texttt{neutral}; \texttt{type} is an alias). \\
+\texttt{size} & \texttt{sm}, \texttt{md}, or \texttt{lg} (default \texttt{md}). \\
+\texttt{icon} & Optional leading icon text. \\
+\texttt{dot} & Show a small leading status dot. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The label text is the tag's content (or a \texttt{value} / \texttt{text} attribute).  \texttt{getValue()} and \texttt{setValue(text)} read or replace the label, and \texttt{setTone(tone)} changes the color at runtime.
+
+\subsection{Avatar}
+\label{sec:comp-avatar}
+
+\texttt{<avatar-badge>}\index{avatar-badge} renders a circular avatar from a name --- showing derived initials --- or from an image, with an optional presence dot.
+
+\begin{lstlisting}[style=html]
+<avatar-badge name="Jane Doe" status="online"></avatar-badge>
+<avatar-badge src="/photos/jane.png" name="Jane Doe"
+              size="48px"></avatar-badge>
+\end{lstlisting}
+
+\noindent
+Supported attributes:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Attribute} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{name} & Used to derive the initials and the accessible label. \\
+\texttt{src} & Image URL; when present, the image is shown instead of initials. \\
+\texttt{size} & CSS size of the avatar (e.g., \texttt{40px}). \\
+\texttt{tone} & Background color when showing initials: \texttt{neutral}, \texttt{accent}, \texttt{success}, \texttt{warning}, \texttt{error}, or \texttt{danger}. \\
+\texttt{status} & Presence dot: \texttt{online}, \texttt{away}, \texttt{busy}, or \texttt{error}. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The initials are derived from the name --- the first letters of the first two words, or the first two characters of a single word.  \texttt{setName(name)} updates the initials and label (clearing any image), \texttt{setSrc(url [, alt])} sets or replaces the image, and \texttt{setStatus(status)} updates the presence dot.
+
+\subsection{Toast Notifications}
+\label{sec:comp-toast}
+
+A toast is a small, non-modal notification that appears briefly and then dismisses itself.  Toasts are the lightweight alternative to \texttt{Utils.showMessage()} (Chapter~\ref{ch:popups}) for transient feedback such as ``Saved'' or ``Copied to clipboard''.
+
+The simplest way to raise a toast needs no markup at all --- call \texttt{Utils.toast()}\index{Utils.toast} (or one of its typed helpers) from anywhere:
+
+\begin{lstlisting}[style=javascript]
+Utils.toast('Settings saved');
+Utils.toast.success('Record created');
+Utils.toast.error('Could not reach the server');
+Utils.toast.warning('Session about to expire',
+                    {duration: 6000});
+Utils.toast.info('3 new messages',
+                 {position: 'bottom-right'});
+
+const t = Utils.toast.manual('Uploading...');  // stays until closed
+// ... later ...
+t.close();
+
+Utils.toast.clear();   // dismiss all visible toasts
+\end{lstlisting}
+
+\noindent
+Each call returns a handle with a \texttt{close()} method.  The options object accepts:
+
+\begin{longtable}{P{3.2cm}P{7.3cm}}
+\toprule
+\textbf{Option} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{type} & \texttt{info}, \texttt{success}, \texttt{warning}, or \texttt{error}. \\
+\texttt{position} & \texttt{top-left}, \texttt{top-center}, \texttt{top-right}, \texttt{bottom-left}, \texttt{bottom-center}, or \texttt{bottom-right} (default \texttt{top-center}).  Top positions automatically sit below an \texttt{.app-nav} bar when one is present. \\
+\texttt{duration} & Milliseconds before auto-dismiss; \texttt{0} keeps the toast open until dismissed (default 3000).  \texttt{time}, \texttt{timeout}, and \texttt{ms} are accepted as aliases. \\
+\texttt{title} & Optional bold title line above the message. \\
+\texttt{maxVisible} & Maximum number of toasts shown at once in a position (default 3). \\
+\texttt{dismissible} & Whether the close (\texttt{x}) button is shown (default \texttt{true}). \\
+\bottomrule
+\end{longtable}
+
+\noindent
+For a dedicated notification region --- to scope toasts to a particular area, or to preconfigure defaults --- declare a \texttt{<toast>}\index{toast} tag and drive it through \texttt{\$\$()}:
+
+\begin{lstlisting}[style=html]
+<toast id="notices" position="bottom-center"
+       type="info" duration="4000" max-visible="2"></toast>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+$$('notices').success('Profile updated');
+$$('notices').show('Custom message',
+                   {type: 'warning', duration: 0});
+$$('notices').configure({position: 'top-right'});
+$$('notices').clear();
+\end{lstlisting}
+
+\noindent
+The tag supports the same values as attributes: \texttt{position}, \texttt{type}, \texttt{duration} (or \texttt{time}), \texttt{auto-dismiss} (\texttt{false} to keep toasts open), \texttt{manual} (the same), \texttt{max-visible}, and \texttt{no-dismiss} (hide the close button).  If the tag has text content, that content is shown as an initial toast.  A region exposes \texttt{show(message [, options])} (returning a handle with \texttt{close()}), the typed helpers \texttt{success}, \texttt{info}, \texttt{warning}, \texttt{error}, and \texttt{manual}, plus \texttt{clear()} and \texttt{configure(options)}.
+
+\section{Stylesheets and Design Tokens}
+\label{sec:comp-stylesheets}
+
+Every component in this chapter is styled by two framework stylesheets, loaded automatically for every Kiss application, in this order (Section~\ref{sec:cache-bootstrap}):
+
+\begin{lstlisting}[style=javascript]
+addStylesheet("kiss/starter-theme.css");
+addStylesheet("kiss/Utils.css");
+\end{lstlisting}
+
+\begin{description}[style=nextline]
+  \item[\texttt{kiss/starter-theme.css}]\index{starter-theme.css} Opinionated default styling for \emph{bare, unnamespaced} HTML elements --- plain \texttt{input[type=text]}, \texttt{input[type=password]}, \texttt{input[type=number]}, \texttt{input[type=date]}, \texttt{textarea}, and \texttt{label} --- so a stock application with no CSS of its own still gets reasonable-looking plain form controls.  Because it restyles bare element selectors rather than anything \texttt{kiss-}-prefixed, it necessarily also restyles whatever plain markup the hosting application writes itself.  An application that owns its own input styling may simply stop linking this file (or override it with a later-loaded application stylesheet) without losing anything else Kiss provides.
+  \item[\texttt{kiss/Utils.css}]\index{Utils.css} Styling for the component library itself --- the form controls earlier in this chapter and the Additional UI Components in Section~\ref{sec:comp-additional}.  Every selector it declares is \texttt{kiss-}-prefixed (e.g. \texttt{.kiss-popup-content}, \texttt{.kiss-toast}) or scoped under a \texttt{kiss-}-prefixed class, and every custom property it declares is \texttt{-{}-kiss-}-prefixed.  Unlike \texttt{starter-theme.css}, it never restyles a bare application element and never squats on an unprefixed custom-property name, so it is namespace-clean --- and it is the file an application should \emph{not} stop linking, since it is what makes the component library legible in the first place.
+\end{description}
+
+\begin{notebox}
+The \texttt{<popup>}, \texttt{<popup-title>}, and \texttt{<popup-body>} tags (Chapter~\ref{ch:popups}) are markup vocabulary, not CSS classes, and are unaffected by the \texttt{kiss-} prefix described here.  If you ever styled a popup or a message dialog by targeting a class such as \texttt{.popup-content}, \texttt{.popup-header}, \texttt{.popup-body}, or \texttt{.msg-modal} directly (instead of the tags), note that these classes now carry a \texttt{kiss-} prefix (\texttt{.kiss-popup-content}, \texttt{.kiss-popup-header}, \texttt{.kiss-popup-body}, \texttt{.kiss-msg-modal}) --- update any such selectors in application CSS.
+\end{notebox}
+
+\subsection{Design Tokens}
+\label{sec:comp-design-tokens}
+
+\texttt{kiss/Utils.css}\index{design tokens} declares a block of CSS custom properties on \texttt{:root} that every control in this chapter reads its colors and surfaces from, instead of hardcoding them:
+
+\begin{lstlisting}[language={}]
+:root {
+    --kiss-ui-bg: #ffffff;
+    --kiss-ui-soft-bg: #f6f8fb;
+    --kiss-ui-ink: #232832;
+    --kiss-ui-muted: #657184;
+    --kiss-ui-ring: rgba(24, 32, 48, 0.10);
+    --kiss-ui-ring-strong: rgba(24, 32, 48, 0.18);
+    --kiss-ui-accent: #2563eb;
+    --kiss-ui-accent-soft: #e9f0ff;
+    --kiss-ui-success: #177245;
+    --kiss-ui-success-soft: #e5f8ed;
+    --kiss-ui-warning: #8a5a12;
+    --kiss-ui-warning-soft: #fff3d8;
+    --kiss-ui-error: #a12b2b;
+    --kiss-ui-error-soft: #fdeaea;
+    --kiss-ui-radius: 12px;
+    --kiss-ui-shadow: ...;
+    --kiss-ui-shadow-hover: ...;
+}
+\end{lstlisting}
+
+\noindent
+Because \texttt{kiss/Utils.css} always loads before any application stylesheet, these tokens are always defined with opaque, legible, light-theme defaults --- a brand-new application that supplies zero application-specific CSS still renders every component in this chapter correctly out of the box; no application theme file is required.  To re-theme the component library, redefine the tokens you want to change in a stylesheet loaded \emph{after} \texttt{kiss/Utils.css}:
+
+\begin{lstlisting}[language={}]
+/* application.css, loaded after kiss/Utils.css */
+:root {
+    --kiss-ui-accent: #7c3aed;
+    --kiss-ui-accent-soft: #f1e9fe;
+    --kiss-ui-radius: 6px;
+}
+\end{lstlisting}
+
+\noindent
+Every control that reads \texttt{var(-{}-kiss-ui-accent)} (and so on for the other tokens) picks up the override immediately --- there is no per-component theming configuration.
+
+\section{Styling Guidelines}
+\label{sec:comp-styling}
+
+\begin{tipbox}
+Avoid \texttt{width: 100\%} on input controls.  This can cause layout issues with the component's internal structure.  Use specific pixel widths instead.
+\end{tipbox}
+
+\begin{lstlisting}[style=html]
+<!-- Correct -->
+<text-input id="name" style="width: 250px;"></text-input>
+
+<!-- Avoid -->
+<text-input id="name" style="width: 100%;"></text-input>
+\end{lstlisting}
+
+\noindent
+CSS Grid is the recommended layout approach for form fields:
+
+\begin{lstlisting}[style=html]
+<div style="display: grid;
+            grid-template-columns: max-content max-content;
+            grid-gap: 10px;">
+    <span>First Name:</span>
+    <text-input id="first-name" style="width: 250px;"
+                maxlength="50" required></text-input>
+
+    <span>Last Name:</span>
+    <text-input id="last-name" style="width: 250px;"
+                maxlength="50" required></text-input>
+
+    <span>Department:</span>
+    <drop-down id="department"
+               style="width: 260px;"></drop-down>
+</div>
+\end{lstlisting}
+
+\section{Validation Pattern}
+\label{sec:comp-validation}
+
+The standard validation pattern uses \texttt{isError()} on each required field before proceeding:
+
+\begin{lstlisting}[style=javascript]
+$$('save-btn').onclick(async () => {
+    if ($$('first-name').isError('First Name'))
+        return;
+    if ($$('last-name').isError('Last Name'))
+        return;
+    if ($$('department').isError('Department'))
+        return;
+
+    // All fields valid --- proceed with save
+    const data = {
+        firstName: $$('first-name').getValue(),
+        lastName: $$('last-name').getValue(),
+        department: $$('department').getValue()
+    };
+    const res = await Server.call(WS, 'save', data);
+    if (res._Success) {
+        Utils.popup_close();
+        refreshGrid();
+    }
+});
+\end{lstlisting}
+
+\noindent
+\texttt{isError()} checks the component's validation rules (e.g., \texttt{required}, \texttt{min}, \texttt{max}).  If validation fails, it displays an error message using the label you provide and sets focus to the invalid field.  It returns \texttt{true} if there is an error, \texttt{false} if the field is valid.

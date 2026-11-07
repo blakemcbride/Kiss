@@ -1,0 +1,425 @@
+\chapter{Database CRUD with Records}
+\label{ch:db-crud}
+
+The \texttt{Record}\index{Record} class represents a single database row.  This chapter covers creating, reading, updating, and deleting records using the Kiss pattern, which replaces raw SQL for most single-table operations.
+
+\section{The Record Class}
+\label{sec:crud-record}
+
+A \texttt{Record} holds column name/value pairs for one row.  Records come from two sources:
+
+\begin{enumerate}
+  \item \textbf{Query results} --- \texttt{fetchOne()}, \texttt{fetchAll()}, and cursor operations return Records populated with data from the database.  These records know their table name and primary key, so they can be updated or deleted.
+  \item \textbf{New records} --- \texttt{db.newRecord("table")} creates an empty Record for a specified table.  You populate it with \texttt{set()} calls and then insert it with \texttt{addRecord()}.
+\end{enumerate}
+
+\section{Creating and Inserting Records}
+\label{sec:crud-insert}
+
+The Kiss pattern for inserting a row:
+
+\begin{lstlisting}[style=groovy]
+Record rec = db.newRecord("phone")
+rec.set("first_name", "Alice")
+rec.set("last_name", "Smith")
+rec.set("phone_number", "555-1234")
+rec.addRecord()
+\end{lstlisting}
+
+\noindent
+Only columns that are explicitly set are included in the INSERT statement.  Columns with database defaults (auto-increment, \texttt{CURRENT\_TIMESTAMP}, etc.) are left out and receive their default values.
+
+\begin{notebox}
+Always use the \texttt{newRecord}/\texttt{set}/\texttt{addRecord} pattern rather than raw SQL \texttt{INSERT} statements.  It is cleaner, handles column types automatically, and only includes non-null columns in the INSERT.
+\end{notebox}
+
+\subsection{Auto-Increment Keys}
+
+If the table has an auto-increment primary key and you need the generated value:
+
+\begin{lstlisting}[style=groovy]
+Record rec = db.newRecord("employee")
+rec.set("first_name", "Bob")
+rec.set("last_name", "Jones")
+Object generatedId = rec.addRecordAutoInc()
+int employeeId = (int) generatedId
+\end{lstlisting}
+
+\noindent
+\texttt{addRecordAutoInc()} inserts the record and returns the generated primary key value.  Cast it to the appropriate type (\texttt{int}, \texttt{long}, or \texttt{short}).
+
+\subsection{Method Chaining}
+
+The \texttt{set()} methods return the Record, allowing method chaining:
+
+\begin{lstlisting}[style=groovy]
+db.newRecord("phone")
+    .set("first_name", "Alice")
+    .set("last_name", "Smith")
+    .set("phone_number", "555-1234")
+    .addRecord()
+\end{lstlisting}
+
+\section{Fetching Records}
+\label{sec:crud-fetch}
+
+\begin{lstlisting}[style=groovy]
+// Single record by primary key
+Record emp = db.fetchOne(
+    "SELECT * FROM employee WHERE employee_id = ?", empId)
+
+// Multiple records
+List<Record> active = db.fetchAll(
+    "SELECT * FROM employee WHERE active = 'Y' " +
+    "ORDER BY last_name")
+\end{lstlisting}
+
+\noindent
+\texttt{fetchOne()} returns \texttt{null} if no rows match.  \texttt{fetchAll()} returns an empty list if no rows match.
+
+\begin{warnbox}
+For a Record to be updatable or deletable, the SELECT must:
+\begin{itemize}
+  \item Query a single table (no joins).
+  \item Include the primary key column(s) in the result.
+\end{itemize}
+\end{warnbox}
+
+\section{Reading Field Values}
+\label{sec:crud-read}
+
+Records provide typed getter methods for each data type:
+
+\begin{lstlisting}[style=groovy]
+String name       = rec.getString("first_name")
+int id            = rec.getInt("employee_id")
+double salary     = rec.getDouble("salary")
+long bigNum       = rec.getLong("big_number")
+short small       = rec.getShort("small_value")
+float pct         = rec.getFloat("percentage")
+BigDecimal amount = rec.getBigDecimal("invoice_total")
+boolean flag      = rec.getBoolean("active_flag")
+char code         = rec.getChar("status_code")
+byte[] data       = rec.getByteArray("binary_data")
+\end{lstlisting}
+
+\noindent
+All getters return \texttt{null} if the column value is NULL.  Column names are case-insensitive.
+
+\noindent
+\texttt{getBigDecimal()} is the right choice for \texttt{NUMERIC} and \texttt{DECIMAL} columns where exact precision matters (money, tax rates, quantities with fixed scale).  Many JDBC drivers return these columns as \texttt{BigDecimal} natively, so \texttt{getInt()}, \texttt{getLong()}, \texttt{getFloat()}, and \texttt{getDouble()} also accept a \texttt{BigDecimal}-backed column and convert it --- exactly for the integer variants (throwing if the value does not fit), and with possible loss of precision for \texttt{float}/\texttt{double}.
+
+\subsection{Date and Time Fields}
+
+Kiss provides several methods for reading date and time values:
+
+\begin{lstlisting}[style=groovy]
+// Date with time information
+Date hired = rec.getDateTime("hire_date")
+
+// Date portion only (time zeroed out)
+Date dateOnly = rec.getDateOnly("birth_date")
+
+// Date as YYYYMMDD integer
+int dateInt = rec.getDateAsInt("birth_date")  // e.g. 19950315
+
+// Date/time as milliseconds since epoch
+long ms = rec.getDateTimeMS("created_at")
+
+// Time portion only (milliseconds)
+long time = rec.getTime("start_time")
+
+// ZonedDateTime (preserves timezone)
+ZonedDateTime zdt = rec.getZonedDateTime("event_time")
+\end{lstlisting}
+
+\begin{warnbox}
+\texttt{getDateTime()} returns \texttt{java.util.Date}, \emph{not} \texttt{java.sql.Timestamp}.  Never cast the result to \texttt{Timestamp}.  This is a common mistake that causes \texttt{ClassCastException} at runtime.
+\end{warnbox}
+
+\subsection{Setting Date and Time Fields}
+
+\begin{lstlisting}[style=groovy]
+// Date and time
+rec.setDateTime("created_at", new Date())
+
+// Date portion only (no time)
+rec.setDateOnly("birth_date", new Date())
+
+// Date from YYYYMMDD integer
+rec.setDateOnly("birth_date", 19950315)
+
+// Date/time from milliseconds since epoch
+rec.setDateTime("event_time", System.currentTimeMillis())
+
+// Time from milliseconds
+rec.setTime("start_time", System.currentTimeMillis())
+\end{lstlisting}
+
+\section{Updating Records}
+\label{sec:crud-update}
+
+Fetch the record, change the fields, and call \texttt{update()}:
+
+\begin{lstlisting}[style=groovy]
+Record emp = db.fetchOne(
+    "SELECT * FROM employee WHERE employee_id = ?", id)
+emp.set("salary", newSalary)
+emp.set("active", "Y")
+emp.update()
+\end{lstlisting}
+
+\noindent
+\texttt{update()} is smart: it compares the current column values against the original values fetched from the database and only includes changed columns in the UPDATE statement.  If nothing has changed, no SQL is executed.
+
+\begin{tipbox}
+Because \texttt{update()} only sends changed fields, it is safe to fetch a record, modify one column, and call \texttt{update()} without worrying about overwriting concurrent changes to other columns.
+\end{tipbox}
+
+\section{Deleting Records}
+\label{sec:crud-delete}
+
+\begin{lstlisting}[style=groovy]
+Record emp = db.fetchOne(
+    "SELECT * FROM employee WHERE employee_id = ?", id)
+emp.delete()
+\end{lstlisting}
+
+\noindent
+Alternatively, use \texttt{Connection.execute()} for a direct delete without fetching:
+
+\begin{lstlisting}[style=groovy]
+db.execute("DELETE FROM employee WHERE employee_id = ?", id)
+\end{lstlisting}
+
+\subsection{Delete Callbacks}
+
+You can register a connection-wide callback that fires whenever a record is deleted:
+
+\begin{lstlisting}[style=groovy]
+db.setDeleteCallback({ String table, Object pkValue ->
+    logger.info("Deleted from ${table}: ${pkValue}")
+})
+\end{lstlisting}
+
+\noindent
+\texttt{ExternalFile} uses this exact mechanism to remove a deleted row's associated file(s) automatically, opted in one table at a time --- see Section~\ref{sec:file-external-cascade}.
+
+\section{Checking Column Existence}
+\label{sec:crud-colexist}
+
+\begin{lstlisting}[style=groovy]
+if (rec.columnExists("middle_name")) {
+    String middle = rec.getString("middle_name")
+}
+\end{lstlisting}
+
+\section{Copying Records}
+\label{sec:crud-copy}
+
+\begin{lstlisting}[style=groovy]
+// Copy all columns from one record to another
+newRec.copy(existingRec)
+
+// Copy only columns that exist in both records (by name
+// and type)
+newRec.copyCorresponding(existingRec)
+\end{lstlisting}
+
+\noindent
+\texttt{copyCorresponding()} is useful when copying between records from different tables that share some column names.
+
+\section{Converting to JSON}
+\label{sec:crud-json}
+
+Records can be converted to JSON for direct frontend communication:
+
+\begin{lstlisting}[style=groovy]
+// Single record to JSON object
+JSONObject json = emp.toJSON()
+outjson.put("employee", json)
+
+// Add record columns to an existing JSON object
+emp.addToJSON(outjson)
+
+// Convert a list of records to a JSON array
+List<Record> recs = db.fetchAll("SELECT * FROM employee")
+JSONArray arr = Record.toJSONArray(recs)
+outjson.put("employees", arr)
+\end{lstlisting}
+
+\noindent
+For the common case, use \texttt{fetchAllJSON()} or \texttt{fetchOneJSON()} directly on the Connection --- these skip the intermediate Record objects:
+
+\begin{lstlisting}[style=groovy]
+// Query directly to JSON array
+outjson.put("records", db.fetchAllJSON(
+    "SELECT employee_id, first_name, last_name FROM employee"))
+
+// Query directly to JSON object
+outjson.put("employee", db.fetchOneJSON(
+    "SELECT * FROM employee WHERE employee_id = ?", id))
+\end{lstlisting}
+
+\section{A Complete CRUD Service}
+\label{sec:crud-example}
+
+The following example shows a complete service with list, add, edit, and delete methods, along with the corresponding frontend screen.
+
+\subsection{Backend Service}
+
+\begin{lstlisting}[style=groovy]
+package services
+
+class EmployeeService {
+
+    void list(JSONObject injson, JSONObject outjson,
+              Connection db, ProcessServlet servlet) {
+        outjson.put("employees", db.fetchAllJSON(
+            "SELECT employee_id, first_name, last_name, " +
+            "active FROM employee " +
+            "ORDER BY last_name, first_name"))
+    }
+
+    void get(JSONObject injson, JSONObject outjson,
+             Connection db, ProcessServlet servlet) {
+        Record emp = db.fetchOne(
+            "SELECT * FROM employee WHERE employee_id = ?",
+            injson.getInt("employeeId"))
+        if (emp == null)
+            throw new UserException("Employee not found")
+        emp.addToJSON(outjson)
+    }
+
+    void create(JSONObject injson, JSONObject outjson,
+                Connection db, ProcessServlet servlet) {
+        Record rec = db.newRecord("employee")
+        rec.set("first_name", injson.getString("firstName"))
+        rec.set("last_name", injson.getString("lastName"))
+        rec.set("active", "Y")
+        rec.addRecord()
+    }
+
+    void save(JSONObject injson, JSONObject outjson,
+              Connection db, ProcessServlet servlet) {
+        Record rec = db.fetchOne(
+            "SELECT * FROM employee WHERE employee_id = ?",
+            injson.getInt("employeeId"))
+        rec.set("first_name", injson.getString("firstName"))
+        rec.set("last_name", injson.getString("lastName"))
+        rec.set("active", injson.getString("active"))
+        rec.update()
+    }
+
+    void delete(JSONObject injson, JSONObject outjson,
+                Connection db, ProcessServlet servlet) {
+        db.execute(
+            "DELETE FROM employee WHERE employee_id = ?",
+            injson.getInt("employeeId"))
+    }
+}
+\end{lstlisting}
+
+\subsection{Frontend Screen (HTML)}
+
+\begin{lstlisting}[style=html]
+<div>
+  <h3>Employees</h3>
+  <div id="emp-grid" style="width: 100%; height: 300px;"></div>
+  <div style="margin-top: 10px;">
+    <push-button id="emp-new">New</push-button>
+    <push-button id="emp-edit" disabled>Edit</push-button>
+    <push-button id="emp-delete" disabled>Delete</push-button>
+  </div>
+
+  <popup id="emp-popup" height="160px" width="400px">
+    <popup-title>Employee</popup-title>
+    <popup-body>
+      <div style="display: grid;
+                  grid-template-columns: auto 1fr;
+                  gap: 8px; padding: 10px;">
+        <span>First Name:</span>
+        <text-input id="ep-first" required
+                    maxlength="50"></text-input>
+        <span>Last Name:</span>
+        <text-input id="ep-last" required
+                    maxlength="50"></text-input>
+      </div>
+      <div style="text-align: right; margin-top: 10px;">
+        <push-button id="ep-ok">OK</push-button>
+        <push-button id="ep-cancel">Cancel</push-button>
+      </div>
+    </popup-body>
+  </popup>
+</div>
+\end{lstlisting}
+
+\subsection{Frontend Screen (JavaScript)}
+
+\begin{lstlisting}[style=javascript]
+'use strict';
+
+(async function () {
+    const WS = 'services/EmployeeService';
+
+    const grid = new AGGrid('emp-grid', [
+        {headerName: 'Last Name', field: 'last_name',
+            width: 40},
+        {headerName: 'First Name', field: 'first_name',
+            width: 40},
+        {headerName: 'Active', field: 'active', width: 20}
+    ], 'employee_id');
+    grid.show();
+
+    async function loadGrid() {
+        grid.clear();
+        $$('emp-edit').disable();
+        $$('emp-delete').disable();
+        const res = await Server.call(WS, 'list');
+        if (res._Success)
+            grid.addRecords(res.employees);
+    }
+
+    loadGrid();
+
+    grid.setOnSelectionChanged((rows) => {
+        $$('emp-edit').enable(rows);
+        $$('emp-delete').enable(rows);
+    });
+
+    $$('emp-new').onclick(() => {
+        $$('ep-first').clear();
+        $$('ep-last').clear();
+        Utils.popup_open('emp-popup', 'ep-first');
+
+        $$('ep-ok').onclick(async () => {
+            if ($$('ep-first').isError('First Name')) return;
+            if ($$('ep-last').isError('Last Name')) return;
+            const res = await Server.call(WS, 'create', {
+                firstName: $$('ep-first').getValue(),
+                lastName: $$('ep-last').getValue()
+            });
+            if (res._Success) {
+                Utils.popup_close();
+                loadGrid();
+            }
+        });
+
+        $$('ep-cancel').onclick(() => Utils.popup_close());
+    });
+
+    $$('emp-delete').onclick(() => {
+        Utils.yesNo('Confirm', 'Delete this employee?',
+                    async () => {
+            const row = grid.getSelectedRow();
+            const res = await Server.call(WS, 'delete', {
+                employeeId: row.employee_id
+            });
+            if (res._Success) loadGrid();
+        });
+    });
+})();
+\end{lstlisting}
+
+\noindent
+This example demonstrates the standard Kiss full-stack pattern: a backend service with CRUD methods, a frontend screen with a grid and popup editor, and \texttt{Server.call()} connecting the two.

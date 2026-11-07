@@ -1,0 +1,984 @@
+\chapter{Utility Classes Reference}
+\label{ch:utilities}
+
+Kiss provides a comprehensive set of utility classes in the \texttt{org.kissweb} package.  This chapter surveys each class with its purpose and key methods.
+
+\section{StringUtils}
+\label{sec:util-string}
+
+\texttt{StringUtils}\index{StringUtils} provides over 50 methods for string manipulation.  All methods are static and null-safe --- passing \texttt{null} returns a sensible default rather than throwing an exception.
+
+\subsection{Substring Operations}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.StringUtils
+
+// Take first N characters (safe if string is shorter)
+StringUtils.take("Hello World", 5)       // "Hello"
+
+// Drop first N characters
+StringUtils.drop("Hello World", 6)       // "World"
+
+// Substring by start index and length (count, not end index)
+StringUtils.substring("Hello World", 0, 5)  // "Hello"
+\end{lstlisting}
+
+\noindent
+\texttt{take()} is the bounds-safe truncating helper; \texttt{substring(str, from, n)} returns \texttt{n} characters starting at \texttt{from} and is not bounds-checked.
+
+\subsection{Trimming}
+
+\begin{lstlisting}[style=groovy]
+// Strip whitespace from the right, left, or both ends
+StringUtils.rightStrip("Hello   ")       // "Hello"
+StringUtils.leftStrip("   Hello")        // "Hello"
+StringUtils.centerStrip("  Hello  ")     // "Hello"
+\end{lstlisting}
+
+\subsection{Joining and Splitting}
+
+\begin{lstlisting}[style=groovy]
+// Join a list with a delimiter
+StringUtils.join(["a", "b", "c"], ", ")   // "a, b, c"
+
+// sprintf-style formatting
+StringUtils.sprintf("%s has %d items",
+    "Cart", 5)                            // "Cart has 5 items"
+\end{lstlisting}
+
+\subsection{Testing and Conversion}
+
+\begin{lstlisting}[style=groovy]
+// Null or empty check
+StringUtils.isEmpty(null)      // true
+StringUtils.isEmpty("")        // true
+StringUtils.isEmpty("  ")     // false
+
+// HTML to plain text
+StringUtils.htmlToText(
+    "<p>Hello <b>World</b></p>")  // "Hello World"
+
+// Fuzzy matching (candidates Vector first, then the target)
+Vector<String> candidates =
+    new Vector<>(["color", "column", "collar"])
+StringUtils.findClosestMatch(candidates, "colour")
+    // "color"
+\end{lstlisting}
+
+\subsection{Key StringUtils Methods}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{take(str, n)} & First \texttt{n} characters (safe). \\
+\texttt{drop(str, n)} & String after dropping first \texttt{n} characters. \\
+\texttt{substring(str, from, n)} & \texttt{n} characters starting at \texttt{from} (length, not end index). \\
+\texttt{rightStrip(str)} & Trim trailing whitespace. \\
+\texttt{leftStrip(str)} & Trim leading whitespace. \\
+\texttt{centerStrip(str)} & Trim whitespace from both ends. \\
+\texttt{join(strings, delim)} & Join a \texttt{String[]} with a delimiter. \\
+\texttt{sprintf(fmt, args...)} & Format a string (like C sprintf). \\
+\texttt{isEmpty(str)} & True if null or empty string. \\
+\texttt{htmlToText(html)} & Strip HTML tags and decode entities. \\
+\texttt{findClosestMatch(\allowbreak candidates, target)} & Closest Levenshtein match; candidates is a \texttt{Vector<String>}. \\
+\bottomrule
+\end{longtable}
+
+\section{DateUtils}
+\label{sec:util-dateutils}
+
+\texttt{DateUtils}\index{DateUtils (backend)} handles dates as YYYYMMDD integers.  This format avoids timezone ambiguity and simplifies date arithmetic and database storage.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.DateUtils
+
+int today = DateUtils.today()               // e.g., 20260404
+Date d = DateUtils.toDate(20260404)         // Java Date
+int dt = DateUtils.toInt(new Date())        // YYYYMMDD int
+
+String s = DateUtils.format("MM/dd/yyyy", 20260404)
+    // "04/04/2026"
+
+int next = DateUtils.addDays(20260404, 7)   // 20260411
+
+int y = DateUtils.year(20260404)            // 2026
+int m = DateUtils.month(20260404)           // 4
+int d = DateUtils.day(20260404)             // 4
+\end{lstlisting}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{today()} & Current date as YYYYMMDD. \\
+\texttt{toInt(Date)} & Convert Date to YYYYMMDD. \\
+\texttt{toDate(int)} & Convert YYYYMMDD to Date. \\
+\texttt{format(fmt, int)} & Format date with pattern. \\
+\texttt{addDays(int, n)} & Add/subtract days. \\
+\texttt{year(int)}, \texttt{month(int)}, \texttt{day(int)} & Extract date components. \\
+\bottomrule
+\end{longtable}
+
+\section{TimeUtils}
+\label{sec:util-timeutils}
+
+\texttt{TimeUtils}\index{TimeUtils (backend)} handles times as HHMM integers (e.g., 1430 for 2:30~PM).
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.TimeUtils
+
+int now = TimeUtils.now()                   // e.g., 1430
+String mil = TimeUtils.formatMilitary(1430) // "14:30"
+String ampm = TimeUtils.formatAMPM(1430)    // "2:30 PM"
+int t = TimeUtils.parse("2:30 PM")          // 1430
+
+int h = TimeUtils.hour(1430)               // 14
+int m = TimeUtils.minutes(1430)            // 30
+\end{lstlisting}
+
+\section{DateTime}
+\label{sec:util-datetime}
+
+\texttt{DateTime}\index{DateTime (backend)} wraps Java's \texttt{ZonedDateTime} for combined date/time operations with timezone awareness.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.DateTime
+
+DateTime dt = new DateTime()            // now
+DateTime dt2 = new DateTime(someDate)   // from java.util.Date
+
+int date = dt.getIntDate()      // YYYYMMDD
+int time = dt.getIntTime()      // HHMM
+Date javaDate = dt.getDate()    // java.util.Date
+
+// "MM/dd/yyyy h:mm a"
+String s = dt.format()
+// custom pattern
+String s2 = dt.format("MM/dd/yyyy h:mm:ss a")
+
+dt = dt.addDays(7)      // each returns a new DateTime
+dt = dt.addHours(3)
+dt = dt.addMinutes(45)
+\end{lstlisting}
+
+\begin{notebox}
+Use \texttt{DateTime} when you need combined date/time handling.  Use \texttt{DateUtils} and \texttt{TimeUtils} when you only need the date or time component.
+\end{notebox}
+
+\section{NumberUtils and NumberFormat}
+\label{sec:util-number}
+
+\subsection{NumberUtils}
+
+\texttt{NumberUtils}\index{NumberUtils (backend)} provides numeric comparison and rounding:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.NumberUtils
+
+// Approximate equality for floating-point
+NumberUtils.doubleEqual(0.1 + 0.2, 0.3, 0.0001) // true
+
+// Rounding
+NumberUtils.round(3.14159, 2)        // 3.14
+NumberUtils.roundUp(3.141, 2)        // 3.15
+NumberUtils.roundDown(3.149, 2)      // 3.14
+
+// Parsing
+double d = NumberUtils.parseDouble("1,234.56")
+\end{lstlisting}
+
+\subsection{NumberFormat}
+
+\texttt{NumberFormat}\index{NumberFormat (backend)} provides full-featured number formatting for reports and displays.  It is covered in detail in Chapter~\ref{ch:reports}, Section~\ref{sec:rpt-numberformat}.  Quick reference:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.NumberFormat
+
+// Currency: ($12,345.35)
+NumberFormat.Format(-12345.348, "CDP", 12, 2)
+
+// With commas: 1,234,567
+NumberFormat.Format(1234567, "C", 10, 0)
+
+// Zero-filled: 00042
+NumberFormat.Format(42, "Z", 5, 0)
+
+// Percent: 85.5%
+NumberFormat.Format(85.5, "R", 6, 1)
+\end{lstlisting}
+
+\noindent
+Format mask codes: \texttt{B} (blank if zero), \texttt{C} (commas), \texttt{D} (dollar sign), \texttt{L} (left justify), \texttt{P} (parentheses for negatives), \texttt{Z} (zero fill), \texttt{U} (uppercase), \texttt{R} (percent sign).
+
+\section{Choosing a Cryptography or Hashing Utility}
+\label{sec:util-crypto-choice}
+
+Kiss provides four distinct classes for cryptographic operations, covered in the sections that follow.  They are kept deliberately separate rather than merged behind one facade --- a facade would put a reversible-encryption call and a one-way-hash call one method name apart, which is exactly the ambiguity that invites misuse (e.g.\ ``just encrypting a password reversibly'' instead of hashing it).  Use the table below to pick the right one for a given need:
+
+\begin{longtable}{P{4.6cm}P{5.9cm}}
+\toprule
+\textbf{Need} & \textbf{Use} \\
+\midrule
+\endhead
+Recover the original value later (reversible encryption) & \texttt{Crypto} (\S\ref{sec:util-crypto}) \\
+Store or verify a user's password (never recoverable) & \texttt{PasswordHash} (\S\ref{sec:util-passwordhash}) \\
+Plain digest, checksum, or content fingerprint --- no secret key involved & \texttt{Hash} (\S\ref{sec:util-hash}) \\
+Keyed digest/MAC, or a deterministic ``blind index'' for equality search over an encrypted column & \texttt{Hmac} (\S\ref{sec:util-hmac}) \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Two smaller shared utilities support all four: \texttt{ConstantTime} (timing-safe byte-array comparison) and \texttt{RandomUtil} (a shared \texttt{SecureRandom}-backed helper), both covered in \S\ref{sec:util-constanttime}.
+
+\section{Crypto}
+\label{sec:util-crypto}
+
+\texttt{Crypto}\index{Crypto} provides reversible AES-256-GCM authenticated encryption for strings and byte arrays --- data a legitimate caller must later recover in plaintext.  It is the wrong tool for passwords; see \texttt{PasswordHash} (\S\ref{sec:util-passwordhash}) for those.  Every encrypted value is a self-describing, versioned container carrying its own random nonce and its own 128-bit authentication tag, so tampering or corruption is detected on decrypt rather than silently producing garbage plaintext.  A \texttt{Crypto} instance may safely be shared across threads.
+
+\subsection{Two Ways to Supply the Key}
+
+\texttt{Crypto} offers two independent construction paths, for two different situations:
+
+\begin{itemize}
+  \item \textbf{Password-based} (\texttt{new Crypto(password)}, \texttt{Crypto.deriveOnce(password, salt)}) --- the AES key is derived from a human-choosable password (and optional salt) with PBKDF2 (65,536 iterations, 256-bit derived key).  PBKDF2 exists to slow down brute-forcing a low-entropy secret, so this path makes sense when the input really is a password.
+  \item \textbf{Raw key} (\texttt{Crypto.fromKey(byte[])}, \texttt{Crypto.fromKeyBase64(String)}) --- the caller supplies an already high-entropy 256-bit key directly, with no PBKDF2, no salt, and no per-call KDF cost.  This is the recommended path for bulk/high-volume field encryption, e.g.\ a master key loaded once from \texttt{application.ini} and reused for many rows.  Use \texttt{Crypto.generateKey()} / \texttt{Crypto.generateKeyBase64()} to provision a fresh key.
+\end{itemize}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.Crypto
+
+// Password-based (low-volume, or an actual human passphrase)
+Crypto crypto = new Crypto(myPassword)
+String encrypted = crypto.encryptWithRandomSalt("Hello World")
+String decrypted = crypto.decryptWithRandomSalt(encrypted)
+
+// Raw 256-bit key, no PBKDF2 -- recommended for
+// bulk/high-volume field encryption (e.g. a master key from
+// application.ini)
+// provision once
+String key = Crypto.generateKeyBase64()
+Crypto fast = Crypto.fromKeyBase64(key)
+String encrypted2 = fast.encryptWithRandomSalt("Hello World")
+String decrypted2 = fast.decryptWithRandomSalt(encrypted2)
+\end{lstlisting}
+
+\begin{tipbox}
+Applying PBKDF2 to a key that is already high-entropy adds latency without adding security --- there is nothing for PBKDF2 to usefully slow down.  Prefer \texttt{fromKey}/\texttt{fromKeyBase64} whenever the ``password'' is really a machine-generated key rather than a human passphrase.
+\end{tipbox}
+
+\noindent
+Regardless of which path is used, per-value non-determinism (the same plaintext encrypting to different ciphertext each time) comes solely from the random 12-byte GCM nonce generated on every encrypt call --- never from the key derivation --- so no security property differs between the two paths; only the KDF cost does.
+
+\subsection{Explicit and Random Salts}
+
+\begin{lstlisting}[style=groovy]
+// With an explicit salt
+String enc = crypto.encrypt("salt123", "sensitive data")
+String dec = crypto.decrypt("salt123", enc)
+
+// With a random salt embedded in the output
+String enc2 = crypto.encryptWithRandomSalt("sensitive data")
+String dec2 = crypto.decryptWithRandomSalt(enc2)
+\end{lstlisting}
+
+\noindent
+\texttt{deriveOnce(password, salt)} builds a password-based instance exactly like \texttt{new Crypto(password)}, except the PBKDF2 derivation for that salt runs immediately at construction rather than lazily on the first encrypt/decrypt call.  The output is byte-for-byte compatible with (and decryptable by) a plain \texttt{new Crypto(password)} instance --- it changes only \emph{when} the PBKDF2 cost is paid, not the format or the key.  This is useful when a caller wants that one-time cost to land at a predictable point (e.g.\ once at the start of a batch) rather than on whichever value happens to be encrypted first.
+
+\begin{notebox}
+Key derivation is cached, not repeated per call.  For a password-based instance, the PBKDF2-derived key for a given (password, salt) pair is computed at most once per instance and reused for every later call with that same salt --- no construction path re-derives the key on every encrypt/decrypt call.
+\end{notebox}
+
+\subsection{Versioned Container and Backward Compatibility}
+
+Every value produced by the current format is a self-describing container: a magic prefix, a version byte, the salt (if any), the random nonce, and the GCM ciphertext with its authentication tag.  String outputs are additionally prefixed \texttt{\$KC1\$} and Base64 encoded.  Two versions share this envelope shape:
+
+\begin{itemize}
+  \item \texttt{VERSION\_1} --- produced by the password-based path; the salt length is embedded and may be non-zero.
+  \item \texttt{VERSION\_2} --- produced by \texttt{fromKey}/\texttt{fromKeyBase64}; no salt applies, so the salt length is always zero.  A \texttt{VERSION\_2} value can only be decrypted by an instance constructed via \texttt{fromKey}/\texttt{fromKeyBase64} --- a password-based instance throws \texttt{IllegalStateException}, since there is no password or derivation to fall back on.
+\end{itemize}
+
+\noindent
+Data produced by older (pre-GCM) versions of this class --- unauthenticated \texttt{AES/ECB} --- remains transparently decryptable: decryption auto-detects the legacy format and falls back to the original algorithm.  All new encryptions always use one of the current GCM formats.  A peer running code that predates \texttt{VERSION\_2} can still decrypt everything it always could, but cannot decrypt values produced via \texttt{fromKey}/\texttt{fromKeyBase64} on a newer version.
+
+\noindent
+Key methods (each has a \texttt{String} and a \texttt{byte[]} form unless noted):
+
+\begin{longtable}{P{5.4cm}P{5.1cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{new Crypto(password)} & Create a password-based instance (PBKDF2, \texttt{VERSION\_1}). \\
+\texttt{Crypto.deriveOnce(password, salt)} & Same as above, but derives the key immediately at construction. \\
+\texttt{Crypto.fromKey(key256)} & Create a raw-key instance from 32 bytes; no PBKDF2 (\texttt{VERSION\_2}). \\
+\texttt{Crypto.\allowbreak fromKeyBase64(\allowbreak base64Key)} & Same, from a Base64-encoded 256-bit key. \\
+\texttt{Crypto.generateKey()} & Generate a fresh random 256-bit key. \\
+\texttt{Crypto.generateKeyBase64()} & Same, Base64 encoded. \\
+\texttt{encrypt(value)} & Encrypt using the instance password/key. \\
+\texttt{encrypt(salt, value)} & Encrypt with an explicit salt (ignored in raw-key mode). \\
+\texttt{decrypt(value)} & Decrypt a value. \\
+\texttt{decrypt(salt, value)} & Decrypt a value encrypted with a salt. \\
+\texttt{encryptWithRandomSalt(\allowbreak value)} & Encrypt with a random salt embedded in the output. \\
+\texttt{decryptWithRandomSalt(\allowbreak value)} & Decrypt a random-salt value. \\
+\bottomrule
+\end{longtable}
+
+\begin{warnbox}
+Store passwords and raw keys securely (e.g., in \texttt{application.ini}), not in source code.
+\end{warnbox}
+
+\begin{warnbox}
+\texttt{Crypto} is for data you must be able to recover.  Never use it to store user passwords --- those must be hashed one-way with \texttt{PasswordHash} (\S\ref{sec:util-passwordhash}).
+\end{warnbox}
+
+\section{PasswordHash}
+\label{sec:util-passwordhash}
+
+\texttt{PasswordHash}\index{PasswordHash} stores user passwords using one-way salted PBKDF2-HMAC-SHA256 hashing (600,000 iterations, the OWASP 2023 floor, with a random 16-byte salt per password).  Passwords are hashed, never encrypted: there is intentionally no way to recover the original password, only to verify a candidate against a stored hash, in constant time (\S\ref{sec:util-constanttime}).
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.PasswordHash
+
+// When setting or changing a password:
+String stored = PasswordHash.hash(plainTextPassword)
+
+// When authenticating:
+boolean ok = PasswordHash.verify(enteredPassword, stored)
+\end{lstlisting}
+
+\noindent
+Key methods (all static):
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{hash(password)} & Hash a plain-text password for storage. \\
+\texttt{verify(password, stored)} & Constant-time verify a candidate against a stored hash. \\
+\texttt{isHashed(stored)} & Whether a stored value is in \texttt{PasswordHash} format. \\
+\texttt{needsRehash(stored)} & Whether a stored hash should be replaced with a fresh one on next successful login. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The stored value is a self-describing string --- the literal \texttt{pbkdf2}, the iteration count, the Base64 salt, and the Base64 hash, each separated by a \texttt{\$} --- and is approximately 80 characters long, so the database column that holds it must be at least \texttt{varchar(255)}.
+
+\subsection{Upgrading the Work Factor: \texttt{needsRehash}}
+
+Because the iteration count is embedded in the stored value, \texttt{PasswordHash} can raise its default work factor over time without invalidating hashes that already exist.  \texttt{needsRehash(stored)} returns \texttt{true} when a stored hash's embedded iteration count is lower than the class's current default --- or when \texttt{stored} is not even in \texttt{PasswordHash} format at all.  It is purely advisory: it never invalidates \texttt{stored} and has no bearing on \texttt{verify()}, which keeps verifying any value it always could.
+
+\noindent
+The standard pattern is to check \texttt{needsRehash} immediately after a successful \texttt{verify()} and, if it returns \texttt{true}, re-hash the just-verified plain-text password and save it --- gradually migrating every stored password up to the current work factor as users log in, with no bulk migration required:
+
+\begin{lstlisting}[style=groovy]
+boolean ok = PasswordHash.verify(enteredPassword, stored)
+if (ok && PasswordHash.needsRehash(stored))
+    // upgrade in place, save 'stored'
+    stored = PasswordHash.hash(enteredPassword)
+\end{lstlisting}
+
+\section{Hash}
+\label{sec:util-hash}
+
+\texttt{Hash}\index{Hash} provides general-purpose, unkeyed cryptographic digests --- SHA-256, SHA-384, SHA-512, and their SHA-3 counterparts --- for content fingerprints, dedup/change detection, checksums, and cache keys, where the input is not secret and speed is a feature rather than a liability.  It is pure JDK (\texttt{MessageDigest} has supported SHA-3 natively since Java 9), so no external dependency is required for any algorithm here.
+
+\begin{warnbox}
+\texttt{Hash} is not the right tool for passwords (use \texttt{PasswordHash}, \S\ref{sec:util-passwordhash}) or for anything needing a secret key or proof of origin (use \texttt{Hmac}, \S\ref{sec:util-hmac}).  A plain digest has neither property.
+\end{warnbox}
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.Hash
+
+byte[] digest = Hash.sha256("some content")
+String hex     = Hash.sha256Hex("some content")
+String b64     = Hash.sha256Base64("some content")
+
+// Streamed, so the whole file is never loaded into memory
+String fileHash = Hash.hashFileHex(new File("upload.bin"),
+    "SHA-256")
+\end{lstlisting}
+
+\noindent
+Each of \texttt{sha256}, \texttt{sha384}, \texttt{sha512}, \texttt{sha3\_256}, and \texttt{sha3\_512} is available in three forms: a raw \texttt{byte[]} digest (from a \texttt{byte[]} or a UTF-8 \texttt{String}), a lowercase-hex \texttt{...Hex} form, and a standard-Base64 \texttt{...Base64} form.
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{sha256(data)} / \texttt{sha256Hex(data)} / \texttt{sha256Base64(data)} & SHA-256 digest, raw/hex/Base64. \\
+\texttt{sha384(data)} / \texttt{sha384Hex(data)} / \texttt{sha384Base64(data)} & SHA-384 digest, raw/hex/Base64. \\
+\texttt{sha512(data)} / \texttt{sha512Hex(data)} / \texttt{sha512Base64(data)} & SHA-512 digest, raw/hex/Base64. \\
+\texttt{sha3\_256(data)} / \texttt{sha3\_256Hex(data)} / \texttt{sha3\_256Base64(data)} & SHA3-256 digest, raw/hex/Base64. \\
+\texttt{sha3\_512(data)} / \texttt{sha3\_512Hex(data)} / \texttt{sha3\_512Base64(data)} & SHA3-512 digest, raw/hex/Base64. \\
+\texttt{hash(inputStream, algorithm)} & Digest a stream in fixed-size chunks; caller closes the stream. \\
+\texttt{hashFile(file, algorithm)} & Digest a file's content, streamed. \\
+\texttt{hashFileHex(file, algorithm)} & Same, lowercase-hex encoded. \\
+\bottomrule
+\end{longtable}
+
+\section{Hmac}
+\label{sec:util-hmac}
+
+\texttt{Hmac}\index{Hmac} provides keyed message authentication codes --- HMAC-SHA256, HMAC-SHA384, and HMAC-SHA512 --- pure JDK (\texttt{javax.crypto.Mac}, no external dependency).  Unlike \texttt{Hash}, every digest here is parameterized by a secret key: only someone holding the key can produce or verify a matching tag for a given message.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.Hmac
+
+byte[] mac = Hmac.hmacSha256(secretKey,
+    "message to authenticate")
+String hex = Hmac.hmacSha256Hex(secretKey,
+    "message to authenticate")
+\end{lstlisting}
+
+\noindent
+As with \texttt{Hash}, each algorithm is available as a raw \texttt{byte[]} MAC plus lowercase-hex and standard-Base64 convenience forms:
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{hmacSha256(key, message)} / \texttt{hmacSha256Hex(...)} / \texttt{hmacSha256Base64(...)} & HMAC-SHA256, raw/hex/Base64. \\
+\texttt{hmacSha384(key, message)} / \texttt{hmacSha384Hex(...)} / \texttt{hmacSha384Base64(...)} & HMAC-SHA384, raw/hex/Base64. \\
+\texttt{hmacSha512(key, message)} / \texttt{hmacSha512Hex(...)} / \texttt{hmacSha512Base64(...)} & HMAC-SHA512, raw/hex/Base64. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+To compare an HMAC output against an expected value, use \texttt{ConstantTime.equals} (\S\ref{sec:util-constanttime}) rather than \texttt{Arrays.equals} or \texttt{String.equals}, which return as soon as they find the first differing byte and so can leak timing information about secret-derived values.
+
+\subsection{The Blind-Index Pattern}
+\index{blind index}
+
+\texttt{Crypto}'s AES-GCM encryption (\S\ref{sec:util-crypto}) is deliberately non-deterministic --- the same plaintext encrypts to different ciphertext every time, via a fresh random nonce --- which is exactly what makes it safe.  It also means \texttt{WHERE encrypted\_column = ?} cannot work directly against it.  A \emph{blind index} restores equality lookup: store a deterministic, keyed HMAC of the (normalized) plaintext in a separate column alongside the encrypted one, and query against that instead:
+
+\begin{lstlisting}[style=java]
+// write path
+row.encryptedValue = Crypto.fromKey(fieldEncryptionKey)
+                           // reversible, for display/export
+                           .encryptWithRandomSalt(value);
+row.blindIndex = Hmac.hmacSha256Hex(fieldIndexKey,
+                           // deterministic, for lookup only
+                           normalize(value));
+
+// read path -- an indexed equality lookup, no decryption
+// of any row
+String candidateIndex = Hmac.hmacSha256Hex(fieldIndexKey,
+    normalize(candidateValue));
+// ... SELECT ... WHERE blind_index = candidateIndex ...
+\end{lstlisting}
+
+\noindent
+Two responsibilities stay with the caller, not with \texttt{Hmac}, because they are application- and data-shape-specific decisions:
+
+\begin{itemize}
+  \item \textbf{Key separation} --- \texttt{fieldIndexKey} must be a \emph{different} key from \texttt{fieldEncryptionKey}.  Never reuse one secret for two primitives; keep each as its own entry in \texttt{application.ini}.
+  \item \textbf{Normalization} --- normalize the plaintext before hashing (trim whitespace, strip punctuation, fix case, etc., as appropriate) so formatting variance --- not a real difference in the underlying value --- does not defeat equality lookup.  What ``normalized'' means is inherently specific to the value being indexed.
+\end{itemize}
+
+\section{ConstantTime and RandomUtil}
+\label{sec:util-constanttime}
+
+\subsection{ConstantTime}
+
+\texttt{ConstantTime}\index{ConstantTime} provides a single method, \texttt{equals(byte[] a, byte[] b)}, that compares two byte arrays without an early return on the first differing byte, so its running time depends only on the arrays' length, not their content.  A naive \texttt{Arrays.equals}-style comparison returns as soon as it finds a mismatch, which can --- in principle --- leak how many leading bytes matched to an attacker measuring response time.  Use it whenever comparing a MAC, password hash, or blind-index value against an expected value.
+
+\begin{lstlisting}[style=java]
+import org.kissweb.ConstantTime;
+
+boolean same = ConstantTime.equals(expectedMac, suppliedMac);
+\end{lstlisting}
+
+\noindent
+\texttt{PasswordHash} (\S\ref{sec:util-passwordhash}) uses \texttt{ConstantTime} internally to verify a candidate password's derived hash against the stored one.
+
+\subsection{RandomUtil}
+
+\texttt{RandomUtil}\index{RandomUtil} provides shared, cryptographically strong random values backed by one lazily-seeded \texttt{SecureRandom} instance, so new code has one obvious place to get random key material or tokens from rather than each caller instantiating its own \texttt{SecureRandom}.
+
+\begin{lstlisting}[style=java]
+import org.kissweb.RandomUtil;
+
+// e.g. a raw Crypto key
+byte[] key   = RandomUtil.randomBytes(32);
+// a human-typeable random code
+String token = RandomUtil.randomAlphaNumeric(20);
+\end{lstlisting}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{randomBytes(n)} & \texttt{n} cryptographically strong random bytes. \\
+\texttt{randomAlphaNumeric(len)} & Random string of \texttt{len} upper/lowercase letters and digits. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+\texttt{Crypto.generateKey()} (\S\ref{sec:util-crypto}) is built on \texttt{RandomUtil.randomBytes}.
+
+\section{Image}
+\label{sec:util-image}
+
+\texttt{Image}\index{Image} is a static utility class for server-side image manipulation.  It does not need to be instantiated.  Operations include resizing, in-place rotation, EXIF orientation correction, recompression of both raster images and PDFs, and conversion of HEIC files to PNG.  Supported raster formats for resize, rotate, and recompression are JPEG, BMP, PNG, and GIF.  PDF compression works by recompressing every embedded image in the document at the specified quality level.
+
+\begin{notebox}
+\texttt{Image} depends on two external libraries: EXIF reading uses \texttt{metadata-extractor} and PDF compression uses \texttt{Apache PDFBox}.  Both must be present on the classpath for the respective operations.  HEIC decoding additionally requires one external command-line tool on the host's \texttt{PATH} (see \S\ref{sec:util-image-heic}).
+\end{notebox}
+
+\subsection{Compression}
+
+\begin{lstlisting}[style=java]
+import org.kissweb.Image;
+
+// Compress a JPEG to 70% quality
+byte[] smaller = Image.compressImage("jpg", originalBytes,
+    0.7f);
+
+// Compress a PDF (recompresses all embedded images)
+byte[] smallerPdf = Image.compressImage("pdf", pdfBytes, 0.6f);
+\end{lstlisting}
+
+\noindent
+The \texttt{quality} parameter is a value between 0.0 and 1.0; lower values produce smaller files with more visible loss.  If \texttt{type} is \texttt{null} or the format has no writer, the original byte array is returned unchanged.
+
+\subsection{File I/O}
+
+\begin{lstlisting}[style=java]
+// Write raw bytes to a file (creates or overwrites)
+Image.writefile("/var/uploads/photo.jpg", imageBytes);
+
+// Read an entire file into a byte array
+byte[] data = Image.readfile("/var/uploads/photo.jpg");
+\end{lstlisting}
+
+\subsection{Resizing}
+
+\begin{lstlisting}[style=java]
+// Resize so the longer axis is at most 1024 pixels;
+// aspect ratio is preserved.
+byte[] thumb = Image.resizeImage(originalBytes, "jpg", 1024);
+\end{lstlisting}
+
+\noindent
+If both axes are already within 10\% of the target size, the original bytes are returned as-is.  Unsupported types are also returned unchanged.
+
+\subsection{Rotation}
+
+\texttt{rotateLeft} and \texttt{rotateRight} operate directly on a file, writing the result back in place.  Exceptions are silently swallowed and the file is left unchanged on failure.
+
+\begin{lstlisting}[style=java]
+// Rotate the file 90 degrees counter-clockwise
+Image.rotateLeft("/var/uploads/photo.jpg");
+
+// Rotate the file 90 degrees clockwise
+Image.rotateRight("/var/uploads/photo.jpg");
+\end{lstlisting}
+
+\noindent
+To rotate an in-memory \texttt{BufferedImage} by an arbitrary angle, use \texttt{rotateImage}.  For 90\textdegree{} and 270\textdegree{} rotations the output dimensions are swapped (width becomes height and vice versa); all other angles keep the original dimensions.
+
+\begin{lstlisting}[style=java]
+BufferedImage rotated = Image.rotateImage(src, 90);  // CW
+\end{lstlisting}
+
+\subsection{EXIF Orientation}
+
+Cameras embed an orientation tag in JPEG EXIF metadata to record how the device was held when the photo was taken.  Without correcting for this tag, an image that looks correct in a camera roll may appear rotated or flipped when displayed in a browser or stored without the EXIF metadata.
+
+\texttt{getExifOrientation} reads the tag from raw image bytes and returns a value from 1 to 8 (EXIF standard), where 1 means no correction is needed.  It returns 1 on any failure, including missing EXIF data or an unsupported format.
+
+\texttt{applyExifOrientation} applies the appropriate rotation and/or flip for a given orientation value.  It has two overloads: one that accepts and returns a \texttt{BufferedImage}, and one that accepts and returns a byte array in a named format.
+
+\begin{lstlisting}[style=java]
+// --- Auto-orient an upload before storing it ---
+
+// 1. Read orientation BEFORE any destructive operation
+//    (compression and resize strip EXIF data)
+int orientation = Image.getExifOrientation(uploadBytes);
+
+// 2. Resize for storage
+byte[] resized = Image.resizeImage(uploadBytes, "jpg", 2048);
+
+// 3. Apply orientation correction to the resized bytes
+byte[] corrected =
+    Image.applyExifOrientation(resized, orientation, "jpg");
+
+// 4. Store the corrected image
+Image.writefile("/var/uploads/photo.jpg", corrected);
+\end{lstlisting}
+
+\begin{tipbox}
+Always call \texttt{getExifOrientation} on the original upload bytes \emph{before} resizing or compressing.  Both operations discard EXIF metadata, so the orientation tag will no longer be readable afterwards.
+\end{tipbox}
+
+\subsection{HEIC to PNG Conversion}
+\label{sec:util-image-heic}
+
+\texttt{convertHeicToPng} decodes a HEIC image and re-encodes it as PNG.  HEIC uses the HEVC codec, for which no production-quality pure-Java decoder exists, so the method delegates to an external command-line converter chosen from the host's \texttt{PATH}.  The first tool found from the following list is used, and the choice is cached for the life of the JVM:
+
+\begin{enumerate}
+\item \texttt{sips} --- built into macOS; no install required.
+\item \texttt{heif-convert} --- Linux; part of the \texttt{libheif-tools} or \texttt{libheif-examples} package.
+\item \texttt{magick} --- ImageMagick 7 with the HEIC delegate; typical Windows install path.
+\item \texttt{ffmpeg} --- universal fallback; official prebuilt binaries are available for Linux, macOS, and Windows.
+\end{enumerate}
+
+Two overloads are provided, one for byte arrays and one for file paths:
+
+\begin{lstlisting}[style=java]
+import org.kissweb.Image;
+
+// Byte-array in / byte-array out (uses temp files internally)
+byte[] pngBytes = Image.convertHeicToPng(heicBytes);
+
+// File-to-file
+Image.convertHeicToPng("/var/uploads/photo.heic",
+                      "/var/uploads/photo.png");
+\end{lstlisting}
+
+\begin{notebox}
+If none of the supported tools is on \texttt{PATH}, both overloads throw \texttt{IOException} with a message that lists the acceptable installs.  To enable HEIC support on each platform:
+
+\begin{itemize}
+\item \textbf{macOS:} nothing to install --- \texttt{sips} ships with the OS.
+\item \textbf{Linux:} \texttt{apt install libheif-examples} (Debian/Ubuntu) or \texttt{dnf install libheif-tools} (Fedora/RHEL).
+\item \textbf{Windows:} install ImageMagick~7 (with the HEIC delegate selected) or ffmpeg; both provide standard installers.
+\end{itemize}
+\end{notebox}
+
+\begin{warnbox}
+Each conversion launches an external process and is bounded by a five-minute timeout.  Do not call \texttt{convertHeicToPng} inside a tight loop on large batches without considering throughput; the per-call process startup cost dominates small-image workloads.
+\end{warnbox}
+
+\noindent
+Key methods:
+
+\begin{longtable}{P{5.2cm}P{5.3cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{compressImage(type, bytes, q)} & Compress image or PDF bytes at quality \texttt{q} (0.0--1.0). \\
+\texttt{writefile(fname, bytes)} & Write bytes to a file. \\
+\texttt{readfile(fname)} & Read a file into a byte array. \\
+\texttt{resizeImage(bytes, type, size)} & Resize to max dimension \texttt{size} px, preserving aspect ratio. \\
+\texttt{rotateLeft(fileName)} & Rotate file 90\textdegree{} counter-clockwise in place. \\
+\texttt{rotateRight(fileName)} & Rotate file 90\textdegree{} clockwise in place. \\
+\texttt{rotateImage(src, angle)} & Rotate a \texttt{BufferedImage} by \texttt{angle} degrees clockwise. \\
+\texttt{getExifOrientation(bytes)} & Read EXIF orientation tag (1--8); returns 1 on failure. \\
+\texttt{applyExifOrientation(img, o)} & Apply EXIF transform to a \texttt{BufferedImage}. \\
+\texttt{applyExifOrientation(\allowbreak bytes, o, fmt)} & Apply EXIF transform to a byte array; return corrected bytes. \\
+\texttt{convertHeicToPng(bytes)} & Decode HEIC bytes, return PNG bytes (external tool). \\
+\texttt{convertHeicToPng(heicPath, pngPath)} & Convert a HEIC file to a PNG file (external tool). \\
+\bottomrule
+\end{longtable}
+
+\section{IniFile}
+\label{sec:util-inifile}
+
+\texttt{IniFile}\index{IniFile} provides a thread-safe parser for INI configuration files with section support, comments, and typed value access.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.IniFile
+
+IniFile ini = IniFile.load("config.ini")
+
+// Read values from a section
+String host = ini.get("database", "host")
+int port = ini.getInt("database", "port")
+boolean debug = ini.getBoolean("app", "debug")
+double rate = ini.getDouble("billing", "rate")
+
+// Write values
+ini.put("app", "version", "2.1")
+ini.save()
+\end{lstlisting}
+
+\noindent
+INI file format:
+
+\begin{lstlisting}[style=ini]
+[database]
+host = localhost
+port = 5432
+
+[app]
+debug = true
+version = 2.0
+\end{lstlisting}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{IniFile.load(path)} & Load and parse an INI file (static). \\
+\texttt{get(section, key)} & Get a string value. \\
+\texttt{getInt(section, key)} & Get an integer value. \\
+\texttt{getDouble(section, key)} & Get a double value. \\
+\texttt{getBoolean(section, key)} & Get a boolean value. \\
+\texttt{getSection(section)} & Get all keys in a section as a map. \\
+\texttt{getSectionNames()} & Get the names of every section in the file. \\
+\texttt{put(section, key, val)} & Set a value. \\
+\texttt{removeValue(section, key)} & Set a key's value to null (key remains). \\
+\texttt{removeKey(section, key)} & Remove a key/value pair from a section. \\
+\texttt{removeSection(section)} & Remove an entire section. \\
+\texttt{save()} & Write changes to disk. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+\texttt{getSectionNames()} and \texttt{removeSection()} let you walk and manipulate an INI file whose section names aren't known at compile time --- for example, persisting one logical record per section.  This is what the OAuth authorization server (Chapter~\ref{ch:oauth-as}) does to track registered clients and refresh tokens, with one section per entry keyed by id.
+
+\begin{notebox}
+The framework's own \texttt{application.ini} uses a simplified format without section headers.  The \texttt{IniFile} class supports both formats --- sectionless keys are accessed with \texttt{null} as the section parameter.
+\end{notebox}
+
+\section{JsonPath}
+\label{sec:util-jsonpath}
+
+\texttt{JsonPath}\index{JsonPath} provides XPath-like access to \texttt{JSONObject} structures using dot-separated paths.  It returns \texttt{null} for missing paths instead of throwing exceptions, making it safe for navigating deeply nested JSON.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.JsonPath
+
+JSONObject data = ... // complex nested JSON
+
+// Safe navigation with dot paths
+String name = JsonPath.getString(data, "user.name")
+int age = JsonPath.getInteger(data, "user.profile.age")
+double salary = JsonPath.getDouble(
+    data, "user.employment.salary")
+boolean active = JsonPath.getBoolean(
+    data, "user.isActive")
+
+// Get a nested object
+Object nested = JsonPath.getObject(
+    data, "user.address")
+\end{lstlisting}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{getObject(json, path)} & Get any value at path. \\
+\texttt{getString(json, path)} & Get string at path. \\
+\texttt{getInteger(json, path)} & Get integer at path. \\
+\texttt{getDouble(json, path)} & Get double at path. \\
+\texttt{getBoolean(json, path)} & Get boolean at path. \\
+\bottomrule
+\end{longtable}
+
+\section{Base64}
+\label{sec:util-base64}
+
+\texttt{Base64}\index{Base64} provides encoding and decoding for binary data:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.Base64
+
+// Encode
+String encoded = Base64.encode("Hello World".getBytes())
+
+// Decode
+byte[] decoded = Base64.decode(encoded)
+String original = new String(decoded)
+\end{lstlisting}
+
+\section{URLBuilder}
+\label{sec:util-urlbuilder}
+
+\texttt{URLBuilder}\index{URLBuilder} constructs URLs with proper parameter encoding:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.URLBuilder
+
+String url = new URLBuilder("https://api.example.com/search")
+    .addParameter("q", "hello world")
+    .addParameter("page", "1")
+    .addParameter("filter", "name=John&age>30")
+    .build()
+// "https://api.example.com/search
+//     ?q=hello+world&page=1&filter=name%3DJohn%26age%3E30"
+\end{lstlisting}
+
+\section{XML}
+\label{sec:util-xml}
+
+\texttt{XML}\index{XML} provides parsing and transformation utilities for XML documents:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.XML
+
+// Parse XML string
+Document doc = XML.parse(xmlString)
+
+// Parse XML file
+Document doc = XML.parseFile("data.xml")
+
+// Transform with XSLT
+String result = XML.transform(doc, xsltDoc)
+\end{lstlisting}
+
+\begin{notebox}
+XML parsing rejects DTDs and external entities, so it is not susceptible to XML external entity (XXE) attacks.  Documents that declare a \texttt{<!DOCTYPE>} are refused.
+\end{notebox}
+
+\section{LRUCache and LRUSet}
+\label{sec:util-lru}
+
+\texttt{LRUCache}\index{LRUCache} and \texttt{LRUSet}\index{LRUSet} are thread-safe collections with automatic eviction based on size and age.
+
+\subsection{LRUCache}
+
+A key/value cache that evicts the least recently used entries:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.LRUCache
+
+// Max 1000 entries, expire after 3600 seconds
+LRUCache<String, UserProfile> cache =
+    new LRUCache<>(1000, 3600)
+
+// Store and retrieve
+cache.put("user-123", profile)
+UserProfile p = cache.get("user-123")
+
+// Check existence
+if (cache.containsKey("user-123")) { ... }
+\end{lstlisting}
+
+\subsection{LRUSet}
+
+A set with the same eviction policy but without values:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.LRUSet
+
+// Track recently seen IPs (max 10000, expire 600s)
+LRUSet<String> recentIPs = new LRUSet<>(10000, 600)
+
+recentIPs.add("192.168.1.100")
+boolean seen = recentIPs.contains("192.168.1.100")
+\end{lstlisting}
+
+\section{ThreadLevelCache}
+\label{sec:util-threadcache}
+
+\texttt{ThreadLevelCache}\index{ThreadLevelCache} provides a per-thread key/value cache.  Each thread gets its own isolated storage, making it useful for request-scoped caching without synchronization.
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.ThreadLevelCache
+
+// Store value for current thread
+ThreadLevelCache.put("currentUser", userData)
+
+// Retrieve (returns null if not set)
+Object val = ThreadLevelCache.get("currentUser")
+\end{lstlisting}
+
+\section{ArrayUtils}
+\label{sec:util-arrayutils}
+
+\texttt{ArrayUtils}\index{ArrayUtils} converts between primitive and boxed byte arrays:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.ArrayUtils
+
+// Boxed Byte[] -> primitive byte[]
+byte[] prim = ArrayUtils.toPrimitiveByteArray(boxed)
+
+// Primitive byte[] -> boxed Byte[]
+Byte[] boxed2 = ArrayUtils.toWrapperByteArray(prim)
+\end{lstlisting}
+
+\section{BuildUtils}
+\label{sec:util-buildutils}
+
+\texttt{BuildUtils}\index{BuildUtils} executes system commands:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.BuildUtils
+
+// Run a shell command (synchronous)
+BuildUtils.runShell("pg_dump -h localhost -U user " +
+    "-d mydb -f backup.sql")
+\end{lstlisting}
+
+\noindent
+The method waits for the command to complete.  Use it for system-level operations like database backups, file conversions, or external tool invocations.
+
+\section{JsonTemplate}
+\label{sec:util-jsontemplate}
+
+\texttt{JsonTemplate}\index{JsonTemplate} substitutes \texttt{\$\{NAME\}} placeholders in a JSON template with values from a map, then parses the result.  The template must be valid JSON (or a path to a JSON file), and \texttt{fill()} returns a \texttt{JSONObject}:
+
+\begin{lstlisting}[style=groovy]
+import org.kissweb.JsonTemplate
+import org.kissweb.json.JSONObject
+
+Map<String, String> values = [
+    "name": "Alice Smith",
+    "date": "04/04/2026"
+]
+
+// Single quotes keep ${...} literal (Groovy does not
+// interpolate single-quoted strings).
+String template =
+    '{ "greeting": "Dear ${name}",' +
+    '  "when": "${date}" }'
+
+JSONObject result = JsonTemplate.fill(template, values)
+String greeting = result.getString("greeting")
+\end{lstlisting}
+
+\section{GroovyUtils}
+\label{sec:util-groovyutils}
+
+\texttt{GroovyUtils}\index{GroovyUtils} provides helpers for Groovy integration, primarily used internally by the framework's service discovery and compilation system.
+
+\section{Summary}
+\label{sec:util-summary}
+
+The following table provides a quick-reference guide to all utility classes:
+
+\begin{longtable}{P{3.6cm}P{6.9cm}}
+\toprule
+\textbf{Class} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{StringUtils} & String manipulation, trimming, joining, HTML conversion. \\
+\texttt{DateUtils} & Dates as YYYYMMDD integers. \\
+\texttt{TimeUtils} & Times as HHMM integers. \\
+\texttt{DateTime} & Combined date/time with timezone support. \\
+\texttt{NumberUtils} & Numeric comparison, rounding, parsing. \\
+\texttt{NumberFormat} & Advanced number formatting for reports. \\
+\texttt{Crypto} & Reversible AES-GCM encryption and decryption. \\
+\texttt{PasswordHash} & One-way salted PBKDF2 password hashing and verification. \\
+\texttt{Hash} & Unkeyed SHA-256/384/512 and SHA-3 digests. \\
+\texttt{Hmac} & Keyed HMAC-SHA256/384/512 MACs and the blind-index pattern. \\
+\texttt{ConstantTime} & Timing-safe byte-array comparison. \\
+\texttt{RandomUtil} & Shared \texttt{SecureRandom}-backed random bytes/strings. \\
+\texttt{IniFile} & INI configuration file parser. \\
+\texttt{JsonPath} & Safe dot-path navigation of JSON. \\
+\texttt{Base64} & Binary encoding and decoding. \\
+\texttt{URLBuilder} & URL construction with parameter encoding. \\
+\texttt{XML} & XML parsing and XSLT transformation. \\
+\texttt{LRUCache} & Thread-safe key/value cache with eviction. \\
+\texttt{LRUSet} & Thread-safe set with eviction. \\
+\texttt{ThreadLevelCache} & Per-thread key/value storage. \\
+\texttt{ArrayUtils} & Byte array primitive/boxed conversions. \\
+\texttt{BuildUtils} & System command execution. \\
+\texttt{JsonTemplate} & \texttt{\$\{NAME\}} placeholder substitution. \\
+\texttt{GroovyUtils} & Groovy integration helpers. \\
+\texttt{Image} & Resize, rotate, EXIF correction, image/PDF compression, and HEIC-to-PNG conversion. \\
+\bottomrule
+\end{longtable}

@@ -1,0 +1,385 @@
+\chapter{Data Grids}
+\label{ch:grids}
+
+Kiss integrates AG-Grid Community Edition for displaying tabular data.  The \texttt{AGGrid}\index{AGGrid} wrapper class provides a high-level API for grid creation, data management, row selection, and event handling.
+
+\section{Creating a Grid}
+\label{sec:grid-create}
+
+A grid requires three things: an HTML container element, column definitions, and an optional key column for row identification:
+
+\begin{lstlisting}[style=html]
+<div id="emp-grid" style="width: 100%; height: 300px;"></div>
+\end{lstlisting}
+
+\begin{lstlisting}[style=javascript]
+const columnDefs = [
+    {headerName: 'Last Name', field: 'lastName', width: 200},
+    {headerName: 'First Name', field: 'firstName', width: 200},
+    {headerName: 'Active', field: 'active', width: 100}
+];
+
+const grid = new AGGrid('emp-grid', columnDefs, 'employeeId');
+grid.show();
+\end{lstlisting}
+
+\noindent
+The three constructor parameters are:
+
+\begin{enumerate}
+  \item \textbf{Element ID} --- the \texttt{id} of the container \texttt{<div>}.
+  \item \textbf{Column definitions} --- an array of column configuration objects.
+  \item \textbf{Key column} (optional) --- the field name that uniquely identifies each row.  Used by \texttt{selectId()}, \texttt{deleteRow()}, and selection tracking.
+\end{enumerate}
+
+\begin{warnbox}
+Always call \texttt{grid.show()} after creating the grid.  The grid is not visible until this method is called.  When done with the grid (screen unload), the framework handles cleanup automatically.
+\end{warnbox}
+
+\section{Column Configuration}
+\label{sec:grid-columns}
+
+Each column definition is a JavaScript object with these common properties:
+
+\begin{longtable}{P{3.8cm}P{6.7cm}}
+\toprule
+\textbf{Property} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{headerName} & Display text in the column header. \\
+\texttt{field} & Property name in the data objects (maps to JSON keys). \\
+\texttt{width} & Column width in pixels. \\
+\texttt{cellRenderer} & Function that returns custom HTML for each cell. \\
+\texttt{valueFormatter} & Function that formats the value for display. \\
+\texttt{sortable} & Enable column sorting (default: true). \\
+\texttt{filter} & Enable column filtering. \\
+\texttt{resizable} & Allow user to resize the column. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Custom Cell Renderers}
+
+\begin{lstlisting}[style=javascript]
+{
+    headerName: 'Active',
+    field: 'active',
+    width: 80,
+    cellRenderer: function(params) {
+        return params.value === 'Y' ? 'Yes' : 'No';
+    }
+}
+\end{lstlisting}
+
+\subsection{Built-in Formatters}
+
+\texttt{AGGrid} provides static formatters for common data types:
+
+\begin{lstlisting}[style=javascript]
+{headerName: 'Hire Date', field: 'hireDate',
+ valueFormatter: AGGrid.date},           // mm/dd/yyyy
+{headerName: 'Created', field: 'created',
+ // mm/dd/yyyy hh:mm AM/PM
+ valueFormatter: AGGrid.dateTime},
+{headerName: 'Start', field: 'startTime',
+ valueFormatter: AGGrid.time},           // hh:mm AM/PM
+{headerName: 'Salary', field: 'salary',
+ valueFormatter: AGGrid.numericFormat,
+ mask: 'CD', decimalPlaces: 2}           // $12,345.67
+\end{lstlisting}
+
+\section{Loading Data}
+\label{sec:grid-data}
+
+\begin{lstlisting}[style=javascript]
+async function loadGrid() {
+    grid.clear();
+    const res = await Server.call(WS, 'list');
+    if (res._Success)
+        grid.addRecords(res.employees);
+}
+\end{lstlisting}
+
+\noindent
+Data management methods:
+
+\begin{longtable}{P{4.5cm}P{6cm}}
+\toprule
+\textbf{Method} & \textbf{Description} \\
+\midrule
+\endhead
+\texttt{addRecords(data)} & Add an array of records to the grid. \\
+\texttt{addRecord(data)} & Add a single record. \\
+\texttt{setRowData(data)} & Replace all rows with new data. \\
+\texttt{clear()} & Remove all rows. \\
+\texttt{deleteRow(id)} & Delete the row where the key column equals \texttt{id}. \\
+\texttt{deleteSelectedRows()} & Delete all currently selected rows. \\
+\texttt{updateSelectedRecord(\allowbreak row)} & Replace the selected row's data. \\
+\bottomrule
+\end{longtable}
+
+\section{Row Selection}
+\label{sec:grid-selection}
+
+\subsection{Selection Events}
+
+\begin{lstlisting}[style=javascript]
+grid.setOnSelectionChanged((rows) => {
+    // rows is an array of selected row data objects
+    $$('edit').enable(rows);     // enable if rows selected
+    $$('delete').enable(rows);
+});
+
+grid.setOnRowDoubleClicked((row) => {
+    editRecord(row);
+});
+\end{lstlisting}
+
+\subsection{Reading Selection}
+
+\begin{lstlisting}[style=javascript]
+// single selected row or null
+let row = grid.getSelectedRow();
+// array of all selected rows
+let rows = grid.getSelectedRows();
+let count = grid.numberOfSelectedRows();
+let idx = grid.getSelectedRowIndex();  // index of selected row
+\end{lstlisting}
+
+\subsection{Programmatic Selection}
+
+\begin{lstlisting}[style=javascript]
+grid.selectId(employeeId);   // select by key column value
+grid.deselectAll();           // clear selection
+// clear selection from selected rows
+grid.clearSelection();
+\end{lstlisting}
+
+\subsection{Multi-Select}
+
+\begin{lstlisting}[style=javascript]
+grid.multiSelect();   // call before grid.show()
+grid.show();
+\end{lstlisting}
+
+\subsection{Disabling Selection}
+
+\begin{lstlisting}[style=javascript]
+grid.noRowSelection();  // call before grid.show()
+\end{lstlisting}
+
+\section{Querying Grid Data}
+\label{sec:grid-query}
+
+\begin{lstlisting}[style=javascript]
+let allRows = grid.getAllRows();
+let first = grid.getFirstRow();
+let last = grid.getLastRow();
+let row = grid.getRowAtIndex(5);
+let count = grid.getNumberOfRows();
+let empty = grid.isEmpty();
+\end{lstlisting}
+
+\section{Row Styling}
+\label{sec:grid-styling}
+
+Apply custom styles to rows based on data:
+
+\begin{lstlisting}[style=javascript]
+grid.rowStyleFunction((params) => {
+    if (params.data.active === 'N')
+        return { color: 'gray', fontStyle: 'italic' };
+    return null;  // default styling
+});
+\end{lstlisting}
+
+\subsection{Row Highlighting}
+
+\begin{lstlisting}[style=javascript]
+grid.highlightRows(3);          // highlight row at index 3
+grid.highlightRows([1, 3, 5]);  // highlight multiple rows
+grid.highlightRows(null);       // remove all highlights
+\end{lstlisting}
+
+\section{Column Visibility}
+\label{sec:grid-colvis}
+
+\begin{lstlisting}[style=javascript]
+// Hide a column (returns previous visibility state)
+let wasVisible = grid.columnShow('salary', false);
+
+// Show a column
+grid.columnShow('salary', true);
+
+// Resize columns to fit container
+grid.sizeColumnsToFit();
+grid.resizeColumns();
+\end{lstlisting}
+
+\section{Drag and Drop}
+\label{sec:grid-drag}
+
+\begin{lstlisting}[style=javascript]
+grid.setDragFunction((draggedRow, targetRow) => {
+    // reorder records based on drag operation
+    reorderRecords(draggedRow.id, targetRow.id);
+});
+\end{lstlisting}
+
+\section{Server-Side Sorting}
+\label{sec:grid-serversort}
+
+When a grid shows only part of a result --- the first 200 rows of a capped search, or one page of many --- sorting in the browser is misleading.  It reorders only the rows already on screen, not the rows the user actually wants first.  The real sort must happen in SQL, before the limit is applied.  Two \texttt{AGGrid} methods support this, and the back-end counterpart is \texttt{SortBuilder} (Section~\ref{sec:qb-sortbuilder}).
+
+The division of labor is:
+
+\begin{enumerate}
+  \item The user clicks a column header.  The grid does \emph{not} sort; it calls your function with the column's \texttt{colId}.
+  \item Your screen decides the sort policy (which column is primary, which direction) and sends the sort keys to the server.
+  \item The server maps the keys to fixed SQL with \texttt{SortBuilder} and returns the rows already in order.
+  \item Your screen loads the rows and calls \texttt{setSortIndicators()} so the header arrows show what the data is sorted by.
+\end{enumerate}
+
+\subsection{Example: Primary and Secondary Sort}
+
+The policy in this example: clicking a column makes it the primary sort, ascending; clicking the primary column again flips its direction; the previous primary becomes the secondary sort.  Only two levels are kept.
+
+\begin{lstlisting}[style=javascript]
+const WS = 'services/OrderService';
+const grid = new AGGrid('order-grid', [
+    {headerName: 'Customer', field: 'customer',
+     width: 220},
+    {headerName: 'Placed', field: 'placed',
+     valueFormatter: AGGrid.date, width: 110},
+    {headerName: 'Status', field: 'status',
+     width: 110},
+    {headerName: 'Notes', field: 'notes',
+     sortable: false, width: 240}
+], 'orderId');
+grid.show();
+
+// field is the column's colId; asc is true/false
+let sorts = [{field: 'customer', asc: true}];
+
+grid.setServerSort(async (colId) => {
+    if (sorts[0].field === colId)
+        sorts[0] = {field: colId, asc: !sorts[0].asc};
+    else
+        sorts = [{field: colId, asc: true},
+                 sorts[0]];
+    await loadGrid();
+});
+
+async function loadGrid() {
+    const res = await Server.call(WS, 'search', {
+        sort1: sorts[0].field, asc1: sorts[0].asc,
+        sort2: sorts[1] ? sorts[1].field : '',
+        asc2:  sorts[1] ? sorts[1].asc : true
+    });
+    if (!res._Success)
+        return;
+    grid.clear();
+    grid.addRecords(res.orders);
+    grid.setSortIndicators(sorts);
+}
+loadGrid();
+\end{lstlisting}
+
+\noindent
+The server side of the same example is shown in Section~\ref{sec:qb-sortbuilder-example}.
+
+\subsection{setServerSort(fn)}\index{setServerSort@\texttt{setServerSort}}
+
+\texttt{grid.setServerSort(fn)} turns server-side sorting on.  Afterwards a header click (or pressing Enter on a focused header) calls \texttt{fn(colId)} and does nothing else.  The \texttt{colId} is the column's \texttt{field}, unless the column definition specifies an explicit \texttt{colId}.
+
+\begin{itemize}
+  \item \textbf{Rows never move.}  The grid never reorders rows itself.  They always display in the order they were added (\texttt{addRecords()}, \texttt{setRowData()}, and so on).  The application owns the policy.
+  \item \textbf{Which columns are clickable.}  Every column is clickable except those whose column definition says \texttt{sortable: false} (and column groups).  Clicking an excluded column does nothing.  The caller's column definitions are never modified.
+  \item \textbf{Timing.}  It may be called before or after \texttt{show()}.
+  \item \textbf{Turning it off.}  A falsy argument (\texttt{grid.setServerSort(null)}) turns server sorting off and clears any indicators.
+  \item \textbf{No effect on other grids.}  A grid that never calls the method behaves exactly as before.
+\end{itemize}
+
+The method returns the grid, so calls can be chained.
+
+\subsection{setSortIndicators(list)}\index{setSortIndicators@\texttt{setSortIndicators}}
+
+\texttt{grid.setSortIndicators(list)} shows the standard AG-Grid sort arrows on the column headers.  It never sorts or reorders rows and never calls the function given to \texttt{setServerSort()}.
+
+\begin{itemize}
+  \item \texttt{list} is an array of \texttt{\{field, asc\}} objects in priority order; the first is the primary sort.  \texttt{field} is a column's \texttt{colId} and \texttt{asc} is true for ascending, false for descending.
+  \item \textbf{Numbered indicators.}  When more than one column is listed, AG-Grid also shows each column's priority number beside its arrow.
+  \item A \texttt{field} that has no column, or whose column is hidden, is silently ignored.
+  \item \texttt{null} or an empty array clears all indicators.
+  \item It may be called before or after \texttt{show()}, and it returns the grid.
+\end{itemize}
+
+\begin{notebox}
+\texttt{setSortIndicators()} only displays state; it does not remember it.  Call it after each reload with the list your screen holds, as the example does.
+\end{notebox}
+
+\section{Enable/Disable}
+\label{sec:grid-enable}
+
+\begin{lstlisting}[style=javascript]
+grid.disable();     // disable clicks on grid
+grid.enable();      // re-enable clicks
+grid.disable(false); // same as enable()
+\end{lstlisting}
+
+\section{Cleanup}
+\label{sec:grid-cleanup}
+
+Grids are automatically cleaned up when screens are unloaded via the context management system.  For manual cleanup:
+
+\begin{lstlisting}[style=javascript]
+grid.destroy();  // free all internal data structures
+\end{lstlisting}
+
+\section{Complete Grid Example}
+\label{sec:grid-example}
+
+\begin{lstlisting}[style=javascript]
+'use strict';
+
+(async function () {
+    const WS = 'services/EmployeeService';
+
+    const grid = new AGGrid('emp-grid', [
+        {headerName: 'Last Name', field: 'lastName',
+            width: 200},
+        {headerName: 'First Name', field: 'firstName',
+            width: 200},
+        {headerName: 'Department', field: 'department',
+            width: 200},
+        {headerName: 'Hire Date', field: 'hireDate',
+         valueFormatter: AGGrid.date, width: 120},
+        {headerName: 'Active', field: 'active', width: 80,
+         cellRenderer: (p) => p.value === 'Y' ? 'Yes' : 'No'}
+    ], 'employeeId');
+    grid.show();
+
+    async function loadGrid() {
+        grid.clear();
+        $$('edit-btn').disable();
+        $$('delete-btn').disable();
+        const res = await Server.call(WS, 'list');
+        if (res._Success)
+            grid.addRecords(res.employees);
+    }
+    loadGrid();
+
+    grid.setOnSelectionChanged((rows) => {
+        $$('edit-btn').enable(rows);
+        $$('delete-btn').enable(rows);
+    });
+
+    grid.setOnRowDoubleClicked(() => editEmployee());
+
+    function editEmployee() {
+        const row = grid.getSelectedRow();
+        // open edit popup with row data...
+    }
+
+    $$('edit-btn').onclick(() => editEmployee());
+})();
+\end{lstlisting}

@@ -1,0 +1,16 @@
+About This Book
+
+The Kiss framework lets you build complete web applications with minimal configuration and maximum productivity. This book is your comprehensive guide -- from first installation to production deployment.
+
+What you'll learn:
+
+- Backend services in Groovy, Java, or Lisp with hot reload
+- Database abstraction: Connection, Record, QueryBuilder
+- Custom HTML components and single-page architecture
+- AG-Grid, popups, reports, and CSV export
+- Authentication, session management, and scheduling
+- LLM integration with OpenAI, Anthropic, OpenRouter, and Ollama
+- Desktop packaging with Electron
+- Testing, deployment, and performance tuning
+
+Includes a complete project-tracking application built step by step, plus an API quick-reference appendix.

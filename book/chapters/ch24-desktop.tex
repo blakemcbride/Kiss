@@ -1,0 +1,134 @@
+\chapter{Desktop Applications}
+\label{ch:desktop}
+
+Kiss applications can be packaged as desktop applications using Electron\index{Electron}, providing a native window experience while running the same web-based code.  This chapter covers the Electron integration, configuration, and packaging.
+
+\section{Overview}
+\label{sec:desk-overview}
+
+Electron wraps a Chromium browser and a Node.js runtime into a standalone executable.  A Kiss application runs inside this wrapper: Electron launches the embedded Tomcat backend, waits for it to become ready, and then opens the frontend in a native window.  The user sees a desktop application rather than a browser tab.
+
+The key advantage is code reuse: the same backend services, frontend screens, and database layer work identically in both web and desktop modes.  Only the launch mechanism differs.
+
+\section{Prerequisites}
+\label{sec:desk-prereqs}
+
+Desktop mode requires:
+
+\begin{itemize}
+  \item \textbf{Node.js} --- version 16 or later.
+  \item \textbf{npm} --- included with Node.js.
+  \item \textbf{Electron} --- installed as a dev dependency via \texttt{npm install}.
+\end{itemize}
+
+\noindent
+The Kiss project includes a \texttt{package.json} that declares Electron as a dependency.  Run \texttt{npm install} in the project root to install it:
+
+\begin{lstlisting}[style=shell]
+cd /path/to/Kiss
+npm install
+\end{lstlisting}
+
+\section{How It Works}
+\label{sec:desk-how}
+
+The Electron integration is driven by \texttt{start-electron.js} in the project root.  When launched, it:
+
+\begin{enumerate}
+  \item Spawns the Java backend via \texttt{./bld start-backend}.
+  \item Polls the backend (\texttt{http://localhost:8001} by default --- the \texttt{backendUrl} constant at the top of \texttt{start-electron.js}, which must match \texttt{portBase}~+~1 from \texttt{Tasks.java}) with exponential backoff (500\,ms intervals, 60-second timeout) until it is ready.
+  \item Opens a native window pointing to the frontend.
+  \item On shutdown, gracefully stops the backend via \texttt{./bld stop-backend}.
+\end{enumerate}
+
+\section{Launching the Desktop Application}
+\label{sec:desk-launch}
+
+\begin{lstlisting}[style=shell]
+# Start in desktop mode
+npm start
+\end{lstlisting}
+
+\noindent
+This runs the \texttt{start} script defined in \texttt{package.json}, which launches Electron with \texttt{start-electron.js} as the main process.
+
+\section{Backend URL Detection}
+\label{sec:desk-url}
+
+The stock launcher loads the window directly from the Tomcat origin, so the pages it displays carry the build-stamped \texttt{SystemInfo.sameOriginBackend} flag and call the backend at their own origin (Section~\ref{sec:fe-backend-url}) --- no URL configuration in the frontend at all.
+
+If an application instead packages the frontend files into Electron and loads them via \texttt{file://}, \texttt{index.js} detects that protocol and defaults the backend to \texttt{http://localhost:8001} (the backend of the default port block):
+
+\begin{lstlisting}[style=javascript]
+if (window.location.protocol === "file:") {
+    // Desktop mode: backend is on localhost
+    Server.setURL("http://localhost:8001");
+}
+\end{lstlisting}
+
+\noindent
+An application using a different \texttt{portBase} sets \texttt{SystemInfo.backendUrl} explicitly in that case.  The same frontend code works in both web and desktop modes.
+
+\section{Development Mode}
+\label{sec:desk-devmode}
+
+The \texttt{start-electron.js} file includes a \texttt{devMode} flag.  When enabled:
+
+\begin{itemize}
+  \item Chrome DevTools are available (right-click, Inspect).
+  \item Hot reload works with Ctrl+R.
+  \item \texttt{nodeIntegration} is enabled for debugging.
+\end{itemize}
+
+\noindent
+For production builds, set \texttt{devMode} to \texttt{false} to disable these features for security.
+
+\section{Packaging and Distribution}
+\label{sec:desk-packaging}
+
+To distribute the application as a standalone installer, use Electron's build tools:
+
+\begin{lstlisting}[style=shell]
+# Install electron-builder
+npm install electron-builder --save-dev
+
+# Build for the current platform
+npx electron-builder
+\end{lstlisting}
+
+\noindent
+This produces platform-specific installers:
+\begin{itemize}
+  \item \textbf{Windows} --- \texttt{.exe} installer or \texttt{.msi} package.
+  \item \textbf{macOS} --- \texttt{.dmg} disk image.
+  \item \textbf{Linux} --- \texttt{.deb}, \texttt{.rpm}, or \texttt{.AppImage}.
+\end{itemize}
+
+\noindent
+The installer includes the Electron runtime, the Kiss frontend, and the Java backend with its embedded Tomcat.
+
+\section{Differences from Web Deployment}
+\label{sec:desk-differences}
+
+\begin{longtable}{P{3.5cm}P{3.5cm}P{3cm}}
+\toprule
+\textbf{Aspect} & \textbf{Web Mode} & \textbf{Desktop Mode} \\
+\midrule
+\endhead
+Backend location & Remote server & Local machine \\
+Launch method & Browser URL & Electron window \\
+Protocol & \texttt{http://} or \texttt{https://} & \texttt{file://} \\
+CORS & Must be configured & Relaxed \\
+File system & No access & Available via Node.js \\
+Updates & Automatic (server) & Requires new installer \\
+Multi-user & Yes & Typically single-user \\
+\bottomrule
+\end{longtable}
+
+\begin{tipbox}
+Desktop mode is ideal for internal tools, data entry applications, or scenarios where a server-based deployment is impractical.  The same codebase serves both web and desktop users.
+\end{tipbox}
+
+\begin{notebox}
+The Java runtime (JRE/JDK 17+) must be installed on the user's machine for desktop mode.  The Electron wrapper handles the browser and Node.js runtime, but the Kiss backend still requires Java.
+\end{notebox}

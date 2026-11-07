@@ -1,0 +1,409 @@
+\chapter{OAuth 2.1 Resource Server}
+\label{ch:oauth}
+
+Kiss can act as an \emph{OAuth 2.1 resource server} --- validating bearer tokens issued by an external authorization server (Auth0, Okta, Keycloak, Microsoft Entra, Google, or any other RFC 8414 / OpenID Connect compliant provider).  This is the half of the OAuth picture that protects an API; the other half (issuing tokens, consent UI, refresh-token handling) is deliberately delegated to a dedicated authorization server.
+
+The primary motivation is the Model Context Protocol.  The MCP specification mandates OAuth 2.1 bearer-token authentication, and almost every production MCP server needs to plug into the customer's existing identity provider.  Kiss makes this automatic: when the authorization-server URL is set in \texttt{application.ini}, every \texttt{MCPServerBase} subclass (Chapter~\ref{ch:external}) starts requiring a valid bearer token on every request, with no code change to the MCP servlet.
+
+The same machinery works for any other servlet that wants OAuth-protected endpoints, MCP or not.
+
+This chapter and the next cover the two server-side roles --- validating tokens here, issuing them in Chapter~\ref{ch:oauth-as}.  The complementary client role, in which Kiss instead \emph{obtains} tokens from a remote OAuth server and presents them on outbound calls, is covered in Chapter~\ref{ch:oauth-client}.
+
+\section{What the Resource Server Does}
+\label{sec:oauth-overview}
+
+When \texttt{OAuthAuthorizationServer} is configured, the framework does five things on every protected request:
+
+\begin{enumerate}
+  \item Parses the \texttt{Authorization: Bearer <jwt>} header.
+  \item Verifies the JWS signature against the authorization server's published JWKS (JSON Web Key Set).
+  \item Validates the JWT claim set: \texttt{iss} matches the configured issuer, \texttt{aud} contains the configured resource identifier, \texttt{exp} is in the future, \texttt{nbf} (if present) is not in the future.
+  \item Checks that every scope listed in \texttt{OAuthRequiredScopes} is present in the token's \texttt{scope} or \texttt{scp} claim.
+  \item Returns a 401 (or 403 for an insufficient-scope token) with the proper RFC 6750 / RFC 9728 \texttt{WWW-Authenticate} challenge on failure, or makes the validated token available to the rest of the request on success.
+\end{enumerate}
+
+It also publishes a discovery document at \texttt{/.well-known/oauth-protected-resource} per RFC 9728, so MCP clients can bootstrap their authentication flow.
+
+\begin{notebox}
+The resource-server role validates tokens that have already been issued.  Token issuance, consent UI, client registration, and refresh-token handling are the authorization server's job.  You can plug the resource-server in front of any third-party authorization server (Auth0, Okta, Keycloak, Microsoft Entra, Google, Hydra, Authentik), or you can run Kiss's own embedded authorization server in the same JVM --- the common MCP deployment shape, covered in Chapter~\ref{ch:oauth-as}.
+\end{notebox}
+
+\section{Configuration}
+\label{sec:oauth-config}
+
+All settings live in \texttt{src/main/back\-end/applic\-ation.ini}\index{application.ini} and are read at startup via \texttt{MainServlet.getEnvironment()}.  Only one key contains a URL --- the others either default to that URL or to discovery against it --- so for the common deployment shape where the resource server and the authorization server are the same Kiss app, the issuer URL appears once in the file and no other URL-bearing key needs to be set:
+
+\begin{lstlisting}[style=ini]
+# Required to enable OAuth.  Issuer URL of the
+# authorization server.
+OAuthAuthorizationServer = https://myapp.example.com
+
+# Optional.  Canonical URL of this resource server
+# (the "aud" value tokens must carry).  Defaults to
+# OAuthAuthorizationServer, which is correct when
+# this Kiss app is both AS and RS.  Set this
+# explicitly only when the RS is hosted at a URL
+# different from the AS.
+# OAuthResourceIdentifier = https://myapp.example.com
+
+# Optional.  Comma- or space-separated scopes every
+# token must carry.  Tokens missing any of these get
+# HTTP 403 with error="insufficient_scope".
+# OAuthRequiredScopes = mcp:read mcp:write
+
+# Optional.  Explicit JWKS URL.  If omitted, the
+# framework discovers it from
+# <OAuthAuthorizationServer>/.well-known/
+#     oauth-authorization-server
+# (RFC 8414, the OAuth 2.1 standard), falling back
+# to <OAuthAuthorizationServer>/.well-known/
+#     openid-configuration
+# for OIDC-only authorization servers.  Set this only
+# when neither metadata document is published.
+# OAuthJwksUri =
+#     https://myapp.example.com/.well-known/jwks.json
+
+# Optional.  How long to cache JWKS keys before
+# refetching, in seconds.  Default 3600.
+# OAuthJwksCacheSeconds = 3600
+
+# Optional.  Comma-separated list of acceptable JWS
+# algorithms.  Supported: RS256, RS384, RS512.
+# Default: RS256.
+# OAuthAllowedAlgorithms = RS256
+
+# Optional.  Allowed clock skew when validating
+# exp/nbf, in seconds.  Default: 60.
+# OAuthClockSkewSeconds = 60
+\end{lstlisting}
+
+If \texttt{OAuthAuthorizationServer} is absent or blank, the OAuth subsystem is \emph{inert}: the discovery endpoint returns 404, MCP servers accept all requests, and no JWKS fetch is ever attempted.  Applications that don't use OAuth pay no runtime cost.
+
+\begin{tipbox}
+Most authorization servers publish their issuer URL with a path component (Auth0 uses \texttt{https://tenant.auth0.com/}, Keycloak uses \texttt{https://kc.example/realms/myrealm}).  Set \texttt{OAuthAuthorizationServer} to the \emph{exact} value of the \texttt{iss} claim in your tokens, modulo a trailing slash (which the validator normalizes).
+\end{tipbox}
+
+\section{Automatic Enforcement for MCP Servers}
+\label{sec:oauth-mcp-auto}
+
+The default \texttt{authenticate()} method in \texttt{MCPServerBase}\index{MCPServerBase} consults \texttt{OAuthConfig}.  If OAuth is configured, it validates the bearer token; if not, it allows the request (the historical default).  So once \texttt{OAuthAuthorizationServer} is set, \emph{every} MCP servlet --- including \texttt{MCPServerExample} and any subclass you write --- starts requiring valid bearer tokens without a single line of Java being touched.
+
+The behavior matrix:
+
+\begin{description}[style=nextline]
+  \item[No \texttt{Authorization} header] 401 with bare \texttt{WWW-Authenticate: Bearer realm="...", resource\_metadata="..."}.  Per RFC 6750 \S 3.1, no \texttt{error} parameter is included when the client did not attempt authentication.
+  \item[Non-Bearer scheme (e.g.\ \texttt{Basic ...})] Treated identically to no header --- the client did not attempt the expected scheme.
+  \item[Malformed JWT, bad signature, expired, wrong issuer, wrong audience] 401 with \texttt{error="invalid\_token"} and a human-readable \texttt{error\_description}.
+  \item[Valid JWT missing a required scope] 403 with \texttt{error="insufficient\_scope"}.
+  \item[Valid JWT with all required scopes] Request proceeds; the validated token is available to tool methods via \texttt{Bearer\-Token\-Validator.current\-Token()}.
+\end{description}
+
+The \texttt{resource\_metadata} parameter in the \texttt{WWW-Authenticate} header points the client at the discovery endpoint (see Section~\ref{sec:oauth-discovery}) so it knows where to obtain a token.
+
+\section{Accessing the Validated Token}
+\label{sec:oauth-current-token}
+
+Inside any tool method --- or anywhere downstream of \texttt{authenticate()} --- you can read the validated token with a static accessor:
+
+\begin{lstlisting}[style=java]
+import org.kissweb.oauth.BearerTokenValidator;
+import org.kissweb.oauth.ValidatedToken;
+
+@Override
+protected JSONObject callTool(String name, JSONObject args) {
+    ValidatedToken tok = BearerTokenValidator.currentToken();
+    String userId = tok.getSubject();          // "sub"
+    String email  = tok.getClaimString("email");
+
+    if (!tok.hasScope("mcp:write"))
+        return toolError(
+            "This tool requires the mcp:write scope.");
+
+    // ... your tool logic ...
+}
+\end{lstlisting}
+
+\noindent
+The \texttt{ValidatedToken} sits in a \texttt{ThreadLocal} for the duration of the request and is cleared automatically in \texttt{MCPServerBase.doPost}'s \texttt{finally} block, so a validated token cannot leak onto a subsequent request that reuses the same servlet-container thread.
+
+\subsection{ValidatedToken Methods}
+
+\begin{description}[style=nextline]
+  \item[\texttt{getSubject()}] The \texttt{sub} claim --- the principal the token represents.
+  \item[\texttt{getIssuer()}] The \texttt{iss} claim.
+  \item[\texttt{getAudience()}] The \texttt{aud} claim values, as a \texttt{Set<String>} (one entry if the claim was a string, more if it was an array).
+  \item[\texttt{getScopes()}] Granted scopes, parsed from either the \texttt{scope} claim (space-separated string) or the \texttt{scp} claim (array) --- whichever the authorization server uses.
+  \item[\texttt{hasScope(String)}] Convenience scope check.
+  \item[\texttt{getExpiresAtEpochSeconds()}] The \texttt{exp} claim as Unix epoch seconds.
+  \item[\texttt{getIssuedAtEpochSeconds()}] The \texttt{iat} claim as Unix epoch seconds.
+  \item[\texttt{getClaimString(String)}] Convenience accessor for any other string-valued claim (\texttt{email}, \texttt{preferred\_username}, custom claims, etc.).
+  \item[\texttt{getClaims()}] The full verified claim set as a \texttt{JSONObject}.  Use for anything not exposed by the named getters.
+\end{description}
+
+\section{Discovery Endpoint}
+\label{sec:oauth-discovery}
+
+The framework auto-registers a servlet at \texttt{/.well-known/oauth-protected-resource} via \texttt{@WebServlet} annotation scanning.  When OAuth is enabled, this endpoint returns the RFC 9728 metadata document:
+
+\begin{lstlisting}[style=java]
+{
+  "resource": "https://myapp.example.com",
+  "authorization_servers": ["https://myapp.example.com"],
+  "bearer_methods_supported": ["header"],
+  "scopes_supported": ["mcp:read", "mcp:write"],
+  "resource_signing_alg_values_supported": ["RS256"]
+}
+\end{lstlisting}
+
+\noindent
+MCP clients call this endpoint after they see a 401 with \texttt{WWW-Authenticate: Bearer ..., resource\_metadata="..."}.  They use the returned \texttt{authorization\_servers} value to start an OAuth flow against the right authorization server.
+
+In the common single-Kiss-app deployment, \texttt{resource} and \texttt{authori\-zation\_servers} carry the same value (the issuer URL); in a split deployment where the resource server lives at a different URL from the authorization server, \texttt{resource} reflects \texttt{OAuthResourceIdentifier} and \texttt{authorization\_servers} reflects \texttt{OAuthAuthorizationServer}.
+
+When OAuth is \emph{not} configured, the endpoint returns 404 --- the same response any non-OAuth resource would give, signaling to clients that this resource is not protected by OAuth.
+
+\section{Customizing Authentication}
+\label{sec:oauth-custom}
+
+The default OAuth-when-configured behavior is right for almost all cases.  Override \texttt{authenticate()} only when you need different semantics for a particular MCP servlet.
+
+\subsection{An Explicitly Public MCP Server}
+
+Suppose OAuth is configured globally but you have one MCP server that should stay open (a public catalog, a development sandbox, an internal-only server behind a firewall):
+
+\begin{lstlisting}[style=java]
+@Override
+protected boolean authenticate(HttpServletRequest req,
+                               HttpServletResponse resp) {
+    return true;
+}
+\end{lstlisting}
+
+\subsection{A Different Authentication Scheme}
+
+To use HTTP basic auth or a custom token scheme instead of OAuth:
+
+\begin{lstlisting}[style=java]
+@Override
+protected boolean authenticate(HttpServletRequest req,
+        HttpServletResponse resp) throws IOException {
+    return basicAuthenticate(req, resp, "MyRealm", "user",
+        "secret");
+}
+\end{lstlisting}
+
+\subsection{OAuth Plus Extra Checks}
+
+To layer additional logic on top of the OAuth default --- for example, multi-tenant routing where the URL path must match a claim in the token:
+
+\begin{lstlisting}[style=java]
+@Override
+protected boolean authenticate(HttpServletRequest req,
+        HttpServletResponse resp) throws IOException {
+    if (!super.authenticate(req, resp))
+        return false;   // 401/403 already written
+    ValidatedToken tok = BearerTokenValidator.currentToken();
+    String tenant = tok.getClaimString("tenant");
+    if (!tenant.equals(expectedTenant(req))) {
+        resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        return false;
+    }
+    return true;
+}
+\end{lstlisting}
+
+\section{Using OAuth from Non-MCP Servlets}
+\label{sec:oauth-non-mcp}
+
+\texttt{Bearer\-Token\-Validator} is not MCP-specific.  Any servlet --- including \texttt{RestServer\-Base} subclasses (Section~\ref{sec:ext-restserverbase}) and your own \texttt{HttpServlet}s --- can validate bearer tokens by calling \texttt{requireBearerToken}:
+
+\begin{lstlisting}[style=java]
+import org.kissweb.oauth.BearerTokenValidator;
+import org.kissweb.oauth.ValidatedToken;
+
+@WebServlet(urlPatterns = "/api/secret")
+public class SecretApi extends RestServerBase {
+    @Override
+    protected void doGet(HttpServletRequest req,
+            HttpServletResponse resp) throws IOException {
+        try {
+            ValidatedToken tok =
+                BearerTokenValidator.requireBearerToken(
+                    req, resp);
+            if (tok == null)
+                return;            // 401/403 already written
+            // ... protected endpoint logic ...
+        } finally {
+            BearerTokenValidator.clearCurrentToken();
+        }
+    }
+}
+\end{lstlisting}
+
+\begin{warnbox}
+Outside of \texttt{MCPServerBase}, the \texttt{ThreadLocal} that holds the validated token is \emph{not} cleared automatically.  Always wrap the request handler in a \texttt{try / finally} and call \texttt{BearerTokenValidator.clearCurrentToken()} in the \texttt{finally} block to prevent the token from leaking onto a subsequent request that reuses the same servlet thread.
+\end{warnbox}
+
+For programmatic validation without HTTP machinery (e.g., from a background job that receives a token via another channel), call \texttt{Bearer\-Token\-Validator.validate(String)} directly.  It throws \texttt{TokenValid\-ation\-Exception} on a validation failure, \texttt{Insufficient\-Scope\-Exception} if required scopes are missing, and \texttt{IOException} if the authorization server's JWKS cannot be fetched.
+
+\section{JWKS Caching and Key Rotation}
+\label{sec:oauth-jwks}
+
+The framework fetches the authorization server's JWKS lazily on the first request and caches each public key by its \texttt{kid} (key id).  Two events trigger a refetch:
+
+\begin{enumerate}
+  \item \emph{TTL expiry.}  By default keys are cached for one hour (\texttt{OAuth\-Jwks\-Cache\-Seconds}).  Adjust if your authorization server rotates keys more aggressively.
+  \item \emph{Unknown \texttt{kid}.}  When a token arrives whose \texttt{kid} is not in the cache, the framework treats this as a possible key rotation, refetches the JWKS under a lock, and re-checks.  Only one thread fetches at a time, even under concurrent load.
+\end{enumerate}
+
+This handles routine key rotation --- issuer adds a new key, lets both keys coexist while old tokens drain, then removes the old key --- without operator intervention.
+
+\subsection{Resolving the JWKS URI}
+\label{sec:oauth-jwks-discovery}
+
+The framework needs to know \emph{where} to fetch the JWKS before it can fetch and cache it.  Resolution is a three-step waterfall, executed once per process and then cached for the lifetime of the JVM:
+
+\begin{enumerate}
+  \item \emph{Explicit \texttt{OAuthJwksUri}}.  If the operator has set this key in \texttt{application.ini}, that URL is used directly.  No discovery requests are made.  This is the override path; it bypasses every other step.
+  \item \emph{RFC 8414 metadata}.  The framework GETs \texttt{<OAuthAuthorization\-Server>/.well-known/oauth-authorization-server} (the OAuth 2.0 Authorization Server Metadata document) and reads the \texttt{jwks\_uri} field.  This is the OAuth 2.1 / MCP standard discovery path, and the one Kiss's own authorization server publishes (Chapter~\ref{ch:oauth-as}).  Most third-party providers (Auth0, Okta, Keycloak, Microsoft Entra) publish this document as well.
+  \item \emph{OpenID Connect Discovery}.  If the RFC 8414 step returned 404, or returned a 2xx body that did not contain a \texttt{jwks\_uri} field, the framework falls back to \texttt{<OAuthAuthorization\-Server>/.well-known/openid-configuration} (the OIDC discovery document).  This step exists for the small number of authorization servers that publish OIDC discovery but not the RFC 8414 metadata document.
+\end{enumerate}
+
+If all three steps fail to yield a \texttt{jwks\_uri}, the framework throws \texttt{IOException} with a message that names both URLs tried and points the operator at the \texttt{OAuthJwksUri} override.
+
+\subsubsection*{Why two discovery paths}
+
+RFC 8414 is the OAuth 2.1 standard and is what MCP clients themselves use to discover the authorization server's endpoints, so trying it first means the resource server uses the same metadata document the clients do.  OIDC discovery, by contrast, predates RFC 8414 and uses a different well-known path; some older or OIDC-focused authorization servers still publish only the OIDC document.  Keeping both paths in the waterfall lets Kiss work zero-config against either kind of server.
+
+\subsubsection*{Soft failures versus hard failures}
+
+During discovery the framework draws a deliberate line between two kinds of failure at a metadata endpoint:
+
+\begin{description}[style=nextline]
+  \item[Soft failure --- fall through to the next step.]  HTTP 404 or 410 (the endpoint is not published); a 2xx response that is not valid JSON (the URL serves something else); a 2xx JSON document that does not contain \texttt{jwks\_uri} (the document is the wrong kind).  All three indicate ``this discovery endpoint is not the one we want'' --- so the resolver moves on to the next step.
+  \item[Hard failure --- propagate.]  Network error (DNS, refused, timeout); HTTP 401/403 (the endpoint exists but refuses the request); HTTP 5xx (the server is failing).  None of these means ``the document is not published'' --- they mean ``something specific is wrong, and the operator needs to know.''  The resolver surfaces these as \texttt{IOException} with the specific HTTP status or cause, rather than papering over them by trying the next step (which would typically fail the same way against the same host, producing a misleading ``tried everything, nothing worked'' diagnostic).
+\end{description}
+
+The operational implication: when JWKS discovery fails, the log message is specific.  ``Could not fetch OAuth metadata from \dots /.well-known/oauth-authorization-server: connect timed out'' tells the operator there's a network problem with the AS, not a configuration problem with the RS.  ``Could not resolve JWKS URI for issuer \dots; neither \dots nor \dots published a jwks\_uri'' tells the operator the AS is reachable but doesn't publish either metadata document, and that \texttt{OAuthJwksUri} is the way out.
+
+\section{Security Considerations}
+\label{sec:oauth-security}
+
+\begin{description}[style=nextline]
+  \item[Make sure \texttt{OAuthResourceIdentifier} reflects this resource server's URL.]  The validator rejects any token whose \texttt{aud} claim does not contain this value.  Without that check, a token issued to a different resource by the same authorization server could be replayed against yours.  RFC 8707 (Resource Indicators) defines the authorization-server side of this binding; Kiss enforces the resource side.  When the AS and the RS are the same Kiss app the default (which equals \texttt{OAuthAuthorizationServer}) is correct; set it explicitly only when the RS is hosted at a URL different from the AS.
+  \item[\texttt{alg=none} is always rejected.]  The algorithm dispatch only handles RSA algorithms (RS256/RS384/RS512), so a forged unsigned token cannot slip through even if a misconfigured authorization server somehow issued one.
+  \item[Run over HTTPS.]  Bearer tokens are bearer credentials; whoever intercepts one can use it until it expires.  TLS termination is the deployer's responsibility --- Kiss does not enforce it.
+  \item[Brief validation cache.]  Validated tokens are cached for 60 seconds, keyed by SHA-256 of the token string, to avoid re-verifying the same JWT on every JSON-RPC call from the same MCP session.  The \texttt{exp} claim is re-checked on every cache hit.  Lower the cache TTL (or bypass via direct \texttt{validate()} calls) if you require sub-minute revocation.
+  \item[JWKS fetch failures surface as 401, not 5xx.]  A failed JWKS fetch is logged at \texttt{error} level but returned to the client as \texttt{invalid\_token} to avoid leaking infrastructure details.
+  \item[No token-type check.]  The validator accepts any JWT signed by a key in the JWKS whose \texttt{alg} is in the allowed list.  Configure your authorization server to issue distinct access tokens and ID tokens; do not configure it to issue access tokens that are reusable as ID tokens or vice versa.
+\end{description}
+
+\section{Components}
+\label{sec:oauth-components}
+
+All classes live in \texttt{org.kiss\-web.oauth}\index{org.kissweb.oauth}.  Application developers do not write or modify any of them --- only \texttt{appli\-cation.ini} keys and (optionally) an \texttt{authenticate()} override in their own \texttt{MCPServer\-Base} subclass.
+
+\begin{description}[style=nextline]
+  \item[\texttt{OAuthConfig}\index{OAuthConfig}] Reads the OAuth settings from \texttt{application.ini}.  Lazy singleton.  Exposes \texttt{isEnabled()} for the rest of the framework to check whether OAuth is configured.
+  \item[\texttt{JwksCache}\index{JwksCache}] Fetches and caches the authorization server's JWKS, keyed by \texttt{kid}.  Thread-safe.  Refetches on unknown \texttt{kid} or TTL expiry.
+  \item[\texttt{BearerTokenValidator}\index{BearerTokenValidator}] The main entry point.  Parses the \texttt{Authorization} header, verifies the JWS signature against the JWKS, validates claims, and writes the appropriate 401 / 403 challenge on failure.
+  \item[\texttt{ValidatedToken}\index{ValidatedToken}] Immutable holder for a successfully validated token's claims.
+  \item[\texttt{ProtectedResourceMetadataServlet}\index{ProtectedResourceMetadataServlet@Protected\-Resource\-Metadata\-Servlet}] Serves \texttt{/.well-known/oauth-protected-resource} per RFC 9728.  Returns 404 when OAuth is not configured.
+\end{description}
+
+\section{A Worked Example}
+\label{sec:oauth-example}
+
+Start from the \texttt{MCPServer\-Example}\index{MCPServerExample} template (Section~\ref{sec:ext-restserverexample} discusses the related \texttt{RestServer\-Example}).  Add this to \texttt{application.ini}:
+
+\begin{lstlisting}[style=ini]
+OAuthAuthorizationServer = https://your-tenant.auth0.com/
+OAuthResourceIdentifier  = https://myapp.example.com
+OAuthRequiredScopes      = mcp:read mcp:write
+\end{lstlisting}
+
+\noindent
+The split between \texttt{OAuthAuthorizationServer} and \texttt{OAuthResource\-Identifier} above reflects the usual third-party-provider shape: the AS is hosted by Auth0; the RS is your own application.  When the AS is Kiss itself in the same JVM (Chapter~\ref{ch:oauth-as}), only \texttt{OAuthAuthorizationServer} is needed --- \texttt{OAuthResource\-Identifier} defaults to it.
+
+\noindent
+Rebuild and restart:
+
+\begin{lstlisting}[style=shell]
+./bld build
+\end{lstlisting}
+
+\noindent
+That's it.  Without touching \texttt{MCPServer\-Example.java}, every request to the MCP endpoint now requires a valid bearer token from your Auth0 tenant, carrying both \texttt{mcp:read} and \texttt{mcp:write} scopes and a matching \texttt{aud}.
+
+To make a tool method aware of the calling user --- for example, to scope queries to the user's own data --- read the token from inside \texttt{callTool}:
+
+\begin{lstlisting}[style=java]
+import org.kissweb.oauth.BearerTokenValidator;
+import org.kissweb.oauth.ValidatedToken;
+
+@Override
+protected JSONObject callTool(String name, JSONObject args) {
+    ValidatedToken tok = BearerTokenValidator.currentToken();
+    String userId = tok.getSubject();
+
+    switch (name) {
+        case "list_my_orders":
+            return toolResult(listOrdersForUser(userId));
+        case "delete_order":
+            if (!tok.hasScope("mcp:write"))
+                return toolError(
+                    "delete_order requires the mcp:write scope.");
+            return toolResult(deleteOrder(userId,
+                args.getString("orderId", "")));
+        default:
+            return toolError("Unknown tool: " + name);
+    }
+}
+\end{lstlisting}
+
+\section{Troubleshooting}
+\label{sec:oauth-troubleshooting}
+
+\begin{description}[style=nextline]
+  \item[Discovery endpoint returns 404.] OAuth is not configured.  Check that \texttt{OAuthAuthorizationServer} is uncommented in \texttt{application.ini} and that the server was restarted after the change (configuration is read once at startup).
+  \item[Every request gets ``No JWKS key found for kid=\dots''.]  The authorization server is signing tokens with a key that is not in its JWKS, or the discovered JWKS URL is wrong.  Check the catalina log for the ``Looking for jwks\_uri in \dots'' lines (one per discovery step actually attempted --- so up to two, one for RFC 8414 and one for the OIDC fallback) and for the eventual ``Fetching JWKS from \dots'' line.  Verify that URL serves the expected JWKS.  Override with explicit \texttt{OAuthJwksUri} if neither metadata document points where you expect.
+  \item[Startup or first-request failure with ``Could not fetch OAuth metadata from \dots /.well-known/oauth-authorization-server''.]  This is a \emph{hard} failure on the RFC 8414 discovery step: a network error, timeout, 401/403, or 5xx response.  It is \emph{not} a ``the document is not published'' condition --- the resolver propagated it instead of silently falling through to OIDC discovery (which would typically fail the same way against the same host and produce a misleading diagnostic).  Resolve at the authorization server (the metadata endpoint is genuinely unreachable, or the AS is rejecting the request); or set \texttt{OAuthJwksUri} explicitly to skip the discovery step entirely.
+  \item[Startup or first-request failure with ``Could not resolve JWKS URI for issuer \dots; neither \dots /.well-known/oauth-authorization-server nor \dots /.well-known/openid-configuration published a jwks\_uri''.]  Both metadata documents were reachable (so this is not a network problem) but neither contained a \texttt{jwks\_uri} field --- the authorization server is not publishing OAuth metadata in either standard form.  Set \texttt{OAuthJwksUri} explicitly to the AS's JWKS endpoint.
+  \item[Every request gets ``Token iss '\dots' does not match expected '\dots' ''.]  The \texttt{OAuthAuthorization\-Server} value must match the \texttt{iss} claim in tokens exactly (modulo a trailing slash, which the validator normalizes).
+  \item[Every request gets ``Token aud does not include resource identifier '\dots' ''.]  The token's \texttt{aud} claim does not include the value of \texttt{OAuthResource\-Identifier}.  Either reconfigure the authorization server to issue tokens with the right audience or set \texttt{OAuthResourceIdentifier} to a value the tokens actually carry.
+  \item[\texttt{BearerTokenValidator.currentToken()} returns null in a tool method.]  The OAuth path was not taken for this request --- most commonly because OAuth is not configured, or because the MCP server overrides \texttt{authenticate()} with a different scheme.
+  \item[Tokens validate the first time but fail after the authorization server rotates keys.]  The framework refetches the JWKS on encountering an unknown \texttt{kid}, so this should self-heal on the next request.  If it does not, ensure the authorization server's rotation policy keeps the old key in the JWKS long enough for the cache to refresh.
+\end{description}
+
+\section{What's Not Implemented}
+\label{sec:oauth-omissions}
+
+To keep the resource-server focused, the following are out of scope --- each can be addressed at the validator (where applicable) or by relying on the authorization server for the missing piece.  (For Kiss's own authorization server, see Chapter~\ref{ch:oauth-as}.)
+
+\begin{itemize}
+  \item \emph{Token revocation and introspection endpoints.}  The RS validates self-contained JWTs using the JWKS; it does not call back to the AS on every request to check for revocation.  Use a short access-token TTL if you need tight revocation semantics; refresh-token rotation (Section~\ref{sec:as-rotation}) covers the longer-lived secret.
+  \item \emph{ECDSA, EdDSA, HMAC signatures.}  Only RSA (RS256, RS384, RS512) is supported.  Adding ECDSA support is a localized change to the signature-verification dispatch in \texttt{BearerTokenValidator}.
+  \item \emph{Opaque tokens with introspection.}  Only self-contained JWTs are validated.  Opaque-token validation would require a call to the authorization server's \texttt{/introspect} endpoint per request.
+  \item \emph{Demonstrating Proof of Possession (DPoP, RFC 9449).}  All validated tokens are bearer tokens.
+  \item \emph{mTLS client certificates as a binding mechanism (RFC 8705).}  Bearer tokens are not bound to a transport-layer client certificate.
+\end{itemize}
+
+\section{Further Reading}
+\label{sec:oauth-references}
+
+A standalone OAuth how-to with copy-paste recipes lives in the repository root as \texttt{OAuth.md}.  The relevant RFCs:
+
+\begin{itemize}
+  \item \emph{RFC 6749} --- The OAuth 2.0 Authorization Framework
+  \item \emph{RFC 6750} --- The OAuth 2.0 Authorization Framework: Bearer Token Usage
+  \item \emph{RFC 7515} --- JSON Web Signature (JWS)
+  \item \emph{RFC 7519} --- JSON Web Token (JWT)
+  \item \emph{RFC 7517} --- JSON Web Key (JWK)
+  \item \emph{RFC 8414} --- OAuth 2.0 Authorization Server Metadata
+  \item \emph{RFC 8707} --- Resource Indicators for OAuth 2.0
+  \item \emph{RFC 9068} --- JSON Web Token (JWT) Profile for OAuth 2.0 Access Tokens
+  \item \emph{RFC 9728} --- OAuth 2.0 Protected Resource Metadata
+\end{itemize}
+
+\noindent
+The Model Context Protocol authorization specification (\url{https://modelcontextprotocol.io}) describes how MCP clients use the discovery document and the \texttt{WWW-Authenticate} challenge to obtain tokens, and is required reading for anyone building MCP servers intended to be used by third-party clients.

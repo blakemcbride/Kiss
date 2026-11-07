@@ -1,0 +1,282 @@
+\chapter{Testing}
+\label{ch:testing}
+
+Kiss integrates JUnit 5\index{JUnit} for unit testing.  This chapter covers running the test suite, writing new tests, and testing strategies for Kiss applications.
+
+\section{Running Tests}
+\label{sec:test-running}
+
+Run the full test suite with:
+
+\begin{lstlisting}[style=shell]
+./bld -v test
+\end{lstlisting}
+
+\noindent
+This command:
+
+\begin{enumerate}
+  \item Compiles all source code (core, precompiled, and test classes).
+  \item Packages the test classes with JUnit dependencies into \texttt{KissUnitTest.jar}.
+  \item Executes the tests using JUnit Platform Console Launcher.
+  \item Reports results to the terminal.
+\end{enumerate}
+
+\noindent
+The \texttt{-v} flag enables verbose output, showing each test class and method as it runs.
+
+\section{The Existing Test Suite}
+\label{sec:test-existing}
+
+Kiss ships with 19 test classes.  The core utility and database tests below live in \texttt{src/test/core/org/kissweb/} (with \texttt{QueryBuilderTest} under \texttt{database/}); an additional six OAuth test classes live under \texttt{oauth/} (\texttt{BearerTokenValidatorTest}, \texttt{JwksDiscoveryTest}, \texttt{oauth/as/AuthorizationServerTest}, and \texttt{oauth/client/\{OAuthClientConfigTest, OAuthClientStoreTest, PkceTest\}}):
+
+\begin{longtable}{P{4.5cm}P{6cm}}
+\toprule
+\textbf{Test Class} & \textbf{What It Tests} \\
+\midrule
+\endhead
+\texttt{ArrayUtilsTest} & Byte array primitive/boxed conversions. \\
+\texttt{Base64Test} & Base64 encoding and decoding. \\
+\texttt{DateTimeTest} & \texttt{DateTime} wrapper operations. \\
+\texttt{DateUtilsTest} & YYYYMMDD date arithmetic and formatting. \\
+\texttt{IniFileTest} & INI file parsing with sections and types. \\
+\texttt{JsonPathTest} & Dot-path JSON navigation. \\
+\texttt{NumberFormatTest} & Number formatting with masks. \\
+\texttt{NumberUtilsTest} & Rounding and floating-point comparison. \\
+\texttt{QueryBuilderTest} & SQL query building (the largest suite). \\
+\texttt{StringUtilsTest} & String manipulation methods. \\
+\texttt{TimeUtilsTest} & HHMM time operations. \\
+\texttt{URLBuilderTest} & URL construction and parameter encoding. \\
+\texttt{XMLTest} & XML parsing and transformation. \\
+\bottomrule
+\end{longtable}
+
+\noindent
+The \texttt{QueryBuilderTest} is the most comprehensive, containing over 100 tests that verify SELECT, WHERE, JOIN, subquery, CTE, and UNION generation against expected SQL output.
+
+\section{Test Dependencies}
+\label{sec:test-deps}
+
+Kiss uses JUnit 5.11 (Jupiter).  The required JARs are included in the \texttt{libs/} directory:
+
+\begin{itemize}
+  \item \texttt{junit-jupiter-5.11.0.jar} --- aggregator module.
+  \item \texttt{junit-jupiter-api-5.11.0.jar} --- annotations and assertions.
+  \item \texttt{junit-jupiter-engine-5.11.0.jar} --- test engine.
+  \item \texttt{junit-jupiter-params-5.11.0.jar} --- parameterized tests.
+  \item \texttt{junit-platform-console-standalone-1.11.0.jar} --- command-line launcher.
+\end{itemize}
+
+\noindent
+No external test framework installation is needed --- everything is bundled.
+
+\section{Writing Tests}
+\label{sec:test-writing}
+
+Place test classes in \texttt{src/test/core/org/kissweb/} with the package declaration \texttt{org.kissweb}:
+
+\begin{lstlisting}[style=java]
+package org.kissweb;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class MyUtilTest {
+
+    @Test
+    public void testBasicOperation() {
+        String result = MyUtil.process("input");
+        assertEquals("expected", result);
+    }
+
+    @Test
+    public void testNullHandling() {
+        assertNull(MyUtil.process(null));
+    }
+
+    @Test
+    public void testException() {
+        assertThrows(IllegalArgumentException.class,
+            () -> MyUtil.process(""));
+    }
+}
+\end{lstlisting}
+
+\subsection{Common Assertions}
+
+\begin{longtable}{P{4.8cm}P{5.7cm}}
+\toprule
+\textbf{Assertion} & \textbf{Purpose} \\
+\midrule
+\endhead
+\texttt{assertEquals(expected, actual)} & Verify equality. \\
+\texttt{assertNotEquals(a, b)} & Verify inequality. \\
+\texttt{assertTrue(condition)} & Verify condition is true. \\
+\texttt{assertFalse(condition)} & Verify condition is false. \\
+\texttt{assertNull(value)} & Verify value is null. \\
+\texttt{assertNotNull(value)} & Verify value is not null. \\
+\texttt{assertThrows(type, executable)} & Verify exception is thrown. \\
+\texttt{assertDoesNotThrow(\allowbreak executable)} & Verify no exception. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Setup and Teardown}
+
+Use \texttt{@BeforeEach} and \texttt{@AfterEach} for per-test initialization:
+
+\begin{lstlisting}[style=java]
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
+
+public class ServiceTest {
+    private Connection db;
+
+    @BeforeEach
+    void setUp() {
+        // Initialize test state
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clean up resources
+    }
+
+    @Test
+    void testService() {
+        // test using initialized state
+    }
+}
+\end{lstlisting}
+
+\subsection{Parameterized Tests}
+
+JUnit 5 supports parameterized tests for testing multiple inputs:
+
+\begin{lstlisting}[style=java]
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class DateUtilsTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "20260101, 2026, 1, 1",
+        "20261231, 2026, 12, 31",
+        "20260404, 2026, 4, 4"
+    })
+    void testDateComponents(int date,
+            int year, int month, int day) {
+        assertEquals(year, DateUtils.year(date));
+        assertEquals(month, DateUtils.month(date));
+        assertEquals(day, DateUtils.day(date));
+    }
+}
+\end{lstlisting}
+
+\section{Testing Database Operations}
+\label{sec:test-db}
+
+Database tests can use an in-memory SQLite database to avoid external dependencies.  Create a \texttt{Connection} with SQLite and a temporary file:
+
+\begin{lstlisting}[style=java]
+import org.kissweb.database.Connection;
+import org.junit.jupiter.api.io.TempDir;
+import java.nio.file.Path;
+
+public class DatabaseTest {
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void testInsertAndFetch() throws Exception {
+        String dbPath = tempDir.resolve("test.db")
+            .toString();
+        Connection db = new Connection(
+            Connection.ConnectionType.SQLite,
+            dbPath);
+
+        // Create table
+        db.execute(
+            "CREATE TABLE test_data (" +
+            "id INTEGER PRIMARY KEY, " +
+            "name TEXT, value REAL)");
+
+        // Insert
+        Record rec = db.newRecord("test_data");
+        rec.set("name", "Alice");
+        rec.set("value", 42.5);
+        rec.addRecord();
+        db.commit();
+
+        // Fetch and verify
+        Record fetched = db.fetchOne(
+            "SELECT * FROM test_data " +
+            "WHERE name = ?", "Alice");
+        assertNotNull(fetched);
+        assertEquals("Alice",
+            fetched.getString("name"));
+        assertEquals(42.5,
+            fetched.getDouble("value"), 0.001);
+
+        db.close();
+    }
+}
+\end{lstlisting}
+
+\begin{tipbox}
+Use JUnit 5's \texttt{@TempDir} annotation to create temporary directories for SQLite databases.  The directory and its contents are automatically cleaned up after the test.
+\end{tipbox}
+
+\section{Testing Services}
+\label{sec:test-services}
+
+Service methods can be tested by constructing \texttt{JSONObject} inputs and calling the method directly.  Since service methods take standard parameters (\texttt{JSONObject}, \texttt{Connection}, \texttt{ProcessServlet}), you can create test instances:
+
+\begin{lstlisting}[style=java]
+import org.kissweb.json.JSONObject;
+
+@Test
+void testServiceMethod() throws Exception {
+    // Set up database (SQLite for isolation)
+    Connection db = createTestDatabase();
+    setupTestData(db);
+
+    // Build input
+    JSONObject injson = new JSONObject();
+    injson.put("employeeId", "EMP001");
+
+    // Build output container
+    JSONObject outjson = new JSONObject();
+
+    // Call the service method directly
+    EmployeeService svc = new EmployeeService();
+    svc.getEmployee(injson, outjson, db, null);
+
+    // Verify output
+    assertEquals("Alice",
+        outjson.getString("firstName"));
+    assertEquals("Engineering",
+        outjson.getString("department"));
+
+    db.close();
+}
+\end{lstlisting}
+
+\begin{notebox}
+When testing services directly, pass \texttt{null} for the \texttt{ProcessServlet} parameter if the service does not use it.  If the service accesses session data via \texttt{servlet.getUserData()}, you will need to mock or stub the servlet.
+\end{notebox}
+
+\section{Testing Strategies}
+\label{sec:test-strategies}
+
+\begin{description}[style=nextline]
+  \item[Unit tests] Test individual utility methods and pure logic.  These are fast and have no external dependencies.  Most of Kiss's existing tests are in this category.
+
+  \item[Integration tests] Test service methods with a real (SQLite) database.  These verify that SQL queries, Record operations, and business logic work together correctly.
+
+  \item[Frontend testing] Kiss's frontend is plain JavaScript without a build step.  Use browser developer tools for interactive debugging, or integrate a tool like Playwright or Cypress for automated UI testing.
+\end{description}
+
+\begin{warnbox}
+Always use parameterized SQL queries in tests, just as in production code.  Never concatenate user input into SQL strings, even in test code, to maintain consistent security practices.
+\end{warnbox}

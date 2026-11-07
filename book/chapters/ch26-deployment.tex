@@ -1,0 +1,224 @@
+\chapter{Deployment}
+\label{ch:deployment}
+
+This chapter covers building, packaging, and deploying a Kiss application to production environments.
+
+\section{Building a WAR File}
+\label{sec:deploy-war}
+
+The standard deployment artifact is a WAR\index{WAR file} (Web Application Archive) file:
+
+\begin{lstlisting}[style=shell]
+./bld war
+\end{lstlisting}
+
+\noindent
+This command:
+
+\begin{enumerate}
+  \item Compiles all Java source code (core, precompiled, and application classes).
+  \item Copies frontend assets, backend scripts, and configuration files into an exploded directory structure.
+  \item Copies \texttt{web-secure.xml} into \texttt{web.xml} to enable production CORS restrictions.
+  \item Packages everything into \texttt{work/Kiss.war}.
+  \item Copies \texttt{web-unsafe.xml} back into \texttt{web.xml} so local development continues with the permissive CORS configuration.
+\end{enumerate}
+
+\noindent
+The resulting WAR file is a standard Jakarta EE 11 (Servlet 6.1) archive containing:
+
+\begin{lstlisting}[style=ini]
+Kiss.war
+  index.html              # Frontend entry point
+  index.js                # Application bootstrap
+  kiss/                   # Framework frontend files
+  screens/                # Application screens
+  WEB-INF/
+    web.xml               # Servlet configuration (secure)
+    classes/              # Compiled Java classes
+    lib/                  # JAR dependencies
+    backend/              # Groovy/Lisp service files
+    application.ini       # Application configuration
+    log4j2.xml            # Logging configuration
+\end{lstlisting}
+
+\section{Web Configuration Variants}
+\label{sec:deploy-webxml}
+
+Kiss maintains two source variants of the servlet configuration in \texttt{src/main/core/WEB-INF/}:
+
+\begin{description}[style=nextline]
+  \item[\texttt{web-unsafe.xml}] Development configuration.  Allows CORS\index{CORS} from any origin (\texttt{*}), enabling rapid frontend development from any port or device.  This is the default during development.
+
+  \item[\texttt{web-secure.xml}] Production configuration.  Restricts CORS to specific origins (\texttt{localhost:8000} and IntelliJ's debug port 63342), preventing cross-origin attacks from arbitrary domains.  This is automatically used when building the WAR file.
+\end{description}
+
+\noindent
+The deployed \texttt{web.xml} is not maintained by hand --- it is a copy that \texttt{bld} writes from one of the two variants above based on whether you are building for development or for production.
+
+\begin{warnbox}
+Never deploy with the permissive CORS configuration (\texttt{web-unsafe.xml}) in production.  The wildcard CORS policy allows any website to make requests to your backend.  The WAR build automatically substitutes \texttt{web-secure.xml}; update its allowed origins to match your production domain.
+\end{warnbox}
+
+\section{Deploying to Tomcat}
+\label{sec:deploy-tomcat}
+
+\subsection{Embedded Tomcat}
+
+Kiss ships with an embedded Tomcat\index{Tomcat} 11 in the \texttt{tomcat/} directory.  To deploy:
+
+\begin{enumerate}
+  \item Build the WAR: \texttt{./bld war}
+  \item Copy to Tomcat: \texttt{cp work/Kiss.war tomcat/webapps/ROOT.war}
+  \item Start Tomcat: \texttt{tomcat/bin/startup.sh}
+\end{enumerate}
+
+\noindent
+The embedded Tomcat listens on the application's back-end port --- 8001 with the default \texttt{portBase} (Section~\ref{sec:build-ports}).  The \texttt{bld} system stamps the port into \texttt{tomcat/conf/server.xml} on every \texttt{setup-tomcat} run.
+
+\begin{notebox}
+A production WAR deployed to the embedded Tomcat (\texttt{webapps/ROOT.war} --- \texttt{./bld build} places one there automatically) does not survive the next development run: \texttt{develop} and \texttt{start-backend} remove any stale \texttt{ROOT.war} before starting Tomcat.  If it were left in place, Tomcat would re-explode the WAR over the \texttt{ROOT} directory at startup, replacing the development tree those tasks stage there --- most visibly \texttt{web.xml}, whose production CORS allow-list rejects the cross-origin development front end.  Treat a WAR deployed to the embedded Tomcat as a production-like test, not a persistent installation.
+\end{notebox}
+
+\subsection{External Tomcat}
+
+To deploy to a standalone Tomcat 11 installation:
+
+\begin{enumerate}
+  \item Build the WAR: \texttt{./bld war}
+  \item Copy \texttt{work/Kiss.war} to Tomcat's \texttt{webapps/} directory, typically renaming it to your application's name (for example \texttt{YourApplication.war}).
+  \item Restart Tomcat (or wait for auto-deploy if enabled).
+  \item Access the application at \texttt{http://hostname:port/}\allowbreak\texttt{YourApplication/}.
+\end{enumerate}
+
+\begin{notebox}
+The WAR filename becomes the application's URL context path.  Tomcat takes the deployed file name (minus the \texttt{.war} extension) and uses it as the first path segment when serving the application: \texttt{Kiss.war} is reached at \texttt{/Kiss/}, \texttt{Payroll.war} at \texttt{/Payroll/}, and so on.  Kiss builds the WAR as \texttt{Kiss.war} by default, so when copying to a production server you will usually rename it to whatever name you want to appear in the URL --- for example \texttt{cp work/Kiss.war /var/lib/tomcat/webapps/YourApplication.war}.
+
+To deploy as the root application (no path segment in the URL), rename the WAR to \texttt{ROOT.war} or configure the Tomcat context path explicitly.
+\end{notebox}
+
+\section{Other Servlet Containers}
+\label{sec:deploy-other}
+
+The WAR file is compatible with any Jakarta EE 11 (Servlet 6.1) container:
+
+\begin{itemize}
+  \item \textbf{Tomcat 11} --- the reference container for Kiss.
+  \item \textbf{Jetty 12} --- lightweight alternative.
+  \item \textbf{WildFly} --- full Jakarta EE application server.
+  \item \textbf{GlassFish} --- reference Jakarta EE implementation.
+\end{itemize}
+
+\noindent
+Deployment procedures vary by container but follow the standard WAR deployment process.
+
+\section{Split-System Deployment}
+\label{sec:deploy-split}
+
+For high-traffic applications or CDN-based frontends, the frontend and backend can be deployed on separate servers.
+
+\subsection{Frontend Server}
+
+Serve the frontend as static files using any web server:
+
+\begin{itemize}
+  \item Nginx, Apache, or a CDN for HTML, CSS, and JavaScript files.
+  \item No server-side processing needed --- the frontend is pure static content.
+\end{itemize}
+
+\subsection{Backend Server}
+
+Deploy the WAR file (or just the backend portion) to a servlet container.
+
+\subsection{Connecting Them}
+
+Configure the backend URL in the frontend's \texttt{index.js} by setting \texttt{SystemInfo.backendUrl} before the framework initializes:
+
+\begin{lstlisting}[style=javascript]
+// In index.js, before Server initialization
+SystemInfo.backendUrl = "https://api.myapp.com";
+\end{lstlisting}
+
+\noindent
+The frontend's \texttt{Server.js} checks for this value and uses it as the base URL for all backend calls.  When not set, it assumes the backend is co-located (same origin).
+
+\begin{notebox}
+In a split deployment, update \texttt{web-secure.xml} to include the frontend's origin in the CORS allowed-origins list.
+\end{notebox}
+
+\section{Production Configuration Checklist}
+\label{sec:deploy-checklist}
+
+Before deploying to production, verify the following settings in \texttt{application.ini}:
+
+\begin{longtable}{P{4.5cm}P{6cm}}
+\toprule
+\textbf{Setting} & \textbf{Production Value} \\
+\midrule
+\endhead
+\texttt{DatabaseType} & Your database type (PostgreSQL, MySQL, MSSqlServer, Oracle). \\
+\texttt{DatabaseHost} & Production database hostname. \\
+\texttt{DatabaseName} & Production database name. \\
+\texttt{DatabaseUser} & Database username with appropriate permissions. \\
+\texttt{DatabasePassword} & Database password. \\
+\texttt{MaxWorkerThreads} & Match to expected concurrent request load (default: 30). \\
+\texttt{UserInactiveSeconds} & Session timeout in seconds (default: 900 = 15 min). \\
+\bottomrule
+\end{longtable}
+
+\noindent
+Additional steps:
+
+\begin{itemize}
+  \item Use \texttt{web-secure.xml} and update allowed CORS origins.
+  \item Configure \texttt{log4j2.xml} for production log levels and file rotation.
+  \item Ensure the database schema is up to date.
+  \item Set JVM memory parameters (\texttt{-Xmx}, \texttt{-Xms}) in the Tomcat startup script.
+  \item Store all passwords hashed (SHA-256) in the \texttt{users} table.
+  \item Test the application with the production database before going live.
+\end{itemize}
+
+\section{Logging in Production}
+\label{sec:deploy-logging}
+
+Server logs are written to \texttt{tomcat/logs/catalina.out}.  The default \texttt{log4j2.xml} configuration sets the root logger to \texttt{ERROR} level with console output:
+
+\begin{lstlisting}[style=ini]
+# log4j2.xml pattern
+%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%-25c{2}] - %m%n
+\end{lstlisting}
+
+\noindent
+For production, consider:
+
+\begin{itemize}
+  \item Setting the root level to \texttt{WARN} or \texttt{ERROR} to reduce log volume.
+  \item Adding a \texttt{RollingFileAppender} for log rotation.
+  \item Configuring specific loggers for application packages at \texttt{DEBUG} level during troubleshooting.
+  \item Using \texttt{Configurator.setLevel()} to change log levels at runtime without a restart (see Chapter~\ref{ch:utilities}).
+\end{itemize}
+
+\section{Performance Tuning}
+\label{sec:deploy-performance}
+
+\begin{description}[style=nextline]
+  \item[Worker threads] The \texttt{MaxWorkerThreads} setting in \texttt{application.ini} controls the size of the service request thread pool.  Set this to match the expected number of concurrent requests.  A typical starting point is 2--4 times the number of CPU cores.
+
+  \item[Connection pool] C3P0 connection pool settings are configured in \texttt{application.ini}.  Key parameters include:
+  \begin{itemize}
+    \item \texttt{MaxPoolSize} --- maximum database connections (default: varies by config).  A good starting point is 4 times the number of CPU cores.
+    \item \texttt{MinPoolSize} --- minimum idle connections to maintain.
+    \item \texttt{MaxIdleTime} --- seconds before idle connections are closed.
+    \item \texttt{DatabaseTestOnCheckin} --- validate connections when returned to the pool.
+  \end{itemize}
+
+  \item[JVM memory] Set \texttt{-Xmx} (maximum heap) and \texttt{-Xms} (initial heap) in the Tomcat startup script or \texttt{CATALINA\_OPTS} environment variable:
+  \begin{lstlisting}[style=shell]
+export CATALINA_OPTS="-Xms512m -Xmx2g"
+  \end{lstlisting}
+
+  \item[Static file caching] In a split deployment, configure the frontend web server (Nginx, Apache) with appropriate cache headers for static assets.  Kiss frontend files rarely change after deployment.
+\end{description}
+
+\begin{tipbox}
+Monitor \texttt{tomcat/logs/catalina.out} during the first days of production deployment.  Watch for connection pool exhaustion warnings, slow query logs, and memory pressure indicators.
+\end{tipbox}
