@@ -84,9 +84,9 @@ A 6-part training series on KISS is at:
 
 * [Getting Started Manual (HTML)](https://blakemcbride.github.io/Kiss/manual/man) — also available as a [PDF](https://blakemcbride.us/software/kiss/GettingStarted.pdf).
 * [Front-end API (JSDoc)](https://blakemcbride.github.io/Kiss/manual/jsdoc)
-* [Kiss: A Complete Guide to the Web Application Framework](https://a.co/d/035V1VEl) — a comprehensive book by Blake McBride, available on Amazon.
-  The book's LaTeX source is in `book/`.  To build the PDF, run `make` in that directory (needs `pdflatex`, `makeindex`, and `xelatex` for the cover, from a TeX distribution such as TeX Live).
-  The PDF is not kept in the repository; build it locally or buy the printed book.
+* [Kiss: A Complete Guide to the Web Application Framework](https://a.co/d/035V1VEl) — a comprehensive book by Blake McBride, available on Amazon, and as a free [PDF](https://blakemcbride.com/files/kiss-book.pdf) download.
+  The book's LaTeX source is in `book/`; run `make` there to build the PDF (needs `pdflatex`, `makeindex`, and `xelatex` for the cover, from a TeX distribution such as TeX Live).
+  The PDF is not kept in the repository.
 
 The back-end JavaDoc must be built by you.  This can be done by typing:
 
