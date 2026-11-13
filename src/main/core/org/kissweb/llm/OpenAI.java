@@ -109,6 +109,7 @@ public class OpenAI {
     private static final Set<String> RESPONSES_ONLY_MODELS = ConcurrentHashMap.newKeySet();
 
     private final String apiKey; // Your API key
+    private final String url;    // Per-instance chat completions URL, or null to use the static default
     private final String model; // e.g. "gpt-4o"
     private final boolean reasoningModel; // true if model supports the "reasoning_effort" field
 
@@ -130,7 +131,12 @@ public class OpenAI {
      * Overrides the OpenAI Chat Completions endpoint URL used by this class.
      *
      * <p>This is a global setting: changing the URL affects all current and future
-     * {@link OpenAI} instances created in this JVM.</p>
+     * {@link OpenAI} instances created in this JVM, except those constructed with their own
+     * URL via {@link #OpenAI(String, String, boolean, String)}.</p>
+     *
+     * <p>This is a JVM-global setting. A multi-tenant application that needs a different
+     * endpoint per client instance should use the constructor overload that takes a URL
+     * instead; that value is held by the instance and does not touch this default.</p>
      *
      * <p>This is primarily intended for testing, proxies, gateways, or OpenAI-compatible
      * endpoints.</p>
@@ -184,6 +190,28 @@ public class OpenAI {
      * @throws NullPointerException if apiKey or model is null
      */
     public OpenAI(String apiKey, String model, boolean reasoningModel) {
+        this(apiKey, model, reasoningModel, null);
+    }
+
+    /**
+     * Creates a new OpenAI client instance that sends its requests to its own endpoint URL.
+     *
+     * <p>This is the per-instance alternative to the JVM-global {@link #setUrl(String)} and
+     * is intended for multi-tenant use, where each client instance must have its own endpoint
+     * without affecting any other instance. The URL is held by this instance only.</p>
+     *
+     * <p>Only the chat completions URL is per-instance; the Responses and Models URLs remain
+     * governed by {@link #setResponsesUrl(String)} and {@link #setModelsUrl(String)}.</p>
+     *
+     * @param apiKey         Your OpenAI API key for authentication
+     * @param model          The model identifier (e.g., "gpt-4o")
+     * @param reasoningModel {@code true} if the model supports reasoning_effort parameter
+     * @param url            The full chat completions URL for this instance, or {@code null} or
+     *                       blank to use the class-wide default governed by {@link #setUrl(String)}
+     * @throws NullPointerException if apiKey or model is null
+     */
+    public OpenAI(String apiKey, String model, boolean reasoningModel, String url) {
+        this.url = (url == null || url.trim().isEmpty()) ? null : url.trim();
         this.apiKey = apiKey;
         this.model = model;
         this.reasoningModel = reasoningModel;
@@ -489,7 +517,7 @@ public class OpenAI {
 
         JSONObject body = buildChatBody(query, imagePath);
 
-        HttpRequest req = HttpRequest.newBuilder(URI.create(OPENAI_URL))
+        HttpRequest req = HttpRequest.newBuilder(URI.create(url != null ? url : OPENAI_URL))
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .timeout(Duration.ofMinutes(10))

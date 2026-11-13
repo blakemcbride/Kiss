@@ -82,6 +82,7 @@ public class OpenRouter {
     private static String OPENROUTER_MODELS_URL = "https://openrouter.ai/api/v1/models";
 
     private final String apiKey; // Your OpenRouter API key
+    private final String url;    // Per-instance chat completions URL, or null to use the static default
     private final String model;  // e.g. "openai/gpt-4o"
 
     private float temperature = 0.7f; // Generation randomness
@@ -102,7 +103,12 @@ public class OpenRouter {
      * Overrides the OpenRouter Chat Completions endpoint URL used by this class.
      *
      * <p>This is a global setting: changing the URL affects all current and future
-     * {@link OpenRouter} instances created in this JVM.</p>
+     * {@link OpenRouter} instances created in this JVM, except those constructed with their own
+     * URL via {@link #OpenRouter(String, String, String)}.</p>
+     *
+     * <p>This is a JVM-global setting. A multi-tenant application that needs a different
+     * endpoint per client instance should use the constructor overload that takes a URL
+     * instead; that value is held by the instance and does not touch this default.</p>
      *
      * <p>This is primarily intended for testing, proxies, or gateways.</p>
      *
@@ -138,6 +144,24 @@ public class OpenRouter {
      * @throws NullPointerException if apiKey or model is null
      */
     public OpenRouter(String apiKey, String model) {
+        this(apiKey, model, null);
+    }
+
+    /**
+     * Creates a new OpenRouter client instance that sends its requests to its own endpoint URL.
+     *
+     * <p>This is the per-instance alternative to the JVM-global {@link #setUrl(String)} and
+     * is intended for multi-tenant use, where each client instance must have its own endpoint
+     * without affecting any other instance. The URL is held by this instance only.</p>
+     *
+     * @param apiKey Your OpenRouter API key for authentication
+     * @param model  The model identifier in {@code provider/model} form
+     * @param url    The full chat completions URL for this instance, or {@code null} or blank to
+     *               use the class-wide default governed by {@link #setUrl(String)}
+     * @throws NullPointerException if apiKey or model is null
+     */
+    public OpenRouter(String apiKey, String model, String url) {
+        this.url = (url == null || url.trim().isEmpty()) ? null : url.trim();
         this.apiKey = apiKey;
         this.model = model;
 
@@ -369,7 +393,7 @@ public class OpenRouter {
 
         JSONObject body = buildChatBody(query, imagePath);
 
-        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(OPENROUTER_URL))
+        HttpRequest.Builder builder = HttpRequest.newBuilder(URI.create(url != null ? url : OPENROUTER_URL))
                 .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .timeout(Duration.ofMinutes(10))

@@ -199,7 +199,7 @@ OpenAI.setModelsUrl(
 \end{lstlisting}
 
 \noindent
-The static \texttt{setUrl()} and \texttt{setResponsesUrl()} methods override the chat completions and responses endpoint URLs respectively.  Both are global, affecting all current and future \texttt{OpenAI} instances, and are primarily intended for proxies, gateways, or OpenAI-compatible endpoints.  If your gateway implements only one of the two, pair the override with \texttt{setApi()} so no request is ever sent to the other (Section~\ref{sec:llm-openai-api}).  \texttt{setModelsUrl()} likewise overrides the endpoint \texttt{getAvailableModels()} calls (Section~\ref{sec:llm-openai-models}), independently of which chat endpoint is selected.
+The static \texttt{setUrl()} and \texttt{setResponsesUrl()} methods override the chat completions and responses endpoint URLs respectively.  Both are global, affecting all current and future \texttt{OpenAI} instances, and are primarily intended for proxies, gateways, or OpenAI-compatible endpoints.  If your gateway implements only one of the two, pair the override with \texttt{setApi()} so no request is ever sent to the other (Section~\ref{sec:llm-openai-api}).  \texttt{setModelsUrl()} likewise overrides the endpoint \texttt{getAvailableModels()} calls (Section~\ref{sec:llm-openai-models}), independently of which chat endpoint is selected.  Because these setters are JVM-global, a multi-tenant application that needs a different endpoint per client should instead pass the chat completions URL as the last constructor argument, \texttt{new OpenAI(key, model, reasoning, url)}; that URL belongs to the instance alone, a \texttt{null} or blank value means ``use the \texttt{setUrl()} default'', and the responses and models URLs stay governed by their own setters.
 
 \subsection{Embeddings}
 
@@ -277,7 +277,7 @@ Anthropic.setModelsUrl(
 \end{lstlisting}
 
 \noindent
-All three are static methods that affect all current and future \texttt{Anthropic} instances globally.
+All three are static methods that affect all current and future \texttt{Anthropic} instances globally.  To give one instance its own Messages URL without touching that global default --- for example, one endpoint per tenant in a multi-tenant application --- pass it as the third constructor argument: \texttt{new Anthropic(key, model, url)}.  A \texttt{null} or blank URL means ``use the \texttt{setUrl()} default''.
 
 \subsection{Anthropic Methods}
 
@@ -287,6 +287,7 @@ All three are static methods that affect all current and future \texttt{Anthropi
 \midrule
 \endhead
 \texttt{Anthropic(key, model)} & Constructor with API key and model name. \\
+\texttt{Anthropic(key, model, url)} & Constructor with a per-instance Messages URL (\texttt{null} or blank uses the \texttt{setUrl()} default). \\
 \texttt{send(prompt [, imagePath])} & Send a prompt (optionally with an image), return the complete response. \\
 \texttt{stream(prompt [, imagePath], onToken, onDone)} & Stream tokens to a \texttt{Consumer<String>}; run a \texttt{Runnable} on completion. \\
 \texttt{setMaxTokens(n)} & Set maximum response tokens. \\
@@ -294,7 +295,7 @@ All three are static methods that affect all current and future \texttt{Anthropi
 \texttt{setSampling(p)} & Set top-p nucleus sampling. \\
 \texttt{setWebSearch(b)} & Allow the model to search the web (default off; Section~\ref{sec:llm-websearch}). \\
 \texttt{getAvailableModels()} & List available model ids, unfiltered and in the order Anthropic reports them. \\
-\texttt{setUrl(url)} & Override the API endpoint URL (static, global). \\
+\texttt{setUrl(url)} & Override the default API endpoint URL (static, global; the three-argument constructor is the per-instance alternative). \\
 \texttt{setVersion(version)} & Override the \texttt{anthropic-version} header (static, global). \\
 \texttt{setModelsUrl(url)} & Override the model-listing endpoint URL (static, global). \\
 \texttt{getResponseCode()} & HTTP status of the last call. \\
@@ -372,6 +373,7 @@ ai.setSiteName("My Application")       // X-Title header
 \midrule
 \endhead
 \texttt{OpenRouter(key, model)} & Constructor with API key and \texttt{provider/model} identifier. \\
+\texttt{OpenRouter(key, model, url)} & Constructor with a per-instance chat completions URL (\texttt{null} or blank uses the \texttt{setUrl()} default). \\
 \texttt{send(prompt [, imagePath])} & Send a prompt (optionally with an image), return the complete response. \\
 \texttt{stream(prompt [, imagePath], onToken, onDone)} & Stream tokens to a \texttt{Consumer<String>}; run a \texttt{Runnable} on completion. \\
 \texttt{setTemperature(t)} & Set generation randomness (0.0 -- 2.0). \\
@@ -383,7 +385,7 @@ ai.setSiteName("My Application")       // X-Title header
 \texttt{setSiteName(name)} & Optional \texttt{X-Title} attribution header. \\
 \texttt{setWebSearch(b)} & Enable the web search plugin (default off; Section~\ref{sec:llm-websearch}). \\
 \texttt{getAvailableModels()} & List available model ids, unfiltered and in the order OpenRouter reports them; works without an API key. \\
-\texttt{setUrl(url)} & Override the API endpoint URL (static, global). \\
+\texttt{setUrl(url)} & Override the default API endpoint URL (static, global; the three-argument constructor is the per-instance alternative). \\
 \texttt{setModelsUrl(url)} & Override the model-listing endpoint URL (static, global). \\
 \texttt{getResponseCode()} & HTTP status of the last call. \\
 \texttt{getResponseString()} & Raw error body of the last failed call. \\

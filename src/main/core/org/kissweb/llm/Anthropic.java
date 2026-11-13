@@ -77,6 +77,7 @@ public class Anthropic {
     private static String ANTHROPIC_MODELS_URL = "https://api.anthropic.com/v1/models?limit=1000";
 
     private final String apiKey; // Your Anthropic API key
+    private final String url;    // Per-instance Messages URL, or null to use the static default
     private final String model;  // e.g. "claude-sonnet-4-20250514"
 
     // Sampling parameters are only included in the request body when the caller has
@@ -99,7 +100,12 @@ public class Anthropic {
      * Overrides the Anthropic Messages API endpoint URL used by this class.
      *
      * <p>This is a global setting: changing the URL affects all current and future
-     * {@link Anthropic} instances created in this JVM.</p>
+     * {@link Anthropic} instances created in this JVM, except those constructed with their own
+     * URL via {@link #Anthropic(String, String, String)}.</p>
+     *
+     * <p>This is a JVM-global setting. A multi-tenant application that needs a different
+     * endpoint per client instance should use the constructor overload that takes a URL
+     * instead; that value is held by the instance and does not touch this default.</p>
      *
      * <p>This is primarily intended for testing, proxies, gateways, or Anthropic-compatible
      * endpoints.</p>
@@ -150,6 +156,24 @@ public class Anthropic {
      * @throws NullPointerException if apiKey or model is null
      */
     public Anthropic(String apiKey, String model) {
+        this(apiKey, model, null);
+    }
+
+    /**
+     * Creates a new Anthropic client instance that sends its requests to its own endpoint URL.
+     *
+     * <p>This is the per-instance alternative to the JVM-global {@link #setUrl(String)} and
+     * is intended for multi-tenant use, where each client instance must have its own endpoint
+     * without affecting any other instance. The URL is held by this instance only.</p>
+     *
+     * @param apiKey Your Anthropic API key for authentication
+     * @param model  The model identifier (e.g., "claude-sonnet-4-20250514")
+     * @param url    The full Messages API URL for this instance, or {@code null} or blank to use
+     *               the class-wide default governed by {@link #setUrl(String)}
+     * @throws NullPointerException if apiKey or model is null
+     */
+    public Anthropic(String apiKey, String model, String url) {
+        this.url = (url == null || url.trim().isEmpty()) ? null : url.trim();
         this.apiKey = apiKey;
         this.model = model;
 
@@ -335,7 +359,7 @@ public class Anthropic {
 
         JSONObject body = buildMessagesBody(query, imagePath);
 
-        HttpRequest req = HttpRequest.newBuilder(URI.create(ANTHROPIC_URL))
+        HttpRequest req = HttpRequest.newBuilder(URI.create(url != null ? url : ANTHROPIC_URL))
                 .header("x-api-key", apiKey)
                 .header("anthropic-version", ANTHROPIC_VERSION)
                 .header("Content-Type", "application/json")
