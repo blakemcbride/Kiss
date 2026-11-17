@@ -15,6 +15,14 @@
  * the current text (never widening to the full list); Enter and Escape also
  * operate on the items shown.  Text that is not in the list is accepted as free entry, and
  * setting the value programmatically never opens or filters the list.
+ *
+ * Resolving the text in the field to a list item (getValue, getData, and the list
+ * highlight) compares labels case-insensitively, so "late" and "Late" both resolve to
+ * the item labeled "late" (for example, when a mobile keyboard auto-capitalizes the
+ * first letter).  If two labels differ only in case, an exact-case match is preferred.
+ * Only label resolution is case-insensitive: setValue matches item values exactly, and
+ * isDirty compares the text exactly.  The text shown in the field is never rewritten
+ * by the resolution; an explicit selection from the list does show the item's label.
  */
 
 /* global Utils, DOMUtils */
@@ -106,6 +114,25 @@
             return v ? v.trim() : '';
         }
 
+        //  Returns the index into items of the item whose label equals txt ignoring
+        //  case, or -1.  An exact-case match wins over a case-only match.  candidates
+        //  optionally restricts the search to those indexes into items.  The lower-case
+        //  form of each label is kept on the item itself (set once in add()), so there
+        //  is no separate cache to go stale and nothing is re-lower-cased per call.
+        function findItemIndex(txt, candidates) {
+            const lower = txt.toLowerCase();
+            const count = candidates ? candidates.length : items.length;
+            let found = -1;
+            for (let k = 0; k < count; k++) {
+                const i = candidates ? candidates[k] : k;
+                if (items[i].label === txt)
+                    return i;
+                if (found === -1 && items[i].lowerLabel === lower)
+                    found = i;
+            }
+            return found;
+        }
+
         function isInteractive() {
             return !el.disabled && !el.readOnly;
         }
@@ -156,7 +183,8 @@
         }
 
         //  Opens the list showing the items matching filterTxt (all items when
-        //  omitted/empty) and highlights the item whose label equals the current text.
+        //  omitted/empty) and highlights the item whose label equals the current text
+        //  (ignoring case).
         function openList(filterTxt) {
             if (!isInteractive() || !items.length)
                 return;
@@ -165,12 +193,7 @@
                 return;
             }
             const txt = currentText();
-            let idx = -1;
-            for (let k = 0; k < visible.length; k++)
-                if (items[visible[k]].label === txt) {
-                    idx = visible[k];
-                    break;
-                }
+            const idx = findItemIndex(txt, visible);
             list.style.display = 'block';
             list.scrollTop = 0;
             setHighlight(idx);
@@ -329,7 +352,7 @@
                 label = val;
             if (typeof val === 'number')
                 keyIsNumber = true;
-            items.push({ value: val, label: label, data: data });
+            items.push({ value: val, label: label, lowerLabel: String(label).toLowerCase(), data: data });
             const idx = items.length - 1;
             const li = document.createElement('li');
             li.textContent = label;
@@ -376,15 +399,15 @@
         };
 
         //  Returns the underlying value:  if what is shown matches a known list
-        //  item, its value is returned; otherwise the typed (free-entry) text is
-        //  returned as-is.
+        //  item (label compared ignoring case), its value is returned;
+        //  otherwise the typed (free-entry) text is returned as-is.
         newElm.getValue = function () {
             const txt = currentText();
-            for (let i = 0; i < items.length; i++)
-                if (items[i].label === txt) {
-                    const v = items[i].value;
-                    return keyIsNumber && v !== '' && v !== null && v !== undefined ? Number(v) : v;
-                }
+            const i = findItemIndex(txt);
+            if (i >= 0) {
+                const v = items[i].value;
+                return keyIsNumber && v !== '' && v !== null && v !== undefined ? Number(v) : v;
+            }
             return txt;
         };
 
@@ -419,11 +442,8 @@
         };
 
         newElm.getData = function () {
-            const txt = currentText();
-            for (let i = 0; i < items.length; i++)
-                if (items[i].label === txt)
-                    return items[i].data;
-            return undefined;
+            const i = findItemIndex(currentText());
+            return i >= 0 ? items[i].data : undefined;
         };
 
         newElm.getAllData = function () {

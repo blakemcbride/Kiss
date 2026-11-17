@@ -97,7 +97,9 @@ class components {
      * button (and clicking into the field) always shows the complete list regardless of what has been typed.  The Up/Down
      * arrow keys (list open or closed) show and move through only the items matching the current text and never widen to
      * the full list; Enter and Escape also operate on the items shown.  Setting the value programmatically never opens or
-     * filters the list.
+     * filters the list.  The text in the field is resolved to a list item by label case-insensitively (so "late" and
+     * "Late" both resolve to the item labeled "late"); an exact-case match is preferred if two labels differ only in case.
+     * <code>setValue()</code> still matches item values exactly, and the field's text is never rewritten by this resolution.
      * <br><br>
      * Each list item has a <em>label</em> (the text shown, typed, and selected by the user) and an optional underlying
      * <em>value</em> and arbitrary associated <em>data</em>.  When the user types text that is not in the list,
