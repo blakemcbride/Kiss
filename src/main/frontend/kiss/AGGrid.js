@@ -72,7 +72,7 @@ class AGGrid {
             rowData: this.data || [],
             rowSelection: {
                 mode: this.rowSelection,
-                enableDeselection: this.rowSelection !== AGGrid.MULTI_SELECTION,
+                // enableClickSelection true also lets Ctrl/Cmd-click deselect a selected row (single and multi select).
                 enableClickSelection: !this.suppressRowClickSelection,
                 checkboxes: false,
                 headerCheckbox: false
@@ -606,6 +606,10 @@ class AGGrid {
     /**
      * By default, grids are single-row-select enabled.  This method enables multi-row-select.
      * It must be called prior to <code>show()</code>.
+     * <br><br>
+     * Ctrl-click (Cmd-click on macOS) toggles a row: it adds an unselected row and deselects a selected row.
+     * Shift-click selects a range and a plain click selects only the clicked row.  The selection-changed
+     * callback runs after every change, including a Ctrl-click deselect.
      *
      * @returns {AGGrid}
      */

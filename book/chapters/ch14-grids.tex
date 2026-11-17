@@ -161,6 +161,8 @@ grid.multiSelect();   // call before grid.show()
 grid.show();
 \end{lstlisting}
 
+In a multi-select grid, Ctrl-click (Cmd-click on macOS) toggles a row: it adds an unselected row to the selection and removes an already-selected row. Shift-click selects a range, and a plain click selects only the clicked row. The selection-changed callback runs after every change, including a Ctrl-click deselect.
+
 \subsection{Disabling Selection}
 
 \begin{lstlisting}[style=javascript]
