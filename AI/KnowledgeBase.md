@@ -96,14 +96,9 @@ Kiss/
 
 ## Notable Features
 
-1. **Hot Reload Development**
-   - No recompilation needed during development for backend service files
-   - Automatic compilation and loading applies **only to files under `src/main/backend/`**
-   - Files under `src/main/core/` and `src/main/precompiled/` are NOT dynamically loaded — they are compiled by the `bld` build and require a server restart to take effect
+1. **Hot Reload Development** — backend services under `src/main/backend/` compile and load without a restart (see "Hot Reload" for the exact scope)
 
-2. **Multi-Language Services**
-   - Write services in Java, Groovy, or Lisp
-   - Services auto-compile on change (only when located under `src/main/backend/`)
+2. **Multi-Language Services** — write services in Java, Groovy, or Lisp
 
 3. **Database Operations**
    - Simplified CRUD with Record/Connection pattern
@@ -121,13 +116,13 @@ Kiss/
 
 6. **LLM Integration**
    - Ollama integration ready (`org.kissweb.llm.Ollama`) — single-prompt `send()` (`/api/generate`) plus multi-turn, role-structured `chat(messages)` / `chat(messages, tools)` (`/api/chat`), which gives correct per-model chat templating, explicit system/user/assistant roles, and a `tools` hook for function calling. The blocking calls request `stream:false` (a single JSON object). Streaming overloads `send(prompt, Consumer<String> onToken)` and `chat(messages, onToken)` request `stream:true`, deliver each chunk to `onToken` as the model produces it, and also return the full assembled text (pass `null` for `onToken` to just assemble); they read Ollama's newline-delimited stream via `RestClient.streamCall`
-   - OpenAI API support (`org.kissweb.llm.OpenAI`) — chat completions, streaming, images, and embeddings. The provider serves models through two endpoints (chat completions and the newer responses endpoint), and some models are available only on the latter. By default (`Api.AUTO`) this is handled automatically. Routing rule: a model whose id ends in `-pro` (e.g. `o1-pro`, `gpt-5-pro`) or that was previously learned is responses-only and goes straight to the responses endpoint (`OpenAI.isResponsesOnlyModel`); any other model goes to chat completions, and a failure that `OpenAI.isResponsesRequiredError(status, body)` accepts re-sends the same request to responses — nothing has been delivered to the caller yet, so the retry is invisible. Eligible failure: HTTP 404 whose body contains `/responses`, or whose error message says "not a chat model", or whose error `param` is `model` (but not code `model_not_found`, a plain unknown model). The retry happens at most once per call; if the responses call also fails, its exception propagates (no loop). The model is added to the JVM-wide responses-only set only after the responses call succeeds, so later requests go straight to it and an unknown model is never remembered. For `-pro` models the responses body omits `temperature`/`top_p` (they reject sampling parameters) and sends `reasoning.effort` only when the caller flagged a reasoning model; neither endpoint sends a max-token limit `setApi(Api.CHAT_COMPLETIONS)` / `setApi(Api.RESPONSES)` pin one endpoint (e.g. for a gateway implementing only one); `setResponsesUrl(String)` overrides the responses URL globally, as `setUrl(String)` does for chat completions. Because `send()` is built on `stream()`, both paths get this
+   - OpenAI API support (`org.kissweb.llm.OpenAI`) — chat completions, streaming, images, and embeddings. The provider serves models through two endpoints (chat completions and the newer responses endpoint), and some models are available only on the latter. By default (`Api.AUTO`) this is handled automatically. Routing rule: a model whose id ends in `-pro` (e.g. `o1-pro`, `gpt-5-pro`) or that was previously learned is responses-only and goes straight to the responses endpoint (`OpenAI.isResponsesOnlyModel`); any other model goes to chat completions, and a failure that `OpenAI.isResponsesRequiredError(status, body)` accepts re-sends the same request to responses — nothing has been delivered to the caller yet, so the retry is invisible. Eligible failure: HTTP 404 whose body contains `/responses`, or whose error message says "not a chat model", or whose error `param` is `model` (but not code `model_not_found`, a plain unknown model). The retry happens at most once per call; if the responses call also fails, its exception propagates (no loop). The model is added to the JVM-wide responses-only set only after the responses call succeeds, so later requests go straight to it and an unknown model is never remembered. For `-pro` models the responses body omits `temperature`/`top_p` (they reject sampling parameters) and sends `reasoning.effort` only when the caller flagged a reasoning model; neither endpoint sends a max-token limit `setApi(Api.CHAT_COMPLETIONS)` / `setApi(Api.RESPONSES)` pin one endpoint (e.g. for a gateway implementing only one); `setResponsesUrl(String)` overrides the responses URL globally, as `setUrl(String)` does for chat completions. Because `send()` is built on `stream()`, both paths get this routing
    - Anthropic (Claude) API support (`org.kissweb.llm.Anthropic`) — `temperature` and `top_p` are sent to the Messages API only when the caller explicitly sets them via `setTemperature`/`setSampling`; the two setters are mutually exclusive (setting one clears the other), and by default neither is sent. This matters because the current Anthropic Messages API rejects a request that specifies both `temperature` and `top_p` together for current models (HTTP 400 `invalid_request_error`); sending neither lets the model apply its own default and is the configuration verified to work out of the box
    - OpenRouter support (`org.kissweb.llm.OpenRouter`) — OpenAI-compatible cloud gateway to many model providers (models named `provider/model`, e.g. `openai/gpt-4o`) through one API key; same `send`/`stream` API as the other cloud classes, plus optional model fallback routing (`setFallbackModels`; OpenRouter rejects invalid model IDs outright — fallback engages only between valid models when a provider fails), unified reasoning-effort control (`setReasoningEffort`), and attribution headers (`setSiteUrl`/`setSiteName`)
-   - **Per-instance endpoint URL** — `Anthropic(apiKey, model, url)`, `OpenAI(apiKey, model, reasoningModel, url)` and `OpenRouter(apiKey, model, url)` take the request URL as the last argument (`Anthropic`: Messages URL; `OpenAI` and `OpenRouter`: chat completions URL). The value is held in a `private final` instance field and resolved at request time: a non-blank URL is used as given, `null`/blank (after trim) falls back to the class-wide static set by `setUrl(String)`. The original constructors delegate with `null`, so they behave as before. The static `setUrl` is JVM-global (every instance without its own URL sees it), so a multi-tenant application must use the constructor overload, never `setUrl`, to give each tenant its own endpoint — otherwise one tenant's URL receives another tenant's key and prompts. `OpenAI`'s responses and models URLs, and the models URLs of the other classes, remain static-only. `Ollama` already takes its URL per instance.
-   - **Opt-in web search** — `OpenAI`, `Anthropic` and `OpenRouter` each have an instance method `setWebSearch(boolean)` (default off; when off the request is byte-identical to one without the feature; `Ollama` has none, being local). The provider runs the searches server-side and the caller still gets one text stream from `send`/`stream`. Wire shapes: `Anthropic` adds `"tools": [{"type":"web_search_20250305","name":"web_search"}]` (basic version, no beta header; later versions add dynamic filtering and need `allowed_callers` handling); the streaming parser already forwards every `text_delta` from every text block and ignores `server_tool_use`/`web_search_tool_result`/`citations_delta`, so the answer around the searches is concatenated with no parsing change. `OpenAI` treats web search as a responses-endpoint tool: when enabled it always routes to the responses endpoint (overriding AUTO routing and a pinned `Api.CHAT_COMPLETIONS`) and adds `"tools": [{"type":"web_search"}]`; search progress events (`response.web_search_call.*`, `web_search_call` items) fall into the parser's ignore-default. `OpenRouter` adds `"plugins": [{"id":"web"}]` (model id untouched, preferred over the `:online` suffix). A provider rejection of the search request surfaces through the normal HTTP-error exception; there is deliberately no retry without the tool. Tests: `WebSearchTest` (local `HttpServer`, no network)
+   - **Per-instance endpoint URL** — `Anthropic(apiKey, model, url)`, `OpenAI(apiKey, model, reasoningModel, url)` and `OpenRouter(apiKey, model, url)` take the request URL as the last argument (`Anthropic`: Messages URL; `OpenAI` and `OpenRouter`: chat completions URL). The value is held in a `private final` instance field and resolved at request time: a non-blank URL is used as given, `null`/blank (after trim) falls back to the class-wide static set by `setUrl(String)`. The static `setUrl` is JVM-global (every instance without its own URL sees it), so a multi-tenant application must use the constructor overload, never `setUrl`, to give each tenant its own endpoint — otherwise one tenant's URL receives another tenant's key and prompts. `OpenAI`'s responses and models URLs, and the models URLs of the other classes, remain static-only. `Ollama` already takes its URL per instance.
+   - **Opt-in web search** — `OpenAI`, `Anthropic` and `OpenRouter` each have an instance method `setWebSearch(boolean)` (default off; when off the request is byte-identical to one without the feature; `Ollama` has none, being local). The provider runs the searches server-side and the caller still gets one text stream from `send`/`stream`. Wire shapes: `Anthropic` adds `"tools": [{"type":"web_search_20250305","name":"web_search"}]` (basic version, no beta header; later versions add dynamic filtering and need `allowed_callers` handling); the streaming parser already forwards every `text_delta` from every text block and ignores `server_tool_use`/`web_search_tool_result`/`citations_delta`, so the answer around the searches is concatenated with no parsing change. `OpenAI` treats web search as a responses-endpoint tool: when enabled it always routes to the responses endpoint (overriding AUTO routing and a pinned `Api.CHAT_COMPLETIONS`) and adds `"tools": [{"type":"web_search"}]`; search progress events (`response.web_search_call.*`, `web_search_call` items) fall into the parser's ignore-default. `OpenRouter` adds `"plugins": [{"id":"web"}]` (model id untouched, preferred over the `:online` suffix). A provider rejection of the search request surfaces through the normal HTTP-error exception; there is deliberately no retry without the tool
    - All three cloud classes (`OpenAI`, `Anthropic`, `OpenRouter`) throw an exception on failed calls carrying the HTTP status and the provider's error body — including errors reported mid-stream as SSE error events — rather than returning silently empty text; the status and error body are also kept in `getResponseCode()`/`getResponseString()`
-   - **Model listing** — every LLM class exposes `List<String> getAvailableModels()`, returning the vendor's model ids unfiltered and in the order the vendor reports them (no sorting; filtering, if wanted, is an application concern, not Kiss's). `Ollama.getAvailableModels()` (`GET /api/tags`) declares `throws IOException`; the three cloud classes declare `throws Exception` to match their own `send()`/`stream()` convention (non-2xx or a malformed response throws with the HTTP status and error body, same as a failed `send`/`stream` call). Each cloud class calls its own models endpoint — `Anthropic` (`GET /v1/models?limit=1000`, `x-api-key` + `anthropic-version` headers, ids at `data[].id`), `OpenAI` (`GET /v1/models`, `Authorization: Bearer`, ids at `data[].id`), `OpenRouter` (`GET /v1/models`, works unauthenticated — the `Authorization` header is only added when an API key is present — ids at `data[].id`) — each with its own static `setModelsUrl(String)` override (global, mirroring the class's existing `setUrl`/`setVersion`/`setResponsesUrl` pattern) for proxies/gateways/testing. The call needs no model name, so it works on an instance constructed with a `null`/placeholder model (none of the four constructors dereference the model argument, so this required no constructor changes)
+   - **Model listing** — every LLM class exposes `List<String> getAvailableModels()`, returning the vendor's model ids unfiltered and in the order the vendor reports them (no sorting; filtering, if wanted, is an application concern, not Kiss's). `Ollama.getAvailableModels()` (`GET /api/tags`) declares `throws IOException`; the three cloud classes declare `throws Exception` to match their own `send()`/`stream()` convention (non-2xx or a malformed response throws with the HTTP status and error body, same as a failed `send`/`stream` call). Each cloud class calls its own models endpoint — `Anthropic` (`GET /v1/models?limit=1000`, `x-api-key` + `anthropic-version` headers, ids at `data[].id`), `OpenAI` (`GET /v1/models`, `Authorization: Bearer`, ids at `data[].id`), `OpenRouter` (`GET /v1/models`, works unauthenticated — the `Authorization` header is only added when an API key is present — ids at `data[].id`) — each with its own static `setModelsUrl(String)` override (global, mirroring the class's existing `setUrl`/`setVersion`/`setResponsesUrl` pattern) for proxies/gateways/testing. The call needs no model name, so it works on an instance constructed with a `null`/placeholder model (no constructor dereferences the model argument)
 
 7. **Desktop Support**
    - Electron compatibility for desktop apps
@@ -381,10 +376,7 @@ startup.
 **Why worker threads and not cores.** `QueueManager` runs a fixed thread pool of
 `MaxWorkerThreads`, and each in-flight service holds exactly one connection for its
 duration. That is the real ceiling on simultaneous checkouts — a pool larger than it
-contains connections no request can ever check out. An earlier version sized from
-`Runtime.availableProcessors()` (`min = cores`, `initial = cores * 2`,
-`max = cores * 4`), which on a 32-core machine asked for 128 connections and pre-opened
-64 before any demand existed.
+contains connections no request can ever check out.
 
 Sizing from CPU count is wrong twice over: it over-provisions badly on a many-core
 machine, and it derives a limit on a **shared** resource — the database server's
@@ -444,17 +436,19 @@ These are the defaults of the development port block (`portBase = 8000` in
 ## Key Libraries
 
 ### Backend Dependencies
-- Groovy 4.0.28 - Dynamic language support
-- C3P0 0.14.1 - Database connection pooling (requires a matching
-  mchange-commons-java; see "Foreign dependency pruning")
-- Log4j 2.25.4 - Logging framework (log4j 2.x API)
-- PDFBox 3.0.5 - PDF generation
+- Groovy - dynamic language support
+- C3P0 - database connection pooling (requires a matching mchange-commons-java; see "Foreign dependency pruning")
+- Log4j 2.x - logging
+- PDFBox - PDF generation
 - Database drivers for PostgreSQL, MySQL, SQLite, MS SQL, Oracle
 
+Versions are declared in `src/main/precompiled/Tasks.java` (the single source of truth).
+
 ### Frontend Dependencies
-- jQuery 3.6.3 - DOM manipulation
 - AG-Grid Community - Data grid component
 - CKEditor - Rich text editor
+
+The frontend does not ship jQuery.
 
 ## Authentication & Security
 
@@ -799,8 +793,7 @@ It never touches a database, logger, or web path - the subclass and hooks do.
     `IllegalStateException` (loud on purpose). The name is found like `getString` finds it (declared name any case/spacing, or the file's title).
   - Declaration mistakes (range before its type, range on text, a second type, `truncate()` with a type, backwards range, `NaN` bound, bad
     date format) throw from `initColumns()`: `check()` propagates, `run()`/`runChecked()` report "Unexpected error" in the result.
-  - `addColumn(...)` used to return `void`; it now returns `Column`. Source compatible (every existing call ignores the value) but NOT
-    binary compatible: callers must be recompiled against the new Kiss.
+  - `addColumn(...)` returns `Column` (it returned `void` in older builds); source compatible, but callers compiled against the older Kiss must be recompiled.
 - **Rules for the unrecognized columns: `protected Column unknownColumnRules()`.** One `Column` declaration for EVERY unknown column
   (those `getUnknownColumnIndexes()` lists), chained in `initColumns()` like any other: `unknownColumnRules().maxLength(() -> w).truncate()`.
   Internally the declaration is a template: after the title line is accepted each unknown column gets its own copy (own file title, own
@@ -910,7 +903,7 @@ The CSP allows **one** inline script: the byte-stable bootstrap kernel in `index
 Kiss refreshes **all** downloaded files on a new release from a single version number, with no server configuration (works on the dev static server, `file://`, Tomcat, and Electron). It solves the chicken-and-egg problem — the version that drives busting can't itself be served stale — by keeping the version in the only perpetually-fresh file, `index.html`.
 
 - **Version + mode** live in `index.html`: `<meta name="app-version">` (the version of the **application**, not of the Kiss framework) and `<meta name="app-mode">` (`development` or `production`; any other value behaves as development). In `production` mode the bust token is `app-version` (stable across a release, so the browser caches everything until the version changes). In `development` mode the kernel instead uses a fresh **per-page-load timestamp** as the token, so dev caches nothing and a plain reload always re-fetches every file. The `?now` freshness redirect for `index.html` itself runs in **both** modes. These are the only per-deploy cache values. The source ships with `EDIT-1` / `development`.
-- **`./bld war` auto-stamps production values** (`Tasks.stampVersion()`): it sets `app-version` to a fresh UUID, `app-mode` to `production`, and `SystemInfo.releaseDate` to the build date — but only in the WAR's staged copies (`work/exploded`), so the source keeps its `EDIT` placeholders. It edits only the meta values, never the kernel, so the CSP hash is unaffected. Every WAR therefore force-refreshes all clients with no manual version bump. **After the WAR is jarred, `war()` restores the staged `index.html` and `SystemInfo.js` from source** (`copyForce`, mirroring its `web-secure.xml`→jar→`web-unsafe.xml` swap), so `work/exploded` is never left holding production busting. Without this, a later `develop`/`start-backend` — whose `copyTree` is mtime-incremental and won't overwrite the newer stamped files — would silently run dev with production busting (a fixed `?ver` pinning stale code, plus the `?now` double load).
+- **`./bld war` auto-stamps production values** (`Tasks.stampVersion()`): it sets `app-version` to a fresh UUID, `app-mode` to `production`, and `SystemInfo.releaseDate` to the build date — but only in the WAR's staged copies (`work/exploded`), so the source keeps its `EDIT` placeholders. It edits only the meta values, never the kernel, so the CSP hash is unaffected. Every WAR therefore force-refreshes all clients with no manual version bump. **After the WAR is jarred, `war()` restores the staged `index.html` and `SystemInfo.js` from source** (`copyForce`, as it does for the `web-secure.xml`→jar→`web-unsafe.xml` swap), so `work/exploded` never holds production busting: `develop`/`start-backend` copy mtime-incrementally and would not overwrite the newer stamped files, silently running dev with a fixed `?ver` pinning stale code plus the `?now` double load.
 - A **byte-stable inline kernel** in `index.html` keeps `index.html` itself uncached via the `?now` redirect, reads the version from the meta, exposes **`window.cacheBust(url)`** (appends `?ver=<version>`), and loads `kiss/bootstrap.js` busted.
 - **`bootstrap.js`** loads everything else through `bust()`: stylesheets, third-party libs (AG-Grid/CKEditor), `SystemInfo.js`, and all framework + application JS. `getScript`/`getScripts` and `Utils.getHTML` (screens) are busted; `Utils.bustHtmlResources` rewrites relative `<img src>` in loaded HTML *before* insertion (so the un-busted URL is never fetched).
 - **Why it's rock-solid:** the version sits in always-fresh `index.html` and the kernel is byte-stable, so a stale cached `index.html` self-heals — its identical kernel redirects to a fresh copy and re-reads the fresh version. No cacheable file in the chain can pin a stale version.
@@ -1055,9 +1048,8 @@ SQL and the number of values bound to it diverge, and the JDBC driver throws a
 "column index out of range" error on every `update()`/`delete()` of a fetched row. For that
 reason `Command.getPriColumns(Cursor)` contains no primary-key resolution logic of its own; it
 purely delegates to `Connection.getPrimaryColumns(c.getTableName())`, so there is exactly one
-place in the framework that decides a table's primary-key columns. Do not reintroduce a
-separate `DatabaseMetaData.getPrimaryKeys(...)` call or cache inside `Command` -- that
-duplication is precisely what caused the divergence described above the first time.
+place in the framework that decides a table's primary-key columns. Do not reintroduce a separate
+`DatabaseMetaData.getPrimaryKeys(...)` call or cache inside `Command`; duplication there makes the counts diverge.
 
 **Caching assumption.** Both methods cache their result per table name only, not per
 schema/catalog. This is safe under the assumption that one `Connection` instance is bound to a
@@ -1099,7 +1091,7 @@ File locations:
 ```
 src/main/core/org/kissweb/database/SchemaGraph.java
 src/main/core/org/kissweb/database/QueryBuilder.java
-src/test/core/org/kissweb/database/QueryBuilderTest.java   (108 tests)
+src/test/core/org/kissweb/database/QueryBuilderTest.java
 ```
 
 ### Quick Start
@@ -1209,7 +1201,6 @@ FK order_line order_id,product_id order_product order_id,product_id
 - Register once (static init): `new SortBuilder().key("rep", text("p.lname"), text("p.fname")).key("status", raw("st.seqno")).join(JOIN_SQL, "lastMail")`. Helpers: `text(col)` (case-insensitive, empty/whitespace = blank), `zeroBlank(col)` (0 = blank), `raw(sql)` (verbatim, must yield NULL when blank); an `Expr` lambda `t -> ...` receives the `ConnectionType` (use `textSql(t, col)` inside it).
 - Per request: `build(db.getDBType(), List<Sort.of(key, asc)>, Sort.of(defaultKey, true), tiebreakItems...)` returns `Result`: `orderBy()` ("order by ..." with no surrounding spaces, empty if nothing), `joins()` (each needed join once, trailing space) / `joinList()`, `rejectedKeys()` (unknown non-blank keys, trimmed, deduped; client text - sanitize before logging). Blank keys are silently ignored; unknown keys are never an exception. The default is used only when no key was usable; tiebreak items (verbatim, include their own direction) go last. A default that is not registered, or a join naming an unregistered key, throws IllegalArgumentException (programmer error).
 - Every expression gets the direction; blanks sort LAST in both directions. PostgreSQL/Oracle/SQLite emit `x asc nulls last`; MySQL/SQL Server emit `case when x is null then 1 else 0 end, x asc`. Text blank rule: PG `lower(nullif(btrim(x), ''))`, SQL Server `lower(nullif(ltrim(rtrim(x)), ''))`, Oracle `lower(trim(x))`, MySQL/SQLite `lower(nullif(trim(x), ''))`. Raw expressions, joins and tiebreaks are not translated.
-- Tests: `src/test/core/org/kissweb/database/SortBuilderTest.java`.
 
 ### QueryBuilder
 
@@ -1317,11 +1308,7 @@ Auto-discovered joins are always `INNER JOIN`. Explicit joins use the specified 
 
 ### Performance
 
-- **SchemaGraph from DB:** ~1–3 seconds for 300 tables (one-time cost)
-- **SchemaGraph from cache:** sub-millisecond
-- **Path finding:** sub-millisecond for 300 nodes
-- **Memory:** <1 MB for 300 tables with ~500 FK relationships
-- **Thread safety:** SchemaGraph is safe for concurrent reads after construction
+SchemaGraph from the database takes about 1-3 seconds for 300 tables (one-time); from a cache file, sub-millisecond. Path finding is sub-millisecond for 300 nodes; memory is under 1 MB for 300 tables. A SchemaGraph is safe for concurrent reads after construction.
 
 ## Report & Export Capabilities
 
@@ -1332,19 +1319,10 @@ Auto-discovered joins are always `INNER JOIN`. Explicit joins use the specified 
 - **CSV Export**: Direct CSV file generation
 - **Temporary File Management**: Automatic cleanup of generated files
 
-## Development Mode Features
+## Deployment
 
-- Hot reload of services without restart
-- Development vs production mode detection
-- Cache control for debugging
-- Separate frontend/backend servers for development
-
-## Production Deployment
-
-- WAR file deployment to standard servlet containers
-- Support for separated frontend/backend deployment
-- Configurable backend URL for distributed systems
-- Built-in static file serving
+- Development runs separate frontend/backend servers with hot reload of `src/main/backend/` (see Hot Reload).
+- Production is a WAR in a standard servlet container, which also serves the static frontend files. Frontend and backend are same-origin by default; a separated deployment sets `SystemInfo.backendUrl` (see CORS).
 
 ## Frontend Components
 
@@ -1391,7 +1369,7 @@ For grids showing a capped subset of server rows, where sorting in the browser w
 - `grid.setSortIndicators([{field, asc}, ...])` - shows ag-grid's sort arrows in priority order (ag-grid numbers them when there is more than one); `null`/`[]` clears. Fields with no column or a hidden column are ignored. Never calls `fn`, never reorders.
 - The screen owns the policy (primary column, direction toggle) and re-queries the server, then calls `setSortIndicators`.
 - Mechanism: a capture-phase click/keydown listener on the grid div swallows header clicks; `postSortRows` restores add order (needed because applying column state to show the arrow would otherwise sort client-side); `setServerSort` swaps in copies of the column defs with `sortable: true`.
-- Works with ag-grid 30 (Stack360 Frontend, `columnApi`) and 32+ (Kiss, `api.applyColumnState`); `columnApi_()` picks the right one. Note `Column.isSortable()` is absent in 30, so read `getColDef().sortable`.
+- Works with ag-grid 30 (`columnApi`) and 32+ (`api.applyColumnState`); `columnApi_()` picks the right one. Note `Column.isSortable()` is absent in 30, so read `getColDef().sortable`.
 - ag-grid 30 columns default to not sortable; grids that never call these methods are unchanged.
 
 ### Design Tokens (`--kiss-ui-*` CSS Custom Properties)
@@ -1479,7 +1457,7 @@ The Kiss Framework emphasizes:
 **CRITICAL: DOM access is strictly layered in the Kiss framework:**
 
 1. **Only `DOMUtils.js` is allowed to access the HTML DOM directly** - All direct DOM manipulation (e.g., `element.style`, `element.setAttribute`, `document.getElementById`, etc.) must be done through DOMUtils.
-2. **In general, only front-end files under the kiss directory should use DOMUtils.js** - Application screens and other code should use the Kiss component APIs, not DOMUtils directly.  If an exception arises yu must get explicit approval
+2. **Application code may use `DOMUtils.js`, but should avoid it** - Use the higher-level utilities (the Kiss component APIs) whenever one covers the task; call DOMUtils directly only when none does.
 3. **Existing DOMUtils functions must not be changed without explicit approval** - New functions may be added, but existing functions should remain stable to avoid breaking dependent code.
 
 This layered architecture ensures:
@@ -1624,11 +1602,11 @@ The `src/main/precompiled/` directory is for shared Java utility classes that ne
   - This is a Java/Groovy language restriction, not a Kiss framework limitation
 - Recommended approach: Create your own package structure (e.g., `io.yourcompany.utils`)
 - Directory structure must match package declaration:
-  - Example: `package io.stack360;` requires file at `src/main/precompiled/io/stack360/ClassName.java`
+  - Example: `package io.yourcompany;` requires file at `src/main/precompiled/io/yourcompany/ClassName.java`
 - After adding new classes, run `./bld -v build` to compile them
 - Access from Groovy services via standard import:
   ```groovy
-  import io.stack360.UUIDGenerator
+  import io.yourcompany.utils.UUIDGenerator
   String id = UUIDGenerator.generateModifiedUUID()
   ```
 
@@ -1887,8 +1865,7 @@ Configurator.setLevel(logger, Level.INFO);
 
 ### Log4j JARs
 The framework includes:
-- `log4j-api-2.25.3.jar` - Log4j 2.x API
-- `log4j-core-2.25.3.jar` - Log4j 2.x implementation
+- `log4j-api` and `log4j-core` (2.x), under `libs/` (versions are in `Tasks.java`)
 
 **Note:** Do NOT use the old log4j 1.x API (`org.apache.log4j.*`) or Java util logging (`java.util.logging.*`).
 
@@ -2178,9 +2155,7 @@ independently of the surrounding database transaction; a rollback does not undo 
 needing correctness under rollback must handle that itself (defer the write until after commit, or
 tolerate an orphaned file).
 
-File: `src/main/core/org/kissweb/database/ExternalFile.java`. It is a generalization of an
-application's own external-file utility (the pattern above — root lambda + directory-mapper lambda
-+ per-table cascade opt-in — is the one to follow when adapting such a class to use this one).
+File: `src/main/core/org/kissweb/database/ExternalFile.java`. To adapt an application's own external-file utility, follow the same pattern: root lambda + directory-mapper lambda + per-table cascade opt-in.
 
 ### Hybrid Inline/External Column Storage (ExternalFile.saveHybridColumn / getHybridColumn)
 
@@ -2249,18 +2224,16 @@ SELECT so they cannot drift. `ExternalFile.isExternal(raw)` is true exactly for 
 `ExternalFile.releaseHybridColumn(db, table, column, pk, nullable)` deletes any external file and
 clears the column (NULL if nullable, "" if NOT NULL); `saveHybridColumn(..., null)` stores SQL NULL
 and `(..., "")` stores "" exactly as passed, so use release when nullability is what matters.
-No-DB tests: `ExternalFileHybridResolveTest`; the PostgreSQL tests (`ExternalFileHybridColumnTest`, `ConnectionColumnWidthPostgresTest`, which proves the exact-table-name fix) are gated by `-Dkiss.test.postgres=true`; `ConnectionColumnWidthTest` (SQLite, throwaway temp file) always runs.
+The PostgreSQL-backed tests are gated by `-Dkiss.test.postgres=true`; the SQLite and no-database tests always run.
 
-**No binary/byte[] variant.** varchar backing implies text, so only a `String` API is provided; a
-binary variant was not added because it does not fall out of this design trivially (binary data
-would need an encoding decision, e.g. Base64, that the character-counting threshold and sentinel
-scheme above are not built around). A caller with binary data should Base64-encode it before calling
-`saveHybridColumn`, or use the existing pure-external `saveData`/`getBinary` methods instead.
+**No binary/byte[] variant.** varchar backing implies text, so only a `String` API exists; binary data has no
+encoding in the character-counting threshold and sentinel scheme. Base64-encode binary data before
+`saveHybridColumn`, or use the pure-external `saveData`/`getBinary` methods.
 
-Documented in the Kiss book, Chapter 23 ("File Handling"), Section 23.7 ("External File Storage") —
-covers both the virtual-column pattern and this hybrid-column pattern in one place.
+Documented in the Kiss book, Chapter 23 ("File Handling"), Section 23.7 ("External File Storage"), covering both the
+virtual-column and the hybrid-column pattern.
 
-## Known Issues & Solutions
+## Configuration Pitfalls
 
 ### Empty `application.ini` values must be quoted (`Key = ""`, not `Key =`)
 
@@ -2281,7 +2254,3 @@ Fix: always give empty config keys an explicit empty-quoted value:
 ServicePassword = ""    # correct
 # ServicePassword =     # WRONG: parses to null -> Hashtable NPE
 ```
-
----
-
-*Last Updated: 2026-09-27*
