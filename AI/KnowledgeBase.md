@@ -201,6 +201,10 @@ class ServiceName {
 }
 ```
 
+### Groovy Method Lookup by Argument Classes
+
+`GroovyService.invoke/getMethod` and `GroovyClass.invoke/getMethod` resolve a method from the runtime classes of the arguments through `GroovyClass.findMethod(Class, name, Class...)`: exact `getMethod` first, then a scan of same-name, same-arity public methods where each parameter is assignable from the argument class (primitives and boxed types alike) and the most specific wins (ambiguity throws `NoSuchMethodException`). So a subclass instance (e.g. a `Connection` subclass) or an `Integer` can be passed to a base-type or `int` parameter. A `null` argument maps to `Object.class`; passing a `Class` object as an argument is a hint for the class of a null argument. Use `findMethod` for any new reflective lookup from runtime arguments instead of `Class.getMethod`.
+
 ## Development Commands
 
 - `./bld develop` - Start both frontend and backend development servers

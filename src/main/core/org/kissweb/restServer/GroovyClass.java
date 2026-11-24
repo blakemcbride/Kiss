@@ -77,7 +77,78 @@ public class GroovyClass {
 	 * @throws Exception if the method cannot be found
 	 */
 	public Method getMethod(String methodName, Class<?>... argTypes) throws Exception {
-		return groovyClass.getMethod(methodName, argTypes);
+		return findMethod(groovyClass, methodName, argTypes);
+	}
+
+	/**
+	 * Finds a public method by name from argument classes.  The exact
+	 * <code>Class.getMethod</code> lookup is tried first.  If that fails, the public
+	 * methods with the same name and arity are scanned and each parameter must be
+	 * assignable from the corresponding argument class (primitives and their boxed
+	 * types are treated alike).  The most specific match wins.
+	 *
+	 * @param cls the class to search
+	 * @param methodName the method name
+	 * @param argTypes the argument classes (use Object.class for a null argument)
+	 * @return the Method
+	 * @throws NoSuchMethodException if nothing matches or the match is ambiguous
+	 */
+	public static Method findMethod(Class<?> cls, String methodName, Class<?>... argTypes) throws NoSuchMethodException {
+		try {
+			return cls.getMethod(methodName, argTypes);
+		} catch (NoSuchMethodException e) {
+			Method best = null;
+			boolean ambiguous = false;
+			for (Method m : cls.getMethods()) {
+				if (!m.getName().equals(methodName))
+					continue;
+				Class<?>[] pt = m.getParameterTypes();
+				if (pt.length != argTypes.length)
+					continue;
+				boolean ok = true;
+				for (int i = 0; ok && i < pt.length; i++)
+					ok = box(pt[i]).isAssignableFrom(box(argTypes[i]));
+				if (!ok)
+					continue;
+				if (best == null) {
+					best = m;
+					continue;
+				}
+				if (moreSpecific(m, best)) {
+					best = m;
+					ambiguous = false;
+				} else if (!moreSpecific(best, m))
+					ambiguous = true;
+			}
+			if (best == null)
+				throw e;
+			if (ambiguous)
+				throw new NoSuchMethodException("Ambiguous call to " + cls.getName() + "." + methodName);
+			return best;
+		}
+	}
+
+	private static boolean moreSpecific(Method a, Method b) {
+		Class<?>[] pa = a.getParameterTypes();
+		Class<?>[] pb = b.getParameterTypes();
+		for (int i = 0; i < pa.length; i++)
+			if (!box(pb[i]).isAssignableFrom(box(pa[i])))
+				return false;
+		return true;
+	}
+
+	private static Class<?> box(Class<?> c) {
+		if (!c.isPrimitive())
+			return c;
+		if (c == int.class) return Integer.class;
+		if (c == long.class) return Long.class;
+		if (c == double.class) return Double.class;
+		if (c == boolean.class) return Boolean.class;
+		if (c == float.class) return Float.class;
+		if (c == short.class) return Short.class;
+		if (c == byte.class) return Byte.class;
+		if (c == char.class) return Character.class;
+		return c;
 	}
 
 	private Method getMethod(String methodName, Object... args) throws Exception {
@@ -94,7 +165,7 @@ public class GroovyClass {
 			Class<?>[] argTypes = new Class[args.length];
 			for (int i = 0; i < args.length; i++)
 				argTypes[i] = args[i].getClass();
-			return groovyClass.getMethod(methodName, argTypes);
+			return findMethod(groovyClass, methodName, argTypes);
 		}
 
 		// Slow path: one or more arguments are null, search by name and parameter count
