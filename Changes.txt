@@ -43,3 +43,15 @@ Kiss change log
   there is exactly one source of truth for a table's primary-key columns and the two
   call sites can never disagree again.
 
+11/24/2026
+
+- Fixed CSP violations from inline event handlers (the enforcing Content-Security-Policy
+  blocks them). TimeInput and DurationInput attached their keystroke masks as inline
+  oninput= attributes, so the masks never ran when pages were served by the back end;
+  each now registers a native input listener on its element, ahead of the DOMUtils.on
+  input handler. The login.html pages (desktop and mobile) no longer use
+  <form onsubmit="return false;">; login.js calls preventDefault() on the form's submit
+  event instead. DeviceInformation.html no longer uses an inline <script> and
+  <body onload=>; it loads DeviceInformation.js, which runs on DOMContentLoaded (the page
+  was blank under the CSP). The manual (chapter on components) now says to attach event
+  handlers in JavaScript, never as inline on* attributes.

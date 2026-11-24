@@ -58,7 +58,6 @@
             }
         }
 
-        nattrs += ' oninput="this.value=Component.TimeInput.$timeinput(this)"';
         nattrs += ' data-lpignore="true"';  // kill lastpass
 
         const newElm = Utils.replaceHTML(id, elm, '<input type="text" style="{style}" {attr} id="{id}" placeholder="{placeholder}">', {
@@ -69,6 +68,13 @@
         if (!newElm)
             return;
         const el = newElm.element;
+
+        //  Keystroke mask.  A native listener rather than an inline oninput= attribute,
+        //  which the Content-Security-Policy (SecurityHeadersFilter) blocks, and rather
+        //  than DOMUtils.on, which keeps one 'input' handler per element and would drop
+        //  this one when inputHandler is attached below.  Registered first so that
+        //  onCChange functions see the cleaned value.
+        el.addEventListener('input', () => el.value = Component.TimeInput.$timeinput(el));
 
         newElm.elementInfo.min = min;
         newElm.elementInfo.max = max;
@@ -88,7 +94,7 @@
         //  'input' fires on every user-driven value change - typing, Backspace/Delete,
         //  paste (keyboard or context menu), cut, drag-and-drop, and browser
         //  autofill/autocomplete - whereas 'keyup' only sees keystrokes.  The control's
-        //  own oninput normalization is attached to the element when it is created, so it
+        //  own input-mask listener is attached to the element when it is created, so it
         //  runs before this handler and the user's onCChange function sees the cleaned value.
         function defaultInputHandler() {
             Utils.someControlValueChanged();

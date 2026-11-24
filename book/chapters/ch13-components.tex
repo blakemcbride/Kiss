@@ -43,6 +43,8 @@ Most components share these methods (push-buttons, text-labels, and pictures sup
 
 \begin{warnbox}
 Always use Kiss component methods for events (\texttt{.onChange()}, \texttt{.onclick()}), not native DOM methods like \texttt{addEventListener()}.  The Kiss methods handle event wiring consistently across all components.
+
+Never write event handlers as inline \texttt{on*} attributes in HTML (for example \texttt{<text-input oninput="...">}) or as inline \texttt{<script>} blocks.  The Content-Security-Policy that Kiss sends (Chapter~\ref{ch:caching-security}) forbids inline handlers, and because components copy unknown attributes onto the inner \texttt{<input>}, such an attribute looks correct but silently never runs.  Always attach handlers in the screen's JavaScript.
 \end{warnbox}
 
 \section{Text Input}

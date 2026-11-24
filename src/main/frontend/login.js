@@ -5,6 +5,10 @@
 
 (function () {
 
+    //  The form must never submit itself (the page's own code handles login).  Done here
+    //  rather than with an inline onsubmit= attribute, which the Content-Security-Policy blocks.
+    document.getElementById('username').form.addEventListener('submit', e => e.preventDefault());
+
     //  Reaching the login screen ends any existing session so a fresh login is required
     //  (e.g. when the user backs into it from inside the app).
     Server.clearSession();
