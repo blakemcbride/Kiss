@@ -72,6 +72,24 @@ class IniFileTest {
      }
 
      @Test
+     void testGetDateIntYYYYMMDD() {
+         iniFile.put("section1", "key1", "20240830");
+         assertEquals(20240830, iniFile.getDateInt("section1", "key1"));
+
+         iniFile.put("section1", "key1", "20240229");
+         assertEquals(20240229, iniFile.getDateInt("section1", "key1"));
+
+         iniFile.put("section1", "key1", "20230229");   // not a leap year
+         assertEquals(0, iniFile.getDateInt("section1", "key1"));
+
+         iniFile.put("section1", "key1", "20241340");
+         assertEquals(0, iniFile.getDateInt("section1", "key1"));
+
+         iniFile.put("key2", "20240830");                // null section
+         assertEquals(20240830, iniFile.getDateInt("key2"));
+     }
+
+     @Test
      void testGetTimeInt() {
          iniFile.put("section1", "key1", 1230);
 

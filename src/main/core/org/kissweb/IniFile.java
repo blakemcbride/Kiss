@@ -3,6 +3,8 @@ package org.kissweb;
 import org.kissweb.restServer.MainServlet;
 
 import java.io.*;
+import java.time.DateTimeException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -306,15 +308,27 @@ public class IniFile {
 
     /**
      * Retrieves the integer value of a date key from a specified section in the ini file.
+     * <br><br>
+     * The value may be in any format accepted by {@link DateUtils#parse(String)}
+     * (MM/DD/YY, MM/DD/YYYY, MM.DD.YYYY, YYYY-MM-DD) or a plain eight-digit YYYYMMDD.
      *
      * @param section the section to search for the key
      * @param key     the key to search for
-     * @return the integer value of the key if found (YYYYMMDD), 0 otherwise
+     * @return the integer value of the key if found and a valid date (YYYYMMDD), 0 otherwise
      */
     public int getDateInt(String section, String key) {
         final String s = get(section, key);
         if (s == null)
             return 0;
+        if (s.matches("\\d{8}")) {
+            final int dt = Integer.parseInt(s);
+            try {
+                LocalDate.of(dt / 10000, dt / 100 % 100, dt % 100);
+                return dt;
+            } catch (DateTimeException e) {
+                return 0;
+            }
+        }
         return DateUtils.parse(s);
     }
 
@@ -529,6 +543,7 @@ public class IniFile {
 
     /**
      * Retrieves the integer value representing a date as YYYYMMDD of a key from the ini file from the <code>null</code> section.
+     * Accepts the same formats as {@link #getDateInt(String, String)}.
      *
      * @param  key     the key to search for
      * @return         the value of the key if found, 0 otherwise

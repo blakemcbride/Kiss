@@ -55,3 +55,7 @@ Kiss change log
   <body onload=>; it loads DeviceInformation.js, which runs on DOMContentLoaded (the page
   was blank under the CSP). The manual (chapter on components) now says to attach event
   handlers in JavaScript, never as inline on* attributes.
+
+- IniFile.getDateInt() now also accepts a plain eight-digit YYYYMMDD value (e.g.
+  20240830), in addition to the formats accepted by DateUtils.parse(). An invalid
+  YYYYMMDD returns 0.
